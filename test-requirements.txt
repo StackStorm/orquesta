@@ -1,0 +1,6 @@
+coverage
+mock>=1.0
+nose
+nosexcover
+pylint
+unittest2
