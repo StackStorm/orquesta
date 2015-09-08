@@ -1,6 +1,8 @@
 coverage
+flake8>=2.3.0,<2.4
 mock>=1.0
 nose
 nosexcover
-pylint
+pep8>=1.6.0,<1.7
+pylint>=1.4.3,<1.5
 unittest2

@@ -11,14 +11,14 @@
 # limitations under the License.
 
 import datetime
-import unittest2
+import unittest
 
 import dateutil.tz
 
 from orchestra.utils import date
 
 
-class DateTest(unittest2.TestCase):
+class DateTest(unittest.TestCase):
 
     def test_date_valid(self):
         self.assertFalse(date.valid(123))

@@ -10,9 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import abc
-import six
-import unittest2
+import unittest
 
 from orchestra import exceptions
 from orchestra.utils import plugin
@@ -22,7 +20,7 @@ class FakePlugin(object):
     pass
 
 
-class PluginFactoryTest(unittest2.TestCase):
+class PluginFactoryTest(unittest.TestCase):
 
     def test_get_instance(self):
         self.assertIsInstance(

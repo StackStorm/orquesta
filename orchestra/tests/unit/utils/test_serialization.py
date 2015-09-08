@@ -11,7 +11,7 @@
 # limitations under the License.
 
 import copy
-import unittest2
+import unittest
 
 from orchestra.utils import date
 from orchestra.utils import jsonify
@@ -40,7 +40,7 @@ class FakeModel(object):
         self.k6 = kwargs.get('k6', {'a': 1, 'b': 2, 'c': 3})
 
 
-class SerializationTest(unittest2.TestCase):
+class SerializationTest(unittest.TestCase):
 
     def test_serialize(self):
         doc = jsonify.serialize(FakeModel())
