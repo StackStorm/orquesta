@@ -10,9 +10,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+
 from stevedore import driver
 
 from orchestra import exceptions
+
+
+LOG = logging.getLogger(__name__)
 
 
 def get_module(namespace, name):
