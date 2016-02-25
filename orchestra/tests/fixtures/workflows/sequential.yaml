@@ -1,0 +1,16 @@
+version: '2.0'
+
+sequential:
+    description: A basic sequential workflow.
+    type: direct
+    tasks:
+        task1:
+            action: core.noop
+            on-success:
+                - task2
+        task2:
+            action: core.noop
+            on-success:
+                - task3
+        task3:
+            action: core.noop
