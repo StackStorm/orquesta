@@ -1,3 +1,4 @@
+networkx>=1.10,<2.0
 python-dateutil
 PyYAML>=3.1.0 # MIT
 six>=1.9.0
