@@ -12,7 +12,7 @@
 
 import unittest
 
-from orchestra import symphony
+from orchestra import composition
 
 
 EXPECTED_GRAPH = {
@@ -58,20 +58,20 @@ class WorkflowScoreTest(unittest.TestCase):
         score.add_sequence('task7', 'task8')
 
     def test_basic_graph(self):
-        score = symphony.WorkflowScore()
+        score = composition.WorkflowScore()
         self._add_tasks(score)
         self._add_sequences(score)
 
         self.assertDictEqual(EXPECTED_GRAPH, score.show())
 
     def test_skip_add_tasks(self):
-        score = symphony.WorkflowScore()
+        score = composition.WorkflowScore()
         self._add_sequences(score)
 
         self.assertDictEqual(EXPECTED_GRAPH, score.show())
 
     def test_duplicate_add_tasks(self):
-        score = symphony.WorkflowScore()
+        score = composition.WorkflowScore()
         self._add_tasks(score)
         self._add_tasks(score)
         self._add_sequences(score)
@@ -79,7 +79,7 @@ class WorkflowScoreTest(unittest.TestCase):
         self.assertDictEqual(EXPECTED_GRAPH, score.show())
 
     def test_duplicate_add_sequences(self):
-        score = symphony.WorkflowScore()
+        score = composition.WorkflowScore()
         self._add_tasks(score)
         self._add_sequences(score)
         self._add_sequences(score)

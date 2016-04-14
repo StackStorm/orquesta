@@ -15,7 +15,7 @@ import Queue
 import six
 
 from orchestra.composers import base
-from orchestra import symphony
+from orchestra import composition
 
 
 LOG = logging.getLogger(__name__)
@@ -70,7 +70,7 @@ class MistralWorkflowComposer(base.WorkflowComposer):
         task_specs = definition[entry]['tasks']
 
         scores = {
-            entry: symphony.WorkflowScore()
+            entry: composition.WorkflowScore()
         }
 
         upstream_map = {
@@ -123,7 +123,7 @@ class MistralWorkflowComposer(base.WorkflowComposer):
                         fqtn = prev_task_name + '->' + task_name
                         scores[score].add_sequence(prev_task_name, fqtn)
                         subscore = score + '.' + task_name
-                        scores[subscore] = symphony.WorkflowScore()
+                        scores[subscore] = composition.WorkflowScore()
                         scores[subscore].add_task(task_name)
 
                     score = subscore
