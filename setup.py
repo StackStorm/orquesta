@@ -61,6 +61,9 @@ setup(
         'Programming Language :: Python :: 2.7'
     ],
     entry_points={
+        'orchestra.composers': [
+            'mistral = orchestra.composers.openstack:MistralWorkflowComposer'
+        ],
         'orchestra.tests': [
             'fake = orchestra.tests.unit.utils.test_plugin:FakePlugin'
         ]
