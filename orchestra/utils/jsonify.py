@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
 
 
 SERIALIZABLE_TYPES = (
-    basestring,
+    six.string_types,
     bool,
     datetime.datetime,
     dict,

@@ -15,6 +15,7 @@
 import datetime
 import logging
 import re
+import six
 
 import dateutil.parser
 
@@ -32,13 +33,22 @@ ISO8601_REGEX_TZ = '^%s?(Z|\+\d{2}|\+\d{4}|\+\d{2}:\d{2})$' % ISO8601_REGEX
 
 def valid(v):
     is_dt_obj = isinstance(v, datetime.datetime)
-    is_dt_str = isinstance(v, basestring) and re.match(ISO8601_REGEX_NAIVE, v)
-    is_dt_str_tz = isinstance(v, basestring) and re.match(ISO8601_REGEX_TZ, v)
+
+    is_dt_str = (
+        isinstance(v, six.string_types) and
+        re.match(ISO8601_REGEX_NAIVE, v)
+    )
+
+    is_dt_str_tz = (
+        isinstance(v, six.string_types) and
+        re.match(ISO8601_REGEX_TZ, v)
+    )
+
     return is_dt_obj or is_dt_str or is_dt_str_tz
 
 
 def format(dt, usec=True, offset=True):
-    if isinstance(dt, basestring):
+    if isinstance(dt, six.string_types):
         dt = parse(dt)
 
     fmt = ISO8601_FORMAT_USEC if usec else ISO8601_FORMAT

@@ -11,8 +11,8 @@
 # limitations under the License.
 
 import logging
-import Queue
 import six
+from six.moves import queue
 
 from orchestra.composers import base
 from orchestra import composition
@@ -96,7 +96,7 @@ class MistralWorkflowComposer(base.WorkflowComposer):
             if len(prev_tasks) < 1
         ]
 
-        q = Queue.Queue()
+        q = queue.Queue()
 
         for task_name in tasks_with_no_parent:
             q.put((task_name, entry))
