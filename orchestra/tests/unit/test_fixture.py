@@ -19,31 +19,11 @@ class FixtureTest(unittest.TestCase):
 
     def test_fixture_loader(self):
         expected = {
-            'version': '2.0',
-            'sequential': {
-                'description': 'A basic sequential workflow.',
-                'type': 'direct',
-                'tasks': {
-                    'task1': {
-                        'action': 'core.noop',
-                        'on-success': [
-                            'task2'
-                        ]
-                    },
-                    'task2': {
-                        'action': 'core.noop',
-                        'on-success': [
-                            'task3'
-                        ]
-                    },
-                    'task3': {
-                        'action': 'core.noop'
-                    }
-                }
-            }
+            'version': 'x.y.z',
+            'name': 'foobar'
         }
 
-        content = loader.get_fixture_content('sequential.yaml', 'workflows')
+        content = loader.get_fixture_content('mock.yaml', 'workflows')
 
         self.assertIsInstance(content, dict)
         self.assertDictEqual(content, expected)
