@@ -31,6 +31,11 @@ class WorkflowComposerTest(unittest.TestCase):
             'workflows'
         )
 
+    def _compose_workflow_scores(self, wf_name):
+        wf_def = self._get_workflow_definition(wf_name)
+        composer = plugin.get_module('orchestra.composers', self.composer_name)
+        return composer.compose(wf_def, entry=wf_name)
+
     def _assert_workflow_composition(self, wf_name, expected_graphs):
         wf_def = self._get_workflow_definition(wf_name)
         composer = plugin.get_module('orchestra.composers', self.composer_name)

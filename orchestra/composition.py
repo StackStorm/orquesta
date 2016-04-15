@@ -11,6 +11,7 @@
 # limitations under the License.
 
 import logging
+import six
 
 import networkx as nx
 
@@ -32,6 +33,13 @@ class WorkflowScore(object):
     def add_task(self, task):
         if not self.has_task(task):
             self._graph.add_node(task)
+
+    def update_task(self, task, *args, **kwargs):
+        if not self.has_task(task):
+            raise Exception('Task does not exist.')
+
+        for key, value in six.iteritems(kwargs):
+            self._graph.node[task][key] = value
 
     def has_sequence(self, source, destination):
         return self._graph.has_edge(source, destination)
