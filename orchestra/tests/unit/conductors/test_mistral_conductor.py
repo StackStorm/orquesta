@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 from six.moves import queue
 
 from orchestra import symphony
@@ -29,23 +30,21 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
         scores = self._compose_workflow_scores(workflow)
         conductor = symphony.WorkflowConductor(scores, entry=workflow)
 
-        self.assertEqual(workflow, conductor.entry)
-
         q = queue.Queue()
 
-        for task_name, score in conductor.conduct():
-            q.put((task_name, score))
+        for task in conductor.start():
+            q.put(task)
 
         while not q.empty():
-            task_name, score = q.get()
-            sequence.append(score + '.' + task_name)
-            successors = conductor.conduct(
-                task=task_name,
-                score=score,
-                task_state='succeeded')
+            queued_task = q.get()
 
-            for next_task_name, next_score in successors:
-                q.put((next_task_name, next_score))
+            # mock completion of the task
+            sequence.append(queued_task['score'] + '.' + queued_task['name'])
+            completed_task = copy.deepcopy(queued_task)
+            completed_task['state'] = 'succeeded'
+
+            for task in conductor.on_task_complete(completed_task):
+                q.put(task)
 
         self.assertListEqual(sorted(expected_sequence), sorted(sequence))
 
@@ -94,12 +93,12 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
             workflow + '.task1',
             workflow + '.task2',
             workflow + '.task3',
-            workflow + '.task4.task4',
-            workflow + '.task4.task5',
-            workflow + '.task4.task6',
-            workflow + '.task4.task4',
-            workflow + '.task4.task5',
-            workflow + '.task4.task6'
+            workflow + '.task4',
+            workflow + '.task4',
+            workflow + '.task5',
+            workflow + '.task5',
+            workflow + '.task6',
+            workflow + '.task6'
         ]
 
         self._assert_conducting_sequences(workflow, expected_sequence)

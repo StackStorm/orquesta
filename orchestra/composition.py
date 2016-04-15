@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import abc
 import logging
 import six
 
@@ -19,7 +20,8 @@ import networkx as nx
 LOG = logging.getLogger(__name__)
 
 
-class WorkflowScore(object):
+@six.add_metaclass(abc.ABCMeta)
+class WorkflowGraph(object):
 
     def __init__(self):
         self._graph = nx.DiGraph()
@@ -30,11 +32,11 @@ class WorkflowScore(object):
     def has_task(self, task):
         return self._graph.has_node(task)
 
-    def add_task(self, task):
+    def add_task(self, task, **kwargs):
         if not self.has_task(task):
-            self._graph.add_node(task)
+            self._graph.add_node(task, **kwargs)
 
-    def update_task(self, task, *args, **kwargs):
+    def update_task(self, task, **kwargs):
         if not self.has_task(task):
             raise Exception('Task does not exist.')
 
@@ -44,7 +46,7 @@ class WorkflowScore(object):
     def has_sequence(self, source, destination):
         return self._graph.has_edge(source, destination)
 
-    def add_sequence(self, source, destination, criteria=None):
+    def add_sequence(self, source, destination, **kwargs):
         if not self.has_task(source):
             self.add_task(source)
 
@@ -52,11 +54,14 @@ class WorkflowScore(object):
             self.add_task(destination)
 
         if not self.has_sequence(source, destination):
-            self._graph.add_edge(
-                source,
-                destination,
-                attr_dict=(criteria or {})
-            )
+            self._graph.add_edge(source, destination, **kwargs)
+
+
+class WorkflowScore(WorkflowGraph):
 
     def get_start_tasks(self):
         return [n for n, d in self._graph.in_degree().items() if d == 0]
+
+
+class WorkflowExecution(WorkflowGraph):
+    pass

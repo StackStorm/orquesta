@@ -76,18 +76,6 @@ class MistralWorkflowComposer(base.WorkflowComposer):
             for task_name, task_spec in six.iteritems(task_specs)
         }
 
-        tasks_with_multi_parents = [
-            task_name
-            for task_name, prev_tasks in six.iteritems(upstream_map)
-            if len(prev_tasks) > 1
-        ]
-
-        tasks_with_single_parent = [
-            task_name
-            for task_name, prev_tasks in six.iteritems(upstream_map)
-            if len(prev_tasks) == 1
-        ]
-
         tasks_with_no_parent = [
             task_name
             for task_name, prev_tasks in six.iteritems(upstream_map)
@@ -102,39 +90,17 @@ class MistralWorkflowComposer(base.WorkflowComposer):
         while not q.empty():
             task_name, score = q.get()
 
-            criteria = {'state': 'succeeded'}
+            scores[score].add_task(task_name)
 
-            if task_name in tasks_with_no_parent:
-                scores[score].add_task(task_name)
-            elif task_name in tasks_with_single_parent:
+            if cls.is_join_task(task_specs[task_name]):
+                scores[score].update_task(task_name, join=True)
+
+            for prev_task_name in upstream_map[task_name]:
                 scores[score].add_sequence(
-                    upstream_map[task_name][0],
+                    prev_task_name,
                     task_name,
-                    criteria=criteria
+                    state='succeeded'
                 )
-            elif task_name in tasks_with_multi_parents:
-                if cls.is_join_task(task_specs[task_name]):
-                    for prev_task_name in upstream_map[task_name]:
-                        scores[score].add_sequence(
-                            prev_task_name,
-                            task_name,
-                            criteria=criteria
-                        )
-                else:
-                    for prev_task_name in upstream_map[task_name]:
-                        fqtn = prev_task_name + '->' + task_name
-
-                        scores[score].add_sequence(
-                            prev_task_name,
-                            fqtn,
-                            criteria=criteria
-                        )
-
-                        subscore = score + '.' + task_name
-                        scores[subscore] = composition.WorkflowScore()
-                        scores[subscore].add_task(task_name)
-
-                    score = subscore
 
             for next_task_name in cls.get_next_tasks(task_specs[task_name]):
                 q.put((next_task_name, score))

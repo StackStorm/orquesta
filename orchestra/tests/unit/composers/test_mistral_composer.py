@@ -123,15 +123,11 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
                     'task3': {'state': 'succeeded'}
                 },
                 'task2': {
-                    'task2->task4': {'state': 'succeeded'}
+                    'task4': {'state': 'succeeded'}
                 },
-                'task2->task4': {},
                 'task3': {
-                    'task3->task4': {'state': 'succeeded'}
+                    'task4': {'state': 'succeeded'}
                 },
-                'task3->task4': {}
-            },
-            workflow + '.task4': {
                 'task4': {
                     'task5': {'state': 'succeeded'}
                 },

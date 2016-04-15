@@ -11,8 +11,9 @@
 # limitations under the License.
 
 import logging
+import uuid
 
-import networkx as nx
+from orchestra import composition
 
 
 LOG = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ LOG = logging.getLogger(__name__)
 
 class WorkflowConductor(object):
 
-    def __init__(self, scores, entry=None):
+    def __init__(self, scores, entry=None, execution=None):
         if len(scores) < 1:
             raise Exception('No workflow score is provided.')
 
@@ -32,46 +33,84 @@ class WorkflowConductor(object):
 
         self.scores = scores
         self.entry = entry if entry else list(scores.keys())[0]
+        self.wf_ex = execution if execution else composition.WorkflowExecution()
 
-    def conduct(self, task=None, score=None, task_state=None):
-        if not score:
-            score = self.entry
+    def start(self):
+        tasks = []
 
-        if not task:
-            return [(t, score) for t in self.scores[score].get_start_tasks()]
+        for task_name in self.scores[self.entry].get_start_tasks():
+            task = {
+                'id': uuid.uuid4().hex,
+                'name': task_name,
+                'score': self.entry
+            }
 
-        self.scores[score].update_task(task, state=task_state)
+            self.wf_ex.add_task(
+                task['id'],
+                name=task['name'],
+                score=task['score']
+            )
 
-        task_states = nx.get_node_attributes(self.scores[score]._graph, 'state')
+            tasks.append(task)
 
-        sequences = []
+        return tasks
 
-        outbounds = [
-            edge
-            for edge in self.scores[score]._graph.out_edges([task], data=True)
+    def on_task_complete(self, task):
+        self.wf_ex.update_task(task['id'], state=task['state'])
+
+        tasks = []
+        score = self.scores[task['score']]
+        next_seqs = [
+            edge for edge in score._graph.out_edges([task['name']], data=True)
             if edge[2].get('state') == 'succeeded'
         ]
 
-        for outbound in outbounds:
-            inbounds = self.scores[score]._graph.in_edges(
-                [outbound[1]],
-                data=True
-            )
+        for next_seq in next_seqs:
+            next_task = next_seq[1]
 
-            succeeded = [
-                inbound[0]
-                for inbound in inbounds
-                if task_states.get(inbound[0]) == 'succeeded'
-            ]
+            if not dict(score._graph.nodes(data=True))[next_task].get('join'):
+                new_task = {
+                    'id': uuid.uuid4().hex,
+                    'name': next_task,
+                    'score': task['score']
+                }
 
-            if len(inbounds) == len(succeeded):
-                sequences.append(outbound)
+                self.wf_ex.add_task(
+                    new_task['id'],
+                    name=new_task['name'],
+                    score=new_task['score']
+                )
 
-        def which_score(task_name, current_score):
-            if '->' in task_name:
-                task_name = list(task_name.split('->'))[1]
-                return (task_name, current_score + '.' + task_name)
+                self.wf_ex.add_sequence(task['id'], new_task['id'])
+
+                tasks.append(new_task)
             else:
-                return (task_name, current_score)
+                prev_seqs = score._graph.in_edges([next_task], data=True)
+                prev_tasks = [seq[0] for seq in prev_seqs]
 
-        return [which_score(sequence[1], score) for sequence in sequences]
+                prev_task_exs = [
+                    n for n, d in self.wf_ex._graph.nodes_iter(data=True)
+                    if (d['score'] == task['score'] and
+                        d['name'] in prev_tasks and
+                        d.get('state') == 'succeeded')
+                ]
+
+                if len(prev_seqs) == len(prev_task_exs):
+                    new_task = {
+                        'id': uuid.uuid4().hex,
+                        'name': next_task,
+                        'score': task['score']
+                    }
+
+                    self.wf_ex.add_task(
+                        new_task['id'],
+                        name=new_task['name'],
+                        score=new_task['score']
+                    )
+
+                    for prev_task_ex in prev_task_exs:
+                        self.wf_ex.add_sequence(prev_task_ex, new_task['id'])
+
+                    tasks.append(new_task)
+
+        return tasks
