@@ -26,9 +26,6 @@ class WorkflowScore(object):
     def show(self):
         return nx.to_dict_of_dicts(self._graph)
 
-    def get_start_tasks(self):
-        return [n for n, d in self._graph.in_degree().items() if d == 0]
-
     def has_task(self, task):
         return self._graph.has_node(task)
 
@@ -39,7 +36,7 @@ class WorkflowScore(object):
     def has_sequence(self, source, destination):
         return self._graph.has_edge(source, destination)
 
-    def add_sequence(self, source, destination):
+    def add_sequence(self, source, destination, criteria=None):
         if not self.has_task(source):
             self.add_task(source)
 
@@ -47,4 +44,11 @@ class WorkflowScore(object):
             self.add_task(destination)
 
         if not self.has_sequence(source, destination):
-            self._graph.add_edge(source, destination)
+            self._graph.add_edge(
+                source,
+                destination,
+                attr_dict=(criteria or {})
+            )
+
+    def get_start_tasks(self):
+        return [n for n, d in self._graph.in_degree().items() if d == 0]

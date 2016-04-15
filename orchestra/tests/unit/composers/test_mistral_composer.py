@@ -52,8 +52,12 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
 
         expected_graphs = {
             workflow: {
-                'task1': {'task2': {}},
-                'task2': {'task3': {}},
+                'task1': {
+                    'task2': {'state': 'succeeded'}
+                },
+                'task2': {
+                    'task3': {'state': 'succeeded'}
+                },
                 'task3': {}
             }
         }
@@ -65,10 +69,17 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
 
         expected_graphs = {
             workflow: {
-                'task1': {'task2': {}, 'task4': {}},
-                'task2': {'task3': {}},
+                'task1': {
+                    'task2': {'state': 'succeeded'},
+                    'task4': {'state': 'succeeded'}
+                },
+                'task2': {
+                    'task3': {'state': 'succeeded'}
+                },
                 'task3': {},
-                'task4': {'task5': {}},
+                'task4': {
+                    'task5': {'state': 'succeeded'}
+                },
                 'task5': {}
             }
         }
@@ -80,11 +91,22 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
 
         expected_graphs = {
             workflow: {
-                'task1': {'task2': {}, 'task4': {}},
-                'task2': {'task3': {}},
-                'task3': {'task6': {}},
-                'task4': {'task5': {}},
-                'task5': {'task6': {}},
+                'task1': {
+                    'task2': {'state': 'succeeded'},
+                    'task4': {'state': 'succeeded'}
+                },
+                'task2': {
+                    'task3': {'state': 'succeeded'}
+                },
+                'task3': {
+                    'task6': {'state': 'succeeded'}
+                },
+                'task4': {
+                    'task5': {'state': 'succeeded'}
+                },
+                'task5': {
+                    'task6': {'state': 'succeeded'}
+                },
                 'task6': {}
             }
         }
@@ -96,15 +118,26 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
 
         expected_graphs = {
             workflow: {
-                'task1': {'task2': {}, 'task3': {}},
-                'task2': {'task2->task4': {}},
+                'task1': {
+                    'task2': {'state': 'succeeded'},
+                    'task3': {'state': 'succeeded'}
+                },
+                'task2': {
+                    'task2->task4': {'state': 'succeeded'}
+                },
                 'task2->task4': {},
-                'task3': {'task3->task4': {}},
+                'task3': {
+                    'task3->task4': {'state': 'succeeded'}
+                },
                 'task3->task4': {}
             },
             workflow + '.task4': {
-                'task4': {'task5': {}},
-                'task5': {'task6': {}},
+                'task4': {
+                    'task5': {'state': 'succeeded'}
+                },
+                'task5': {
+                    'task6': {'state': 'succeeded'}
+                },
                 'task6': {}
             }
         }
