@@ -35,25 +35,26 @@ class WorkflowConductor(object):
         self.entry = entry if entry else list(scores.keys())[0]
         self.wf_ex = execution if execution else composition.WorkflowExecution()
 
-    def start(self):
-        tasks = []
+    def add_task(self, score, task_name, prev_task_ex_ids=None):
+        task_ex_id = uuid.uuid4().hex
 
-        for task_name in self.scores[self.entry].get_start_tasks():
-            task = {
-                'id': uuid.uuid4().hex,
-                'name': task_name,
-                'score': self.entry
-            }
+        self.wf_ex.add_task(task_ex_id, name=task_name, score=score)
 
-            self.wf_ex.add_task(
-                task['id'],
-                name=task['name'],
-                score=task['score']
-            )
+        if prev_task_ex_ids:
+            for prev_task_ex_id in prev_task_ex_ids:
+                self.wf_ex.add_sequence(prev_task_ex_id, task_ex_id)
 
-            tasks.append(task)
+        return {
+            'id': task_ex_id,
+            'name': task_name,
+            'score': score
+        }
 
-        return tasks
+    def start_workflow(self):
+        return [
+            self.add_task(self.entry, task_name)
+            for task_name in self.scores[self.entry].get_start_tasks()
+        ]
 
     def on_task_complete(self, task):
         self.wf_ex.update_task(task['id'], state=task['state'])
@@ -69,48 +70,31 @@ class WorkflowConductor(object):
             next_task = next_seq[1]
 
             if not dict(score._graph.nodes(data=True))[next_task].get('join'):
-                new_task = {
-                    'id': uuid.uuid4().hex,
-                    'name': next_task,
-                    'score': task['score']
-                }
-
-                self.wf_ex.add_task(
-                    new_task['id'],
-                    name=new_task['name'],
-                    score=new_task['score']
+                tasks.append(
+                    self.add_task(
+                        task['score'],
+                        next_task,
+                        [task['id']]
+                    )
                 )
-
-                self.wf_ex.add_sequence(task['id'], new_task['id'])
-
-                tasks.append(new_task)
             else:
                 prev_seqs = score._graph.in_edges([next_task], data=True)
                 prev_tasks = [seq[0] for seq in prev_seqs]
 
-                prev_task_exs = [
+                prev_task_ex_ids = [
                     n for n, d in self.wf_ex._graph.nodes_iter(data=True)
                     if (d['score'] == task['score'] and
                         d['name'] in prev_tasks and
                         d.get('state') == 'succeeded')
                 ]
 
-                if len(prev_seqs) == len(prev_task_exs):
-                    new_task = {
-                        'id': uuid.uuid4().hex,
-                        'name': next_task,
-                        'score': task['score']
-                    }
-
-                    self.wf_ex.add_task(
-                        new_task['id'],
-                        name=new_task['name'],
-                        score=new_task['score']
+                if len(prev_seqs) == len(prev_task_ex_ids):
+                    tasks.append(
+                        self.add_task(
+                            task['score'],
+                            next_task,
+                            prev_task_ex_ids
+                        )
                     )
-
-                    for prev_task_ex in prev_task_exs:
-                        self.wf_ex.add_sequence(prev_task_ex, new_task['id'])
-
-                    tasks.append(new_task)
 
         return tasks

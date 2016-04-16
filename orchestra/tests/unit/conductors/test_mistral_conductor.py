@@ -32,7 +32,7 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
 
         q = queue.Queue()
 
-        for task in conductor.start():
+        for task in conductor.start_workflow():
             q.put(task)
 
         while not q.empty():
