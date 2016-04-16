@@ -11,8 +11,10 @@
 # limitations under the License.
 
 import copy
+import six
 from six.moves import queue
 
+from orchestra import composition
 from orchestra import symphony
 from orchestra.tests.unit.composers import base
 
@@ -24,16 +26,42 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
         super(MistralWorkflowConductorTest, cls).setUpClass()
         cls.composer_name = 'mistral'
 
+    def _serialize_conductor(self, conductor):
+        return {
+            'scores': {
+                name: score.serialize()
+                for name, score in six.iteritems(conductor.scores)
+            },
+            'wf_ex': conductor.wf_ex.serialize(),
+            'entry': conductor.entry
+        }
+
+    def _deserialize_conductor(self, data):
+        scores = {
+            name: composition.WorkflowScore.deserialize(score_json)
+            for name, score_json in six.iteritems(data['scores'])
+        }
+
+        wf_ex = composition.WorkflowExecution.deserialize(data['wf_ex'])
+
+        return symphony.WorkflowConductor(
+            scores,
+            entry=data['entry'],
+            execution=wf_ex
+        )
+
     def _assert_conducting_sequences(self, workflow, expected_sequence):
         sequence = []
+        q = queue.Queue()
 
         scores = self._compose_workflow_scores(workflow)
         conductor = symphony.WorkflowConductor(scores, entry=workflow)
 
-        q = queue.Queue()
-
         for task in conductor.start_workflow():
             q.put(task)
+
+        # serialize conductor
+        conductor_json = self._serialize_conductor(conductor)
 
         while not q.empty():
             queued_task = q.get()
@@ -43,8 +71,14 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
             completed_task = copy.deepcopy(queued_task)
             completed_task['state'] = 'succeeded'
 
+            # deserialize conductor
+            conductor = self._deserialize_conductor(conductor_json)
+
             for task in conductor.on_task_complete(completed_task):
                 q.put(task)
+
+            # serialize conductor
+            conductor_json = self._serialize_conductor(conductor)
 
         self.assertListEqual(sorted(expected_sequence), sorted(sequence))
 

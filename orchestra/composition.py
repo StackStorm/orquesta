@@ -15,6 +15,7 @@ import logging
 import six
 
 import networkx as nx
+from networkx.readwrite import json_graph
 
 
 LOG = logging.getLogger(__name__)
@@ -23,11 +24,20 @@ LOG = logging.getLogger(__name__)
 @six.add_metaclass(abc.ABCMeta)
 class WorkflowGraph(object):
 
-    def __init__(self):
-        self._graph = nx.DiGraph()
+    def __init__(self, graph=None):
+        self._graph = graph if graph else nx.DiGraph()
 
     def show(self):
         return nx.to_dict_of_dicts(self._graph)
+
+    def serialize(self):
+        return json_graph.node_link_data(self._graph)
+
+    @classmethod
+    def deserialize(cls, data):
+        g = json_graph.node_link_graph(data, directed=True, multigraph=False)
+
+        return cls(graph=g)
 
     def has_task(self, task):
         return self._graph.has_node(task)
