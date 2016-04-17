@@ -17,25 +17,25 @@ from orchestra import composition
 
 EXPECTED_GRAPH = {
     'task1': {
-        'task2': {},
-        'task4': {},
-        'task7': {}
+        'task2': {0: {}},
+        'task4': {0: {}},
+        'task7': {0: {}}
     },
     'task2': {
-        'task3': {}
+        'task3': {0: {}}
     },
     'task3': {
-        'task5': {}
+        'task5': {0: {}}
     },
     'task4': {
-        'task5': {}
+        'task5': {0: {}}
     },
     'task5': {
-        'task6': {}
+        'task6': {0: {}}
     },
     'task6': {},
     'task7': {
-        'task8': {}
+        'task8': {0: {}}
     },
     'task8': {}
 }

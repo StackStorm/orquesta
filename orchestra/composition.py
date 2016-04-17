@@ -25,7 +25,7 @@ LOG = logging.getLogger(__name__)
 class WorkflowGraph(object):
 
     def __init__(self, graph=None):
-        self._graph = graph if graph else nx.DiGraph()
+        self._graph = graph if graph else nx.MultiDiGraph()
 
     def show(self):
         return nx.to_dict_of_dicts(self._graph)
@@ -35,7 +35,7 @@ class WorkflowGraph(object):
 
     @classmethod
     def deserialize(cls, data):
-        g = json_graph.node_link_graph(data, directed=True, multigraph=False)
+        g = json_graph.node_link_graph(data, directed=True, multigraph=True)
 
         return cls(graph=g)
 
