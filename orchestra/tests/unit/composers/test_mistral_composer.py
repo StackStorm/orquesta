@@ -25,8 +25,9 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
     @classmethod
     def _get_seq_criteria(cls, name, state):
         composer = plugin.get_module('orchestra.composers', cls.composer_name)
+        criteria = composer.compose_task_transition_criteria(name, state)
 
-        return {'criteria': composer.compose_sequence_criteria(name, state)}
+        return {'criteria': criteria}
 
     def test_get_composer(self):
         self.assertEqual(

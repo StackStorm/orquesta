@@ -24,41 +24,18 @@ LOG = logging.getLogger(__name__)
 class MistralWorkflowComposer(base.WorkflowComposer):
 
     @staticmethod
-    def is_next_task(task_name, next_tasks):
-        task_names = [
-            next_task for next_task in next_tasks
-            if not isinstance(next_task, dict)
-        ]
-
-        task_names += [
-            next_task.keys()[0]
-            for next_task in next_tasks
-            if isinstance(next_task, dict)
-        ]
-
-        return task_name in task_names
-
-    @staticmethod
     def is_join_task(task_spec):
         return task_spec.get('join') is not None
 
-    @classmethod
-    def get_prev_tasks(cls, target, workflow):
+    @staticmethod
+    def get_next_tasks(task_spec, condition):
         return [
-            task_name
-            for task_name, task_spec in six.iteritems(workflow['tasks'])
-            if cls.is_next_task(target, task_spec.get('on-success', []))
+            task.items()[0] if isinstance(task, dict) else (task, None)
+            for task in task_spec.get(condition, [])
         ]
 
     @staticmethod
-    def get_next_tasks(task_spec):
-        return [
-            task.keys()[0] if isinstance(task, dict) else task
-            for task in task_spec.get('on-success', [])
-        ]
-
-    @staticmethod
-    def compose_sequence_criteria(task_name, task_state):
+    def compose_task_transition_criteria(task_name, task_state):
         expr = 'task(%s).get(state, "unknown") = "%s"' % (task_name, task_state)
 
         return {'yaql': expr}
@@ -72,47 +49,34 @@ class MistralWorkflowComposer(base.WorkflowComposer):
             entry = definition.keys()[0]
 
         task_specs = definition[entry]['tasks']
-
-        scores = {
-            entry: composition.WorkflowScore()
-        }
-
-        upstream_map = {
-            task_name: cls.get_prev_tasks(task_name, definition[entry])
-            for task_name, task_spec in six.iteritems(task_specs)
-        }
-
-        tasks_with_no_parent = [
-            task_name
-            for task_name, prev_tasks in six.iteritems(upstream_map)
-            if len(prev_tasks) < 1
-        ]
-
+        scores = {entry: composition.WorkflowScore()}
         q = queue.Queue()
 
-        for task_name in tasks_with_no_parent:
+        for task_name in task_specs.keys():
             q.put((task_name, entry))
 
         while not q.empty():
             task_name, score = q.get()
+            task_spec = task_specs[task_name]
 
             scores[score].add_task(task_name)
 
-            if cls.is_join_task(task_specs[task_name]):
+            if cls.is_join_task(task_spec):
                 scores[score].update_task(task_name, join=True)
 
-            for prev_task_name in upstream_map[task_name]:
-                scores[score].add_sequence(
-                    prev_task_name,
+            next_tasks = cls.get_next_tasks(task_spec, 'on-success')
+
+            for next_task_name, yaql_expr in next_tasks:
+                criteria = cls.compose_task_transition_criteria(
                     task_name,
-                    criteria=cls.compose_sequence_criteria(
-                        prev_task_name,
-                        'succeeded'
-                    )
+                    'succeeded'
                 )
 
-            for next_task_name in cls.get_next_tasks(task_specs[task_name]):
-                q.put((next_task_name, score))
+                scores[score].add_sequence(
+                    task_name,
+                    next_task_name,
+                    criteria=criteria
+                )
 
         return scores
 
