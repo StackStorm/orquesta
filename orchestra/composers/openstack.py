@@ -57,6 +57,12 @@ class MistralWorkflowComposer(base.WorkflowComposer):
             for task in task_spec.get('on-success', [])
         ]
 
+    @staticmethod
+    def compose_sequence_criteria(task_name, task_state):
+        expr = 'task(%s).get(state, "unknown") = "%s"' % (task_name, task_state)
+
+        return {'yaql': expr}
+
     @classmethod
     def compose(cls, definition, entry=None):
         if not definition:
@@ -99,7 +105,10 @@ class MistralWorkflowComposer(base.WorkflowComposer):
                 scores[score].add_sequence(
                     prev_task_name,
                     task_name,
-                    state='succeeded'
+                    criteria=cls.compose_sequence_criteria(
+                        prev_task_name,
+                        'succeeded'
+                    )
                 )
 
             for next_task_name in cls.get_next_tasks(task_specs[task_name]):

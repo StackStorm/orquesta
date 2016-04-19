@@ -14,6 +14,7 @@ import logging
 import uuid
 
 from orchestra import composition
+from orchestra.utils import expression
 
 
 LOG = logging.getLogger(__name__)
@@ -56,14 +57,19 @@ class WorkflowConductor(object):
             for task_name in self.scores[self.entry].get_start_tasks()
         ]
 
-    def on_task_complete(self, task):
+    def on_task_complete(self, task, context=None):
         self.wf_ex.update_task(task['id'], state=task['state'])
+
+        if not context:
+            context = {'__tasks': {}}
+
+        context['__tasks'][task['name']] = task
 
         tasks = []
         score = self.scores[task['score']]
         next_seqs = [
             edge for edge in score._graph.out_edges([task['name']], data=True)
-            if edge[2].get('state') == 'succeeded'
+            if expression.evaluate(edge[2]['criteria']['yaql'], context)
         ]
 
         for next_seq in next_seqs:

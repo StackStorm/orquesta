@@ -22,6 +22,12 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
         super(MistralWorkflowComposerTest, cls).setUpClass()
         cls.composer_name = 'mistral'
 
+    @classmethod
+    def _get_seq_criteria(cls, name, state):
+        composer = plugin.get_module('orchestra.composers', cls.composer_name)
+
+        return {'criteria': composer.compose_sequence_criteria(name, state)}
+
     def test_get_composer(self):
         self.assertEqual(
             plugin.get_module('orchestra.composers', self.composer_name),
@@ -53,10 +59,10 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
         expected_graphs = {
             workflow: {
                 'task1': {
-                    'task2': {0: {'state': 'succeeded'}}
+                    'task2': {0: self._get_seq_criteria('task1', 'succeeded')}
                 },
                 'task2': {
-                    'task3': {0: {'state': 'succeeded'}}
+                    'task3': {0: self._get_seq_criteria('task2', 'succeeded')}
                 },
                 'task3': {}
             }
@@ -70,15 +76,15 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
         expected_graphs = {
             workflow: {
                 'task1': {
-                    'task2': {0: {'state': 'succeeded'}},
-                    'task4': {0: {'state': 'succeeded'}}
+                    'task2': {0: self._get_seq_criteria('task1', 'succeeded')},
+                    'task4': {0: self._get_seq_criteria('task1', 'succeeded')}
                 },
                 'task2': {
-                    'task3': {0: {'state': 'succeeded'}}
+                    'task3': {0: self._get_seq_criteria('task2', 'succeeded')}
                 },
                 'task3': {},
                 'task4': {
-                    'task5': {0: {'state': 'succeeded'}}
+                    'task5': {0: self._get_seq_criteria('task4', 'succeeded')}
                 },
                 'task5': {}
             }
@@ -92,20 +98,20 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
         expected_graphs = {
             workflow: {
                 'task1': {
-                    'task2': {0: {'state': 'succeeded'}},
-                    'task4': {0: {'state': 'succeeded'}}
+                    'task2': {0: self._get_seq_criteria('task1', 'succeeded')},
+                    'task4': {0: self._get_seq_criteria('task1', 'succeeded')}
                 },
                 'task2': {
-                    'task3': {0: {'state': 'succeeded'}}
+                    'task3': {0: self._get_seq_criteria('task2', 'succeeded')}
                 },
                 'task3': {
-                    'task6': {0: {'state': 'succeeded'}}
+                    'task6': {0: self._get_seq_criteria('task3', 'succeeded')}
                 },
                 'task4': {
-                    'task5': {0: {'state': 'succeeded'}}
+                    'task5': {0: self._get_seq_criteria('task4', 'succeeded')}
                 },
                 'task5': {
-                    'task6': {0: {'state': 'succeeded'}}
+                    'task6': {0: self._get_seq_criteria('task5', 'succeeded')}
                 },
                 'task6': {}
             }
@@ -119,20 +125,20 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
         expected_graphs = {
             workflow: {
                 'task1': {
-                    'task2': {0: {'state': 'succeeded'}},
-                    'task3': {0: {'state': 'succeeded'}}
+                    'task2': {0: self._get_seq_criteria('task1', 'succeeded')},
+                    'task3': {0: self._get_seq_criteria('task1', 'succeeded')}
                 },
                 'task2': {
-                    'task4': {0: {'state': 'succeeded'}}
+                    'task4': {0: self._get_seq_criteria('task2', 'succeeded')}
                 },
                 'task3': {
-                    'task4': {0: {'state': 'succeeded'}}
+                    'task4': {0: self._get_seq_criteria('task3', 'succeeded')}
                 },
                 'task4': {
-                    'task5': {0: {'state': 'succeeded'}}
+                    'task5': {0: self._get_seq_criteria('task4', 'succeeded')}
                 },
                 'task5': {
-                    'task6': {0: {'state': 'succeeded'}}
+                    'task6': {0: self._get_seq_criteria('task5', 'succeeded')}
                 },
                 'task6': {}
             }
