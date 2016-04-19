@@ -50,12 +50,13 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
             execution=wf_ex
         )
 
-    def _assert_conducting_sequences(self, workflow, expected_sequence):
+    def _assert_conducting_sequences(self, workflow, expected_seq, **kwargs):
         sequence = []
         q = queue.Queue()
 
         scores = self._compose_workflow_scores(workflow)
         conductor = symphony.WorkflowConductor(scores, entry=workflow)
+        context = copy.deepcopy(kwargs)
 
         for task in conductor.start_workflow():
             q.put(task)
@@ -74,29 +75,34 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
             # deserialize conductor
             conductor = self._deserialize_conductor(conductor_json)
 
-            for task in conductor.on_task_complete(completed_task):
-                q.put(task)
+            next_tasks = conductor.on_task_complete(
+                completed_task,
+                context=context
+            )
+
+            for next_task in next_tasks:
+                q.put(next_task)
 
             # serialize conductor
             conductor_json = self._serialize_conductor(conductor)
 
-        self.assertListEqual(sorted(expected_sequence), sorted(sequence))
+        self.assertListEqual(sorted(expected_seq), sorted(sequence))
 
     def test_sequential(self):
         workflow = 'sequential'
 
-        expected_sequence = [
+        expected_seq = [
             workflow + '.task1',
             workflow + '.task2',
             workflow + '.task3'
         ]
 
-        self._assert_conducting_sequences(workflow, expected_sequence)
+        self._assert_conducting_sequences(workflow, expected_seq)
 
     def test_branching(self):
         workflow = 'branching'
 
-        expected_sequence = [
+        expected_seq = [
             workflow + '.task1',
             workflow + '.task2',
             workflow + '.task4',
@@ -104,12 +110,12 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
             workflow + '.task5'
         ]
 
-        self._assert_conducting_sequences(workflow, expected_sequence)
+        self._assert_conducting_sequences(workflow, expected_seq)
 
     def test_join(self):
         workflow = 'join'
 
-        expected_sequence = [
+        expected_seq = [
             workflow + '.task1',
             workflow + '.task2',
             workflow + '.task4',
@@ -118,12 +124,12 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
             workflow + '.task6'
         ]
 
-        self._assert_conducting_sequences(workflow, expected_sequence)
+        self._assert_conducting_sequences(workflow, expected_seq)
 
     def test_shared_branching(self):
         workflow = 'shared_branching'
 
-        expected_sequence = [
+        expected_seq = [
             workflow + '.task1',
             workflow + '.task2',
             workflow + '.task3',
@@ -135,4 +141,25 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
             workflow + '.task6'
         ]
 
-        self._assert_conducting_sequences(workflow, expected_sequence)
+        self._assert_conducting_sequences(workflow, expected_seq)
+
+    def test_decision_tree(self):
+        workflow = 'decision'
+
+        self._assert_conducting_sequences(
+            workflow,
+            [workflow + '.t1', workflow + '.a'],
+            which='a'
+        )
+
+        self._assert_conducting_sequences(
+            workflow,
+            [workflow + '.t1', workflow + '.b'],
+            which='b'
+        )
+
+        self._assert_conducting_sequences(
+            workflow,
+            [workflow + '.t1', workflow + '.c'],
+            which='c'
+        )

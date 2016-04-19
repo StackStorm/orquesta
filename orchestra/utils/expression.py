@@ -11,6 +11,7 @@
 # limitations under the License.
 
 import logging
+import re
 
 import yaql
 
@@ -19,6 +20,16 @@ LOG = logging.getLogger(__name__)
 
 YAQL_ENGINE = yaql.language.factory.YaqlFactory().create()
 YAQL_ROOT_CONTEXT = yaql.create_context()
+
+
+def strip_delimiter(expr):
+    match = re.search('<%(.+?)%>', expr)
+
+    if match:
+        found = match.group(1)
+        return found.strip()
+
+    return expr
 
 
 def evaluate(expr, data=None):

@@ -1,0 +1,22 @@
+version: '2.0'
+
+decision:
+    description: >
+        A sample workflow that demonstrates how to use conditions
+        to determine which path in the workflow to take.
+    type: direct
+    input:
+        - which
+    tasks:
+        t1:
+            action: std.noop
+            on-success:
+                - a: <% $.which = 'a' %>
+                - b: <% $.which = 'b' %>
+                - c: <% not $.which in list(a, b) %>
+        a:
+            action: std.noop
+        b:
+            action: std.noop
+        c:
+            action: std.noop

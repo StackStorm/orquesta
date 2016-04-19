@@ -63,6 +63,9 @@ class WorkflowConductor(object):
         if not context:
             context = {'__tasks': {}}
 
+        if '__tasks' not in context:
+            context['__tasks'] = {}
+
         context['__tasks'][task['name']] = task
 
         tasks = []

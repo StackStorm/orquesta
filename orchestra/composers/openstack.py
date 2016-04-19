@@ -16,6 +16,7 @@ from six.moves import queue
 
 from orchestra.composers import base
 from orchestra import composition
+from orchestra.utils import expression
 
 
 LOG = logging.getLogger(__name__)
@@ -30,15 +31,20 @@ class MistralWorkflowComposer(base.WorkflowComposer):
     @staticmethod
     def get_next_tasks(task_spec, condition):
         return [
-            task.items()[0] if isinstance(task, dict) else (task, None)
+            list(task.items())[0] if isinstance(task, dict) else (task, None)
             for task in task_spec.get(condition, [])
         ]
 
     @staticmethod
-    def compose_task_transition_criteria(task_name, task_state):
-        expr = 'task(%s).get(state, "unknown") = "%s"' % (task_name, task_state)
+    def compose_task_transition_criteria(task_name, task_state, expr=None):
+        yaql_expr = (
+            'task(%s).get(state, "unknown") = "%s"' % (task_name, task_state)
+        )
 
-        return {'yaql': expr}
+        if expr:
+            yaql_expr += ' and (%s)' % expression.strip_delimiter(expr)
+
+        return {'yaql': yaql_expr}
 
     @classmethod
     def compose(cls, definition, entry=None):
@@ -66,10 +72,11 @@ class MistralWorkflowComposer(base.WorkflowComposer):
 
             next_tasks = cls.get_next_tasks(task_spec, 'on-success')
 
-            for next_task_name, yaql_expr in next_tasks:
+            for next_task_name, expr in next_tasks:
                 criteria = cls.compose_task_transition_criteria(
                     task_name,
-                    'succeeded'
+                    'succeeded',
+                    expr=expr
                 )
 
                 scores[score].add_sequence(

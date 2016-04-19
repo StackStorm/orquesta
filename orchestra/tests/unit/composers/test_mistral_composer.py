@@ -23,9 +23,14 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
         cls.composer_name = 'mistral'
 
     @classmethod
-    def _get_seq_criteria(cls, name, state):
+    def _get_seq_criteria(cls, name, state, expr=None):
         composer = plugin.get_module('orchestra.composers', cls.composer_name)
-        criteria = composer.compose_task_transition_criteria(name, state)
+
+        criteria = composer.compose_task_transition_criteria(
+            name,
+            state,
+            expr=expr
+        )
 
         return {'criteria': criteria}
 
@@ -142,6 +147,42 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
                     'task6': {0: self._get_seq_criteria('task5', 'succeeded')}
                 },
                 'task6': {}
+            }
+        }
+
+        self._assert_workflow_composition(workflow, expected_graphs)
+
+    def test_decision_tree(self):
+        workflow = 'decision'
+
+        expected_graphs = {
+            workflow: {
+                't1': {
+                    'a': {
+                        0: self._get_seq_criteria(
+                            't1',
+                            'succeeded',
+                            "$.which = 'a'"
+                        )
+                    },
+                    'b': {
+                        0: self._get_seq_criteria(
+                            't1',
+                            'succeeded',
+                            "$.which = 'b'"
+                        )
+                    },
+                    'c': {
+                        0: self._get_seq_criteria(
+                            't1',
+                            'succeeded',
+                            "not $.which in list(a, b)"
+                        )
+                    }
+                },
+                'a': {},
+                'b': {},
+                'c': {}
             }
         }
 
