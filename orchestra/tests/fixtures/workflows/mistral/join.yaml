@@ -35,3 +35,7 @@ join:
         task6:
             join: all
             action: core.noop
+            on-success:
+                - task7
+        task7:
+            action: core.noop

@@ -32,7 +32,7 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
                 name: score.serialize()
                 for name, score in six.iteritems(conductor.scores)
             },
-            'wf_ex': conductor.wf_ex.serialize(),
+            'plot': conductor.plot.serialize(),
             'entry': conductor.entry
         }
 
@@ -42,12 +42,12 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
             for name, score_json in six.iteritems(data['scores'])
         }
 
-        wf_ex = composition.WorkflowExecution.deserialize(data['wf_ex'])
+        plot = composition.WorkflowExecution.deserialize(data['plot'])
 
         return symphony.WorkflowConductor(
             scores,
             entry=data['entry'],
-            execution=wf_ex
+            plot=plot
         )
 
     def _assert_conducting_sequences(self, workflow, expected_seq, **kwargs):
@@ -58,8 +58,9 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
         conductor = symphony.WorkflowConductor(scores, entry=workflow)
         context = copy.deepcopy(kwargs)
 
-        for task in conductor.start_workflow():
-            q.put(task)
+        for task_id, attributes in six.iteritems(conductor.start_workflow()):
+            attributes['id'] = task_id
+            q.put(attributes)
 
         # serialize conductor
         conductor_json = self._serialize_conductor(conductor)
@@ -121,7 +122,8 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
             workflow + '.task4',
             workflow + '.task3',
             workflow + '.task5',
-            workflow + '.task6'
+            workflow + '.task6',
+            workflow + '.task7'
         ]
 
         self._assert_conducting_sequences(workflow, expected_seq)
@@ -134,11 +136,13 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
             workflow + '.task2',
             workflow + '.task3',
             workflow + '.task4',
-            workflow + '.task4',
-            workflow + '.task5',
             workflow + '.task5',
             workflow + '.task6',
-            workflow + '.task6'
+            workflow + '.task7',
+            workflow + '.task4',
+            workflow + '.task5',
+            workflow + '.task6',
+            workflow + '.task7'
         ]
 
         self._assert_conducting_sequences(workflow, expected_seq)

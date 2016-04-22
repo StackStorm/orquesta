@@ -119,7 +119,10 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
                 'task5': {
                     'task6': {0: self._get_seq_criteria('task5', 'succeeded')}
                 },
-                'task6': {}
+                'task6': {
+                    'task7': {0: self._get_seq_criteria('task6', 'succeeded')}
+                },
+                'task7': {}
             }
         }
 
@@ -141,12 +144,16 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
                     'task4': {0: self._get_seq_criteria('task3', 'succeeded')}
                 },
                 'task4': {
-                    'task5': {0: self._get_seq_criteria('task4', 'succeeded')}
+                    'task5': {0: self._get_seq_criteria('task4', 'succeeded')},
+                    'task6': {0: self._get_seq_criteria('task4', 'succeeded')}
                 },
                 'task5': {
-                    'task6': {0: self._get_seq_criteria('task5', 'succeeded')}
+                    'task7': {0: self._get_seq_criteria('task5', 'succeeded')}
                 },
-                'task6': {}
+                'task6': {
+                    'task7': {0: self._get_seq_criteria('task6', 'succeeded')}
+                },
+                'task7': {}
             }
         }
 

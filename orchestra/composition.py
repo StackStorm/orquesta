@@ -11,11 +11,12 @@
 # limitations under the License.
 
 import abc
+import copy
 import logging
-import six
 
 import networkx as nx
 from networkx.readwrite import json_graph
+import six
 
 
 LOG = logging.getLogger(__name__)
@@ -68,10 +69,12 @@ class WorkflowGraph(object):
 
 
 class WorkflowScore(WorkflowGraph):
-
     def get_start_tasks(self):
-        return [n for n, d in self._graph.in_degree().items() if d == 0]
+        return {
+            n: copy.deepcopy(self._graph.node[n])
+            for n, d in self._graph.in_degree().items() if d == 0
+        }
 
 
-class WorkflowExecution(WorkflowGraph):
+class WorkflowExecution(WorkflowScore):
     pass

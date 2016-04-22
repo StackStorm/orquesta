@@ -26,9 +26,15 @@ shared_branching:
             action: core.noop
             on-success:
                 - task5
+                - task6
         task5:
             action: core.noop
             on-success:
-                - task6
+                - task7
         task6:
+            action: core.noop
+            on-success:
+                - task7
+        task7:
+            join: all
             action: core.noop
