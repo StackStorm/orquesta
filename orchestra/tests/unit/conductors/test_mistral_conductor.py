@@ -23,58 +23,41 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
 
     @classmethod
     def setUpClass(cls):
-        super(MistralWorkflowConductorTest, cls).setUpClass()
         cls.composer_name = 'mistral'
-
-    def _serialize_conductor(self, conductor):
-        return {
-            'scores': {
-                name: score.serialize()
-                for name, score in six.iteritems(conductor.scores)
-            },
-            'plot': conductor.plot.serialize(),
-            'entry': conductor.entry
-        }
-
-    def _deserialize_conductor(self, data):
-        scores = {
-            name: composition.WorkflowScore.deserialize(score_json)
-            for name, score_json in six.iteritems(data['scores'])
-        }
-
-        plot = composition.WorkflowExecution.deserialize(data['plot'])
-
-        return symphony.WorkflowConductor(
-            scores,
-            entry=data['entry'],
-            plot=plot
-        )
+        super(MistralWorkflowConductorTest, cls).setUpClass()
 
     def _assert_conducting_sequences(self, workflow, expected_seq, **kwargs):
         sequence = []
         q = queue.Queue()
-
-        scores = self._compose_workflow_scores(workflow)
-        conductor = symphony.WorkflowConductor(scores, entry=workflow)
         context = copy.deepcopy(kwargs)
+
+        wf_def = self._get_wf_def(workflow)
+        wf_ex_graph = self.composer.compose(wf_def, entry=workflow)
+        conductor = symphony.WorkflowConductor(wf_ex_graph)
 
         for task_id, attributes in six.iteritems(conductor.start_workflow()):
             attributes['id'] = task_id
             q.put(attributes)
 
-        # serialize conductor
-        conductor_json = self._serialize_conductor(conductor)
+        # serialize workflow execution graph to mock async execution
+        wf_ex_graph_json = wf_ex_graph.serialize()
 
         while not q.empty():
             queued_task = q.get()
 
             # mock completion of the task
-            sequence.append(queued_task['score'] + '.' + queued_task['name'])
+            task_name = queued_task['workflow'] + '.' + queued_task['name']
+            sequence.append(task_name)
             completed_task = copy.deepcopy(queued_task)
             completed_task['state'] = 'succeeded'
 
-            # deserialize conductor
-            conductor = self._deserialize_conductor(conductor_json)
+            # deserialize workflow execution graph to mock async execution
+            wf_ex_graph = composition.WorkflowGraph.deserialize(
+                wf_ex_graph_json
+            )
+
+            # Instantiate a new conductor to mock async execution
+            conductor = symphony.WorkflowConductor(wf_ex_graph)
 
             next_tasks = conductor.on_task_complete(
                 completed_task,
@@ -84,8 +67,8 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
             for next_task in next_tasks:
                 q.put(next_task)
 
-            # serialize conductor
-            conductor_json = self._serialize_conductor(conductor)
+            # serialize workflow execution graph to mock async execution
+            wf_ex_graph_json = wf_ex_graph.serialize()
 
         self.assertListEqual(sorted(expected_seq), sorted(sequence))
 
@@ -128,8 +111,8 @@ class MistralWorkflowConductorTest(base.WorkflowComposerTest):
 
         self._assert_conducting_sequences(workflow, expected_seq)
 
-    def test_shared_branching(self):
-        workflow = 'shared_branching'
+    def test_merge(self):
+        workflow = 'merge'
 
         expected_seq = [
             workflow + '.task1',

@@ -28,15 +28,12 @@ class WorkflowGraph(object):
     def __init__(self, graph=None):
         self._graph = graph if graph else nx.MultiDiGraph()
 
-    def show(self):
-        return nx.to_dict_of_dicts(self._graph)
-
     def serialize(self):
-        return json_graph.node_link_data(self._graph)
+        return json_graph.adjacency_data(self._graph)
 
     @classmethod
     def deserialize(cls, data):
-        g = json_graph.node_link_graph(data, directed=True, multigraph=True)
+        g = json_graph.adjacency_graph(data, directed=True, multigraph=True)
 
         return cls(graph=g)
 
@@ -67,14 +64,8 @@ class WorkflowGraph(object):
         if not self.has_sequence(source, destination):
             self._graph.add_edge(source, destination, **kwargs)
 
-
-class WorkflowScore(WorkflowGraph):
     def get_start_tasks(self):
         return {
             n: copy.deepcopy(self._graph.node[n])
             for n, d in self._graph.in_degree().items() if d == 0
         }
-
-
-class WorkflowExecution(WorkflowScore):
-    pass
