@@ -15,15 +15,15 @@ import uuid
 
 from orchestra.composers import openstack
 from orchestra.utils import plugin
-from orchestra.tests.unit.composers import base
+from orchestra.tests.unit import base
 
 
-class MistralWorkflowComposerTest(base.WorkflowComposerTest):
+class MistralWorkflowConductorTest(base.WorkflowConductorTest):
 
     @classmethod
     def setUpClass(cls):
         cls.composer_name = 'mistral'
-        super(MistralWorkflowComposerTest, cls).setUpClass()
+        super(MistralWorkflowConductorTest, cls).setUpClass()
 
     def test_get_composer(self):
         self.assertEqual(
@@ -145,6 +145,14 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
         }
 
         self._assert_compose(wf_name, expected_wf_ex_graph)
+
+        expected_task_seq = [
+            '101',
+            '102',
+            '103'
+        ]
+
+        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
 
     @mock.patch.object(
         uuid,
@@ -299,6 +307,16 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
         }
 
         self._assert_compose(wf_name, expected_wf_ex_graph)
+
+        expected_task_seq = [
+            '101',
+            '102',
+            '104',
+            '103',
+            '105'
+        ]
+
+        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
 
     @mock.patch.object(
         uuid,
@@ -529,6 +547,18 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
         }
 
         self._assert_compose(wf_name, expected_wf_ex_graph)
+
+        expected_task_seq = [
+            '101',
+            '102',
+            '106',
+            '103',
+            '107',
+            '104',
+            '105'
+        ]
+
+        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
 
     @mock.patch.object(
         uuid,
@@ -836,6 +866,22 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
 
         self._assert_compose(wf_name, expected_wf_ex_graph)
 
+        expected_task_seq = [
+            '101',
+            '102',
+            '107',
+            '103',
+            '108',
+            '104',
+            '106',
+            '109',
+            '111',
+            '105',
+            '110'
+        ]
+
+        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
+
     @mock.patch.object(
         uuid,
         'uuid4',
@@ -965,3 +1011,39 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
         }
 
         self._assert_compose(wf_name, expected_wf_ex_graph)
+
+        # Test branch "a"
+        expected_task_seq = [
+            '101',
+            '102'
+        ]
+
+        self._assert_conduct(
+            expected_wf_ex_graph,
+            expected_task_seq,
+            which='a'
+        )
+
+        # Test branch "b"
+        expected_task_seq = [
+            '101',
+            '103'
+        ]
+
+        self._assert_conduct(
+            expected_wf_ex_graph,
+            expected_task_seq,
+            which='b'
+        )
+
+        # Test branch "c"
+        expected_task_seq = [
+            '101',
+            '104'
+        ]
+
+        self._assert_conduct(
+            expected_wf_ex_graph,
+            expected_task_seq,
+            which='c'
+        )

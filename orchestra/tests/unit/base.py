@@ -11,8 +11,15 @@
 # limitations under the License.
 
 import abc
+import copy
 import six
+from six.moves import queue
 import unittest
+
+from orchestra import composition
+from orchestra import symphony
+from orchestra.utils import plugin
+from orchestra.tests.fixtures import loader
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -36,3 +43,110 @@ class WorkflowGraphTest(unittest.TestCase):
         expected_wf_graph_meta = self._zip_wf_graph_meta(expected_wf_graph)
 
         self.assertListEqual(wf_graph_meta, expected_wf_graph_meta)
+
+
+@six.add_metaclass(abc.ABCMeta)
+class WorkflowConductorTest(WorkflowGraphTest):
+    composer_name = None
+    composer = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.composer = plugin.get_module(
+            'orchestra.composers',
+            cls.composer_name
+        )
+
+    def _get_fixture_path(self, wf_name):
+        return self.composer_name + '/' + wf_name + '.yaml'
+
+    def _get_wf_def(self, wf_name):
+        return loader.get_fixture_content(
+            self._get_fixture_path(wf_name),
+            'workflows'
+        )
+
+    def _serialize_wf_graphs(self, wf_graphs):
+        return {
+            name: wf_graph.serialize()
+            for name, wf_graph in six.iteritems(wf_graphs)
+        }
+
+    def _get_seq_expr(self, name, state, expr=None):
+        return self.composer._compose_task_transition_criteria(
+            name,
+            state,
+            expr=expr
+        )
+
+    def _compose_wf_graphs(self, wf_name):
+        return self.composer._compose_wf_graphs(
+            self._get_wf_def(wf_name),
+            entry=wf_name
+        )
+
+    def _assert_wf_graphs(self, wf_name, expected_wf_graphs):
+        wf_graphs = self.composer._compose_wf_graphs(
+            self._get_wf_def(wf_name),
+            entry=wf_name
+        )
+
+        self._assert_graph_equal(
+            wf_graphs[wf_name],
+            expected_wf_graphs[wf_name]
+        )
+
+        return wf_graphs
+
+    def _assert_compose(self, wf_name, expected_wf_ex_graph):
+        wf_ex_graph = self.composer.compose(
+            self._get_wf_def(wf_name),
+            entry=wf_name
+        )
+
+        self._assert_graph_equal(wf_ex_graph, expected_wf_ex_graph)
+
+        return wf_ex_graph
+
+    def _assert_conduct(self, wf_ex_graph_json, expected_task_seq, **kwargs):
+        actual_task_seq = []
+        q = queue.Queue()
+        context = copy.deepcopy(kwargs)
+        wf_ex_graph = composition.WorkflowGraph.deserialize(wf_ex_graph_json)
+        conductor = symphony.WorkflowConductor(wf_ex_graph)
+
+        for task_id, attributes in six.iteritems(conductor.start_workflow()):
+            attributes['id'] = task_id
+            q.put(attributes)
+
+        # serialize workflow execution graph to mock async execution
+        wf_ex_graph_json = wf_ex_graph.serialize()
+
+        while not q.empty():
+            queued_task = q.get()
+
+            # mock completion of the task
+            actual_task_seq.append(queued_task['id'])
+            completed_task = copy.deepcopy(queued_task)
+            completed_task['state'] = 'succeeded'
+
+            # deserialize workflow execution graph to mock async execution
+            wf_ex_graph = composition.WorkflowGraph.deserialize(
+                wf_ex_graph_json
+            )
+
+            # Instantiate a new conductor to mock async execution
+            conductor = symphony.WorkflowConductor(wf_ex_graph)
+
+            next_tasks = conductor.on_task_complete(
+                completed_task,
+                context=context
+            )
+
+            for next_task in next_tasks:
+                q.put(next_task)
+
+            # serialize workflow execution graph to mock async execution
+            wf_ex_graph_json = wf_ex_graph.serialize()
+
+        self.assertListEqual(expected_task_seq, actual_task_seq)

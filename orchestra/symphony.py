@@ -83,4 +83,4 @@ class WorkflowConductor(object):
 
             tasks.append(next_task)
 
-        return tasks
+        return sorted(tasks, key=lambda x: x['name'])
