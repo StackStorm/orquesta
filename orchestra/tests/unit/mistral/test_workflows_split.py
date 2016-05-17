@@ -16,12 +16,12 @@ import uuid
 from orchestra.tests.unit import base
 
 
-class MistralSplitWorkflowTest(base.WorkflowConductorTest):
+class SplitWorkflowConductorTest(base.WorkflowConductorTest):
 
     @classmethod
     def setUpClass(cls):
         cls.composer_name = 'mistral'
-        super(MistralSplitWorkflowTest, cls).setUpClass()
+        super(SplitWorkflowConductorTest, cls).setUpClass()
 
     def test_get_prev_tasks(self):
         wf_name = 'split'
