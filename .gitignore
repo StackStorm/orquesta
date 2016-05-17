@@ -55,3 +55,6 @@ target/
 
 # Virtual Environments
 .venv
+
+# Temporary Files
+*.swp
