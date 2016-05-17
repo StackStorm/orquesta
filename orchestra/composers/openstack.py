@@ -250,10 +250,3 @@ class MistralWorkflowComposer(base.WorkflowComposer):
         wf_graphs = cls._compose_wf_graphs(definition, entry=entry)
 
         return cls._compose_wf_ex_graph(wf_graphs, entry)
-
-    @classmethod
-    def serialize(cls, wf_graphs):
-        return {
-            name: wf_graph.show()
-            for name, wf_graph in six.iteritems(wf_graphs)
-        }
