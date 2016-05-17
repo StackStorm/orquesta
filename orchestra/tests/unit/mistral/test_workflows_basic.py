@@ -25,27 +25,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         cls.composer_name = 'mistral'
         super(BasicWorkflowConductorTest, cls).setUpClass()
 
-    def test_get_composer(self):
-        self.assertEqual(
-            plugin.get_module('orchestra.composers', self.composer_name),
-            openstack.MistralWorkflowComposer
-        )
-
-    def test_exception_empty_definition(self):
-        self.assertRaises(
-            ValueError,
-            self.composer.compose,
-            {}
-        )
-
-    def test_exception_unidentified_entry(self):
-        self.assertRaises(
-            KeyError,
-            self.composer.compose,
-            self._get_wf_def('sequential'),
-            entry='foobar'
-        )
-
     @mock.patch.object(
         uuid,
         'uuid4',

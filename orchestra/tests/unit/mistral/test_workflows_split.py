@@ -23,46 +23,6 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
         cls.composer_name = 'mistral'
         super(SplitWorkflowConductorTest, cls).setUpClass()
 
-    def test_get_prev_tasks(self):
-        wf_name = 'split'
-        wf_def = self._get_wf_def(wf_name)
-        task_specs = wf_def[wf_name]['tasks']
-
-        self.assertListEqual(
-            self.composer._get_prev_tasks(task_specs, 'task1'),
-            []
-        )
-
-        self.assertListEqual(
-            self.composer._get_prev_tasks(task_specs, 'task2'),
-            ['task1']
-        )
-
-        self.assertListEqual(
-            self.composer._get_prev_tasks(task_specs, 'task3'),
-            ['task1']
-        )
-
-        self.assertListEqual(
-            self.composer._get_prev_tasks(task_specs, 'task4'),
-            ['task2', 'task3']
-        )
-
-        self.assertListEqual(
-            self.composer._get_prev_tasks(task_specs, 'task5'),
-            ['task4']
-        )
-
-        self.assertListEqual(
-            self.composer._get_prev_tasks(task_specs, 'task6'),
-            ['task4']
-        )
-
-        self.assertListEqual(
-            self.composer._get_prev_tasks(task_specs, 'task7'),
-            ['task5', 'task6']
-        )
-
     @mock.patch.object(
         uuid,
         'uuid4',
