@@ -13,37 +13,54 @@
 import mock
 import uuid
 
-from orchestra.composers import openstack
-from orchestra.utils import plugin
 from orchestra.tests.unit import base
 
 
-class MistralWorkflowConductorTest(base.WorkflowConductorTest):
+class MistralSplitWorkflowTest(base.WorkflowConductorTest):
 
     @classmethod
     def setUpClass(cls):
         cls.composer_name = 'mistral'
-        super(MistralWorkflowConductorTest, cls).setUpClass()
+        super(MistralSplitWorkflowTest, cls).setUpClass()
 
-    def test_get_composer(self):
-        self.assertEqual(
-            plugin.get_module('orchestra.composers', self.composer_name),
-            openstack.MistralWorkflowComposer
+    def test_get_prev_tasks(self):
+        wf_name = 'split'
+        wf_def = self._get_wf_def(wf_name)
+        task_specs = wf_def[wf_name]['tasks']
+
+        self.assertListEqual(
+            self.composer._get_prev_tasks(task_specs, 'task1'),
+            []
         )
 
-    def test_exception_empty_definition(self):
-        self.assertRaises(
-            ValueError,
-            self.composer.compose,
-            {}
+        self.assertListEqual(
+            self.composer._get_prev_tasks(task_specs, 'task2'),
+            ['task1']
         )
 
-    def test_exception_unidentified_entry(self):
-        self.assertRaises(
-            KeyError,
-            self.composer.compose,
-            self._get_wf_def('sequential'),
-            entry='foobar'
+        self.assertListEqual(
+            self.composer._get_prev_tasks(task_specs, 'task3'),
+            ['task1']
+        )
+
+        self.assertListEqual(
+            self.composer._get_prev_tasks(task_specs, 'task4'),
+            ['task2', 'task3']
+        )
+
+        self.assertListEqual(
+            self.composer._get_prev_tasks(task_specs, 'task5'),
+            ['task4']
+        )
+
+        self.assertListEqual(
+            self.composer._get_prev_tasks(task_specs, 'task6'),
+            ['task4']
+        )
+
+        self.assertListEqual(
+            self.composer._get_prev_tasks(task_specs, 'task7'),
+            ['task5', 'task6']
         )
 
     @mock.patch.object(
@@ -51,116 +68,9 @@ class MistralWorkflowConductorTest(base.WorkflowConductorTest):
         'uuid4',
         mock.MagicMock(side_effect=range(101, 200))
     )
-    def test_sequential(self):
-        wf_name = 'sequential'
-
-        expected_wf_graphs = {
-            wf_name: {
-                'directed': True,
-                'graph': {},
-                'nodes': [
-                    {
-                        'id': 'task1'
-                    },
-                    {
-                        'id': 'task2'
-                    },
-                    {
-                        'id': 'task3'
-                    }
-                ],
-                'adjacency': [
-                    [
-                        {
-                            'id': 'task2',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task1',
-                                'succeeded'
-                            )
-                        }
-                    ],
-                    [
-                        {
-                            'id': 'task3',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task2',
-                                'succeeded'
-                            )
-                        }
-                    ],
-                    []
-                ],
-                'multigraph': True
-            }
-        }
-
-        self._assert_wf_graphs(wf_name, expected_wf_graphs)
-
-        expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': '101',
-                    'name': 'task1',
-                    'workflow': wf_name
-                },
-                {
-                    'id': '102',
-                    'name': 'task2',
-                    'workflow': wf_name
-                },
-                {
-                    'id': '103',
-                    'name': 'task3',
-                    'workflow': wf_name
-                }
-            ],
-            'adjacency': [
-                [
-                    {
-                        'id': '102',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task1',
-                            'succeeded'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': '103',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task2',
-                            'succeeded'
-                        )
-                    }
-                ],
-                []
-            ],
-            'multigraph': True
-        }
-
-        self._assert_compose(wf_name, expected_wf_ex_graph)
-
-        expected_task_seq = [
-            '101',
-            '102',
-            '103'
-        ]
-
-        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
-
-    @mock.patch.object(
-        uuid,
-        'uuid4',
-        mock.MagicMock(side_effect=range(101, 200))
-    )
-    def test_branching(self):
-        wf_name = 'branching'
+    def test_split(self):
+        wf_name = 'split'
+        sub_wf_graph_name = wf_name + '.task4'
 
         expected_wf_graphs = {
             wf_name: {
@@ -177,10 +87,8 @@ class MistralWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task3'
                     },
                     {
-                        'id': 'task4'
-                    },
-                    {
-                        'id': 'task5'
+                        'id': 'task4',
+                        'subgraph': wf_name + '.task4'
                     }
                 ],
                 'adjacency': [
@@ -194,188 +102,17 @@ class MistralWorkflowConductorTest(base.WorkflowConductorTest):
                             )
                         },
                         {
-                            'id': 'task4',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task1',
-                                'succeeded'
-                            )
-                        }
-                    ],
-                    [
-                        {
                             'id': 'task3',
                             'key': 0,
                             'criteria': self._get_seq_expr(
-                                'task2',
-                                'succeeded'
-                            )
-                        }
-                    ],
-                    [],
-                    [
-                        {
-                            'id': 'task5',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task4',
-                                'succeeded'
-                            )
-                        }
-                    ],
-                    []
-                ],
-                'multigraph': True
-            }
-        }
-
-        self._assert_wf_graphs(wf_name, expected_wf_graphs)
-
-        expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': '101',
-                    'name': 'task1',
-                    'workflow': wf_name
-                },
-                {
-                    'id': '102',
-                    'name': 'task2',
-                    'workflow': wf_name
-                },
-                {
-                    'id': '103',
-                    'name': 'task3',
-                    'workflow': wf_name
-                },
-                {
-                    'id': '104',
-                    'name': 'task4',
-                    'workflow': wf_name
-                },
-                {
-                    'id': '105',
-                    'name': 'task5',
-                    'workflow': wf_name
-                }
-            ],
-            'adjacency': [
-                [
-                    {
-                        'id': '102',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task1',
-                            'succeeded'
-                        )
-                    },
-                    {
-                        'id': '104',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task1',
-                            'succeeded'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': '103',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task2',
-                            'succeeded'
-                        )
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': '105',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task4',
-                            'succeeded'
-                        )
-                    }
-                ],
-                []
-            ],
-            'multigraph': True
-        }
-
-        self._assert_compose(wf_name, expected_wf_ex_graph)
-
-        expected_task_seq = [
-            '101',
-            '102',
-            '104',
-            '103',
-            '105'
-        ]
-
-        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
-
-    @mock.patch.object(
-        uuid,
-        'uuid4',
-        mock.MagicMock(side_effect=range(101, 200))
-    )
-    def test_join(self):
-        wf_name = 'join'
-
-        expected_wf_graphs = {
-            wf_name: {
-                'directed': True,
-                'graph': {},
-                'nodes': [
-                    {
-                        'id': 'task1'
-                    },
-                    {
-                        'id': 'task2'
-                    },
-                    {
-                        'id': 'task3'
-                    },
-                    {
-                        'id': 'task4'
-                    },
-                    {
-                        'id': 'task5'
-                    },
-                    {
-                        'id': 'task6',
-                        'join': True
-                    },
-                    {
-                        'id': 'task7'
-                    }
-                ],
-                'adjacency': [
-                    [
-                        {
-                            'id': 'task2',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
                                 'task1',
                                 'succeeded'
                             )
-                        },
+                        }
+                    ],
+                    [
                         {
                             'id': 'task4',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task1',
-                                'succeeded'
-                            )
-                        }
-                    ],
-                    [
-                        {
-                            'id': 'task3',
                             'key': 0,
                             'criteria': self._get_seq_expr(
                                 'task2',
@@ -385,7 +122,7 @@ class MistralWorkflowConductorTest(base.WorkflowConductorTest):
                     ],
                     [
                         {
-                            'id': 'task6',
+                            'id': 'task4',
                             'key': 0,
                             'criteria': self._get_seq_expr(
                                 'task3',
@@ -393,195 +130,14 @@ class MistralWorkflowConductorTest(base.WorkflowConductorTest):
                             )
                         }
                     ],
-                    [
-                        {
-                            'id': 'task5',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task4',
-                                'succeeded'
-                            )
-                        }
-                    ],
-                    [
-                        {
-                            'id': 'task6',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task5',
-                                'succeeded'
-                            )
-                        }
-                    ],
-                    [
-                        {
-                            'id': 'task7',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task6',
-                                'succeeded'
-                            )
-                        }
-                    ],
                     []
                 ],
                 'multigraph': True
-            }
-        }
-
-        self._assert_wf_graphs(wf_name, expected_wf_graphs)
-
-        expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': '101',
-                    'name': 'task1',
-                    'workflow': 'join'
-                },
-                {
-                    'id': '102',
-                    'name': 'task2',
-                    'workflow': 'join'
-                },
-                {
-                    'id': '103',
-                    'name': 'task3',
-                    'workflow': 'join'
-                },
-                {
-                    'id': '104',
-                    'name': 'task6',
-                    'workflow': 'join',
-                    'join': True
-                },
-                {
-                    'id': '105',
-                    'name': 'task7',
-                    'workflow': 'join'
-                },
-                {
-                    'id': '106',
-                    'name': 'task4',
-                    'workflow': 'join',
-                },
-                {
-                    'id': '107',
-                    'name': 'task5',
-                    'workflow': 'join'
-                }
-            ],
-            'adjacency': [
-                [
-                    {
-                        'id': '102',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task1',
-                            'succeeded'
-                        )
-                    },
-                    {
-                        'id': '106',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task1',
-                            'succeeded'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': '103',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task2',
-                            'succeeded'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': '104',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task3',
-                            'succeeded'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': '105',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task6',
-                            'succeeded'
-                        )
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': '107',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task4',
-                            'succeeded'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': '104',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task5',
-                            'succeeded'
-                        )
-                    }
-                ]
-            ],
-            'multigraph': True
-        }
-
-        self._assert_compose(wf_name, expected_wf_ex_graph)
-
-        expected_task_seq = [
-            '101',
-            '102',
-            '106',
-            '103',
-            '107',
-            '104',
-            '105'
-        ]
-
-        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
-
-    @mock.patch.object(
-        uuid,
-        'uuid4',
-        mock.MagicMock(side_effect=range(101, 200))
-    )
-    def test_merge(self):
-        wf_name = 'merge'
-
-        expected_wf_graphs = {
-            wf_name: {
+            },
+            sub_wf_graph_name: {
                 'directed': True,
                 'graph': {},
                 'nodes': [
-                    {
-                        'id': 'task1'
-                    },
-                    {
-                        'id': 'task2'
-                    },
-                    {
-                        'id': 'task3'
-                    },
                     {
                         'id': 'task4'
                     },
@@ -599,44 +155,6 @@ class MistralWorkflowConductorTest(base.WorkflowConductorTest):
                 'adjacency': [
                     [
                         {
-                            'id': 'task2',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task1',
-                                'succeeded'
-                            )
-                        },
-                        {
-                            'id': 'task3',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task1',
-                                'succeeded'
-                            )
-                        }
-                    ],
-                    [
-                        {
-                            'id': 'task4',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task2',
-                                'succeeded'
-                            )
-                        }
-                    ],
-                    [
-                        {
-                            'id': 'task4',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task3',
-                                'succeeded'
-                            )
-                        }
-                    ],
-                    [
-                        {
                             'id': 'task5',
                             'key': 0,
                             'criteria': self._get_seq_expr(
@@ -688,59 +206,59 @@ class MistralWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': '101',
                     'name': 'task1',
-                    'workflow': 'merge'
+                    'workflow': 'split'
                 },
                 {
                     'id': '102',
                     'name': 'task2',
-                    'workflow': 'merge'
+                    'workflow': 'split'
                 },
                 {
                     'id': '103',
                     'name': 'task4',
-                    'workflow': 'merge'
+                    'workflow': 'split'
                 },
                 {
                     'id': '104',
                     'name': 'task5',
-                    'workflow': 'merge'
+                    'workflow': 'split'
                 },
                 {
                     'id': '105',
                     'name': 'task7',
-                    'workflow': 'merge',
+                    'workflow': 'split',
                     'join': True
                 },
                 {
                     'id': '106',
                     'name': 'task6',
-                    'workflow': 'merge'
+                    'workflow': 'split'
                 },
                 {
                     'id': '107',
                     'name': 'task3',
-                    'workflow': 'merge'
+                    'workflow': 'split'
                 },
                 {
                     'id': '108',
                     'name': 'task4',
-                    'workflow': 'merge'
+                    'workflow': 'split'
                 },
                 {
                     'id': '109',
                     'name': 'task5',
-                    'workflow': 'merge'
+                    'workflow': 'split'
                 },
                 {
                     'id': '110',
                     'name': 'task7',
-                    'workflow': 'merge',
+                    'workflow': 'split',
                     'join': True
                 },
                 {
                     'id': '111',
                     'name': 'task6',
-                    'workflow': 'merge'
+                    'workflow': 'split'
                 }
             ],
             'adjacency': [
@@ -887,8 +405,8 @@ class MistralWorkflowConductorTest(base.WorkflowConductorTest):
         'uuid4',
         mock.MagicMock(side_effect=range(101, 200))
     )
-    def test_decision_tree(self):
-        wf_name = 'decision'
+    def test_splits(self):
+        wf_name = 'splits'
 
         expected_wf_graphs = {
             wf_name: {
@@ -896,53 +414,161 @@ class MistralWorkflowConductorTest(base.WorkflowConductorTest):
                 'graph': {},
                 'nodes': [
                     {
-                        'id': 't1'
+                        'id': 'task1'
                     },
                     {
-                        'id': 'a'
+                        'id': 'task2'
                     },
                     {
-                        'id': 'b'
+                        'id': 'task3'
                     },
                     {
-                        'id': 'c'
+                        'id': 'task4',
+                        'subgraph': wf_name + '.task4'
+                    },
+                    {
+                        'id': 'task8',
+                        'subgraph': wf_name + '.task8'
                     }
                 ],
                 'adjacency': [
                     [
                         {
-                            'id': 'a',
+                            'id': 'task2',
                             'key': 0,
                             'criteria': self._get_seq_expr(
-                                't1',
-                                'succeeded',
-                                "$.which = 'a'"
+                                'task1',
+                                'succeeded'
                             )
                         },
                         {
-                            'id': 'b',
+                            'id': 'task3',
                             'key': 0,
                             'criteria': self._get_seq_expr(
-                                't1',
-                                'succeeded',
-                                "$.which = 'b'"
+                                'task1',
+                                'succeeded'
                             )
                         },
                         {
-                            'id': 'c',
+                            'id': 'task8',
                             'key': 0,
                             'criteria': self._get_seq_expr(
-                                't1',
-                                'succeeded',
-                                "not $.which in list(a, b)"
+                                'task1',
+                                'succeeded'
+                            )
+                        }
+                    ],
+                    [
+                        {
+                            'id': 'task4',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task2',
+                                'succeeded'
+                            )
+                        }
+                    ],
+                    [
+                        {
+                            'id': 'task4',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task3',
+                                'succeeded'
                             )
                         }
                     ],
                     [],
-                    [],
                     []
                 ],
                 'multigraph': True
+            },
+            wf_name + '.task4': {
+                'directed': True,
+                'graph': {},
+                'nodes': [
+                    {
+                        'id': 'task4'
+                    },
+                    {
+                        'id': 'task5'
+                    },
+                    {
+                        'id': 'task6'
+                    },
+                    {
+                        'id': 'task7',
+                        'join': True
+                    },
+                    {
+                        'id': 'task8',
+                        'subgraph': wf_name + '.task8'
+                    }
+                ],
+                'adjacency': [
+                    [
+                        {
+                            'id': 'task5',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task4',
+                                'succeeded'
+                            )
+                        },
+                        {
+                            'id': 'task6',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task4',
+                                'succeeded'
+                            )
+                        }
+                    ],
+                    [
+                        {
+                            'id': 'task7',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task5',
+                                'succeeded'
+                            )
+                        }
+                    ],
+                    [
+                        {
+                            'id': 'task7',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task6',
+                                'succeeded'
+                            )
+                        }
+                    ],
+                    [
+                        {
+                            'id': 'task8',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task7',
+                                'succeeded'
+                            )
+                        }
+                    ],
+                    []
+                ],
+                'multigraph': True
+            },
+            wf_name + '.task8': {
+                'directed': True,
+                'graph': {},
+                'nodes': [
+                    {
+                        'id': 'task8'
+                    }
+                ],
+                'adjacency': [
+                    []
+                ]
             }
         }
 
@@ -954,23 +580,75 @@ class MistralWorkflowConductorTest(base.WorkflowConductorTest):
             'nodes': [
                 {
                     'id': '101',
-                    'name': 't1',
-                    'workflow': wf_name
+                    'name': 'task1',
+                    'workflow': 'splits'
                 },
                 {
                     'id': '102',
-                    'name': 'a',
-                    'workflow': wf_name
+                    'name': 'task2',
+                    'workflow': 'splits'
                 },
                 {
                     'id': '103',
-                    'name': 'b',
-                    'workflow': wf_name
+                    'name': 'task4',
+                    'workflow': 'splits'
                 },
                 {
                     'id': '104',
-                    'name': 'c',
-                    'workflow': wf_name
+                    'name': 'task5',
+                    'workflow': 'splits'
+                },
+                {
+                    'id': '105',
+                    'name': 'task7',
+                    'workflow': 'splits',
+                    'join': True
+                },
+                {
+                    'id': '106',
+                    'name': 'task8',
+                    'workflow': 'splits'
+                },
+                {
+                    'id': '107',
+                    'name': 'task6',
+                    'workflow': 'splits'
+                },
+                {
+                    'id': '108',
+                    'name': 'task3',
+                    'workflow': 'splits'
+                },
+                {
+                    'id': '109',
+                    'name': 'task4',
+                    'workflow': 'splits'
+                },
+                {
+                    'id': '110',
+                    'name': 'task5',
+                    'workflow': 'splits'
+                },
+                {
+                    'id': '111',
+                    'name': 'task7',
+                    'workflow': 'splits',
+                    'join': True
+                },
+                {
+                    'id': '112',
+                    'name': 'task8',
+                    'workflow': 'splits'
+                },
+                {
+                    'id': '113',
+                    'name': 'task6',
+                    'workflow': 'splits'
+                },
+                {
+                    'id': '114',
+                    'name': 'task8',
+                    'workflow': 'splits'
                 }
             ],
             'adjacency': [
@@ -979,32 +657,145 @@ class MistralWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': '102',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            't1',
-                            'succeeded',
-                            "$.which = 'a'"
+                            'task1',
+                            'succeeded'
                         )
                     },
+                    {
+                        'id': '108',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task1',
+                            'succeeded'
+                        )
+                    },
+                    {
+                        'id': '114',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task1',
+                            'succeeded'
+                        )
+                    }
+                ],
+                [
                     {
                         'id': '103',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            't1',
-                            'succeeded',
-                            "$.which = 'b'"
+                            'task2',
+                            'succeeded'
                         )
-                    },
+                    }
+                ],
+                [
                     {
                         'id': '104',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            't1',
-                            'succeeded',
-                            "not $.which in list(a, b)"
+                            'task4',
+                            'succeeded'
+                        )
+                    },
+                    {
+                        'id': '107',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task4',
+                            'succeeded'
+                        )
+                    },
+                ],
+                [
+                    {
+                        'id': '105',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task5',
+                            'succeeded'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': '106',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task7',
+                            'succeeded'
                         )
                     }
                 ],
                 [],
+                [
+                    {
+                        'id': '105',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task6',
+                            'succeeded'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': '109',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task3',
+                            'succeeded'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': '110',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task4',
+                            'succeeded'
+                        )
+                    },
+                    {
+                        'id': '113',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task4',
+                            'succeeded'
+                        )
+                    },
+                ],
+                [
+                    {
+                        'id': '111',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task5',
+                            'succeeded'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': '112',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task7',
+                            'succeeded'
+                        )
+                    }
+                ],
                 [],
+                [
+                    {
+                        'id': '111',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task6',
+                            'succeeded'
+                        )
+                    }
+                ],
                 []
             ],
             'multigraph': True
@@ -1012,38 +803,21 @@ class MistralWorkflowConductorTest(base.WorkflowConductorTest):
 
         self._assert_compose(wf_name, expected_wf_ex_graph)
 
-        # Test branch "a"
         expected_task_seq = [
             '101',
-            '102'
+            '102',
+            '108',
+            '114',
+            '103',
+            '109',
+            '104',
+            '107',
+            '110',
+            '113',
+            '105',
+            '111',
+            '106',
+            '112'
         ]
 
-        self._assert_conduct(
-            expected_wf_ex_graph,
-            expected_task_seq,
-            which='a'
-        )
-
-        # Test branch "b"
-        expected_task_seq = [
-            '101',
-            '103'
-        ]
-
-        self._assert_conduct(
-            expected_wf_ex_graph,
-            expected_task_seq,
-            which='b'
-        )
-
-        # Test branch "c"
-        expected_task_seq = [
-            '101',
-            '104'
-        ]
-
-        self._assert_conduct(
-            expected_wf_ex_graph,
-            expected_task_seq,
-            which='c'
-        )
+        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)

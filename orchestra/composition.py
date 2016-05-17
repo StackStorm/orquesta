@@ -43,6 +43,8 @@ class WorkflowGraph(object):
     def add_task(self, task, **kwargs):
         if not self.has_task(task):
             self._graph.add_node(task, **kwargs)
+        else:
+            self.update_task(task, **kwargs)
 
     def update_task(self, task, **kwargs):
         if not self.has_task(task):
@@ -63,9 +65,24 @@ class WorkflowGraph(object):
 
         if not self.has_sequence(source, destination):
             self._graph.add_edge(source, destination, **kwargs)
+        else:
+            self.update_sequence(source, destination, **kwargs)
+
+    def update_sequence(self, source, destination, **kwargs):
+        if not self.has_sequence(source, destination):
+            raise Exception('Task sequence does not exist.')
+
+        for key, value in six.iteritems(kwargs):
+            self._graph[source][destination][0][key] = value
 
     def get_start_tasks(self):
         return {
             n: copy.deepcopy(self._graph.node[n])
             for n, d in self._graph.in_degree().items() if d == 0
         }
+
+    def get_next_sequences(self, task):
+        return sorted(
+            [e for e in self._graph.out_edges([task], data=True)],
+            key=lambda x: x[1]
+        )

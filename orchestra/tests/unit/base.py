@@ -91,10 +91,11 @@ class WorkflowConductorTest(WorkflowGraphTest):
             entry=wf_name
         )
 
-        self._assert_graph_equal(
-            wf_graphs[wf_name],
-            expected_wf_graphs[wf_name]
-        )
+        for name in sorted(wf_graphs.keys()):
+            self._assert_graph_equal(
+                wf_graphs[name],
+                expected_wf_graphs[name]
+            )
 
         return wf_graphs
 

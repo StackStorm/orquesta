@@ -31,10 +31,39 @@ class MistralWorkflowComposer(base.WorkflowComposer):
         return task_spec.get('join') is not None
 
     @staticmethod
-    def _get_next_tasks(task_spec, condition):
+    def _get_next_tasks(task_spec, condition, name_only=False):
+        if name_only:
+            return [
+                list(task.items())[0][0] if isinstance(task, dict) else task
+                for task in task_spec.get(condition, [])
+            ]
+
         return [
             list(task.items())[0] if isinstance(task, dict) else (task, None)
             for task in task_spec.get(condition, [])
+        ]
+
+    @classmethod
+    def _get_prev_tasks(cls, task_specs, task_name):
+        return sorted(
+            [
+                referrer
+                for referrer, task_spec in six.iteritems(task_specs)
+                if task_name in (
+                    cls._get_next_tasks(
+                        task_spec,
+                        'on-success',
+                        name_only=True
+                    )
+                )
+            ]
+        )
+
+    @classmethod
+    def _get_start_tasks(cls, task_specs):
+        return [
+            task_name for task_name, task_spec in six.iteritems(task_specs)
+            if len(cls._get_prev_tasks(task_specs, task_name)) <= 0
         ]
 
     @staticmethod
@@ -54,21 +83,41 @@ class MistralWorkflowComposer(base.WorkflowComposer):
         wf_graphs = {entry: composition.WorkflowGraph()}
         q = queue.Queue()
 
-        for task_name in task_specs.keys():
+        for task_name in cls._get_start_tasks(task_specs):
             q.put((task_name, entry))
 
         while not q.empty():
             task_name, wf_graph = q.get()
             task_spec = task_specs[task_name]
+            prev_tasks = cls._get_prev_tasks(task_specs, task_name)
+            is_join_task = cls._is_join_task(task_spec)
+            is_split_task = not is_join_task and len(prev_tasks) > 1
 
             wf_graphs[wf_graph].add_task(task_name)
 
-            if cls._is_join_task(task_spec):
-                wf_graphs[wf_graph].update_task(task_name, join=True)
+            if is_join_task:
+                wf_graphs[wf_graph].update_task(task_name, join=is_join_task)
+
+            if is_split_task:
+                sub_wf_graph = entry + '.' + task_name
+
+                wf_graphs[wf_graph].update_task(
+                    task_name,
+                    subgraph=sub_wf_graph
+                )
+
+                wf_graph = sub_wf_graph
+
+                if wf_graph not in wf_graphs:
+                    wf_graphs[wf_graph] = composition.WorkflowGraph()
+                    wf_graphs[wf_graph].add_task(task_name)
 
             next_tasks = cls._get_next_tasks(task_spec, 'on-success')
 
             for next_task_name, expr in sorted(next_tasks):
+                if not wf_graphs[wf_graph].has_task(next_task_name):
+                    q.put((next_task_name, wf_graph))
+
                 criteria = cls._compose_task_transition_criteria(
                     task_name,
                     'succeeded',
@@ -84,9 +133,9 @@ class MistralWorkflowComposer(base.WorkflowComposer):
         return wf_graphs
 
     @classmethod
-    def _get_join_task(cls, wf_ex_graph, wf_graphs, wf_name,
+    def _get_join_task(cls, wf_ex_graph, wf_graphs, subgraph, wf_name,
                        join_task_name, task_id):
-        req = len(wf_graphs[wf_name]._graph.in_edges([join_task_name]))
+        req = len(wf_graphs[subgraph]._graph.in_edges([join_task_name]))
 
         join_tasks = [
             {'id': n, 'name': d['name'], 'workflow': d['workflow']}
@@ -104,15 +153,16 @@ class MistralWorkflowComposer(base.WorkflowComposer):
         return None
 
     @classmethod
-    def _traverse_task(cls, wf_ex_graph, wf_graphs, wf_name, task_name,
-                       prev_task_id=None):
-        wf_graph = wf_graphs[wf_name]
+    def _traverse_task(cls, wf_ex_graph, wf_graphs, subgraph, wf_name,
+                       task_name, prev_task_id=None):
+        wf_graph = wf_graphs[subgraph]
         nodes = dict(wf_graph._graph.nodes(data=True))
         task_id = str(uuid.uuid4())
 
         attributes = copy.deepcopy(nodes[task_name])
         attributes['workflow'] = wf_name
         attributes['name'] = task_name
+        next_subgraph = attributes.pop('subgraph', subgraph)
 
         wf_ex_graph.add_task(task_id, **attributes)
 
@@ -124,12 +174,12 @@ class MistralWorkflowComposer(base.WorkflowComposer):
                 attributes = copy.deepcopy(edge_attr)
                 wf_ex_graph.add_sequence(prev_task_id, task_id, **attributes)
 
-        transitions = sorted(
-            [e for e in wf_graph._graph.out_edges([task_name], data=True)],
-            key=lambda x: x[1]
-        )
+        if next_subgraph != subgraph:
+            subgraph = next_subgraph
+            wf_graph = wf_graphs[subgraph]
+            nodes = dict(wf_graph._graph.nodes(data=True))
 
-        for transition in transitions:
+        for transition in wf_graph.get_next_sequences(task_name):
             next_task_name, attributes = transition[1], transition[2]
             joining = nodes[next_task_name].get('join')
 
@@ -137,6 +187,7 @@ class MistralWorkflowComposer(base.WorkflowComposer):
                 join_task = cls._get_join_task(
                     wf_ex_graph,
                     wf_graphs,
+                    subgraph,
                     wf_name,
                     next_task_name,
                     task_id
@@ -154,6 +205,7 @@ class MistralWorkflowComposer(base.WorkflowComposer):
             cls._traverse_task(
                 wf_ex_graph,
                 wf_graphs,
+                subgraph,
                 wf_name,
                 next_task_name,
                 task_id
@@ -180,6 +232,7 @@ class MistralWorkflowComposer(base.WorkflowComposer):
             cls._traverse_task(
                 wf_ex_graph,
                 wf_graphs,
+                entry,
                 entry,
                 task_name
             )
