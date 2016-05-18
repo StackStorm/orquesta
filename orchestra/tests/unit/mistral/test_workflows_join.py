@@ -254,13 +254,13 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
         self._assert_compose(wf_name, expected_wf_ex_graph)
 
         expected_task_seq = [
-            '101',
-            '102',
-            '106',
-            '103',
-            '107',
-            '104',
-            '105'
+            '101',  # task1
+            '102',  # task2
+            '106',  # task4
+            '103',  # task3
+            '107',  # task5
+            '104',  # task6
+            '105'   # task7
         ]
 
         self._assert_conduct(expected_wf_ex_graph, expected_task_seq)

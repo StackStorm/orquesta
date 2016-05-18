@@ -126,9 +126,9 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         self._assert_compose(wf_name, expected_wf_ex_graph)
 
         expected_task_seq = [
-            '101',
-            '102',
-            '103'
+            '101',  # task1
+            '102',  # task2
+            '103'   # task3
         ]
 
         self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
@@ -288,11 +288,11 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         self._assert_compose(wf_name, expected_wf_ex_graph)
 
         expected_task_seq = [
-            '101',
-            '102',
-            '104',
-            '103',
-            '105'
+            '101',  # task1
+            '102',  # task2
+            '104',  # task4
+            '103',  # task3
+            '105'   # task5
         ]
 
         self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
@@ -429,8 +429,8 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
 
         # Test branch "a"
         expected_task_seq = [
-            '101',
-            '102'
+            '101',  # t1
+            '102'   # a
         ]
 
         self._assert_conduct(
@@ -441,8 +441,8 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
 
         # Test branch "b"
         expected_task_seq = [
-            '101',
-            '103'
+            '101',  # t1
+            '103'   # b
         ]
 
         self._assert_conduct(
@@ -453,8 +453,8 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
 
         # Test branch "c"
         expected_task_seq = [
-            '101',
-            '104'
+            '101',  # t1
+            '104'   # c
         ]
 
         self._assert_conduct(
