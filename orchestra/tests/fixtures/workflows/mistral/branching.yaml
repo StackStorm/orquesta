@@ -5,23 +5,23 @@ branching:
     type: direct
     tasks:
         task1:
-            action: core.noop
+            action: std.noop
             on-success:
                 - task2
                 - task4
 
         # branch 1
         task2:
-            action: core.noop
+            action: std.noop
             on-success:
                 - task3
         task3:
-            action: core.noop
+            action: std.noop
 
         # branch 2
         task4:
-            action: core.noop
+            action: std.noop
             on-success:
                 - task5
         task5:
-            action: core.noop
+            action: std.noop

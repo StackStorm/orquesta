@@ -5,12 +5,12 @@ sequential:
     type: direct
     tasks:
         task1:
-            action: core.noop
+            action: std.noop
             on-success:
                 - task2
         task2:
-            action: core.noop
+            action: std.noop
             on-success:
                 - task3
         task3:
-            action: core.noop
+            action: std.noop

@@ -7,7 +7,7 @@ splits:
     type: direct
     tasks:
         task1:
-            action: core.noop
+            action: std.noop
             on-success:
                 - task2
                 - task3
@@ -15,34 +15,34 @@ splits:
 
         # branch 1
         task2:
-            action: core.noop
+            action: std.noop
             on-success:
                 - task4
 
         # branch 2
         task3:
-            action: core.noop
+            action: std.noop
             on-success:
                 - task4
 
         # split branch
         task4:
-            action: core.noop
+            action: std.noop
             on-success:
                 - task5
                 - task6
         task5:
-            action: core.noop
+            action: std.noop
             on-success:
                 - task7
         task6:
-            action: core.noop
+            action: std.noop
             on-success:
                 - task7
         task7:
             join: all
-            action: core.noop
+            action: std.noop
             on-success:
                 - task8
         task8:
-            action: core.noop
+            action: std.noop
