@@ -142,39 +142,32 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
             'nodes': [
                 {
                     'id': '101',
-                    'name': 'task1',
-                    'workflow': 'join'
+                    'name': 'task1'
                 },
                 {
                     'id': '102',
-                    'name': 'task2',
-                    'workflow': 'join'
+                    'name': 'task2'
                 },
                 {
                     'id': '103',
-                    'name': 'task3',
-                    'workflow': 'join'
+                    'name': 'task3'
                 },
                 {
                     'id': '104',
                     'name': 'task6',
-                    'workflow': 'join',
                     'join': True
                 },
                 {
                     'id': '105',
-                    'name': 'task7',
-                    'workflow': 'join'
+                    'name': 'task7'
                 },
                 {
                     'id': '106',
-                    'name': 'task4',
-                    'workflow': 'join',
+                    'name': 'task4'
                 },
                 {
                     'id': '107',
-                    'name': 'task5',
-                    'workflow': 'join'
+                    'name': 'task5'
                 }
             ],
             'adjacency': [

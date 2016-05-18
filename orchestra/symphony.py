@@ -77,8 +77,7 @@ class WorkflowConductor(object):
 
             next_task = {
                 'id': next_task_id,
-                'name': nodes[next_task_id]['name'],
-                'workflow': nodes[next_task_id]['workflow']
+                'name': nodes[next_task_id]['name']
             }
 
             tasks.append(next_task)

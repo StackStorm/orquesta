@@ -83,18 +83,15 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
             'nodes': [
                 {
                     'id': '101',
-                    'name': 'task1',
-                    'workflow': wf_name
+                    'name': 'task1'
                 },
                 {
                     'id': '102',
-                    'name': 'task2',
-                    'workflow': wf_name
+                    'name': 'task2'
                 },
                 {
                     'id': '103',
-                    'name': 'task3',
-                    'workflow': wf_name
+                    'name': 'task3'
                 }
             ],
             'adjacency': [
@@ -216,28 +213,23 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
             'nodes': [
                 {
                     'id': '101',
-                    'name': 'task1',
-                    'workflow': wf_name
+                    'name': 'task1'
                 },
                 {
                     'id': '102',
-                    'name': 'task2',
-                    'workflow': wf_name
+                    'name': 'task2'
                 },
                 {
                     'id': '103',
-                    'name': 'task3',
-                    'workflow': wf_name
+                    'name': 'task3'
                 },
                 {
                     'id': '104',
-                    'name': 'task4',
-                    'workflow': wf_name
+                    'name': 'task4'
                 },
                 {
                     'id': '105',
-                    'name': 'task5',
-                    'workflow': wf_name
+                    'name': 'task5'
                 }
             ],
             'adjacency': [
@@ -369,23 +361,19 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
             'nodes': [
                 {
                     'id': '101',
-                    'name': 't1',
-                    'workflow': wf_name
+                    'name': 't1'
                 },
                 {
                     'id': '102',
-                    'name': 'a',
-                    'workflow': wf_name
+                    'name': 'a'
                 },
                 {
                     'id': '103',
-                    'name': 'b',
-                    'workflow': wf_name
+                    'name': 'b'
                 },
                 {
                     'id': '104',
-                    'name': 'c',
-                    'workflow': wf_name
+                    'name': 'c'
                 }
             ],
             'adjacency': [

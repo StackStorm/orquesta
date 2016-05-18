@@ -164,60 +164,49 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
             'nodes': [
                 {
                     'id': '101',
-                    'name': 'task1',
-                    'workflow': 'split'
+                    'name': 'task1'
                 },
                 {
                     'id': '102',
-                    'name': 'task2',
-                    'workflow': 'split'
+                    'name': 'task2'
                 },
                 {
                     'id': '103',
-                    'name': 'task4',
-                    'workflow': 'split'
+                    'name': 'task4'
                 },
                 {
                     'id': '104',
-                    'name': 'task5',
-                    'workflow': 'split'
+                    'name': 'task5'
                 },
                 {
                     'id': '105',
                     'name': 'task7',
-                    'workflow': 'split',
                     'join': True
                 },
                 {
                     'id': '106',
-                    'name': 'task6',
-                    'workflow': 'split'
+                    'name': 'task6'
                 },
                 {
                     'id': '107',
-                    'name': 'task3',
-                    'workflow': 'split'
+                    'name': 'task3'
                 },
                 {
                     'id': '108',
-                    'name': 'task4',
-                    'workflow': 'split'
+                    'name': 'task4'
                 },
                 {
                     'id': '109',
-                    'name': 'task5',
-                    'workflow': 'split'
+                    'name': 'task5'
                 },
                 {
                     'id': '110',
                     'name': 'task7',
-                    'workflow': 'split',
                     'join': True
                 },
                 {
                     'id': '111',
-                    'name': 'task6',
-                    'workflow': 'split'
+                    'name': 'task6'
                 }
             ],
             'adjacency': [
@@ -539,75 +528,61 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
             'nodes': [
                 {
                     'id': '101',
-                    'name': 'task1',
-                    'workflow': 'splits'
+                    'name': 'task1'
                 },
                 {
                     'id': '102',
-                    'name': 'task2',
-                    'workflow': 'splits'
+                    'name': 'task2'
                 },
                 {
                     'id': '103',
-                    'name': 'task4',
-                    'workflow': 'splits'
+                    'name': 'task4'
                 },
                 {
                     'id': '104',
-                    'name': 'task5',
-                    'workflow': 'splits'
+                    'name': 'task5'
                 },
                 {
                     'id': '105',
                     'name': 'task7',
-                    'workflow': 'splits',
                     'join': True
                 },
                 {
                     'id': '106',
-                    'name': 'task8',
-                    'workflow': 'splits'
+                    'name': 'task8'
                 },
                 {
                     'id': '107',
-                    'name': 'task6',
-                    'workflow': 'splits'
+                    'name': 'task6'
                 },
                 {
                     'id': '108',
-                    'name': 'task3',
-                    'workflow': 'splits'
+                    'name': 'task3'
                 },
                 {
                     'id': '109',
-                    'name': 'task4',
-                    'workflow': 'splits'
+                    'name': 'task4'
                 },
                 {
                     'id': '110',
-                    'name': 'task5',
-                    'workflow': 'splits'
+                    'name': 'task5'
                 },
                 {
                     'id': '111',
                     'name': 'task7',
-                    'workflow': 'splits',
                     'join': True
                 },
                 {
                     'id': '112',
-                    'name': 'task8',
-                    'workflow': 'splits'
+                    'name': 'task8'
                 },
                 {
                     'id': '113',
-                    'name': 'task6',
-                    'workflow': 'splits'
+                    'name': 'task6'
                 },
                 {
                     'id': '114',
-                    'name': 'task8',
-                    'workflow': 'splits'
+                    'name': 'task8'
                 }
             ],
             'adjacency': [
@@ -949,77 +924,63 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
             'nodes': [
                 {
                     'id': '101',
-                    'name': 'task1',
-                    'workflow': 'splits-extra-join'
+                    'name': 'task1'
                 },
                 {
                     'id': '102',
-                    'name': 'task2',
-                    'workflow': 'splits-extra-join'
+                    'name': 'task2'
                 },
                 {
                     'id': '103',
-                    'name': 'task4',
-                    'workflow': 'splits-extra-join'
+                    'name': 'task4'
                 },
                 {
                     'id': '104',
-                    'name': 'task5',
-                    'workflow': 'splits-extra-join'
+                    'name': 'task5'
                 },
                 {
                     'id': '105',
                     'name': 'task7',
-                    'workflow': 'splits-extra-join',
                     'join': True
                 },
                 {
                     'id': '106',
                     'name': 'task8',
-                    'workflow': 'splits-extra-join',
                     'join': True
                 },
                 {
                     'id': '107',
-                    'name': 'task6',
-                    'workflow': 'splits-extra-join'
+                    'name': 'task6'
                 },
                 {
                     'id': '108',
-                    'name': 'task3',
-                    'workflow': 'splits-extra-join'
+                    'name': 'task3'
                 },
                 {
                     'id': '109',
-                    'name': 'task4',
-                    'workflow': 'splits-extra-join'
+                    'name': 'task4'
                 },
                 {
                     'id': '110',
-                    'name': 'task5',
-                    'workflow': 'splits-extra-join'
+                    'name': 'task5'
                 },
                 {
                     'id': '111',
                     'name': 'task7',
-                    'workflow': 'splits-extra-join',
                     'join': True
                 },
                 {
                     'id': '112',
                     'name': 'task8',
-                    'workflow': 'splits-extra-join',
                     'join': True
                 },
                 {
                     'id': '113',
-                    'name': 'task6',
-                    'workflow': 'splits-extra-join'
+                    'name': 'task6'
                 },
                 {
                     'id': '114',
                     'name': 'task8',
-                    'workflow': 'splits-extra-join',
                     'join': True
                 }
             ],
@@ -1395,132 +1356,107 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
             'nodes': [
                 {
                     'id': '101',
-                    'name': 'task1',
-                    'workflow': 'splits-nested'
+                    'name': 'task1'
                 },
                 {
                     'id': '102',
-                    'name': 'task2',
-                    'workflow': 'splits-nested'
+                    'name': 'task2'
                 },
                 {
                     'id': '103',
-                    'name': 'task4',
-                    'workflow': 'splits-nested'
+                    'name': 'task4'
                 },
                 {
                     'id': '104',
-                    'name': 'task5',
-                    'workflow': 'splits-nested'
+                    'name': 'task5'
                 },
                 {
                     'id': '105',
-                    'name': 'task7',
-                    'workflow': 'splits-nested'
+                    'name': 'task7'
                 },
                 {
                     'id': '106',
-                    'name': 'task8',
-                    'workflow': 'splits-nested'
+                    'name': 'task8'
                 },
                 {
                     'id': '107',
                     'name': 'task10',
-                    'workflow': 'splits-nested',
                     'join': True
                 },
                 {
                     'id': '108',
-                    'name': 'task9',
-                    'workflow': 'splits-nested'
+                    'name': 'task9'
                 },
                 {
                     'id': '109',
-                    'name': 'task6',
-                    'workflow': 'splits-nested'
+                    'name': 'task6'
                 },
                 {
                     'id': '110',
-                    'name': 'task7',
-                    'workflow': 'splits-nested'
+                    'name': 'task7'
                 },
                 {
                     'id': '111',
-                    'name': 'task8',
-                    'workflow': 'splits-nested'
+                    'name': 'task8'
                 },
                 {
                     'id': '112',
                     'name': 'task10',
-                    'workflow': 'splits-nested',
                     'join': True
                 },
                 {
                     'id': '113',
-                    'name': 'task9',
-                    'workflow': 'splits-nested'
+                    'name': 'task9'
                 },
                 {
                     'id': '114',
-                    'name': 'task3',
-                    'workflow': 'splits-nested'
+                    'name': 'task3'
                 },
                 {
                     'id': '115',
-                    'name': 'task4',
-                    'workflow': 'splits-nested'
+                    'name': 'task4'
                 },
                 {
                     'id': '116',
-                    'name': 'task5',
-                    'workflow': 'splits-nested'
+                    'name': 'task5'
                 },
                 {
                     'id': '117',
-                    'name': 'task7',
-                    'workflow': 'splits-nested'
+                    'name': 'task7'
                 },
                 {
                     'id': '118',
-                    'name': 'task8',
-                    'workflow': 'splits-nested'
+                    'name': 'task8'
                 },
                 {
                     'id': '119',
                     'name': 'task10',
-                    'workflow': 'splits-nested',
                     'join': True
                 },
                 {
                     'id': '120',
-                    'name': 'task9',
-                    'workflow': 'splits-nested'
+                    'name': 'task9'
                 },
                 {
                     'id': '121',
-                    'name': 'task6',
-                    'workflow': 'splits-nested'
+                    'name': 'task6'
                 },
                 {
                     'id': '122',
-                    'name': 'task7',
-                    'workflow': 'splits-nested'
+                    'name': 'task7'
                 },
                 {
                     'id': '123',
-                    'name': 'task8',
-                    'workflow': 'splits-nested'
+                    'name': 'task8'
                 },
                 {
                     'id': '124',
                     'name': 'task10',
-                    'workflow': 'splits-nested',
                     'join': True
                 },
                 {
                     'id': '125',
-                    'name': 'task9',
-                    'workflow': 'splits-nested'
+                    'name': 'task9'
                 }
             ],
             'adjacency': [

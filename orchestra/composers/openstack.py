@@ -138,9 +138,9 @@ class MistralWorkflowComposer(base.WorkflowComposer):
         req = len(wf_graphs[subgraph]._graph.in_edges([join_task_name]))
 
         join_tasks = [
-            {'id': n, 'name': d['name'], 'workflow': d['workflow']}
+            {'id': n, 'name': d['name']}
             for n, d in wf_ex_graph._graph.nodes_iter(data=True)
-            if d['name'] == join_task_name and d['workflow'] == wf_name
+            if d['name'] == join_task_name
         ]
 
         for join_task in join_tasks:
@@ -160,7 +160,6 @@ class MistralWorkflowComposer(base.WorkflowComposer):
         task_id = str(uuid.uuid4())
 
         attributes = copy.deepcopy(nodes[task_name])
-        attributes['workflow'] = wf_name
         attributes['name'] = task_name
         next_subgraph = attributes.pop('subgraph', subgraph)
 
