@@ -76,7 +76,11 @@ class MistralWorkflowComposer(base.WorkflowComposer):
     @staticmethod
     def _compose_task_transition_criteria(task_name, task_state, expr=None):
         yaql_expr = (
-            'task(%s).get(state, "unknown") = "%s"' % (task_name, task_state)
+            'task(%s).get(state, "%s") = "%s"' % (
+                task_name,
+                states.UNKNOWN,
+                task_state
+            )
         )
 
         if expr:
