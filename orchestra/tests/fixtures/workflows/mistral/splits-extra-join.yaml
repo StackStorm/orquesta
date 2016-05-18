@@ -1,0 +1,51 @@
+version: '2.0'
+
+splits-extra-join:
+    description: >
+        A basic workflow that demonstrate multiple splits where a split task
+        (task8) begin referenced at multiple levels is marked with a join.
+        There is already a split at task4. The join on task8 should have no
+        effect.
+    type: direct
+    tasks:
+        task1:
+            action: core.noop
+            on-success:
+                - task2
+                - task3
+                - task8
+
+        # branch 1
+        task2:
+            action: core.noop
+            on-success:
+                - task4
+
+        # branch 2
+        task3:
+            action: core.noop
+            on-success:
+                - task4
+
+        # split branch
+        task4:
+            action: core.noop
+            on-success:
+                - task5
+                - task6
+        task5:
+            action: core.noop
+            on-success:
+                - task7
+        task6:
+            action: core.noop
+            on-success:
+                - task7
+        task7:
+            join: all
+            action: core.noop
+            on-success:
+                - task8
+        task8:
+            join: all
+            action: core.noop

@@ -786,6 +786,419 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
         'uuid4',
         mock.MagicMock(side_effect=range(101, 200))
     )
+    def test_splits_extra_join(self):
+        wf_name = 'splits-extra-join'
+
+        expected_wf_graphs = {
+            wf_name: {
+                'directed': True,
+                'graph': {},
+                'nodes': [
+                    {
+                        'id': 'task1'
+                    },
+                    {
+                        'id': 'task2'
+                    },
+                    {
+                        'id': 'task3'
+                    },
+                    {
+                        'id': 'task4',
+                        'subgraph': wf_name + '.task4'
+                    },
+                    {
+                        'id': 'task8',
+                        'join': True
+                    }
+                ],
+                'adjacency': [
+                    [
+                        {
+                            'id': 'task2',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task1',
+                                'succeeded'
+                            )
+                        },
+                        {
+                            'id': 'task3',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task1',
+                                'succeeded'
+                            )
+                        },
+                        {
+                            'id': 'task8',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task1',
+                                'succeeded'
+                            )
+                        }
+                    ],
+                    [
+                        {
+                            'id': 'task4',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task2',
+                                'succeeded'
+                            )
+                        }
+                    ],
+                    [
+                        {
+                            'id': 'task4',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task3',
+                                'succeeded'
+                            )
+                        }
+                    ],
+                    [],
+                    []
+                ],
+                'multigraph': True
+            },
+            wf_name + '.task4': {
+                'directed': True,
+                'graph': {},
+                'nodes': [
+                    {
+                        'id': 'task4'
+                    },
+                    {
+                        'id': 'task5'
+                    },
+                    {
+                        'id': 'task6'
+                    },
+                    {
+                        'id': 'task7',
+                        'join': True
+                    },
+                    {
+                        'id': 'task8',
+                        'join': True
+                    }
+                ],
+                'adjacency': [
+                    [
+                        {
+                            'id': 'task5',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task4',
+                                'succeeded'
+                            )
+                        },
+                        {
+                            'id': 'task6',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task4',
+                                'succeeded'
+                            )
+                        }
+                    ],
+                    [
+                        {
+                            'id': 'task7',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task5',
+                                'succeeded'
+                            )
+                        }
+                    ],
+                    [
+                        {
+                            'id': 'task7',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task6',
+                                'succeeded'
+                            )
+                        }
+                    ],
+                    [
+                        {
+                            'id': 'task8',
+                            'key': 0,
+                            'criteria': self._get_seq_expr(
+                                'task7',
+                                'succeeded'
+                            )
+                        }
+                    ],
+                    []
+                ],
+                'multigraph': True
+            }
+        }
+
+        self._assert_wf_graphs(wf_name, expected_wf_graphs)
+
+        expected_wf_ex_graph = {
+            'directed': True,
+            'graph': {},
+            'nodes': [
+                {
+                    'id': '101',
+                    'name': 'task1',
+                    'workflow': 'splits-extra-join'
+                },
+                {
+                    'id': '102',
+                    'name': 'task2',
+                    'workflow': 'splits-extra-join'
+                },
+                {
+                    'id': '103',
+                    'name': 'task4',
+                    'workflow': 'splits-extra-join'
+                },
+                {
+                    'id': '104',
+                    'name': 'task5',
+                    'workflow': 'splits-extra-join'
+                },
+                {
+                    'id': '105',
+                    'name': 'task7',
+                    'workflow': 'splits-extra-join',
+                    'join': True
+                },
+                {
+                    'id': '106',
+                    'name': 'task8',
+                    'workflow': 'splits-extra-join',
+                    'join': True
+                },
+                {
+                    'id': '107',
+                    'name': 'task6',
+                    'workflow': 'splits-extra-join'
+                },
+                {
+                    'id': '108',
+                    'name': 'task3',
+                    'workflow': 'splits-extra-join'
+                },
+                {
+                    'id': '109',
+                    'name': 'task4',
+                    'workflow': 'splits-extra-join'
+                },
+                {
+                    'id': '110',
+                    'name': 'task5',
+                    'workflow': 'splits-extra-join'
+                },
+                {
+                    'id': '111',
+                    'name': 'task7',
+                    'workflow': 'splits-extra-join',
+                    'join': True
+                },
+                {
+                    'id': '112',
+                    'name': 'task8',
+                    'workflow': 'splits-extra-join',
+                    'join': True
+                },
+                {
+                    'id': '113',
+                    'name': 'task6',
+                    'workflow': 'splits-extra-join'
+                },
+                {
+                    'id': '114',
+                    'name': 'task8',
+                    'workflow': 'splits-extra-join',
+                    'join': True
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'id': '102',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task1',
+                            'succeeded'
+                        )
+                    },
+                    {
+                        'id': '108',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task1',
+                            'succeeded'
+                        )
+                    },
+                    {
+                        'id': '114',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task1',
+                            'succeeded'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': '103',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task2',
+                            'succeeded'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': '104',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task4',
+                            'succeeded'
+                        )
+                    },
+                    {
+                        'id': '107',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task4',
+                            'succeeded'
+                        )
+                    },
+                ],
+                [
+                    {
+                        'id': '105',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task5',
+                            'succeeded'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': '106',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task7',
+                            'succeeded'
+                        )
+                    }
+                ],
+                [],
+                [
+                    {
+                        'id': '105',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task6',
+                            'succeeded'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': '109',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task3',
+                            'succeeded'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': '110',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task4',
+                            'succeeded'
+                        )
+                    },
+                    {
+                        'id': '113',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task4',
+                            'succeeded'
+                        )
+                    },
+                ],
+                [
+                    {
+                        'id': '111',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task5',
+                            'succeeded'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': '112',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task7',
+                            'succeeded'
+                        )
+                    }
+                ],
+                [],
+                [
+                    {
+                        'id': '111',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task6',
+                            'succeeded'
+                        )
+                    }
+                ],
+                []
+            ],
+            'multigraph': True
+        }
+
+        self._assert_compose(wf_name, expected_wf_ex_graph)
+
+        expected_task_seq = [
+            '101',  # task1
+            '102',  # task2
+            '108',  # task3
+            '114',  # task8
+            '103',  # task4.1
+            '109',  # task4.2
+            '104',  # task5.1
+            '107',  # task6.1
+            '110',  # task5.2
+            '113',  # task6.2
+            '105',  # task7.1
+            '111',  # task7.2
+            '106',  # task8.1
+            '112'   # task8.2
+        ]
+
+        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
+
+    @mock.patch.object(
+        uuid,
+        'uuid4',
+        mock.MagicMock(side_effect=range(101, 200))
+    )
     def test_nested_splits(self):
         wf_name = 'splits-nested'
 
