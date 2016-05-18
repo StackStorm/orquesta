@@ -32,39 +32,45 @@ class MistralWorkflowComposer(base.WorkflowComposer):
         return task_spec.get('join') is not None
 
     @staticmethod
-    def _get_next_tasks(task_spec, condition, name_only=False):
-        if name_only:
-            return [
-                list(task.items())[0][0] if isinstance(task, dict) else task
-                for task in task_spec.get(condition, [])
+    def _get_next_tasks(task_spec, conditions=None):
+        if not conditions:
+            conditions = [
+                'on-success',
+                'on-error',
+                'on-complete'
             ]
 
-        return [
-            list(task.items())[0] if isinstance(task, dict) else (task, None)
-            for task in task_spec.get(condition, [])
-        ]
+        next_tasks = []
+
+        for condition in conditions:
+            for task in task_spec.get(condition, []):
+                next_tasks.append(
+                    list(task.items())[0] + (condition,)
+                    if isinstance(task, dict)
+                    else (task, None, condition)
+                )
+
+        return sorted(next_tasks, key=lambda x: x[0])
 
     @classmethod
-    def _get_prev_tasks(cls, task_specs, task_name):
-        return sorted(
-            [
-                referrer
-                for referrer, task_spec in six.iteritems(task_specs)
-                if task_name in (
-                    cls._get_next_tasks(
-                        task_spec,
-                        'on-success',
-                        name_only=True
+    def _get_prev_tasks(cls, task_specs, task_name, conditions=None):
+        prev_tasks = []
+
+        for referrer, task_spec in six.iteritems(task_specs):
+            for next_task in cls._get_next_tasks(task_spec, conditions):
+                if task_name == next_task[0]:
+                    prev_tasks.append(
+                        (referrer, next_task[1], next_task[2])
                     )
-                )
-            ]
-        )
+
+        return sorted(prev_tasks, key=lambda x: x[0])
 
     @classmethod
     def _get_start_tasks(cls, task_specs):
         return [
-            task_name for task_name, task_spec in six.iteritems(task_specs)
-            if len(cls._get_prev_tasks(task_specs, task_name)) <= 0
+            task_name
+            for task_name, task_spec in six.iteritems(task_specs)
+            if not cls._get_prev_tasks(task_specs, task_name)
         ]
 
     @staticmethod
@@ -113,9 +119,9 @@ class MistralWorkflowComposer(base.WorkflowComposer):
                     wf_graphs[wf_graph] = composition.WorkflowGraph()
                     wf_graphs[wf_graph].add_task(task_name)
 
-            next_tasks = cls._get_next_tasks(task_spec, 'on-success')
+            next_tasks = cls._get_next_tasks(task_spec)
 
-            for next_task_name, expr in sorted(next_tasks):
+            for next_task_name, expr, condition in next_tasks:
                 if not wf_graphs[wf_graph].has_task(next_task_name):
                     q.put((next_task_name, wf_graph))
 

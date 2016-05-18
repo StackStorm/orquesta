@@ -57,30 +57,30 @@ class WorkflowComposerTest(base.WorkflowConductorTest):
 
         self.assertListEqual(
             self.composer._get_prev_tasks(task_specs, 'task2'),
-            ['task1']
+            [('task1', None, 'on-success')]
         )
 
         self.assertListEqual(
             self.composer._get_prev_tasks(task_specs, 'task3'),
-            ['task1']
+            [('task1', None, 'on-success')]
         )
 
         self.assertListEqual(
             self.composer._get_prev_tasks(task_specs, 'task4'),
-            ['task2', 'task3']
+            [('task2', None, 'on-success'), ('task3', None, 'on-success')]
         )
 
         self.assertListEqual(
             self.composer._get_prev_tasks(task_specs, 'task5'),
-            ['task4']
+            [('task4', None, 'on-success')]
         )
 
         self.assertListEqual(
             self.composer._get_prev_tasks(task_specs, 'task6'),
-            ['task4']
+            [('task4', None, 'on-success')]
         )
 
         self.assertListEqual(
             self.composer._get_prev_tasks(task_specs, 'task7'),
-            ['task5', 'task6']
+            [('task5', None, 'on-success'), ('task6', None, 'on-success')]
         )
