@@ -18,6 +18,7 @@ import uuid
 
 from orchestra.composers import base
 from orchestra import composition
+from orchestra import states
 from orchestra.utils import expression
 
 
@@ -120,7 +121,7 @@ class MistralWorkflowComposer(base.WorkflowComposer):
 
                 criteria = cls._compose_task_transition_criteria(
                     task_name,
-                    'succeeded',
+                    states.SUCCESS,
                     expr=expr
                 )
 

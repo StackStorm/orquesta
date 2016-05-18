@@ -14,8 +14,9 @@ import mock
 import uuid
 
 from orchestra.composers import openstack
-from orchestra.utils import plugin
+from orchestra import states
 from orchestra.tests.unit import base
+from orchestra.utils import plugin
 
 
 class BasicWorkflowConductorTest(base.WorkflowConductorTest):
@@ -55,7 +56,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                             'key': 0,
                             'criteria': self._get_seq_expr(
                                 'task1',
-                                'succeeded'
+                                states.SUCCESS
                             )
                         }
                     ],
@@ -65,7 +66,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                             'key': 0,
                             'criteria': self._get_seq_expr(
                                 'task2',
-                                'succeeded'
+                                states.SUCCESS
                             )
                         }
                     ],
@@ -101,7 +102,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'succeeded'
+                            states.SUCCESS
                         )
                     }
                 ],
@@ -111,7 +112,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
-                            'succeeded'
+                            states.SUCCESS
                         )
                     }
                 ],
@@ -166,7 +167,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                             'key': 0,
                             'criteria': self._get_seq_expr(
                                 'task1',
-                                'succeeded'
+                                states.SUCCESS
                             )
                         },
                         {
@@ -174,7 +175,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                             'key': 0,
                             'criteria': self._get_seq_expr(
                                 'task1',
-                                'succeeded'
+                                states.SUCCESS
                             )
                         }
                     ],
@@ -184,7 +185,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                             'key': 0,
                             'criteria': self._get_seq_expr(
                                 'task2',
-                                'succeeded'
+                                states.SUCCESS
                             )
                         }
                     ],
@@ -195,7 +196,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                             'key': 0,
                             'criteria': self._get_seq_expr(
                                 'task4',
-                                'succeeded'
+                                states.SUCCESS
                             )
                         }
                     ],
@@ -239,7 +240,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'succeeded'
+                            states.SUCCESS
                         )
                     },
                     {
@@ -247,7 +248,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'succeeded'
+                            states.SUCCESS
                         )
                     }
                 ],
@@ -257,7 +258,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
-                            'succeeded'
+                            states.SUCCESS
                         )
                     }
                 ],
@@ -268,7 +269,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task4',
-                            'succeeded'
+                            states.SUCCESS
                         )
                     }
                 ],
@@ -322,7 +323,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                             'key': 0,
                             'criteria': self._get_seq_expr(
                                 't1',
-                                'succeeded',
+                                states.SUCCESS,
                                 "$.which = 'a'"
                             )
                         },
@@ -331,7 +332,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                             'key': 0,
                             'criteria': self._get_seq_expr(
                                 't1',
-                                'succeeded',
+                                states.SUCCESS,
                                 "$.which = 'b'"
                             )
                         },
@@ -340,7 +341,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                             'key': 0,
                             'criteria': self._get_seq_expr(
                                 't1',
-                                'succeeded',
+                                states.SUCCESS,
                                 "not $.which in list(a, b)"
                             )
                         }
@@ -383,7 +384,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             't1',
-                            'succeeded',
+                            states.SUCCESS,
                             "$.which = 'a'"
                         )
                     },
@@ -392,7 +393,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             't1',
-                            'succeeded',
+                            states.SUCCESS,
                             "$.which = 'b'"
                         )
                     },
@@ -401,7 +402,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             't1',
-                            'succeeded',
+                            states.SUCCESS,
                             "not $.which in list(a, b)"
                         )
                     }

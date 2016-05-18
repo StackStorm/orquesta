@@ -17,6 +17,7 @@ from six.moves import queue
 import unittest
 
 from orchestra import composition
+from orchestra import states
 from orchestra import symphony
 from orchestra.utils import plugin
 from orchestra.tests.fixtures import loader
@@ -129,7 +130,7 @@ class WorkflowConductorTest(WorkflowGraphTest):
             # mock completion of the task
             actual_task_seq.append(queued_task['id'])
             completed_task = copy.deepcopy(queued_task)
-            completed_task['state'] = 'succeeded'
+            completed_task['state'] = states.SUCCESS
 
             # deserialize workflow execution graph to mock async execution
             wf_ex_graph = composition.WorkflowGraph.deserialize(
