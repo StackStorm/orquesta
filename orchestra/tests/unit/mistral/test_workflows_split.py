@@ -1306,7 +1306,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     }
                 ],
                 'adjacency': [
-                   [
+                    [
                         {
                             'id': 'task8',
                             'key': 0,

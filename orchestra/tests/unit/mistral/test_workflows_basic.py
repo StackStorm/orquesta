@@ -13,10 +13,8 @@
 import mock
 import uuid
 
-from orchestra.composers import openstack
 from orchestra import states
 from orchestra.tests.unit import base
-from orchestra.utils import plugin
 
 
 class BasicWorkflowConductorTest(base.WorkflowConductorTest):
@@ -425,7 +423,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         self._assert_conduct(
             expected_wf_ex_graph,
             expected_task_seq,
-            which='a'
+            contexts=[{'which': 'a'}]
         )
 
         # Test branch "b"
@@ -437,7 +435,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         self._assert_conduct(
             expected_wf_ex_graph,
             expected_task_seq,
-            which='b'
+            contexts=[{'which': 'b'}]
         )
 
         # Test branch "c"
@@ -449,5 +447,5 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         self._assert_conduct(
             expected_wf_ex_graph,
             expected_task_seq,
-            which='c'
+            contexts=[{'which': 'c'}]
         )

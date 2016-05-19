@@ -94,7 +94,7 @@ class MistralWorkflowComposer(base.WorkflowComposer):
         wf_graphs = {entry: composition.WorkflowGraph()}
         q = queue.Queue()
 
-        for task_name in cls._get_start_tasks(task_specs):
+        for task_name in sorted(cls._get_start_tasks(task_specs)):
             q.put((task_name, entry))
 
         while not q.empty():
