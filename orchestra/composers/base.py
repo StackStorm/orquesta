@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
 class WorkflowComposer(object):
 
     @classmethod
-    def compose(cls, definition, entry=None):
+    def compose(cls, definition):
         raise NotImplementedError()
 
     @classmethod

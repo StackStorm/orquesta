@@ -17,6 +17,7 @@ from six.moves import queue
 import unittest
 
 from orchestra import composition
+from orchestra import specs
 from orchestra import states
 from orchestra import symphony
 from orchestra.utils import plugin
@@ -81,16 +82,12 @@ class WorkflowConductorTest(WorkflowGraphTest):
         )
 
     def _compose_wf_graphs(self, wf_name):
-        return self.composer._compose_wf_graphs(
-            self._get_wf_def(wf_name),
-            entry=wf_name
-        )
+        wf_spec = specs.WorkflowSpec(self._get_wf_def(wf_name))
+        return self.composer._compose_wf_graphs(wf_spec)
 
     def _assert_wf_graphs(self, wf_name, expected_wf_graphs):
-        wf_graphs = self.composer._compose_wf_graphs(
-            self._get_wf_def(wf_name),
-            entry=wf_name
-        )
+        wf_spec = specs.WorkflowSpec(self._get_wf_def(wf_name))
+        wf_graphs = self.composer._compose_wf_graphs(wf_spec)
 
         for name in sorted(wf_graphs.keys()):
             self._assert_graph_equal(
@@ -101,10 +98,7 @@ class WorkflowConductorTest(WorkflowGraphTest):
         return wf_graphs
 
     def _assert_compose(self, wf_name, expected_wf_ex_graph):
-        wf_ex_graph = self.composer.compose(
-            self._get_wf_def(wf_name),
-            entry=wf_name
-        )
+        wf_ex_graph = self.composer.compose(self._get_wf_def(wf_name))
 
         self._assert_graph_equal(wf_ex_graph, expected_wf_ex_graph)
 

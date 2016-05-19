@@ -18,6 +18,7 @@ import uuid
 
 from orchestra.composers import base
 from orchestra import composition
+from orchestra import specs
 from orchestra import states
 from orchestra.utils import expression
 
@@ -26,52 +27,6 @@ LOG = logging.getLogger(__name__)
 
 
 class MistralWorkflowComposer(base.WorkflowComposer):
-
-    @staticmethod
-    def _is_join_task(task_spec):
-        return task_spec.get('join') is not None
-
-    @staticmethod
-    def _get_next_tasks(task_spec, conditions=None):
-        if not conditions:
-            conditions = [
-                'on-success',
-                'on-error',
-                'on-complete'
-            ]
-
-        next_tasks = []
-
-        for condition in conditions:
-            for task in task_spec.get(condition, []):
-                next_tasks.append(
-                    list(task.items())[0] + (condition,)
-                    if isinstance(task, dict)
-                    else (task, None, condition)
-                )
-
-        return sorted(next_tasks, key=lambda x: x[0])
-
-    @classmethod
-    def _get_prev_tasks(cls, task_specs, task_name, conditions=None):
-        prev_tasks = []
-
-        for referrer, task_spec in six.iteritems(task_specs):
-            for next_task in cls._get_next_tasks(task_spec, conditions):
-                if task_name == next_task[0]:
-                    prev_tasks.append(
-                        (referrer, next_task[1], next_task[2])
-                    )
-
-        return sorted(prev_tasks, key=lambda x: x[0])
-
-    @classmethod
-    def _get_start_tasks(cls, task_specs):
-        return [
-            task_name
-            for task_name, task_spec in six.iteritems(task_specs)
-            if not cls._get_prev_tasks(task_specs, task_name)
-        ]
 
     @staticmethod
     def _compose_task_transition_criteria(task_name, task_state, expr=None):
@@ -89,19 +44,18 @@ class MistralWorkflowComposer(base.WorkflowComposer):
         return {'yaql': yaql_expr}
 
     @classmethod
-    def _compose_wf_graphs(cls, definition, entry):
-        task_specs = definition[entry]['tasks']
-        wf_graphs = {entry: composition.WorkflowGraph()}
+    def _compose_wf_graphs(cls, wf_spec):
         q = queue.Queue()
+        entry = wf_spec.entry
+        wf_graphs = {entry: composition.WorkflowGraph()}
 
-        for task_name in sorted(cls._get_start_tasks(task_specs)):
+        for task_name in wf_spec.get_start_tasks():
             q.put((task_name, entry))
 
         while not q.empty():
             task_name, wf_graph = q.get()
-            task_spec = task_specs[task_name]
-            prev_tasks = cls._get_prev_tasks(task_specs, task_name)
-            is_join_task = cls._is_join_task(task_spec)
+            prev_tasks = wf_spec.get_prev_tasks(task_name)
+            is_join_task = wf_spec.is_join_task(task_name)
             is_split_task = not is_join_task and len(prev_tasks) > 1
 
             wf_graphs[wf_graph].add_task(task_name)
@@ -123,7 +77,7 @@ class MistralWorkflowComposer(base.WorkflowComposer):
                     wf_graphs[wf_graph] = composition.WorkflowGraph()
                     wf_graphs[wf_graph].add_task(task_name)
 
-            next_tasks = cls._get_next_tasks(task_spec)
+            next_tasks = wf_spec.get_next_tasks(task_name)
 
             for next_task_name, expr, condition in next_tasks:
                 if not wf_graphs[wf_graph].has_task(next_task_name):
@@ -250,13 +204,12 @@ class MistralWorkflowComposer(base.WorkflowComposer):
         return wf_ex_graph
 
     @classmethod
-    def compose(cls, definition, entry=None):
+    def compose(cls, definition):
         if not definition:
             raise ValueError('Workflow definition is empty.')
 
-        if not entry and len(definition) == 1:
-            entry = definition.keys()[0]
+        wf_spec = specs.WorkflowSpec(definition)
 
-        wf_graphs = cls._compose_wf_graphs(definition, entry=entry)
+        wf_graphs = cls._compose_wf_graphs(wf_spec)
 
-        return cls._compose_wf_ex_graph(wf_graphs, entry)
+        return cls._compose_wf_ex_graph(wf_graphs, wf_spec.entry)
