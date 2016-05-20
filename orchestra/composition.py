@@ -37,6 +37,15 @@ class WorkflowGraph(object):
 
         return cls(graph=g)
 
+    def is_join_task(self, task):
+        return self._graph.node[task].get('join') is not None
+
+    def is_split_task(self, task):
+        return (
+            len(self.get_prev_sequences(task)) > 1 and
+            not self.is_join_task(task)
+        )
+
     def has_task(self, task):
         return self._graph.has_node(task)
 
@@ -84,5 +93,11 @@ class WorkflowGraph(object):
     def get_next_sequences(self, task):
         return sorted(
             [e for e in self._graph.out_edges([task], data=True)],
+            key=lambda x: x[1]
+        )
+
+    def get_prev_sequences(self, task):
+        return sorted(
+            [e for e in self._graph.in_edges([task], data=True)],
             key=lambda x: x[1]
         )

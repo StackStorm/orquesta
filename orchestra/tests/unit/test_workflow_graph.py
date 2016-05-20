@@ -31,7 +31,8 @@ EXPECTED_WF_GRAPH = {
             'id': 'task4'
         },
         {
-            'id': 'task5'
+            'id': 'task5',
+            'join': True
         },
         {
             'id': 'task6'
@@ -41,6 +42,9 @@ EXPECTED_WF_GRAPH = {
         },
         {
             'id': 'task8'
+        },
+        {
+            'id': 'task9'
         }
     ],
     'adjacency': [
@@ -55,6 +59,10 @@ EXPECTED_WF_GRAPH = {
             },
             {
                 'id': 'task7',
+                'key': 0
+            },
+            {
+                'id': 'task9',
                 'key': 0
             }
         ],
@@ -89,6 +97,12 @@ EXPECTED_WF_GRAPH = {
                 'key': 0
             }
         ],
+        [
+            {
+                'id': 'task9',
+                'key': 0
+            }
+        ],
         []
     ],
     'multigraph': True
@@ -98,7 +112,7 @@ EXPECTED_WF_GRAPH = {
 class WorkflowGraphTest(base.WorkflowGraphTest):
 
     def _add_tasks(self, wf_graph):
-        for i in range(1, 9):
+        for i in range(1, 10):
             wf_graph.add_task('task' + str(i))
 
     def _add_sequences(self, wf_graph):
@@ -110,32 +124,94 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         wf_graph.add_sequence('task5', 'task6')
         wf_graph.add_sequence('task1', 'task7')
         wf_graph.add_sequence('task7', 'task8')
+        wf_graph.add_sequence('task1', 'task9')
+        wf_graph.add_sequence('task8', 'task9')
+
+    def _update_tasks_attrs(self, wf_graph):
+        wf_graph.update_task('task5', join=True)
+
+    def _prep_graph(self, wf_graph):
+        self._add_tasks(wf_graph)
+        self._update_tasks_attrs(wf_graph)
+        self._add_sequences(wf_graph)
 
     def test_basic_graph(self):
         wf_graph = composition.WorkflowGraph()
-        self._add_tasks(wf_graph)
-        self._add_sequences(wf_graph)
+        self._prep_graph(wf_graph)
 
         self._assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
     def test_skip_add_tasks(self):
         wf_graph = composition.WorkflowGraph()
         self._add_sequences(wf_graph)
+        self._update_tasks_attrs(wf_graph)
 
         self._assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
     def test_duplicate_add_tasks(self):
         wf_graph = composition.WorkflowGraph()
         self._add_tasks(wf_graph)
-        self._add_tasks(wf_graph)
-        self._add_sequences(wf_graph)
+        self._prep_graph(wf_graph)
 
         self._assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
     def test_duplicate_add_sequences(self):
         wf_graph = composition.WorkflowGraph()
-        self._add_tasks(wf_graph)
-        self._add_sequences(wf_graph)
+        self._prep_graph(wf_graph)
         self._add_sequences(wf_graph)
 
         self._assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
+
+    def test_get_start_tasks(self):
+        wf_graph = composition.WorkflowGraph()
+        self._prep_graph(wf_graph)
+
+        expected_start_tasks = {
+            'task1': {}
+        }
+
+        self.assertDictEqual(wf_graph.get_start_tasks(), expected_start_tasks)
+
+    def test_get_next_sequences(self):
+        wf_graph = composition.WorkflowGraph()
+        self._prep_graph(wf_graph)
+
+        expected_sequences = [
+            ('task1', 'task2', {}),
+            ('task1', 'task4', {}),
+            ('task1', 'task7', {}),
+            ('task1', 'task9', {})
+        ]
+
+        self.assertListEqual(
+            wf_graph.get_next_sequences('task1'),
+            expected_sequences
+        )
+
+    def test_get_prev_sequences(self):
+        wf_graph = composition.WorkflowGraph()
+        self._prep_graph(wf_graph)
+
+        expected_sequences = [
+            ('task3', 'task5', {}),
+            ('task4', 'task5', {})
+        ]
+
+        self.assertListEqual(
+            wf_graph.get_prev_sequences('task5'),
+            expected_sequences
+        )
+
+    def test_is_join_task(self):
+        wf_graph = composition.WorkflowGraph()
+        self._prep_graph(wf_graph)
+
+        self.assertTrue(wf_graph.is_join_task('task5'))
+        self.assertFalse(wf_graph.is_join_task('task9'))
+
+    def test_is_split_task(self):
+        wf_graph = composition.WorkflowGraph()
+        self._prep_graph(wf_graph)
+
+        self.assertFalse(wf_graph.is_split_task('task5'))
+        self.assertTrue(wf_graph.is_split_task('task9'))
