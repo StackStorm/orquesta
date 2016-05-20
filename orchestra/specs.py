@@ -21,6 +21,9 @@ LOG = logging.getLogger(__name__)
 class WorkflowSpec(object):
 
     def __init__(self, definition):
+        if not definition:
+            raise ValueError('Workflow definition is empty.')
+
         self.definition = (
             definition
             if isinstance(definition, dict)
@@ -87,3 +90,9 @@ class WorkflowSpec(object):
             raise Exception('Task "%s" is not in the spec.' % task_name)
 
         return self.task_specs[task_name].get('join') is not None
+
+    def is_split_task(self, task_name):
+        return (
+            not self.is_join_task(task_name) and
+            len(self.get_prev_tasks(task_name)) > 1
+        )

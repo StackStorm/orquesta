@@ -21,6 +21,11 @@ class WorkflowSpecTest(base.WorkflowConductorTest):
         cls.composer_name = 'mistral'
         super(WorkflowSpecTest, cls).setUpClass()
 
+    def test_exception_empty_definition(self):
+        self.assertRaises(ValueError, specs.WorkflowSpec, {})
+        self.assertRaises(ValueError, specs.WorkflowSpec, '')
+        self.assertRaises(ValueError, specs.WorkflowSpec, None)
+
     def test_get_next_tasks(self):
         wf_name = 'split'
         wf_def = self._get_wf_def(wf_name)
@@ -118,3 +123,11 @@ class WorkflowSpecTest(base.WorkflowConductorTest):
 
         self.assertFalse(wf_spec.is_join_task('task4'))
         self.assertTrue(wf_spec.is_join_task('task7'))
+
+    def test_is_split_task(self):
+        wf_name = 'split'
+        wf_def = self._get_wf_def(wf_name)
+        wf_spec = specs.WorkflowSpec(wf_def)
+
+        self.assertTrue(wf_spec.is_split_task('task4'))
+        self.assertFalse(wf_spec.is_split_task('task7'))
