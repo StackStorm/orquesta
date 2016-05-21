@@ -10,9 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import mock
-import uuid
-
 from orchestra import states
 from orchestra.tests.unit import base
 
@@ -24,79 +21,27 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         cls.composer_name = 'mistral'
         super(BasicWorkflowConductorTest, cls).setUpClass()
 
-    @mock.patch.object(
-        uuid,
-        'uuid4',
-        mock.MagicMock(side_effect=range(101, 200))
-    )
     def test_sequential(self):
         wf_name = 'sequential'
 
-        expected_wf_graphs = {
-            wf_name: {
-                'directed': True,
-                'graph': {},
-                'nodes': [
-                    {
-                        'id': 'task1'
-                    },
-                    {
-                        'id': 'task2'
-                    },
-                    {
-                        'id': 'task3'
-                    }
-                ],
-                'adjacency': [
-                    [
-                        {
-                            'id': 'task2',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task1',
-                                states.SUCCESS
-                            )
-                        }
-                    ],
-                    [
-                        {
-                            'id': 'task3',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task2',
-                                states.SUCCESS
-                            )
-                        }
-                    ],
-                    []
-                ],
-                'multigraph': True
-            }
-        }
-
-        self._assert_wf_graphs(wf_name, expected_wf_graphs)
-
-        expected_wf_ex_graph = {
+        expected_wf_graph = {
             'directed': True,
             'graph': {},
             'nodes': [
                 {
-                    'id': '101',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': '102',
-                    'name': 'task2'
+                    'id': 'task2'
                 },
                 {
-                    'id': '103',
-                    'name': 'task3'
+                    'id': 'task3'
                 }
             ],
             'adjacency': [
                 [
                     {
-                        'id': '102',
+                        'id': 'task2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
@@ -106,7 +51,52 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 ],
                 [
                     {
-                        'id': '103',
+                        'id': 'task3',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task2',
+                            states.SUCCESS
+                        )
+                    }
+                ],
+                []
+            ],
+            'multigraph': True
+        }
+
+        self._assert_wf_graph(wf_name, expected_wf_graph)
+
+        expected_wf_ex_graph = {
+            'directed': True,
+            'graph': {},
+            'nodes': [
+                {
+                    'id': 'task1',
+                    'name': 'task1'
+                },
+                {
+                    'id': 'task2',
+                    'name': 'task2'
+                },
+                {
+                    'id': 'task3',
+                    'name': 'task3'
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'id': 'task2',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task1',
+                            states.SUCCESS
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': 'task3',
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
@@ -122,119 +112,40 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         self._assert_compose(wf_name, expected_wf_ex_graph)
 
         expected_task_seq = [
-            '101',  # task1
-            '102',  # task2
-            '103'   # task3
+            'task1',
+            'task2',
+            'task3'
         ]
 
         self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
 
-    @mock.patch.object(
-        uuid,
-        'uuid4',
-        mock.MagicMock(side_effect=range(101, 200))
-    )
     def test_branching(self):
         wf_name = 'branching'
 
-        expected_wf_graphs = {
-            wf_name: {
-                'directed': True,
-                'graph': {},
-                'nodes': [
-                    {
-                        'id': 'task1'
-                    },
-                    {
-                        'id': 'task2'
-                    },
-                    {
-                        'id': 'task3'
-                    },
-                    {
-                        'id': 'task4'
-                    },
-                    {
-                        'id': 'task5'
-                    }
-                ],
-                'adjacency': [
-                    [
-                        {
-                            'id': 'task2',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task1',
-                                states.SUCCESS
-                            )
-                        },
-                        {
-                            'id': 'task4',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task1',
-                                states.SUCCESS
-                            )
-                        }
-                    ],
-                    [
-                        {
-                            'id': 'task3',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task2',
-                                states.SUCCESS
-                            )
-                        }
-                    ],
-                    [],
-                    [
-                        {
-                            'id': 'task5',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                'task4',
-                                states.SUCCESS
-                            )
-                        }
-                    ],
-                    []
-                ],
-                'multigraph': True
-            }
-        }
-
-        self._assert_wf_graphs(wf_name, expected_wf_graphs)
-
-        expected_wf_ex_graph = {
+        expected_wf_graph = {
             'directed': True,
             'graph': {},
             'nodes': [
                 {
-                    'id': '101',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': '102',
-                    'name': 'task2'
+                    'id': 'task2'
                 },
                 {
-                    'id': '103',
-                    'name': 'task3'
+                    'id': 'task3'
                 },
                 {
-                    'id': '104',
-                    'name': 'task4'
+                    'id': 'task4'
                 },
                 {
-                    'id': '105',
-                    'name': 'task5'
+                    'id': 'task5'
                 }
             ],
             'adjacency': [
                 [
                     {
-                        'id': '102',
+                        'id': 'task2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
@@ -242,7 +153,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         )
                     },
                     {
-                        'id': '104',
+                        'id': 'task4',
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
@@ -252,7 +163,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 ],
                 [
                     {
-                        'id': '103',
+                        'id': 'task3',
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
@@ -263,7 +174,79 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [],
                 [
                     {
-                        'id': '105',
+                        'id': 'task5',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task4',
+                            states.SUCCESS
+                        )
+                    }
+                ],
+                []
+            ],
+            'multigraph': True
+        }
+
+        self._assert_wf_graph(wf_name, expected_wf_graph)
+
+        expected_wf_ex_graph = {
+            'directed': True,
+            'graph': {},
+            'nodes': [
+                {
+                    'id': 'task1',
+                    'name': 'task1'
+                },
+                {
+                    'id': 'task2',
+                    'name': 'task2'
+                },
+                {
+                    'id': 'task3',
+                    'name': 'task3'
+                },
+                {
+                    'id': 'task4',
+                    'name': 'task4'
+                },
+                {
+                    'id': 'task5',
+                    'name': 'task5'
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'id': 'task2',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task1',
+                            states.SUCCESS
+                        )
+                    },
+                    {
+                        'id': 'task4',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task1',
+                            states.SUCCESS
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': 'task3',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task2',
+                            states.SUCCESS
+                        )
+                    }
+                ],
+                [],
+                [
+                    {
+                        'id': 'task5',
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task4',
@@ -279,106 +262,39 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         self._assert_compose(wf_name, expected_wf_ex_graph)
 
         expected_task_seq = [
-            '101',  # task1
-            '102',  # task2
-            '104',  # task4
-            '103',  # task3
-            '105'   # task5
+            'task1',
+            'task2',
+            'task4',
+            'task3',
+            'task5'
         ]
 
         self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
 
-    @mock.patch.object(
-        uuid,
-        'uuid4',
-        mock.MagicMock(side_effect=range(101, 200))
-    )
     def test_decision_tree(self):
         wf_name = 'decision'
 
-        expected_wf_graphs = {
-            wf_name: {
-                'directed': True,
-                'graph': {},
-                'nodes': [
-                    {
-                        'id': 't1'
-                    },
-                    {
-                        'id': 'a'
-                    },
-                    {
-                        'id': 'b'
-                    },
-                    {
-                        'id': 'c'
-                    }
-                ],
-                'adjacency': [
-                    [
-                        {
-                            'id': 'a',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                't1',
-                                states.SUCCESS,
-                                "$.which = 'a'"
-                            )
-                        },
-                        {
-                            'id': 'b',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                't1',
-                                states.SUCCESS,
-                                "$.which = 'b'"
-                            )
-                        },
-                        {
-                            'id': 'c',
-                            'key': 0,
-                            'criteria': self._get_seq_expr(
-                                't1',
-                                states.SUCCESS,
-                                "not $.which in list(a, b)"
-                            )
-                        }
-                    ],
-                    [],
-                    [],
-                    []
-                ],
-                'multigraph': True
-            }
-        }
-
-        self._assert_wf_graphs(wf_name, expected_wf_graphs)
-
-        expected_wf_ex_graph = {
+        expected_wf_graph = {
             'directed': True,
             'graph': {},
             'nodes': [
                 {
-                    'id': '101',
-                    'name': 't1'
+                    'id': 't1'
                 },
                 {
-                    'id': '102',
-                    'name': 'a'
+                    'id': 'a'
                 },
                 {
-                    'id': '103',
-                    'name': 'b'
+                    'id': 'b'
                 },
                 {
-                    'id': '104',
-                    'name': 'c'
+                    'id': 'c'
                 }
             ],
             'adjacency': [
                 [
                     {
-                        'id': '102',
+                        'id': 'a',
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             't1',
@@ -387,7 +303,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         )
                     },
                     {
-                        'id': '103',
+                        'id': 'b',
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             't1',
@@ -396,7 +312,67 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         )
                     },
                     {
-                        'id': '104',
+                        'id': 'c',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            't1',
+                            states.SUCCESS,
+                            "not $.which in list(a, b)"
+                        )
+                    }
+                ],
+                [],
+                [],
+                []
+            ],
+            'multigraph': True
+        }
+
+        self._assert_wf_graph(wf_name, expected_wf_graph)
+
+        expected_wf_ex_graph = {
+            'directed': True,
+            'graph': {},
+            'nodes': [
+                {
+                    'id': 't1',
+                    'name': 't1'
+                },
+                {
+                    'id': 'a',
+                    'name': 'a'
+                },
+                {
+                    'id': 'b',
+                    'name': 'b'
+                },
+                {
+                    'id': 'c',
+                    'name': 'c'
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'id': 'a',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            't1',
+                            states.SUCCESS,
+                            "$.which = 'a'"
+                        )
+                    },
+                    {
+                        'id': 'b',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            't1',
+                            states.SUCCESS,
+                            "$.which = 'b'"
+                        )
+                    },
+                    {
+                        'id': 'c',
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             't1',
@@ -416,8 +392,8 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
 
         # Test branch "a"
         expected_task_seq = [
-            '101',  # t1
-            '102'   # a
+            't1',
+            'a'
         ]
 
         self._assert_conduct(
@@ -428,8 +404,8 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
 
         # Test branch "b"
         expected_task_seq = [
-            '101',  # t1
-            '103'   # b
+            't1',
+            'b'
         ]
 
         self._assert_conduct(
@@ -440,8 +416,8 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
 
         # Test branch "c"
         expected_task_seq = [
-            '101',  # t1
-            '104'   # c
+            't1',
+            'c'
         ]
 
         self._assert_conduct(

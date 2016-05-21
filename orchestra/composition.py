@@ -49,6 +49,12 @@ class WorkflowGraph(object):
     def has_task(self, task):
         return self._graph.has_node(task)
 
+    def get_task(self, task):
+        if not self.has_task(task):
+            raise Exception('Task does not exist.')
+
+        return copy.deepcopy(self._graph.node[task])
+
     def add_task(self, task, **kwargs):
         if not self.has_task(task):
             self._graph.add_node(task, **kwargs)
@@ -64,6 +70,16 @@ class WorkflowGraph(object):
 
     def has_sequence(self, source, destination):
         return self._graph.has_edge(source, destination)
+
+    def get_sequence(self, source, destination):
+        if not self.has_sequence(source, destination):
+            raise Exception('Task sequence does not exist.')
+
+        return (
+            source,
+            destination,
+            copy.deepcopy(self._graph[source][destination][0])
+        )
 
     def add_sequence(self, source, destination, **kwargs):
         if not self.has_task(source):

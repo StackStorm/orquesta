@@ -29,7 +29,7 @@ LOG = logging.getLogger(__name__)
 class MistralWorkflowComposer(base.WorkflowComposer):
 
     @staticmethod
-    def _compose_task_transition_criteria(task_name, task_state, expr=None):
+    def _compose_sequence_criteria(task_name, task_state, expr=None):
         yaql_expr = (
             'task(%s).get(state, "%s") = "%s"' % (
                 task_name,
@@ -44,172 +44,140 @@ class MistralWorkflowComposer(base.WorkflowComposer):
         return {'yaql': yaql_expr}
 
     @classmethod
-    def _compose_wf_graphs(cls, wf_spec):
+    def _compose_wf_graph(cls, wf_spec):
         q = queue.Queue()
-        entry = wf_spec.entry
-        wf_graphs = {entry: composition.WorkflowGraph()}
+        wf_graph = composition.WorkflowGraph()
 
         for task_name in wf_spec.get_start_tasks():
-            q.put((task_name, entry))
+            q.put((task_name, []))
 
         while not q.empty():
-            task_name, wf_graph = q.get()
-            prev_tasks = wf_spec.get_prev_tasks(task_name)
-            is_join_task = wf_spec.is_join_task(task_name)
-            is_split_task = not is_join_task and len(prev_tasks) > 1
+            task_name, splits = q.get()
 
-            wf_graphs[wf_graph].add_task(task_name)
+            wf_graph.add_task(task_name)
 
-            if is_join_task:
-                wf_graphs[wf_graph].update_task(task_name, join=is_join_task)
+            if wf_spec.is_join_task(task_name):
+                wf_graph.update_task(task_name, join=True)
 
-            if is_split_task:
-                sub_wf_graph = entry + '.' + task_name
+            if wf_spec.is_split_task(task_name):
+                splits.append(task_name)
 
-                wf_graphs[wf_graph].update_task(
-                    task_name,
-                    subgraph=sub_wf_graph
-                )
-
-                wf_graph = sub_wf_graph
-
-                if wf_graph not in wf_graphs:
-                    wf_graphs[wf_graph] = composition.WorkflowGraph()
-                    wf_graphs[wf_graph].add_task(task_name)
+            if splits:
+                wf_graph.update_task(task_name, splits=splits)
 
             next_tasks = wf_spec.get_next_tasks(task_name)
 
             for next_task_name, expr, condition in next_tasks:
-                if not wf_graphs[wf_graph].has_task(next_task_name):
-                    q.put((next_task_name, wf_graph))
+                q.put((next_task_name, list(splits)))
 
-                criteria = cls._compose_task_transition_criteria(
-                    task_name,
-                    states.SUCCESS,
-                    expr=expr
-                )
-
-                wf_graphs[wf_graph].add_sequence(
-                    task_name,
-                    next_task_name,
-                    criteria=criteria
-                )
-
-        return wf_graphs
-
-    @classmethod
-    def _get_join_task(cls, wf_ex_graph, wf_graphs, subgraph, wf_name,
-                       join_task_name, task_id):
-        req = len(wf_graphs[subgraph]._graph.in_edges([join_task_name]))
-
-        join_tasks = [
-            {'id': n, 'name': d['name']}
-            for n, d in wf_ex_graph._graph.nodes_iter(data=True)
-            if d['name'] == join_task_name
-        ]
-
-        for join_task in join_tasks:
-            in_edges = wf_ex_graph._graph.in_edges([join_task['id']])
-            in_tasks = [in_edge[0] for in_edge in in_edges]
-
-            if task_id not in in_tasks and len(in_tasks) != req:
-                return join_task
-
-        return None
-
-    @classmethod
-    def _traverse_task(cls, wf_ex_graph, wf_graphs, subgraph, wf_name,
-                       task_name, prev_task_id=None):
-        wf_graph = wf_graphs[subgraph]
-        nodes = dict(wf_graph._graph.nodes(data=True))
-        task_id = str(uuid.uuid4())
-
-        attributes = copy.deepcopy(nodes[task_name])
-        attributes['name'] = task_name
-        next_subgraph = attributes.pop('subgraph', subgraph)
-
-        wf_ex_graph.add_task(task_id, **attributes)
-
-        if prev_task_id:
-            prev_task_name = wf_ex_graph._graph.node[prev_task_id]['name']
-            edges = wf_graph._graph.edge[prev_task_name][task_name]
-
-            for edge_idx, edge_attr in six.iteritems(edges):
-                attributes = copy.deepcopy(edge_attr)
-                wf_ex_graph.add_sequence(prev_task_id, task_id, **attributes)
-
-        if next_subgraph != subgraph:
-            subgraph = next_subgraph
-            wf_graph = wf_graphs[subgraph]
-            nodes = dict(wf_graph._graph.nodes(data=True))
-
-        for transition in wf_graph.get_next_sequences(task_name):
-            next_task_name, attributes = transition[1], transition[2]
-            joining = nodes[next_task_name].get('join')
-
-            if joining:
-                join_task = cls._get_join_task(
-                    wf_ex_graph,
-                    wf_graphs,
-                    subgraph,
-                    wf_name,
-                    next_task_name,
-                    task_id
-                )
-
-                if join_task:
-                    wf_ex_graph.add_sequence(
-                        task_id,
-                        join_task['id'],
-                        **attributes
+                if not wf_graph.has_sequence(task_name, next_task_name):
+                    criteria = cls._compose_sequence_criteria(
+                        task_name,
+                        states.SUCCESS,
+                        expr=expr
                     )
 
-                    continue
+                    wf_graph.add_sequence(
+                        task_name,
+                        next_task_name,
+                        criteria=criteria
+                    )
 
-            cls._traverse_task(
-                wf_ex_graph,
-                wf_graphs,
-                subgraph,
-                wf_name,
-                next_task_name,
-                task_id
-            )
+        return wf_graph
 
     @classmethod
-    def _compose_wf_ex_graph(cls, wf_graphs, entry):
-        if len(wf_graphs) < 1:
-            raise Exception('No workflow definition is provided.')
-
-        if len(wf_graphs) > 1 and not entry:
-            raise Exception('No entry point provided for '
-                            'multiple workflow definitions.')
-
-        if (len(wf_graphs) == 1 and
-                entry is not None and entry not in wf_graphs):
-            raise Exception('Unable to find entry point in '
-                            'the workflow definitions.')
-
+    def _compose_wf_ex_graph(cls, wf_graph):
+        q = queue.Queue()
+        split_counter = {}
         wf_ex_graph = composition.WorkflowGraph()
-        tasks = wf_graphs[entry].get_start_tasks()
+        nodes = dict(wf_graph._graph.nodes(data=True))
 
-        for task_name, attributes in sorted(six.iteritems(tasks)):
-            cls._traverse_task(
-                wf_ex_graph,
-                wf_graphs,
-                entry,
-                entry,
-                task_name
+        def create_task_ex_name(task_name, split_id):
+            return (
+                task_name + '__' + str(split_id)
+                if split_id > 0
+                else task_name
             )
+
+        for task_name in sorted(wf_graph.get_start_tasks().keys()):
+            q.put((task_name, None, []))
+
+        while not q.empty():
+            task_name, prev_task_ex_name, splits = q.get()
+            is_split_task = wf_graph.is_split_task(task_name)
+            attributes = copy.deepcopy(nodes[task_name])
+            attributes['name'] = task_name
+
+            expected_splits = attributes.pop('splits', [])
+            prev_task = (
+                wf_ex_graph.get_task(prev_task_ex_name)
+                if prev_task_ex_name else {}
+            )
+
+            if (expected_splits and
+                    task_name not in expected_splits and
+                    not prev_task.get('splits', {})):
+                continue
+
+            if is_split_task:
+                split_id = split_counter.get(task_name, 0) + 1
+                split_counter[task_name] = split_id
+                split = (task_name, split_id)
+                splits.append(split)
+
+            if splits:
+                attributes['splits'] = splits
+
+            task_ex_name = create_task_ex_name(
+                task_name,
+                splits[-1][1] if splits else 0
+            )
+
+            if wf_ex_graph.has_task(task_ex_name):
+                continue
+                
+            wf_ex_graph.add_task(task_ex_name, **attributes)
+
+            for next_seq in wf_graph.get_next_sequences(task_name):
+                q.put((next_seq[1], task_ex_name, list(splits)))
+
+            if is_split_task and prev_task:
+                seq = wf_graph.get_sequence(prev_task['name'], task_name)
+
+                wf_ex_graph.add_sequence(
+                    prev_task_ex_name,
+                    task_ex_name,
+                    **seq[2]
+                )
+
+                continue
+
+            for seq in wf_graph.get_prev_sequences(task_name):
+                prev_task = wf_graph.get_task(seq[0])
+
+                split_srcs = [item[0] for item in splits]
+                matches = [
+                    split_src for split_src in prev_task.get('splits', [])
+                    if split_src in split_srcs
+                ]
+
+                prev_task_ex_name = create_task_ex_name(
+                    seq[0],
+                    splits[-1][1] if matches else 0
+                )
+
+                wf_ex_graph.add_sequence(
+                    prev_task_ex_name,
+                    task_ex_name,
+                    **seq[2]
+                )
 
         return wf_ex_graph
 
     @classmethod
     def compose(cls, definition):
-        if not definition:
-            raise ValueError('Workflow definition is empty.')
-
         wf_spec = specs.WorkflowSpec(definition)
 
-        wf_graphs = cls._compose_wf_graphs(wf_spec)
+        wf_graph = cls._compose_wf_graph(wf_spec)
 
-        return cls._compose_wf_ex_graph(wf_graphs, wf_spec.entry)
+        return cls._compose_wf_ex_graph(wf_graph)

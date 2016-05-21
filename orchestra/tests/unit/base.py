@@ -68,34 +68,20 @@ class WorkflowConductorTest(WorkflowGraphTest):
             'workflows'
         )
 
-    def _serialize_wf_graphs(self, wf_graphs):
-        return {
-            name: wf_graph.serialize()
-            for name, wf_graph in six.iteritems(wf_graphs)
-        }
-
     def _get_seq_expr(self, name, state, expr=None):
-        return self.composer._compose_task_transition_criteria(
-            name,
-            state,
-            expr=expr
-        )
+        return self.composer._compose_sequence_criteria(name, state, expr=expr)
 
-    def _compose_wf_graphs(self, wf_name):
+    def _compose_wf_graph(self, wf_name):
         wf_spec = specs.WorkflowSpec(self._get_wf_def(wf_name))
-        return self.composer._compose_wf_graphs(wf_spec)
+        return self.composer._compose_wf_graph(wf_spec)
 
-    def _assert_wf_graphs(self, wf_name, expected_wf_graphs):
+    def _assert_wf_graph(self, wf_name, expected_wf_graph):
         wf_spec = specs.WorkflowSpec(self._get_wf_def(wf_name))
-        wf_graphs = self.composer._compose_wf_graphs(wf_spec)
+        wf_graph = self.composer._compose_wf_graph(wf_spec)
 
-        for name in sorted(wf_graphs.keys()):
-            self._assert_graph_equal(
-                wf_graphs[name],
-                expected_wf_graphs[name]
-            )
+        self._assert_graph_equal(wf_graph, expected_wf_graph)
 
-        return wf_graphs
+        return wf_graph
 
     def _assert_compose(self, wf_name, expected_wf_ex_graph):
         wf_ex_graph = self.composer.compose(self._get_wf_def(wf_name))

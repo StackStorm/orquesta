@@ -29,8 +29,6 @@ class WorkflowComposerTest(base.WorkflowConductorTest):
         )
 
     def test_exception_empty_definition(self):
-        self.assertRaises(
-            ValueError,
-            self.composer.compose,
-            {}
-        )
+        self.assertRaises(ValueError, self.composer.compose, {})
+        self.assertRaises(ValueError, self.composer.compose, '')
+        self.assertRaises(ValueError, self.composer.compose, None)

@@ -184,8 +184,8 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         ]
 
         self.assertListEqual(
-            wf_graph.get_next_sequences('task1'),
-            expected_sequences
+            sorted(wf_graph.get_next_sequences('task1')),
+            sorted(expected_sequences)
         )
 
     def test_get_prev_sequences(self):
@@ -198,8 +198,8 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         ]
 
         self.assertListEqual(
-            wf_graph.get_prev_sequences('task5'),
-            expected_sequences
+            sorted(wf_graph.get_prev_sequences('task5')),
+            sorted(expected_sequences)
         )
 
     def test_is_join_task(self):
