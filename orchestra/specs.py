@@ -12,6 +12,7 @@
 
 import logging
 import six
+from six.moves import queue
 import yaml
 
 
@@ -96,3 +97,20 @@ class WorkflowSpec(object):
             not self.is_join_task(task_name) and
             len(self.get_prev_tasks(task_name)) > 1
         )
+
+    def in_cycle(self, task_name):
+        q = queue.Queue()
+
+        for task in self.get_next_tasks(task_name):
+            q.put(task[0])
+
+        while not q.empty():
+            next_task_name = q.get()
+
+            if next_task_name == task_name:
+                return True
+
+            for task in self.get_next_tasks(next_task_name):
+                q.put(task[0])
+
+        return False

@@ -117,3 +117,6 @@ class WorkflowGraph(object):
             [e for e in self._graph.in_edges([task], data=True)],
             key=lambda x: x[1]
         )
+
+    def in_cycle(self, task):
+        return [c for c in nx.simple_cycles(self._graph) if task in c]

@@ -131,3 +131,17 @@ class WorkflowSpecTest(base.WorkflowConductorTest):
 
         self.assertTrue(wf_spec.is_split_task('task4'))
         self.assertFalse(wf_spec.is_split_task('task7'))
+
+    def test_in_cycle(self):
+        wf_name = 'cycle'
+        wf_def = self._get_wf_def(wf_name)
+        wf_spec = specs.WorkflowSpec(wf_def)
+
+        self.assertTrue(wf_spec.in_cycle('task1'))
+
+    def test_not_in_cycle(self):
+        wf_name = 'split'
+        wf_def = self._get_wf_def(wf_name)
+        wf_spec = specs.WorkflowSpec(wf_def)
+
+        self.assertFalse(wf_spec.in_cycle('task4'))
