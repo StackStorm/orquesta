@@ -61,14 +61,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task3',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -77,7 +77,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -86,7 +86,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4',
                         'criteria': self._get_seq_expr(
                             'task3',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -95,14 +95,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task6',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -111,7 +111,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -120,7 +120,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7',
                         'criteria': self._get_seq_expr(
                             'task6',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -196,14 +196,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task3',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -212,7 +212,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4__1',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -221,14 +221,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5__1',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task6__1',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                 ],
@@ -237,7 +237,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__1',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -247,7 +247,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__1',
                         'criteria': self._get_seq_expr(
                             'task6',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -256,7 +256,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4__2',
                         'criteria': self._get_seq_expr(
                             'task3',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -265,14 +265,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5__2',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task6__2',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                 ],
@@ -281,7 +281,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__2',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -291,7 +291,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__2',
                         'criteria': self._get_seq_expr(
                             'task6',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ]
@@ -361,21 +361,21 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task3',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task8',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -384,7 +384,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -393,7 +393,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4',
                         'criteria': self._get_seq_expr(
                             'task3',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -402,14 +402,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task6',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -418,7 +418,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -427,7 +427,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7',
                         'criteria': self._get_seq_expr(
                             'task6',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -436,7 +436,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -527,21 +527,21 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task3',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task8__1',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -550,7 +550,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4__1',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -559,14 +559,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5__1',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task6__1',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                 ],
@@ -575,7 +575,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__1',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -584,7 +584,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8__2',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -594,7 +594,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__1',
                         'criteria': self._get_seq_expr(
                             'task6',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -603,7 +603,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4__2',
                         'criteria': self._get_seq_expr(
                             'task3',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -612,14 +612,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5__2',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task6__2',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                 ],
@@ -628,7 +628,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__2',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -637,7 +637,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8__3',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -647,7 +647,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__2',
                         'criteria': self._get_seq_expr(
                             'task6',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -729,14 +729,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task3',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -745,7 +745,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -754,7 +754,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4',
                         'criteria': self._get_seq_expr(
                             'task3',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -763,14 +763,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task6',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -779,7 +779,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -788,7 +788,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7',
                         'criteria': self._get_seq_expr(
                             'task6',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -797,14 +797,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task9',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -813,7 +813,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10',
                         'criteria': self._get_seq_expr(
                             'task8',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -822,7 +822,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10',
                         'criteria': self._get_seq_expr(
                             'task9',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -970,14 +970,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task3',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -986,7 +986,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4__1',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -995,14 +995,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5__1',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task6__1',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                 ],
@@ -1011,7 +1011,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__1',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1020,14 +1020,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8__1',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task9__1',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1036,7 +1036,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10__1',
                         'criteria': self._get_seq_expr(
                             'task8',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1046,7 +1046,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10__1',
                         'criteria': self._get_seq_expr(
                             'task9',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1055,7 +1055,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__2',
                         'criteria': self._get_seq_expr(
                             'task6',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1064,14 +1064,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8__2',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task9__2',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1080,7 +1080,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10__2',
                         'criteria': self._get_seq_expr(
                             'task8',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1090,7 +1090,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10__2',
                         'criteria': self._get_seq_expr(
                             'task9',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1099,7 +1099,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4__2',
                         'criteria': self._get_seq_expr(
                             'task3',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1108,14 +1108,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5__2',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task6__2',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                 ],
@@ -1124,7 +1124,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__3',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1133,14 +1133,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8__3',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task9__3',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1149,7 +1149,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10__3',
                         'criteria': self._get_seq_expr(
                             'task8',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1159,7 +1159,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10__3',
                         'criteria': self._get_seq_expr(
                             'task9',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1168,7 +1168,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__4',
                         'criteria': self._get_seq_expr(
                             'task6',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1177,14 +1177,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8__4',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task9__4',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1193,7 +1193,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10__4',
                         'criteria': self._get_seq_expr(
                             'task8',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1203,7 +1203,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10__4',
                         'criteria': self._get_seq_expr(
                             'task9',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ]
@@ -1288,21 +1288,21 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task3',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task8',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1311,7 +1311,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1320,7 +1320,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4',
                         'criteria': self._get_seq_expr(
                             'task3',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1329,14 +1329,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task6',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1345,7 +1345,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1354,7 +1354,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7',
                         'criteria': self._get_seq_expr(
                             'task6',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1363,7 +1363,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1451,28 +1451,28 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task3',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task8__1',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task8__2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1481,7 +1481,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4__1',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1490,14 +1490,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5__1',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task6__1',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                 ],
@@ -1506,7 +1506,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__1',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1515,7 +1515,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8__1',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1525,7 +1525,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__1',
                         'criteria': self._get_seq_expr(
                             'task6',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1534,7 +1534,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4__2',
                         'criteria': self._get_seq_expr(
                             'task3',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1543,14 +1543,14 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5__2',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task6__2',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                 ],
@@ -1559,7 +1559,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__2',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1568,7 +1568,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8__2',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -1578,7 +1578,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__2',
                         'criteria': self._get_seq_expr(
                             'task6',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ]

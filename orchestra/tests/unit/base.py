@@ -68,8 +68,12 @@ class WorkflowConductorTest(WorkflowGraphTest):
             'workflows'
         )
 
-    def _get_seq_expr(self, name, state, expr=None):
-        return self.composer._compose_sequence_criteria(name, state, expr=expr)
+    def _get_seq_expr(self, name, condition, expr=None):
+        return self.composer._compose_sequence_criteria(
+            name,
+            condition,
+            expr=expr
+        )
 
     def _compose_wf_graph(self, wf_name):
         wf_spec = specs.WorkflowSpec(self._get_wf_def(wf_name))

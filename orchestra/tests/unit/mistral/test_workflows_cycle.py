@@ -47,7 +47,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task1',
                         'criteria': self._get_seq_expr(
                             'prep',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -56,7 +56,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -65,7 +65,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task3',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -74,7 +74,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task1',
                         'criteria': self._get_seq_expr(
                             'task3',
-                            states.SUCCESS,
+                            'on-success',
                             "$.count < 3"
                         )
                     }
@@ -112,7 +112,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task1',
                         'criteria': self._get_seq_expr(
                             'prep',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -121,7 +121,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -130,7 +130,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task3',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -139,7 +139,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task1',
                         'criteria': self._get_seq_expr(
                             'task3',
-                            states.SUCCESS,
+                            'on-success',
                             "$.count < 3"
                         )
                     }
@@ -214,7 +214,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task1',
                         'criteria': self._get_seq_expr(
                             'prep',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -223,7 +223,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -232,7 +232,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task3',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS,
+                            'on-success',
                             'not $.proceed'
                         )
                     },
@@ -240,7 +240,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS,
+                            'on-success',
                             '$.proceed'
                         )
                     }
@@ -250,7 +250,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4',
                         'criteria': self._get_seq_expr(
                             'task3',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -259,7 +259,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -268,7 +268,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task1',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS,
+                            'on-success',
                             "$.count < 3"
                         )
                     }
@@ -314,7 +314,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task1',
                         'criteria': self._get_seq_expr(
                             'prep',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -323,7 +323,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -332,7 +332,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task3',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS,
+                            'on-success',
                             'not $.proceed'
                         )
                     },
@@ -340,7 +340,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS,
+                            'on-success',
                             '$.proceed'
                         )
                     }
@@ -350,7 +350,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task4',
                         'criteria': self._get_seq_expr(
                             'task3',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -359,7 +359,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -368,7 +368,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task1',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS,
+                            'on-success',
                             "$.count < 3"
                         )
                     }

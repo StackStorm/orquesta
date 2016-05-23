@@ -29,19 +29,19 @@ LOG = logging.getLogger(__name__)
 class MistralWorkflowComposer(base.WorkflowComposer):
 
     @staticmethod
-    def _compose_sequence_criteria(task_name, task_state, expr=None):
+    def _compose_sequence_criteria(task_name, condition, expr=None):
         yaql_expr = (
-            'task(%s).get(state, "%s") = "%s"' % (
+            'task(%s).get(state, "%s") in %s' % (
                 task_name,
                 states.UNKNOWN,
-                task_state
+                str(states.TASK_TRANSITION_MAP[condition])
             )
         )
 
         if expr:
             yaql_expr += ' and (%s)' % expression.strip_delimiter(expr)
 
-        return {'yaql': yaql_expr}
+        return yaql_expr
 
     @classmethod
     def _compose_wf_graph(cls, wf_spec):
@@ -80,7 +80,7 @@ class MistralWorkflowComposer(base.WorkflowComposer):
                 if not wf_graph.has_sequence(task_name, next_task_name):
                     criteria = cls._compose_sequence_criteria(
                         task_name,
-                        states.SUCCESS,
+                        condition,
                         expr=expr
                     )
 

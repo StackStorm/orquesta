@@ -48,7 +48,7 @@ class WorkflowConductor(object):
 
         outbounds = [
             seq for seq in self.wf_ex_graph.get_next_sequences(task['id'])
-            if expression.evaluate(seq[2]['criteria']['yaql'], context)
+            if expression.evaluate(seq[2]['criteria'], context)
         ]
 
         for sequence in outbounds:

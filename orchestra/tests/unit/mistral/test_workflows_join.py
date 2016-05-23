@@ -57,14 +57,14 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task4',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -73,7 +73,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task3',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -82,7 +82,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task6',
                         'criteria': self._get_seq_expr(
                             'task3',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -91,7 +91,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -100,7 +100,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task6',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -109,7 +109,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7',
                         'criteria': self._get_seq_expr(
                             'task6',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -160,14 +160,14 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task4',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -176,7 +176,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task3',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -185,7 +185,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task6',
                         'criteria': self._get_seq_expr(
                             'task3',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -194,7 +194,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -203,7 +203,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task6',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -212,7 +212,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7',
                         'criteria': self._get_seq_expr(
                             'task6',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -274,21 +274,21 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task4',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task6',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -297,7 +297,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task3',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -306,7 +306,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8',
                         'criteria': self._get_seq_expr(
                             'task3',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -315,7 +315,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -324,7 +324,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -333,7 +333,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7',
                         'criteria': self._get_seq_expr(
                             'task6',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -342,7 +342,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -397,21 +397,21 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task2',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task4',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     },
                     {
                         'id': 'task6',
                         'criteria': self._get_seq_expr(
                             'task1',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -420,7 +420,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task3',
                         'criteria': self._get_seq_expr(
                             'task2',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -429,7 +429,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8',
                         'criteria': self._get_seq_expr(
                             'task3',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -438,7 +438,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5',
                         'criteria': self._get_seq_expr(
                             'task4',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -447,7 +447,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8',
                         'criteria': self._get_seq_expr(
                             'task5',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -456,7 +456,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7',
                         'criteria': self._get_seq_expr(
                             'task6',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],
@@ -465,7 +465,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8',
                         'criteria': self._get_seq_expr(
                             'task7',
-                            states.SUCCESS
+                            'on-success'
                         )
                     }
                 ],

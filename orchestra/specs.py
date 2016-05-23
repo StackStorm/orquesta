@@ -51,9 +51,9 @@ class WorkflowSpec(object):
 
         if not conditions:
             conditions = [
-                'on-success',
+                'on-complete',
                 'on-error',
-                'on-complete'
+                'on-success'
             ]
 
         next_tasks = []
