@@ -91,15 +91,20 @@ class WorkflowConductorTest(WorkflowGraphTest):
         return wf_ex_graph
 
     def _assert_conduct(self, wf_ex_graph_json, expected_task_seq,
-                        contexts=None):
+                        mock_contexts=None, mock_states=None):
         context = {}
         actual_task_seq = []
         q = queue.Queue()
         ctx_q = queue.Queue()
+        state_q = queue.Queue()
 
-        if contexts:
-            for item in contexts:
+        if mock_contexts:
+            for item in mock_contexts:
                 ctx_q.put(item)
+
+        if mock_states:
+            for item in mock_states:
+                state_q.put(item)
 
         wf_ex_graph = composition.WorkflowGraph.deserialize(wf_ex_graph_json)
         conductor = symphony.WorkflowConductor(wf_ex_graph)
@@ -114,9 +119,10 @@ class WorkflowConductorTest(WorkflowGraphTest):
             queued_task = q.get()
 
             # mock completion of the task
+            state = state_q.get() if not state_q.empty() else states.SUCCESS
             actual_task_seq.append(queued_task['id'])
             completed_task = copy.deepcopy(queued_task)
-            completed_task['state'] = states.SUCCESS
+            completed_task['state'] = state
 
             # deserialize workflow execution graph to mock async execution
             wf_ex_graph = composition.WorkflowGraph.deserialize(

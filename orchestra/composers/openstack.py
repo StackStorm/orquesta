@@ -57,7 +57,8 @@ class MistralWorkflowComposer(base.WorkflowComposer):
             wf_graph.add_task(task_name)
 
             if wf_spec.is_join_task(task_name):
-                wf_graph.update_task(task_name, join=True)
+                task_spec = wf_spec.get_task(task_name)
+                wf_graph.update_task(task_name, join=task_spec['join'])
 
             if (wf_spec.is_split_task(task_name) and
                     not wf_spec.in_cycle(task_name)):

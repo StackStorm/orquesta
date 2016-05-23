@@ -51,7 +51,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                 },
                 {
                     'id': 'task7',
-                    'join': True,
+                    'join': 'all',
                     'splits': ['task4']
                 }
             ],
@@ -156,7 +156,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': 'task7__1',
                     'name': 'task7',
-                    'join': True,
+                    'join': 'all',
                     'splits': [('task4', 1)]
                 },
                 {
@@ -181,7 +181,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': 'task7__2',
                     'name': 'task7',
-                    'join': True,
+                    'join': 'all',
                     'splits': [('task4', 2)]
                 },
                 {
@@ -347,7 +347,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                 },
                 {
                     'id': 'task7',
-                    'join': True,
+                    'join': 'all',
                     'splits': ['task4']
                 },
                 {
@@ -472,7 +472,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': 'task7__1',
                     'name': 'task7',
-                    'join': True,
+                    'join': 'all',
                     'splits': [('task4', 1)]
                 },
                 {
@@ -502,7 +502,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': 'task7__2',
                     'name': 'task7',
-                    'join': True,
+                    'join': 'all',
                     'splits': [('task4', 2)]
                 },
                 {
@@ -719,7 +719,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                 },
                 {
                     'id': 'task10',
-                    'join': True,
+                    'join': 'all',
                     'splits': ['task4', 'task7']
                 }
             ],
@@ -868,7 +868,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': 'task10__1',
                     'name': 'task10',
-                    'join': True,
+                    'join': 'all',
                     'splits': [('task4', 1), ('task7', 1)]
                 },
                 {
@@ -894,7 +894,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': 'task10__2',
                     'name': 'task10',
-                    'join': True,
+                    'join': 'all',
                     'splits': [('task4', 1), ('task7', 2)]
                 },
                 {
@@ -929,7 +929,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': 'task10__3',
                     'name': 'task10',
-                    'join': True,
+                    'join': 'all',
                     'splits': [('task4', 2), ('task7', 3)]
                 },
                 {
@@ -955,7 +955,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': 'task10__4',
                     'name': 'task10',
-                    'join': True,
+                    'join': 'all',
                     'splits': [('task4', 2), ('task7', 4)]
                 },
                 {
@@ -1273,12 +1273,12 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                 },
                 {
                     'id': 'task7',
-                    'join': True,
+                    'join': 'all',
                     'splits': ['task4']
                 },
                 {
                     'id': 'task8',
-                    'join': True,
+                    'join': 'all',
                     'splits': ['task4']
                 }
             ],
@@ -1399,13 +1399,13 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': 'task7__1',
                     'name': 'task7',
-                    'join': True,
+                    'join': 'all',
                     'splits': [('task4', 1)]
                 },
                 {
                     'id': 'task8__1',
                     'name': 'task8',
-                    'join': True,
+                    'join': 'all',
                     'splits': [('task4', 1)]
                 },
                 {
@@ -1430,13 +1430,13 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': 'task7__2',
                     'name': 'task7',
-                    'join': True,
+                    'join': 'all',
                     'splits': [('task4', 2)]
                 },
                 {
                     'id': 'task8__2',
                     'name': 'task8',
-                    'join': True,
+                    'join': 'all',
                     'splits': [('task4', 2)]
                 },
                 {

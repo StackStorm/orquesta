@@ -163,7 +163,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
             'task3'
         ]
 
-        contexts = [
+        mock_contexts = [
             {'count': 0},   # prep
             {'count': 0},   # task1
             {'count': 0},   # task2
@@ -179,7 +179,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
         self._assert_conduct(
             expected_wf_ex_graph,
             expected_task_seq,
-            contexts=contexts
+            mock_contexts=mock_contexts
         )
 
     def test_cycles(self):
@@ -401,7 +401,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
             'task5'
         ]
 
-        contexts = [
+        mock_contexts = [
             {'count': 0},                   # prep
             {'count': 0, 'proceed': False}, # task1
             {'count': 0, 'proceed': False}, # task2
@@ -426,5 +426,5 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
         self._assert_conduct(
             expected_wf_ex_graph,
             expected_task_seq,
-            contexts=contexts
+            mock_contexts=mock_contexts
         )

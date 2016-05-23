@@ -40,11 +40,14 @@ class WorkflowSpec(object):
             self.task_specs = self.wf_spec.get('tasks', dict())
             break
 
-    def get_next_tasks(self, task_name, conditions=None):
+    def get_task(self, task_name):
         if task_name not in self.task_specs:
             raise Exception('Task "%s" is not in the spec.' % task_name)
 
-        task_spec = self.task_specs[task_name]
+        return self.task_specs[task_name]
+
+    def get_next_tasks(self, task_name, conditions=None):
+        task_spec = self.get_task(task_name)
 
         if not conditions:
             conditions = [
@@ -87,10 +90,9 @@ class WorkflowSpec(object):
         )
 
     def is_join_task(self, task_name):
-        if task_name not in self.task_specs:
-            raise Exception('Task "%s" is not in the spec.' % task_name)
+        task_spec = self.get_task(task_name)
 
-        return self.task_specs[task_name].get('join') is not None
+        return task_spec.get('join') is not None
 
     def is_split_task(self, task_name):
         return (

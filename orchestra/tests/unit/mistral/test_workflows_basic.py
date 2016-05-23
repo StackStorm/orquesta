@@ -537,7 +537,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         self._assert_conduct(
             expected_wf_ex_graph,
             expected_task_seq,
-            contexts=[{'which': 'a'}]
+            mock_contexts=[{'which': 'a'}]
         )
 
         # Test branch "b"
@@ -549,7 +549,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         self._assert_conduct(
             expected_wf_ex_graph,
             expected_task_seq,
-            contexts=[{'which': 'b'}]
+            mock_contexts=[{'which': 'b'}]
         )
 
         # Test branch "c"
@@ -561,5 +561,5 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         self._assert_conduct(
             expected_wf_ex_graph,
             expected_task_seq,
-            contexts=[{'which': 'c'}]
+            mock_contexts=[{'which': 'c'}]
         )

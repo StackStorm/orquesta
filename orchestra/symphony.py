@@ -45,41 +45,33 @@ class WorkflowConductor(object):
         context['__tasks'][task['name']] = task
 
         tasks = []
-        nodes = dict(self.wf_ex_graph._graph.nodes(data=True))
-        outbound_transitions = [
-            e
-            for e in self.wf_ex_graph._graph.out_edges([task['id']], data=True)
-            if expression.evaluate(e[2]['criteria']['yaql'], context)
+
+        outbounds = [
+            seq for seq in self.wf_ex_graph.get_next_sequences(task['id'])
+            if expression.evaluate(seq[2]['criteria']['yaql'], context)
         ]
 
-        for transition in outbound_transitions:
-            next_task_id, attributes = transition[1], transition[2]
+        for sequence in outbounds:
+            next_task_id, attributes = sequence[1], sequence[2]
+            next_task = self.wf_ex_graph.get_task(next_task_id)
 
             if not attributes.get('satisfied', False):
-                edge = self.wf_ex_graph._graph[task['id']][next_task_id]
-                edge['satisfied'] = True
-
-            is_join_task = nodes[next_task_id].get('join')
-
-            if is_join_task:
-                inbound_transitions = self.wf_ex_graph._graph.in_edges(
-                    [next_task_id],
-                    data=True
+                self.wf_ex_graph.update_sequence(
+                    task['id'],
+                    next_task_id,
+                    satisfied=True
                 )
 
-                unsatisfied = [
-                    t for t in inbound_transitions
-                    if not t[2].get('satisfied')
-                ]
+            join_spec = next_task.get('join')
 
-                if unsatisfied:
+            if join_spec:
+                inbounds = self.wf_ex_graph.get_prev_sequences(next_task_id)
+                satisfied = [t for t in inbounds if t[2].get('satisfied')]
+                join_spec = len(inbounds) if join_spec == 'all' else join_spec
+
+                if len(satisfied) < join_spec:
                     continue
 
-            next_task = {
-                'id': next_task_id,
-                'name': nodes[next_task_id]['name']
-            }
-
-            tasks.append(next_task)
+            tasks.append({'id': next_task_id, 'name': next_task['name']})
 
         return sorted(tasks, key=lambda x: x['name'])
