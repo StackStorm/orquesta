@@ -95,7 +95,8 @@ class WorkflowSpec(object):
     def is_split_task(self, task_name):
         return (
             not self.is_join_task(task_name) and
-            len(self.get_prev_tasks(task_name)) > 1
+            len(self.get_prev_tasks(task_name)) > 1 and
+            not self.in_cycle(task_name)
         )
 
     def in_cycle(self, task_name):
