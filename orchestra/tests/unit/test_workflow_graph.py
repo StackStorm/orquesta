@@ -156,11 +156,9 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         wf_graph = composition.WorkflowGraph()
         self._prep_graph(wf_graph)
 
-        expected_start_tasks = {
-            'task1': {}
-        }
+        expected_start_tasks = [{'id': 'task1', 'name': 'task1'}]
 
-        self.assertDictEqual(wf_graph.get_start_tasks(), expected_start_tasks)
+        self.assertListEqual(wf_graph.get_start_tasks(), expected_start_tasks)
 
     def test_get_next_sequences(self):
         wf_graph = composition.WorkflowGraph()

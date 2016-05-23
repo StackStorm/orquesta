@@ -102,8 +102,8 @@ class MistralWorkflowComposer(base.WorkflowComposer):
                 else task_name
             )
 
-        for task_name in sorted(wf_graph.get_start_tasks().keys()):
-            q.put((task_name, None, []))
+        for task in wf_graph.get_start_tasks():
+            q.put((task['id'], None, []))
 
         while not q.empty():
             task_name, prev_task_ex_name, splits = q.get()

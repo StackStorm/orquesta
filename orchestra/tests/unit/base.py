@@ -104,9 +104,8 @@ class WorkflowConductorTest(WorkflowGraphTest):
         wf_ex_graph = composition.WorkflowGraph.deserialize(wf_ex_graph_json)
         conductor = symphony.WorkflowConductor(wf_ex_graph)
 
-        for task_id, attributes in six.iteritems(conductor.start_workflow()):
-            attributes['id'] = task_id
-            q.put(attributes)
+        for task in conductor.start_workflow():
+            q.put(task)
 
         # serialize workflow execution graph to mock async execution
         wf_ex_graph_json = wf_ex_graph.serialize()

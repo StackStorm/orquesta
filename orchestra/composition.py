@@ -101,10 +101,12 @@ class WorkflowGraph(object):
             self._graph[source][destination][key] = value
 
     def get_start_tasks(self):
-        return {
-            n: copy.deepcopy(self._graph.node[n])
+        tasks = [
+            {'id': n, 'name': self._graph.node[n].get('name', n)}
             for n, d in self._graph.in_degree().items() if d == 0
-        }
+        ]
+
+        return sorted(tasks, key=lambda x: x['name'])
 
     def get_next_sequences(self, task):
         return sorted(
