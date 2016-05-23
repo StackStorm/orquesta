@@ -119,6 +119,170 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
 
         self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
 
+    def test_parallel(self):
+        wf_name = 'parallel'
+
+        expected_wf_graph = {
+            'directed': True,
+            'graph': {},
+            'nodes': [
+                {
+                    'id': 'task1'
+                },
+                {
+                    'id': 'task2'
+                },
+                {
+                    'id': 'task3'
+                },
+                {
+                    'id': 'task4'
+                },
+                {
+                    'id': 'task5'
+                },
+                {
+                    'id': 'task6'
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'id': 'task2',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task1',
+                            states.SUCCESS
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': 'task3',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task2',
+                            states.SUCCESS
+                        )
+                    }
+                ],
+                [],
+                [
+                    {
+                        'id': 'task5',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task4',
+                            states.SUCCESS
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': 'task6',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task5',
+                            states.SUCCESS
+                        )
+                    }
+                ],
+                []
+            ],
+            'multigraph': True
+        }
+
+        self._assert_wf_graph(wf_name, expected_wf_graph)
+
+        expected_wf_ex_graph = {
+            'directed': True,
+            'graph': {},
+            'nodes': [
+                {
+                    'id': 'task1',
+                    'name': 'task1'
+                },
+                {
+                    'id': 'task2',
+                    'name': 'task2'
+                },
+                {
+                    'id': 'task3',
+                    'name': 'task3'
+                },
+                {
+                    'id': 'task4',
+                    'name': 'task4'
+                },
+                {
+                    'id': 'task5',
+                    'name': 'task5'
+                },
+                {
+                    'id': 'task6',
+                    'name': 'task6'
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'id': 'task2',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task1',
+                            states.SUCCESS
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': 'task3',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task2',
+                            states.SUCCESS
+                        )
+                    }
+                ],
+                [],
+                [
+                    {
+                        'id': 'task5',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task4',
+                            states.SUCCESS
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': 'task6',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task5',
+                            states.SUCCESS
+                        )
+                    }
+                ],
+                []
+            ],
+            'multigraph': True
+        }
+
+        self._assert_compose(wf_name, expected_wf_ex_graph)
+
+        expected_task_seq = [
+            'task1',
+            'task4',
+            'task2',
+            'task5',
+            'task3',
+            'task6'
+        ]
+
+        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
+
     def test_branching(self):
         wf_name = 'branching'
 
