@@ -56,7 +56,7 @@ class WorkflowConductor(object):
             next_task_id, attributes = transition[1], transition[2]
 
             if not attributes.get('satisfied', False):
-                edge = self.wf_ex_graph._graph[task['id']][next_task_id][0]
+                edge = self.wf_ex_graph._graph[task['id']][next_task_id]
                 edge['satisfied'] = True
 
             is_join_task = nodes[next_task_id].get('join')

@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
 class WorkflowGraph(object):
 
     def __init__(self, graph=None):
-        self._graph = graph if graph else nx.MultiDiGraph()
+        self._graph = graph if graph else nx.DiGraph()
 
     def serialize(self):
         return json_graph.adjacency_data(self._graph)
@@ -78,7 +78,7 @@ class WorkflowGraph(object):
         return (
             source,
             destination,
-            copy.deepcopy(self._graph[source][destination][0])
+            copy.deepcopy(self._graph[source][destination])
         )
 
     def add_sequence(self, source, destination, **kwargs):
@@ -98,7 +98,7 @@ class WorkflowGraph(object):
             raise Exception('Task sequence does not exist.')
 
         for key, value in six.iteritems(kwargs):
-            self._graph[source][destination][0][key] = value
+            self._graph[source][destination][key] = value
 
     def get_start_tasks(self):
         return {

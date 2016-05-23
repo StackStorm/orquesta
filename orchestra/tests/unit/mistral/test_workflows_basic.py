@@ -42,7 +42,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task2',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             states.SUCCESS
@@ -52,7 +51,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task3',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
                             states.SUCCESS
@@ -61,7 +59,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 ],
                 []
             ],
-            'multigraph': True
+            'multigraph': False
         }
 
         self._assert_wf_graph(wf_name, expected_wf_graph)
@@ -87,7 +85,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task2',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             states.SUCCESS
@@ -97,7 +94,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task3',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
                             states.SUCCESS
@@ -106,7 +102,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 ],
                 []
             ],
-            'multigraph': True
+            'multigraph': False
         }
 
         self._assert_compose(wf_name, expected_wf_ex_graph)
@@ -149,7 +145,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task2',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             states.SUCCESS
@@ -159,7 +154,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task3',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
                             states.SUCCESS
@@ -170,7 +164,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task5',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task4',
                             states.SUCCESS
@@ -180,7 +173,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task6',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task5',
                             states.SUCCESS
@@ -189,7 +181,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 ],
                 []
             ],
-            'multigraph': True
+            'multigraph': False
         }
 
         self._assert_wf_graph(wf_name, expected_wf_graph)
@@ -227,7 +219,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task2',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             states.SUCCESS
@@ -237,7 +228,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task3',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
                             states.SUCCESS
@@ -248,7 +238,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task5',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task4',
                             states.SUCCESS
@@ -258,7 +247,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task6',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task5',
                             states.SUCCESS
@@ -267,7 +255,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 ],
                 []
             ],
-            'multigraph': True
+            'multigraph': False
         }
 
         self._assert_compose(wf_name, expected_wf_ex_graph)
@@ -310,7 +298,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task2',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             states.SUCCESS
@@ -318,7 +305,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                     },
                     {
                         'id': 'task4',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             states.SUCCESS
@@ -328,7 +314,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task3',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
                             states.SUCCESS
@@ -339,7 +324,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task5',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task4',
                             states.SUCCESS
@@ -348,7 +332,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 ],
                 []
             ],
-            'multigraph': True
+            'multigraph': False
         }
 
         self._assert_wf_graph(wf_name, expected_wf_graph)
@@ -382,7 +366,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task2',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             states.SUCCESS
@@ -390,7 +373,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                     },
                     {
                         'id': 'task4',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             states.SUCCESS
@@ -400,7 +382,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task3',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
                             states.SUCCESS
@@ -411,7 +392,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task5',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task4',
                             states.SUCCESS
@@ -420,7 +400,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 ],
                 []
             ],
-            'multigraph': True
+            'multigraph': False
         }
 
         self._assert_compose(wf_name, expected_wf_ex_graph)
@@ -459,7 +439,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'a',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             't1',
                             states.SUCCESS,
@@ -468,7 +447,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                     },
                     {
                         'id': 'b',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             't1',
                             states.SUCCESS,
@@ -477,7 +455,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                     },
                     {
                         'id': 'c',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             't1',
                             states.SUCCESS,
@@ -489,7 +466,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [],
                 []
             ],
-            'multigraph': True
+            'multigraph': False
         }
 
         self._assert_wf_graph(wf_name, expected_wf_graph)
@@ -519,7 +496,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'a',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             't1',
                             states.SUCCESS,
@@ -528,7 +504,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                     },
                     {
                         'id': 'b',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             't1',
                             states.SUCCESS,
@@ -537,7 +512,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                     },
                     {
                         'id': 'c',
-                        'key': 0,
                         'criteria': self._get_seq_expr(
                             't1',
                             states.SUCCESS,
@@ -549,7 +523,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 [],
                 []
             ],
-            'multigraph': True
+            'multigraph': False
         }
 
         self._assert_compose(wf_name, expected_wf_ex_graph)

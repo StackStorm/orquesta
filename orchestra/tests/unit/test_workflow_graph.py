@@ -51,61 +51,51 @@ EXPECTED_WF_GRAPH = {
         [
             {
                 'id': 'task2',
-                'key': 0
             },
             {
                 'id': 'task4',
-                'key': 0
             },
             {
                 'id': 'task7',
-                'key': 0
             },
             {
                 'id': 'task9',
-                'key': 0
             }
         ],
         [
             {
                 'id': 'task3',
-                'key': 0
             }
         ],
         [
             {
                 'id': 'task5',
-                'key': 0
             }
         ],
         [
             {
                 'id': 'task5',
-                'key': 0
             }
         ],
         [
             {
                 'id': 'task6',
-                'key': 0
             }
         ],
         [],
         [
             {
                 'id': 'task8',
-                'key': 0
             }
         ],
         [
             {
                 'id': 'task9',
-                'key': 0
             }
         ],
         []
     ],
-    'multigraph': True
+    'multigraph': False
 }
 
 
