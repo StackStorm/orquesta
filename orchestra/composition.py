@@ -43,8 +43,7 @@ class WorkflowGraph(object):
     def is_split_task(self, task):
         return (
             len(self.get_prev_sequences(task)) > 1 and
-            not self.is_join_task(task) and
-            not self.in_cycle(task)
+            not self.is_join_task(task)
         )
 
     def has_task(self, task):

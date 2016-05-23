@@ -59,7 +59,8 @@ class MistralWorkflowComposer(base.WorkflowComposer):
             if wf_spec.is_join_task(task_name):
                 wf_graph.update_task(task_name, join=True)
 
-            if wf_spec.is_split_task(task_name):
+            if (wf_spec.is_split_task(task_name) and
+                    not wf_spec.in_cycle(task_name)):
                 splits.append(task_name)
 
             if splits:
@@ -122,7 +123,7 @@ class MistralWorkflowComposer(base.WorkflowComposer):
                     not prev_task.get('splits', {})):
                 continue
 
-            if is_split_task:
+            if is_split_task and not is_task_in_cycle:
                 split_id = split_counter.get(task_name, 0) + 1
                 split_counter[task_name] = split_id
                 split = (task_name, split_id)
@@ -138,35 +139,11 @@ class MistralWorkflowComposer(base.WorkflowComposer):
 
             if wf_ex_graph.has_task(task_ex_name):
                 wf_ex_graph.update_task(task_ex_name, **attributes)
+            else:
+                wf_ex_graph.add_task(task_ex_name, **attributes)
 
-                if is_task_in_cycle:
-                    for seq in wf_graph.get_prev_sequences(task_name):
-                        prev_task = wf_graph.get_task(seq[0])
-
-                        split_srcs = [item[0] for item in splits]
-                        matches = [
-                            split_src
-                            for split_src in prev_task.get('splits', [])
-                            if split_src in split_srcs
-                        ]
-
-                        prev_task_ex_name = create_task_ex_name(
-                            seq[0],
-                            splits[-1][1] if matches else 0
-                        )
-
-                        wf_ex_graph.add_sequence(
-                            prev_task_ex_name,
-                            task_ex_name,
-                            **seq[2]
-                        )
-
-                continue
-
-            wf_ex_graph.add_task(task_ex_name, **attributes)
-
-            for next_seq in wf_graph.get_next_sequences(task_name):
-                q.put((next_seq[1], task_ex_name, list(splits)))
+                for next_seq in wf_graph.get_next_sequences(task_name):
+                    q.put((next_seq[1], task_ex_name, list(splits)))
 
             if is_split_task and prev_task:
                 seq = wf_graph.get_sequence(prev_task['name'], task_name)
