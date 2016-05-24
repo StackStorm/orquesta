@@ -48,17 +48,18 @@ class WorkflowConductor(object):
 
         outbounds = [
             seq for seq in self.wf_ex_graph.get_next_sequences(task['id'])
-            if expression.evaluate(seq[2]['criteria'], context)
+            if expression.evaluate(seq[3]['criteria'], context)
         ]
 
-        for sequence in outbounds:
-            next_task_id, attributes = sequence[1], sequence[2]
+        for seq in outbounds:
+            next_task_id, seq_key, attrs = seq[1], seq[2], seq[3]
             next_task = self.wf_ex_graph.get_task(next_task_id)
 
-            if not attributes.get('satisfied', False):
+            if not attrs.get('satisfied', False):
                 self.wf_ex_graph.update_sequence(
                     task['id'],
                     next_task_id,
+                    key=seq_key,
                     satisfied=True
                 )
 
@@ -66,7 +67,7 @@ class WorkflowConductor(object):
 
             if join_spec:
                 inbounds = self.wf_ex_graph.get_prev_sequences(next_task_id)
-                satisfied = [t for t in inbounds if t[2].get('satisfied')]
+                satisfied = [s for s in inbounds if s[3].get('satisfied')]
                 join_spec = len(inbounds) if join_spec == 'all' else join_spec
 
                 if len(satisfied) < join_spec:

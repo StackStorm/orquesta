@@ -77,13 +77,19 @@ class MistralWorkflowComposer(base.WorkflowComposer):
                         not wf_spec.in_cycle(next_task_name)):
                     q.put((next_task_name, list(splits)))
 
-                if not wf_graph.has_sequence(task_name, next_task_name):
-                    criteria = cls._compose_sequence_criteria(
-                        task_name,
-                        condition,
-                        expr=expr
-                    )
+                criteria = cls._compose_sequence_criteria(
+                    task_name,
+                    condition,
+                    expr=expr
+                )
 
+                seqs = wf_graph.has_sequence(
+                    task_name,
+                    next_task_name,
+                    criteria=criteria
+                )
+
+                if not seqs:
                     wf_graph.add_sequence(
                         task_name,
                         next_task_name,
@@ -107,10 +113,10 @@ class MistralWorkflowComposer(base.WorkflowComposer):
             )
 
         for task in wf_graph.get_start_tasks():
-            q.put((task['id'], None, []))
+            q.put((task['id'], None, None, []))
 
         while not q.empty():
-            task_name, prev_task_ex_name, splits = q.get()
+            task_name, prev_task_ex_name, criteria, splits = q.get()
             attributes = copy.deepcopy(nodes[task_name])
             attributes['name'] = task_name
 
@@ -157,19 +163,24 @@ class MistralWorkflowComposer(base.WorkflowComposer):
                 wf_ex_graph.add_task(task_ex_name, **attributes)
 
                 for next_seq in wf_graph.get_next_sequences(task_name):
-                    q.put((next_seq[1], task_ex_name, list(splits)))
+                    item = (
+                        next_seq[1],
+                        task_ex_name,
+                        next_seq[3]['criteria'],
+                        list(splits)
+                    )
+
+                    q.put(item)
 
             # A split task should only have one previous sequence even if there
             # are multiple different tasks transitioning to it. Since it has
             # no join requirement, the split task will create a new instance
             # and execute.
             if is_split_task and prev_task:
-                seq = wf_graph.get_sequence(prev_task['name'], task_name)
-
                 wf_ex_graph.add_sequence(
                     prev_task_ex_name,
                     task_ex_name,
-                    **seq[2]
+                    criteria=criteria
                 )
 
                 continue
@@ -192,7 +203,7 @@ class MistralWorkflowComposer(base.WorkflowComposer):
                 wf_ex_graph.add_sequence(
                     prev_task_ex_name,
                     task_ex_name,
-                    **seq[2]
+                    criteria=seq[3]['criteria']
                 )
 
         return wf_ex_graph

@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
 class WorkflowGraph(object):
 
     def __init__(self, graph=None):
-        self._graph = graph if graph else nx.DiGraph()
+        self._graph = graph if graph else nx.MultiDiGraph()
 
     def serialize(self):
         return json_graph.adjacency_data(self._graph)
@@ -68,37 +68,56 @@ class WorkflowGraph(object):
         for key, value in six.iteritems(kwargs):
             self._graph.node[task][key] = value
 
-    def has_sequence(self, source, destination):
-        return self._graph.has_edge(source, destination)
+    def has_sequence(self, source, destination, criteria=None):
+        return [
+            edge for edge in self._graph.edges(data=True, keys=True)
+            if (edge[0] == source and edge[1] == destination and
+                edge[3].get('criteria', None) == criteria)
+        ]
 
-    def get_sequence(self, source, destination):
-        if not self.has_sequence(source, destination):
+    def get_sequence(self, source, destination, key=None, criteria=None):
+        seqs = [
+            edge for edge in self._graph.edges(data=True, keys=True)
+            if (edge[0] == source and edge[1] == destination and (
+                    edge[3].get('criteria', None) == criteria or
+                    edge[2] == key))
+        ]
+
+        if not seqs:
             raise Exception('Task sequence does not exist.')
 
-        return (
-            source,
-            destination,
-            copy.deepcopy(self._graph[source][destination])
-        )
+        if len(seqs) > 1:
+            raise Exception('More than one task sequences found.')
 
-    def add_sequence(self, source, destination, **kwargs):
+        return seqs[0]
+
+    def add_sequence(self, source, destination, criteria=None):
         if not self.has_task(source):
             self.add_task(source)
 
         if not self.has_task(destination):
             self.add_task(destination)
 
-        if not self.has_sequence(source, destination):
-            self._graph.add_edge(source, destination, **kwargs)
+        seqs = self.has_sequence(source, destination, criteria)
+
+        if len(seqs) > 1:
+            raise Exception('More than one task sequences found.')
+
+        if not seqs:
+            self._graph.add_edge(source, destination, criteria=criteria)
         else:
-            self.update_sequence(source, destination, **kwargs)
+            self.update_sequence(
+                source,
+                destination,
+                key=seqs[0][2],
+                criteria=criteria
+            )
 
-    def update_sequence(self, source, destination, **kwargs):
-        if not self.has_sequence(source, destination):
-            raise Exception('Task sequence does not exist.')
+    def update_sequence(self, source, destination, key, **kwargs):
+        seq = self.get_sequence(source, destination, key=key)
 
-        for key, value in six.iteritems(kwargs):
-            self._graph[source][destination][key] = value
+        for attr, value in six.iteritems(kwargs):
+            self._graph[source][destination][seq[2]][attr] = value
 
     def get_start_tasks(self):
         tasks = [
@@ -110,13 +129,13 @@ class WorkflowGraph(object):
 
     def get_next_sequences(self, task):
         return sorted(
-            [e for e in self._graph.out_edges([task], data=True)],
+            [e for e in self._graph.out_edges([task], data=True, keys=True)],
             key=lambda x: x[1]
         )
 
     def get_prev_sequences(self, task):
         return sorted(
-            [e for e in self._graph.in_edges([task], data=True)],
+            [e for e in self._graph.in_edges([task], data=True, keys=True)],
             key=lambda x: x[1]
         )
 

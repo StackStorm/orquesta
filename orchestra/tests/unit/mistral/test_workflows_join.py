@@ -55,6 +55,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task2',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             'on-success'
@@ -62,6 +63,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                     },
                     {
                         'id': 'task4',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             'on-success'
@@ -71,6 +73,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task3',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
                             'on-success'
@@ -80,6 +83,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task6',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task3',
                             'on-success'
@@ -89,6 +93,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task5',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task4',
                             'on-success'
@@ -98,6 +103,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task6',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task5',
                             'on-success'
@@ -107,6 +113,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task7',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task6',
                             'on-success'
@@ -115,7 +122,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 ],
                 []
             ],
-            'multigraph': False
+            'multigraph': True
         }
 
         self._assert_wf_graph(wf_name, expected_wf_graph)
@@ -158,6 +165,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task2',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             'on-success'
@@ -165,6 +173,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                     },
                     {
                         'id': 'task4',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             'on-success'
@@ -174,6 +183,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task3',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
                             'on-success'
@@ -183,6 +193,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task6',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task3',
                             'on-success'
@@ -192,6 +203,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task5',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task4',
                             'on-success'
@@ -201,6 +213,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task6',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task5',
                             'on-success'
@@ -210,6 +223,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task7',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task6',
                             'on-success'
@@ -218,7 +232,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 ],
                 []
             ],
-            'multigraph': False
+            'multigraph': True
         }
 
         self._assert_compose(wf_name, expected_wf_ex_graph)
@@ -272,6 +286,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task2',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             'on-success'
@@ -279,6 +294,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                     },
                     {
                         'id': 'task4',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             'on-success'
@@ -286,6 +302,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                     },
                     {
                         'id': 'task6',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             'on-success'
@@ -295,6 +312,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task3',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
                             'on-success'
@@ -304,6 +322,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task8',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task3',
                             'on-success'
@@ -313,6 +332,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task5',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task4',
                             'on-success'
@@ -322,6 +342,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task8',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task5',
                             'on-success'
@@ -331,6 +352,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task7',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task6',
                             'on-success'
@@ -340,6 +362,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task8',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task7',
                             'on-success'
@@ -348,7 +371,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 ],
                 []
             ],
-            'multigraph': False
+            'multigraph': True
         }
 
         self._assert_wf_graph(wf_name, expected_wf_graph)
@@ -395,6 +418,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task2',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             'on-success'
@@ -402,6 +426,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                     },
                     {
                         'id': 'task4',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             'on-success'
@@ -409,6 +434,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                     },
                     {
                         'id': 'task6',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
                             'on-success'
@@ -418,6 +444,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task3',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
                             'on-success'
@@ -427,6 +454,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task8',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task3',
                             'on-success'
@@ -436,6 +464,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task5',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task4',
                             'on-success'
@@ -445,6 +474,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task8',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task5',
                             'on-success'
@@ -454,6 +484,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task7',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task6',
                             'on-success'
@@ -463,6 +494,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 [
                     {
                         'id': 'task8',
+                        'key': 0,
                         'criteria': self._get_seq_expr(
                             'task7',
                             'on-success'
@@ -471,7 +503,7 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 ],
                 []
             ],
-            'multigraph': False
+            'multigraph': True
         }
 
         self._assert_compose(wf_name, expected_wf_ex_graph)

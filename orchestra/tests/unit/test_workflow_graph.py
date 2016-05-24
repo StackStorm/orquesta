@@ -51,51 +51,71 @@ EXPECTED_WF_GRAPH = {
         [
             {
                 'id': 'task2',
+                'key': 0,
+                'criteria': None
             },
             {
                 'id': 'task4',
+                'key': 0,
+                'criteria': None
             },
             {
                 'id': 'task7',
+                'key': 0,
+                'criteria': None
             },
             {
                 'id': 'task9',
+                'key': 0,
+                'criteria': None
             }
         ],
         [
             {
                 'id': 'task3',
+                'key': 0,
+                'criteria': None
             }
         ],
         [
             {
                 'id': 'task5',
+                'key': 0,
+                'criteria': None
             }
         ],
         [
             {
                 'id': 'task5',
+                'key': 0,
+                'criteria': None
             }
         ],
         [
             {
                 'id': 'task6',
+                'key': 0,
+                'criteria': None
             }
         ],
         [],
         [
             {
                 'id': 'task8',
+                'key': 0,
+                'criteria': None
             }
         ],
         [
             {
                 'id': 'task9',
+                'key': 0,
+                'criteria': None
             }
         ],
         []
     ],
-    'multigraph': False
+    'multigraph': True
 }
 
 
@@ -165,10 +185,10 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         self._prep_graph(wf_graph)
 
         expected_sequences = [
-            ('task1', 'task2', {}),
-            ('task1', 'task4', {}),
-            ('task1', 'task7', {}),
-            ('task1', 'task9', {})
+            ('task1', 'task2', 0, {'criteria': None}),
+            ('task1', 'task4', 0, {'criteria': None}),
+            ('task1', 'task7', 0, {'criteria': None}),
+            ('task1', 'task9', 0, {'criteria': None})
         ]
 
         self.assertListEqual(
@@ -181,8 +201,8 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         self._prep_graph(wf_graph)
 
         expected_sequences = [
-            ('task3', 'task5', {}),
-            ('task4', 'task5', {})
+            ('task3', 'task5', 0, {'criteria': None}),
+            ('task4', 'task5', 0, {'criteria': None})
         ]
 
         self.assertListEqual(
