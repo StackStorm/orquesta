@@ -103,9 +103,8 @@ class MistralWorkflowComposer(base.WorkflowComposer):
         q = queue.Queue()
         split_counter = {}
         wf_ex_graph = composition.WorkflowGraph()
-        nodes = dict(wf_graph._graph.nodes(data=True))
 
-        def create_task_ex_name(task_name, split_id):
+        def _create_task_ex_name(task_name, split_id):
             return (
                 task_name + '__' + str(split_id)
                 if split_id > 0
@@ -117,40 +116,39 @@ class MistralWorkflowComposer(base.WorkflowComposer):
 
         while not q.empty():
             task_name, prev_task_ex_name, criteria, splits = q.get()
-            attributes = copy.deepcopy(nodes[task_name])
-            attributes['name'] = task_name
+            task_ex_attrs = wf_graph.get_task(task_name)
+            task_ex_attrs['name'] = task_name
 
             # For complex multi-level splits and joins, if a task from higher
-            # in the hierarchy is processed first, the task should be ignored.
-            # The task will be processed again later in the hierarchy.
-            # Otherwise, the task will be treated as a separate branch path.
-            expected_splits = attributes.pop('splits', [])
-            prev_task = (
+            # in the hierarchy is processed first, then ignore the task for
+            # now. This task will be processed again later in the hierarchy.
+            # Otherwise, if this task is processed now, it will be placed in a
+            # separate workflow branch.
+            expected_splits = task_ex_attrs.pop('splits', [])
+            prev_task_ex = (
                 wf_ex_graph.get_task(prev_task_ex_name)
                 if prev_task_ex_name else {}
             )
 
             if (expected_splits and
                     task_name not in expected_splits and
-                    not prev_task.get('splits', {})):
+                    not prev_task_ex.get('splits', [])):
                 continue
 
             # Determine if the task is a split task and if it is in a cycle.
             # If the task is a split task, keep track of how many instances
-            # and which branch the instance belows to.
+            # and which branch the instance belongs to.
             is_split_task = wf_graph.is_split_task(task_name)
             is_task_in_cycle = wf_graph.in_cycle(task_name)
 
             if is_split_task and not is_task_in_cycle:
-                split_id = split_counter.get(task_name, 0) + 1
-                split_counter[task_name] = split_id
-                split = (task_name, split_id)
-                splits.append(split)
+                split_counter[task_name] = split_counter.get(task_name, 0) + 1
+                splits.append((task_name, split_counter[task_name]))
 
             if splits:
-                attributes['splits'] = splits
+                task_ex_attrs['splits'] = splits
 
-            task_ex_name = create_task_ex_name(
+            task_ex_name = _create_task_ex_name(
                 task_name,
                 splits[-1][1] if splits else 0
             )
@@ -158,9 +156,9 @@ class MistralWorkflowComposer(base.WorkflowComposer):
             # If the task already exists in the execution graph, the task is
             # already processed and this is a cycle in the graph. 
             if wf_ex_graph.has_task(task_ex_name):
-                wf_ex_graph.update_task(task_ex_name, **attributes)
+                wf_ex_graph.update_task(task_ex_name, **task_ex_attrs)
             else:
-                wf_ex_graph.add_task(task_ex_name, **attributes)
+                wf_ex_graph.add_task(task_ex_name, **task_ex_attrs)
 
                 for next_seq in wf_graph.get_next_sequences(task_name):
                     item = (
@@ -176,7 +174,7 @@ class MistralWorkflowComposer(base.WorkflowComposer):
             # are multiple different tasks transitioning to it. Since it has
             # no join requirement, the split task will create a new instance
             # and execute.
-            if is_split_task and prev_task:
+            if is_split_task and prev_task_ex_name:
                 wf_ex_graph.add_sequence(
                     prev_task_ex_name,
                     task_ex_name,
@@ -186,24 +184,18 @@ class MistralWorkflowComposer(base.WorkflowComposer):
                 continue
 
             # Finally, process all inbound task transitions.
-            for seq in wf_graph.get_prev_sequences(task_name):
-                prev_task = wf_graph.get_task(seq[0])
+            for prev_seq in wf_graph.get_prev_sequences(task_name):
+                prev_task = wf_graph.get_task(prev_seq[0])
 
-                split_srcs = [item[0] for item in splits]
-                matches = [
-                    split_src for split_src in prev_task.get('splits', [])
-                    if split_src in split_srcs
-                ]
-
-                prev_task_ex_name = create_task_ex_name(
-                    seq[0],
-                    splits[-1][1] if matches else 0
-                )
+                split_id = 0
+                for prev_task_split in prev_task.get('splits', []):
+                    matches = [s for s in splits if s[0] == prev_task_split]
+                    split_id = matches[0][1] if matches else split_id
 
                 wf_ex_graph.add_sequence(
-                    prev_task_ex_name,
+                    _create_task_ex_name(prev_seq[0], split_id),
                     task_ex_name,
-                    criteria=seq[3]['criteria']
+                    criteria=prev_seq[3]['criteria']
                 )
 
         return wf_ex_graph
