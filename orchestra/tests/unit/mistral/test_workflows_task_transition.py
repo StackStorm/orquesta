@@ -116,7 +116,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         ]
 
         mock_states = [
-            states.SUCCESS, # task1
+            states.SUCCESS,     # task1
             states.SUCCESS  # task2
         ]
 
@@ -264,9 +264,9 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         ]
 
         mock_states = [
-            states.SUCCESS, # task1
-            states.SUCCESS, # task2
-            states.SUCCESS  # task4
+            states.SUCCESS,     # task1
+            states.SUCCESS,     # task2
+            states.SUCCESS      # task4
         ]
 
         self._assert_conduct(
@@ -283,9 +283,9 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         ]
 
         mock_states = [
-            states.ERROR,   # task1
-            states.SUCCESS, # task3
-            states.SUCCESS  # task4
+            states.ERROR,       # task1
+            states.SUCCESS,     # task3
+            states.SUCCESS      # task4
         ]
 
         self._assert_conduct(
@@ -411,9 +411,9 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         ]
 
         mock_states = [
-            states.SUCCESS, # task1
-            states.SUCCESS, # task2__1 on-complete
-            states.SUCCESS  # task2__3 on-success
+            states.SUCCESS,     # task1
+            states.SUCCESS,     # task2__1 on-complete
+            states.SUCCESS      # task2__3 on-success
         ]
 
         self._assert_conduct(
@@ -430,9 +430,9 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
         ]
 
         mock_states = [
-            states.ERROR,   # task1
-            states.SUCCESS, # task2__1 on-complete
-            states.SUCCESS  # task2__2 on-error
+            states.ERROR,       # task1
+            states.SUCCESS,     # task2__1 on-complete
+            states.SUCCESS      # task2__2 on-error
         ]
 
         self._assert_conduct(

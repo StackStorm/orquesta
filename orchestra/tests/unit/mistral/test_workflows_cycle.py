@@ -10,7 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra import states
 from orchestra.tests.unit import base
 
 
@@ -37,7 +36,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': 'task2'
                 },
-                {   
+                {
                     'id': 'task3'
                 }
             ],
@@ -206,7 +205,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': 'task2'
                 },
-                {   
+                {
                     'id': 'task3'
                 },
                 {
@@ -397,7 +396,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                 ]
             ],
             'multigraph': True
-        } 
+        }
 
         self._assert_compose(wf_name, expected_wf_ex_graph)
 
@@ -424,25 +423,25 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
         ]
 
         mock_contexts = [
-            {'count': 0},                   # prep
-            {'count': 0, 'proceed': False}, # task1
-            {'count': 0, 'proceed': False}, # task2
-            {'count': 0, 'proceed': False}, # task3
-            {'count': 0, 'proceed': True},  # task4
-            {'count': 0, 'proceed': True},  # task2
-            {'count': 1, 'proceed': True},  # task5
-            {'count': 1, 'proceed': False}, # task1
-            {'count': 1, 'proceed': False}, # task2
-            {'count': 1, 'proceed': False}, # task3
-            {'count': 1, 'proceed': True},  # task4
-            {'count': 1, 'proceed': True},  # task2
-            {'count': 2, 'proceed': True},  # task5
-            {'count': 2, 'proceed': False}, # task1
-            {'count': 2, 'proceed': False}, # task2
-            {'count': 2, 'proceed': False}, # task3
-            {'count': 2, 'proceed': True},  # task4
-            {'count': 2, 'proceed': True},  # task2
-            {'count': 3, 'proceed': True}   # task5
+            {'count': 0},                       # prep
+            {'count': 0, 'proceed': False},     # task1
+            {'count': 0, 'proceed': False},     # task2
+            {'count': 0, 'proceed': False},     # task3
+            {'count': 0, 'proceed': True},      # task4
+            {'count': 0, 'proceed': True},      # task2
+            {'count': 1, 'proceed': True},      # task5
+            {'count': 1, 'proceed': False},     # task1
+            {'count': 1, 'proceed': False},     # task2
+            {'count': 1, 'proceed': False},     # task3
+            {'count': 1, 'proceed': True},      # task4
+            {'count': 1, 'proceed': True},      # task2
+            {'count': 2, 'proceed': True},      # task5
+            {'count': 2, 'proceed': False},     # task1
+            {'count': 2, 'proceed': False},     # task2
+            {'count': 2, 'proceed': False},     # task3
+            {'count': 2, 'proceed': True},      # task4
+            {'count': 2, 'proceed': True},      # task2
+            {'count': 3, 'proceed': True}       # task5
         ]
 
         self._assert_conduct(

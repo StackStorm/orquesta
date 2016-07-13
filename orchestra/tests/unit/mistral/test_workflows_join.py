@@ -520,13 +520,13 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
         ]
 
         mock_states = [
-            states.SUCCESS, # task1
-            states.SUCCESS, # task2
-            states.SUCCESS, # task4
-            states.ERROR,   # task6
-            states.SUCCESS, # task3
-            states.SUCCESS, # task5
-            states.SUCCESS  # task8
+            states.SUCCESS,     # task1
+            states.SUCCESS,     # task2
+            states.SUCCESS,     # task4
+            states.ERROR,       # task6
+            states.SUCCESS,     # task3
+            states.SUCCESS,     # task5
+            states.SUCCESS      # task8
         ]
 
         self._assert_conduct(
@@ -548,14 +548,14 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
         ]
 
         mock_states = [
-            states.SUCCESS, # task1
-            states.SUCCESS, # task2
-            states.SUCCESS, # task4
-            states.SUCCESS, # task6
-            states.SUCCESS, # task3
-            states.SUCCESS, # task5
-            states.ERROR,   # task7
-            states.SUCCESS  # task8
+            states.SUCCESS,     # task1
+            states.SUCCESS,     # task2
+            states.SUCCESS,     # task4
+            states.SUCCESS,     # task6
+            states.SUCCESS,     # task3
+            states.SUCCESS,     # task5
+            states.ERROR,       # task7
+            states.SUCCESS      # task8
         ]
 
         self._assert_conduct(

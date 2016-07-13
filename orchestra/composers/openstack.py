@@ -10,11 +10,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import logging
-import six
 from six.moves import queue
-import uuid
 
 from orchestra.composers import base
 from orchestra import composition
@@ -154,7 +151,7 @@ class MistralWorkflowComposer(base.WorkflowComposer):
             )
 
             # If the task already exists in the execution graph, the task is
-            # already processed and this is a cycle in the graph. 
+            # already processed and this is a cycle in the graph.
             if wf_ex_graph.has_task(task_ex_name):
                 wf_ex_graph.update_task(task_ex_name, **task_ex_attrs)
             else:

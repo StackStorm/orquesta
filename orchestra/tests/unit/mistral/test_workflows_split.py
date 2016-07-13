@@ -10,7 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra import states
 from orchestra.tests.unit import base
 
 
@@ -353,15 +352,15 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': 'task3'
                 },
-                {    
+                {
                     'id': 'task4',
                     'splits': ['task4']
-                },   
-                {    
+                },
+                {
                     'id': 'task5',
                     'splits': ['task4']
-                },   
-                {    
+                },
+                {
                     'id': 'task6',
                     'splits': ['task4']
                 },
@@ -738,15 +737,15 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': 'task3'
                 },
-                {    
+                {
                     'id': 'task4',
                     'splits': ['task4']
-                },   
-                {    
+                },
+                {
                     'id': 'task5',
                     'splits': ['task4']
-                },   
-                {    
+                },
+                {
                     'id': 'task6',
                     'splits': ['task4']
                 },

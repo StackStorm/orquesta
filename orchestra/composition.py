@@ -79,8 +79,8 @@ class WorkflowGraph(object):
         seqs = [
             edge for edge in self._graph.edges(data=True, keys=True)
             if (edge[0] == source and edge[1] == destination and (
-                    edge[3].get('criteria', None) == criteria or
-                    edge[2] == key))
+                edge[3].get('criteria', None) == criteria or
+                edge[2] == key))
         ]
 
         if not seqs:
