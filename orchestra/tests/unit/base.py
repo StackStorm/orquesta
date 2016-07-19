@@ -151,3 +151,16 @@ class WorkflowConductorTest(WorkflowGraphTest):
             wf_ex_graph_json = wf_ex_graph.serialize()
 
         self.assertListEqual(expected_task_seq, actual_task_seq)
+
+
+@six.add_metaclass(abc.ABCMeta)
+class ExpressionEvaluatorTest(unittest.TestCase):
+    language = None
+    evaluator = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.evaluator = plugin.get_module(
+            'orchestra.evaluators',
+            cls.language
+        )

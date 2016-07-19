@@ -64,6 +64,9 @@ setup(
         'orchestra.composers': [
             'mistral = orchestra.composers.openstack:MistralWorkflowComposer'
         ],
+        'orchestra.evaluators': [
+            'yaql = orchestra.expressions.default:YAQLEvaluator'
+        ],
         'orchestra.tests': [
             'fake = orchestra.tests.unit.utils.test_plugin:FakePlugin'
         ]

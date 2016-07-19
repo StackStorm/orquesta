@@ -11,10 +11,13 @@
 # limitations under the License.
 
 import copy
+import jsonschema
 import logging
+import yaml
 
 from orchestra import utils
 from orchestra.specs import types
+from orchestra.utils import plugin
 
 
 LOG = logging.getLogger(__name__)
@@ -37,6 +40,14 @@ class BaseSpec(object):
         },
         'required': ['name', 'version']
     }
+
+    _expr_evaluator = {
+        'yaql': plugin.get_module('orchestra.evaluators', 'yaql')
+    }
+
+    @classmethod
+    def get_expr_evaluator(cls, language):
+        return cls._expr_evaluator[language]
 
     @classmethod
     def merge_schema(cls, source1, source2, overwrite=True):
@@ -96,3 +107,39 @@ class BaseSpec(object):
             schema = cls.merge_schema(schema, meta_schema)
 
         return schema
+
+    @classmethod
+    def validate(cls, spec):
+        if not isinstance(spec, dict):
+            spec = yaml.safe_load(spec)
+
+        errors = {}
+
+        syntax_errors = cls._validate_syntax(spec)
+
+        if syntax_errors:
+            errors['syntax'] = syntax_errors
+
+        expr_errors = cls._validate_expressions(spec)
+
+        if expr_errors:
+            errors['expressions'] = expr_errors
+
+        return errors
+
+    @classmethod
+    def _validate_syntax(cls, spec):
+        validator = jsonschema.Draft4Validator(cls.get_schema())
+
+        return [
+            {
+                'message': e.message,
+                'spec_path': '.'.join(list(e.absolute_path)) or None,
+                'schema_path': '.'.join(list(e.absolute_schema_path)) or None
+            }
+            for e in sorted(validator.iter_errors(spec), key=lambda e: e.path)
+        ]
+
+    @classmethod
+    def _validate_expressions(cls, spec):
+        return None

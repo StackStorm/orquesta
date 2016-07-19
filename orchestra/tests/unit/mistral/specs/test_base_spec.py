@@ -12,6 +12,7 @@
 
 import unittest
 
+from orchestra.expressions import default as expr
 from orchestra.specs import types
 from orchestra.specs.v2 import base
 
@@ -23,52 +24,122 @@ class MockSpec(base.BaseSpec):
         'type': 'object',
         'properties': {
             'attr1': types.NONEMPTY_STRING,
-            'attr2': types.NONEMPTY_DICT
+            'attr2': types.NONEMPTY_DICT,
+            'attr3': types.YAQL
         },
         'required': ['attr1'],
         'additionalProperties': False
     }
 
+    _expr_paths = ['attr3']
 
-MOCK_SPEC_SCHEMA = {
-    'type': 'object',
-    'properties': {
-        'name': types.NONEMPTY_STRING,
-        'version': dict(
-            list(types.VERSION.items()) +
-            [('enum', ['2.0', 2.0])]
-        ),
-        'description': types.NONEMPTY_STRING,
-        'tags': types.UNIQUE_STRING_LIST,
-        'attr1': types.NONEMPTY_STRING,
-        'attr2': types.NONEMPTY_DICT
-    },
-    'required': ['attr1', 'name', 'version'],
-    'additionalProperties': False
-}
+    @classmethod
+    def _validate_expressions(cls, spec):
+        evaluator = cls.get_expr_evaluator('yaql')
 
+        errors = []
 
-MOCK_SPEC_NO_META_SCHEMA = {
-    'type': 'object',
-    'properties': {
-        'attr1': types.NONEMPTY_STRING,
-        'attr2': types.NONEMPTY_DICT
-    },
-    'required': ['attr1'],
-    'additionalProperties': False
-}
+        for path in cls._expr_paths:
+            errors = evaluator.validate(spec.get(path, ''))
 
+            for error in errors:
+                error['spec_path'] = path
+                error['schema_path'] = 'properties.%s' % path
+
+        return errors
 
 class BaseSpecTest(unittest.TestCase):
 
+    def setUp(self):
+        super(BaseSpecTest, self).setUp()
+        self.maxDiff = None
+
     def test_get_schema(self):
-        self.assertDictEqual(
-            MOCK_SPEC_SCHEMA,
-            MockSpec.get_schema()
-        )
+        schema = {
+            'type': 'object',
+            'properties': {
+                'name': types.NONEMPTY_STRING,
+                'version': dict(
+                    list(types.VERSION.items()) +
+                    [('enum', ['2.0', 2.0])]
+                ),
+                'description': types.NONEMPTY_STRING,
+                'tags': types.UNIQUE_STRING_LIST,
+                'attr1': types.NONEMPTY_STRING,
+                'attr2': types.NONEMPTY_DICT,
+                'attr3': types.YAQL
+            },
+            'required': ['attr1', 'name', 'version'],
+            'additionalProperties': False
+        }
+
+        self.assertDictEqual(schema, MockSpec.get_schema())
 
     def test_get_schema_no_meta(self):
-        self.assertDictEqual(
-            MOCK_SPEC_NO_META_SCHEMA,
-            MockSpec.get_schema(includes=None)
-        )
+        schema = {
+            'type': 'object',
+            'properties': {
+                'attr1': types.NONEMPTY_STRING,
+                'attr2': types.NONEMPTY_DICT,
+                'attr3': types.YAQL
+            },
+            'required': ['attr1'],
+            'additionalProperties': False
+        }
+
+        self.assertDictEqual(schema, MockSpec.get_schema(includes=None))
+
+    def test_get_expr_evaluator(self):
+        evaluator = MockSpec.get_expr_evaluator('yaql')
+
+        self.assertTrue(evaluator is expr.YAQLEvaluator)
+
+    def test_spec_valid(self):
+        spec = {
+            'name': 'mock',
+            'version': '2.0',
+            'description': 'This is a mock spec.',
+            'attr1': 'foobar',
+            'attr2': {
+                'macro': 'polo'
+            }
+        }
+
+        self.assertDictEqual(MockSpec.validate(spec), {})
+
+    def test_spec_invalid(self):
+        spec = {
+            'name': 'mock',
+            'version': '1.0',
+            'description': 'This is a mock spec.',
+            'attr2': {
+                'macro': 'polo'
+            },
+            'attr3': '<% 1 +/ 2 %>'
+        }
+
+        errors = {
+            'syntax': [
+                {
+                    'spec_path': None,
+                    'schema_path': 'required',
+                    'message': '\'attr1\' is a required property'
+                },
+                {
+                    'spec_path': 'version',
+                    'schema_path': 'properties.version.enum',
+                    'message': '\'1.0\' is not one of [\'2.0\', 2.0]'
+                }
+            ],
+            'expressions': [
+                {
+                    'expression': '1 +/ 2',
+                    'spec_path': 'attr3',
+                    'schema_path': 'properties.attr3',
+                    'message': 'Parse error: unexpected \'/\' at '
+                               'position 3 of expression \'1 +/ 2\''
+                }
+            ]
+        }
+
+        self.assertDictEqual(errors, MockSpec.validate(spec))

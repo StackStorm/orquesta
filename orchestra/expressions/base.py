@@ -10,19 +10,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import abc
 import logging
+import six
 
 
 LOG = logging.getLogger(__name__)
 
 
-class PluginFactoryError(Exception):
-    pass
+@six.add_metaclass(abc.ABCMeta)
+class Evaluator(object):
 
+    @classmethod
+    @abc.abstractmethod
+    def strip_delimiter(cls, expr):
+        raise NotImplementedError()
 
-class YaqlGrammarException(Exception):
-    pass
+    @classmethod
+    @abc.abstractmethod
+    def validate(cls, expr):
+        raise NotImplementedError()
 
-
-class YaqlEvaluationException(Exception):
-    pass
+    @classmethod
+    @abc.abstractmethod
+    def evaluate(cls, text, data):
+        raise NotImplementedError()
