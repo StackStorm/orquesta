@@ -41,6 +41,8 @@ class BaseSpec(object):
         'required': ['name', 'version']
     }
 
+    _schema_validator = None
+
     _expr_evaluator = {
         'yaql': plugin.get_module('orchestra.evaluators', 'yaql')
     }
@@ -48,6 +50,13 @@ class BaseSpec(object):
     @classmethod
     def get_expr_evaluator(cls, language):
         return cls._expr_evaluator[language]
+
+    @classmethod
+    def get_schema_validator(cls):
+        if not cls._schema_validator:
+            cls._schema_validator = jsonschema.Draft4Validator(cls.get_schema())
+
+        return cls._schema_validator
 
     @classmethod
     def merge_schema(cls, source1, source2, overwrite=True):
@@ -135,7 +144,7 @@ class BaseSpec(object):
 
     @classmethod
     def _validate_syntax(cls, spec):
-        validator = jsonschema.Draft4Validator(cls.get_schema())
+        validator = cls.get_schema_validator()
 
         return [
             {
