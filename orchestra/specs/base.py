@@ -117,7 +117,7 @@ class BaseSpec(object):
 
         syntax_errors = sorted(
             cls._validate_syntax(spec),
-            key=lambda e: e.get('spec_path', None)
+            key=lambda e: e['schema_path']
         )
 
         if syntax_errors:
@@ -125,7 +125,7 @@ class BaseSpec(object):
 
         expr_errors = sorted(
             cls._validate_expressions(spec),
-            key=lambda e: e.get('spec_path', None)
+            key=lambda e: e['schema_path']
         )
 
         if expr_errors:

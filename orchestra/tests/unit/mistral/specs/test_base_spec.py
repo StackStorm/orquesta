@@ -48,6 +48,7 @@ class MockSpec(base.BaseSpec):
 
         return errors
 
+
 class BaseSpecTest(unittest.TestCase):
 
     def setUp(self):
@@ -121,14 +122,14 @@ class BaseSpecTest(unittest.TestCase):
         errors = {
             'syntax': [
                 {
-                    'spec_path': None,
-                    'schema_path': 'required',
-                    'message': '\'attr1\' is a required property'
-                },
-                {
                     'spec_path': 'version',
                     'schema_path': 'properties.version.enum',
                     'message': '\'1.0\' is not one of [\'2.0\', 2.0]'
+                },
+                {
+                    'spec_path': None,
+                    'schema_path': 'required',
+                    'message': '\'attr1\' is a required property'
                 }
             ],
             'expressions': [
