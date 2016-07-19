@@ -115,12 +115,18 @@ class BaseSpec(object):
 
         errors = {}
 
-        syntax_errors = cls._validate_syntax(spec)
+        syntax_errors = sorted(
+            cls._validate_syntax(spec),
+            key=lambda e: e.get('spec_path', None)
+        )
 
         if syntax_errors:
             errors['syntax'] = syntax_errors
 
-        expr_errors = cls._validate_expressions(spec)
+        expr_errors = sorted(
+            cls._validate_expressions(spec),
+            key=lambda e: e.get('spec_path', None)
+        )
 
         if expr_errors:
             errors['expressions'] = expr_errors
@@ -137,7 +143,7 @@ class BaseSpec(object):
                 'spec_path': '.'.join(list(e.absolute_path)) or None,
                 'schema_path': '.'.join(list(e.absolute_schema_path)) or None
             }
-            for e in sorted(validator.iter_errors(spec), key=lambda e: e.path)
+            for e in validator.iter_errors(spec)
         ]
 
     @classmethod

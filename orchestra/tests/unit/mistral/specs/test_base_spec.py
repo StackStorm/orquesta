@@ -25,7 +25,7 @@ class MockSpec(base.BaseSpec):
         'properties': {
             'attr1': types.NONEMPTY_STRING,
             'attr2': types.NONEMPTY_DICT,
-            'attr3': types.YAQL
+            'attr3': types.NONEMPTY_STRING
         },
         'required': ['attr1'],
         'additionalProperties': False
@@ -67,7 +67,7 @@ class BaseSpecTest(unittest.TestCase):
                 'tags': types.UNIQUE_STRING_LIST,
                 'attr1': types.NONEMPTY_STRING,
                 'attr2': types.NONEMPTY_DICT,
-                'attr3': types.YAQL
+                'attr3': types.NONEMPTY_STRING
             },
             'required': ['attr1', 'name', 'version'],
             'additionalProperties': False
@@ -81,7 +81,7 @@ class BaseSpecTest(unittest.TestCase):
             'properties': {
                 'attr1': types.NONEMPTY_STRING,
                 'attr2': types.NONEMPTY_DICT,
-                'attr3': types.YAQL
+                'attr3': types.NONEMPTY_STRING
             },
             'required': ['attr1'],
             'additionalProperties': False
@@ -115,7 +115,7 @@ class BaseSpecTest(unittest.TestCase):
             'attr2': {
                 'macro': 'polo'
             },
-            'attr3': '<% 1 +/ 2 %>'
+            'attr3': '<% 1 +/ 2 %> and <% {"a": 123} %>'
         }
 
         errors = {
@@ -138,6 +138,13 @@ class BaseSpecTest(unittest.TestCase):
                     'schema_path': 'properties.attr3',
                     'message': 'Parse error: unexpected \'/\' at '
                                'position 3 of expression \'1 +/ 2\''
+                },
+                {
+                    'expression': '{"a": 123}',
+                    'spec_path': 'attr3',
+                    'schema_path': 'properties.attr3',
+                    'message': 'Lexical error: illegal character '
+                               '\':\' at position 4',
                 }
             ]
         }
