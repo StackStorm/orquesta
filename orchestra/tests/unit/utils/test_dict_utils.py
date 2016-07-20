@@ -37,9 +37,9 @@ RIGHT = {
 }
 
 
-class MergeDictsTest(unittest.TestCase):
+class DictUtilsTest(unittest.TestCase):
 
-    def test_merge_overwrite(self):
+    def test_dict_merge_overwrite(self):
         left = copy.deepcopy(LEFT)
         right = copy.deepcopy(RIGHT)
 
@@ -60,7 +60,7 @@ class MergeDictsTest(unittest.TestCase):
 
         self.assertDictEqual(left, expected)
 
-    def test_merge_overwrite_false(self):
+    def test_dict_merge_overwrite_false(self):
         left = copy.deepcopy(LEFT)
         right = copy.deepcopy(RIGHT)
 
@@ -80,3 +80,51 @@ class MergeDictsTest(unittest.TestCase):
         }
 
         self.assertDictEqual(left, expected)
+
+    def test_dict_dot_notation_access(self):
+        data = {
+            'a': 'foo',
+            'b': {
+                'c': 'bar',
+                'd': {
+                    'e': 123,
+                    'f': False,
+                    'g': {},
+                    'h': None
+                }
+            },
+            'x': {},
+            'y': None
+        }
+
+        self.assertEqual('foo', utils.get_dict_value(data, 'a'))
+        self.assertEqual('bar', utils.get_dict_value(data, 'b.c'))
+        self.assertEqual(123, utils.get_dict_value(data, 'b.d.e'))
+        self.assertFalse(utils.get_dict_value(data, 'b.d.f'))
+        self.assertDictEqual({}, utils.get_dict_value(data, 'b.d.g'))
+        self.assertIsNone(utils.get_dict_value(data, 'b.d.h'))
+        self.assertDictEqual({}, utils.get_dict_value(data, 'x'))
+        self.assertIsNone(utils.get_dict_value(data, 'x.x'))
+        self.assertIsNone(utils.get_dict_value(data, 'y'))
+        self.assertIsNone(utils.get_dict_value(data, 'z'))
+
+    def test_dict_dot_notation_access_type_error(self):
+        data = {'a': 'foo'}
+
+        self.assertRaises(
+            TypeError,
+            utils.get_dict_value,
+            data,
+            'a.b'
+        )
+
+    def test_dict_dot_notation_access_key_error(self):
+        data = {'a': {}}
+
+        self.assertRaises(
+            KeyError,
+            utils.get_dict_value,
+            data,
+            'a.b',
+            raise_key_error=True
+        )
