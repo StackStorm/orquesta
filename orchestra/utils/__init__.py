@@ -40,10 +40,10 @@ def get_dict_value(obj, path, raise_key_error=False):
     traversed = ''
 
     for key in keys:
-        traversed += '.' + key
-
         if not isinstance(item, dict) and traversed != path:
             raise TypeError('Value of \'%s\' is not typeof dict.' % traversed)
+
+        traversed += '.' + key if len(traversed) > 0 else key
 
         if key not in item and raise_key_error:
             raise KeyError('Key \'%s\' does not exist.' % traversed)
