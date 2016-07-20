@@ -17,6 +17,20 @@ from orchestra.specs import types
 from orchestra.specs.v2 import base
 
 
+class ChildMockSpec(base.BaseSpec):
+
+    _schema = {
+        'type': 'object',
+        'properties': {
+            'attr4_1': types.NONEMPTY_STRING
+        },
+        'required': ['attr4_1'],
+        'additionalProperties': False
+    }
+
+    _expressions = ['attr4_1']
+
+
 class MockSpec(base.BaseSpec):
     _version = '2.0'
 
@@ -25,28 +39,15 @@ class MockSpec(base.BaseSpec):
         'properties': {
             'attr1': types.NONEMPTY_STRING,
             'attr2': types.NONEMPTY_DICT,
-            'attr3': types.NONEMPTY_STRING
+            'attr3': types.NONEMPTY_STRING,
+            'attr4': ChildMockSpec.get_schema(includes=None)
         },
         'required': ['attr1'],
         'additionalProperties': False
     }
 
-    _expr_paths = ['attr3']
-
-    @classmethod
-    def _validate_expressions(cls, spec):
-        evaluator = cls.get_expr_evaluator('yaql')
-
-        errors = []
-
-        for path in cls._expr_paths:
-            errors = evaluator.validate(spec.get(path, ''))
-
-            for error in errors:
-                error['spec_path'] = path
-                error['schema_path'] = 'properties.%s' % path
-
-        return errors
+    _expressions = ['attr3']
+    _expressions += ChildMockSpec.get_expr_paths(parent='attr4')
 
 
 class BaseSpecTest(unittest.TestCase):
@@ -68,7 +69,8 @@ class BaseSpecTest(unittest.TestCase):
                 'tags': types.UNIQUE_STRING_LIST,
                 'attr1': types.NONEMPTY_STRING,
                 'attr2': types.NONEMPTY_DICT,
-                'attr3': types.NONEMPTY_STRING
+                'attr3': types.NONEMPTY_STRING,
+                'attr4': ChildMockSpec.get_schema(includes=None)
             },
             'required': ['attr1', 'name', 'version'],
             'additionalProperties': False
@@ -76,13 +78,27 @@ class BaseSpecTest(unittest.TestCase):
 
         self.assertDictEqual(schema, MockSpec.get_schema())
 
+    def test_get_expr_paths(self):
+        expr_paths = {
+            'attr3': 'properties.attr3',
+            'attr4.attr4_1': 'properties.attr4.properties.attr4_1'
+        }
+
+        self.assertDictEqual(expr_paths, MockSpec.get_expr_schema_paths())
+
+        self.assertListEqual(
+            sorted(list(expr_paths.keys())),
+            sorted(MockSpec.get_expr_paths())
+        )
+
     def test_get_schema_no_meta(self):
         schema = {
             'type': 'object',
             'properties': {
                 'attr1': types.NONEMPTY_STRING,
                 'attr2': types.NONEMPTY_DICT,
-                'attr3': types.NONEMPTY_STRING
+                'attr3': types.NONEMPTY_STRING,
+                'attr4': ChildMockSpec.get_schema(includes=None)
             },
             'required': ['attr1'],
             'additionalProperties': False
@@ -103,6 +119,10 @@ class BaseSpecTest(unittest.TestCase):
             'attr1': 'foobar',
             'attr2': {
                 'macro': 'polo'
+            },
+            'attr3': '<% $.foobar %>',
+            'attr4': {
+                'attr4_1': '<% $.macro %> <% $.polo %>'
             }
         }
 
@@ -116,7 +136,10 @@ class BaseSpecTest(unittest.TestCase):
             'attr2': {
                 'macro': 'polo'
             },
-            'attr3': '<% 1 +/ 2 %> and <% {"a": 123} %>'
+            'attr3': '<% 1 +/ 2 %> and <% {"a": 123} %>',
+            'attr4': {
+                'attr4_1': '<% <% $.foobar %> %>'
+            }
         }
 
         errors = {
@@ -146,6 +169,13 @@ class BaseSpecTest(unittest.TestCase):
                     'schema_path': 'properties.attr3',
                     'message': 'Lexical error: illegal character '
                                '\':\' at position 4',
+                },
+                {
+                    'expression': '<% $.foobar',
+                    'spec_path': 'attr4.attr4_1',
+                    'schema_path': 'properties.attr4.properties.attr4_1',
+                    'message': 'Parse error: unexpected \'<\' at position 0 '
+                               'of expression \'<% $.foobar\''
                 }
             ]
         }

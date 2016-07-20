@@ -13,6 +13,7 @@
 import copy
 import jsonschema
 import logging
+import six
 import yaml
 
 from orchestra import utils
@@ -42,6 +43,8 @@ class BaseSpec(object):
     }
 
     _schema_validator = None
+
+    _expressions = []
 
     _expr_evaluator = {
         'yaql': plugin.get_module('orchestra.evaluators', 'yaql')
@@ -118,6 +121,55 @@ class BaseSpec(object):
         return schema
 
     @classmethod
+    def get_expr_paths(cls, parent=None):
+        expr_paths = []
+        schema = cls.get_schema()
+
+        for expr_path in cls._expressions:
+            keys = expr_path.split('.')
+            schema_obj = schema
+
+            for key in keys:
+                if key not in schema_obj.get('properties', {}):
+                    raise KeyError(
+                        'Unable to identify schema path '
+                        'for \'%s\'.' % expr_path
+                    )
+
+                schema_obj = schema_obj['properties'][key]
+
+            xpath = parent + '.' + expr_path if parent else expr_path
+            expr_paths.append(xpath)
+
+        return expr_paths
+
+    @classmethod
+    def get_expr_schema_paths(cls, parent=None):
+        expr_schema = {}
+        schema = cls.get_schema()
+
+        for expr_path in cls._expressions:
+            keys = expr_path.split('.')
+            schema_obj = schema
+            schema_path = '' if not parent else 'properties.%s' % parent
+
+            for key in keys:
+                if key not in schema_obj.get('properties', {}):
+                    raise KeyError(
+                        'Unable to identify schema path '
+                        'for \'%s\'.' % expr_path
+                    )
+
+                schema_obj = schema_obj['properties'][key]
+                schema_path += '.' if len(schema_path) > 0 else ''
+                schema_path += 'properties.' + key
+
+            xpath = parent + '.' + expr_path if parent else expr_path
+            expr_schema[xpath] = schema_path
+
+        return expr_schema
+
+    @classmethod
     def validate(cls, spec):
         if not isinstance(spec, dict):
             spec = yaml.safe_load(spec)
@@ -157,4 +209,20 @@ class BaseSpec(object):
 
     @classmethod
     def _validate_expressions(cls, spec):
-        return None
+        evaluator = cls.get_expr_evaluator('yaql')
+
+        result = []
+        expr_schema_paths = cls.get_expr_schema_paths()
+
+        for expr_path, schema_path in six.iteritems(expr_schema_paths):
+            errors = evaluator.validate(
+                utils.get_dict_value(spec, expr_path) or ''
+            )
+
+            for error in errors:
+                error['spec_path'] = expr_path
+                error['schema_path'] = schema_path
+
+            result += errors
+
+        return result
