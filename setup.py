@@ -67,6 +67,10 @@ setup(
         'orchestra.evaluators': [
             'yaql = orchestra.expressions.default:YAQLEvaluator'
         ],
+        'orchestra.expressions.functions.yaql': [
+            'task = orchestra.expressions.yaql_functions:task_',
+            'json = orchestra.expressions.yaql_functions:json_'
+        ],
         'orchestra.tests': [
             'fake = orchestra.tests.unit.utils.test_plugin:FakePlugin'
         ]

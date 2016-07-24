@@ -20,6 +20,7 @@ import yaql.language.exceptions as yaql_exc
 
 from orchestra import exceptions as exc
 from orchestra.expressions import base
+from orchestra.expressions import yaql_functions
 
 
 LOG = logging.getLogger(__name__)
@@ -31,6 +32,7 @@ class YAQLEvaluator(base.Evaluator):
     _regex_parser = re.compile(_regex_pattern)
     _engine = yaql.language.factory.YaqlFactory().create()
     _root_ctx = yaql.create_context()
+    _custom_functions = yaql_functions.register_functions(_root_ctx)
 
     @classmethod
     def strip_delimiter(cls, expr):
@@ -57,7 +59,7 @@ class YAQLEvaluator(base.Evaluator):
         return errors
 
     @classmethod
-    def evaluate(cls, text, data):
+    def evaluate(cls, text, data=None):
         if not isinstance(text, six.string_types):
             raise ValueError('Text to be evaluated is not typeof string.')
 
@@ -95,6 +97,6 @@ class YAQLEvaluator(base.Evaluator):
                 )
             )
         except (yaql_exc.YaqlException, ValueError, TypeError) as e:
-            raise exc.YaqlEvaluationException(str(e.message))
+            raise exc.YaqlEvaluationException(str(getattr(e, 'message', e)))
 
         return output

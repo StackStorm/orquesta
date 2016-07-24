@@ -33,5 +33,5 @@ class Evaluator(object):
 
     @classmethod
     @abc.abstractmethod
-    def evaluate(cls, text, data):
+    def evaluate(cls, text, data=None):
         raise NotImplementedError()

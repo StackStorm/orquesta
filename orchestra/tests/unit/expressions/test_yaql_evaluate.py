@@ -24,10 +24,11 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
         super(YAQLEvaluationTest, cls).setUpClass()
 
     def test_get_evaluator(self):
-        self.assertEqual(
-            plugin.get_module('orchestra.evaluators', self.language),
-            default.YAQLEvaluator
-        )
+        e = plugin.get_module('orchestra.evaluators', self.language)
+
+        self.assertEqual(e, default.YAQLEvaluator)
+        self.assertIn('json', e._custom_functions)
+        self.assertIn('task', e._custom_functions)
 
     def test_basic_eval(self):
         expr = '<% $.foo %>'
@@ -141,3 +142,17 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
         }
 
         self.assertEqual('101 -> 201', self.evaluator.evaluate(expr, data))
+
+    def test_custom_function(self):
+        expr = '<% json(\'{"a": 123}\') %>'
+
+        self.assertDictEqual({'a': 123}, self.evaluator.evaluate(expr))
+
+    def test_custom_function_failure(self):
+        expr = '<% json(int(123)) %>'
+
+        self.assertRaises(
+            exc.YaqlEvaluationException,
+            self.evaluator.evaluate,
+            expr
+        )
