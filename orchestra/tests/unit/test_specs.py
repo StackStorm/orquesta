@@ -18,7 +18,7 @@ class WorkflowSpecTest(base.WorkflowConductorTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.composer_name = 'mistral'
+        cls.composer_name = 'direct'
         super(WorkflowSpecTest, cls).setUpClass()
 
     def test_exception_empty_definition(self):

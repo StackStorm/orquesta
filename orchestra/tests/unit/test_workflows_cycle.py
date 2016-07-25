@@ -10,24 +10,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra import states
 from orchestra.tests.unit import base
 
 
-class JoinWorkflowConductorTest(base.WorkflowConductorTest):
+class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.composer_name = 'mistral'
-        super(JoinWorkflowConductorTest, cls).setUpClass()
+        cls.composer_name = 'direct'
+        super(CyclicWorkflowConductorTest, cls).setUpClass()
 
-    def test_join(self):
-        wf_name = 'join'
+    def test_cycle(self):
+        wf_name = 'cycle'
 
         expected_wf_graph = {
             'directed': True,
             'graph': {},
             'nodes': [
+                {
+                    'id': 'prep'
+                },
                 {
                     'id': 'task1'
                 },
@@ -36,33 +38,22 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 },
                 {
                     'id': 'task3'
-                },
-                {
-                    'id': 'task4'
-                },
-                {
-                    'id': 'task5'
-                },
-                {
-                    'id': 'task6',
-                    'join': 'all'
-                },
-                {
-                    'id': 'task7'
                 }
             ],
             'adjacency': [
                 [
                     {
-                        'id': 'task2',
+                        'id': 'task1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task1',
+                            'prep',
                             'on-success'
                         )
-                    },
+                    }
+                ],
+                [
                     {
-                        'id': 'task4',
+                        'id': 'task2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
@@ -82,45 +73,15 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 ],
                 [
                     {
-                        'id': 'task6',
+                        'id': 'task1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task3',
-                            'on-success'
+                            'on-success',
+                            "$.count < 3"
                         )
                     }
-                ],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task4',
-                            'on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task6',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task5',
-                            'on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task7',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task6',
-                            'on-success'
-                        )
-                    }
-                ],
-                []
+                ]
             ],
             'multigraph': True
         }
@@ -132,254 +93,9 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'prep',
+                    'name': 'prep'
                 },
-                {
-                    'id': 'task2',
-                    'name': 'task2'
-                },
-                {
-                    'id': 'task3',
-                    'name': 'task3'
-                },
-                {
-                    'id': 'task4',
-                    'name': 'task4'
-                },
-                {
-                    'id': 'task5',
-                    'name': 'task5'
-                },
-                {
-                    'id': 'task6',
-                    'name': 'task6',
-                    'join': 'all'
-                },
-                {
-                    'id': 'task7',
-                    'name': 'task7'
-                }
-            ],
-            'adjacency': [
-                [
-                    {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task1',
-                            'on-success'
-                        )
-                    },
-                    {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task1',
-                            'on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task2',
-                            'on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task6',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task3',
-                            'on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task4',
-                            'on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task6',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task5',
-                            'on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task7',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task6',
-                            'on-success'
-                        )
-                    }
-                ],
-                []
-            ],
-            'multigraph': True
-        }
-
-        self._assert_compose(wf_name, expected_wf_ex_graph)
-
-        expected_task_seq = [
-            'task1',
-            'task2',
-            'task4',
-            'task3',
-            'task5',
-            'task6',
-            'task7'
-        ]
-
-        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
-
-    def test_join_count(self):
-        wf_name = 'join-count'
-
-        expected_wf_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                },
-                {
-                    'id': 'task4'
-                },
-                {
-                    'id': 'task5'
-                },
-                {
-                    'id': 'task6'
-                },
-                {
-                    'id': 'task7'
-                },
-                {
-                    'id': 'task8',
-                    'join': 2
-                }
-            ],
-            'adjacency': [
-                [
-                    {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task1',
-                            'on-success'
-                        )
-                    },
-                    {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task1',
-                            'on-success'
-                        )
-                    },
-                    {
-                        'id': 'task6',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task1',
-                            'on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task2',
-                            'on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task3',
-                            'on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task4',
-                            'on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task5',
-                            'on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task7',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task6',
-                            'on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task7',
-                            'on-success'
-                        )
-                    }
-                ],
-                []
-            ],
-            'multigraph': True
-        }
-
-        self._assert_wf_graph(wf_name, expected_wf_graph)
-
-        expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
                 {
                     'id': 'task1',
                     'name': 'task1'
@@ -391,49 +107,22 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': 'task3',
                     'name': 'task3'
-                },
-                {
-                    'id': 'task4',
-                    'name': 'task4'
-                },
-                {
-                    'id': 'task5',
-                    'name': 'task5'
-                },
-                {
-                    'id': 'task6',
-                    'name': 'task6'
-                },
-                {
-                    'id': 'task7',
-                    'name': 'task7'
-                },
-                {
-                    'id': 'task8',
-                    'name': 'task8',
-                    'join': 2
                 }
             ],
             'adjacency': [
                 [
                     {
+                        'id': 'task1',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'prep',
+                            'on-success'
+                        )
+                    }
+                ],
+                [
+                    {
                         'id': 'task2',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task1',
-                            'on-success'
-                        )
-                    },
-                    {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task1',
-                            'on-success'
-                        )
-                    },
-                    {
-                        'id': 'task6',
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
@@ -453,113 +142,310 @@ class JoinWorkflowConductorTest(base.WorkflowConductorTest):
                 ],
                 [
                     {
-                        'id': 'task8',
+                        'id': 'task1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task3',
-                            'on-success'
+                            'on-success',
+                            "$.count < 3"
                         )
                     }
-                ],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task4',
-                            'on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task5',
-                            'on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task7',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task6',
-                            'on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8',
-                        'key': 0,
-                        'criteria': self._get_seq_expr(
-                            'task7',
-                            'on-success'
-                        )
-                    }
-                ],
-                []
+                ]
             ],
             'multigraph': True
         }
 
         self._assert_compose(wf_name, expected_wf_ex_graph)
 
-        # Mock error at task6
         expected_task_seq = [
+            'prep',
             'task1',
             'task2',
-            'task4',
-            'task6',
             'task3',
-            'task5',
-            'task8'
+            'task1',
+            'task2',
+            'task3',
+            'task1',
+            'task2',
+            'task3'
         ]
 
-        mock_states = [
-            states.SUCCESS,     # task1
-            states.SUCCESS,     # task2
-            states.SUCCESS,     # task4
-            states.ERROR,       # task6
-            states.SUCCESS,     # task3
-            states.SUCCESS,     # task5
-            states.SUCCESS      # task8
+        mock_contexts = [
+            {'count': 0},   # prep
+            {'count': 0},   # task1
+            {'count': 0},   # task2
+            {'count': 1},   # task3
+            {'count': 1},   # task1
+            {'count': 1},   # task2
+            {'count': 2},   # task3
+            {'count': 2},   # task1
+            {'count': 2},   # task2
+            {'count': 3}    # task3
         ]
 
         self._assert_conduct(
             expected_wf_ex_graph,
             expected_task_seq,
-            mock_states=mock_states
+            mock_contexts=mock_contexts
         )
 
-        # Mock error at task7
+    def test_cycles(self):
+        wf_name = 'cycles'
+
+        expected_wf_graph = {
+            'directed': True,
+            'graph': {},
+            'nodes': [
+                {
+                    'id': 'prep'
+                },
+                {
+                    'id': 'task1'
+                },
+                {
+                    'id': 'task2'
+                },
+                {
+                    'id': 'task3'
+                },
+                {
+                    'id': 'task4'
+                },
+                {
+                    'id': 'task5'
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'id': 'task1',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'prep',
+                            'on-success'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': 'task2',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task1',
+                            'on-success'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': 'task3',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task2',
+                            'on-success',
+                            'not $.proceed'
+                        )
+                    },
+                    {
+                        'id': 'task5',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task2',
+                            'on-success',
+                            '$.proceed'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': 'task4',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task3',
+                            'on-success'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': 'task2',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task4',
+                            'on-success'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': 'task1',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task5',
+                            'on-success',
+                            "$.count < 3"
+                        )
+                    }
+                ]
+            ],
+            'multigraph': True
+        }
+
+        self._assert_wf_graph(wf_name, expected_wf_graph)
+
+        expected_wf_ex_graph = {
+            'directed': True,
+            'graph': {},
+            'nodes': [
+                {
+                    'id': 'prep',
+                    'name': 'prep'
+                },
+                {
+                    'id': 'task1',
+                    'name': 'task1'
+                },
+                {
+                    'id': 'task2',
+                    'name': 'task2'
+                },
+                {
+                    'id': 'task3',
+                    'name': 'task3'
+                },
+                {
+                    'id': 'task4',
+                    'name': 'task4'
+                },
+                {
+                    'id': 'task5',
+                    'name': 'task5'
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'id': 'task1',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'prep',
+                            'on-success'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': 'task2',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task1',
+                            'on-success'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': 'task3',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task2',
+                            'on-success',
+                            'not $.proceed'
+                        )
+                    },
+                    {
+                        'id': 'task5',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task2',
+                            'on-success',
+                            '$.proceed'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': 'task4',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task3',
+                            'on-success'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': 'task2',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task4',
+                            'on-success'
+                        )
+                    }
+                ],
+                [
+                    {
+                        'id': 'task1',
+                        'key': 0,
+                        'criteria': self._get_seq_expr(
+                            'task5',
+                            'on-success',
+                            "$.count < 3"
+                        )
+                    }
+                ]
+            ],
+            'multigraph': True
+        }
+
+        self._assert_compose(wf_name, expected_wf_ex_graph)
+
         expected_task_seq = [
+            'prep',
             'task1',
             'task2',
-            'task4',
-            'task6',
             'task3',
+            'task4',
+            'task2',
             'task5',
-            'task7',
-            'task8'
+            'task1',
+            'task2',
+            'task3',
+            'task4',
+            'task2',
+            'task5',
+            'task1',
+            'task2',
+            'task3',
+            'task4',
+            'task2',
+            'task5'
         ]
 
-        mock_states = [
-            states.SUCCESS,     # task1
-            states.SUCCESS,     # task2
-            states.SUCCESS,     # task4
-            states.SUCCESS,     # task6
-            states.SUCCESS,     # task3
-            states.SUCCESS,     # task5
-            states.ERROR,       # task7
-            states.SUCCESS      # task8
+        mock_contexts = [
+            {'count': 0},                       # prep
+            {'count': 0, 'proceed': False},     # task1
+            {'count': 0, 'proceed': False},     # task2
+            {'count': 0, 'proceed': False},     # task3
+            {'count': 0, 'proceed': True},      # task4
+            {'count': 0, 'proceed': True},      # task2
+            {'count': 1, 'proceed': True},      # task5
+            {'count': 1, 'proceed': False},     # task1
+            {'count': 1, 'proceed': False},     # task2
+            {'count': 1, 'proceed': False},     # task3
+            {'count': 1, 'proceed': True},      # task4
+            {'count': 1, 'proceed': True},      # task2
+            {'count': 2, 'proceed': True},      # task5
+            {'count': 2, 'proceed': False},     # task1
+            {'count': 2, 'proceed': False},     # task2
+            {'count': 2, 'proceed': False},     # task3
+            {'count': 2, 'proceed': True},      # task4
+            {'count': 2, 'proceed': True},      # task2
+            {'count': 3, 'proceed': True}       # task5
         ]
 
         self._assert_conduct(
             expected_wf_ex_graph,
             expected_task_seq,
-            mock_states=mock_states
+            mock_contexts=mock_contexts
         )

@@ -17,7 +17,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.composer_name = 'mistral'
+        cls.composer_name = 'direct'
         super(SplitWorkflowConductorTest, cls).setUpClass()
 
     def test_split(self):

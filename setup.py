@@ -62,7 +62,7 @@ setup(
     ],
     entry_points={
         'orchestra.composers': [
-            'mistral = orchestra.composers.openstack:MistralWorkflowComposer'
+            'direct = orchestra.composers.direct:DirectWorkflowComposer'
         ],
         'orchestra.expressions.evaluators': [
             'yaql = orchestra.expressions.default:YAQLEvaluator'

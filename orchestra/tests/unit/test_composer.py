@@ -10,22 +10,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra.composers import openstack
+from orchestra.composers import direct
 from orchestra.utils import plugin
 from orchestra.tests.unit import base
 
 
-class WorkflowComposerTest(base.WorkflowConductorTest):
+class DirectWorkflowComposerTest(base.WorkflowConductorTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.composer_name = 'mistral'
-        super(WorkflowComposerTest, cls).setUpClass()
+        cls.composer_name = 'direct'
+        super(DirectWorkflowComposerTest, cls).setUpClass()
 
     def test_get_composer(self):
         self.assertEqual(
             plugin.get_module('orchestra.composers', self.composer_name),
-            openstack.MistralWorkflowComposer
+            direct.DirectWorkflowComposer
         )
 
     def test_exception_empty_definition(self):

@@ -23,7 +23,7 @@ from orchestra.expressions import base as expressions
 LOG = logging.getLogger(__name__)
 
 
-class MistralWorkflowComposer(base.WorkflowComposer):
+class DirectWorkflowComposer(base.WorkflowComposer):
     _yaql_evaluator = expressions.get_evaluator('yaql')
 
     @classmethod

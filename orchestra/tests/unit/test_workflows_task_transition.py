@@ -18,7 +18,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.composer_name = 'mistral'
+        cls.composer_name = 'direct'
         super(BasicWorkflowConductorTest, cls).setUpClass()
 
     def test_on_error(self):

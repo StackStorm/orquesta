@@ -14,8 +14,14 @@ import abc
 import logging
 import six
 
+from orchestra.utils import plugin
+
 
 LOG = logging.getLogger(__name__)
+
+
+def get_composer(workflow_type):
+    return plugin.get_module('orchestra.composers', workflow_type)
 
 
 @six.add_metaclass(abc.ABCMeta)
