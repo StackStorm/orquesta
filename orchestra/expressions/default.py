@@ -70,6 +70,7 @@ class YAQLEvaluator(base.Evaluator):
         exprs = cls._regex_parser.findall(text)
         ctx = cls._root_ctx.create_child_context()
         ctx['$'] = data or {}
+        ctx['__tasks'] = ctx['$'].get('__tasks')
 
         try:
             for expr in exprs:

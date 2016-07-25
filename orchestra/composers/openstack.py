@@ -17,16 +17,17 @@ from orchestra.composers import base
 from orchestra import composition
 from orchestra import specs
 from orchestra import states
-from orchestra.utils import expression
+from orchestra.expressions import base as expressions
 
 
 LOG = logging.getLogger(__name__)
 
 
 class MistralWorkflowComposer(base.WorkflowComposer):
+    _yaql_evaluator = expressions.get_evaluator('yaql')
 
-    @staticmethod
-    def _compose_sequence_criteria(task_name, condition, expr=None):
+    @classmethod
+    def _compose_sequence_criteria(cls, task_name, condition, expr=None):
         yaql_expr = (
             'task(%s).get(state, "%s") in %s' % (
                 task_name,
@@ -36,9 +37,10 @@ class MistralWorkflowComposer(base.WorkflowComposer):
         )
 
         if expr:
-            yaql_expr += ' and (%s)' % expression.strip_delimiter(expr)
+            stripped_expr = cls._yaql_evaluator.strip_delimiter(expr)
+            yaql_expr += ' and (%s)' % stripped_expr
 
-        return yaql_expr
+        return '<% ' + yaql_expr + ' %>'
 
     @classmethod
     def _compose_wf_graph(cls, wf_spec):

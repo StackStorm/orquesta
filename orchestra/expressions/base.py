@@ -14,8 +14,14 @@ import abc
 import logging
 import six
 
+from orchestra.utils import plugin
+
 
 LOG = logging.getLogger(__name__)
+
+
+def get_evaluator(language):
+    return plugin.get_module('orchestra.evaluators', language)
 
 
 @six.add_metaclass(abc.ABCMeta)

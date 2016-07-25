@@ -13,7 +13,7 @@
 import logging
 
 from orchestra import composition
-from orchestra.utils import expression
+from orchestra.expressions import base as expressions
 
 
 LOG = logging.getLogger(__name__)
@@ -29,6 +29,7 @@ class WorkflowConductor(object):
             raise ValueError('Invalid type for workflow execution graph.')
 
         self.wf_ex_graph = wf_ex_graph
+        self.expr_evaluator = expressions.get_evaluator('yaql')
 
     def start_workflow(self):
         return self.wf_ex_graph.get_start_tasks()
@@ -48,7 +49,7 @@ class WorkflowConductor(object):
 
         outbounds = [
             seq for seq in self.wf_ex_graph.get_next_sequences(task['id'])
-            if expression.evaluate(seq[3]['criteria'], context)
+            if self.expr_evaluator.evaluate(seq[3]['criteria'], context)
         ]
 
         for seq in outbounds:
