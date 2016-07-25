@@ -161,6 +161,6 @@ class ExpressionEvaluatorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.evaluator = plugin.get_module(
-            'orchestra.evaluators',
+            'orchestra.expressions.evaluators',
             cls.language
         )

@@ -47,7 +47,7 @@ class BaseSpec(object):
     _expressions = []
 
     _expr_evaluator = {
-        'yaql': plugin.get_module('orchestra.evaluators', 'yaql')
+        'yaql': plugin.get_module('orchestra.expressions.evaluators', 'yaql')
     }
 
     @classmethod

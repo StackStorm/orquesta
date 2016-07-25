@@ -64,7 +64,7 @@ setup(
         'orchestra.composers': [
             'mistral = orchestra.composers.openstack:MistralWorkflowComposer'
         ],
-        'orchestra.evaluators': [
+        'orchestra.expressions.evaluators': [
             'yaql = orchestra.expressions.default:YAQLEvaluator'
         ],
         'orchestra.expressions.functions.yaql': [

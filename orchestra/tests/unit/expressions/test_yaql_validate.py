@@ -24,7 +24,10 @@ class YAQLValidationTest(base.ExpressionEvaluatorTest):
 
     def test_get_evaluator(self):
         self.assertEqual(
-            plugin.get_module('orchestra.evaluators', self.language),
+            plugin.get_module(
+                'orchestra.expressions.evaluators',
+                self.language
+            ),
             default.YAQLEvaluator
         )
 

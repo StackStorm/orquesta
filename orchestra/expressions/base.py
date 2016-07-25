@@ -21,7 +21,7 @@ LOG = logging.getLogger(__name__)
 
 
 def get_evaluator(language):
-    return plugin.get_module('orchestra.evaluators', language)
+    return plugin.get_module('orchestra.expressions.evaluators', language)
 
 
 @six.add_metaclass(abc.ABCMeta)

@@ -24,7 +24,10 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
         super(YAQLEvaluationTest, cls).setUpClass()
 
     def test_get_evaluator(self):
-        e = plugin.get_module('orchestra.evaluators', self.language)
+        e = plugin.get_module(
+            'orchestra.expressions.evaluators',
+            self.language
+        )
 
         self.assertEqual(e, default.YAQLEvaluator)
         self.assertIn('json', e._custom_functions)
