@@ -10,26 +10,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra import specs
+from orchestra.specs import v2 as specs
 from orchestra.tests.unit import base
 
 
-class WorkflowSpecTest(base.WorkflowConductorTest):
+class DirectWorkflowSpecTest(base.WorkflowConductorTest):
 
     @classmethod
     def setUpClass(cls):
         cls.composer_name = 'direct'
-        super(WorkflowSpecTest, cls).setUpClass()
+        super(DirectWorkflowSpecTest, cls).setUpClass()
 
     def test_exception_empty_definition(self):
-        self.assertRaises(ValueError, specs.WorkflowSpec, {})
-        self.assertRaises(ValueError, specs.WorkflowSpec, '')
-        self.assertRaises(ValueError, specs.WorkflowSpec, None)
+        self.assertRaises(ValueError, specs.DirectWorkflowSpec, {})
+        self.assertRaises(ValueError, specs.DirectWorkflowSpec, '')
+        self.assertRaises(ValueError, specs.DirectWorkflowSpec, None)
 
     def test_get_next_tasks(self):
         wf_name = 'split'
         wf_def = self._get_wf_def(wf_name)
-        wf_spec = specs.WorkflowSpec(wf_def)
+        wf_spec = specs.DirectWorkflowSpec(wf_def)
 
         self.assertListEqual(
             wf_spec.get_next_tasks('task1'),
@@ -69,7 +69,7 @@ class WorkflowSpecTest(base.WorkflowConductorTest):
     def test_get_prev_tasks(self):
         wf_name = 'split'
         wf_def = self._get_wf_def(wf_name)
-        wf_spec = specs.WorkflowSpec(wf_def)
+        wf_spec = specs.DirectWorkflowSpec(wf_def)
 
         self.assertListEqual(
             wf_spec.get_prev_tasks('task1'),
@@ -109,7 +109,7 @@ class WorkflowSpecTest(base.WorkflowConductorTest):
     def test_get_start_tasks(self):
         wf_name = 'split'
         wf_def = self._get_wf_def(wf_name)
-        wf_spec = specs.WorkflowSpec(wf_def)
+        wf_spec = specs.DirectWorkflowSpec(wf_def)
 
         self.assertListEqual(
             wf_spec.get_start_tasks(),
@@ -119,7 +119,7 @@ class WorkflowSpecTest(base.WorkflowConductorTest):
     def test_is_join_task(self):
         wf_name = 'split'
         wf_def = self._get_wf_def(wf_name)
-        wf_spec = specs.WorkflowSpec(wf_def)
+        wf_spec = specs.DirectWorkflowSpec(wf_def)
 
         self.assertFalse(wf_spec.is_join_task('task4'))
         self.assertTrue(wf_spec.is_join_task('task7'))
@@ -127,21 +127,28 @@ class WorkflowSpecTest(base.WorkflowConductorTest):
     def test_is_split_task(self):
         wf_name = 'split'
         wf_def = self._get_wf_def(wf_name)
-        wf_spec = specs.WorkflowSpec(wf_def)
+        wf_spec = specs.DirectWorkflowSpec(wf_def)
 
         self.assertTrue(wf_spec.is_split_task('task4'))
         self.assertFalse(wf_spec.is_split_task('task7'))
 
+    def test_has_cycles(self):
+        wf_name = 'cycle'
+        wf_def = self._get_wf_def(wf_name)
+        wf_spec = specs.DirectWorkflowSpec(wf_def)
+
+        self.assertTrue(wf_spec.has_cycles())
+
     def test_in_cycle(self):
         wf_name = 'cycle'
         wf_def = self._get_wf_def(wf_name)
-        wf_spec = specs.WorkflowSpec(wf_def)
+        wf_spec = specs.DirectWorkflowSpec(wf_def)
 
         self.assertTrue(wf_spec.in_cycle('task1'))
 
     def test_not_in_cycle(self):
         wf_name = 'split'
         wf_def = self._get_wf_def(wf_name)
-        wf_spec = specs.WorkflowSpec(wf_def)
+        wf_spec = specs.DirectWorkflowSpec(wf_def)
 
         self.assertFalse(wf_spec.in_cycle('task4'))

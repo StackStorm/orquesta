@@ -17,10 +17,10 @@ from six.moves import queue
 import unittest
 
 from orchestra import composition
-from orchestra import specs
 from orchestra import states
 from orchestra import symphony
 from orchestra.utils import plugin
+from orchestra.specs import v2 as specs
 from orchestra.tests.fixtures import loader
 
 
@@ -59,6 +59,13 @@ class WorkflowConductorTest(WorkflowGraphTest):
             cls.composer_name
         )
 
+        wf_spec_classes = {
+            'direct': specs.DirectWorkflowSpec,
+            'reverse': specs.ReverseWorkflowSpec
+        }
+
+        cls.wf_spec_cls = wf_spec_classes[cls.composer_name]
+
     def _get_fixture_path(self, wf_name):
         return self.composer_name + '/' + wf_name + '.yaml'
 
@@ -68,19 +75,15 @@ class WorkflowConductorTest(WorkflowGraphTest):
             'workflows'
         )
 
-    def _get_seq_expr(self, name, condition, expr=None):
-        return self.composer._compose_sequence_criteria(
-            name,
-            condition,
-            expr=expr
-        )
+    def _get_seq_expr(self, name, *args, **kwargs):
+        return self.composer._compose_sequence_criteria(name, *args, **kwargs)
 
     def _compose_wf_graph(self, wf_name):
-        wf_spec = specs.WorkflowSpec(self._get_wf_def(wf_name))
+        wf_spec = self.wf_spec_cls(self._get_wf_def(wf_name))
         return self.composer._compose_wf_graph(wf_spec)
 
     def _assert_wf_graph(self, wf_name, expected_wf_graph):
-        wf_spec = specs.WorkflowSpec(self._get_wf_def(wf_name))
+        wf_spec = self.wf_spec_cls(self._get_wf_def(wf_name))
         wf_graph = self.composer._compose_wf_graph(wf_spec)
 
         self._assert_graph_equal(wf_graph, expected_wf_graph)

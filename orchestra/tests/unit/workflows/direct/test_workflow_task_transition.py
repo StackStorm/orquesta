@@ -45,7 +45,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-success'
+                            condition='on-success'
                         )
                     },
                     {
@@ -53,7 +53,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-error'
+                            condition='on-error'
                         )
                     }
                 ],
@@ -89,7 +89,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-success'
+                            condition='on-success'
                         )
                     },
                     {
@@ -97,7 +97,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-error'
+                            condition='on-error'
                         )
                     }
                 ],
@@ -170,7 +170,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-success'
+                            condition='on-success'
                         )
                     },
                     {
@@ -178,7 +178,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-error'
+                            condition='on-error'
                         )
                     },
                     {
@@ -186,7 +186,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-complete'
+                            condition='on-complete'
                         )
                     }
                 ],
@@ -227,7 +227,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-success'
+                            condition='on-success'
                         )
                     },
                     {
@@ -235,7 +235,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-error'
+                            condition='on-error'
                         )
                     },
                     {
@@ -243,7 +243,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-complete'
+                            condition='on-complete'
                         )
                     }
                 ],
@@ -316,7 +316,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-complete'
+                            condition='on-complete'
                         )
                     },
                     {
@@ -324,7 +324,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 1,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-error'
+                            condition='on-error'
                         )
                     },
                     {
@@ -332,7 +332,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 2,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-success'
+                            condition='on-success'
                         )
                     }
                 ],
@@ -374,7 +374,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-complete'
+                            condition='on-complete'
                         )
                     },
                     {
@@ -382,7 +382,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-error'
+                            condition='on-error'
                         )
                     },
                     {
@@ -390,7 +390,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-success'
+                            condition='on-success'
                         )
                     }
                 ],

@@ -23,26 +23,19 @@ from orchestra.expressions import base as expressions
 LOG = logging.getLogger(__name__)
 
 
-class DirectWorkflowComposer(base.WorkflowComposer):
-    wf_spec_cls = specs.DirectWorkflowSpec
+class ReverseWorkflowComposer(base.WorkflowComposer):
+    wf_spec_cls = specs.ReverseWorkflowSpec
     expr_evaluator = expressions.get_evaluator('yaql')
 
     @classmethod
     def _compose_sequence_criteria(cls, task_name, *args, **kwargs):
-        condition = kwargs.get('condition')
-        expr = kwargs.get('expr')
-
         yaql_expr = (
-            'task(%s).get(state, "%s") in %s' % (
+            'task(%s).get(state, "%s") = %s' % (
                 task_name,
                 states.UNKNOWN,
-                str(states.TASK_TRANSITION_MAP[condition])
+                str(states.SUCCESS)
             )
         )
-
-        if expr:
-            stripped_expr = cls.expr_evaluator.strip_delimiter(expr)
-            yaql_expr += ' and (%s)' % stripped_expr
 
         return '<% ' + yaql_expr + ' %>'
 
@@ -53,43 +46,30 @@ class DirectWorkflowComposer(base.WorkflowComposer):
                 'Workflow spec is not typeof %s.' % cls.wf_spec_cls.__name__
             )
 
+        if wf_spec.has_cycles():
+            raise Exception('Cycle detected in reverse workflow.')
+
         q = queue.Queue()
         wf_graph = composition.WorkflowGraph()
 
         for task_name in wf_spec.get_start_tasks():
-            q.put((task_name, []))
+            q.put(task_name)
 
         while not q.empty():
-            task_name, splits = q.get()
+            task_name = q.get()
 
             wf_graph.add_task(task_name)
 
             if wf_spec.is_join_task(task_name):
-                task_spec = wf_spec.get_task(task_name)
-                wf_graph.update_task(task_name, join=task_spec['join'])
-
-            # Determine if the task is a split task and if it is in a cycle.
-            # If the task is a split task, keep track of where the split(s)
-            # occurs.
-            if (wf_spec.is_split_task(task_name) and
-                    not wf_spec.in_cycle(task_name)):
-                splits.append(task_name)
-
-            if splits:
-                wf_graph.update_task(task_name, splits=splits)
+                wf_graph.update_task(task_name, join='all')
 
             next_tasks = wf_spec.get_next_tasks(task_name)
 
             for next_task_name, expr, condition in next_tasks:
-                if (not wf_graph.has_task(next_task_name) or
-                        not wf_spec.in_cycle(next_task_name)):
-                    q.put((next_task_name, list(splits)))
+                if not wf_graph.has_task(next_task_name):
+                    q.put(next_task_name)
 
-                criteria = cls._compose_sequence_criteria(
-                    task_name,
-                    condition=condition,
-                    expr=expr
-                )
+                criteria = cls._compose_sequence_criteria(task_name)
 
                 seqs = wf_graph.has_sequence(
                     task_name,

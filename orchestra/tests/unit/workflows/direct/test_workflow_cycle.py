@@ -47,7 +47,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'prep',
-                            'on-success'
+                            condition='on-success'
                         )
                     }
                 ],
@@ -57,7 +57,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-success'
+                            condition='on-success'
                         )
                     }
                 ],
@@ -67,7 +67,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
-                            'on-success'
+                            condition='on-success'
                         )
                     }
                 ],
@@ -77,8 +77,8 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task3',
-                            'on-success',
-                            "$.count < 3"
+                            condition='on-success',
+                            expr="$.count < 3"
                         )
                     }
                 ]
@@ -116,7 +116,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'prep',
-                            'on-success'
+                            condition='on-success'
                         )
                     }
                 ],
@@ -126,7 +126,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-success'
+                            condition='on-success'
                         )
                     }
                 ],
@@ -136,7 +136,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
-                            'on-success'
+                            condition='on-success'
                         )
                     }
                 ],
@@ -146,8 +146,8 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task3',
-                            'on-success',
-                            "$.count < 3"
+                            condition='on-success',
+                            expr="$.count < 3"
                         )
                     }
                 ]
@@ -222,7 +222,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'prep',
-                            'on-success'
+                            condition='on-success'
                         )
                     }
                 ],
@@ -232,7 +232,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-success'
+                            condition='on-success'
                         )
                     }
                 ],
@@ -242,8 +242,8 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
-                            'on-success',
-                            'not $.proceed'
+                            condition='on-success',
+                            expr='not $.proceed'
                         )
                     },
                     {
@@ -251,8 +251,8 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
-                            'on-success',
-                            '$.proceed'
+                            condition='on-success',
+                            expr='$.proceed'
                         )
                     }
                 ],
@@ -262,7 +262,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task3',
-                            'on-success'
+                            condition='on-success'
                         )
                     }
                 ],
@@ -272,7 +272,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task4',
-                            'on-success'
+                            condition='on-success'
                         )
                     }
                 ],
@@ -282,8 +282,8 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task5',
-                            'on-success',
-                            "$.count < 3"
+                            condition='on-success',
+                            expr="$.count < 3"
                         )
                     }
                 ]
@@ -329,7 +329,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'prep',
-                            'on-success'
+                            condition='on-success'
                         )
                     }
                 ],
@@ -339,7 +339,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task1',
-                            'on-success'
+                            condition='on-success'
                         )
                     }
                 ],
@@ -349,8 +349,8 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
-                            'on-success',
-                            'not $.proceed'
+                            condition='on-success',
+                            expr='not $.proceed'
                         )
                     },
                     {
@@ -358,8 +358,8 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task2',
-                            'on-success',
-                            '$.proceed'
+                            condition='on-success',
+                            expr='$.proceed'
                         )
                     }
                 ],
@@ -369,7 +369,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task3',
-                            'on-success'
+                            condition='on-success'
                         )
                     }
                 ],
@@ -379,7 +379,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task4',
-                            'on-success'
+                            condition='on-success'
                         )
                     }
                 ],
@@ -389,8 +389,8 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                         'key': 0,
                         'criteria': self._get_seq_expr(
                             'task5',
-                            'on-success',
-                            "$.count < 3"
+                            condition='on-success',
+                            expr="$.count < 3"
                         )
                     }
                 ]
