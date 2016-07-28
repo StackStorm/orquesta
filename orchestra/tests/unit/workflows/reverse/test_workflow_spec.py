@@ -76,6 +76,13 @@ class ReverseWorkflowSpecTest(base.WorkflowConductorTest):
             ['task1']
         )
 
+    def test_not_in_cycle(self):
+        wf_name = 'sequential'
+        wf_def = self._get_wf_def(wf_name)
+        wf_spec = specs.ReverseWorkflowSpec(wf_def)
+
+        self.assertFalse(wf_spec.in_cycle('task1'))
+
     def test_has_cycles(self):
         wf_name = 'cycle'
         wf_def = self._get_wf_def(wf_name)
