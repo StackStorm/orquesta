@@ -112,10 +112,16 @@ class WorkflowComposer(object):
                 wf_ex_graph.add_task(task_ex_name, **task_ex_attrs)
 
                 for next_seq in wf_graph.get_next_sequences(task_name):
+                    next_seq_criteria = next_seq[3]['criteria']
+                    next_seq_criteria = next_seq_criteria.replace(
+                        'task_state(%s)' % task_name,
+                        'task_state(%s)' % task_ex_name
+                    )
+
                     item = (
                         next_seq[1],
                         task_ex_name,
-                        next_seq[3]['criteria'],
+                        next_seq_criteria,
                         list(splits)
                     )
 
@@ -139,14 +145,23 @@ class WorkflowComposer(object):
                 prev_task = wf_graph.get_task(prev_seq[0])
 
                 split_id = 0
+
                 for prev_task_split in prev_task.get('splits', []):
                     matches = [s for s in splits if s[0] == prev_task_split]
                     split_id = matches[0][1] if matches else split_id
 
+                p_task_name = prev_seq[0]
+                p_task_ex_name = _create_task_ex_name(p_task_name, split_id)
+                p_seq_criteria = prev_seq[3]['criteria']
+                p_seq_criteria = p_seq_criteria.replace(
+                    'task_state(%s)' % p_task_name,
+                    'task_state(%s)' % p_task_ex_name
+                )
+
                 wf_ex_graph.add_sequence(
-                    _create_task_ex_name(prev_seq[0], split_id),
+                    p_task_ex_name,
                     task_ex_name,
-                    criteria=prev_seq[3]['criteria']
+                    criteria=p_seq_criteria
                 )
 
         return wf_ex_graph

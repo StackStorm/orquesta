@@ -33,9 +33,8 @@ class DirectWorkflowComposer(base.WorkflowComposer):
         expr = kwargs.get('expr')
 
         yaql_expr = (
-            'task(%s).get(state, "%s") in %s' % (
+            'task_state(%s) in %s' % (
                 task_name,
-                states.UNKNOWN,
                 str(states.TASK_TRANSITION_MAP[condition])
             )
         )

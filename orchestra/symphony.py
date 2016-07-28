@@ -14,6 +14,7 @@ import logging
 
 from orchestra import composition
 from orchestra.expressions import base as expressions
+from orchestra import utils
 
 
 LOG = logging.getLogger(__name__)
@@ -37,13 +38,11 @@ class WorkflowConductor(object):
     def on_task_complete(self, task, context=None):
         self.wf_ex_graph.update_task(task['id'], state=task['state'])
 
-        if not context:
-            context = {'__tasks': {}}
-
-        if '__tasks' not in context:
-            context['__tasks'] = {}
-
-        context['__tasks'][task['name']] = task
+        context = utils.merge_dicts(
+            context or {},
+            {'__task_states': self.wf_ex_graph.get_task_attributes('state')},
+            overwrite=True
+        )
 
         tasks = []
 

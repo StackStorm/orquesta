@@ -231,7 +231,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task4',
+                            'task4__1',
                             condition='on-success'
                         )
                     },
@@ -239,7 +239,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task6__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task4',
+                            'task4__1',
                             condition='on-success'
                         )
                     },
@@ -249,7 +249,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task5',
+                            'task5__1',
                             condition='on-success'
                         )
                     }
@@ -260,7 +260,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task6',
+                            'task6__1',
                             condition='on-success'
                         )
                     }
@@ -280,7 +280,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task4',
+                            'task4__2',
                             condition='on-success'
                         )
                     },
@@ -288,7 +288,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task6__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task4',
+                            'task4__2',
                             condition='on-success'
                         )
                     },
@@ -298,7 +298,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task5',
+                            'task5__2',
                             condition='on-success'
                         )
                     }
@@ -309,7 +309,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task6',
+                            'task6__2',
                             condition='on-success'
                         )
                     }
@@ -592,7 +592,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task4',
+                            'task4__1',
                             condition='on-success'
                         )
                     },
@@ -600,7 +600,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task6__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task4',
+                            'task4__1',
                             condition='on-success'
                         )
                     },
@@ -610,7 +610,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task5',
+                            'task5__1',
                             condition='on-success'
                         )
                     }
@@ -620,7 +620,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task7',
+                            'task7__1',
                             condition='on-success'
                         )
                     }
@@ -631,7 +631,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task6',
+                            'task6__1',
                             condition='on-success'
                         )
                     }
@@ -651,7 +651,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task4',
+                            'task4__2',
                             condition='on-success'
                         )
                     },
@@ -659,7 +659,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task6__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task4',
+                            'task4__2',
                             condition='on-success'
                         )
                     },
@@ -669,7 +669,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task5',
+                            'task5__2',
                             condition='on-success'
                         )
                     }
@@ -679,7 +679,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8__3',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task7',
+                            'task7__2',
                             condition='on-success'
                         )
                     }
@@ -690,7 +690,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task6',
+                            'task6__2',
                             condition='on-success'
                         )
                     }
@@ -1054,7 +1054,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task4',
+                            'task4__1',
                             condition='on-success'
                         )
                     },
@@ -1062,7 +1062,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task6__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task4',
+                            'task4__1',
                             condition='on-success'
                         )
                     },
@@ -1072,7 +1072,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task5',
+                            'task5__1',
                             condition='on-success'
                         )
                     }
@@ -1082,7 +1082,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task7',
+                            'task7__1',
                             condition='on-success'
                         )
                     },
@@ -1090,7 +1090,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task9__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task7',
+                            'task7__1',
                             condition='on-success'
                         )
                     }
@@ -1100,7 +1100,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task8',
+                            'task8__1',
                             condition='on-success'
                         )
                     }
@@ -1111,7 +1111,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task9',
+                            'task9__1',
                             condition='on-success'
                         )
                     }
@@ -1121,7 +1121,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task6',
+                            'task6__1',
                             condition='on-success'
                         )
                     }
@@ -1131,7 +1131,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task7',
+                            'task7__2',
                             condition='on-success'
                         )
                     },
@@ -1139,7 +1139,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task9__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task7',
+                            'task7__2',
                             condition='on-success'
                         )
                     }
@@ -1149,7 +1149,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task8',
+                            'task8__2',
                             condition='on-success'
                         )
                     }
@@ -1160,7 +1160,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task9',
+                            'task9__2',
                             condition='on-success'
                         )
                     }
@@ -1180,7 +1180,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task4',
+                            'task4__2',
                             condition='on-success'
                         )
                     },
@@ -1188,7 +1188,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task6__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task4',
+                            'task4__2',
                             condition='on-success'
                         )
                     },
@@ -1198,7 +1198,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__3',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task5',
+                            'task5__2',
                             condition='on-success'
                         )
                     }
@@ -1208,7 +1208,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8__3',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task7',
+                            'task7__3',
                             condition='on-success'
                         )
                     },
@@ -1216,7 +1216,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task9__3',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task7',
+                            'task7__3',
                             condition='on-success'
                         )
                     }
@@ -1226,7 +1226,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10__3',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task8',
+                            'task8__3',
                             condition='on-success'
                         )
                     }
@@ -1237,7 +1237,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10__3',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task9',
+                            'task9__3',
                             condition='on-success'
                         )
                     }
@@ -1247,7 +1247,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__4',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task6',
+                            'task6__2',
                             condition='on-success'
                         )
                     }
@@ -1257,7 +1257,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8__4',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task7',
+                            'task7__4',
                             condition='on-success'
                         )
                     },
@@ -1265,7 +1265,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task9__4',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task7',
+                            'task7__4',
                             condition='on-success'
                         )
                     }
@@ -1275,7 +1275,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10__4',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task8',
+                            'task8__4',
                             condition='on-success'
                         )
                     }
@@ -1286,7 +1286,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task10__4',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task9',
+                            'task9__4',
                             condition='on-success'
                         )
                     }
@@ -1589,7 +1589,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task4',
+                            'task4__1',
                             condition='on-success'
                         )
                     },
@@ -1597,7 +1597,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task6__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task4',
+                            'task4__1',
                             condition='on-success'
                         )
                     },
@@ -1607,7 +1607,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task5',
+                            'task5__1',
                             condition='on-success'
                         )
                     }
@@ -1617,7 +1617,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task7',
+                            'task7__1',
                             condition='on-success'
                         )
                     }
@@ -1628,7 +1628,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__1',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task6',
+                            'task6__1',
                             condition='on-success'
                         )
                     }
@@ -1648,7 +1648,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task5__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task4',
+                            'task4__2',
                             condition='on-success'
                         )
                     },
@@ -1656,7 +1656,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task6__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task4',
+                            'task4__2',
                             condition='on-success'
                         )
                     },
@@ -1666,7 +1666,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task5',
+                            'task5__2',
                             condition='on-success'
                         )
                     }
@@ -1676,7 +1676,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task8__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task7',
+                            'task7__2',
                             condition='on-success'
                         )
                     }
@@ -1687,7 +1687,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                         'id': 'task7__2',
                         'key': 0,
                         'criteria': self._get_seq_expr(
-                            'task6',
+                            'task6__2',
                             condition='on-success'
                         )
                     }

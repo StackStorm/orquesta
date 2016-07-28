@@ -30,9 +30,8 @@ class ReverseWorkflowComposer(base.WorkflowComposer):
     @classmethod
     def _compose_sequence_criteria(cls, task_name, *args, **kwargs):
         yaql_expr = (
-            'task(%s).get(state, "%s") = %s' % (
+            'task_state(%s) = %s' % (
                 task_name,
-                states.UNKNOWN,
                 str(states.SUCCESS)
             )
         )

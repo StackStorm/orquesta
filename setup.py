@@ -69,7 +69,7 @@ setup(
             'yaql = orchestra.expressions.default:YAQLEvaluator'
         ],
         'orchestra.expressions.functions.yaql': [
-            'task = orchestra.expressions.yaql_functions:task_',
+            'task_state = orchestra.expressions.yaql_functions:task_state_',
             'json = orchestra.expressions.yaql_functions:json_'
         ],
         'orchestra.tests': [

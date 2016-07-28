@@ -15,6 +15,8 @@ import six
 
 from stevedore import extension
 
+from orchestra import states
+
 
 def register_functions(ctx):
     mgr = extension.ExtensionManager(
@@ -45,5 +47,7 @@ def json_(s):
     return json.loads(s)
 
 
-def task_(context, task_name):
-    return context['__tasks'][task_name]
+def task_state_(context, task_name):
+    task_states = context['__task_states'] or {}
+
+    return task_states.get(task_name, states.UNKNOWN)

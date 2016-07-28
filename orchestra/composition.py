@@ -55,6 +55,9 @@ class WorkflowGraph(object):
 
         return copy.deepcopy(self._graph.node[task])
 
+    def get_task_attributes(self, attribute):
+        return nx.get_node_attributes(self._graph, attribute)
+
     def add_task(self, task, **kwargs):
         if not self.has_task(task):
             self._graph.add_node(task, **kwargs)
@@ -90,6 +93,9 @@ class WorkflowGraph(object):
             raise Exception('More than one task sequences found.')
 
         return seqs[0]
+
+    def get_sequence_attributes(self, attribute):
+        return nx.get_edge_attributes(self._graph, attribute)
 
     def add_sequence(self, source, destination, criteria=None):
         if not self.has_task(source):
