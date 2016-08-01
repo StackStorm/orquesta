@@ -13,15 +13,10 @@
 from orchestra.tests.unit import base
 
 
-class BasicWorkflowConductorTest(base.WorkflowConductorTest):
+class TaskTransitionWorkflowComposerTest(base.DirectWorkflowComposerTest):
 
-    @classmethod
-    def setUpClass(cls):
-        cls.composer_name = 'reverse'
-        super(BasicWorkflowConductorTest, cls).setUpClass()
-
-    def test_sequential(self):
-        wf_name = 'sequential'
+    def test_on_error(self):
+        wf_name = 'task-on-error'
 
         expected_wf_graph = {
             'directed': True,
@@ -42,22 +37,27 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task1')
-                    }
-                ],
-                [
+                        'criteria': self.compose_seq_expr(
+                            'task1',
+                            condition='on-success'
+                        )
+                    },
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task2')
+                        'criteria': self.compose_seq_expr(
+                            'task1',
+                            condition='on-error'
+                        )
                     }
                 ],
+                [],
                 []
             ],
             'multigraph': True
         }
 
-        self._assert_wf_graph(wf_name, expected_wf_graph)
+        self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
             'directed': True,
@@ -81,33 +81,30 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task1')
-                    }
-                ],
-                [
+                        'criteria': self.compose_seq_expr(
+                            'task1',
+                            condition='on-success'
+                        )
+                    },
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task2')
+                        'criteria': self.compose_seq_expr(
+                            'task1',
+                            condition='on-error'
+                        )
                     }
                 ],
+                [],
                 []
             ],
             'multigraph': True
         }
 
-        self._assert_compose(wf_name, expected_wf_ex_graph)
+        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
 
-        expected_task_seq = [
-            'task1',
-            'task2',
-            'task3'
-        ]
-
-        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
-
-    def test_parallel(self):
-        wf_name = 'parallel'
+    def test_on_complete(self):
+        wf_name = 'task-on-complete'
 
         expected_wf_graph = {
             'directed': True,
@@ -124,12 +121,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 },
                 {
                     'id': 'task4'
-                },
-                {
-                    'id': 'task5'
-                },
-                {
-                    'id': 'task6'
                 }
             ],
             'adjacency': [
@@ -137,37 +128,36 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task1')
-                    }
-                ],
-                [
+                        'criteria': self.compose_seq_expr(
+                            'task1',
+                            condition='on-success'
+                        )
+                    },
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task2')
+                        'criteria': self.compose_seq_expr(
+                            'task1',
+                            condition='on-error'
+                        )
+                    },
+                    {
+                        'id': 'task4',
+                        'key': 0,
+                        'criteria': self.compose_seq_expr(
+                            'task1',
+                            condition='on-complete'
+                        )
                     }
                 ],
                 [],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'criteria': self._get_seq_expr('task4')
-                    }
-                ],
-                [
-                    {
-                        'id': 'task6',
-                        'key': 0,
-                        'criteria': self._get_seq_expr('task5')
-                    }
-                ],
+                [],
                 []
             ],
             'multigraph': True
         }
 
-        self._assert_wf_graph(wf_name, expected_wf_graph)
+        self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
             'directed': True,
@@ -188,14 +178,6 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                 {
                     'id': 'task4',
                     'name': 'task4'
-                },
-                {
-                    'id': 'task5',
-                    'name': 'task5'
-                },
-                {
-                    'id': 'task6',
-                    'name': 'task6'
                 }
             ],
             'adjacency': [
@@ -203,51 +185,39 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task1')
-                    }
-                ],
-                [
+                        'criteria': self.compose_seq_expr(
+                            'task1',
+                            condition='on-success'
+                        )
+                    },
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task2')
+                        'criteria': self.compose_seq_expr(
+                            'task1',
+                            condition='on-error'
+                        )
+                    },
+                    {
+                        'id': 'task4',
+                        'key': 0,
+                        'criteria': self.compose_seq_expr(
+                            'task1',
+                            condition='on-complete'
+                        )
                     }
                 ],
                 [],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'criteria': self._get_seq_expr('task4')
-                    }
-                ],
-                [
-                    {
-                        'id': 'task6',
-                        'key': 0,
-                        'criteria': self._get_seq_expr('task5')
-                    }
-                ],
+                [],
                 []
             ],
             'multigraph': True
         }
 
-        self._assert_compose(wf_name, expected_wf_ex_graph)
+        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
 
-        expected_task_seq = [
-            'task1',
-            'task4',
-            'task2',
-            'task5',
-            'task3',
-            'task6'
-        ]
-
-        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
-
-    def test_branching(self):
-        wf_name = 'branching'
+    def test_task_transitions_split(self):
+        wf_name = 'task-transitions-split'
 
         expected_wf_graph = {
             'directed': True,
@@ -257,16 +227,8 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                     'id': 'task1'
                 },
                 {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                },
-                {
-                    'id': 'task4'
-                },
-                {
-                    'id': 'task5'
+                    'id': 'task2',
+                    'splits': ['task2']
                 }
             ],
             'adjacency': [
@@ -274,27 +236,26 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task1')
+                        'criteria': self.compose_seq_expr(
+                            'task1',
+                            condition='on-complete'
+                        )
                     },
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self._get_seq_expr('task1')
-                    }
-                ],
-                [
+                        'id': 'task2',
+                        'key': 1,
+                        'criteria': self.compose_seq_expr(
+                            'task1',
+                            condition='on-error'
+                        )
+                    },
                     {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self._get_seq_expr('task2')
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'criteria': self._get_seq_expr('task4')
+                        'id': 'task2',
+                        'key': 2,
+                        'criteria': self.compose_seq_expr(
+                            'task1',
+                            condition='on-success'
+                        )
                     }
                 ],
                 []
@@ -302,7 +263,7 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
             'multigraph': True
         }
 
-        self._assert_wf_graph(wf_name, expected_wf_graph)
+        self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
             'directed': True,
@@ -313,63 +274,53 @@ class BasicWorkflowConductorTest(base.WorkflowConductorTest):
                     'name': 'task1'
                 },
                 {
-                    'id': 'task2',
-                    'name': 'task2'
+                    'id': 'task2__1',
+                    'name': 'task2',
+                    'splits': [('task2', 1)]
                 },
                 {
-                    'id': 'task3',
-                    'name': 'task3'
+                    'id': 'task2__2',
+                    'name': 'task2',
+                    'splits': [('task2', 2)]
                 },
                 {
-                    'id': 'task4',
-                    'name': 'task4'
-                },
-                {
-                    'id': 'task5',
-                    'name': 'task5'
+                    'id': 'task2__3',
+                    'name': 'task2',
+                    'splits': [('task2', 3)]
                 }
             ],
             'adjacency': [
                 [
                     {
-                        'id': 'task2',
+                        'id': 'task2__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task1')
+                        'criteria': self.compose_seq_expr(
+                            'task1',
+                            condition='on-complete'
+                        )
                     },
                     {
-                        'id': 'task4',
+                        'id': 'task2__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task1')
-                    }
-                ],
-                [
+                        'criteria': self.compose_seq_expr(
+                            'task1',
+                            condition='on-error'
+                        )
+                    },
                     {
-                        'id': 'task3',
+                        'id': 'task2__3',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task2')
+                        'criteria': self.compose_seq_expr(
+                            'task1',
+                            condition='on-success'
+                        )
                     }
                 ],
                 [],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'criteria': self._get_seq_expr('task4')
-                    }
-                ],
+                [],
                 []
             ],
             'multigraph': True
         }
 
-        self._assert_compose(wf_name, expected_wf_ex_graph)
-
-        expected_task_seq = [
-            'task1',
-            'task2',
-            'task4',
-            'task3',
-            'task5'
-        ]
-
-        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
+        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)

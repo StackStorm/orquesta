@@ -25,6 +25,19 @@ from orchestra.tests.fixtures import loader
 
 
 @six.add_metaclass(abc.ABCMeta)
+class ExpressionEvaluatorTest(unittest.TestCase):
+    language = None
+    evaluator = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.evaluator = plugin.get_module(
+            'orchestra.expressions.evaluators',
+            cls.language
+        )
+
+
+@six.add_metaclass(abc.ABCMeta)
 class WorkflowGraphTest(unittest.TestCase):
 
     def _zip_wf_graph_meta(self, wf_graph_json):
@@ -40,65 +53,102 @@ class WorkflowGraphTest(unittest.TestCase):
 
         return wf_graph_meta
 
-    def _assert_graph_equal(self, wf_graph, expected_wf_graph):
+    def assert_graph_equal(self, wf_graph, expected_wf_graph):
         wf_graph_meta = self._zip_wf_graph_meta(wf_graph.serialize())
         expected_wf_graph_meta = self._zip_wf_graph_meta(expected_wf_graph)
 
         self.assertListEqual(wf_graph_meta, expected_wf_graph_meta)
 
 
+class WorkflowSpecTest(unittest.TestCase):
+
+    def get_fixture_path(self, wf_name, rel_path=None):
+        if rel_path:
+            return rel_path + '/' + wf_name + '.yaml'
+        else:
+            return wf_name + '.yaml'
+
+    def get_wf_def(self, wf_name, rel_path=None):
+        return loader.get_fixture_content(
+            self.get_fixture_path(wf_name, rel_path=rel_path),
+            'workflows'
+        )
+
+
 @six.add_metaclass(abc.ABCMeta)
-class WorkflowConductorTest(WorkflowGraphTest):
+class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
     composer_name = None
     composer = None
 
     @classmethod
     def setUpClass(cls):
+        WorkflowGraphTest.setUpClass()
+        WorkflowSpecTest.setUpClass()
+
         cls.composer = plugin.get_module(
             'orchestra.composers',
             cls.composer_name
         )
 
-        wf_spec_classes = {
-            'direct': specs.DirectWorkflowSpec,
-            'reverse': specs.ReverseWorkflowSpec
-        }
-
-        cls.wf_spec_cls = wf_spec_classes[cls.composer_name]
-
-    def _get_fixture_path(self, wf_name):
-        return self.composer_name + '/' + wf_name + '.yaml'
-
-    def _get_wf_def(self, wf_name):
-        return loader.get_fixture_content(
-            self._get_fixture_path(wf_name),
-            'workflows'
+        cls.wf_spec_type = (
+            specs.ReverseWorkflowSpec
+            if cls.composer_name == 'reverse'
+            else specs.DirectWorkflowSpec
         )
 
-    def _get_seq_expr(self, name, *args, **kwargs):
+        cls.fixture_rel_path = cls.composer_name
+
+    def compose_seq_expr(self, name, *args, **kwargs):
         return self.composer._compose_sequence_criteria(name, *args, **kwargs)
 
-    def _compose_wf_graph(self, wf_name):
-        wf_spec = self.wf_spec_cls(self._get_wf_def(wf_name))
+    def compose_wf_graph(self, wf_name):
+        wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
+        wf_spec = self.wf_spec_type(wf_def)
+
         return self.composer._compose_wf_graph(wf_spec)
 
-    def _assert_wf_graph(self, wf_name, expected_wf_graph):
-        wf_spec = self.wf_spec_cls(self._get_wf_def(wf_name))
-        wf_graph = self.composer._compose_wf_graph(wf_spec)
+    def assert_compose_to_wf_graph(self, wf_name, expected_wf_graph):
+        wf_graph = self.compose_wf_graph(wf_name)
 
-        self._assert_graph_equal(wf_graph, expected_wf_graph)
+        self.assert_graph_equal(wf_graph, expected_wf_graph)
 
-        return wf_graph
+    def compose_wf_ex_graph(self, wf_name):
+        wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
+        wf_spec = self.wf_spec_type(wf_def)
 
-    def _assert_compose(self, wf_name, expected_wf_ex_graph):
-        wf_ex_graph = self.composer.compose(self._get_wf_def(wf_name))
+        return self.composer.compose(wf_spec)
 
-        self._assert_graph_equal(wf_ex_graph, expected_wf_ex_graph)
+    def assert_compose_to_wf_ex_graph(self, wf_name, expected_wf_ex_graph):
+        wf_ex_graph = self.compose_wf_ex_graph(wf_name)
 
-        return wf_ex_graph
+        self.assert_graph_equal(wf_ex_graph, expected_wf_ex_graph)
 
-    def _assert_conduct(self, wf_ex_graph_json, expected_task_seq,
-                        mock_contexts=None, mock_states=None):
+
+class DirectWorkflowComposerTest(WorkflowComposerTest):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.composer_name = 'direct'
+        super(DirectWorkflowComposerTest, cls).setUpClass()
+
+
+class ReverseWorkflowComposerTest(WorkflowComposerTest):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.composer_name = 'reverse'
+        super(ReverseWorkflowComposerTest, cls).setUpClass()
+
+
+@six.add_metaclass(abc.ABCMeta)
+class WorkflowConductorTest(WorkflowComposerTest):
+
+    def assert_conducting_sequences(self, wf_name, expected_task_seq,
+                                    mock_contexts=None, mock_states=None):
+
+        wf_ex_graph = self.compose_wf_ex_graph(wf_name)
+        wf_ex_graph_json = wf_ex_graph.serialize()
+
         context = {}
         actual_task_seq = []
         q = queue.Queue()
@@ -156,14 +206,17 @@ class WorkflowConductorTest(WorkflowGraphTest):
         self.assertListEqual(expected_task_seq, actual_task_seq)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class ExpressionEvaluatorTest(unittest.TestCase):
-    language = None
-    evaluator = None
+class DirectWorkflowConductorTest(WorkflowConductorTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.evaluator = plugin.get_module(
-            'orchestra.expressions.evaluators',
-            cls.language
-        )
+        cls.composer_name = 'direct'
+        super(DirectWorkflowConductorTest, cls).setUpClass()
+
+
+class ReverseWorkflowConductorTest(WorkflowConductorTest):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.composer_name = 'reverse'
+        super(ReverseWorkflowConductorTest, cls).setUpClass()

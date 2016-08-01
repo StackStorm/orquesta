@@ -149,28 +149,28 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         wf_graph = composition.WorkflowGraph()
         self._prep_graph(wf_graph)
 
-        self._assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
+        self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
     def test_skip_add_tasks(self):
         wf_graph = composition.WorkflowGraph()
         self._add_sequences(wf_graph)
         self._update_tasks_attrs(wf_graph)
 
-        self._assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
+        self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
     def test_duplicate_add_tasks(self):
         wf_graph = composition.WorkflowGraph()
         self._add_tasks(wf_graph)
         self._prep_graph(wf_graph)
 
-        self._assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
+        self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
     def test_duplicate_add_sequences(self):
         wf_graph = composition.WorkflowGraph()
         self._prep_graph(wf_graph)
         self._add_sequences(wf_graph)
 
-        self._assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
+        self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
     def test_get_start_tasks(self):
         wf_graph = composition.WorkflowGraph()

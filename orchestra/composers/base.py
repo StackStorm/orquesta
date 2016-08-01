@@ -17,7 +17,6 @@ from six.moves import queue
 
 from orchestra import composition
 from orchestra.expressions import base as expressions
-from orchestra.specs import v2 as specs
 from orchestra.utils import plugin
 
 
@@ -30,14 +29,18 @@ def get_composer(workflow_type):
 
 @six.add_metaclass(abc.ABCMeta)
 class WorkflowComposer(object):
-    wf_spec_cls = specs.DirectWorkflowSpec
+    wf_spec_type = None
     expr_evaluator = expressions.get_evaluator('yaql')
 
     @classmethod
-    def compose(cls, definition):
-        wf_spec = cls.wf_spec_cls(definition)
+    def compose(cls, spec):
+        if not cls.wf_spec_type:
+            raise TypeError('Undefined spec type for composer.')
 
-        wf_graph = cls._compose_wf_graph(wf_spec)
+        if not isinstance(spec, cls.wf_spec_type):
+            raise TypeError('Unsupported spec type "%s".' % str(type(spec)))
+
+        wf_graph = cls._compose_wf_graph(spec)
 
         return cls._compose_wf_ex_graph(wf_graph)
 

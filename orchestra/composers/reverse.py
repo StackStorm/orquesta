@@ -24,7 +24,7 @@ LOG = logging.getLogger(__name__)
 
 
 class ReverseWorkflowComposer(base.WorkflowComposer):
-    wf_spec_cls = specs.ReverseWorkflowSpec
+    wf_spec_type = specs.ReverseWorkflowSpec
     expr_evaluator = expressions.get_evaluator('yaql')
 
     @classmethod
@@ -40,9 +40,9 @@ class ReverseWorkflowComposer(base.WorkflowComposer):
 
     @classmethod
     def _compose_wf_graph(cls, wf_spec):
-        if not isinstance(wf_spec, cls.wf_spec_cls):
+        if not isinstance(wf_spec, cls.wf_spec_type):
             raise TypeError(
-                'Workflow spec is not typeof %s.' % cls.wf_spec_cls.__name__
+                'Workflow spec is not typeof %s.' % cls.wf_spec_type.__name__
             )
 
         if wf_spec.has_cycles():

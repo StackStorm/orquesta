@@ -13,12 +13,7 @@
 from orchestra.tests.unit import base
 
 
-class SplitWorkflowConductorTest(base.WorkflowConductorTest):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.composer_name = 'direct'
-        super(SplitWorkflowConductorTest, cls).setUpClass()
+class SplitWorkflowComposerTest(base.DirectWorkflowComposerTest):
 
     def test_split(self):
         wf_name = 'split'
@@ -59,7 +54,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -67,7 +62,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -77,7 +72,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success'
                         )
@@ -87,7 +82,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task3',
                             condition='on-success'
                         )
@@ -97,7 +92,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4',
                             condition='on-success'
                         )
@@ -105,7 +100,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task6',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4',
                             condition='on-success'
                         )
@@ -115,7 +110,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task5',
                             condition='on-success'
                         )
@@ -125,7 +120,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task6',
                             condition='on-success'
                         )
@@ -136,7 +131,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
             'multigraph': True
         }
 
-        self._assert_wf_graph(wf_name, expected_wf_graph)
+        self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
             'directed': True,
@@ -202,7 +197,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -210,7 +205,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -220,7 +215,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success'
                         )
@@ -230,7 +225,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task5__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4__1',
                             condition='on-success'
                         )
@@ -238,7 +233,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task6__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4__1',
                             condition='on-success'
                         )
@@ -248,7 +243,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task5__1',
                             condition='on-success'
                         )
@@ -259,7 +254,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task6__1',
                             condition='on-success'
                         )
@@ -269,7 +264,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task3',
                             condition='on-success'
                         )
@@ -279,7 +274,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task5__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4__2',
                             condition='on-success'
                         )
@@ -287,7 +282,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task6__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4__2',
                             condition='on-success'
                         )
@@ -297,7 +292,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task5__2',
                             condition='on-success'
                         )
@@ -308,7 +303,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task6__2',
                             condition='on-success'
                         )
@@ -318,23 +313,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
             'multigraph': True
         }
 
-        self._assert_compose(wf_name, expected_wf_ex_graph)
-
-        expected_task_seq = [
-            'task1',
-            'task2',
-            'task3',
-            'task4__1',
-            'task4__2',
-            'task5__1',
-            'task6__1',
-            'task5__2',
-            'task6__2',
-            'task7__1',
-            'task7__2'
-        ]
-
-        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
+        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
 
     def test_splits(self):
         wf_name = 'splits'
@@ -379,7 +358,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -387,7 +366,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -395,7 +374,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task8',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -405,7 +384,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success'
                         )
@@ -415,7 +394,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task3',
                             condition='on-success'
                         )
@@ -425,7 +404,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4',
                             condition='on-success'
                         )
@@ -433,7 +412,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task6',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4',
                             condition='on-success'
                         )
@@ -443,7 +422,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task5',
                             condition='on-success'
                         )
@@ -453,7 +432,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task6',
                             condition='on-success'
                         )
@@ -463,7 +442,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task8',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task7',
                             condition='on-success'
                         )
@@ -474,7 +453,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
             'multigraph': True
         }
 
-        self._assert_wf_graph(wf_name, expected_wf_graph)
+        self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
             'directed': True,
@@ -555,7 +534,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -563,7 +542,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -571,7 +550,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task8__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -581,7 +560,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success'
                         )
@@ -591,7 +570,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task5__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4__1',
                             condition='on-success'
                         )
@@ -599,7 +578,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task6__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4__1',
                             condition='on-success'
                         )
@@ -609,7 +588,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task5__1',
                             condition='on-success'
                         )
@@ -619,7 +598,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task8__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task7__1',
                             condition='on-success'
                         )
@@ -630,7 +609,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task6__1',
                             condition='on-success'
                         )
@@ -640,7 +619,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task3',
                             condition='on-success'
                         )
@@ -650,7 +629,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task5__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4__2',
                             condition='on-success'
                         )
@@ -658,7 +637,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task6__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4__2',
                             condition='on-success'
                         )
@@ -668,7 +647,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task5__2',
                             condition='on-success'
                         )
@@ -678,7 +657,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task8__3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task7__2',
                             condition='on-success'
                         )
@@ -689,7 +668,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task6__2',
                             condition='on-success'
                         )
@@ -700,26 +679,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
             'multigraph': True
         }
 
-        self._assert_compose(wf_name, expected_wf_ex_graph)
-
-        expected_task_seq = [
-            'task1',
-            'task2',
-            'task3',
-            'task8__1',
-            'task4__1',
-            'task4__2',
-            'task5__1',
-            'task6__1',
-            'task5__2',
-            'task6__2',
-            'task7__1',
-            'task7__2',
-            'task8__2',
-            'task8__3'
-        ]
-
-        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
+        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
 
     def test_nested_splits(self):
         wf_name = 'splits-nested'
@@ -772,7 +732,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -780,7 +740,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -790,7 +750,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success'
                         )
@@ -800,7 +760,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task3',
                             condition='on-success'
                         )
@@ -810,7 +770,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4',
                             condition='on-success'
                         )
@@ -818,7 +778,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task6',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4',
                             condition='on-success'
                         )
@@ -828,7 +788,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task5',
                             condition='on-success'
                         )
@@ -838,7 +798,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task6',
                             condition='on-success'
                         )
@@ -848,7 +808,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task8',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task7',
                             condition='on-success'
                         )
@@ -856,7 +816,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task9',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task7',
                             condition='on-success'
                         )
@@ -866,7 +826,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task10',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task8',
                             condition='on-success'
                         )
@@ -876,7 +836,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task10',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task9',
                             condition='on-success'
                         )
@@ -887,7 +847,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
             'multigraph': True
         }
 
-        self._assert_wf_graph(wf_name, expected_wf_graph)
+        self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
             'directed': True,
@@ -1025,7 +985,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -1033,7 +993,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -1043,7 +1003,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success'
                         )
@@ -1053,7 +1013,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task5__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4__1',
                             condition='on-success'
                         )
@@ -1061,7 +1021,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task6__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4__1',
                             condition='on-success'
                         )
@@ -1071,7 +1031,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task5__1',
                             condition='on-success'
                         )
@@ -1081,7 +1041,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task8__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task7__1',
                             condition='on-success'
                         )
@@ -1089,7 +1049,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task9__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task7__1',
                             condition='on-success'
                         )
@@ -1099,7 +1059,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task10__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task8__1',
                             condition='on-success'
                         )
@@ -1110,7 +1070,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task10__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task9__1',
                             condition='on-success'
                         )
@@ -1120,7 +1080,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task6__1',
                             condition='on-success'
                         )
@@ -1130,7 +1090,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task8__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task7__2',
                             condition='on-success'
                         )
@@ -1138,7 +1098,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task9__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task7__2',
                             condition='on-success'
                         )
@@ -1148,7 +1108,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task10__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task8__2',
                             condition='on-success'
                         )
@@ -1159,7 +1119,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task10__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task9__2',
                             condition='on-success'
                         )
@@ -1169,7 +1129,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task3',
                             condition='on-success'
                         )
@@ -1179,7 +1139,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task5__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4__2',
                             condition='on-success'
                         )
@@ -1187,7 +1147,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task6__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4__2',
                             condition='on-success'
                         )
@@ -1197,7 +1157,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7__3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task5__2',
                             condition='on-success'
                         )
@@ -1207,7 +1167,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task8__3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task7__3',
                             condition='on-success'
                         )
@@ -1215,7 +1175,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task9__3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task7__3',
                             condition='on-success'
                         )
@@ -1225,7 +1185,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task10__3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task8__3',
                             condition='on-success'
                         )
@@ -1236,7 +1196,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task10__3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task9__3',
                             condition='on-success'
                         )
@@ -1246,7 +1206,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7__4',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task6__2',
                             condition='on-success'
                         )
@@ -1256,7 +1216,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task8__4',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task7__4',
                             condition='on-success'
                         )
@@ -1264,7 +1224,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task9__4',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task7__4',
                             condition='on-success'
                         )
@@ -1274,7 +1234,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task10__4',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task8__4',
                             condition='on-success'
                         )
@@ -1285,7 +1245,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task10__4',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task9__4',
                             condition='on-success'
                         )
@@ -1295,37 +1255,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
             'multigraph': True
         }
 
-        self._assert_compose(wf_name, expected_wf_ex_graph)
-
-        expected_task_seq = [
-            'task1',
-            'task2',
-            'task3',
-            'task4__1',
-            'task4__2',
-            'task5__1',
-            'task6__1',
-            'task5__2',
-            'task6__2',
-            'task7__1',
-            'task7__2',
-            'task7__3',
-            'task7__4',
-            'task8__1',
-            'task9__1',
-            'task8__2',
-            'task9__2',
-            'task8__3',
-            'task9__3',
-            'task8__4',
-            'task9__4',
-            'task10__1',
-            'task10__2',
-            'task10__3',
-            'task10__4'
-        ]
-
-        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
+        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
 
     def test_splits_extra_join(self):
         wf_name = 'splits-join'
@@ -1371,7 +1301,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -1379,7 +1309,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -1387,7 +1317,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task8',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -1397,7 +1327,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success'
                         )
@@ -1407,7 +1337,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task3',
                             condition='on-success'
                         )
@@ -1417,7 +1347,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4',
                             condition='on-success'
                         )
@@ -1425,7 +1355,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task6',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4',
                             condition='on-success'
                         )
@@ -1435,7 +1365,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task5',
                             condition='on-success'
                         )
@@ -1445,7 +1375,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task6',
                             condition='on-success'
                         )
@@ -1455,7 +1385,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task8',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task7',
                             condition='on-success'
                         )
@@ -1466,7 +1396,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
             'multigraph': True
         }
 
-        self._assert_wf_graph(wf_name, expected_wf_graph)
+        self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
             'directed': True,
@@ -1544,7 +1474,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -1552,7 +1482,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -1560,7 +1490,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task8__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -1568,7 +1498,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task8__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -1578,7 +1508,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success'
                         )
@@ -1588,7 +1518,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task5__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4__1',
                             condition='on-success'
                         )
@@ -1596,7 +1526,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task6__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4__1',
                             condition='on-success'
                         )
@@ -1606,7 +1536,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task5__1',
                             condition='on-success'
                         )
@@ -1616,7 +1546,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task8__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task7__1',
                             condition='on-success'
                         )
@@ -1627,7 +1557,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task6__1',
                             condition='on-success'
                         )
@@ -1637,7 +1567,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task3',
                             condition='on-success'
                         )
@@ -1647,7 +1577,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task5__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4__2',
                             condition='on-success'
                         )
@@ -1655,7 +1585,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task6__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4__2',
                             condition='on-success'
                         )
@@ -1665,7 +1595,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task5__2',
                             condition='on-success'
                         )
@@ -1675,7 +1605,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task8__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task7__2',
                             condition='on-success'
                         )
@@ -1686,7 +1616,7 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task6__2',
                             condition='on-success'
                         )
@@ -1696,22 +1626,4 @@ class SplitWorkflowConductorTest(base.WorkflowConductorTest):
             'multigraph': True
         }
 
-        self._assert_compose(wf_name, expected_wf_ex_graph)
-
-        expected_task_seq = [
-            'task1',
-            'task2',
-            'task3',
-            'task4__1',
-            'task4__2',
-            'task5__1',
-            'task6__1',
-            'task5__2',
-            'task6__2',
-            'task7__1',
-            'task7__2',
-            'task8__1',
-            'task8__2'
-        ]
-
-        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
+        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)

@@ -13,12 +13,7 @@
 from orchestra.tests.unit import base
 
 
-class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.composer_name = 'direct'
-        super(CyclicWorkflowConductorTest, cls).setUpClass()
+class CyclicWorkflowComposerTest(base.DirectWorkflowComposerTest):
 
     def test_cycle(self):
         wf_name = 'cycle'
@@ -45,7 +40,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'prep',
                             condition='on-success'
                         )
@@ -55,7 +50,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -65,7 +60,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success'
                         )
@@ -75,7 +70,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task3',
                             condition='on-success',
                             expr="$.count < 3"
@@ -86,7 +81,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
             'multigraph': True
         }
 
-        self._assert_wf_graph(wf_name, expected_wf_graph)
+        self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
             'directed': True,
@@ -114,7 +109,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'prep',
                             condition='on-success'
                         )
@@ -124,7 +119,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -134,7 +129,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success'
                         )
@@ -144,7 +139,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task3',
                             condition='on-success',
                             expr="$.count < 3"
@@ -155,39 +150,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
             'multigraph': True
         }
 
-        self._assert_compose(wf_name, expected_wf_ex_graph)
-
-        expected_task_seq = [
-            'prep',
-            'task1',
-            'task2',
-            'task3',
-            'task1',
-            'task2',
-            'task3',
-            'task1',
-            'task2',
-            'task3'
-        ]
-
-        mock_contexts = [
-            {'count': 0},   # prep
-            {'count': 0},   # task1
-            {'count': 0},   # task2
-            {'count': 1},   # task3
-            {'count': 1},   # task1
-            {'count': 1},   # task2
-            {'count': 2},   # task3
-            {'count': 2},   # task1
-            {'count': 2},   # task2
-            {'count': 3}    # task3
-        ]
-
-        self._assert_conduct(
-            expected_wf_ex_graph,
-            expected_task_seq,
-            mock_contexts=mock_contexts
-        )
+        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
 
     def test_cycles(self):
         wf_name = 'cycles'
@@ -220,7 +183,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'prep',
                             condition='on-success'
                         )
@@ -230,7 +193,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -240,7 +203,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success',
                             expr='not $.proceed'
@@ -249,7 +212,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success',
                             expr='$.proceed'
@@ -260,7 +223,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task3',
                             condition='on-success'
                         )
@@ -270,7 +233,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4',
                             condition='on-success'
                         )
@@ -280,7 +243,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task5',
                             condition='on-success',
                             expr="$.count < 3"
@@ -291,7 +254,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
             'multigraph': True
         }
 
-        self._assert_wf_graph(wf_name, expected_wf_graph)
+        self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
             'directed': True,
@@ -327,7 +290,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'prep',
                             condition='on-success'
                         )
@@ -337,7 +300,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
@@ -347,7 +310,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success',
                             expr='not $.proceed'
@@ -356,7 +319,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success',
                             expr='$.proceed'
@@ -367,7 +330,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task3',
                             condition='on-success'
                         )
@@ -377,7 +340,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task4',
                             condition='on-success'
                         )
@@ -387,7 +350,7 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': self._get_seq_expr(
+                        'criteria': self.compose_seq_expr(
                             'task5',
                             condition='on-success',
                             expr="$.count < 3"
@@ -398,54 +361,4 @@ class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
             'multigraph': True
         }
 
-        self._assert_compose(wf_name, expected_wf_ex_graph)
-
-        expected_task_seq = [
-            'prep',
-            'task1',
-            'task2',
-            'task3',
-            'task4',
-            'task2',
-            'task5',
-            'task1',
-            'task2',
-            'task3',
-            'task4',
-            'task2',
-            'task5',
-            'task1',
-            'task2',
-            'task3',
-            'task4',
-            'task2',
-            'task5'
-        ]
-
-        mock_contexts = [
-            {'count': 0},                       # prep
-            {'count': 0, 'proceed': False},     # task1
-            {'count': 0, 'proceed': False},     # task2
-            {'count': 0, 'proceed': False},     # task3
-            {'count': 0, 'proceed': True},      # task4
-            {'count': 0, 'proceed': True},      # task2
-            {'count': 1, 'proceed': True},      # task5
-            {'count': 1, 'proceed': False},     # task1
-            {'count': 1, 'proceed': False},     # task2
-            {'count': 1, 'proceed': False},     # task3
-            {'count': 1, 'proceed': True},      # task4
-            {'count': 1, 'proceed': True},      # task2
-            {'count': 2, 'proceed': True},      # task5
-            {'count': 2, 'proceed': False},     # task1
-            {'count': 2, 'proceed': False},     # task2
-            {'count': 2, 'proceed': False},     # task3
-            {'count': 2, 'proceed': True},      # task4
-            {'count': 2, 'proceed': True},      # task2
-            {'count': 3, 'proceed': True}       # task5
-        ]
-
-        self._assert_conduct(
-            expected_wf_ex_graph,
-            expected_task_seq,
-            mock_contexts=mock_contexts
-        )
+        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)

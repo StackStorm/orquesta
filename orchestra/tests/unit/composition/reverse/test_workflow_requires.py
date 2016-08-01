@@ -13,12 +13,7 @@
 from orchestra.tests.unit import base
 
 
-class MultipleRequiresWorkflowConductorTest(base.WorkflowConductorTest):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.composer_name = 'reverse'
-        super(MultipleRequiresWorkflowConductorTest, cls).setUpClass()
+class RequiresWorkflowComposerTest(base.ReverseWorkflowComposerTest):
 
     def test_multiple_requires(self):
         wf_name = 'requires'
@@ -55,47 +50,47 @@ class MultipleRequiresWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task1')
+                        'criteria': self.compose_seq_expr('task1')
                     },
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task1')
+                        'criteria': self.compose_seq_expr('task1')
                     }
                 ],
                 [
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task2')
+                        'criteria': self.compose_seq_expr('task2')
                     }
                 ],
                 [
                     {
                         'id': 'task6',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task3')
+                        'criteria': self.compose_seq_expr('task3')
                     }
                 ],
                 [
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task4')
+                        'criteria': self.compose_seq_expr('task4')
                     }
                 ],
                 [
                     {
                         'id': 'task6',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task5')
+                        'criteria': self.compose_seq_expr('task5')
                     }
                 ],
                 [
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task6')
+                        'criteria': self.compose_seq_expr('task6')
                     }
                 ],
                 []
@@ -103,7 +98,7 @@ class MultipleRequiresWorkflowConductorTest(base.WorkflowConductorTest):
             'multigraph': True
         }
 
-        self._assert_wf_graph(wf_name, expected_wf_graph)
+        self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
             'directed': True,
@@ -144,47 +139,47 @@ class MultipleRequiresWorkflowConductorTest(base.WorkflowConductorTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task1')
+                        'criteria': self.compose_seq_expr('task1')
                     },
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task1')
+                        'criteria': self.compose_seq_expr('task1')
                     }
                 ],
                 [
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task2')
+                        'criteria': self.compose_seq_expr('task2')
                     }
                 ],
                 [
                     {
                         'id': 'task6',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task3')
+                        'criteria': self.compose_seq_expr('task3')
                     }
                 ],
                 [
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task4')
+                        'criteria': self.compose_seq_expr('task4')
                     }
                 ],
                 [
                     {
                         'id': 'task6',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task5')
+                        'criteria': self.compose_seq_expr('task5')
                     }
                 ],
                 [
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': self._get_seq_expr('task6')
+                        'criteria': self.compose_seq_expr('task6')
                     }
                 ],
                 []
@@ -192,16 +187,4 @@ class MultipleRequiresWorkflowConductorTest(base.WorkflowConductorTest):
             'multigraph': True
         }
 
-        self._assert_compose(wf_name, expected_wf_ex_graph)
-
-        expected_task_seq = [
-            'task1',
-            'task2',
-            'task4',
-            'task3',
-            'task5',
-            'task6',
-            'task7'
-        ]
-
-        self._assert_conduct(expected_wf_ex_graph, expected_task_seq)
+        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)

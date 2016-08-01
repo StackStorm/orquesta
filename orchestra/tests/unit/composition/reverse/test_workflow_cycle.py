@@ -13,17 +13,12 @@
 from orchestra.tests.unit import base
 
 
-class CyclicWorkflowConductorTest(base.WorkflowConductorTest):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.composer_name = 'reverse'
-        super(CyclicWorkflowConductorTest, cls).setUpClass()
+class CyclicWorkflowComposerTest(base.ReverseWorkflowComposerTest):
 
     def test_cycle(self):
         wf_name = 'cycle'
-
-        wf_spec = self.wf_spec_cls(self._get_wf_def(wf_name))
+        wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
+        wf_spec = self.wf_spec_type(wf_def)
 
         with self.assertRaises(Exception) as cm:
             self.composer._compose_wf_graph(wf_spec)

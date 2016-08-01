@@ -10,25 +10,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra.composers import direct
+from orchestra.composers import reverse
+from orchestra.specs.v2 import workflows as specs
 from orchestra.utils import plugin
 from orchestra.tests.unit import base
 
 
-class DirectWorkflowComposerTest(base.WorkflowConductorTest):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.composer_name = 'direct'
-        super(DirectWorkflowComposerTest, cls).setUpClass()
+class ReverseWorkflowComposerTest(base.ReverseWorkflowComposerTest):
 
     def test_get_composer(self):
         self.assertEqual(
             plugin.get_module('orchestra.composers', self.composer_name),
-            direct.DirectWorkflowComposer
+            reverse.ReverseWorkflowComposer
         )
 
-    def test_exception_empty_definition(self):
-        self.assertRaises(ValueError, self.composer.compose, {})
-        self.assertRaises(ValueError, self.composer.compose, '')
-        self.assertRaises(ValueError, self.composer.compose, None)
+    def test_unsupported_spec_type(self):
+        self.assertRaises(TypeError, self.composer.compose, {})
+
+        wf_def = self.get_wf_def('sequential', rel_path='direct')
+        wf_spec = specs.DirectWorkflowSpec(wf_def)
+
+        self.assertRaises(TypeError, self.composer.compose, wf_spec)
