@@ -20,7 +20,7 @@ from orchestra import states
 
 def register_functions(ctx):
     mgr = extension.ExtensionManager(
-        namespace='orchestra.expressions.functions.yaql',
+        namespace='orchestra.expressions.functions',
         invoke_on_load=False
     )
 

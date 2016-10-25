@@ -66,11 +66,12 @@ setup(
             'reverse = orchestra.composers.reverse:ReverseWorkflowComposer'
         ],
         'orchestra.expressions.evaluators': [
-            'yaql = orchestra.expressions.default:YAQLEvaluator'
+            'yaql = orchestra.expressions.yql:YAQLEvaluator',
+            'jinja = orchestra.expressions.jinja:JinjaEvaluator'
         ],
-        'orchestra.expressions.functions.yaql': [
-            'task_state = orchestra.expressions.yaql_functions:task_state_',
-            'json = orchestra.expressions.yaql_functions:json_'
+        'orchestra.expressions.functions': [
+            'task_state = orchestra.expressions.functions:task_state_',
+            'json = orchestra.expressions.functions:json_'
         ],
         'orchestra.tests': [
             'fake = orchestra.tests.unit.utils.test_plugin:FakePlugin'

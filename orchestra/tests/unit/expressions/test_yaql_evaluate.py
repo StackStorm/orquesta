@@ -11,7 +11,7 @@
 # limitations under the License.
 
 from orchestra import exceptions as exc
-from orchestra.expressions import default
+from orchestra.expressions import yql
 from orchestra.tests.unit import base
 from orchestra.utils import plugin
 
@@ -29,7 +29,7 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
             self.language
         )
 
-        self.assertEqual(e, default.YAQLEvaluator)
+        self.assertEqual(e, yql.YAQLEvaluator)
         self.assertIn('json', e._custom_functions)
         self.assertIn('task_state', e._custom_functions)
 

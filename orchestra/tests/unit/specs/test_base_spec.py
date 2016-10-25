@@ -12,7 +12,7 @@
 
 import unittest
 
-from orchestra.expressions import default as expr
+from orchestra.expressions import yql as expr
 from orchestra.specs import types
 from orchestra.specs.v2 import base
 

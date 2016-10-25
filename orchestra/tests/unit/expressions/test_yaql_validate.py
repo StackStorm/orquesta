@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra.expressions import default
+from orchestra.expressions import yql
 from orchestra.tests.unit import base
 from orchestra.utils import plugin
 
@@ -28,7 +28,7 @@ class YAQLValidationTest(base.ExpressionEvaluatorTest):
                 'orchestra.expressions.evaluators',
                 self.language
             ),
-            default.YAQLEvaluator
+            yql.YAQLEvaluator
         )
 
     def test_basic_validate(self):
