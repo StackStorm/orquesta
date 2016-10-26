@@ -70,8 +70,8 @@ setup(
             'jinja = orchestra.expressions.jinja:JinjaEvaluator'
         ],
         'orchestra.expressions.functions': [
-            'task_state = orchestra.expressions.functions:task_state_',
-            'json = orchestra.expressions.functions:json_'
+            'json = orchestra.expressions.functions.common:json_',
+            'task_state = orchestra.expressions.functions.workflow:task_state_',
         ],
         'orchestra.tests': [
             'fake = orchestra.tests.unit.utils.test_plugin:FakePlugin'

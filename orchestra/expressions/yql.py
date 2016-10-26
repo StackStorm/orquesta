@@ -20,10 +20,19 @@ import yaql.language.exceptions as yaql_exc
 
 from orchestra import exceptions as exc
 from orchestra.expressions import base
-from orchestra.expressions import functions
+from orchestra.expressions.functions import base as functions
 
 
 LOG = logging.getLogger(__name__)
+
+
+def register_functions(ctx):
+    catalog = functions.load()
+
+    for name, func in six.iteritems(catalog):
+        ctx.register_function(func, name=name)
+
+    return catalog.keys()
 
 
 class YAQLEvaluator(base.Evaluator):
@@ -32,11 +41,7 @@ class YAQLEvaluator(base.Evaluator):
     _regex_parser = re.compile(_regex_pattern)
     _engine = yaql.language.factory.YaqlFactory().create()
     _root_ctx = yaql.create_context()
-    _custom_functions = functions.register_functions(_root_ctx)
-
-    @classmethod
-    def strip_delimiter(cls, expr):
-        return expr.strip(cls._delimiter).strip()
+    _custom_functions = register_functions(_root_ctx)
 
     @classmethod
     def validate(cls, text):

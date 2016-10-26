@@ -10,34 +10,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import abc
-import logging
-import six
-
+from orchestra import exceptions as exc
+from orchestra.expressions import jinja
+from orchestra.tests.unit import base
 from orchestra.utils import plugin
 
 
-LOG = logging.getLogger(__name__)
-
-
-def get_evaluator(language):
-    return plugin.get_module('orchestra.expressions.evaluators', language)
-
-
-@six.add_metaclass(abc.ABCMeta)
-class Evaluator(object):
-    _delimiter = None
+class JinjaEvaluationTest(base.ExpressionEvaluatorTest):
 
     @classmethod
-    def strip_delimiter(cls, expr):
-        return expr.strip(cls._delimiter).strip()
+    def setUpClass(cls):
+        cls.language = 'jinja'
+        super(JinjaEvaluationTest, cls).setUpClass()
 
-    @classmethod
-    @abc.abstractmethod
-    def validate(cls, expr):
-        raise NotImplementedError()
+    def test_get_evaluator(self):
+        e = plugin.get_module(
+            'orchestra.expressions.evaluators',
+            self.language
+        )
 
-    @classmethod
-    @abc.abstractmethod
-    def evaluate(cls, text, data=None):
-        raise NotImplementedError()
+        self.assertEqual(e, jinja.JinjaEvaluator)
+        self.assertIn('json', e._custom_functions)
+        self.assertIn('task_state', e._custom_functions)
