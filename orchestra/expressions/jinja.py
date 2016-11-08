@@ -32,15 +32,13 @@ def register_functions(env):
     for name, func in six.iteritems(catalog):
         env.filters[name] = func
 
-    return catalog.keys()
+    return catalog
 
 
 class JinjaEvaluator(base.Evaluator):
     _delimiter = '{{}}'
     _regex_pattern = '({{.*?}}|{%.*?%})'
     _regex_parser = re.compile(_regex_pattern)
-
-    _root_ctx = {}
 
     _jinja_env = jinja2.Environment(
         undefined=jinja2.StrictUndefined,
@@ -51,16 +49,27 @@ class JinjaEvaluator(base.Evaluator):
     _custom_functions = register_functions(_jinja_env)
 
     @classmethod
+    def contextualize(cls, data):
+        ctx = {'_': data}
+
+        for name, func in six.iteritems(cls._custom_functions):
+            ctx[name] = partial(func, ctx['_'])
+
+        if isinstance(data, dict):
+            ctx['__task_states'] = data.get('__task_states')
+
+        return ctx
+
+    @classmethod
     def validate(cls, text):
         if not isinstance(text, six.string_types):
             raise ValueError('Text to be evaluated is not typeof string.')
 
         errors = []
+        exprs = cls._regex_parser.findall(text)
 
-        for expr in cls._regex_parser.findall(text):
+        for expr in exprs:
             try:
-                print(cls.strip_delimiter(expr))
-
                 parser = jinja2.parser.Parser(
                     cls._jinja_env.overlay(),
                     cls.strip_delimiter(expr),
@@ -80,4 +89,44 @@ class JinjaEvaluator(base.Evaluator):
 
     @classmethod
     def evaluate(cls, text, data=None):
-        pass
+        if not isinstance(text, six.string_types):
+            raise ValueError('Text to be evaluated is not typeof string.')
+
+        if data and not isinstance(data, dict):
+            raise ValueError('Provided data is not typeof dict.')
+
+        output = text
+        exprs = cls._regex_parser.findall(text)
+        ctx = cls.contextualize(data)
+        opts = {'undefined_to_none': False}
+
+        try:
+            for expr in exprs:
+                stripped = cls.strip_delimiter(expr)
+                compiled = cls._jinja_env.compile_expression(stripped, **opts)
+                result = compiled(**ctx)
+
+                if inspect.isgenerator(result):
+                    result = list(result)
+
+                if isinstance(result, six.string_types):
+                    result = cls.evaluate(result, data)
+
+                output = (
+                    output.replace(expr, str(result))
+                    if len(exprs) > 1
+                    else result
+                )
+
+            # For StrictUndefined values, UndefinedError only gets raised
+            # when the value is accessed, not when it gets created. The
+            # simplest way to access it is to try and cast it to string.
+            # When StrictUndefined is cast to str below, this will raise
+            # an exception with error description.
+            if type(output) is jinja2.runtime.StrictUndefined:
+                output = str(output)
+
+        except jinja2.exceptions.UndefinedError as e:
+            raise exc.JinjaEvaluationException(str(getattr(e, 'message', e)))
+
+        return output

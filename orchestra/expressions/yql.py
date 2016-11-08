@@ -32,7 +32,7 @@ def register_functions(ctx):
     for name, func in six.iteritems(catalog):
         ctx.register_function(func, name=name)
 
-    return catalog.keys()
+    return catalog
 
 
 class YAQLEvaluator(base.Evaluator):
@@ -44,13 +44,22 @@ class YAQLEvaluator(base.Evaluator):
     _custom_functions = register_functions(_root_ctx)
 
     @classmethod
+    def contextualize(cls, data):
+        ctx = cls._root_ctx.create_child_context()
+        ctx['$'] = data or {}
+        ctx['__task_states'] = ctx['$'].get('__task_states')
+
+        return ctx
+
+    @classmethod
     def validate(cls, text):
         if not isinstance(text, six.string_types):
             raise ValueError('Text to be evaluated is not typeof string.')
 
         errors = []
+        exprs = cls._regex_parser.findall(text)
 
-        for expr in cls._regex_parser.findall(text):
+        for expr in exprs:
             try:
                 cls._engine(cls.strip_delimiter(expr))
             except (yaql_exc.YaqlException, ValueError, TypeError) as e:
@@ -73,9 +82,7 @@ class YAQLEvaluator(base.Evaluator):
 
         output = text
         exprs = cls._regex_parser.findall(text)
-        ctx = cls._root_ctx.create_child_context()
-        ctx['$'] = data or {}
-        ctx['__task_states'] = ctx['$'].get('__task_states')
+        ctx = cls.contextualize(data)
 
         try:
             for expr in exprs:

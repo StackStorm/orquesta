@@ -14,7 +14,7 @@ import json
 import six
 
 
-def json_(s):
+def json_(context, s):
     if isinstance(s, dict):
         return s
 

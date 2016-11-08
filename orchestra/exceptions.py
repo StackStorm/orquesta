@@ -26,3 +26,7 @@ class YaqlGrammarException(Exception):
 
 class YaqlEvaluationException(Exception):
     pass
+
+
+class JinjaEvaluationException(Exception):
+    pass

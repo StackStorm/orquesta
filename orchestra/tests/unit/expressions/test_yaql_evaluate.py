@@ -30,8 +30,8 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
         )
 
         self.assertEqual(e, yql.YAQLEvaluator)
-        self.assertIn('json', e._custom_functions)
-        self.assertIn('task_state', e._custom_functions)
+        self.assertIn('json', e._custom_functions.keys())
+        self.assertIn('task_state', e._custom_functions.keys())
 
     def test_basic_eval(self):
         expr = '<% $.foo %>'
