@@ -40,7 +40,7 @@ class JinjaEvaluationTest(base.ExpressionEvaluatorTest):
 
         self.assertEqual('bar', self.evaluator.evaluate(expr, data))
 
-    def test_basic_bad_eval(self):
+    def test_basic_eval_undefined(self):
         expr = '{{ _.foo }}'
 
         data = {}
@@ -85,11 +85,27 @@ class JinjaEvaluationTest(base.ExpressionEvaluatorTest):
 
         self.assertEqual('fee-fi-fo-fum', self.evaluator.evaluate(expr, data))
 
+    def test_eval_recursive_undefined(self):
+        expr = '{{ _.fee }}'
+
+        data = {
+            'fee': '{{ _.fi }}',
+            'fi': '{{ _.fo }}',
+            'fo': '{{ _.fum }}'
+        }
+
+        self.assertRaises(
+            exc.JinjaEvaluationException,
+            self.evaluator.evaluate,
+            expr,
+            data
+        )
+
     def test_multi_eval_recursive(self):
         expr = '{{ _.fee }} {{ _.im }}'
 
         data = {
-            'fee': '{{ _.fi }} <_.fo }}',
+            'fee': '{{ _.fi }}',
             'fi': '{{ _.fo }}',
             'fo': '{{ _.fum }}',
             'fum': 'fee-fi-fo-fum!',
@@ -159,3 +175,68 @@ class JinjaEvaluationTest(base.ExpressionEvaluatorTest):
             self.evaluator.evaluate,
             expr
         )
+
+    def test_block_eval(self):
+        expr = '{% for i in _.x %}{{ i }}{% endfor %}'
+
+        data = {
+            'x': ['a', 'b', 'c']
+        }
+
+        self.assertEqual('abc', self.evaluator.evaluate(expr, data))
+
+    def test_block_eval_undefined(self):
+        expr = '{% for i in _.x %}{{ _.y }}{% endfor %}'
+
+        data = {
+            'x': ['a', 'b', 'c']
+        }
+
+        self.assertRaises(
+            exc.JinjaEvaluationException,
+            self.evaluator.evaluate,
+            expr,
+            data
+        )
+
+    def test_block_eval_recursive(self):
+        expr = '{% for i in _.x %}{{ i }}{% endfor %}'
+
+        data = {
+            'x': [
+                '{{ _.a }}',
+                '{{ _.b }}',
+                '{{ _.c }}'
+                '{% for j in _.y %}{{ j }}{% endfor %}'
+            ],
+            'a': 'a',
+            'b': 'b',
+            'c': 'c',
+            'y': ['d', 'e', 'f']
+        }
+
+        self.assertEqual('abcdef', self.evaluator.evaluate(expr, data))
+
+    def test_multi_block_eval(self):
+        expr = (
+            '{% for i in _.x %}{{ i }}{% endfor %}'
+            '{% for i in _.y %}{{ i }}{% endfor %}'
+        )
+
+        data = {
+            'x': ['a', 'b', 'c'],
+            'y': ['d', 'e', 'f']
+        }
+
+        self.assertEqual('abcdef', self.evaluator.evaluate(expr, data))
+
+    def test_mix_block_and_expr_eval(self):
+        expr = '{{ _.a }}{% for i in _.x %}{{ i }}{% endfor %}{{ _.d }}'
+
+        data = {
+            'x': ['b', 'c'],
+            'a': 'a',
+            'd': 'd'
+        }
+
+        self.assertEqual('abcd', self.evaluator.evaluate(expr, data))

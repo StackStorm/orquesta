@@ -40,7 +40,7 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
 
         self.assertEqual('bar', self.evaluator.evaluate(expr, data))
 
-    def test_basic_bad_eval(self):
+    def test_basic_eval_undefined(self):
         expr = '<% $.foo %>'
 
         data = {}
@@ -89,7 +89,7 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
         expr = '<% $.fee %> <% $.im %>'
 
         data = {
-            'fee': '<% $.fi %> <$.fo %>',
+            'fee': '<% $.fi %>',
             'fi': '<% $.fo %>',
             'fo': '<% $.fum %>',
             'fum': 'fee-fi-fo-fum!',

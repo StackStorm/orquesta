@@ -37,8 +37,10 @@ def register_functions(env):
 
 class JinjaEvaluator(base.Evaluator):
     _delimiter = '{{}}'
-    _regex_pattern = '({{.*?}}|{%.*?%})'
+    _regex_pattern = '{{.*?}}'
     _regex_parser = re.compile(_regex_pattern)
+    _regex_block_pattern = '{%.*?%}'
+    _regex_block_parser = re.compile(_regex_block_pattern)
 
     _jinja_env = jinja2.Environment(
         undefined=jinja2.StrictUndefined,
@@ -88,19 +90,15 @@ class JinjaEvaluator(base.Evaluator):
         return errors
 
     @classmethod
-    def evaluate(cls, text, data=None):
-        if not isinstance(text, six.string_types):
-            raise ValueError('Text to be evaluated is not typeof string.')
-
-        if data and not isinstance(data, dict):
-            raise ValueError('Provided data is not typeof dict.')
-
+    def _traverse_and_evaluate(cls, text, data=None):
         output = text
         exprs = cls._regex_parser.findall(text)
+        block_exprs = cls._regex_block_parser.findall(text)
         ctx = cls.contextualize(data)
         opts = {'undefined_to_none': False}
 
         try:
+            # Evaluate inline jinja expressions first.
             for expr in exprs:
                 stripped = cls.strip_delimiter(expr)
                 compiled = cls._jinja_env.compile_expression(stripped, **opts)
@@ -110,23 +108,52 @@ class JinjaEvaluator(base.Evaluator):
                     result = list(result)
 
                 if isinstance(result, six.string_types):
-                    result = cls.evaluate(result, data)
+                    result = cls._traverse_and_evaluate(result, data)
 
-                output = (
-                    output.replace(expr, str(result))
-                    if len(exprs) > 1
-                    else result
-                )
+                # For StrictUndefined values, UndefinedError only gets raised
+                # when the value is accessed, not when it gets created. The
+                # simplest way to access it is to try and cast it to string.
+                # When StrictUndefined is cast to str below, this will raise
+                # an exception with error description.
+                if not isinstance(result, jinja2.runtime.StrictUndefined):
+                    output = (
+                        output.replace(expr, str(result))
+                        if len(exprs) > 1 or block_exprs
+                        else result
+                    )
 
-            # For StrictUndefined values, UndefinedError only gets raised
-            # when the value is accessed, not when it gets created. The
-            # simplest way to access it is to try and cast it to string.
-            # When StrictUndefined is cast to str below, this will raise
-            # an exception with error description.
-            if type(output) is jinja2.runtime.StrictUndefined:
-                output = str(output)
+            # Evaluate jinja block(s) after inline expressions are evaluated..
+            if block_exprs and isinstance(output, six.string_types):
+                output = cls._jinja_env.from_string(output).render(ctx)
+
+                # Traverse and evaulate again in case additional inline
+                # epxressions are introduced after the jinja block is evaluated.
+                output = cls._traverse_and_evaluate(output, data)
 
         except jinja2.exceptions.UndefinedError as e:
             raise exc.JinjaEvaluationException(str(getattr(e, 'message', e)))
+
+        return output
+
+    @classmethod
+    def evaluate(cls, text, data=None):
+        if not isinstance(text, six.string_types):
+            raise ValueError('Text to be evaluated is not typeof string.')
+
+        if data and not isinstance(data, dict):
+            raise ValueError('Provided data is not typeof dict.')
+
+        output = cls._traverse_and_evaluate(text, data=data)
+
+        if isinstance(output, six.string_types):
+            exprs = [
+                cls.strip_delimiter(expr)
+                for expr in cls._regex_parser.findall(output)
+            ]
+
+            if exprs:
+                raise exc.JinjaEvaluationException(
+                    'There are unresolved variables: %s' % ', '.join(exprs)
+                )
 
         return output
