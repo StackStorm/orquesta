@@ -39,6 +39,8 @@ class JinjaEvaluator(base.Evaluator):
     _delimiter = '{{}}'
     _regex_pattern = '{{.*?}}'
     _regex_parser = re.compile(_regex_pattern)
+
+    _block_delimiter = '{%}'
     _regex_block_pattern = '{%.*?%}'
     _regex_block_parser = re.compile(_regex_block_pattern)
 
@@ -68,9 +70,23 @@ class JinjaEvaluator(base.Evaluator):
             raise ValueError('Text to be evaluated is not typeof string.')
 
         errors = []
-        exprs = cls._regex_parser.findall(text)
 
-        for expr in exprs:
+        def append_error(expr, exc):
+            error = {
+                'message': str(getattr(exc, 'message', exc)),
+                'expression': expr
+            }
+
+            errors.append(error)
+
+        # Validate the entire text to cover malformed delimiters and blocks.
+        try:
+            cls._jinja_env.parse(text)
+        except jinja2.exceptions.TemplateError as e:
+            append_error(text, e)
+
+        # Validate individual inline expressions.
+        for expr in cls._regex_parser.findall(text):
             try:
                 parser = jinja2.parser.Parser(
                     cls._jinja_env.overlay(),
@@ -80,12 +96,7 @@ class JinjaEvaluator(base.Evaluator):
 
                 parser.parse_expression()
             except jinja2.exceptions.TemplateError as e:
-                error = {
-                    'message': str(getattr(e, 'message', e)),
-                    'expression': cls.strip_delimiter(expr)
-                }
-
-                errors.append(error)
+                append_error(cls.strip_delimiter(expr), e)
 
         return errors
 
@@ -122,7 +133,7 @@ class JinjaEvaluator(base.Evaluator):
                         else result
                     )
 
-            # Evaluate jinja block(s) after inline expressions are evaluated..
+            # Evaluate jinja block(s) after inline expressions are evaluated.
             if block_exprs and isinstance(output, six.string_types):
                 output = cls._jinja_env.from_string(output).render(ctx)
 

@@ -42,13 +42,29 @@ class JinjaValidationTest(base.ExpressionEvaluatorTest):
         expr = '{{ {{ _.foo }} }}'
         errors = self.evaluator.validate(expr)
 
-        self.assertEqual(1, len(errors))
-        self.assertIn('unexpected end of template', errors[0]['message'])
+        self.assertEqual(2, len(errors))
+        self.assertIn('expected token \':\', got \'}\'', errors[0]['message'])
+        self.assertIn('unexpected end of template', errors[1]['message'])
 
     def test_multiple_errors(self):
         expr = '{{ 1 +/ 2 }} and {{ * }}'
         errors = self.evaluator.validate(expr)
 
-        self.assertEqual(2, len(errors))
+        self.assertEqual(3, len(errors))
         self.assertIn('unexpected', errors[0]['message'])
         self.assertIn('unexpected', errors[1]['message'])
+        self.assertIn('unexpected', errors[2]['message'])
+
+    def test_block_error(self):
+        expr = '{% for i in _.x %}{{ i }}{% foobar %}'
+        errors = self.evaluator.validate(expr)
+
+        self.assertEqual(1, len(errors))
+        self.assertIn('unknown tag', errors[0]['message'])
+
+    def test_missing_braces_error(self):
+        expr = '{% for i in _.x %}{{ i }}{{ foobar %}'
+        errors = self.evaluator.validate(expr)
+
+        self.assertEqual(1, len(errors))
+        self.assertIn('unexpected \'}\'', errors[0]['message'])
