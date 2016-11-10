@@ -33,6 +33,13 @@ class Evaluator(object):
         return expr.strip(cls._delimiter).strip()
 
     @classmethod
+    def format_error(cls, expr, exc):
+        return {
+            'message': str(getattr(exc, 'message', exc)),
+            'expression': expr
+        }
+
+    @classmethod
     @abc.abstractmethod
     def validate(cls, expr):
         raise NotImplementedError()

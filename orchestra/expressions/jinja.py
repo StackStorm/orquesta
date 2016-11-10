@@ -71,19 +71,11 @@ class JinjaEvaluator(base.Evaluator):
 
         errors = []
 
-        def append_error(expr, exc):
-            error = {
-                'message': str(getattr(exc, 'message', exc)),
-                'expression': expr
-            }
-
-            errors.append(error)
-
         # Validate the entire text to cover malformed delimiters and blocks.
         try:
             cls._jinja_env.parse(text)
         except jinja2.exceptions.TemplateError as e:
-            append_error(text, e)
+            errors.append(cls.format_error(text, e))
 
         # Validate individual inline expressions.
         for expr in cls._regex_parser.findall(text):
@@ -96,12 +88,12 @@ class JinjaEvaluator(base.Evaluator):
 
                 parser.parse_expression()
             except jinja2.exceptions.TemplateError as e:
-                append_error(cls.strip_delimiter(expr), e)
+                errors.append(cls.format_error(cls.strip_delimiter(expr), e))
 
         return errors
 
     @classmethod
-    def _traverse_and_evaluate(cls, text, data=None):
+    def _evaluate_and_expand(cls, text, data=None):
         output = text
         exprs = cls._regex_parser.findall(text)
         block_exprs = cls._regex_block_parser.findall(text)
@@ -119,7 +111,7 @@ class JinjaEvaluator(base.Evaluator):
                     result = list(result)
 
                 if isinstance(result, six.string_types):
-                    result = cls._traverse_and_evaluate(result, data)
+                    result = cls._evaluate_and_expand(result, data)
 
                 # For StrictUndefined values, UndefinedError only gets raised
                 # when the value is accessed, not when it gets created. The
@@ -139,7 +131,7 @@ class JinjaEvaluator(base.Evaluator):
 
                 # Traverse and evaulate again in case additional inline
                 # epxressions are introduced after the jinja block is evaluated.
-                output = cls._traverse_and_evaluate(output, data)
+                output = cls._evaluate_and_expand(output, data)
 
         except jinja2.exceptions.UndefinedError as e:
             raise exc.JinjaEvaluationException(str(getattr(e, 'message', e)))
@@ -154,7 +146,7 @@ class JinjaEvaluator(base.Evaluator):
         if data and not isinstance(data, dict):
             raise ValueError('Provided data is not typeof dict.')
 
-        output = cls._traverse_and_evaluate(text, data=data)
+        output = cls._evaluate_and_expand(text, data=data)
 
         if isinstance(output, six.string_types):
             exprs = [

@@ -57,18 +57,12 @@ class YAQLEvaluator(base.Evaluator):
             raise ValueError('Text to be evaluated is not typeof string.')
 
         errors = []
-        exprs = cls._regex_parser.findall(text)
 
-        for expr in exprs:
+        for expr in cls._regex_parser.findall(text):
             try:
                 cls._engine(cls.strip_delimiter(expr))
             except (yaql_exc.YaqlException, ValueError, TypeError) as e:
-                error = {
-                    'message': str(getattr(e, 'message', e)),
-                    'expression': cls.strip_delimiter(expr)
-                }
-
-                errors.append(error)
+                errors.append(cls.format_error(cls.strip_delimiter(expr), e))
 
         return errors
 
