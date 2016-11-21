@@ -35,7 +35,16 @@ def register_functions(ctx):
     return catalog
 
 
+class YaqlGrammarException(exc.ExpressionGrammarException):
+    pass
+
+
+class YaqlEvaluationException(exc.ExpressionEvaluationException):
+    pass
+
+
 class YAQLEvaluator(base.Evaluator):
+    _type = 'yaql'
     _delimiter = '<%>'
     _regex_pattern = '<%.*?%>'
     _regex_parser = re.compile(_regex_pattern)
@@ -50,6 +59,12 @@ class YAQLEvaluator(base.Evaluator):
         ctx['__task_states'] = ctx['$'].get('__task_states')
 
         return ctx
+
+    @classmethod
+    def has_expressions(cls, text):
+        exprs = cls._regex_parser.findall(text)
+
+        return exprs is not None and len(exprs) > 0
 
     @classmethod
     def validate(cls, text):
@@ -96,7 +111,7 @@ class YAQLEvaluator(base.Evaluator):
                 )
 
         except KeyError as e:
-            raise exc.YaqlEvaluationException(
+            raise YaqlEvaluationException(
                 'Unable to resolve key \'%s\' in expression '
                 '\'%s\' from context.' % (
                     str(getattr(e, 'message', e)),
@@ -104,6 +119,6 @@ class YAQLEvaluator(base.Evaluator):
                 )
             )
         except (yaql_exc.YaqlException, ValueError, TypeError) as e:
-            raise exc.YaqlEvaluationException(str(getattr(e, 'message', e)))
+            raise YaqlEvaluationException(str(getattr(e, 'message', e)))
 
         return output

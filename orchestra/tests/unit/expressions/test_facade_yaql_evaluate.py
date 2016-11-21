@@ -10,34 +10,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra.expressions import yql
-from orchestra.tests.unit import base
-from orchestra.utils import plugin
+import unittest
+
+from orchestra import exceptions as exc
+from orchestra.expressions import base as expressions
 
 
-class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.language = 'yaql'
-        super(YAQLEvaluationTest, cls).setUpClass()
-
-    def test_get_evaluator(self):
-        e = plugin.get_module(
-            'orchestra.expressions.evaluators',
-            self.language
-        )
-
-        self.assertEqual(e, yql.YAQLEvaluator)
-        self.assertIn('json', e._custom_functions.keys())
-        self.assertIn('task_state', e._custom_functions.keys())
+class YAQLFacadeEvaluationTest(unittest.TestCase):
 
     def test_basic_eval(self):
         expr = '<% $.foo %>'
 
         data = {'foo': 'bar'}
 
-        self.assertEqual('bar', self.evaluator.evaluate(expr, data))
+        self.assertEqual('bar', expressions.evaluate(expr, data))
 
     def test_basic_eval_undefined(self):
         expr = '<% $.foo %>'
@@ -45,8 +31,8 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
         data = {}
 
         self.assertRaises(
-            yql.YaqlEvaluationException,
-            self.evaluator.evaluate,
+            exc.ExpressionEvaluationException,
+            expressions.evaluate,
             expr,
             data
         )
@@ -60,7 +46,7 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
             }
         }
 
-        self.assertEqual('bar', self.evaluator.evaluate(expr, data))
+        self.assertEqual('bar', expressions.evaluate(expr, data))
 
     def test_multi_eval(self):
         expr = '<% $.foo %> and <% $.marco %>'
@@ -70,7 +56,7 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
             'marco': 'polo'
         }
 
-        self.assertEqual('bar and polo', self.evaluator.evaluate(expr, data))
+        self.assertEqual('bar and polo', expressions.evaluate(expr, data))
 
     def test_eval_recursive(self):
         expr = '<% $.fee %>'
@@ -82,7 +68,7 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
             'fum': 'fee-fi-fo-fum'
         }
 
-        self.assertEqual('fee-fi-fo-fum', self.evaluator.evaluate(expr, data))
+        self.assertEqual('fee-fi-fo-fum', expressions.evaluate(expr, data))
 
     def test_multi_eval_recursive(self):
         expr = '<% $.fee %> <% $.im %>'
@@ -98,7 +84,7 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
 
         self.assertEqual(
             'fee-fi-fo-fum! i\'m hungry!',
-            self.evaluator.evaluate(expr, data)
+            expressions.evaluate(expr, data)
         )
 
     def test_type_preservation(self):
@@ -113,27 +99,27 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
 
         self.assertEqual(
             data['k1'],
-            self.evaluator.evaluate('<% $.k1 %>', data)
+            expressions.evaluate('<% $.k1 %>', data)
         )
 
         self.assertEqual(
             data['k2'],
-            self.evaluator.evaluate('<% $.k2 %>', data)
+            expressions.evaluate('<% $.k2 %>', data)
         )
 
-        self.assertTrue(self.evaluator.evaluate('<% $.k3 %>', data))
+        self.assertTrue(expressions.evaluate('<% $.k3 %>', data))
 
         self.assertListEqual(
             data['k4'],
-            self.evaluator.evaluate('<% $.k4 %>', data)
+            expressions.evaluate('<% $.k4 %>', data)
         )
 
         self.assertDictEqual(
             data['k5'],
-            self.evaluator.evaluate('<% $.k5 %>', data)
+            expressions.evaluate('<% $.k5 %>', data)
         )
 
-        self.assertIsNone(self.evaluator.evaluate('<% $.k6 %>', data))
+        self.assertIsNone(expressions.evaluate('<% $.k6 %>', data))
 
     def test_type_string_detection(self):
         expr = '<% $.foo %> -> <% $.bar %>'
@@ -143,18 +129,18 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
             'bar': 201
         }
 
-        self.assertEqual('101 -> 201', self.evaluator.evaluate(expr, data))
+        self.assertEqual('101 -> 201', expressions.evaluate(expr, data))
 
     def test_custom_function(self):
         expr = '<% json(\'{"a": 123}\') %>'
 
-        self.assertDictEqual({'a': 123}, self.evaluator.evaluate(expr))
+        self.assertDictEqual({'a': 123}, expressions.evaluate(expr))
 
     def test_custom_function_failure(self):
         expr = '<% json(int(123)) %>'
 
         self.assertRaises(
-            yql.YaqlEvaluationException,
-            self.evaluator.evaluate,
+            exc.ExpressionEvaluationException,
+            expressions.evaluate,
             expr
         )

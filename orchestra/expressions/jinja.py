@@ -35,7 +35,16 @@ def register_functions(env):
     return catalog
 
 
+class JinjaGrammarException(exc.ExpressionGrammarException):
+    pass
+
+
+class JinjaEvaluationException(exc.ExpressionEvaluationException):
+    pass
+
+
 class JinjaEvaluator(base.Evaluator):
+    _type = 'jinja'
     _delimiter = '{{}}'
     _regex_pattern = '{{.*?}}'
     _regex_parser = re.compile(_regex_pattern)
@@ -63,6 +72,13 @@ class JinjaEvaluator(base.Evaluator):
             ctx['__task_states'] = data.get('__task_states')
 
         return ctx
+
+    @classmethod
+    def has_expressions(cls, text):
+        exprs = cls._regex_parser.findall(text)
+        block_exprs = cls._regex_block_parser.findall(text)
+
+        return exprs or block_exprs
 
     @classmethod
     def validate(cls, text):
@@ -134,7 +150,7 @@ class JinjaEvaluator(base.Evaluator):
                 output = cls._evaluate_and_expand(output, data)
 
         except jinja2.exceptions.UndefinedError as e:
-            raise exc.JinjaEvaluationException(str(getattr(e, 'message', e)))
+            raise JinjaEvaluationException(str(getattr(e, 'message', e)))
 
         return output
 
@@ -155,7 +171,7 @@ class JinjaEvaluator(base.Evaluator):
             ]
 
             if exprs:
-                raise exc.JinjaEvaluationException(
+                raise JinjaEvaluationException(
                     'There are unresolved variables: %s' % ', '.join(exprs)
                 )
 

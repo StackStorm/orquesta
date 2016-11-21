@@ -17,6 +17,7 @@ from six.moves import queue
 import unittest
 
 from orchestra import composition
+from orchestra.expressions import base as expressions
 from orchestra import states
 from orchestra import symphony
 from orchestra.utils import plugin
@@ -35,6 +36,13 @@ class ExpressionEvaluatorTest(unittest.TestCase):
             'orchestra.expressions.evaluators',
             cls.language
         )
+
+
+@six.add_metaclass(abc.ABCMeta)
+class ExpressionFacadeEvaluatorTest(unittest.TestCase):
+
+    def validate(self, expr):
+        return expressions.validate(expr).get('errors', [])
 
 
 @six.add_metaclass(abc.ABCMeta)

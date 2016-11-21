@@ -20,13 +20,9 @@ class PluginFactoryError(Exception):
     pass
 
 
-class YaqlGrammarException(Exception):
+class ExpressionGrammarException(Exception):
     pass
 
 
-class YaqlEvaluationException(Exception):
-    pass
-
-
-class JinjaEvaluationException(Exception):
+class ExpressionEvaluationException(Exception):
     pass

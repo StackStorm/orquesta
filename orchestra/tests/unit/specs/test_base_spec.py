@@ -157,6 +157,7 @@ class BaseSpecTest(unittest.TestCase):
             ],
             'expressions': [
                 {
+                    'type': 'yaql',
                     'expression': '1 +/ 2',
                     'spec_path': 'attr3',
                     'schema_path': 'properties.attr3',
@@ -164,6 +165,7 @@ class BaseSpecTest(unittest.TestCase):
                                'position 3 of expression \'1 +/ 2\''
                 },
                 {
+                    'type': 'yaql',
                     'expression': '{"a": 123}',
                     'spec_path': 'attr3',
                     'schema_path': 'properties.attr3',
@@ -171,6 +173,7 @@ class BaseSpecTest(unittest.TestCase):
                                '\':\' at position 4',
                 },
                 {
+                    'type': 'yaql',
                     'expression': '<% $.foobar',
                     'spec_path': 'attr4.attr4_1',
                     'schema_path': 'properties.attr4.properties.attr4_1',

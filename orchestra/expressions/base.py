@@ -11,21 +11,25 @@
 # limitations under the License.
 
 import abc
+import json
 import logging
 import six
 
+from stevedore import extension
+
+from orchestra import exceptions as exc
 from orchestra.utils import plugin
 
 
 LOG = logging.getLogger(__name__)
 
-
-def get_evaluator(language):
-    return plugin.get_module('orchestra.expressions.evaluators', language)
+_EXP_EVALUATORS = None
+_EXP_EVALUATOR_NAMESPACE = 'orchestra.expressions.evaluators'
 
 
 @six.add_metaclass(abc.ABCMeta)
 class Evaluator(object):
+    _type = 'unspecified'
     _delimiter = None
 
     @classmethod
@@ -35,16 +39,85 @@ class Evaluator(object):
     @classmethod
     def format_error(cls, expr, exc):
         return {
-            'message': str(getattr(exc, 'message', exc)),
-            'expression': expr
+            'type': cls._type,
+            'expression': expr,
+            'message': str(getattr(exc, 'message', exc))
         }
 
     @classmethod
+    def has_expressions(cls, text):
+        raise NotImplementedError()
+
+    @classmethod
     @abc.abstractmethod
-    def validate(cls, expr):
+    def validate(cls, text):
         raise NotImplementedError()
 
     @classmethod
     @abc.abstractmethod
     def evaluate(cls, text, data=None):
         raise NotImplementedError()
+
+
+def get_evaluator(language):
+    return plugin.get_module(_EXP_EVALUATOR_NAMESPACE, language)
+
+
+def get_evaluators():
+    global _EXP_EVALUATORS
+
+    if _EXP_EVALUATORS is None:
+        _EXP_EVALUATORS = {}
+
+        mgr = extension.ExtensionManager(
+            namespace=_EXP_EVALUATOR_NAMESPACE,
+            invoke_on_load=False
+        )
+
+        for name in mgr.names():
+            _EXP_EVALUATORS[name] = get_evaluator(name)
+
+    return _EXP_EVALUATORS
+
+
+def validate(text):
+    result = [
+        {
+            'type': name,
+            'module': evaluator,
+            'errors': evaluator.validate(text)
+        }
+        for name, evaluator in six.iteritems(get_evaluators())
+        if evaluator.has_expressions(text)
+    ]
+
+    if len(result) == 1:
+        return result[0]
+    else:
+        error = Evaluator.format_error(
+            text,
+            exc.ExpressionGrammarException(
+                'The statement contains multiple expression '
+                'types which is not supported.'
+            )
+        )
+
+        return {
+            'type': None,
+            'module': None,
+            'errors': [error]
+        }
+
+
+def evaluate(text, data=None):
+    result = validate(text)
+    errors = result.get('errors', [])
+
+    if len(errors) > 0:
+        raise exc.ExpressionGrammarException(
+            'Validation failed for expression. %s', json.dumps(errors)
+        )
+
+    evaluator = result.get('module')
+
+    return evaluator.evaluate(text, data=data)
