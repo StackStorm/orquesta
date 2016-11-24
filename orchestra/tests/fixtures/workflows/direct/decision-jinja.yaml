@@ -1,0 +1,22 @@
+version: '2.0'
+
+decision-jinja:
+    description: >
+        A sample workflow that demonstrates how to use conditions
+        to determine which path in the workflow to take.
+    type: direct
+    input:
+        - which
+    tasks:
+        t1:
+            action: std.noop
+            on-success:
+                - a: "{{ _.which == 'a' }}"
+                - b: "{{ _.which == 'b' }}"
+                - c: "{{ not _.which in ['a', 'b'] }}"
+        a:
+            action: std.noop
+        b:
+            action: std.noop
+        c:
+            action: std.noop

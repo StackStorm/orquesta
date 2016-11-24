@@ -17,7 +17,6 @@ from orchestra.composers import base
 from orchestra import composition
 from orchestra import states
 from orchestra.specs import v2 as specs
-from orchestra.expressions import base as expressions
 
 
 LOG = logging.getLogger(__name__)
@@ -25,18 +24,21 @@ LOG = logging.getLogger(__name__)
 
 class ReverseWorkflowComposer(base.WorkflowComposer):
     wf_spec_type = specs.ReverseWorkflowSpec
-    expr_evaluator = expressions.get_evaluator('yaql')
 
     @classmethod
     def _compose_sequence_criteria(cls, task_name, *args, **kwargs):
-        yaql_expr = (
+        criteria = []
+
+        task_state_criterion = (
             'task_state(%s) = %s' % (
                 task_name,
                 str(states.SUCCESS)
             )
         )
 
-        return '<% ' + yaql_expr + ' %>'
+        criteria.append('<% ' + task_state_criterion + ' %>')
+
+        return criteria
 
     @classmethod
     def _compose_wf_graph(cls, wf_spec):

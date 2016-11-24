@@ -17,7 +17,6 @@ from orchestra.composers import base
 from orchestra import composition
 from orchestra import states
 from orchestra.specs import v2 as specs
-from orchestra.expressions import base as expressions
 
 
 LOG = logging.getLogger(__name__)
@@ -25,25 +24,27 @@ LOG = logging.getLogger(__name__)
 
 class DirectWorkflowComposer(base.WorkflowComposer):
     wf_spec_type = specs.DirectWorkflowSpec
-    expr_evaluator = expressions.get_evaluator('yaql')
 
     @classmethod
     def _compose_sequence_criteria(cls, task_name, *args, **kwargs):
+        criteria = []
+
         condition = kwargs.get('condition')
         expr = kwargs.get('expr')
 
-        yaql_expr = (
+        task_state_criterion = (
             'task_state(%s) in %s' % (
                 task_name,
                 str(states.TASK_TRANSITION_MAP[condition])
             )
         )
 
-        if expr:
-            stripped_expr = cls.expr_evaluator.strip_delimiter(expr)
-            yaql_expr += ' and (%s)' % stripped_expr
+        criteria.append('<% ' + task_state_criterion + ' %>')
 
-        return '<% ' + yaql_expr + ' %>'
+        if expr:
+            criteria.append(expr)
+
+        return criteria
 
     @classmethod
     def _compose_wf_graph(cls, wf_spec):

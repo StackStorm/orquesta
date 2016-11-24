@@ -73,7 +73,7 @@ class CyclicWorkflowComposerTest(base.DirectWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             'task3',
                             condition='on-success',
-                            expr="$.count < 3"
+                            expr="<% $.count < 3 %>"
                         )
                     }
                 ]
@@ -142,7 +142,7 @@ class CyclicWorkflowComposerTest(base.DirectWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             'task3',
                             condition='on-success',
-                            expr="$.count < 3"
+                            expr="<% $.count < 3 %>"
                         )
                     }
                 ]
@@ -206,7 +206,7 @@ class CyclicWorkflowComposerTest(base.DirectWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success',
-                            expr='not $.proceed'
+                            expr='<% not $.proceed %>'
                         )
                     },
                     {
@@ -215,7 +215,7 @@ class CyclicWorkflowComposerTest(base.DirectWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success',
-                            expr='$.proceed'
+                            expr='<% $.proceed %>'
                         )
                     }
                 ],
@@ -246,7 +246,7 @@ class CyclicWorkflowComposerTest(base.DirectWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             'task5',
                             condition='on-success',
-                            expr="$.count < 3"
+                            expr="<% $.count < 3 %>"
                         )
                     }
                 ]
@@ -313,7 +313,7 @@ class CyclicWorkflowComposerTest(base.DirectWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success',
-                            expr='not $.proceed'
+                            expr='<% not $.proceed %>'
                         )
                     },
                     {
@@ -322,7 +322,7 @@ class CyclicWorkflowComposerTest(base.DirectWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             'task2',
                             condition='on-success',
-                            expr='$.proceed'
+                            expr='<% $.proceed %>'
                         )
                     }
                 ],
@@ -353,7 +353,7 @@ class CyclicWorkflowComposerTest(base.DirectWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             'task5',
                             condition='on-success',
-                            expr="$.count < 3"
+                            expr="<% $.count < 3 %>"
                         )
                     }
                 ]

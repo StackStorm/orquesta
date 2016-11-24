@@ -16,7 +16,6 @@ import six
 from six.moves import queue
 
 from orchestra import composition
-from orchestra.expressions import base as expressions
 from orchestra.utils import plugin
 
 
@@ -30,7 +29,6 @@ def get_composer(workflow_type):
 @six.add_metaclass(abc.ABCMeta)
 class WorkflowComposer(object):
     wf_spec_type = None
-    expr_evaluator = expressions.get_evaluator('yaql')
 
     @classmethod
     def compose(cls, spec):
@@ -115,11 +113,13 @@ class WorkflowComposer(object):
                 wf_ex_graph.add_task(task_ex_name, **task_ex_attrs)
 
                 for next_seq in wf_graph.get_next_sequences(task_name):
-                    next_seq_criteria = next_seq[3]['criteria']
-                    next_seq_criteria = next_seq_criteria.replace(
-                        'task_state(%s)' % task_name,
-                        'task_state(%s)' % task_ex_name
-                    )
+                    next_seq_criteria = [
+                        criterion.replace(
+                            'task_state(%s)' % task_name,
+                            'task_state(%s)' % task_ex_name
+                        )
+                        for criterion in next_seq[3]['criteria']
+                    ]
 
                     item = (
                         next_seq[1],
@@ -155,11 +155,14 @@ class WorkflowComposer(object):
 
                 p_task_name = prev_seq[0]
                 p_task_ex_name = _create_task_ex_name(p_task_name, split_id)
-                p_seq_criteria = prev_seq[3]['criteria']
-                p_seq_criteria = p_seq_criteria.replace(
-                    'task_state(%s)' % p_task_name,
-                    'task_state(%s)' % p_task_ex_name
-                )
+
+                p_seq_criteria = [
+                    criterion.replace(
+                        'task_state(%s)' % p_task_name,
+                        'task_state(%s)' % p_task_ex_name
+                    )
+                    for criterion in prev_seq[3]['criteria']
+                ]
 
                 wf_ex_graph.add_sequence(
                     p_task_ex_name,

@@ -30,7 +30,6 @@ class WorkflowConductor(object):
             raise ValueError('Invalid type for workflow execution graph.')
 
         self.wf_ex_graph = wf_ex_graph
-        self.expr_evaluator = expressions.get_evaluator('yaql')
 
     def start_workflow(self):
         return self.wf_ex_graph.get_start_tasks()
@@ -45,11 +44,16 @@ class WorkflowConductor(object):
         )
 
         tasks = []
+        outbounds = []
 
-        outbounds = [
-            seq for seq in self.wf_ex_graph.get_next_sequences(task['id'])
-            if self.expr_evaluator.evaluate(seq[3]['criteria'], context)
-        ]
+        for seq in self.wf_ex_graph.get_next_sequences(task['id']):
+            evaluated_criteria = [
+                expressions.evaluate(criterion, context)
+                for criterion in seq[3]['criteria']
+            ]
+
+            if all(evaluated_criteria):
+                outbounds.append(seq)
 
         for seq in outbounds:
             next_task_id, seq_key, attrs = seq[1], seq[2], seq[3]

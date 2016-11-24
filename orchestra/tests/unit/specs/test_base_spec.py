@@ -12,7 +12,6 @@
 
 import unittest
 
-from orchestra.expressions import yql as expr
 from orchestra.specs import types
 from orchestra.specs.v2 import base
 
@@ -105,11 +104,6 @@ class BaseSpecTest(unittest.TestCase):
         }
 
         self.assertDictEqual(schema, MockSpec.get_schema(includes=None))
-
-    def test_get_expr_evaluator(self):
-        evaluator = MockSpec.get_expr_evaluator('yaql')
-
-        self.assertTrue(evaluator is expr.YAQLEvaluator)
 
     def test_spec_valid(self):
         spec = {

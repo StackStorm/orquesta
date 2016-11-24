@@ -16,9 +16,9 @@ import logging
 import six
 import yaml
 
+from orchestra.expressions import base as expressions
 from orchestra import utils
 from orchestra.specs import types
-from orchestra.utils import plugin
 
 
 LOG = logging.getLogger(__name__)
@@ -45,14 +45,6 @@ class BaseSpec(object):
     _schema_validator = None
 
     _expressions = []
-
-    _expr_evaluator = {
-        'yaql': plugin.get_module('orchestra.expressions.evaluators', 'yaql')
-    }
-
-    @classmethod
-    def get_expr_evaluator(cls, language):
-        return cls._expr_evaluator[language]
 
     @classmethod
     def get_schema_validator(cls):
@@ -209,15 +201,12 @@ class BaseSpec(object):
 
     @classmethod
     def _validate_expressions(cls, spec):
-        evaluator = cls.get_expr_evaluator('yaql')
-
         result = []
         expr_schema_paths = cls.get_expr_schema_paths()
 
         for expr_path, schema_path in six.iteritems(expr_schema_paths):
-            errors = evaluator.validate(
-                utils.get_dict_value(spec, expr_path) or ''
-            )
+            expr = utils.get_dict_value(spec, expr_path) or ''
+            errors = expressions.validate(expr).get('errors', [])
 
             for error in errors:
                 error['spec_path'] = expr_path
