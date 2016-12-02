@@ -10,7 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import unittest
 
 from orchestra.utils import date
@@ -28,29 +27,56 @@ MOCK_JSON = {
     'k6': {'a': 1, 'b': 2, 'c': 3}
 }
 
+MOCK_JSON_UNSERIALIZEABLE = {
+    'k1': object()
+}
+
 
 class FakeModel(object):
 
     def __init__(self, *args, **kwargs):
-        self.k1 = kwargs.get('k1', 'abc')
-        self.k2 = kwargs.get('k2', 123)
-        self.k3 = kwargs.get('k3', False)
-        self.k4 = kwargs.get('k4', date.parse(MOCK_DATETIME_STR))
-        self.k5 = kwargs.get('k5', [1, 3, 5, 7, 9])
-        self.k6 = kwargs.get('k6', {'a': 1, 'b': 2, 'c': 3})
+        self.k1 = None
+        self.k2 = None
+        self.k3 = None
+        self.k4 = None
+        self.k5 = None
+        self.k6 = None
 
 
 class SerializationTest(unittest.TestCase):
 
     def test_serialize(self):
-        doc = jsonify.serialize(FakeModel())
+        obj = FakeModel()
+        obj.k1 = MOCK_JSON['k1']
+        obj.k2 = MOCK_JSON['k2']
+        obj.k3 = MOCK_JSON['k3']
+        obj.k4 = MOCK_JSON['k4']
+        obj.k5 = MOCK_JSON['k5']
+        obj.k6 = MOCK_JSON['k6']
+
+        doc = jsonify.serialize(obj)
+
         self.assertDictEqual(MOCK_JSON, doc)
 
+    def test_serialize_unsupported_type(self):
+        obj = FakeModel()
+        obj.k1 = MOCK_JSON_UNSERIALIZEABLE['k1']
+
+        doc = jsonify.serialize(obj)
+
+        self.assertDictEqual(dict(), doc)
+
     def test_deserialize(self):
-        obj = jsonify.deserialize(FakeModel, copy.deepcopy(MOCK_JSON))
+        obj = jsonify.deserialize(FakeModel, MOCK_JSON)
+
         self.assertEqual(MOCK_JSON['k1'], obj.k1)
         self.assertEqual(MOCK_JSON['k2'], obj.k2)
         self.assertEqual(MOCK_JSON['k3'], obj.k3)
         self.assertEqual(date.parse(MOCK_JSON['k4']), obj.k4)
         self.assertListEqual(MOCK_JSON['k5'], obj.k5)
         self.assertDictEqual(MOCK_JSON['k6'], obj.k6)
+
+    def test_deserialize_unsupported_type(self):
+        obj = jsonify.deserialize(FakeModel, MOCK_JSON_UNSERIALIZEABLE)
+
+        self.assertIsNone(obj.k1)
