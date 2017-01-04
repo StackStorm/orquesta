@@ -55,6 +55,9 @@ class BaseSpecTest(unittest.TestCase):
         super(BaseSpecTest, self).setUp()
         self.maxDiff = None
 
+    def test_get_version(self):
+        self.assertEqual('2.0', MockSpec.get_version())
+
     def test_get_schema(self):
         schema = {
             'type': 'object',

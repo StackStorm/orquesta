@@ -47,6 +47,10 @@ class BaseSpec(object):
     _expressions = []
 
     @classmethod
+    def get_version(cls):
+        return cls._version
+
+    @classmethod
     def get_schema_validator(cls):
         if not cls._schema_validator:
             cls._schema_validator = jsonschema.Draft4Validator(cls.get_schema())

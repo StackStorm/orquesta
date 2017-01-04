@@ -54,6 +54,7 @@ class WorkflowSpec(base.BaseSpec):
 
             self.entry = wf_name
             self.wf_spec = wf_spec
+            self.wf_type = self.wf_spec.get('type', 'direct')
             self.task_specs = self.wf_spec.get('tasks', dict())
             break
 
