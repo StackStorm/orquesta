@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from orchestra.specs.v2 import base
 from orchestra.specs.v2.tasks import DirectTaskSpec
 from orchestra.specs.v2.tasks import DirectTaskDefaultsSpec
 from orchestra.specs.v2.workflows import DirectWorkflowSpec
@@ -17,6 +18,7 @@ from orchestra.specs.v2.tasks import ReverseTaskSpec
 from orchestra.specs.v2.tasks import ReverseTaskDefaultsSpec
 from orchestra.specs.v2.workflows import ReverseWorkflowSpec
 
+VERSION = base.BaseSpec.get_version()
 
 __all__ = [
     DirectWorkflowSpec.__name__,

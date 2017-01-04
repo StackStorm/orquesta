@@ -76,10 +76,11 @@ class WorkflowSpecTest(unittest.TestCase):
         else:
             return wf_name + '.yaml'
 
-    def get_wf_def(self, wf_name, rel_path=None):
+    def get_wf_def(self, wf_name, rel_path=None, raw=False):
         return loader.get_fixture_content(
             self.get_fixture_path(wf_name, rel_path=rel_path),
-            'workflows'
+            'workflows',
+            raw=raw
         )
 
 
