@@ -27,3 +27,15 @@ class FixtureTest(unittest.TestCase):
 
         self.assertIsInstance(content, dict)
         self.assertDictEqual(content, expected)
+
+    def test_fixture_loader_raw(self):
+        expected = "version: 'x.y.z'\nname: 'foobar'\n"
+
+        content = loader.get_fixture_content(
+            'mock.yaml',
+            'workflows',
+            raw=True
+        )
+
+        self.assertIsInstance(content, str)
+        self.assertEqual(content, expected)

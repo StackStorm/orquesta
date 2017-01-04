@@ -37,7 +37,7 @@ def get_workflow_fixtures_base_path():
     return os.path.join(get_fixtures_base_path(), 'workflows')
 
 
-def get_fixture_content(fixture_file_name, fixture_type):
+def get_fixture_content(fixture_file_name, fixture_type, raw=False):
     if fixture_type not in FIXTURE_TYPES:
         raise Exception('Unsupported fixture type of %s' % fixture_type)
 
@@ -49,4 +49,4 @@ def get_fixture_content(fixture_file_name, fixture_type):
         raise Exception('Unsupported fixture file ext type of %s.' % file_ext)
 
     with open(file_path, 'r') as fd:
-        return FIXTURE_EXTS[file_ext](fd)
+        return FIXTURE_EXTS[file_ext](fd) if not raw else fd.read()
