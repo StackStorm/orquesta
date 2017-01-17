@@ -53,6 +53,9 @@ class JinjaEvaluator(base.Evaluator):
     _regex_block_pattern = '{%.*?%}'
     _regex_block_parser = re.compile(_regex_block_pattern)
 
+    _regex_raw_block_pattern = '{% raw %}.*?{% endraw %}'
+    _regex_raw_block_parser = re.compile(_regex_raw_block_pattern)
+
     _jinja_env = jinja2.Environment(
         undefined=jinja2.StrictUndefined,
         trim_blocks=True,
@@ -162,6 +165,13 @@ class JinjaEvaluator(base.Evaluator):
         if data and not isinstance(data, dict):
             raise ValueError('Provided data is not typeof dict.')
 
+        # Remove raw blocks from the expression.
+        raw_blocks = cls._regex_raw_block_parser.findall(text)
+
+        for i in range(0, len(raw_blocks)):
+            text = text.replace(raw_blocks[i], '{%s}' % str(i))
+
+        # Recursively evaluate the expression.
         output = cls._evaluate_and_expand(text, data=data)
 
         if isinstance(output, six.string_types):
@@ -174,5 +184,14 @@ class JinjaEvaluator(base.Evaluator):
                 raise JinjaEvaluationException(
                     'There are unresolved variables: %s' % ', '.join(exprs)
                 )
+
+        if raw_blocks:
+            # Put raw blocks back into the expression.
+            for i in range(0, len(raw_blocks)):
+                output = output.replace('{%s}' % str(i), raw_blocks[i])
+
+            # Evaluate the raw blocks.
+            ctx = cls.contextualize(data)
+            output = cls._jinja_env.from_string(output).render(ctx)
 
         return output
