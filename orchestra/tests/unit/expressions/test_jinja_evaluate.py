@@ -229,8 +229,32 @@ class JinjaEvaluationTest(base.ExpressionEvaluatorTest):
 
         self.assertEqual('abcdef', self.evaluator.evaluate(expr, data))
 
+    def test_raw_block(self):
+        expr = '{% raw %}{{ _.foo }}{% endraw %}'
+
+        data = {'foo': 'bar'}
+
+        self.assertEqual('{{ _.foo }}', self.evaluator.evaluate(expr, data))
+
+    def test_multi_raw_blocks(self):
+        expr = (
+            '{% raw %}{{ _.foo }}{% endraw %} and '
+            '{% raw %}{{ _.bar }}{% endraw %} and '
+            '{% raw %}foobar{% endraw %}'
+        )
+
+        data = {'foo': 'bar'}
+
+        self.assertEqual(
+            '{{ _.foo }} and {{ _.bar }} and foobar',
+            self.evaluator.evaluate(expr, data)
+        )
+
     def test_mix_block_and_expr_eval(self):
-        expr = '{{ _.a }}{% for i in _.x %}{{ i }}{% endfor %}{{ _.d }}'
+        expr = (
+            '{{ _.a }}{% for i in _.x %}{{ i }}{% endfor %}{{ _.d }} and '
+            '{% raw %}{{ 1234 }}{% endraw %}'
+        )
 
         data = {
             'x': ['b', 'c'],
@@ -238,4 +262,7 @@ class JinjaEvaluationTest(base.ExpressionEvaluatorTest):
             'd': 'd'
         }
 
-        self.assertEqual('abcd', self.evaluator.evaluate(expr, data))
+        self.assertEqual(
+            'abcd and {{ 1234 }}',
+            self.evaluator.evaluate(expr, data)
+        )
