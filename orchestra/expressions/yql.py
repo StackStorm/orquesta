@@ -48,6 +48,8 @@ class YAQLEvaluator(base.Evaluator):
     _delimiter = '<%>'
     _regex_pattern = '<%.*?%>'
     _regex_parser = re.compile(_regex_pattern)
+    _regex_var_pattern = '.*?(\$\.[a-zA-Z0-9_\.\[\]\(\)]*).*?'
+    _regex_var_parser = re.compile(_regex_var_pattern)
     _engine = yaql.language.factory.YaqlFactory().create()
     _root_ctx = yaql.create_context()
     _custom_functions = register_functions(_root_ctx)
@@ -122,3 +124,15 @@ class YAQLEvaluator(base.Evaluator):
             raise YaqlEvaluationException(str(getattr(e, 'message', e)))
 
         return output
+
+    @classmethod
+    def extract_vars(cls, text):
+        if not isinstance(text, six.string_types):
+            raise ValueError('Text to be evaluated is not typeof string.')
+
+        vars = []
+
+        for expr in cls._regex_parser.findall(text):
+            vars.extend(cls._regex_var_parser.findall(expr))
+
+        return sorted(list(set(vars)))

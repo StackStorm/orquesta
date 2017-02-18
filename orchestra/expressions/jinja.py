@@ -48,6 +48,8 @@ class JinjaEvaluator(base.Evaluator):
     _delimiter = '{{}}'
     _regex_pattern = '{{.*?}}'
     _regex_parser = re.compile(_regex_pattern)
+    _regex_var_pattern = '.*?(_\.[a-zA-Z0-9_\.\[\]\(\)]*).*?'
+    _regex_var_parser = re.compile(_regex_var_pattern)
 
     _block_delimiter = '{%}'
     _regex_block_pattern = '{%.*?%}'
@@ -195,3 +197,15 @@ class JinjaEvaluator(base.Evaluator):
             output = cls._jinja_env.from_string(output).render(ctx)
 
         return output
+
+    @classmethod
+    def extract_vars(cls, text):
+        if not isinstance(text, six.string_types):
+            raise ValueError('Text to be evaluated is not typeof string.')
+
+        vars = []
+
+        for expr in cls._regex_parser.findall(text):
+            vars.extend(cls._regex_var_parser.findall(expr))
+
+        return sorted(list(set(vars)))
