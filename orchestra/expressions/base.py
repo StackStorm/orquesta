@@ -13,6 +13,7 @@
 import abc
 import json
 import logging
+import re
 import six
 
 from stevedore import extension
@@ -25,6 +26,7 @@ LOG = logging.getLogger(__name__)
 
 _EXP_EVALUATORS = None
 _EXP_EVALUATOR_NAMESPACE = 'orchestra.expressions.evaluators'
+_REGEX_VAR_EXTRACT = '\%s\.([a-zA-Z0-9_\-]*)\.?'
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -56,6 +58,11 @@ class Evaluator(object):
     @classmethod
     @abc.abstractmethod
     def evaluate(cls, text, data=None):
+        raise NotImplementedError()
+
+    @classmethod
+    @abc.abstractmethod
+    def extract_vars(cls, text):
         raise NotImplementedError()
 
 
@@ -121,3 +128,15 @@ def evaluate(text, data=None):
     evaluator = result.get('module')
 
     return evaluator.evaluate(text, data=data)
+
+
+def extract_vars(text):
+    variables = []
+
+    for name, evaluator in six.iteritems(get_evaluators()):
+        regex_var_extract = _REGEX_VAR_EXTRACT % evaluator._var_symbol
+
+        for var_ref in evaluator.extract_vars(text):
+            variables.append(re.search(regex_var_extract, var_ref).group(1))
+
+    return sorted(list(set(variables)))

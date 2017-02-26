@@ -45,6 +45,7 @@ class JinjaEvaluationException(exc.ExpressionEvaluationException):
 
 class JinjaEvaluator(base.Evaluator):
     _type = 'jinja'
+    _var_symbol = '_'
     _delimiter = '{{}}'
     _regex_pattern = '{{.*?}}'
     _regex_parser = re.compile(_regex_pattern)
@@ -203,9 +204,9 @@ class JinjaEvaluator(base.Evaluator):
         if not isinstance(text, six.string_types):
             raise ValueError('Text to be evaluated is not typeof string.')
 
-        vars = []
+        variables = []
 
         for expr in cls._regex_parser.findall(text):
-            vars.extend(cls._regex_var_parser.findall(expr))
+            variables.extend(cls._regex_var_parser.findall(expr))
 
-        return sorted(list(set(vars)))
+        return sorted(list(set(variables)))
