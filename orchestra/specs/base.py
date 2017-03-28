@@ -46,6 +46,19 @@ class BaseSpec(object):
 
     _expressions = []
 
+    def __init__(self, spec):
+        if spec is None:
+            raise ValueError('The spec cannot be type of None.')
+
+        self.spec = (
+            yaml.safe_load(spec)
+            if not isinstance(spec, dict)
+            else spec
+        )
+
+        if not isinstance(spec, dict) and not isinstance(self.spec, dict):
+            raise ValueError('The spec is not type of json or yaml.')
+
     @classmethod
     def get_version(cls):
         return cls._version
@@ -165,15 +178,11 @@ class BaseSpec(object):
 
         return expr_schema
 
-    @classmethod
-    def validate(cls, spec):
-        if not isinstance(spec, dict):
-            spec = yaml.safe_load(spec)
-
+    def validate(self):
         errors = {}
 
         syntax_errors = sorted(
-            cls._validate_syntax(spec),
+            self._validate_syntax(),
             key=lambda e: e['schema_path']
         )
 
@@ -181,7 +190,7 @@ class BaseSpec(object):
             errors['syntax'] = syntax_errors
 
         expr_errors = sorted(
-            cls._validate_expressions(spec),
+            self._validate_expressions(),
             key=lambda e: e['schema_path']
         )
 
@@ -190,9 +199,8 @@ class BaseSpec(object):
 
         return errors
 
-    @classmethod
-    def _validate_syntax(cls, spec):
-        validator = cls.get_schema_validator()
+    def _validate_syntax(self):
+        validator = self.get_schema_validator()
 
         return [
             {
@@ -200,16 +208,15 @@ class BaseSpec(object):
                 'spec_path': '.'.join(list(e.absolute_path)) or None,
                 'schema_path': '.'.join(list(e.absolute_schema_path)) or None
             }
-            for e in validator.iter_errors(spec)
+            for e in validator.iter_errors(self.spec)
         ]
 
-    @classmethod
-    def _validate_expressions(cls, spec):
+    def _validate_expressions(self):
         result = []
-        expr_schema_paths = cls.get_expr_schema_paths()
+        expr_schema_paths = self.get_expr_schema_paths()
 
         for expr_path, schema_path in six.iteritems(expr_schema_paths):
-            expr = utils.get_dict_value(spec, expr_path) or ''
+            expr = utils.get_dict_value(self.spec, expr_path) or ''
             errors = expressions.validate(expr).get('errors', [])
 
             for error in errors:

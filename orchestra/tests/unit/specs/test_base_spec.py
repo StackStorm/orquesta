@@ -11,6 +11,7 @@
 # limitations under the License.
 
 import unittest
+import yaml
 
 from orchestra.specs import types
 from orchestra.specs.v2 import base
@@ -108,6 +109,27 @@ class BaseSpecTest(unittest.TestCase):
 
         self.assertDictEqual(schema, MockSpec.get_schema(includes=None))
 
+    def test_spec_init_none_arg(self):
+        self.assertRaises(
+            ValueError,
+            MockSpec,
+            None
+        )
+
+    def test_spec_init_empty_str(self):
+        self.assertRaises(
+            ValueError,
+            MockSpec,
+            ''
+        )
+
+    def test_spec_init_bad_yaml(self):
+        self.assertRaises(
+            ValueError,
+            MockSpec,
+            'foobar'
+        )
+
     def test_spec_valid(self):
         spec = {
             'name': 'mock',
@@ -123,7 +145,10 @@ class BaseSpecTest(unittest.TestCase):
             }
         }
 
-        self.assertDictEqual(MockSpec.validate(spec), {})
+        spec_obj = MockSpec(spec)
+
+        self.assertDictEqual(spec_obj.spec, spec)
+        self.assertDictEqual(spec_obj.validate(), {})
 
     def test_spec_invalid(self):
         spec = {
@@ -180,4 +205,22 @@ class BaseSpecTest(unittest.TestCase):
             ]
         }
 
-        self.assertDictEqual(errors, MockSpec.validate(spec))
+        self.assertDictEqual(errors, MockSpec(spec).validate())
+
+    def test_spec_valid_yaml(self):
+        spec = """
+        name: mock
+        version: '2.0'
+        description: This is a mock spec.
+        attr1: foobar
+        attr2:
+            macro: polo
+        attr3: <% $.foobar %>
+        attr4:
+            attr4_1: <% $.macro %> <% $.polo %>
+        """
+
+        spec_obj = MockSpec(spec)
+
+        self.assertDictEqual(spec_obj.spec, yaml.safe_load(spec))
+        self.assertDictEqual(spec_obj.validate(), {})
