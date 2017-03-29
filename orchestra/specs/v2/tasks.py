@@ -11,6 +11,7 @@
 # limitations under the License.
 
 import logging
+import six
 
 from orchestra.specs import types
 from orchestra.specs.v2 import base
@@ -41,6 +42,16 @@ class TaskDefaultsSpec(base.BaseSpec):
         },
         'additionalProperties': False
     }
+
+    def __init__(self, name, spec):
+        super(TaskDefaultsSpec, self).__init__(name, spec)
+
+        self.wait_before = self.spec.get('wait-before', None)
+        self.wait_after = self.spec.get('wait-after', None)
+        self.pause_before = self.spec.get('pause-before', None)
+        self.timeout = self.spec.get('timeout', None)
+        self.retry = policies.RetrySpec(None, spec)
+        self.concurrency = self.spec.get('concurrency', None)
 
 
 class TaskSpec(base.BaseSpec):
@@ -90,6 +101,21 @@ class TaskSpec(base.BaseSpec):
         ]
     }
 
+    def __init__(self, name, spec):
+        super(TaskSpec, self).__init__(name, spec)
+
+        self.with_items = self.spec.get('with-items', None)
+        self.action = self.spec.get('action', None)
+        self.workflow = self.spec.get('workflow', None)
+        self.input = self.spec.get('input', {})
+        self.publish = self.spec.get('publish', {})
+        self.wait_before = self.spec.get('wait-before', None)
+        self.wait_after = self.spec.get('wait-after', None)
+        self.pause_before = self.spec.get('pause-before', None)
+        self.timeout = self.spec.get('timeout', None)
+        self.retry = policies.RetrySpec(None, spec)
+        self.concurrency = self.spec.get('concurrency', None)
+
 
 class DirectTaskDefaultsSpec(TaskDefaultsSpec):
     _schema = {
@@ -101,6 +127,13 @@ class DirectTaskDefaultsSpec(TaskDefaultsSpec):
         },
         'additionalProperties': False
     }
+
+    def __init__(self, name, spec):
+        super(DirectTaskDefaultsSpec, self).__init__(name, spec)
+
+        self.on_complete = self.spec.get('on-complete', [])
+        self.on_success = self.spec.get('on-success', [])
+        self.on_error = self.spec.get('on-error', [])
 
 
 class DirectTaskSpec(TaskSpec):
@@ -120,6 +153,14 @@ class DirectTaskSpec(TaskSpec):
         'additionalProperties': False
     }
 
+    def __init__(self, name, spec):
+        super(DirectTaskSpec, self).__init__(name, spec)
+
+        self.join = self.spec.get('join', None)
+        self.on_complete = self.spec.get('on-complete', [])
+        self.on_success = self.spec.get('on-success', [])
+        self.on_error = self.spec.get('on-error', [])
+
 
 class ReverseTaskDefaultsSpec(TaskDefaultsSpec):
     _schema = {
@@ -132,6 +173,14 @@ class ReverseTaskDefaultsSpec(TaskDefaultsSpec):
         'additionalProperties': False
     }
 
+    def __init__(self, name, spec):
+        super(ReverseTaskDefaultsSpec, self).__init__(name, spec)
+
+        self.requires = self.spec.get('requires', [])
+
+        if isinstance(self.requires, six.string_types):
+            self.requires = [self.requires]
+
 
 class ReverseTaskSpec(TaskSpec):
     _schema = {
@@ -143,3 +192,11 @@ class ReverseTaskSpec(TaskSpec):
         },
         'additionalProperties': False
     }
+
+    def __init__(self, name, spec):
+        super(ReverseTaskSpec, self).__init__(name, spec)
+
+        self.requires = self.spec.get('requires', [])
+
+        if isinstance(self.requires, six.string_types):
+            self.requires = [self.requires]

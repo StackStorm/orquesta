@@ -66,7 +66,7 @@ class DirectWorkflowComposer(base.WorkflowComposer):
 
             if wf_spec.is_join_task(task_name):
                 task_spec = wf_spec.get_task(task_name)
-                wf_graph.update_task(task_name, join=task_spec['join'])
+                wf_graph.update_task(task_name, join=task_spec.join)
 
             # Determine if the task is a split task and if it is in a cycle.
             # If the task is a split task, keep track of where the split(s)

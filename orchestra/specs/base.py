@@ -46,8 +46,10 @@ class BaseSpec(object):
 
     _expressions = []
 
-    def __init__(self, spec):
-        if spec is None:
+    def __init__(self, name, spec):
+        self.name = name
+
+        if not spec:
             raise ValueError('The spec cannot be type of None.')
 
         self.spec = (

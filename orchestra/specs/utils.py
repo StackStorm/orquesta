@@ -35,19 +35,21 @@ def convert_wf_def_to_spec(definition):
         else yaml.safe_load(definition)
     )
 
-    version = str(wf_def['version'])
+    version = str(wf_def.pop('version', specs.VERSION))
 
     if version != specs.VERSION:
         raise ValueError(
-            'Workflow definition is not supported version "%s".',
+            'Workflow definition is not the supported version "%s".',
             specs.VERSION
         )
 
-    wf_names = [key for key in wf_def.keys() if key != 'version']
-
-    if not wf_names:
+    if not wf_def.keys():
         raise ValueError('Workflow definition contains no workflow.')
 
-    wf_type = wf_def[wf_names[0]].get('type', 'direct')
+    if len(wf_def.keys()) > 1:
+        raise ValueError('Workflow definition contains more than one workflow.')
 
-    return WF_SPEC_MAP[wf_type](wf_def)
+    wf_name, wf_spec = list(wf_def.items())[0]
+    wf_type = wf_spec.get('type', 'direct')
+
+    return WF_SPEC_MAP[wf_type](wf_name, wf_spec)

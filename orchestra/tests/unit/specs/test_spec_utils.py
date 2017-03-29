@@ -28,7 +28,8 @@ class SpecUtilsTest(base.WorkflowSpecTest):
         wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertIsInstance(wf_spec, specs.DirectWorkflowSpec)
-        self.assertDictEqual(wf_def, wf_spec.definition)
+        self.assertEqual(wf_name, wf_spec.name)
+        self.assertDictEqual(wf_def[wf_name], wf_spec.spec)
 
     def test_convert_direct_wf_def_yaml_to_spec(self):
         wf_name = 'sequential'
@@ -39,7 +40,8 @@ class SpecUtilsTest(base.WorkflowSpecTest):
         wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertIsInstance(wf_spec, specs.DirectWorkflowSpec)
-        self.assertDictEqual(yaml.safe_load(wf_def), wf_spec.definition)
+        self.assertEqual(wf_name, wf_spec.name)
+        self.assertDictEqual(yaml.safe_load(wf_def)[wf_name], wf_spec.spec)
 
     def test_convert_reverse_wf_def_dict_to_spec(self):
         wf_name = 'sequential'
@@ -50,7 +52,8 @@ class SpecUtilsTest(base.WorkflowSpecTest):
         wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertIsInstance(wf_spec, specs.ReverseWorkflowSpec)
-        self.assertDictEqual(wf_def, wf_spec.definition)
+        self.assertEqual(wf_name, wf_spec.name)
+        self.assertDictEqual(wf_def[wf_name], wf_spec.spec)
 
     def test_convert_reverse_wf_def_yaml_to_spec(self):
         wf_name = 'sequential'
@@ -61,4 +64,5 @@ class SpecUtilsTest(base.WorkflowSpecTest):
         wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertIsInstance(wf_spec, specs.ReverseWorkflowSpec)
-        self.assertDictEqual(yaml.safe_load(wf_def), wf_spec.definition)
+        self.assertEqual(wf_name, wf_spec.name)
+        self.assertDictEqual(yaml.safe_load(wf_def)[wf_name], wf_spec.spec)

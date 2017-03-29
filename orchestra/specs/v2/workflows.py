@@ -13,7 +13,6 @@
 import logging
 import six
 from six.moves import queue
-import yaml
 
 from orchestra.specs import types
 from orchestra.specs.v2 import base
@@ -21,6 +20,11 @@ from orchestra.specs.v2 import tasks
 
 
 LOG = logging.getLogger(__name__)
+
+TASK_SPEC_MAP = {
+    'direct': tasks.DirectTaskSpec,
+    'reverse': tasks.ReverseTaskSpec
+}
 
 
 class WorkflowSpec(base.BaseSpec):
@@ -38,31 +42,26 @@ class WorkflowSpec(base.BaseSpec):
         'additionalProperties': False
     }
 
-    def __init__(self, definition):
-        if not definition:
-            raise ValueError('Workflow definition is empty.')
+    def __init__(self, name, spec):
+        super(WorkflowSpec, self).__init__(name, spec)
 
-        self.definition = (
-            definition
-            if isinstance(definition, dict)
-            else yaml.safe_load(definition)
-        )
+        self.type = self.spec.get('type', 'direct')
+        self.vars = self.spec.get('vars', {})
+        self.input = self.spec.get('input', [])
+        self.output = self.spec.get('output', {})
+        self.task_defaults = {}
+        self.tasks = {}
 
-        for wf_name, wf_spec in six.iteritems(self.definition):
-            if wf_name == 'version':
-                continue
+        task_spec_cls = TASK_SPEC_MAP[self.type]
 
-            self.entry = wf_name
-            self.wf_spec = wf_spec
-            self.wf_type = self.wf_spec.get('type', 'direct')
-            self.task_specs = self.wf_spec.get('tasks', dict())
-            break
+        for task_name, task_spec in six.iteritems(self.spec.get('tasks', {})):
+            self.tasks[task_name] = task_spec_cls(task_name, task_spec)
 
     def get_task(self, task_name):
-        if task_name not in self.task_specs:
+        if task_name not in self.tasks:
             raise Exception('Task "%s" is not in the spec.' % task_name)
 
-        return self.task_specs[task_name]
+        return self.tasks[task_name]
 
     def get_next_tasks(self, task_name, *args, **kwargs):
         raise NotImplementedError()
@@ -74,7 +73,7 @@ class WorkflowSpec(base.BaseSpec):
         return sorted(
             [
                 task_name
-                for task_name in self.task_specs.keys()
+                for task_name in self.tasks.keys()
                 if not self.get_prev_tasks(task_name)
             ]
         )
@@ -107,7 +106,7 @@ class WorkflowSpec(base.BaseSpec):
         return False
 
     def has_cycles(self):
-        for task_name, task_spec in six.iteritems(self.task_specs):
+        for task_name, task_spec in six.iteritems(self.tasks):
             if self.in_cycle(task_name):
                 return True
 
@@ -148,7 +147,7 @@ class DirectWorkflowSpec(WorkflowSpec):
         next_tasks = []
 
         for condition in conditions:
-            for task in task_spec.get(condition, []):
+            for task in getattr(task_spec, condition.replace('-', '_'), []):
                 next_tasks.append(
                     list(task.items())[0] + (condition,)
                     if isinstance(task, dict)
@@ -161,7 +160,7 @@ class DirectWorkflowSpec(WorkflowSpec):
         prev_tasks = []
         conditions = kwargs.get('conditions')
 
-        for name, task_spec in six.iteritems(self.task_specs):
+        for name, task_spec in six.iteritems(self.tasks):
             for next_task in self.get_next_tasks(name, conditions=conditions):
                 if task_name == next_task[0]:
                     prev_tasks.append(
@@ -173,7 +172,7 @@ class DirectWorkflowSpec(WorkflowSpec):
     def is_join_task(self, task_name):
         task_spec = self.get_task(task_name)
 
-        return task_spec.get('join') is not None
+        return task_spec.join is not None
 
     def is_split_task(self, task_name):
         return (
@@ -205,13 +204,8 @@ class ReverseWorkflowSpec(WorkflowSpec):
     def get_next_tasks(self, task_name, *args, **kwargs):
         next_tasks = []
 
-        for name, task_spec in six.iteritems(self.task_specs):
-            requires = task_spec.get('requires', [])
-
-            if isinstance(requires, six.string_types):
-                requires = [requires]
-
-            if task_name in requires:
+        for name, task_spec in six.iteritems(self.tasks):
+            if task_name in task_spec.requires:
                 next_tasks.append((name, None, None))
 
         return sorted(next_tasks, key=lambda x: x[0])
@@ -219,21 +213,16 @@ class ReverseWorkflowSpec(WorkflowSpec):
     def get_prev_tasks(self, task_name, *args, **kwargs):
         prev_tasks = []
         task_spec = self.get_task(task_name)
-        requires = task_spec.get('requires', [])
 
-        if isinstance(requires, six.string_types):
-            requires = [requires]
-
-        for name in requires:
+        for name in task_spec.requires:
             prev_tasks.append((name, None, None))
 
         return sorted(prev_tasks, key=lambda x: x[0])
 
     def is_join_task(self, task_name):
         task_spec = self.get_task(task_name)
-        requires = task_spec.get('requires', [])
 
-        return len(requires) > 1
+        return len(task_spec.requires) > 1
 
 
 class WorkbookSpec(base.BaseSpec):

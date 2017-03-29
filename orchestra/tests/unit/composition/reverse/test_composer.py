@@ -27,7 +27,8 @@ class ReverseWorkflowComposerTest(base.ReverseWorkflowComposerTest):
     def test_unsupported_spec_type(self):
         self.assertRaises(TypeError, self.composer.compose, {})
 
-        wf_def = self.get_wf_def('sequential', rel_path='direct')
-        wf_spec = specs.DirectWorkflowSpec(wf_def)
+        wf_name = 'sequential'
+        wf_def = self.get_wf_def(wf_name, rel_path='direct')
+        wf_spec = specs.DirectWorkflowSpec(wf_name, wf_def[wf_name])
 
         self.assertRaises(TypeError, self.composer.compose, wf_spec)

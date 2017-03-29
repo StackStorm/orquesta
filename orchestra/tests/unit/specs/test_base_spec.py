@@ -109,24 +109,27 @@ class BaseSpecTest(unittest.TestCase):
 
         self.assertDictEqual(schema, MockSpec.get_schema(includes=None))
 
-    def test_spec_init_none_arg(self):
+    def test_spec_init_arg_none_type(self):
         self.assertRaises(
             ValueError,
             MockSpec,
+            'some_spec_name',
             None
         )
 
-    def test_spec_init_empty_str(self):
+    def test_spec_init_arg_empty_str(self):
         self.assertRaises(
             ValueError,
             MockSpec,
+            'some_spec_name',
             ''
         )
 
-    def test_spec_init_bad_yaml(self):
+    def test_spec_init_arg_bad_yaml(self):
         self.assertRaises(
             ValueError,
             MockSpec,
+            'some_spec_name',
             'foobar'
         )
 
@@ -145,7 +148,7 @@ class BaseSpecTest(unittest.TestCase):
             }
         }
 
-        spec_obj = MockSpec(spec)
+        spec_obj = MockSpec('some_spec_name', spec)
 
         self.assertDictEqual(spec_obj.spec, spec)
         self.assertDictEqual(spec_obj.validate(), {})
@@ -205,7 +208,9 @@ class BaseSpecTest(unittest.TestCase):
             ]
         }
 
-        self.assertDictEqual(errors, MockSpec(spec).validate())
+        spec_obj = MockSpec('some_spec_name', spec)
+
+        self.assertDictEqual(spec_obj.validate(), errors)
 
     def test_spec_valid_yaml(self):
         spec = """
@@ -220,7 +225,7 @@ class BaseSpecTest(unittest.TestCase):
             attr4_1: <% $.macro %> <% $.polo %>
         """
 
-        spec_obj = MockSpec(spec)
+        spec_obj = MockSpec('some_spec_name', spec)
 
         self.assertDictEqual(spec_obj.spec, yaml.safe_load(spec))
         self.assertDictEqual(spec_obj.validate(), {})

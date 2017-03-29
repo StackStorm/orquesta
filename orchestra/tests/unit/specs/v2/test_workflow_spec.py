@@ -11,6 +11,7 @@
 # limitations under the License.
 
 from orchestra.specs import v2 as specs
+from orchestra.specs import utils
 from orchestra.tests.unit import base
 
 
@@ -18,14 +19,14 @@ class DirectWorkflowSpecTest(base.WorkflowSpecTest):
     fixture_rel_path = 'direct'
 
     def test_exception_empty_definition(self):
-        self.assertRaises(ValueError, specs.DirectWorkflowSpec, {})
-        self.assertRaises(ValueError, specs.DirectWorkflowSpec, '')
-        self.assertRaises(ValueError, specs.DirectWorkflowSpec, None)
+        self.assertRaises(ValueError, specs.DirectWorkflowSpec, None, {})
+        self.assertRaises(ValueError, specs.DirectWorkflowSpec, None, '')
+        self.assertRaises(ValueError, specs.DirectWorkflowSpec, None, None)
 
     def test_get_next_tasks(self):
         wf_name = 'split'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = specs.DirectWorkflowSpec(wf_def)
+        wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertListEqual(
             wf_spec.get_next_tasks('task1'),
@@ -65,7 +66,7 @@ class DirectWorkflowSpecTest(base.WorkflowSpecTest):
     def test_get_prev_tasks(self):
         wf_name = 'split'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = specs.DirectWorkflowSpec(wf_def)
+        wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertListEqual(
             wf_spec.get_prev_tasks('task1'),
@@ -105,7 +106,7 @@ class DirectWorkflowSpecTest(base.WorkflowSpecTest):
     def test_get_start_tasks(self):
         wf_name = 'split'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = specs.DirectWorkflowSpec(wf_def)
+        wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertListEqual(
             wf_spec.get_start_tasks(),
@@ -115,7 +116,7 @@ class DirectWorkflowSpecTest(base.WorkflowSpecTest):
     def test_is_join_task(self):
         wf_name = 'split'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = specs.DirectWorkflowSpec(wf_def)
+        wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertFalse(wf_spec.is_join_task('task4'))
         self.assertTrue(wf_spec.is_join_task('task7'))
@@ -123,7 +124,7 @@ class DirectWorkflowSpecTest(base.WorkflowSpecTest):
     def test_is_split_task(self):
         wf_name = 'split'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = specs.DirectWorkflowSpec(wf_def)
+        wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertTrue(wf_spec.is_split_task('task4'))
         self.assertFalse(wf_spec.is_split_task('task7'))
@@ -131,21 +132,21 @@ class DirectWorkflowSpecTest(base.WorkflowSpecTest):
     def test_not_in_cycle(self):
         wf_name = 'split'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = specs.DirectWorkflowSpec(wf_def)
+        wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertFalse(wf_spec.in_cycle('task4'))
 
     def test_has_cycles(self):
         wf_name = 'cycle'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = specs.DirectWorkflowSpec(wf_def)
+        wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertTrue(wf_spec.has_cycles())
 
     def test_in_cycle(self):
         wf_name = 'cycle'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = specs.DirectWorkflowSpec(wf_def)
+        wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertTrue(wf_spec.in_cycle('task1'))
 
@@ -154,14 +155,14 @@ class ReverseWorkflowSpecTest(base.WorkflowSpecTest):
     fixture_rel_path = 'reverse'
 
     def test_exception_empty_definition(self):
-        self.assertRaises(ValueError, specs.ReverseWorkflowSpec, {})
-        self.assertRaises(ValueError, specs.ReverseWorkflowSpec, '')
-        self.assertRaises(ValueError, specs.ReverseWorkflowSpec, None)
+        self.assertRaises(ValueError, specs.ReverseWorkflowSpec, None, {})
+        self.assertRaises(ValueError, specs.ReverseWorkflowSpec, None, '')
+        self.assertRaises(ValueError, specs.ReverseWorkflowSpec, None, None)
 
     def test_get_next_tasks(self):
         wf_name = 'sequential'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = specs.ReverseWorkflowSpec(wf_def)
+        wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertListEqual(
             wf_spec.get_next_tasks('task1'),
@@ -181,7 +182,7 @@ class ReverseWorkflowSpecTest(base.WorkflowSpecTest):
     def test_get_prev_tasks(self):
         wf_name = 'sequential'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = specs.ReverseWorkflowSpec(wf_def)
+        wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertListEqual(
             wf_spec.get_prev_tasks('task1'),
@@ -201,7 +202,7 @@ class ReverseWorkflowSpecTest(base.WorkflowSpecTest):
     def test_get_start_tasks(self):
         wf_name = 'sequential'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = specs.ReverseWorkflowSpec(wf_def)
+        wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertListEqual(
             wf_spec.get_start_tasks(),
@@ -211,20 +212,20 @@ class ReverseWorkflowSpecTest(base.WorkflowSpecTest):
     def test_not_in_cycle(self):
         wf_name = 'sequential'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = specs.ReverseWorkflowSpec(wf_def)
+        wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertFalse(wf_spec.in_cycle('task1'))
 
     def test_has_cycles(self):
         wf_name = 'cycle'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = specs.ReverseWorkflowSpec(wf_def)
+        wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertTrue(wf_spec.has_cycles())
 
     def test_in_cycle(self):
         wf_name = 'cycle'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = specs.ReverseWorkflowSpec(wf_def)
+        wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertTrue(wf_spec.in_cycle('task1'))
