@@ -36,7 +36,13 @@ class WorkflowSpec(base.BaseSpec):
             'input': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
             'output': types.NONEMPTY_DICT,
             'task-defaults': tasks.TaskDefaultsSpec.get_schema(includes=None),
-            'tasks': tasks.TaskSpec.get_schema(includes=None)
+            'tasks': {
+                'type': 'object',
+                'minProperties': 1,
+                'patternProperties': {
+                    '^\w+$': tasks.TaskSpec.get_schema(includes=None)
+                }
+            }
         },
         'required': ['tasks'],
         'additionalProperties': False

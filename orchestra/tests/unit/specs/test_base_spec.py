@@ -75,7 +75,7 @@ class BaseSpecTest(unittest.TestCase):
                 'attr3': types.NONEMPTY_STRING,
                 'attr4': ChildMockSpec.get_schema(includes=None)
             },
-            'required': ['attr1', 'name', 'version'],
+            'required': ['attr1'],
             'additionalProperties': False
         }
 

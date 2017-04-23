@@ -27,6 +27,5 @@ class BaseSpec(base.BaseSpec):
             'version': {
                 'enum': [_version, float(_version)]
             }
-        },
-        'required': ['version']
+        }
     }

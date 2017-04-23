@@ -38,8 +38,7 @@ class BaseSpec(object):
             'version': types.VERSION,
             'description': types.NONEMPTY_STRING,
             'tags': types.UNIQUE_STRING_LIST
-        },
-        'required': ['name', 'version']
+        }
     }
 
     _schema_validator = None
