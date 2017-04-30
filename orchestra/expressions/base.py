@@ -19,6 +19,7 @@ import six
 from stevedore import extension
 
 from orchestra import exceptions as exc
+from orchestra.expressions import utils
 from orchestra.utils import plugin
 
 
@@ -35,16 +36,12 @@ class Evaluator(object):
     _delimiter = None
 
     @classmethod
-    def strip_delimiter(cls, expr):
-        return expr.strip(cls._delimiter).strip()
+    def get_type(cls):
+        return cls._type
 
     @classmethod
-    def format_error(cls, expr, exc):
-        return {
-            'type': cls._type,
-            'expression': expr,
-            'message': str(getattr(exc, 'message', exc))
-        }
+    def strip_delimiter(cls, expr):
+        return expr.strip(cls._delimiter).strip()
 
     @classmethod
     def has_expressions(cls, text):
@@ -101,7 +98,8 @@ def validate(text):
     if len(result) == 1:
         return result[0]
     else:
-        error = Evaluator.format_error(
+        error = utils.format_error(
+            Evaluator.get_type(),
             text,
             exc.ExpressionGrammarException(
                 'The statement contains multiple expression '

@@ -21,6 +21,7 @@ import jinja2
 from orchestra import exceptions as exc
 from orchestra.expressions import base
 from orchestra.expressions.functions import base as functions
+from orchestra.expressions import utils
 
 
 LOG = logging.getLogger(__name__)
@@ -97,7 +98,7 @@ class JinjaEvaluator(base.Evaluator):
         try:
             cls._jinja_env.parse(text)
         except jinja2.exceptions.TemplateError as e:
-            errors.append(cls.format_error(text, e))
+            errors.append(utils.format_error(cls._type, text, e))
 
         # Validate individual inline expressions.
         for expr in cls._regex_parser.findall(text):
@@ -110,7 +111,9 @@ class JinjaEvaluator(base.Evaluator):
 
                 parser.parse_expression()
             except jinja2.exceptions.TemplateError as e:
-                errors.append(cls.format_error(cls.strip_delimiter(expr), e))
+                errors.append(
+                    utils.format_error(cls._type, cls.strip_delimiter(expr), e)
+                )
 
         return errors
 

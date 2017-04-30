@@ -21,6 +21,7 @@ import yaql.language.exceptions as yaql_exc
 from orchestra import exceptions as exc
 from orchestra.expressions import base
 from orchestra.expressions.functions import base as functions
+from orchestra.expressions import utils
 
 
 LOG = logging.getLogger(__name__)
@@ -80,7 +81,9 @@ class YAQLEvaluator(base.Evaluator):
             try:
                 cls._engine(cls.strip_delimiter(expr))
             except (yaql_exc.YaqlException, ValueError, TypeError) as e:
-                errors.append(cls.format_error(cls.strip_delimiter(expr), e))
+                errors.append(
+                    utils.format_error(cls._type, cls.strip_delimiter(expr), e)
+                )
 
         return errors
 
