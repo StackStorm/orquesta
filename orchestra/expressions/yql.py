@@ -82,7 +82,7 @@ class YAQLEvaluator(base.Evaluator):
                 cls._engine(cls.strip_delimiter(expr))
             except (yaql_exc.YaqlException, ValueError, TypeError) as e:
                 errors.append(
-                    utils.format_error(cls._type, cls.strip_delimiter(expr), e)
+                    utils.format_error(cls._type, expr, e)
                 )
 
         return errors

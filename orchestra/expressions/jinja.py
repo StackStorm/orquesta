@@ -112,7 +112,7 @@ class JinjaEvaluator(base.Evaluator):
                 parser.parse_expression()
             except jinja2.exceptions.TemplateError as e:
                 errors.append(
-                    utils.format_error(cls._type, cls.strip_delimiter(expr), e)
+                    utils.format_error(cls._type, expr, e)
                 )
 
         return errors

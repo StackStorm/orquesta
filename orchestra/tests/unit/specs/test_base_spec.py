@@ -183,7 +183,7 @@ class BaseSpecTest(unittest.TestCase):
             'expressions': [
                 {
                     'type': 'yaql',
-                    'expression': '1 +/ 2',
+                    'expression': '<% 1 +/ 2 %>',
                     'spec_path': 'attr3',
                     'schema_path': 'properties.attr3',
                     'message': 'Parse error: unexpected \'/\' at '
@@ -191,7 +191,7 @@ class BaseSpecTest(unittest.TestCase):
                 },
                 {
                     'type': 'yaql',
-                    'expression': '{"a": 123}',
+                    'expression': '<% {"a": 123} %>',
                     'spec_path': 'attr3',
                     'schema_path': 'properties.attr3',
                     'message': 'Lexical error: illegal character '
@@ -199,7 +199,7 @@ class BaseSpecTest(unittest.TestCase):
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foobar',
+                    'expression': '<% <% $.foobar %>',
                     'spec_path': 'attr4.attr4_1',
                     'schema_path': 'properties.attr4.properties.attr4_1',
                     'message': 'Parse error: unexpected \'<\' at position 0 '
