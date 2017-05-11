@@ -14,6 +14,8 @@ import logging
 import six
 from six.moves import queue
 
+from orchestra.expressions import base as expr
+from orchestra.expressions import utils as expr_utils
 from orchestra.specs import types
 from orchestra.specs.v2 import base
 from orchestra.specs.v2 import tasks
@@ -62,6 +64,44 @@ class WorkflowSpec(base.BaseSpec):
 
         for task_name, task_spec in six.iteritems(self.spec.get('tasks', {})):
             self.tasks[task_name] = task_spec_cls(task_name, task_spec)
+
+    def _validate_context(self, ctx=None):
+        errors = []
+        current_ctx = list(set((ctx or []) + self.input))
+
+        # Check context in vars.
+        ctx_vars = []
+
+        for key, value in six.iteritems(self.vars):
+            spec_path = '%s.vars.%s' % (self.name, key)
+            schema_path = 'properties.vars'
+
+            extracted_vars = expr.extract_vars(value)
+
+            for var in extracted_vars:
+                var['spec_path'] = spec_path
+                var['schema_path'] = schema_path
+
+            ctx_vars.extend(extracted_vars)
+
+        for var in ctx_vars:
+            if var['name'] not in current_ctx:
+                message = (
+                    'Variable "%s" is referenced before assignment.'
+                    % var['name']
+                )
+
+                errors.append(
+                    expr_utils.format_error(
+                        var['type'],
+                        var['expression'],
+                        message,
+                        var['spec_path'],
+                        var['schema_path']
+                    )
+                )
+
+        return sorted(errors, key=lambda x: x['spec_path'])
 
     def get_task(self, task_name):
         if task_name not in self.tasks:

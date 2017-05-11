@@ -46,3 +46,22 @@ class ExpressionUtilsTest(unittest.TestCase):
         )
 
         self.assertEqual(expected, actual)
+
+    def test_format_error_with_paths(self):
+        expected = {
+            'type': 'yaql',
+            'expression': '$.foo in $.bar',
+            'spec_path': 'path.to.error.in.spec',
+            'schema_path': 'path.to.reference.in.schema',
+            'message': 'Unknown error.'
+        }
+
+        actual = utils.format_error(
+            'yaql',
+            '$.foo in $.bar',
+            Exception('Unknown error.'),
+            spec_path='path.to.error.in.spec',
+            schema_path='path.to.reference.in.schema'
+        )
+
+        self.assertEqual(expected, actual)

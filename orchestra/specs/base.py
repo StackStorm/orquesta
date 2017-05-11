@@ -198,6 +198,11 @@ class BaseSpec(object):
         if expr_errors:
             errors['expressions'] = expr_errors
 
+        ctx_errors = self._validate_context()
+
+        if ctx_errors:
+            errors['context'] = ctx_errors
+
         return errors
 
     def _validate_syntax(self):
@@ -227,3 +232,6 @@ class BaseSpec(object):
             result += errors
 
         return result
+
+    def _validate_context(self, ctx=None):
+        return []
