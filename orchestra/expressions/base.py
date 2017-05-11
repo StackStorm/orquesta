@@ -135,6 +135,13 @@ def extract_vars(text):
         regex_var_extract = _REGEX_VAR_EXTRACT % evaluator._var_symbol
 
         for var_ref in evaluator.extract_vars(text):
-            variables.append(re.search(regex_var_extract, var_ref).group(1))
+            var = {
+                'type': evaluator.get_type(),
+                'expression': text,
+                'name': re.search(regex_var_extract, var_ref).group(1)
+            }
 
-    return sorted(list(set(variables)))
+            if not list(filter(lambda x: x['name'] == var['name'], variables)):
+                variables.append(var)
+
+    return sorted(variables, key=lambda var: var['name'])

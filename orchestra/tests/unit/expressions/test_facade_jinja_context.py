@@ -25,7 +25,11 @@ class JinjaFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
         expr = '{{ _.foobar  }}'
 
         expected_vars = [
-            'foobar'
+            {
+                'type': 'jinja',
+                'expression': expr,
+                'name': 'foobar'
+            }
         ]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
@@ -34,7 +38,11 @@ class JinjaFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
         expr = '{{ _.foo.bar  }}'
 
         expected_vars = [
-            'foo'
+            {
+                'type': 'jinja',
+                'expression': expr,
+                'name': 'foo'
+            }
         ]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
@@ -43,7 +51,11 @@ class JinjaFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
         expr = '{{ _.foo[0]  }}'
 
         expected_vars = [
-            'foo'
+            {
+                'type': 'jinja',
+                'expression': expr,
+                'name': 'foo'
+            }
         ]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
@@ -52,7 +64,11 @@ class JinjaFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
         expr = '{{ _.foo.get(bar)  }}'
 
         expected_vars = [
-            'foo'
+            {
+                'type': 'jinja',
+                'expression': expr,
+                'name': 'foo'
+            }
         ]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
@@ -61,25 +77,39 @@ class JinjaFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
         expr = '{{ _.foobar _.foo.get(bar) _.fu.bar _.fu.bar[0]  }}'
 
         expected_vars = [
-            'foo',
-            'foobar',
-            'fu'
+            {
+                'type': 'jinja',
+                'expression': expr,
+                'name': 'foo'
+            },
+            {
+                'type': 'jinja',
+                'expression': expr,
+                'name': 'foobar'
+            },
+            {
+                'type': 'jinja',
+                'expression': expr,
+                'name': 'fu'
+            }
         ]
 
-        self.assertListEqual(
-            sorted(expected_vars),
-            sorted(expressions.extract_vars(expr))
-        )
+        self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
     def test_multiple_interleaved_vars_extraction(self):
         expr = '{{ Why the _.foobar are you so _.fu.bar serious? }}'
 
         expected_vars = [
-            'foobar',
-            'fu'
+            {
+                'type': 'jinja',
+                'expression': expr,
+                'name': 'foobar'
+            },
+            {
+                'type': 'jinja',
+                'expression': expr,
+                'name': 'fu'
+            }
         ]
 
-        self.assertListEqual(
-            expected_vars,
-            sorted(expressions.extract_vars(expr))
-        )
+        self.assertListEqual(expected_vars, expressions.extract_vars(expr))

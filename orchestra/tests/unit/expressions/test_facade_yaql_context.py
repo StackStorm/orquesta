@@ -25,7 +25,11 @@ class YAQLFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
         expr = '<% $.foobar  %>'
 
         expected_vars = [
-            'foobar'
+            {
+                'type': 'yaql',
+                'expression': expr,
+                'name': 'foobar'
+            }
         ]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
@@ -34,7 +38,11 @@ class YAQLFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
         expr = '<% $.foo.bar  %>'
 
         expected_vars = [
-            'foo'
+            {
+                'type': 'yaql',
+                'expression': expr,
+                'name': 'foo'
+            }
         ]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
@@ -43,7 +51,11 @@ class YAQLFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
         expr = '<% $.foo[0]  %>'
 
         expected_vars = [
-            'foo'
+            {
+                'type': 'yaql',
+                'expression': expr,
+                'name': 'foo'
+            }
         ]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
@@ -52,7 +64,11 @@ class YAQLFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
         expr = '<% $.foo.get(bar)  %>'
 
         expected_vars = [
-            'foo'
+            {
+                'type': 'yaql',
+                'expression': expr,
+                'name': 'foo'
+            }
         ]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
@@ -61,25 +77,39 @@ class YAQLFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
         expr = '<% $.foobar $.foo.get(bar) $.fu.bar $.fu.bar[0]  %>'
 
         expected_vars = [
-            'foo',
-            'foobar',
-            'fu'
+            {
+                'type': 'yaql',
+                'expression': expr,
+                'name': 'foo'
+            },
+            {
+                'type': 'yaql',
+                'expression': expr,
+                'name': 'foobar'
+            },
+            {
+                'type': 'yaql',
+                'expression': expr,
+                'name': 'fu'
+            }
         ]
 
-        self.assertListEqual(
-            sorted(expected_vars),
-            sorted(expressions.extract_vars(expr))
-        )
+        self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
     def test_multiple_interleaved_vars_extraction(self):
         expr = '<% Why the $.foobar are you so $.fu.bar serious? %>'
 
         expected_vars = [
-            'foobar',
-            'fu'
+            {
+                'type': 'yaql',
+                'expression': expr,
+                'name': 'foobar'
+            },
+            {
+                'type': 'yaql',
+                'expression': expr,
+                'name': 'fu'
+            }
         ]
 
-        self.assertListEqual(
-            expected_vars,
-            sorted(expressions.extract_vars(expr))
-        )
+        self.assertListEqual(expected_vars, expressions.extract_vars(expr))
