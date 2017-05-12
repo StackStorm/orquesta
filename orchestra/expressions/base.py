@@ -84,48 +84,47 @@ def get_evaluators():
     return _EXP_EVALUATORS
 
 
-def validate(text):
-    result = [
-        {
-            'type': name,
-            'module': evaluator,
-            'errors': evaluator.validate(text)
-        }
-        for name, evaluator in six.iteritems(get_evaluators())
-        if evaluator.has_expressions(text)
-    ]
+def validate(value):
 
-    if len(result) == 1:
-        return result[0]
-    else:
-        error = utils.format_error(
-            Evaluator.get_type(),
-            text,
-            exc.ExpressionGrammarException(
-                'The statement contains multiple expression '
-                'types which is not supported.'
-            )
-        )
+    errors = []
 
-        return {
-            'type': None,
-            'module': None,
-            'errors': [error]
-        }
+    if isinstance(value, dict):
+        for k, v in six.iteritems(value):
+            errors.extend(validate(k)['errors'])
+            errors.extend(validate(v)['errors'])
+
+    elif isinstance(value, list):
+        for item in value:
+            errors.extend(validate(item)['errors'])
+
+    elif isinstance(value, six.string_types):
+        evaluators = [
+            evaluator for name, evaluator in six.iteritems(get_evaluators())
+            if evaluator.has_expressions(value)
+        ]
+
+        if len(evaluators) == 1:
+            errors.extend(evaluators[0].validate(value))
+        elif len(evaluators) > 1:
+            message = 'Expression with multiple types is not supported.'
+            errors.append(utils.format_error(None, value, message))
+
+    return {'errors': errors}
 
 
 def evaluate(text, data=None):
-    result = validate(text)
-    errors = result.get('errors', [])
+    errors = validate(text).get('errors', [])
 
     if len(errors) > 0:
         raise exc.ExpressionGrammarException(
             'Validation failed for expression. %s', json.dumps(errors)
         )
 
-    evaluator = result.get('module')
+    for name, evaluator in six.iteritems(get_evaluators()):
+        if evaluator.has_expressions(text):
+            return evaluator.evaluate(text, data=data)
 
-    return evaluator.evaluate(text, data=data)
+    return text
 
 
 def extract_vars(text):

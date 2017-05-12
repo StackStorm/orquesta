@@ -102,6 +102,10 @@ class JinjaEvaluator(base.Evaluator):
 
         # Validate individual inline expressions.
         for expr in cls._regex_parser.findall(text):
+            # Skip expression if it has already been validated and erred.
+            if list(filter(lambda x: x['expression'] == expr, errors)):
+                continue
+
             try:
                 parser = jinja2.parser.Parser(
                     cls._jinja_env.overlay(),
@@ -111,9 +115,7 @@ class JinjaEvaluator(base.Evaluator):
 
                 parser.parse_expression()
             except jinja2.exceptions.TemplateError as e:
-                errors.append(
-                    utils.format_error(cls._type, expr, e)
-                )
+                errors.append(utils.format_error(cls._type, expr, e))
 
         return errors
 
