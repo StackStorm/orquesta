@@ -47,7 +47,7 @@ class Evaluator(object):
 
     @classmethod
     @abc.abstractmethod
-    def validate(cls, text):
+    def validate(cls, statement):
         raise NotImplementedError()
 
     @classmethod
@@ -82,30 +82,30 @@ def get_evaluators():
     return _EXP_EVALUATORS
 
 
-def validate(value):
+def validate(statement):
 
     errors = []
 
-    if isinstance(value, dict):
-        for k, v in six.iteritems(value):
+    if isinstance(statement, dict):
+        for k, v in six.iteritems(statement):
             errors.extend(validate(k)['errors'])
             errors.extend(validate(v)['errors'])
 
-    elif isinstance(value, list):
-        for item in value:
+    elif isinstance(statement, list):
+        for item in statement:
             errors.extend(validate(item)['errors'])
 
-    elif isinstance(value, six.string_types):
+    elif isinstance(statement, six.string_types):
         evaluators = [
             evaluator for name, evaluator in six.iteritems(get_evaluators())
-            if evaluator.has_expressions(value)
+            if evaluator.has_expressions(statement)
         ]
 
         if len(evaluators) == 1:
-            errors.extend(evaluators[0].validate(value))
+            errors.extend(evaluators[0].validate(statement))
         elif len(evaluators) > 1:
             message = 'Expression with multiple types is not supported.'
-            errors.append(utils.format_error(None, value, message))
+            errors.append(utils.format_error(None, statement, message))
 
     return {'errors': errors}
 
