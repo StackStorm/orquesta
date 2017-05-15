@@ -11,14 +11,12 @@
 # limitations under the License.
 
 import abc
-import json
 import logging
 import re
 import six
 
 from stevedore import extension
 
-from orchestra import exceptions as exc
 from orchestra.expressions import utils
 from orchestra.utils import plugin
 
@@ -113,13 +111,6 @@ def validate(value):
 
 
 def evaluate(text, data=None):
-    errors = validate(text).get('errors', [])
-
-    if len(errors) > 0:
-        raise exc.ExpressionGrammarException(
-            'Validation failed for expression. %s', json.dumps(errors)
-        )
-
     for name, evaluator in six.iteritems(get_evaluators()):
         if evaluator.has_expressions(text):
             return evaluator.evaluate(text, data=data)
