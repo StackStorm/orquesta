@@ -79,10 +79,15 @@ class WorkflowSpec(base.BaseSpec):
             extracted_vars = expr.extract_vars(value)
 
             for var in extracted_vars:
-                var['spec_path'] = spec_path
-                var['schema_path'] = schema_path
+                ctx_var = {
+                    'type': var[0],
+                    'expression': var[1],
+                    'name': var[2],
+                    'spec_path': spec_path,
+                    'schema_path': schema_path
+                }
 
-            ctx_vars.extend(extracted_vars)
+                ctx_vars.append(ctx_var)
 
         for var in ctx_vars:
             if var['name'] not in current_ctx:

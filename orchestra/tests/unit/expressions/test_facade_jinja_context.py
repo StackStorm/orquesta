@@ -24,52 +24,28 @@ class JinjaFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
     def test_single_var_extraction(self):
         expr = '{{ _.foobar  }}'
 
-        expected_vars = [
-            {
-                'type': 'jinja',
-                'expression': expr,
-                'name': 'foobar'
-            }
-        ]
+        expected_vars = [('jinja', expr, 'foobar')]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
     def test_single_dotted_var_extraction(self):
         expr = '{{ _.foo.bar  }}'
 
-        expected_vars = [
-            {
-                'type': 'jinja',
-                'expression': expr,
-                'name': 'foo'
-            }
-        ]
+        expected_vars = [('jinja', expr, 'foo')]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
     def test_single_indexing_var_extraction(self):
         expr = '{{ _.foo[0]  }}'
 
-        expected_vars = [
-            {
-                'type': 'jinja',
-                'expression': expr,
-                'name': 'foo'
-            }
-        ]
+        expected_vars = [('jinja', expr, 'foo')]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
     def test_single_functional_var_extraction(self):
         expr = '{{ _.foo.get(bar)  }}'
 
-        expected_vars = [
-            {
-                'type': 'jinja',
-                'expression': expr,
-                'name': 'foo'
-            }
-        ]
+        expected_vars = [('jinja', expr, 'foo')]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
@@ -77,21 +53,9 @@ class JinjaFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
         expr = '{{ _.foobar _.foo.get(bar) _.fu.bar _.fu.bar[0]  }}'
 
         expected_vars = [
-            {
-                'type': 'jinja',
-                'expression': expr,
-                'name': 'foo'
-            },
-            {
-                'type': 'jinja',
-                'expression': expr,
-                'name': 'foobar'
-            },
-            {
-                'type': 'jinja',
-                'expression': expr,
-                'name': 'fu'
-            }
+            ('jinja', expr, 'foo'),
+            ('jinja', expr, 'foobar'),
+            ('jinja', expr, 'fu')
         ]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
@@ -100,16 +64,45 @@ class JinjaFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
         expr = '{{ Why the _.foobar are you so _.fu.bar serious? }}'
 
         expected_vars = [
-            {
-                'type': 'jinja',
-                'expression': expr,
-                'name': 'foobar'
-            },
-            {
-                'type': 'jinja',
-                'expression': expr,
-                'name': 'fu'
-            }
+            ('jinja', expr, 'foobar'),
+            ('jinja', expr, 'fu')
+        ]
+
+        self.assertListEqual(expected_vars, expressions.extract_vars(expr))
+
+    def test_vars_extraction_from_list(self):
+        expr = [
+            '{{ abc }}',
+            '{{ Why the _.foobar are you so _.fu.bar serious? }}',
+            'All your base are belong to us.',
+            {'{{ _.x }}': 123, 'k2': '{{ _.y }}', 'k3': ['{{ _.z }}']}
+        ]
+
+        expected_vars = [
+            ('jinja', expr[1], 'foobar'),
+            ('jinja', expr[1], 'fu'),
+            ('jinja', '{{ _.x }}', 'x'),
+            ('jinja', '{{ _.y }}', 'y'),
+            ('jinja', '{{ _.z }}', 'z')
+        ]
+
+        self.assertListEqual(expected_vars, expressions.extract_vars(expr))
+
+    def test_vars_extraction_from_dict(self):
+        expr = {
+            'k1': '{{ abc }}',
+            'k2': '{{ Why the _.foobar are you so _.fu.bar serious? }}',
+            'k3': ['{{ _.z }}'],
+            'k4': {'k5': '{{ _.y }}'},
+            '{{ _.x }}': 123
+        }
+
+        expected_vars = [
+            ('jinja', expr['k2'], 'foobar'),
+            ('jinja', expr['k2'], 'fu'),
+            ('jinja', '{{ _.x }}', 'x'),
+            ('jinja', '{{ _.y }}', 'y'),
+            ('jinja', '{{ _.z }}', 'z')
         ]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))

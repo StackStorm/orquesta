@@ -57,7 +57,7 @@ class Evaluator(object):
 
     @classmethod
     @abc.abstractmethod
-    def extract_vars(cls, text):
+    def extract_vars(cls, statement):
         raise NotImplementedError()
 
 
@@ -118,20 +118,25 @@ def evaluate(text, data=None):
     return text
 
 
-def extract_vars(text):
+def extract_vars(statement):
+
     variables = []
 
-    for name, evaluator in six.iteritems(get_evaluators()):
-        regex_var_extract = _REGEX_VAR_EXTRACT % evaluator._var_symbol
+    if isinstance(statement, dict):
+        for k, v in six.iteritems(statement):
+            variables.extend(extract_vars(k))
+            variables.extend(extract_vars(v))
 
-        for var_ref in evaluator.extract_vars(text):
-            var = {
-                'type': evaluator.get_type(),
-                'expression': text,
-                'name': re.search(regex_var_extract, var_ref).group(1)
-            }
+    elif isinstance(statement, list):
+        for item in statement:
+            variables.extend(extract_vars(item))
 
-            if not list(filter(lambda x: x['name'] == var['name'], variables)):
-                variables.append(var)
+    elif isinstance(statement, six.string_types):
+        for name, evaluator in six.iteritems(get_evaluators()):
+            regex_var_extract = _REGEX_VAR_EXTRACT % evaluator._var_symbol
 
-    return sorted(variables, key=lambda var: var['name'])
+            for var_ref in evaluator.extract_vars(statement):
+                var = re.search(regex_var_extract, var_ref).group(1)
+                variables.append((evaluator.get_type(), statement, var))
+
+    return sorted(list(set(variables)), key=lambda var: var[2])

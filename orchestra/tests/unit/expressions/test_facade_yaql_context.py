@@ -24,52 +24,28 @@ class YAQLFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
     def test_single_var_extraction(self):
         expr = '<% $.foobar  %>'
 
-        expected_vars = [
-            {
-                'type': 'yaql',
-                'expression': expr,
-                'name': 'foobar'
-            }
-        ]
+        expected_vars = [('yaql', expr, 'foobar')]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
     def test_single_dotted_var_extraction(self):
         expr = '<% $.foo.bar  %>'
 
-        expected_vars = [
-            {
-                'type': 'yaql',
-                'expression': expr,
-                'name': 'foo'
-            }
-        ]
+        expected_vars = [('yaql', expr, 'foo')]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
     def test_single_indexing_var_extraction(self):
         expr = '<% $.foo[0]  %>'
 
-        expected_vars = [
-            {
-                'type': 'yaql',
-                'expression': expr,
-                'name': 'foo'
-            }
-        ]
+        expected_vars = [('yaql', expr, 'foo')]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
     def test_single_functional_var_extraction(self):
         expr = '<% $.foo.get(bar)  %>'
 
-        expected_vars = [
-            {
-                'type': 'yaql',
-                'expression': expr,
-                'name': 'foo'
-            }
-        ]
+        expected_vars = [('yaql', expr, 'foo')]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
@@ -77,21 +53,9 @@ class YAQLFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
         expr = '<% $.foobar $.foo.get(bar) $.fu.bar $.fu.bar[0]  %>'
 
         expected_vars = [
-            {
-                'type': 'yaql',
-                'expression': expr,
-                'name': 'foo'
-            },
-            {
-                'type': 'yaql',
-                'expression': expr,
-                'name': 'foobar'
-            },
-            {
-                'type': 'yaql',
-                'expression': expr,
-                'name': 'fu'
-            }
+            ('yaql', expr, 'foo'),
+            ('yaql', expr, 'foobar'),
+            ('yaql', expr, 'fu')
         ]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
@@ -100,16 +64,45 @@ class YAQLFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
         expr = '<% Why the $.foobar are you so $.fu.bar serious? %>'
 
         expected_vars = [
-            {
-                'type': 'yaql',
-                'expression': expr,
-                'name': 'foobar'
-            },
-            {
-                'type': 'yaql',
-                'expression': expr,
-                'name': 'fu'
-            }
+            ('yaql', expr, 'foobar'),
+            ('yaql', expr, 'fu')
+        ]
+
+        self.assertListEqual(expected_vars, expressions.extract_vars(expr))
+
+    def test_vars_extraction_from_list(self):
+        expr = [
+            '<% abc %>',
+            '<% Why the $.foobar are you so $.fu.bar serious? %>',
+            'All your base are belong to us.',
+            {'<% $.x %>': 123, 'k2': '<% $.y %>', 'k3': ['<% $.z %>']}
+        ]
+
+        expected_vars = [
+            ('yaql', expr[1], 'foobar'),
+            ('yaql', expr[1], 'fu'),
+            ('yaql', '<% $.x %>', 'x'),
+            ('yaql', '<% $.y %>', 'y'),
+            ('yaql', '<% $.z %>', 'z')
+        ]
+
+        self.assertListEqual(expected_vars, expressions.extract_vars(expr))
+
+    def test_vars_extraction_from_dict(self):
+        expr = {
+            'k1': '<% abc %>',
+            'k2': '<% Why the $.foobar are you so $.fu.bar serious? %>',
+            'k3': ['<% $.z %>'],
+            'k4': {'k5': '<% $.y %>'},
+            '<% $.x %>': 123
+        }
+
+        expected_vars = [
+            ('yaql', expr['k2'], 'foobar'),
+            ('yaql', expr['k2'], 'fu'),
+            ('yaql', '<% $.x %>', 'x'),
+            ('yaql', '<% $.y %>', 'y'),
+            ('yaql', '<% $.z %>', 'z')
         ]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
