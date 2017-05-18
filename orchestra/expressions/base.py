@@ -110,12 +110,23 @@ def validate(statement):
     return {'errors': errors}
 
 
-def evaluate(text, data=None):
-    for name, evaluator in six.iteritems(get_evaluators()):
-        if evaluator.has_expressions(text):
-            return evaluator.evaluate(text, data=data)
+def evaluate(statement, data=None):
 
-    return text
+    if isinstance(statement, dict):
+        return {
+            evaluate(k, data=data): evaluate(v, data=data)
+            for k, v in six.iteritems(statement)
+        }
+
+    elif isinstance(statement, list):
+        return [evaluate(item, data=data) for item in statement]
+
+    elif isinstance(statement, six.string_types):
+        for name, evaluator in six.iteritems(get_evaluators()):
+            if evaluator.has_expressions(statement):
+                return evaluator.evaluate(statement, data=data)
+
+    return statement
 
 
 def extract_vars(statement):

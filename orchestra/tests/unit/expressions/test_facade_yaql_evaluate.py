@@ -87,6 +87,117 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
             expressions.evaluate(expr, data)
         )
 
+    def test_eval_list(self):
+        expr = [
+            '<% $.foo %>',
+            '<% $.marco %>'
+        ]
+
+        data = {
+            'foo': 'bar',
+            'marco': 'polo'
+        }
+
+        self.assertListEqual(['bar', 'polo'], expressions.evaluate(expr, data))
+
+    def test_eval_list_of_list(self):
+        expr = [
+            [
+                '<% $.foo %>',
+                '<% $.marco %>'
+            ]
+        ]
+
+        data = {
+            'foo': 'bar',
+            'marco': 'polo'
+        }
+
+        expected = [['bar', 'polo']]
+
+        self.assertListEqual(expected, expressions.evaluate(expr, data))
+
+    def test_eval_list_of_dict(self):
+        expr = [
+            {
+                'foo': '<% $.bar %>',
+                '<% $.marco %>': 'polo'
+            }
+        ]
+
+        data = {
+            'bar': 'bar',
+            'marco': 'marco'
+        }
+
+        expected = [
+            {
+                'foo': 'bar',
+                'marco': 'polo'
+            }
+        ]
+
+        self.assertListEqual(expected, expressions.evaluate(expr, data))
+
+    def test_eval_dict(self):
+        expr = {
+            'foo': '<% $.bar %>',
+            '<% $.marco %>': 'polo'
+        }
+
+        data = {
+            'bar': 'bar',
+            'marco': 'marco'
+        }
+
+        expected = {
+            'foo': 'bar',
+            'marco': 'polo'
+        }
+
+        self.assertDictEqual(expected, expressions.evaluate(expr, data))
+
+    def test_eval_dict_of_dict(self):
+        expr = {
+            'nested': {
+                'foo': '<% $.bar %>',
+                '<% $.marco %>': 'polo'
+            }
+        }
+
+        data = {
+            'bar': 'bar',
+            'marco': 'marco'
+        }
+
+        expected = {
+            'nested': {
+                'foo': 'bar',
+                'marco': 'polo'
+            }
+        }
+
+        self.assertDictEqual(expected, expressions.evaluate(expr, data))
+
+    def test_eval_dict_of_list(self):
+        expr = {
+            'nested': [
+                '<% $.foo %>',
+                '<% $.marco %>'
+            ]
+        }
+
+        data = {
+            'foo': 'bar',
+            'marco': 'polo'
+        }
+
+        expected = {
+            'nested': ['bar', 'polo']
+        }
+
+        self.assertDictEqual(expected, expressions.evaluate(expr, data))
+
     def test_type_preservation(self):
         data = {
             'k1': 101,
