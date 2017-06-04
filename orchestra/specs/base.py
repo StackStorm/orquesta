@@ -43,8 +43,6 @@ class BaseSpec(object):
 
     _schema_validator = None
 
-    _expressions = []
-
     def __init__(self, name, spec):
         self.name = name
 
@@ -131,53 +129,26 @@ class BaseSpec(object):
         return schema
 
     @classmethod
-    def get_expr_paths(cls, parent=None):
-        expr_paths = []
-        schema = cls.get_schema()
+    def get_expr_schema_paths(cls, schema=None):
+        expr_schema_paths = {}
 
-        for expr_path in cls._expressions:
-            keys = expr_path.split('.')
-            schema_obj = schema
+        if not schema:
+            schema = cls.get_schema(includes=None)
 
-            for key in keys:
-                if key not in schema_obj.get('properties', {}):
-                    raise KeyError(
-                        'Unable to identify schema path '
-                        'for \'%s\'.' % expr_path
-                    )
+        for prop_name, prop_type in six.iteritems(schema['properties']):
+            base_schema_path = 'properties.' + prop_name
 
-                schema_obj = schema_obj['properties'][key]
+            if isinstance(prop_type, dict) and 'properties' in prop_type:
+                sub_paths = cls.get_expr_schema_paths(schema=prop_type)
 
-            xpath = parent + '.' + expr_path if parent else expr_path
-            expr_paths.append(xpath)
+                for sub_expr_path, sub_schema_path in six.iteritems(sub_paths):
+                    expr_path = prop_name + '.' + sub_expr_path
+                    schema_path = base_schema_path + '.' + sub_schema_path
+                    expr_schema_paths[expr_path] = schema_path
+            else:
+                expr_schema_paths[prop_name] = base_schema_path
 
-        return expr_paths
-
-    @classmethod
-    def get_expr_schema_paths(cls, parent=None):
-        expr_schema = {}
-        schema = cls.get_schema()
-
-        for expr_path in cls._expressions:
-            keys = expr_path.split('.')
-            schema_obj = schema
-            schema_path = '' if not parent else 'properties.%s' % parent
-
-            for key in keys:
-                if key not in schema_obj.get('properties', {}):
-                    raise KeyError(
-                        'Unable to identify schema path '
-                        'for \'%s\'.' % expr_path
-                    )
-
-                schema_obj = schema_obj['properties'][key]
-                schema_path += '.' if len(schema_path) > 0 else ''
-                schema_path += 'properties.' + key
-
-            xpath = parent + '.' + expr_path if parent else expr_path
-            expr_schema[xpath] = schema_path
-
-        return expr_schema
+        return expr_schema_paths
 
     def validate(self):
         errors = {}

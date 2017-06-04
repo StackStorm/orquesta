@@ -17,18 +17,28 @@ from orchestra.specs import types
 from orchestra.specs.v2 import base
 
 
+class GrandChildMockSpec(base.BaseSpec):
+
+    _schema = {
+        'type': 'object',
+        'properties': {
+            'attr1': types.NONEMPTY_STRING
+        },
+        'required': ['attr1'],
+        'additionalProperties': False
+    }
+
+
 class ChildMockSpec(base.BaseSpec):
 
     _schema = {
         'type': 'object',
         'properties': {
-            'attr4_1': types.NONEMPTY_STRING
+            'attr1': GrandChildMockSpec.get_schema(includes=None)
         },
-        'required': ['attr4_1'],
+        'required': ['attr1'],
         'additionalProperties': False
     }
-
-    _expressions = ['attr4_1']
 
 
 class MockSpec(base.BaseSpec):
@@ -45,9 +55,6 @@ class MockSpec(base.BaseSpec):
         'required': ['attr1'],
         'additionalProperties': False
     }
-
-    _expressions = ['attr3']
-    _expressions += ChildMockSpec.get_expr_paths(parent='attr4')
 
 
 class BaseSpecTest(unittest.TestCase):
@@ -83,16 +90,17 @@ class BaseSpecTest(unittest.TestCase):
 
     def test_get_expr_paths(self):
         expr_paths = {
+            'attr1': 'properties.attr1',
+            'attr2': 'properties.attr2',
             'attr3': 'properties.attr3',
-            'attr4.attr4_1': 'properties.attr4.properties.attr4_1'
+            'attr4.attr1.attr1': (
+                'properties.attr4.'
+                'properties.attr1.'
+                'properties.attr1'
+            )
         }
 
         self.assertDictEqual(expr_paths, MockSpec.get_expr_schema_paths())
-
-        self.assertListEqual(
-            sorted(list(expr_paths.keys())),
-            sorted(MockSpec.get_expr_paths())
-        )
 
     def test_get_schema_no_meta(self):
         schema = {
@@ -144,7 +152,9 @@ class BaseSpecTest(unittest.TestCase):
             },
             'attr3': '<% $.foobar %>',
             'attr4': {
-                'attr4_1': '<% $.macro %> <% $.polo %>'
+                'attr1': {
+                    'attr1': '<% $.macro %> <% $.polo %>'
+                }
             }
         }
 
@@ -163,7 +173,9 @@ class BaseSpecTest(unittest.TestCase):
             },
             'attr3': '<% 1 +/ 2 %> and <% {"a": 123} %>',
             'attr4': {
-                'attr4_1': '<% <% $.foobar %> %>'
+                'attr1': {
+                    'attr1': '<% <% $.foobar %> %>'
+                }
             }
         }
 
@@ -200,8 +212,12 @@ class BaseSpecTest(unittest.TestCase):
                 {
                     'type': 'yaql',
                     'expression': '<% <% $.foobar %>',
-                    'spec_path': 'attr4.attr4_1',
-                    'schema_path': 'properties.attr4.properties.attr4_1',
+                    'spec_path': 'attr4.attr1.attr1',
+                    'schema_path': (
+                        'properties.attr4.'
+                        'properties.attr1.'
+                        'properties.attr1'
+                    ),
                     'message': 'Parse error: unexpected \'<\' at position 0 '
                                'of expression \'<% $.foobar\''
                 }
@@ -222,7 +238,8 @@ class BaseSpecTest(unittest.TestCase):
             macro: polo
         attr3: <% $.foobar %>
         attr4:
-            attr4_1: <% $.macro %> <% $.polo %>
+            attr1:
+                attr1: <% $.macro %> <% $.polo %>
         """
 
         spec_obj = MockSpec('some_spec_name', spec)
