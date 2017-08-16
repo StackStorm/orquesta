@@ -13,7 +13,7 @@
 import copy
 import unittest
 
-from orchestra import utils
+from orchestra.utils import dictionary as utils
 
 
 LEFT = {

@@ -17,7 +17,7 @@ import six
 
 from stevedore import extension
 
-from orchestra.expressions import utils
+from orchestra.utils import expression as expr_utils
 from orchestra.utils import plugin
 
 
@@ -105,7 +105,7 @@ def validate(statement):
             errors.extend(evaluators[0].validate(statement))
         elif len(evaluators) > 1:
             message = 'Expression with multiple types is not supported.'
-            errors.append(utils.format_error(None, statement, message))
+            errors.append(expr_utils.format_error(None, statement, message))
 
     return {'errors': errors}
 

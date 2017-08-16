@@ -52,4 +52,4 @@ def convert_wf_def_to_spec(definition):
     wf_name, wf_spec = list(wf_def.items())[0]
     wf_type = wf_spec.get('type', 'direct')
 
-    return WF_SPEC_MAP[wf_type](wf_name, wf_spec)
+    return WF_SPEC_MAP[wf_type](wf_spec, name=wf_name)

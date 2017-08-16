@@ -21,7 +21,7 @@ import yaql.language.exceptions as yaql_exc
 from orchestra import exceptions as exc
 from orchestra.expressions import base
 from orchestra.expressions.functions import base as functions
-from orchestra.expressions import utils
+from orchestra.utils import expression as utils
 
 
 LOG = logging.getLogger(__name__)

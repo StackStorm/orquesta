@@ -18,7 +18,7 @@ from orchestra.specs.v2.tasks import ReverseTaskSpec
 from orchestra.specs.v2.tasks import ReverseTaskDefaultsSpec
 from orchestra.specs.v2.workflows import ReverseWorkflowSpec
 
-VERSION = base.BaseSpec.get_version()
+VERSION = base.Spec.get_version()
 
 __all__ = [
     DirectWorkflowSpec.__name__,

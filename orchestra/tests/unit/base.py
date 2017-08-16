@@ -112,7 +112,7 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
 
     def compose_wf_graph(self, wf_name):
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = self.wf_spec_type(wf_name, wf_def[wf_name])
+        wf_spec = self.wf_spec_type(wf_def[wf_name], name=wf_name)
 
         return self.composer._compose_wf_graph(wf_spec)
 
@@ -123,7 +123,7 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
 
     def compose_wf_ex_graph(self, wf_name):
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = self.wf_spec_type(wf_name, wf_def[wf_name])
+        wf_spec = self.wf_spec_type(wf_def[wf_name], name=wf_name)
 
         return self.composer.compose(wf_spec)
 

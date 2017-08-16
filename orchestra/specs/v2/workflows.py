@@ -15,21 +15,16 @@ import six
 from six.moves import queue
 
 from orchestra.expressions import base as expr
-from orchestra.expressions import utils as expr_utils
 from orchestra.specs import types
 from orchestra.specs.v2 import base
 from orchestra.specs.v2 import tasks
+from orchestra.utils import expression as expr_utils
 
 
 LOG = logging.getLogger(__name__)
 
-TASK_SPEC_MAP = {
-    'direct': tasks.DirectTaskSpec,
-    'reverse': tasks.ReverseTaskSpec
-}
 
-
-class WorkflowSpec(base.BaseSpec):
+class WorkflowSpec(base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
@@ -37,42 +32,21 @@ class WorkflowSpec(base.BaseSpec):
             'vars': types.NONEMPTY_DICT,
             'input': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
             'output': types.NONEMPTY_DICT,
-            'task-defaults': tasks.TaskDefaultsSpec.get_schema(includes=None),
-            'tasks': {
-                'type': 'object',
-                'minProperties': 1,
-                'patternProperties': {
-                    '^\w+$': tasks.TaskSpec.get_schema(includes=None)
-                }
-            }
+            'task-defaults': tasks.TaskDefaultsSpec,
+            'tasks': tasks.TaskMappingSpec
         },
         'required': ['tasks'],
         'additionalProperties': False
     }
 
-    def __init__(self, name, spec):
-        super(WorkflowSpec, self).__init__(name, spec)
-
-        self.type = self.spec.get('type', 'direct')
-        self.vars = self.spec.get('vars', {})
-        self.input = self.spec.get('input', [])
-        self.output = self.spec.get('output', {})
-        self.task_defaults = {}
-        self.tasks = {}
-
-        task_spec_cls = TASK_SPEC_MAP[self.type]
-
-        for task_name, task_spec in six.iteritems(self.spec.get('tasks', {})):
-            self.tasks[task_name] = task_spec_cls(task_name, task_spec)
-
     def _validate_context(self, ctx=None):
         errors = []
-        current_ctx = list(set((ctx or []) + self.input))
+        current_ctx = list(set((ctx or []) + (self.input or [])))
 
         # Check context in vars.
         ctx_vars = []
 
-        for key, value in six.iteritems(self.vars):
+        for key, value in six.iteritems(self.vars or {}):
             spec_path = '%s.vars.%s' % (self.name, key)
             schema_path = 'properties.vars'
 
@@ -171,14 +145,8 @@ class DirectWorkflowSpec(WorkflowSpec):
             'type': {
                 'enum': ['direct']
             },
-            'task-defaults': tasks.DirectTaskDefaultsSpec.get_schema(None),
-            'tasks': {
-                'type': 'object',
-                'minProperties': 1,
-                'patternProperties': {
-                    '^\w+$': tasks.DirectTaskSpec.get_schema(None)
-                }
-            }
+            'task-defaults': tasks.DirectTaskDefaultsSpec,
+            'tasks': tasks.DirectTaskMappingSpec
         },
         'required': ['tasks'],
         'additionalProperties': False
@@ -198,7 +166,7 @@ class DirectWorkflowSpec(WorkflowSpec):
         next_tasks = []
 
         for condition in conditions:
-            for task in getattr(task_spec, condition.replace('-', '_'), []):
+            for task in getattr(task_spec, condition) or []:
                 next_tasks.append(
                     list(task.items())[0] + (condition,)
                     if isinstance(task, dict)
@@ -239,14 +207,8 @@ class ReverseWorkflowSpec(WorkflowSpec):
             'type': {
                 'enum': ['reverse']
             },
-            'task-defaults': tasks.ReverseTaskDefaultsSpec.get_schema(None),
-            'tasks': {
-                'type': 'object',
-                'minProperties': 1,
-                'patternProperties': {
-                    '^\w+$': tasks.ReverseTaskSpec.get_schema(None)
-                }
-            }
+            'task-defaults': tasks.ReverseTaskDefaultsSpec,
+            'tasks': tasks.ReverseTaskMappingSpec
         },
         'required': ['tasks'],
         'additionalProperties': False
@@ -256,7 +218,7 @@ class ReverseWorkflowSpec(WorkflowSpec):
         next_tasks = []
 
         for name, task_spec in six.iteritems(self.tasks):
-            if task_name in task_spec.requires:
+            if task_spec.requires and task_name in task_spec.requires:
                 next_tasks.append((name, None, None))
 
         return sorted(next_tasks, key=lambda x: x[0])
@@ -265,18 +227,19 @@ class ReverseWorkflowSpec(WorkflowSpec):
         prev_tasks = []
         task_spec = self.get_task(task_name)
 
-        for name in task_spec.requires:
-            prev_tasks.append((name, None, None))
+        if task_spec.requires:
+            for name in task_spec.requires:
+                prev_tasks.append((name, None, None))
 
         return sorted(prev_tasks, key=lambda x: x[0])
 
     def is_join_task(self, task_name):
         task_spec = self.get_task(task_name)
 
-        return len(task_spec.requires) > 1
+        return task_spec.requires and len(task_spec.requires) > 1
 
 
-class WorkbookSpec(base.BaseSpec):
+class WorkbookSpec(base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
@@ -286,8 +249,8 @@ class WorkbookSpec(base.BaseSpec):
                 'patternProperties': {
                     '^(?!version)\w+$': {
                         'oneOf': [
-                            DirectWorkflowSpec.get_schema(includes=None),
-                            ReverseWorkflowSpec.get_schema(includes=None)
+                            DirectWorkflowSpec,
+                            ReverseWorkflowSpec
                         ]
                     }
                 }

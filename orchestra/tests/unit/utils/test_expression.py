@@ -12,7 +12,7 @@
 
 import unittest
 
-from orchestra.expressions import utils
+from orchestra.utils import expression as utils
 
 
 class ExpressionUtilsTest(unittest.TestCase):

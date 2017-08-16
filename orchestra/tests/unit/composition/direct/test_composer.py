@@ -29,6 +29,6 @@ class DirectWorkflowComposerTest(base.DirectWorkflowComposerTest):
 
         wf_name = 'sequential'
         wf_def = self.get_wf_def(wf_name, rel_path='reverse')
-        wf_spec = specs.ReverseWorkflowSpec(wf_name, wf_def[wf_name])
+        wf_spec = specs.ReverseWorkflowSpec(wf_def[wf_name], name=wf_name)
 
         self.assertRaises(TypeError, self.composer.compose, wf_spec)
