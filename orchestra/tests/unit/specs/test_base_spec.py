@@ -72,7 +72,8 @@ class MockSpec(base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
-            'inputs': types.NONEMPTY_DICT,
+            'inputs': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+            'vars': types.NONEMPTY_DICT,
             'attr1': types.NONEMPTY_STRING,
             'attr1-1': types.NONEMPTY_STRING,
             'attr1_2': types.NONEMPTY_STRING,
@@ -89,6 +90,7 @@ class MockSpec(base.Spec):
 
     _context_evaluation_sequence = [
         'inputs',
+        'vars',
         'attr1',
         'attr1-1',
         'attr1_2',
@@ -101,7 +103,8 @@ class MockSpec(base.Spec):
     ]
 
     _context_inputs = [
-        'inputs'
+        'inputs',
+        'vars'
     ]
 
 
@@ -125,7 +128,8 @@ class SpecTest(unittest.TestCase):
                 ),
                 'description': types.NONEMPTY_STRING,
                 'tags': types.UNIQUE_STRING_LIST,
-                'inputs': types.NONEMPTY_DICT,
+                'inputs': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+                'vars': types.NONEMPTY_DICT,
                 'attr1': types.NONEMPTY_STRING,
                 'attr1-1': types.NONEMPTY_STRING,
                 'attr1_2': types.NONEMPTY_STRING,
@@ -153,7 +157,8 @@ class SpecTest(unittest.TestCase):
                 ),
                 'description': types.NONEMPTY_STRING,
                 'tags': types.UNIQUE_STRING_LIST,
-                'inputs': types.NONEMPTY_DICT,
+                'inputs': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+                'vars': types.NONEMPTY_DICT,
                 'attr1': types.NONEMPTY_STRING,
                 'attr1-1': types.NONEMPTY_STRING,
                 'attr1_2': types.NONEMPTY_STRING,
@@ -174,7 +179,8 @@ class SpecTest(unittest.TestCase):
         schema = {
             'type': 'object',
             'properties': {
-                'inputs': types.NONEMPTY_DICT,
+                'inputs': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+                'vars': types.NONEMPTY_DICT,
                 'attr1': types.NONEMPTY_STRING,
                 'attr1-1': types.NONEMPTY_STRING,
                 'attr1_2': types.NONEMPTY_STRING,
@@ -195,7 +201,8 @@ class SpecTest(unittest.TestCase):
         schema = {
             'type': 'object',
             'properties': {
-                'inputs': types.NONEMPTY_DICT,
+                'inputs': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+                'vars': types.NONEMPTY_DICT,
                 'attr1': types.NONEMPTY_STRING,
                 'attr1-1': types.NONEMPTY_STRING,
                 'attr1_2': types.NONEMPTY_STRING,
@@ -215,6 +222,7 @@ class SpecTest(unittest.TestCase):
     def test_get_expr_paths(self):
         expr_paths = {
             'inputs': 'properties.inputs',
+            'vars': 'properties.vars',
             'attr1': 'properties.attr1',
             'attr1-1': 'properties.attr1-1',
             'attr1_2': 'properties.attr1_2',
@@ -263,10 +271,14 @@ class SpecTest(unittest.TestCase):
             'name': 'mock',
             'version': '2.0',
             'description': 'This is a mock spec.',
-            'inputs': {
+            'inputs': [
+                'x',
+                {'y': 'polo'}
+            ],
+            'vars': {
                 'var1': 'foobar',
-                'var2': 'macro',
-                'var3': 'polo'
+                'var2': '<% $.x %>',
+                'var3': '<% $.y %>'
             },
             'attr1': 'foobar',
             'attr1-1': 'fubar',
@@ -374,9 +386,12 @@ class SpecTest(unittest.TestCase):
         version: '2.0'
         description: This is a mock spec.
         inputs:
+            - x
+            - y: polo
+        vars:
             var1: foobar
-            var2: macro
-            var3: polo
+            var2: <% $.x %>
+            var3: <% $.y %>
         attr1: foobar
         attr2:
             macro: polo
@@ -413,7 +428,7 @@ class SpecTest(unittest.TestCase):
         spec = {
             'version': '2.0',
             'description': 'This is a mock spec.',
-            'inputs': {
+            'vars': {
                 'var1': 'foobar',
                 'var2': 'macro',
                 'var3': 'polo'
@@ -430,7 +445,7 @@ class SpecTest(unittest.TestCase):
         spec = {
             'version': '2.0',
             'description': 'This is a mock spec.',
-            'inputs': {
+            'vars': {
                 'var1': 'foobar',
                 'var2': 'macro',
                 'var3': 'polo'
@@ -448,7 +463,7 @@ class SpecTest(unittest.TestCase):
             'name': 'mock',
             'version': '2.0',
             'description': 'This is a mock spec.',
-            'inputs': {
+            'vars': {
                 'var1': 'foobar',
                 'var2': 'macro',
                 'var3': 'polo'
@@ -475,10 +490,14 @@ class SpecTest(unittest.TestCase):
             'name': 'mock',
             'version': '2.0',
             'description': 'This is a mock spec.',
-            'inputs': {
+            'inputs': [
+                'x',
+                {'y': 'polo'}
+            ],
+            'vars': {
                 'var1': 'foobar',
-                'var2': 'macro',
-                'var3': 'polo'
+                'var2': '<% $.x %>',
+                'var3': '<% $.y %>'
             },
             'attr1': 'foobar',
             'attr2': {
@@ -509,9 +528,12 @@ class SpecTest(unittest.TestCase):
         version: '2.0'
         description: This is a mock spec.
         inputs:
+            - x
+            - y: polo
+        vars:
             var1: foobar
-            var2: macro
-            var3: polo
+            var2: <% $.x %>
+            var3: <% $.y %>
         attr1: foobar
         attr2:
             macro: polo
@@ -532,10 +554,14 @@ class SpecTest(unittest.TestCase):
             'name': 'mock',
             'version': '1.0',
             'description': 'This is a mock spec.',
-            'inputs': {
+            'inputs': [
+                'x',
+                {'y': 'polo'}
+            ],
+            'vars': {
                 'var1': 'foobar',
-                'var2': 'macro',
-                'var3': 'polo'
+                'var2': '<% $.x %>',
+                'var3': '<% $.y %>'
             },
             'attr2': {
                 'macro': 'polo'

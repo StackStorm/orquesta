@@ -309,16 +309,21 @@ class Spec(object):
             return error
 
         def get_ctx_inputs(prop_name, prop_value):
+            ctx_inputs = []
+
             # By default, context inputs support only dictionary
             # or list of single item dictionaries.
             if isinstance(prop_value, dict):
-                return list(prop_value.keys())
-            elif (isinstance(prop_value, list) and
-                    len(prop_value[0]) == 1 and
-                    isinstance(prop_value[0], dict)):
-                return list(prop_value[0].keys())
-            else:
-                return []
+                ctx_inputs = list(prop_value.keys())
+            elif isinstance(prop_value, list):
+                for prop_value_item in prop_value:
+                    if isinstance(prop_value_item, six.string_types):
+                        ctx_inputs.append(prop_value_item)
+                    elif (isinstance(prop_value_item, dict) and
+                            len(prop_value_item) == 1):
+                        ctx_inputs.extend(list(prop_value_item.keys()))
+
+            return ctx_inputs
 
         for prop_name in self._context_evaluation_sequence:
             prop_value = getattr(self, prop_name)
