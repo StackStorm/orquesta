@@ -1,0 +1,28 @@
+version: '2.0'
+
+parallel:
+    description: A sample set of parallel sequential workflows.
+    tasks:
+        # Branch 1
+        task1:
+            action: std.noop
+            on-success:
+                - task2
+        task2:
+            action: std.noop
+            on-success:
+                - task3
+        task3:
+            action: std.noop
+
+        # Branch 2
+        task4:
+            action: std.noop
+            on-success:
+                - task5
+        task5:
+            action: std.noop
+            on-success:
+                - task6
+        task6:
+            action: std.noop

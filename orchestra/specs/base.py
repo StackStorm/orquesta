@@ -335,7 +335,7 @@ class Spec(object):
 
             spec_path = (
                 parent.get('spec_path') + '.' + prop_name
-                if parent else prop_name
+                if parent else self.name + '.' + prop_name
             )
 
             schema_path = (

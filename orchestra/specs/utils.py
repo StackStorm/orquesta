@@ -19,12 +19,6 @@ from orchestra import specs
 LOG = logging.getLogger(__name__)
 
 
-WF_SPEC_MAP = {
-    'direct': specs.DirectWorkflowSpec,
-    'reverse': specs.ReverseWorkflowSpec
-}
-
-
 def convert_wf_def_to_spec(definition):
     if not definition:
         raise ValueError('Workflow definition is empty.')
@@ -50,6 +44,5 @@ def convert_wf_def_to_spec(definition):
         raise ValueError('Workflow definition contains more than one workflow.')
 
     wf_name, wf_spec = list(wf_def.items())[0]
-    wf_type = wf_spec.get('type', 'direct')
 
-    return WF_SPEC_MAP[wf_type](wf_spec, name=wf_name)
+    return specs.WorkflowSpec(wf_spec, name=wf_name)

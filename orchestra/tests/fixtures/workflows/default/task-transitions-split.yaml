@@ -1,0 +1,17 @@
+version: '2.0'
+
+task-transitions-split:
+    description: >
+        A workflow that demonstrates on-condition handlers
+        referencing the same task.
+    tasks:
+        task1:
+            action: std.noop
+            on-success:
+                - task2
+            on-error:
+                - task2
+            on-complete:
+                - task2
+        task2:
+            action: std.noop

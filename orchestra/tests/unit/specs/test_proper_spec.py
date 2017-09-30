@@ -24,32 +24,17 @@ class ProperSpecTest(unittest.TestCase):
 
     def test_workflow_spec_imports(self):
         self.assertEqual(
-            specs.DirectWorkflowSpec,
-            v2_specs.workflows.DirectWorkflowSpec
-        )
-
-        self.assertEqual(
-            specs.ReverseWorkflowSpec,
-            v2_specs.workflows.ReverseWorkflowSpec
+            specs.WorkflowSpec,
+            v2_specs.workflows.WorkflowSpec
         )
 
     def test_task_spec_imports(self):
         self.assertEqual(
-            specs.DirectTaskDefaultsSpec,
-            v2_specs.tasks.DirectTaskDefaultsSpec
+            specs.TaskDefaultsSpec,
+            v2_specs.tasks.TaskDefaultsSpec
         )
 
         self.assertEqual(
-            specs.DirectTaskSpec,
-            v2_specs.tasks.DirectTaskSpec
-        )
-
-        self.assertEqual(
-            specs.ReverseTaskDefaultsSpec,
-            v2_specs.tasks.ReverseTaskDefaultsSpec
-        )
-
-        self.assertEqual(
-            specs.ReverseTaskSpec,
-            v2_specs.tasks.ReverseTaskSpec
+            specs.TaskSpec,
+            v2_specs.tasks.TaskSpec
         )

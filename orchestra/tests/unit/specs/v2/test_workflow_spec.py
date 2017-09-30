@@ -15,13 +15,13 @@ from orchestra.specs import utils
 from orchestra.tests.unit import base
 
 
-class DirectWorkflowSpecTest(base.WorkflowSpecTest):
-    fixture_rel_path = 'direct'
+class WorkflowSpecTest(base.WorkflowSpecTest):
+    fixture_rel_path = 'default'
 
     def test_exception_empty_definition(self):
-        self.assertRaises(ValueError, specs.DirectWorkflowSpec, None, {})
-        self.assertRaises(ValueError, specs.DirectWorkflowSpec, None, '')
-        self.assertRaises(ValueError, specs.DirectWorkflowSpec, None, None)
+        self.assertRaises(ValueError, specs.WorkflowSpec, None, {})
+        self.assertRaises(ValueError, specs.WorkflowSpec, None, '')
+        self.assertRaises(ValueError, specs.WorkflowSpec, None, None)
 
     def test_get_next_tasks(self):
         wf_name = 'split'
@@ -135,86 +135,6 @@ class DirectWorkflowSpecTest(base.WorkflowSpecTest):
         wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertFalse(wf_spec.in_cycle('task4'))
-
-    def test_has_cycles(self):
-        wf_name = 'cycle'
-        wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = utils.convert_wf_def_to_spec(wf_def)
-
-        self.assertTrue(wf_spec.has_cycles())
-
-    def test_in_cycle(self):
-        wf_name = 'cycle'
-        wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = utils.convert_wf_def_to_spec(wf_def)
-
-        self.assertTrue(wf_spec.in_cycle('task1'))
-
-
-class ReverseWorkflowSpecTest(base.WorkflowSpecTest):
-    fixture_rel_path = 'reverse'
-
-    def test_exception_empty_definition(self):
-        self.assertRaises(ValueError, specs.ReverseWorkflowSpec, None, {})
-        self.assertRaises(ValueError, specs.ReverseWorkflowSpec, None, '')
-        self.assertRaises(ValueError, specs.ReverseWorkflowSpec, None, None)
-
-    def test_get_next_tasks(self):
-        wf_name = 'sequential'
-        wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = utils.convert_wf_def_to_spec(wf_def)
-
-        self.assertListEqual(
-            wf_spec.get_next_tasks('task1'),
-            [('task2', None, None)]
-        )
-
-        self.assertListEqual(
-            wf_spec.get_next_tasks('task2'),
-            [('task3', None, None)]
-        )
-
-        self.assertListEqual(
-            wf_spec.get_next_tasks('task3'),
-            []
-        )
-
-    def test_get_prev_tasks(self):
-        wf_name = 'sequential'
-        wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = utils.convert_wf_def_to_spec(wf_def)
-
-        self.assertListEqual(
-            wf_spec.get_prev_tasks('task1'),
-            []
-        )
-
-        self.assertListEqual(
-            wf_spec.get_prev_tasks('task2'),
-            [('task1', None, None)]
-        )
-
-        self.assertListEqual(
-            wf_spec.get_prev_tasks('task3'),
-            [('task2', None, None)]
-        )
-
-    def test_get_start_tasks(self):
-        wf_name = 'sequential'
-        wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = utils.convert_wf_def_to_spec(wf_def)
-
-        self.assertListEqual(
-            wf_spec.get_start_tasks(),
-            ['task1']
-        )
-
-    def test_not_in_cycle(self):
-        wf_name = 'sequential'
-        wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = utils.convert_wf_def_to_spec(wf_def)
-
-        self.assertFalse(wf_spec.in_cycle('task1'))
 
     def test_has_cycles(self):
         wf_name = 'cycle'

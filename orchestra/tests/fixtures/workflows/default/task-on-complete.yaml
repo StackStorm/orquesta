@@ -1,0 +1,19 @@
+version: '2.0'
+
+task-on-complete:
+    description: A basic workflow that demonstrates on-complete handler.
+    tasks:
+        task1:
+            action: std.noop
+            on-success:
+                - task2
+            on-error:
+                - task3
+            on-complete:
+                - task4
+        task2:
+            action: std.noop
+        task3:
+            action: std.noop
+        task4:
+            action: std.noop

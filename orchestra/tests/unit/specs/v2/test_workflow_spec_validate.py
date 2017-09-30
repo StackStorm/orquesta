@@ -14,8 +14,8 @@ from orchestra.specs import utils
 from orchestra.tests.unit import base
 
 
-class DirectWorkflowSpecValidationTest(base.WorkflowSpecTest):
-    fixture_rel_path = 'direct'
+class WorkflowSpecValidationTest(base.WorkflowSpecTest):
+    fixture_rel_path = 'default'
 
     def test_success(self):
         wf_def = """
@@ -23,7 +23,6 @@ class DirectWorkflowSpecValidationTest(base.WorkflowSpecTest):
 
             sequential:
                 description: A basic sequential workflow.
-                type: direct
                 tasks:
                     task1:
                         action: std.noop
@@ -47,7 +46,6 @@ class DirectWorkflowSpecValidationTest(base.WorkflowSpecTest):
 
             sequential:
                 description: A basic sequential workflow.
-                type: direct
         """
 
         wf_spec = utils.convert_wf_def_to_spec(wf_def)
@@ -70,7 +68,6 @@ class DirectWorkflowSpecValidationTest(base.WorkflowSpecTest):
 
             sequential:
                 description: A basic sequential workflow.
-                type: direct
                 tasks: {}
         """
 
@@ -94,7 +91,6 @@ class DirectWorkflowSpecValidationTest(base.WorkflowSpecTest):
 
             sequential:
                 description: A basic sequential workflow.
-                type: direct
                 task-defaults:
                     timeout: 60
                 tasks:
@@ -112,7 +108,6 @@ class DirectWorkflowSpecValidationTest(base.WorkflowSpecTest):
 
             sequential:
                 description: A basic sequential workflow.
-                type: direct
                 task-defaults: {}
                 tasks:
                     task1:

@@ -1,0 +1,43 @@
+version: '2.0'
+
+split:
+    description: >
+        A basic workflow that demonstrate a split use case where a non-join task
+        is referenced in more than one task transitions. The workflow is hence
+        split into multiple branches from the non-join task.
+    tasks:
+        task1:
+            action: std.noop
+            on-success:
+                - task2
+                - task3
+
+        # branch 1
+        task2:
+            action: std.noop
+            on-success:
+                - task4
+
+        # branch 2
+        task3:
+            action: std.noop
+            on-success:
+                - task4
+
+        # split branch
+        task4:
+            action: std.noop
+            on-success:
+                - task5
+                - task6
+        task5:
+            action: std.noop
+            on-success:
+                - task7
+        task6:
+            action: std.noop
+            on-success:
+                - task7
+        task7:
+            join: all
+            action: std.noop

@@ -15,7 +15,7 @@ from orchestra.tests.unit import base
 
 
 class WorkflowSpecVarsValidationTest(base.WorkflowSpecTest):
-    fixture_rel_path = 'direct'
+    fixture_rel_path = 'default'
 
     def test_bad_vars_yaql(self):
         wf_def = """
@@ -23,7 +23,6 @@ class WorkflowSpecVarsValidationTest(base.WorkflowSpecTest):
 
             sequential:
                 description: A basic sequential workflow.
-                type: direct
                 input:
                     - y
                 vars:
@@ -43,21 +42,21 @@ class WorkflowSpecVarsValidationTest(base.WorkflowSpecTest):
                     'expression': '<% $.a %>',
                     'message': 'Variable "a" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars.foo'
+                    'spec_path': 'sequential.vars'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.x + $.y + $.z %>',
                     'message': 'Variable "x" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars.fooa'
+                    'spec_path': 'sequential.vars'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.x + $.y + $.z %>',
                     'message': 'Variable "z" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars.fooa'
+                    'spec_path': 'sequential.vars'
                 }
             ]
         }
@@ -70,7 +69,6 @@ class WorkflowSpecVarsValidationTest(base.WorkflowSpecTest):
 
             sequential:
                 description: A basic sequential workflow.
-                type: direct
                 input:
                     - y
                 vars:
@@ -90,21 +88,21 @@ class WorkflowSpecVarsValidationTest(base.WorkflowSpecTest):
                     'expression': '{{ _.a }}',
                     'message': 'Variable "a" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars.foo'
+                    'spec_path': 'sequential.vars'
                 },
                 {
                     'type': 'jinja',
                     'expression': '{{ _.x + _.y + _.z }}',
                     'message': 'Variable "x" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars.fooa'
+                    'spec_path': 'sequential.vars'
                 },
                 {
                     'type': 'jinja',
                     'expression': '{{ _.x + _.y + _.z }}',
                     'message': 'Variable "z" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars.fooa'
+                    'spec_path': 'sequential.vars'
                 }
             ]
         }
@@ -117,7 +115,6 @@ class WorkflowSpecVarsValidationTest(base.WorkflowSpecTest):
 
             sequential:
                 description: A basic sequential workflow.
-                type: direct
                 input:
                     - y
                 vars:
@@ -137,21 +134,21 @@ class WorkflowSpecVarsValidationTest(base.WorkflowSpecTest):
                     'expression': '{{ _.a }}',
                     'message': 'Variable "a" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars.foo'
+                    'spec_path': 'sequential.vars'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.x + $.y + $.z %>',
                     'message': 'Variable "x" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars.fooa'
+                    'spec_path': 'sequential.vars'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.x + $.y + $.z %>',
                     'message': 'Variable "z" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars.fooa'
+                    'spec_path': 'sequential.vars'
                 }
             ]
         }

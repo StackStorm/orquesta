@@ -32,12 +32,15 @@ class TaskDefaultsSpec(base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
+            'concurrency': policies.CONCURRENCY_SCHEMA,
             'retry': policies.RetrySpec,
             'wait-before': policies.WAIT_BEFORE_SCHEMA,
             'wait-after': policies.WAIT_AFTER_SCHEMA,
-            'timeout': policies.TIMEOUT_SCHEMA,
             'pause-before': policies.PAUSE_BEFORE_SCHEMA,
-            'concurrency': policies.CONCURRENCY_SCHEMA
+            'timeout': policies.TIMEOUT_SCHEMA,
+            'on-complete': ON_CLAUSE_SCHEMA,
+            'on-success': ON_CLAUSE_SCHEMA,
+            'on-error': ON_CLAUSE_SCHEMA
         },
         'additionalProperties': False
     }
@@ -47,25 +50,31 @@ class TaskSpec(base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
-            'type': types.WORKFLOW_TYPE,
-            'action': types.NONEMPTY_STRING,
-            'workflow': types.NONEMPTY_STRING,
-            'input': types.NONEMPTY_DICT,
+            'join': {
+                'oneOf': [
+                    {'enum': ['all']},
+                    types.POSITIVE_INTEGER
+                ]
+            },
             'with-items': {
                 'oneOf': [
                     types.NONEMPTY_STRING,
                     types.UNIQUE_STRING_LIST
                 ]
             },
+            'concurrency': policies.CONCURRENCY_SCHEMA,
+            'action': types.NONEMPTY_STRING,
+            'workflow': types.NONEMPTY_STRING,
+            'input': types.NONEMPTY_DICT,
             'publish': types.NONEMPTY_DICT,
             'retry': policies.RetrySpec,
             'wait-before': policies.WAIT_BEFORE_SCHEMA,
             'wait-after': policies.WAIT_AFTER_SCHEMA,
-            'timeout': policies.TIMEOUT_SCHEMA,
             'pause-before': policies.PAUSE_BEFORE_SCHEMA,
-            'concurrency': policies.CONCURRENCY_SCHEMA,
-            'target': types.NONEMPTY_STRING,
-            'keep-result': types.YAQL_OR_BOOLEAN
+            'timeout': policies.TIMEOUT_SCHEMA,
+            'on-complete': ON_CLAUSE_SCHEMA,
+            'on-success': ON_CLAUSE_SCHEMA,
+            'on-error': ON_CLAUSE_SCHEMA
         },
         'additionalProperties': False,
         'anyOf': [
@@ -91,85 +100,11 @@ class TaskSpec(base.Spec):
     }
 
 
-class DirectTaskDefaultsSpec(TaskDefaultsSpec):
-    _schema = {
-        'type': 'object',
-        'properties': {
-            'on-complete': ON_CLAUSE_SCHEMA,
-            'on-success': ON_CLAUSE_SCHEMA,
-            'on-error': ON_CLAUSE_SCHEMA
-        },
-        'additionalProperties': False
-    }
-
-
-class DirectTaskSpec(TaskSpec):
-    _schema = {
-        'type': 'object',
-        'properties': {
-            'join': {
-                'oneOf': [
-                    {'enum': ['all']},
-                    types.POSITIVE_INTEGER
-                ]
-            },
-            'on-complete': ON_CLAUSE_SCHEMA,
-            'on-success': ON_CLAUSE_SCHEMA,
-            'on-error': ON_CLAUSE_SCHEMA
-        },
-        'additionalProperties': False
-    }
-
-
-class ReverseTaskDefaultsSpec(TaskDefaultsSpec):
-    _schema = {
-        'type': 'object',
-        'properties': {
-            'requires': {
-                'oneOf': [types.NONEMPTY_STRING, types.UNIQUE_STRING_LIST]
-            }
-        },
-        'additionalProperties': False
-    }
-
-
-class ReverseTaskSpec(TaskSpec):
-    _schema = {
-        'type': 'object',
-        'properties': {
-            'requires': {
-                'oneOf': [types.NONEMPTY_STRING, types.UNIQUE_STRING_LIST]
-            }
-        },
-        'additionalProperties': False
-    }
-
-
 class TaskMappingSpec(base.MappingSpec):
     _schema = {
         'type': 'object',
         'minProperties': 1,
         'patternProperties': {
             '^\w+$': TaskSpec
-        }
-    }
-
-
-class DirectTaskMappingSpec(base.MappingSpec):
-    _schema = {
-        'type': 'object',
-        'minProperties': 1,
-        'patternProperties': {
-            '^\w+$': DirectTaskSpec
-        }
-    }
-
-
-class ReverseTaskMappingSpec(base.MappingSpec):
-    _schema = {
-        'type': 'object',
-        'minProperties': 1,
-        'patternProperties': {
-            '^\w+$': ReverseTaskSpec
         }
     }

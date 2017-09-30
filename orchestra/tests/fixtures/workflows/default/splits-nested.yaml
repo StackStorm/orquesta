@@ -1,0 +1,59 @@
+version: '2.0'
+
+splits-nested:
+    description: >
+        A basic workflow that demonstrate splits that are nested. The
+        following workflow will instantiate two separate branches at
+        task4 and then splitting again at task7 resulting in four
+        separate instances of task7.
+    tasks:
+        task1:
+            action: std.noop
+            on-success:
+                - task2
+                - task3
+
+        # branch 1
+        task2:
+            action: std.noop
+            on-success:
+                - task4
+
+        # branch 2
+        task3:
+            action: std.noop
+            on-success:
+                - task4
+
+        # split branch
+        task4:
+            action: std.noop
+            on-success:
+                - task5
+                - task6
+        task5:
+            action: std.noop
+            on-success:
+                - task7
+        task6:
+            action: std.noop
+            on-success:
+                - task7
+
+        # nested split
+        task7:
+            action: std.noop
+            on-success:
+                - task8
+                - task9
+        task8:
+            action: std.noop
+            on-success:
+                - task10
+        task9:
+            action: std.noop
+            on-success:
+                - task10
+        task10:
+            join: all
+            action: std.noop
