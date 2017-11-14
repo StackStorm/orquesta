@@ -374,6 +374,9 @@ class MappingSpec(Spec):
         raise NotImplementedError()
 
     def __getitem__(self, key):
+        if key not in self.keys():
+            raise KeyError(key)
+
         return getattr(self, key)
 
     def __delitem__(self, key):

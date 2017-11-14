@@ -29,37 +29,37 @@ class WorkflowSpecTest(base.WorkflowSpecTest):
         wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertListEqual(
-            wf_spec.get_next_tasks('task1'),
+            wf_spec.tasks.get_next_tasks('task1'),
             [('task2', None, 'on-success'), ('task3', None, 'on-success')]
         )
 
         self.assertListEqual(
-            wf_spec.get_next_tasks('task2'),
+            wf_spec.tasks.get_next_tasks('task2'),
             [('task4', None, 'on-success')]
         )
 
         self.assertListEqual(
-            wf_spec.get_next_tasks('task3'),
+            wf_spec.tasks.get_next_tasks('task3'),
             [('task4', None, 'on-success')]
         )
 
         self.assertListEqual(
-            wf_spec.get_next_tasks('task4'),
+            wf_spec.tasks.get_next_tasks('task4'),
             [('task5', None, 'on-success'), ('task6', None, 'on-success')]
         )
 
         self.assertListEqual(
-            wf_spec.get_next_tasks('task5'),
+            wf_spec.tasks.get_next_tasks('task5'),
             [('task7', None, 'on-success')]
         )
 
         self.assertListEqual(
-            wf_spec.get_next_tasks('task6'),
+            wf_spec.tasks.get_next_tasks('task6'),
             [('task7', None, 'on-success')]
         )
 
         self.assertListEqual(
-            wf_spec.get_next_tasks('task7'),
+            wf_spec.tasks.get_next_tasks('task7'),
             []
         )
 
@@ -69,37 +69,37 @@ class WorkflowSpecTest(base.WorkflowSpecTest):
         wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertListEqual(
-            wf_spec.get_prev_tasks('task1'),
+            wf_spec.tasks.get_prev_tasks('task1'),
             []
         )
 
         self.assertListEqual(
-            wf_spec.get_prev_tasks('task2'),
+            wf_spec.tasks.get_prev_tasks('task2'),
             [('task1', None, 'on-success')]
         )
 
         self.assertListEqual(
-            wf_spec.get_prev_tasks('task3'),
+            wf_spec.tasks.get_prev_tasks('task3'),
             [('task1', None, 'on-success')]
         )
 
         self.assertListEqual(
-            wf_spec.get_prev_tasks('task4'),
+            wf_spec.tasks.get_prev_tasks('task4'),
             [('task2', None, 'on-success'), ('task3', None, 'on-success')]
         )
 
         self.assertListEqual(
-            wf_spec.get_prev_tasks('task5'),
+            wf_spec.tasks.get_prev_tasks('task5'),
             [('task4', None, 'on-success')]
         )
 
         self.assertListEqual(
-            wf_spec.get_prev_tasks('task6'),
+            wf_spec.tasks.get_prev_tasks('task6'),
             [('task4', None, 'on-success')]
         )
 
         self.assertListEqual(
-            wf_spec.get_prev_tasks('task7'),
+            wf_spec.tasks.get_prev_tasks('task7'),
             [('task5', None, 'on-success'), ('task6', None, 'on-success')]
         )
 
@@ -109,7 +109,7 @@ class WorkflowSpecTest(base.WorkflowSpecTest):
         wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
         self.assertListEqual(
-            wf_spec.get_start_tasks(),
+            wf_spec.tasks.get_start_tasks(),
             ['task1']
         )
 
@@ -118,34 +118,34 @@ class WorkflowSpecTest(base.WorkflowSpecTest):
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
         wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
-        self.assertFalse(wf_spec.is_join_task('task4'))
-        self.assertTrue(wf_spec.is_join_task('task7'))
+        self.assertFalse(wf_spec.tasks.is_join_task('task4'))
+        self.assertTrue(wf_spec.tasks.is_join_task('task7'))
 
     def test_is_split_task(self):
         wf_name = 'split'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
         wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
-        self.assertTrue(wf_spec.is_split_task('task4'))
-        self.assertFalse(wf_spec.is_split_task('task7'))
+        self.assertTrue(wf_spec.tasks.is_split_task('task4'))
+        self.assertFalse(wf_spec.tasks.is_split_task('task7'))
 
     def test_not_in_cycle(self):
         wf_name = 'split'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
         wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
-        self.assertFalse(wf_spec.in_cycle('task4'))
+        self.assertFalse(wf_spec.tasks.in_cycle('task4'))
 
     def test_has_cycles(self):
         wf_name = 'cycle'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
         wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
-        self.assertTrue(wf_spec.has_cycles())
+        self.assertTrue(wf_spec.tasks.has_cycles())
 
     def test_in_cycle(self):
         wf_name = 'cycle'
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
         wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
-        self.assertTrue(wf_spec.in_cycle('task1'))
+        self.assertTrue(wf_spec.tasks.in_cycle('task1'))

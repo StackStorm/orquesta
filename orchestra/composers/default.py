@@ -56,7 +56,7 @@ class WorkflowComposer(base.WorkflowComposer):
         q = queue.Queue()
         wf_graph = composition.WorkflowGraph()
 
-        for task_name in wf_spec.get_start_tasks():
+        for task_name in wf_spec.tasks.get_start_tasks():
             q.put((task_name, []))
 
         while not q.empty():
@@ -64,25 +64,25 @@ class WorkflowComposer(base.WorkflowComposer):
 
             wf_graph.add_task(task_name)
 
-            if wf_spec.is_join_task(task_name):
-                task_spec = wf_spec.get_task(task_name)
+            if wf_spec.tasks.is_join_task(task_name):
+                task_spec = wf_spec.tasks[task_name]
                 wf_graph.update_task(task_name, join=task_spec.join)
 
             # Determine if the task is a split task and if it is in a cycle.
             # If the task is a split task, keep track of where the split(s)
             # occurs.
-            if (wf_spec.is_split_task(task_name) and
-                    not wf_spec.in_cycle(task_name)):
+            if (wf_spec.tasks.is_split_task(task_name) and
+                    not wf_spec.tasks.in_cycle(task_name)):
                 splits.append(task_name)
 
             if splits:
                 wf_graph.update_task(task_name, splits=splits)
 
-            next_tasks = wf_spec.get_next_tasks(task_name)
+            next_tasks = wf_spec.tasks.get_next_tasks(task_name)
 
             for next_task_name, expr, condition in next_tasks:
                 if (not wf_graph.has_task(next_task_name) or
-                        not wf_spec.in_cycle(next_task_name)):
+                        not wf_spec.tasks.in_cycle(next_task_name)):
                     q.put((next_task_name, list(splits)))
 
                 criteria = cls._compose_sequence_criteria(

@@ -11,6 +11,8 @@
 # limitations under the License.
 
 import logging
+import six
+from six.moves import queue
 
 from orchestra.specs import types
 from orchestra.specs.v2 import base
@@ -108,3 +110,93 @@ class TaskMappingSpec(base.MappingSpec):
             '^\w+$': TaskSpec
         }
     }
+
+    def get_next_tasks(self, task_name, *args, **kwargs):
+        task_spec = self[task_name]
+        conditions = kwargs.get('conditions')
+
+        if not conditions:
+            conditions = [
+                'on-complete',
+                'on-error',
+                'on-success'
+            ]
+
+        next_tasks = []
+
+        for condition in conditions:
+            for task in getattr(task_spec, condition) or []:
+                next_tasks.append(
+                    list(task.items())[0] + (condition,)
+                    if isinstance(task, dict)
+                    else (task, None, condition)
+                )
+
+        return sorted(next_tasks, key=lambda x: x[0])
+
+    def get_prev_tasks(self, task_name, *args, **kwargs):
+        prev_tasks = []
+        conditions = kwargs.get('conditions')
+
+        for name, task_spec in six.iteritems(self):
+            for next_task in self.get_next_tasks(name, conditions=conditions):
+                if task_name == next_task[0]:
+                    prev_tasks.append(
+                        (name, next_task[1], next_task[2])
+                    )
+
+        return sorted(prev_tasks, key=lambda x: x[0])
+
+    def get_start_tasks(self):
+        return sorted(
+            [
+                task_name
+                for task_name in self.keys()
+                if not self.get_prev_tasks(task_name)
+            ]
+        )
+
+    def is_join_task(self, task_name):
+        task_spec = self[task_name]
+
+        return task_spec.join is not None
+
+    def is_split_task(self, task_name):
+        return (
+            not self.is_join_task(task_name) and
+            len(self.get_prev_tasks(task_name)) > 1
+        )
+
+    def in_cycle(self, task_name):
+        traversed = []
+        q = queue.Queue()
+
+        for task in self.get_next_tasks(task_name):
+            q.put(task[0])
+
+        while not q.empty():
+            next_task_name = q.get()
+
+            # If the next task matches the original task, then it's in a loop.
+            if next_task_name == task_name:
+                return True
+
+            # If the next task has already been traversed but didn't match the
+            # original task, then there's a loop but the original task is not
+            # in the loop.
+            if next_task_name in traversed:
+                return False
+
+            for task in self.get_next_tasks(next_task_name):
+                q.put(task[0])
+
+            traversed.append(next_task_name)
+
+        return False
+
+    def has_cycles(self):
+        for task_name, task_spec in six.iteritems(self):
+            if self.in_cycle(task_name):
+                return True
+
+        return False
