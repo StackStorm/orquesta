@@ -237,7 +237,7 @@ class Spec(object):
         if expr_errors:
             errors['expressions'] = expr_errors
 
-        ctx_errors = self._validate_context()
+        ctx_errors, _ = self._validate_context()
 
         if ctx_errors:
             errors['context'] = ctx_errors
@@ -350,7 +350,9 @@ class Spec(object):
                     'schema_path': schema_path
                 }
 
-                errors.extend(prop_value._validate_context(parent=parent))
+                result = prop_value._validate_context(parent=parent)
+                errors.extend(result[0])
+                rolling_ctx = list(set(rolling_ctx + result[1]))
 
                 continue
 
@@ -365,7 +367,10 @@ class Spec(object):
                 updated_ctx = get_ctx_inputs(prop_name, prop_value)
                 rolling_ctx = list(set(rolling_ctx + updated_ctx))
 
-        return sorted(errors, key=lambda x: x['spec_path'])
+        return (
+            sorted(errors, key=lambda x: x['spec_path']),
+            rolling_ctx
+        )
 
 
 class MappingSpec(Spec):

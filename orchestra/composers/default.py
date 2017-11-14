@@ -56,7 +56,7 @@ class WorkflowComposer(base.WorkflowComposer):
         q = queue.Queue()
         wf_graph = composition.WorkflowGraph()
 
-        for task_name in wf_spec.tasks.get_start_tasks():
+        for task_name, expr, condition in wf_spec.tasks.get_start_tasks():
             q.put((task_name, []))
 
         while not q.empty():

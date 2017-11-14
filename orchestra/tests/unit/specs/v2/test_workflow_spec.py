@@ -110,7 +110,7 @@ class WorkflowSpecTest(base.WorkflowSpecTest):
 
         self.assertListEqual(
             wf_spec.tasks.get_start_tasks(),
-            ['task1']
+            [('task1', None, None)]
         )
 
     def test_is_join_task(self):

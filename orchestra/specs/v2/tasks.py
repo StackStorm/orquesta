@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import logging
 import six
 from six.moves import queue
@@ -101,6 +102,26 @@ class TaskSpec(base.Spec):
         ]
     }
 
+    _context_evaluation_sequence = [
+        'join',
+        'with-items',
+        'concurrency',
+        'action',
+        'workflow',
+        'input',
+        'publish',
+        'on-complete',
+        'on-success',
+        'on-error'
+    ]
+
+    _context_inputs = [
+        'publish'
+    ]
+
+    def has_join(self):
+        return hasattr(self, 'join') and self.join
+
 
 class TaskMappingSpec(base.MappingSpec):
     _schema = {
@@ -111,8 +132,11 @@ class TaskMappingSpec(base.MappingSpec):
         }
     }
 
+    def get_task(self, task_name):
+        return self[task_name]
+
     def get_next_tasks(self, task_name, *args, **kwargs):
-        task_spec = self[task_name]
+        task_spec = self.get_task(task_name)
         conditions = kwargs.get('conditions')
 
         if not conditions:
@@ -128,6 +152,8 @@ class TaskMappingSpec(base.MappingSpec):
             for task in getattr(task_spec, condition) or []:
                 next_tasks.append(
                     list(task.items())[0] + (condition,)
+                    # The task attribute is either a name or
+                    # it's a dict that contains name and expr.
                     if isinstance(task, dict)
                     else (task, None, condition)
                 )
@@ -148,16 +174,16 @@ class TaskMappingSpec(base.MappingSpec):
         return sorted(prev_tasks, key=lambda x: x[0])
 
     def get_start_tasks(self):
-        return sorted(
-            [
-                task_name
-                for task_name in self.keys()
-                if not self.get_prev_tasks(task_name)
-            ]
-        )
+        start_tasks = [
+            (task_name, None, None)
+            for task_name in self.keys()
+            if not self.get_prev_tasks(task_name)
+        ]
+
+        return sorted(start_tasks, key=lambda x: x[0])
 
     def is_join_task(self, task_name):
-        task_spec = self[task_name]
+        task_spec = self.get_task(task_name)
 
         return task_spec.join is not None
 
@@ -200,3 +226,48 @@ class TaskMappingSpec(base.MappingSpec):
                 return True
 
         return False
+
+    def _validate_context(self, parent=None):
+        ctxs = {}
+        errors = []
+        parent_ctx = parent.get('ctx', []) if parent else []
+        rolling_ctx = list(set(parent_ctx))
+        q = queue.Queue()
+
+        for task in self.get_start_tasks():
+            q.put((task[0], copy.deepcopy(rolling_ctx)))
+
+        while not q.empty():
+            task_name, task_ctx = q.get()
+
+            if not task_ctx:
+                task_ctx = ctxs.get(task_name, [])
+
+            task_spec = self.get_task(task_name)
+
+            spec_path = parent.get('spec_path') + '.' + task_name
+            schema_path = (
+                parent.get('schema_path') + '.' + 'properties.' + task_name
+            )
+
+            task_parent = {
+                'ctx': task_ctx,
+                'spec_path': spec_path,
+                'schema_path': schema_path
+            }
+
+            result = task_spec._validate_context(parent=task_parent)
+            errors.extend(result[0])
+            task_ctx = list(set(task_ctx + result[1]))
+            rolling_ctx = list(set(rolling_ctx + task_ctx))
+
+            for task in self.get_next_tasks(task_name):
+                next_task_spec = self.get_task(task[0])
+
+                if not next_task_spec.has_join():
+                    q.put((task[0], task_ctx))
+                else:
+                    ctxs[task[0]] = list(set(ctxs.get(task[0], []) + task_ctx))
+                    q.put((task[0], None))
+
+        return (errors, rolling_ctx)

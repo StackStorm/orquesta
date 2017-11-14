@@ -37,6 +37,7 @@ class WorkflowSpec(base.Spec):
     _context_evaluation_sequence = [
         'input',
         'vars',
+        'tasks',
         'output'
     ]
 
