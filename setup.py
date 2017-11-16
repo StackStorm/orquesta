@@ -62,8 +62,7 @@ setup(
     ],
     entry_points={
         'orchestra.composers': [
-            'direct = orchestra.composers.direct:DirectWorkflowComposer',
-            'reverse = orchestra.composers.reverse:ReverseWorkflowComposer'
+            'default = orchestra.composers.default:WorkflowComposer'
         ],
         'orchestra.expressions.evaluators': [
             'yaql = orchestra.expressions.yql:YAQLEvaluator',

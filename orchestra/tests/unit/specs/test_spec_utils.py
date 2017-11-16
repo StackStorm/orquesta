@@ -19,46 +19,26 @@ from orchestra.tests.unit import base
 
 class SpecUtilsTest(base.WorkflowSpecTest):
 
-    def test_convert_direct_wf_def_dict_to_spec(self):
+    def test_convert_wf_def_dict_to_spec(self):
         wf_name = 'sequential'
-        wf_def = self.get_wf_def(wf_name, rel_path='direct')
+        wf_def = self.get_wf_def(wf_name)
 
         self.assertIsInstance(wf_def, dict)
 
         wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
-        self.assertIsInstance(wf_spec, specs.DirectWorkflowSpec)
-        self.assertDictEqual(wf_def, wf_spec.definition)
+        self.assertIsInstance(wf_spec, specs.WorkflowSpec)
+        self.assertEqual(wf_name, wf_spec.name)
+        self.assertDictEqual(wf_def[wf_name], wf_spec.spec)
 
-    def test_convert_direct_wf_def_yaml_to_spec(self):
+    def test_convert_wf_def_yaml_to_spec(self):
         wf_name = 'sequential'
-        wf_def = self.get_wf_def(wf_name, rel_path='direct', raw=True)
+        wf_def = self.get_wf_def(wf_name, raw=True)
 
         self.assertIsInstance(wf_def, str)
 
         wf_spec = utils.convert_wf_def_to_spec(wf_def)
 
-        self.assertIsInstance(wf_spec, specs.DirectWorkflowSpec)
-        self.assertDictEqual(yaml.safe_load(wf_def), wf_spec.definition)
-
-    def test_convert_reverse_wf_def_dict_to_spec(self):
-        wf_name = 'sequential'
-        wf_def = self.get_wf_def(wf_name, rel_path='reverse')
-
-        self.assertIsInstance(wf_def, dict)
-
-        wf_spec = utils.convert_wf_def_to_spec(wf_def)
-
-        self.assertIsInstance(wf_spec, specs.ReverseWorkflowSpec)
-        self.assertDictEqual(wf_def, wf_spec.definition)
-
-    def test_convert_reverse_wf_def_yaml_to_spec(self):
-        wf_name = 'sequential'
-        wf_def = self.get_wf_def(wf_name, rel_path='reverse', raw=True)
-
-        self.assertIsInstance(wf_def, str)
-
-        wf_spec = utils.convert_wf_def_to_spec(wf_def)
-
-        self.assertIsInstance(wf_spec, specs.ReverseWorkflowSpec)
-        self.assertDictEqual(yaml.safe_load(wf_def), wf_spec.definition)
+        self.assertIsInstance(wf_spec, specs.WorkflowSpec)
+        self.assertEqual(wf_name, wf_spec.name)
+        self.assertDictEqual(yaml.safe_load(wf_def)[wf_name], wf_spec.spec)

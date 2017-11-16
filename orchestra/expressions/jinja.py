@@ -21,6 +21,7 @@ import jinja2
 from orchestra import exceptions as exc
 from orchestra.expressions import base
 from orchestra.expressions.functions import base as functions
+from orchestra.utils import expression as utils
 
 
 LOG = logging.getLogger(__name__)
@@ -45,9 +46,12 @@ class JinjaEvaluationException(exc.ExpressionEvaluationException):
 
 class JinjaEvaluator(base.Evaluator):
     _type = 'jinja'
+    _var_symbol = '_'
     _delimiter = '{{}}'
     _regex_pattern = '{{.*?}}'
     _regex_parser = re.compile(_regex_pattern)
+    _regex_var_pattern = '.*?(_\.[a-zA-Z0-9_\.\[\]\(\)]*).*?'
+    _regex_var_parser = re.compile(_regex_var_pattern)
 
     _block_delimiter = '{%}'
     _regex_block_pattern = '{%.*?%}'
@@ -94,10 +98,14 @@ class JinjaEvaluator(base.Evaluator):
         try:
             cls._jinja_env.parse(text)
         except jinja2.exceptions.TemplateError as e:
-            errors.append(cls.format_error(text, e))
+            errors.append(utils.format_error(cls._type, text, e))
 
         # Validate individual inline expressions.
         for expr in cls._regex_parser.findall(text):
+            # Skip expression if it has already been validated and erred.
+            if list(filter(lambda x: x['expression'] == expr, errors)):
+                continue
+
             try:
                 parser = jinja2.parser.Parser(
                     cls._jinja_env.overlay(),
@@ -107,7 +115,7 @@ class JinjaEvaluator(base.Evaluator):
 
                 parser.parse_expression()
             except jinja2.exceptions.TemplateError as e:
-                errors.append(cls.format_error(cls.strip_delimiter(expr), e))
+                errors.append(utils.format_error(cls._type, expr, e))
 
         return errors
 
@@ -195,3 +203,15 @@ class JinjaEvaluator(base.Evaluator):
             output = cls._jinja_env.from_string(output).render(ctx)
 
         return output
+
+    @classmethod
+    def extract_vars(cls, text):
+        if not isinstance(text, six.string_types):
+            raise ValueError('Text to be evaluated is not typeof string.')
+
+        variables = []
+
+        for expr in cls._regex_parser.findall(text):
+            variables.extend(cls._regex_var_parser.findall(expr))
+
+        return sorted(list(set(variables)))

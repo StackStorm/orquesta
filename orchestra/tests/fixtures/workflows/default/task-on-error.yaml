@@ -1,0 +1,15 @@
+version: '2.0'
+
+task-on-error:
+    description: A basic workflow that demonstrates on-error handler.
+    tasks:
+        task1:
+            action: std.noop
+            on-success:
+                - task2
+            on-error:
+                - task3
+        task2:
+            action: std.noop
+        task3:
+            action: std.noop

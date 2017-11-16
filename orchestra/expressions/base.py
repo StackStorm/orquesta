@@ -11,13 +11,13 @@
 # limitations under the License.
 
 import abc
-import json
 import logging
+import re
 import six
 
 from stevedore import extension
 
-from orchestra import exceptions as exc
+from orchestra.utils import expression as expr_utils
 from orchestra.utils import plugin
 
 
@@ -25,6 +25,7 @@ LOG = logging.getLogger(__name__)
 
 _EXP_EVALUATORS = None
 _EXP_EVALUATOR_NAMESPACE = 'orchestra.expressions.evaluators'
+_REGEX_VAR_EXTRACT = '\%s\.([a-zA-Z0-9_\-]*)\.?'
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -33,16 +34,12 @@ class Evaluator(object):
     _delimiter = None
 
     @classmethod
-    def strip_delimiter(cls, expr):
-        return expr.strip(cls._delimiter).strip()
+    def get_type(cls):
+        return cls._type
 
     @classmethod
-    def format_error(cls, expr, exc):
-        return {
-            'type': cls._type,
-            'expression': expr,
-            'message': str(getattr(exc, 'message', exc))
-        }
+    def strip_delimiter(cls, expr):
+        return expr.strip(cls._delimiter).strip()
 
     @classmethod
     def has_expressions(cls, text):
@@ -50,12 +47,17 @@ class Evaluator(object):
 
     @classmethod
     @abc.abstractmethod
-    def validate(cls, text):
+    def validate(cls, statement):
         raise NotImplementedError()
 
     @classmethod
     @abc.abstractmethod
     def evaluate(cls, text, data=None):
+        raise NotImplementedError()
+
+    @classmethod
+    @abc.abstractmethod
+    def extract_vars(cls, statement):
         raise NotImplementedError()
 
 
@@ -80,44 +82,72 @@ def get_evaluators():
     return _EXP_EVALUATORS
 
 
-def validate(text):
-    result = [
-        {
-            'type': name,
-            'module': evaluator,
-            'errors': evaluator.validate(text)
-        }
-        for name, evaluator in six.iteritems(get_evaluators())
-        if evaluator.has_expressions(text)
-    ]
+def validate(statement):
 
-    if len(result) == 1:
-        return result[0]
-    else:
-        error = Evaluator.format_error(
-            text,
-            exc.ExpressionGrammarException(
-                'The statement contains multiple expression '
-                'types which is not supported.'
-            )
-        )
+    errors = []
 
+    if isinstance(statement, dict):
+        for k, v in six.iteritems(statement):
+            errors.extend(validate(k)['errors'])
+            errors.extend(validate(v)['errors'])
+
+    elif isinstance(statement, list):
+        for item in statement:
+            errors.extend(validate(item)['errors'])
+
+    elif isinstance(statement, six.string_types):
+        evaluators = [
+            evaluator for name, evaluator in six.iteritems(get_evaluators())
+            if evaluator.has_expressions(statement)
+        ]
+
+        if len(evaluators) == 1:
+            errors.extend(evaluators[0].validate(statement))
+        elif len(evaluators) > 1:
+            message = 'Expression with multiple types is not supported.'
+            errors.append(expr_utils.format_error(None, statement, message))
+
+    return {'errors': errors}
+
+
+def evaluate(statement, data=None):
+
+    if isinstance(statement, dict):
         return {
-            'type': None,
-            'module': None,
-            'errors': [error]
+            evaluate(k, data=data): evaluate(v, data=data)
+            for k, v in six.iteritems(statement)
         }
 
+    elif isinstance(statement, list):
+        return [evaluate(item, data=data) for item in statement]
 
-def evaluate(text, data=None):
-    result = validate(text)
-    errors = result.get('errors', [])
+    elif isinstance(statement, six.string_types):
+        for name, evaluator in six.iteritems(get_evaluators()):
+            if evaluator.has_expressions(statement):
+                return evaluator.evaluate(statement, data=data)
 
-    if len(errors) > 0:
-        raise exc.ExpressionGrammarException(
-            'Validation failed for expression. %s', json.dumps(errors)
-        )
+    return statement
 
-    evaluator = result.get('module')
 
-    return evaluator.evaluate(text, data=data)
+def extract_vars(statement):
+
+    variables = []
+
+    if isinstance(statement, dict):
+        for k, v in six.iteritems(statement):
+            variables.extend(extract_vars(k))
+            variables.extend(extract_vars(v))
+
+    elif isinstance(statement, list):
+        for item in statement:
+            variables.extend(extract_vars(item))
+
+    elif isinstance(statement, six.string_types):
+        for name, evaluator in six.iteritems(get_evaluators()):
+            regex_var_extract = _REGEX_VAR_EXTRACT % evaluator._var_symbol
+
+            for var_ref in evaluator.extract_vars(statement):
+                var = re.search(regex_var_extract, var_ref).group(1)
+                variables.append((evaluator.get_type(), statement, var))
+
+    return sorted(list(set(variables)), key=lambda var: var[2])

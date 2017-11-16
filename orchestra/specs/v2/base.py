@@ -18,7 +18,7 @@ from orchestra.specs import base
 LOG = logging.getLogger(__name__)
 
 
-class BaseSpec(base.BaseSpec):
+class Spec(base.Spec):
     _version = '2.0'
 
     _meta_schema = {
@@ -27,6 +27,31 @@ class BaseSpec(base.BaseSpec):
             'version': {
                 'enum': [_version, float(_version)]
             }
-        },
-        'required': ['version']
+        }
+    }
+
+
+class MappingSpec(base.MappingSpec):
+    _version = '2.0'
+
+    _meta_schema = {
+        'type': 'object',
+        'properties': {
+            'version': {
+                'enum': [_version, float(_version)]
+            }
+        }
+    }
+
+
+class SequenceSpec(base.SequenceSpec):
+    _version = '2.0'
+
+    _meta_schema = {
+        'type': 'object',
+        'properties': {
+            'version': {
+                'enum': [_version, float(_version)]
+            }
+        }
     }

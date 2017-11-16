@@ -26,3 +26,11 @@ class ExpressionGrammarException(Exception):
 
 class ExpressionEvaluationException(Exception):
     pass
+
+
+class SchemaDefinitionError(Exception):
+    pass
+
+
+class SchemaIncompatibleError(Exception):
+    pass

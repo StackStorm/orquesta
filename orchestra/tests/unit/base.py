@@ -69,6 +69,9 @@ class WorkflowGraphTest(unittest.TestCase):
 
 
 class WorkflowSpecTest(unittest.TestCase):
+    def __init__(self, *args, **kwargs):
+        super(WorkflowSpecTest, self).__init__(*args, **kwargs)
+        self.maxDiff = None
 
     def get_fixture_path(self, wf_name, rel_path=None):
         if rel_path:
@@ -76,7 +79,7 @@ class WorkflowSpecTest(unittest.TestCase):
         else:
             return wf_name + '.yaml'
 
-    def get_wf_def(self, wf_name, rel_path=None, raw=False):
+    def get_wf_def(self, wf_name, rel_path='default', raw=False):
         return loader.get_fixture_content(
             self.get_fixture_path(wf_name, rel_path=rel_path),
             'workflows',
@@ -99,12 +102,7 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
             cls.composer_name
         )
 
-        cls.wf_spec_type = (
-            specs.ReverseWorkflowSpec
-            if cls.composer_name == 'reverse'
-            else specs.DirectWorkflowSpec
-        )
-
+        cls.wf_spec_type = specs.WorkflowSpec
         cls.fixture_rel_path = cls.composer_name
 
     def compose_seq_expr(self, name, *args, **kwargs):
@@ -112,7 +110,7 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
 
     def compose_wf_graph(self, wf_name):
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = self.wf_spec_type(wf_def)
+        wf_spec = self.wf_spec_type(wf_def[wf_name], name=wf_name)
 
         return self.composer._compose_wf_graph(wf_spec)
 
@@ -123,7 +121,7 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
 
     def compose_wf_ex_graph(self, wf_name):
         wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
-        wf_spec = self.wf_spec_type(wf_def)
+        wf_spec = self.wf_spec_type(wf_def[wf_name], name=wf_name)
 
         return self.composer.compose(wf_spec)
 
@@ -133,20 +131,12 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
         self.assert_graph_equal(wf_ex_graph, expected_wf_ex_graph)
 
 
-class DirectWorkflowComposerTest(WorkflowComposerTest):
+class DefaultWorkflowComposerTest(WorkflowComposerTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.composer_name = 'direct'
-        super(DirectWorkflowComposerTest, cls).setUpClass()
-
-
-class ReverseWorkflowComposerTest(WorkflowComposerTest):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.composer_name = 'reverse'
-        super(ReverseWorkflowComposerTest, cls).setUpClass()
+        cls.composer_name = 'default'
+        super(DefaultWorkflowComposerTest, cls).setUpClass()
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -215,17 +205,9 @@ class WorkflowConductorTest(WorkflowComposerTest):
         self.assertListEqual(expected_task_seq, actual_task_seq)
 
 
-class DirectWorkflowConductorTest(WorkflowConductorTest):
+class DefaultWorkflowConductorTest(WorkflowConductorTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.composer_name = 'direct'
-        super(DirectWorkflowConductorTest, cls).setUpClass()
-
-
-class ReverseWorkflowConductorTest(WorkflowConductorTest):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.composer_name = 'reverse'
-        super(ReverseWorkflowConductorTest, cls).setUpClass()
+        cls.composer_name = 'default'
+        super(DefaultWorkflowConductorTest, cls).setUpClass()

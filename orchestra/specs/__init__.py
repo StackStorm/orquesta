@@ -11,20 +11,14 @@
 # limitations under the License.
 
 from orchestra.specs import v2
-from orchestra.specs.v2 import DirectWorkflowSpec
-from orchestra.specs.v2 import DirectTaskDefaultsSpec
-from orchestra.specs.v2 import DirectTaskSpec
-from orchestra.specs.v2 import ReverseWorkflowSpec
-from orchestra.specs.v2 import ReverseTaskDefaultsSpec
-from orchestra.specs.v2 import ReverseTaskSpec
+from orchestra.specs.v2 import WorkflowSpec
+from orchestra.specs.v2 import TaskDefaultsSpec
+from orchestra.specs.v2 import TaskSpec
 
 VERSION = v2.VERSION
 
 __all__ = [
-    DirectWorkflowSpec.__name__,
-    DirectTaskDefaultsSpec.__name__,
-    DirectTaskSpec.__name__,
-    ReverseWorkflowSpec.__name__,
-    ReverseTaskDefaultsSpec.__name__,
-    ReverseTaskSpec.__name__
+    WorkflowSpec.__name__,
+    TaskDefaultsSpec.__name__,
+    TaskSpec.__name__
 ]

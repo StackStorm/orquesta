@@ -26,40 +26,35 @@ PAUSE_BEFORE_SCHEMA = types.YAQL_OR_BOOLEAN
 CONCURRENCY_SCHEMA = types.YAQL_OR_POSITIVE_INTEGER
 
 
-class RetrySpec(base.BaseSpec):
-    _schema = {
-        'oneOf': [
-            types.NONEMPTY_STRING,
-            {
-                'type': 'object',
-                'properties': {
-                    'count': {
-                        'oneOf': [
-                            types.YAQL,
-                            types.POSITIVE_INTEGER
-                        ]
-                    },
-                    'break-on': types.YAQL,
-                    'continue-on': types.YAQL,
-                    'delay': {
-                        'oneOf': [
-                            types.YAQL,
-                            types.POSITIVE_INTEGER
-                        ]
-                    },
-                },
-                'required': ['delay', 'count'],
-                'additionalProperties': False
-            }
-        ]
-    }
-
-
-class PoliciesSpec(base.BaseSpec):
+class RetrySpec(base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
-            'retry': RetrySpec.get_schema(includes=None),
+            'count': {
+                'oneOf': [
+                    types.YAQL,
+                    types.POSITIVE_INTEGER
+                ]
+            },
+            'break-on': types.YAQL,
+            'continue-on': types.YAQL,
+            'delay': {
+                'oneOf': [
+                    types.YAQL,
+                    types.POSITIVE_INTEGER
+                ]
+            },
+        },
+        'required': ['delay', 'count'],
+        'additionalProperties': False
+    }
+
+
+class PoliciesSpec(base.Spec):
+    _schema = {
+        'type': 'object',
+        'properties': {
+            'retry': RetrySpec,
             'wait-before': WAIT_BEFORE_SCHEMA,
             'wait-after': WAIT_AFTER_SCHEMA,
             'timeout': TIMEOUT_SCHEMA,

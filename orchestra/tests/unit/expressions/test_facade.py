@@ -22,12 +22,9 @@ class ExpressionEvaluatorTest(unittest.TestCase):
 
         expected_errors = [
             {
+                'type': None,
                 'expression': expr,
-                'message': (
-                    'The statement contains multiple expression '
-                    'types which is not supported.'
-                ),
-                'type': 'unspecified'
+                'message': 'Expression with multiple types is not supported.'
             }
         ]
 

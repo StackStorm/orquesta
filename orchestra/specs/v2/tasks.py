@@ -10,7 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import logging
+import six
+from six.moves import queue
 
 from orchestra.specs import types
 from orchestra.specs.v2 import base
@@ -28,44 +31,53 @@ ON_CLAUSE_SCHEMA = {
 }
 
 
-class TaskDefaultsSpec(base.BaseSpec):
+class TaskDefaultsSpec(base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
-            'retry': policies.RetrySpec.get_schema(includes=None),
+            'concurrency': policies.CONCURRENCY_SCHEMA,
+            'retry': policies.RetrySpec,
             'wait-before': policies.WAIT_BEFORE_SCHEMA,
             'wait-after': policies.WAIT_AFTER_SCHEMA,
-            'timeout': policies.TIMEOUT_SCHEMA,
             'pause-before': policies.PAUSE_BEFORE_SCHEMA,
-            'concurrency': policies.CONCURRENCY_SCHEMA
+            'timeout': policies.TIMEOUT_SCHEMA,
+            'on-complete': ON_CLAUSE_SCHEMA,
+            'on-success': ON_CLAUSE_SCHEMA,
+            'on-error': ON_CLAUSE_SCHEMA
         },
         'additionalProperties': False
     }
 
 
-class TaskSpec(base.BaseSpec):
+class TaskSpec(base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
-            'type': types.WORKFLOW_TYPE,
-            'action': types.NONEMPTY_STRING,
-            'workflow': types.NONEMPTY_STRING,
-            'input': types.NONEMPTY_DICT,
+            'join': {
+                'oneOf': [
+                    {'enum': ['all']},
+                    types.POSITIVE_INTEGER
+                ]
+            },
             'with-items': {
                 'oneOf': [
                     types.NONEMPTY_STRING,
                     types.UNIQUE_STRING_LIST
                 ]
             },
+            'concurrency': policies.CONCURRENCY_SCHEMA,
+            'action': types.NONEMPTY_STRING,
+            'workflow': types.NONEMPTY_STRING,
+            'input': types.NONEMPTY_DICT,
             'publish': types.NONEMPTY_DICT,
-            'retry': policies.RetrySpec.get_schema(includes=None),
+            'retry': policies.RetrySpec,
             'wait-before': policies.WAIT_BEFORE_SCHEMA,
             'wait-after': policies.WAIT_AFTER_SCHEMA,
-            'timeout': policies.TIMEOUT_SCHEMA,
             'pause-before': policies.PAUSE_BEFORE_SCHEMA,
-            'concurrency': policies.CONCURRENCY_SCHEMA,
-            'target': types.NONEMPTY_STRING,
-            'keep-result': types.YAQL_OR_BOOLEAN
+            'timeout': policies.TIMEOUT_SCHEMA,
+            'on-complete': ON_CLAUSE_SCHEMA,
+            'on-success': ON_CLAUSE_SCHEMA,
+            'on-error': ON_CLAUSE_SCHEMA
         },
         'additionalProperties': False,
         'anyOf': [
@@ -90,56 +102,172 @@ class TaskSpec(base.BaseSpec):
         ]
     }
 
+    _context_evaluation_sequence = [
+        'join',
+        'with-items',
+        'concurrency',
+        'action',
+        'workflow',
+        'input',
+        'publish',
+        'on-complete',
+        'on-success',
+        'on-error'
+    ]
 
-class DirectTaskDefaultsSpec(TaskDefaultsSpec):
+    _context_inputs = [
+        'publish'
+    ]
+
+    def has_join(self):
+        return hasattr(self, 'join') and self.join
+
+
+class TaskMappingSpec(base.MappingSpec):
     _schema = {
         'type': 'object',
-        'properties': {
-            'on-complete': ON_CLAUSE_SCHEMA,
-            'on-success': ON_CLAUSE_SCHEMA,
-            'on-error': ON_CLAUSE_SCHEMA
-        },
-        'additionalProperties': False
+        'minProperties': 1,
+        'patternProperties': {
+            '^\w+$': TaskSpec
+        }
     }
 
+    def get_task(self, task_name):
+        return self[task_name]
 
-class DirectTaskSpec(TaskSpec):
-    _schema = {
-        'type': 'object',
-        'properties': {
-            'join': {
-                'oneOf': [
-                    {'enum': ['all']},
-                    types.POSITIVE_INTEGER
-                ]
-            },
-            'on-complete': ON_CLAUSE_SCHEMA,
-            'on-success': ON_CLAUSE_SCHEMA,
-            'on-error': ON_CLAUSE_SCHEMA
-        },
-        'additionalProperties': False
-    }
+    def get_next_tasks(self, task_name, *args, **kwargs):
+        task_spec = self.get_task(task_name)
+        conditions = kwargs.get('conditions')
 
+        if not conditions:
+            conditions = [
+                'on-complete',
+                'on-error',
+                'on-success'
+            ]
 
-class ReverseTaskDefaultsSpec(TaskDefaultsSpec):
-    _schema = {
-        'type': 'object',
-        'properties': {
-            'requires': {
-                'oneOf': [types.NONEMPTY_STRING, types.UNIQUE_STRING_LIST]
+        next_tasks = []
+
+        for condition in conditions:
+            for task in getattr(task_spec, condition) or []:
+                next_tasks.append(
+                    list(task.items())[0] + (condition,)
+                    # The task attribute is either a name or
+                    # it's a dict that contains name and expr.
+                    if isinstance(task, dict)
+                    else (task, None, condition)
+                )
+
+        return sorted(next_tasks, key=lambda x: x[0])
+
+    def get_prev_tasks(self, task_name, *args, **kwargs):
+        prev_tasks = []
+        conditions = kwargs.get('conditions')
+
+        for name, task_spec in six.iteritems(self):
+            for next_task in self.get_next_tasks(name, conditions=conditions):
+                if task_name == next_task[0]:
+                    prev_tasks.append(
+                        (name, next_task[1], next_task[2])
+                    )
+
+        return sorted(prev_tasks, key=lambda x: x[0])
+
+    def get_start_tasks(self):
+        start_tasks = [
+            (task_name, None, None)
+            for task_name in self.keys()
+            if not self.get_prev_tasks(task_name)
+        ]
+
+        return sorted(start_tasks, key=lambda x: x[0])
+
+    def is_join_task(self, task_name):
+        task_spec = self.get_task(task_name)
+
+        return task_spec.join is not None
+
+    def is_split_task(self, task_name):
+        return (
+            not self.is_join_task(task_name) and
+            len(self.get_prev_tasks(task_name)) > 1
+        )
+
+    def in_cycle(self, task_name):
+        traversed = []
+        q = queue.Queue()
+
+        for task in self.get_next_tasks(task_name):
+            q.put(task[0])
+
+        while not q.empty():
+            next_task_name = q.get()
+
+            # If the next task matches the original task, then it's in a loop.
+            if next_task_name == task_name:
+                return True
+
+            # If the next task has already been traversed but didn't match the
+            # original task, then there's a loop but the original task is not
+            # in the loop.
+            if next_task_name in traversed:
+                return False
+
+            for task in self.get_next_tasks(next_task_name):
+                q.put(task[0])
+
+            traversed.append(next_task_name)
+
+        return False
+
+    def has_cycles(self):
+        for task_name, task_spec in six.iteritems(self):
+            if self.in_cycle(task_name):
+                return True
+
+        return False
+
+    def _validate_context(self, parent=None):
+        ctxs = {}
+        errors = []
+        parent_ctx = parent.get('ctx', []) if parent else []
+        rolling_ctx = list(set(parent_ctx))
+        q = queue.Queue()
+
+        for task in self.get_start_tasks():
+            q.put((task[0], copy.deepcopy(rolling_ctx)))
+
+        while not q.empty():
+            task_name, task_ctx = q.get()
+
+            if not task_ctx:
+                task_ctx = ctxs.get(task_name, [])
+
+            task_spec = self.get_task(task_name)
+
+            spec_path = parent.get('spec_path') + '.' + task_name
+            schema_path = (
+                parent.get('schema_path') + '.' + 'properties.' + task_name
+            )
+
+            task_parent = {
+                'ctx': task_ctx,
+                'spec_path': spec_path,
+                'schema_path': schema_path
             }
-        },
-        'additionalProperties': False
-    }
 
+            result = task_spec._validate_context(parent=task_parent)
+            errors.extend(result[0])
+            task_ctx = list(set(task_ctx + result[1]))
+            rolling_ctx = list(set(rolling_ctx + task_ctx))
 
-class ReverseTaskSpec(TaskSpec):
-    _schema = {
-        'type': 'object',
-        'properties': {
-            'requires': {
-                'oneOf': [types.NONEMPTY_STRING, types.UNIQUE_STRING_LIST]
-            }
-        },
-        'additionalProperties': False
-    }
+            for task in self.get_next_tasks(task_name):
+                next_task_spec = self.get_task(task[0])
+
+                if not next_task_spec.has_join():
+                    q.put((task[0], task_ctx))
+                else:
+                    ctxs[task[0]] = list(set(ctxs.get(task[0], []) + task_ctx))
+                    q.put((task[0], None))
+
+        return (errors, rolling_ctx)

@@ -21,6 +21,7 @@ import yaql.language.exceptions as yaql_exc
 from orchestra import exceptions as exc
 from orchestra.expressions import base
 from orchestra.expressions.functions import base as functions
+from orchestra.utils import expression as utils
 
 
 LOG = logging.getLogger(__name__)
@@ -45,9 +46,12 @@ class YaqlEvaluationException(exc.ExpressionEvaluationException):
 
 class YAQLEvaluator(base.Evaluator):
     _type = 'yaql'
+    _var_symbol = '$'
     _delimiter = '<%>'
     _regex_pattern = '<%.*?%>'
     _regex_parser = re.compile(_regex_pattern)
+    _regex_var_pattern = '.*?(\$\.[a-zA-Z0-9_\.\[\]\(\)]*).*?'
+    _regex_var_parser = re.compile(_regex_var_pattern)
     _engine = yaql.language.factory.YaqlFactory().create()
     _root_ctx = yaql.create_context()
     _custom_functions = register_functions(_root_ctx)
@@ -77,7 +81,9 @@ class YAQLEvaluator(base.Evaluator):
             try:
                 cls._engine(cls.strip_delimiter(expr))
             except (yaql_exc.YaqlException, ValueError, TypeError) as e:
-                errors.append(cls.format_error(cls.strip_delimiter(expr), e))
+                errors.append(
+                    utils.format_error(cls._type, expr, e)
+                )
 
         return errors
 
@@ -122,3 +128,15 @@ class YAQLEvaluator(base.Evaluator):
             raise YaqlEvaluationException(str(getattr(e, 'message', e)))
 
         return output
+
+    @classmethod
+    def extract_vars(cls, text):
+        if not isinstance(text, six.string_types):
+            raise ValueError('Text to be evaluated is not typeof string.')
+
+        variables = []
+
+        for expr in cls._regex_parser.findall(text):
+            variables.extend(cls._regex_var_parser.findall(expr))
+
+        return sorted(list(set(variables)))
