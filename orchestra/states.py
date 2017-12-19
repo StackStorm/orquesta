@@ -13,9 +13,3 @@
 SUCCESS = 'SUCCESS'
 ERROR = 'ERROR'
 UNKNOWN = 'UNKNOWN'
-
-TASK_TRANSITION_MAP = {
-    'on-success': [SUCCESS],
-    'on-error': [ERROR],
-    'on-complete': [SUCCESS, ERROR]
-}
