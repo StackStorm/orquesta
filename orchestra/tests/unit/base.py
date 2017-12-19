@@ -20,7 +20,6 @@ from orchestra import composition
 from orchestra.expressions import base as expressions
 from orchestra.specs import loader as specs_loader
 from orchestra import states
-from orchestra import symphony
 from orchestra.utils import plugin
 from orchestra.utils import specs
 from orchestra.tests.fixtures import loader as fixture_loader
@@ -162,9 +161,8 @@ class WorkflowConductorTest(WorkflowComposerTest):
                 state_q.put(item)
 
         wf_ex_graph = composition.WorkflowGraph.deserialize(wf_ex_graph_json)
-        conductor = symphony.WorkflowConductor(wf_ex_graph)
 
-        for task in conductor.start_workflow():
+        for task in wf_ex_graph.get_start_tasks():
             q.put(task)
 
         # serialize workflow execution graph to mock async execution
@@ -184,13 +182,10 @@ class WorkflowConductorTest(WorkflowComposerTest):
                 wf_ex_graph_json
             )
 
-            # Instantiate a new conductor to mock async execution
-            conductor = symphony.WorkflowConductor(wf_ex_graph)
-
             if not ctx_q.empty():
                 context = ctx_q.get()
 
-            next_tasks = conductor.on_task_complete(
+            next_tasks = wf_ex_graph.get_next_tasks(
                 completed_task,
                 context=context
             )
