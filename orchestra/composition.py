@@ -18,6 +18,9 @@ import networkx as nx
 from networkx.readwrite import json_graph
 import six
 
+from orchestra.expressions import base as expressions
+from orchestra.utils import dictionary as dict_utils
+
 
 LOG = logging.getLogger(__name__)
 
@@ -125,14 +128,6 @@ class WorkflowGraph(object):
         for attr, value in six.iteritems(kwargs):
             self._graph[source][destination][seq[2]][attr] = value
 
-    def get_start_tasks(self):
-        tasks = [
-            {'id': n, 'name': self._graph.node[n].get('name', n)}
-            for n, d in self._graph.in_degree().items() if d == 0
-        ]
-
-        return sorted(tasks, key=lambda x: x['name'])
-
     def get_next_sequences(self, task):
         return sorted(
             [e for e in self._graph.out_edges([task], data=True, keys=True)],
@@ -147,3 +142,58 @@ class WorkflowGraph(object):
 
     def in_cycle(self, task):
         return [c for c in nx.simple_cycles(self._graph) if task in c]
+
+    def get_start_tasks(self):
+        tasks = [
+            {'id': n, 'name': self._graph.node[n].get('name', n)}
+            for n, d in self._graph.in_degree().items() if d == 0
+        ]
+
+        return sorted(tasks, key=lambda x: x['name'])
+
+    def get_next_tasks(self, task, context=None):
+        self.update_task(task['id'], state=task['state'])
+
+        context = dict_utils.merge_dicts(
+            context or {},
+            {'__task_states': self.get_task_attributes('state')},
+            overwrite=True
+        )
+
+        tasks = []
+        outbounds = []
+
+        for seq in self.get_next_sequences(task['id']):
+            evaluated_criteria = [
+                expressions.evaluate(criterion, context)
+                for criterion in seq[3]['criteria']
+            ]
+
+            if all(evaluated_criteria):
+                outbounds.append(seq)
+
+        for seq in outbounds:
+            next_task_id, seq_key, attrs = seq[1], seq[2], seq[3]
+            next_task = self.get_task(next_task_id)
+
+            if not attrs.get('satisfied', False):
+                self.update_sequence(
+                    task['id'],
+                    next_task_id,
+                    key=seq_key,
+                    satisfied=True
+                )
+
+            join_spec = next_task.get('join')
+
+            if join_spec:
+                inbounds = self.get_prev_sequences(next_task_id)
+                satisfied = [s for s in inbounds if s[3].get('satisfied')]
+                join_spec = len(inbounds) if join_spec == 'all' else join_spec
+
+                if len(satisfied) < join_spec:
+                    continue
+
+            tasks.append({'id': next_task_id, 'name': next_task['name']})
+
+        return sorted(tasks, key=lambda x: x['name'])
