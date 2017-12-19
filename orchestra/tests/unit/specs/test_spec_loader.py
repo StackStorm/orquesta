@@ -19,22 +19,13 @@ from orchestra.specs import loader
 class SpecLoaderTest(unittest.TestCase):
 
     def test_get_bad_module(self):
-        self.assertRaises(
-            ImportError,
-            loader.get_spec_module,
-            'foobar'
-        )
+        self.assertRaises(ImportError, loader.get_spec_module, 'foobar')
 
     def test_get_module(self):
-        self.assertEqual(
-            loader.get_spec_module('mock'),
-            mock
-        )
+        self.assertEqual(loader.get_spec_module('mock'), mock)
 
     def test_get_spec(self):
         spec_module = loader.get_spec_module('mock')
 
-        self.assertEqual(
-            spec_module.WorkflowSpec,
-            mock.WorkflowSpec
-        )
+        self.assertEqual(spec_module.WorkflowSpec.get_catalog(), 'mock')
+        self.assertEqual(spec_module.WorkflowSpec, mock.WorkflowSpec)

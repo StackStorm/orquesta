@@ -114,6 +114,11 @@ class SpecTest(unittest.TestCase):
         super(SpecTest, self).setUp()
         self.maxDiff = None
 
+    def test_get_catalog(self):
+        self.assertIsNone(MockSpec.get_catalog())
+        self.assertIsNone(MockMappingSpec.get_catalog())
+        self.assertIsNone(MockSequenceSpec.get_catalog())
+
     def test_get_version(self):
         self.assertEqual('1.0', MockSpec.get_version())
 
