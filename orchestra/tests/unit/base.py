@@ -18,11 +18,12 @@ import unittest
 
 from orchestra import composition
 from orchestra.expressions import base as expressions
+from orchestra.specs import loader as specs_loader
 from orchestra import states
 from orchestra import symphony
 from orchestra.utils import plugin
-from orchestra.specs import v2 as specs
-from orchestra.tests.fixtures import loader
+from orchestra.utils import specs
+from orchestra.tests.fixtures import loader as fixture_loader
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -69,27 +70,33 @@ class WorkflowGraphTest(unittest.TestCase):
 
 
 class WorkflowSpecTest(unittest.TestCase):
+    spec_module_name = 'mock'
+
     def __init__(self, *args, **kwargs):
         super(WorkflowSpecTest, self).__init__(*args, **kwargs)
         self.maxDiff = None
 
-    def get_fixture_path(self, wf_name, rel_path=None):
-        if rel_path:
-            return rel_path + '/' + wf_name + '.yaml'
-        else:
-            return wf_name + '.yaml'
+    def get_fixture_path(self, wf_name):
+        return self.spec_module_name + '/' + wf_name + '.yaml'
 
-    def get_wf_def(self, wf_name, rel_path='default', raw=False):
-        return loader.get_fixture_content(
-            self.get_fixture_path(wf_name, rel_path=rel_path),
+    def get_wf_def(self, wf_name, raw=False):
+        return fixture_loader.get_fixture_content(
+            self.get_fixture_path(wf_name),
             'workflows',
             raw=raw
         )
 
+    def get_wf_spec(self, wf_name):
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = specs.convert_wf_def_to_spec(self.spec_module_name, wf_def)
+        return wf_spec
+
+    def convert_wf_def_to_spec(self, wf_def):
+        return specs.convert_wf_def_to_spec(self.spec_module_name, wf_def)
+
 
 @six.add_metaclass(abc.ABCMeta)
 class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
-    composer_name = None
     composer = None
 
     @classmethod
@@ -99,17 +106,17 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
 
         cls.composer = plugin.get_module(
             'orchestra.composers',
-            cls.composer_name
+            cls.spec_module_name
         )
 
-        cls.wf_spec_type = specs.WorkflowSpec
-        cls.fixture_rel_path = cls.composer_name
+        cls.spec_module = specs_loader.get_spec_module(cls.spec_module_name)
+        cls.wf_spec_type = cls.spec_module.WorkflowSpec
 
     def compose_seq_expr(self, name, *args, **kwargs):
         return self.composer._compose_sequence_criteria(name, *args, **kwargs)
 
     def compose_wf_graph(self, wf_name):
-        wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
+        wf_def = self.get_wf_def(wf_name)
         wf_spec = self.wf_spec_type(wf_def[wf_name], name=wf_name)
 
         return self.composer._compose_wf_graph(wf_spec)
@@ -120,7 +127,7 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
         self.assert_graph_equal(wf_graph, expected_wf_graph)
 
     def compose_wf_ex_graph(self, wf_name):
-        wf_def = self.get_wf_def(wf_name, rel_path=self.fixture_rel_path)
+        wf_def = self.get_wf_def(wf_name)
         wf_spec = self.wf_spec_type(wf_def[wf_name], name=wf_name)
 
         return self.composer.compose(wf_spec)
@@ -129,14 +136,6 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
         wf_ex_graph = self.compose_wf_ex_graph(wf_name)
 
         self.assert_graph_equal(wf_ex_graph, expected_wf_ex_graph)
-
-
-class DefaultWorkflowComposerTest(WorkflowComposerTest):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.composer_name = 'default'
-        super(DefaultWorkflowComposerTest, cls).setUpClass()
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -203,11 +202,3 @@ class WorkflowConductorTest(WorkflowComposerTest):
             wf_ex_graph_json = wf_ex_graph.serialize()
 
         self.assertListEqual(expected_task_seq, actual_task_seq)
-
-
-class DefaultWorkflowConductorTest(WorkflowConductorTest):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.composer_name = 'default'
-        super(DefaultWorkflowConductorTest, cls).setUpClass()

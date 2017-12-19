@@ -19,20 +19,22 @@ class FixtureTest(unittest.TestCase):
 
     def test_fixture_loader(self):
         expected = {
-            'version': 'x.y.z',
-            'name': 'foobar'
+            'version': 1.0,
+            'basic': {
+                'tasks': [{'task1': 'foobar'}]
+            }
         }
 
-        content = loader.get_fixture_content('mock.yaml', 'workflows')
+        content = loader.get_fixture_content('mock/basic.yaml', 'workflows')
 
         self.assertIsInstance(content, dict)
         self.assertDictEqual(content, expected)
 
     def test_fixture_loader_raw(self):
-        expected = "version: 'x.y.z'\nname: 'foobar'\n"
+        expected = "version: 1.0\nbasic:\n  tasks:\n    - task1: foobar\n"
 
         content = loader.get_fixture_content(
-            'mock.yaml',
+            'mock/basic.yaml',
             'workflows',
             raw=True
         )

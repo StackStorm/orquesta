@@ -15,7 +15,7 @@ import unittest
 import yaml
 
 from orchestra.specs import types
-from orchestra.specs.v2 import base
+from orchestra.specs import base
 
 
 class MockLeafSpec(base.Spec):
@@ -67,7 +67,7 @@ class MockSequenceSpec(base.SequenceSpec):
 
 
 class MockSpec(base.Spec):
-    _version = '2.0'
+    _version = '1.0'
 
     _schema = {
         'type': 'object',
@@ -115,17 +115,14 @@ class SpecTest(unittest.TestCase):
         self.maxDiff = None
 
     def test_get_version(self):
-        self.assertEqual('2.0', MockSpec.get_version())
+        self.assertEqual('1.0', MockSpec.get_version())
 
     def test_get_schema(self):
         schema = {
             'type': 'object',
             'properties': {
                 'name': types.NONEMPTY_STRING,
-                'version': dict(
-                    list(types.VERSION.items()) +
-                    [('enum', ['2.0', 2.0])]
-                ),
+                'version': types.VERSION,
                 'description': types.NONEMPTY_STRING,
                 'tags': types.UNIQUE_STRING_LIST,
                 'inputs': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
@@ -151,10 +148,7 @@ class SpecTest(unittest.TestCase):
             'type': 'object',
             'properties': {
                 'name': types.NONEMPTY_STRING,
-                'version': dict(
-                    list(types.VERSION.items()) +
-                    [('enum', ['2.0', 2.0])]
-                ),
+                'version': types.VERSION,
                 'description': types.NONEMPTY_STRING,
                 'tags': types.UNIQUE_STRING_LIST,
                 'inputs': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
@@ -269,7 +263,7 @@ class SpecTest(unittest.TestCase):
     def test_spec_init(self):
         spec = {
             'name': 'mock',
-            'version': '2.0',
+            'version': '1.0',
             'description': 'This is a mock spec.',
             'inputs': [
                 'x',
@@ -383,7 +377,7 @@ class SpecTest(unittest.TestCase):
     def test_spec_init_yaml(self):
         spec = """
         name: mock
-        version: '2.0'
+        version: '1.0'
         description: This is a mock spec.
         inputs:
             - x
@@ -426,7 +420,7 @@ class SpecTest(unittest.TestCase):
 
     def test_spec_init_name_not_given(self):
         spec = {
-            'version': '2.0',
+            'version': '1.0',
             'description': 'This is a mock spec.',
             'vars': {
                 'var1': 'foobar',
@@ -443,7 +437,7 @@ class SpecTest(unittest.TestCase):
 
     def test_spec_init_name_arg_given(self):
         spec = {
-            'version': '2.0',
+            'version': '1.0',
             'description': 'This is a mock spec.',
             'vars': {
                 'var1': 'foobar',
@@ -461,7 +455,7 @@ class SpecTest(unittest.TestCase):
     def test_spec_init_just_required(self):
         spec = {
             'name': 'mock',
-            'version': '2.0',
+            'version': '1.0',
             'description': 'This is a mock spec.',
             'vars': {
                 'var1': 'foobar',
@@ -488,7 +482,7 @@ class SpecTest(unittest.TestCase):
     def test_spec_valid(self):
         spec = {
             'name': 'mock',
-            'version': '2.0',
+            'version': '1.0',
             'description': 'This is a mock spec.',
             'inputs': [
                 'x',
@@ -525,7 +519,7 @@ class SpecTest(unittest.TestCase):
     def test_spec_valid_yaml(self):
         spec = """
         name: mock
-        version: '2.0'
+        version: '1.0'
         description: This is a mock spec.
         inputs:
             - x
@@ -552,7 +546,7 @@ class SpecTest(unittest.TestCase):
     def test_spec_invalid(self):
         spec = {
             'name': 'mock',
-            'version': '1.0',
+            'version': None,
             'description': 'This is a mock spec.',
             'inputs': [
                 'x',
@@ -584,8 +578,9 @@ class SpecTest(unittest.TestCase):
             'syntax': [
                 {
                     'spec_path': 'version',
-                    'schema_path': 'properties.version.enum',
-                    'message': '\'1.0\' is not one of [\'2.0\', 2.0]'
+                    'schema_path': 'properties.version.anyOf',
+                    'message': 'None is not valid under any '
+                               'of the given schemas',
                 },
                 {
                     'spec_path': None,
