@@ -21,5 +21,5 @@ def get_specs_path():
     return __name__[:__name__.rfind('.')]
 
 
-def get_spec_module(spec_type):
-    return importlib.import_module(get_specs_path() + '.' + spec_type)
+def get_spec_module(catalog):
+    return importlib.import_module(get_specs_path() + '.' + catalog)

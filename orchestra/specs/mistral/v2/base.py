@@ -19,6 +19,8 @@ LOG = logging.getLogger(__name__)
 
 
 class Spec(base.Spec):
+    _catalog = 'mistral'
+
     _version = '2.0'
 
     _meta_schema = {
@@ -32,6 +34,8 @@ class Spec(base.Spec):
 
 
 class MappingSpec(base.MappingSpec):
+    _catalog = 'mistral'
+
     _version = '2.0'
 
     _meta_schema = {
@@ -45,6 +49,8 @@ class MappingSpec(base.MappingSpec):
 
 
 class SequenceSpec(base.SequenceSpec):
+    _catalog = 'mistral'
+
     _version = '2.0'
 
     _meta_schema = {

@@ -35,6 +35,8 @@ def isspec(value):
 
 
 class Spec(object):
+    _catalog = None
+
     _version = '1.0'
 
     _schema = {
@@ -138,6 +140,10 @@ class Spec(object):
             for name, value in six.iteritems(self.spec):
                 if re.match(pattern, name) and value:
                     setattr(self, name, spec_cls(value, member=True))
+
+    @classmethod
+    def get_catalog(cls):
+        return cls._catalog
 
     @classmethod
     def get_version(cls):

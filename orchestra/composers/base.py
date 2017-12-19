@@ -22,8 +22,8 @@ from orchestra.utils import plugin
 LOG = logging.getLogger(__name__)
 
 
-def get_composer(workflow_type):
-    return plugin.get_module('orchestra.composers', workflow_type)
+def get_composer(catalog):
+    return plugin.get_module('orchestra.composers', catalog)
 
 
 @six.add_metaclass(abc.ABCMeta)

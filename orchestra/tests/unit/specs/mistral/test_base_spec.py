@@ -37,6 +37,14 @@ class SpecTest(unittest.TestCase):
             mistral.WorkflowSpec
         )
 
+    def test_spec_catalog(self):
+        spec_module = loader.get_spec_module(self.spec_module_name)
+
+        self.assertEqual(
+            spec_module.WorkflowSpec.get_catalog(),
+            self.spec_module_name
+        )
+
     def test_spec_version(self):
         self.assertEqual('2.0', mistral_v2.VERSION)
         self.assertEqual('2.0', mistral.VERSION)

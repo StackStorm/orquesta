@@ -19,4 +19,4 @@ LOG = logging.getLogger(__name__)
 
 
 class WorkflowSpec(base.Spec):
-    pass
+    _catalog = 'mock'
