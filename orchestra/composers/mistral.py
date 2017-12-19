@@ -21,6 +21,12 @@ from orchestra.specs import mistral as specs
 
 LOG = logging.getLogger(__name__)
 
+TASK_TRANSITION_MAP = {
+    'on-success': [states.SUCCESS],
+    'on-error': [states.ERROR],
+    'on-complete': [states.SUCCESS, states.ERROR]
+}
+
 
 class WorkflowComposer(base.WorkflowComposer):
     wf_spec_type = specs.WorkflowSpec
@@ -35,7 +41,7 @@ class WorkflowComposer(base.WorkflowComposer):
         task_state_criterion = (
             'task_state(%s) in %s' % (
                 task_name,
-                str(states.TASK_TRANSITION_MAP[condition])
+                str(TASK_TRANSITION_MAP[condition])
             )
         )
 
