@@ -44,7 +44,7 @@ class WorkflowComposer(base.WorkflowComposer):
         return cls._compose_wf_ex_graph(wf_graph)
 
     @classmethod
-    def _compose_sequence_criteria(cls, task_name, *args, **kwargs):
+    def _compose_transition_criteria(cls, task_name, *args, **kwargs):
         criteria = []
 
         condition = kwargs.get('condition')
@@ -104,20 +104,20 @@ class WorkflowComposer(base.WorkflowComposer):
                         not wf_spec.tasks.in_cycle(next_task_name)):
                     q.put((next_task_name, list(splits)))
 
-                criteria = cls._compose_sequence_criteria(
+                criteria = cls._compose_transition_criteria(
                     task_name,
                     condition=condition,
                     expr=expr
                 )
 
-                seqs = wf_graph.has_sequence(
+                seqs = wf_graph.has_transition(
                     task_name,
                     next_task_name,
                     criteria=criteria
                 )
 
                 if not seqs:
-                    wf_graph.add_sequence(
+                    wf_graph.add_transition(
                         task_name,
                         next_task_name,
                         criteria=criteria
@@ -166,7 +166,7 @@ class WorkflowComposer(base.WorkflowComposer):
             # If the task is a split task, keep track of how many instances
             # and which branch the instance belongs to.
             is_split_task = (
-                len(wf_graph.get_prev_sequences(task_name)) > 1 and
+                len(wf_graph.get_prev_transitions(task_name)) > 1 and
                 not wf_graph.has_barrier(task_name)
             )
 
@@ -191,7 +191,7 @@ class WorkflowComposer(base.WorkflowComposer):
             else:
                 wf_ex_graph.add_task(task_ex_name, **task_ex_attrs)
 
-                for next_seq in wf_graph.get_next_sequences(task_name):
+                for next_seq in wf_graph.get_next_transitions(task_name):
                     next_seq_criteria = [
                         criterion.replace(
                             'task_state(%s)' % task_name,
@@ -209,12 +209,12 @@ class WorkflowComposer(base.WorkflowComposer):
 
                     q.put(item)
 
-            # A split task should only have one previous sequence even if there
-            # are multiple different tasks transitioning to it. Since it has
-            # no join requirement, the split task will create a new instance
-            # and execute.
+            # A split task should only have one previous transition even if
+            # there are multiple different tasks transitioning to it. Since
+            # it has no join requirement, the split task will create a new
+            # instance and execute.
             if is_split_task and prev_task_ex_name:
-                wf_ex_graph.add_sequence(
+                wf_ex_graph.add_transition(
                     prev_task_ex_name,
                     task_ex_name,
                     criteria=criteria
@@ -223,7 +223,7 @@ class WorkflowComposer(base.WorkflowComposer):
                 continue
 
             # Finally, process all inbound task transitions.
-            for prev_seq in wf_graph.get_prev_sequences(task_name):
+            for prev_seq in wf_graph.get_prev_transitions(task_name):
                 prev_task = wf_graph.get_task(prev_seq[0])
 
                 split_id = 0
@@ -243,7 +243,7 @@ class WorkflowComposer(base.WorkflowComposer):
                     for criterion in prev_seq[3]['criteria']
                 ]
 
-                wf_ex_graph.add_sequence(
+                wf_ex_graph.add_transition(
                     p_task_ex_name,
                     task_ex_name,
                     criteria=p_seq_criteria

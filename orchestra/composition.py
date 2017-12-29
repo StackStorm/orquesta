@@ -85,7 +85,7 @@ class WorkflowGraph(object):
         tasks = []
         outbounds = []
 
-        for seq in self.get_next_sequences(task['id']):
+        for seq in self.get_next_transitions(task['id']):
             evaluated_criteria = [
                 expressions.evaluate(criterion, context)
                 for criterion in seq[3]['criteria']
@@ -99,7 +99,7 @@ class WorkflowGraph(object):
             next_task = self.get_task(next_task_id)
 
             if not attrs.get('satisfied', False):
-                self.update_sequence(
+                self.update_transition(
                     task['id'],
                     next_task_id,
                     key=seq_key,
@@ -108,7 +108,7 @@ class WorkflowGraph(object):
 
             if self.has_barrier(next_task_id):
                 barrier = self.get_barrier(next_task_id)
-                inbounds = self.get_prev_sequences(next_task_id)
+                inbounds = self.get_prev_transitions(next_task_id)
                 satisfied = [s for s in inbounds if s[3].get('satisfied')]
                 barrier = len(inbounds) if barrier == '*' else barrier
 
@@ -119,14 +119,14 @@ class WorkflowGraph(object):
 
         return sorted(tasks, key=lambda x: x['name'])
 
-    def has_sequence(self, source, destination, criteria=None):
+    def has_transition(self, source, destination, criteria=None):
         return [
             edge for edge in self._graph.edges(data=True, keys=True)
             if (edge[0] == source and edge[1] == destination and
                 edge[3].get('criteria', None) == criteria)
         ]
 
-    def get_sequence(self, source, destination, key=None, criteria=None):
+    def get_transition(self, source, destination, key=None, criteria=None):
         seqs = [
             edge for edge in self._graph.edges(data=True, keys=True)
             if (edge[0] == source and edge[1] == destination and (
@@ -135,51 +135,51 @@ class WorkflowGraph(object):
         ]
 
         if not seqs:
-            raise Exception('Task sequence does not exist.')
+            raise Exception('Task transition does not exist.')
 
         if len(seqs) > 1:
-            raise Exception('More than one task sequences found.')
+            raise Exception('More than one task transitions found.')
 
         return seqs[0]
 
-    def get_sequence_attributes(self, attribute):
+    def get_transition_attributes(self, attribute):
         return nx.get_edge_attributes(self._graph, attribute)
 
-    def add_sequence(self, source, destination, criteria=None):
+    def add_transition(self, source, destination, criteria=None):
         if not self.has_task(source):
             self.add_task(source)
 
         if not self.has_task(destination):
             self.add_task(destination)
 
-        seqs = self.has_sequence(source, destination, criteria)
+        seqs = self.has_transition(source, destination, criteria)
 
         if len(seqs) > 1:
-            raise Exception('More than one task sequences found.')
+            raise Exception('More than one task transitions found.')
 
         if not seqs:
             self._graph.add_edge(source, destination, criteria=criteria)
         else:
-            self.update_sequence(
+            self.update_transition(
                 source,
                 destination,
                 key=seqs[0][2],
                 criteria=criteria
             )
 
-    def update_sequence(self, source, destination, key, **kwargs):
-        seq = self.get_sequence(source, destination, key=key)
+    def update_transition(self, source, destination, key, **kwargs):
+        seq = self.get_transition(source, destination, key=key)
 
         for attr, value in six.iteritems(kwargs):
             self._graph[source][destination][seq[2]][attr] = value
 
-    def get_next_sequences(self, task):
+    def get_next_transitions(self, task):
         return sorted(
             [e for e in self._graph.out_edges([task], data=True, keys=True)],
             key=lambda x: x[1]
         )
 
-    def get_prev_sequences(self, task):
+    def get_prev_transitions(self, task):
         return sorted(
             [e for e in self._graph.in_edges([task], data=True, keys=True)],
             key=lambda x: x[1]
