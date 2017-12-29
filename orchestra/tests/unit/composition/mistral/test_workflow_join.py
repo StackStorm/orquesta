@@ -39,7 +39,7 @@ class JoinWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 },
                 {
                     'id': 'task6',
-                    'join': 'all'
+                    'barrier': '*'
                 },
                 {
                     'id': 'task7'
@@ -148,7 +148,7 @@ class JoinWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 {
                     'id': 'task6',
                     'name': 'task6',
-                    'join': 'all'
+                    'barrier': '*'
                 },
                 {
                     'id': 'task7',
@@ -261,7 +261,7 @@ class JoinWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 },
                 {
                     'id': 'task8',
-                    'join': 2
+                    'barrier': 2
                 }
             ],
             'adjacency': [
@@ -393,7 +393,7 @@ class JoinWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 {
                     'id': 'task8',
                     'name': 'task8',
-                    'join': 2
+                    'barrier': 2
                 }
             ],
             'adjacency': [

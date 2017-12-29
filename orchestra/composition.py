@@ -40,15 +40,6 @@ class WorkflowGraph(object):
 
         return cls(graph=g)
 
-    def is_join_task(self, task):
-        return self._graph.node[task].get('join') is not None
-
-    def is_split_task(self, task):
-        return (
-            len(self.get_prev_sequences(task)) > 1 and
-            not self.is_join_task(task)
-        )
-
     def has_task(self, task):
         return self._graph.has_node(task)
 
@@ -73,6 +64,60 @@ class WorkflowGraph(object):
 
         for key, value in six.iteritems(kwargs):
             self._graph.node[task][key] = value
+
+    def get_start_tasks(self):
+        tasks = [
+            {'id': n, 'name': self._graph.node[n].get('name', n)}
+            for n, d in self._graph.in_degree().items() if d == 0
+        ]
+
+        return sorted(tasks, key=lambda x: x['name'])
+
+    def get_next_tasks(self, task, context=None):
+        self.update_task(task['id'], state=task['state'])
+
+        context = dict_utils.merge_dicts(
+            context or {},
+            {'__task_states': self.get_task_attributes('state')},
+            overwrite=True
+        )
+
+        tasks = []
+        outbounds = []
+
+        for seq in self.get_next_sequences(task['id']):
+            evaluated_criteria = [
+                expressions.evaluate(criterion, context)
+                for criterion in seq[3]['criteria']
+            ]
+
+            if all(evaluated_criteria):
+                outbounds.append(seq)
+
+        for seq in outbounds:
+            next_task_id, seq_key, attrs = seq[1], seq[2], seq[3]
+            next_task = self.get_task(next_task_id)
+
+            if not attrs.get('satisfied', False):
+                self.update_sequence(
+                    task['id'],
+                    next_task_id,
+                    key=seq_key,
+                    satisfied=True
+                )
+
+            if self.has_barrier(next_task_id):
+                barrier = self.get_barrier(next_task_id)
+                inbounds = self.get_prev_sequences(next_task_id)
+                satisfied = [s for s in inbounds if s[3].get('satisfied')]
+                barrier = len(inbounds) if barrier == '*' else barrier
+
+                if len(satisfied) < barrier:
+                    continue
+
+            tasks.append({'id': next_task_id, 'name': next_task['name']})
+
+        return sorted(tasks, key=lambda x: x['name'])
 
     def has_sequence(self, source, destination, criteria=None):
         return [
@@ -143,57 +188,13 @@ class WorkflowGraph(object):
     def in_cycle(self, task):
         return [c for c in nx.simple_cycles(self._graph) if task in c]
 
-    def get_start_tasks(self):
-        tasks = [
-            {'id': n, 'name': self._graph.node[n].get('name', n)}
-            for n, d in self._graph.in_degree().items() if d == 0
-        ]
+    def set_barrier(self, task, value='*'):
+        self.update_task(task, barrier=value)
 
-        return sorted(tasks, key=lambda x: x['name'])
+    def get_barrier(self, task):
+        return self.get_task(task).get('barrier')
 
-    def get_next_tasks(self, task, context=None):
-        self.update_task(task['id'], state=task['state'])
+    def has_barrier(self, task):
+        b = self.get_barrier(task)
 
-        context = dict_utils.merge_dicts(
-            context or {},
-            {'__task_states': self.get_task_attributes('state')},
-            overwrite=True
-        )
-
-        tasks = []
-        outbounds = []
-
-        for seq in self.get_next_sequences(task['id']):
-            evaluated_criteria = [
-                expressions.evaluate(criterion, context)
-                for criterion in seq[3]['criteria']
-            ]
-
-            if all(evaluated_criteria):
-                outbounds.append(seq)
-
-        for seq in outbounds:
-            next_task_id, seq_key, attrs = seq[1], seq[2], seq[3]
-            next_task = self.get_task(next_task_id)
-
-            if not attrs.get('satisfied', False):
-                self.update_sequence(
-                    task['id'],
-                    next_task_id,
-                    key=seq_key,
-                    satisfied=True
-                )
-
-            join_spec = next_task.get('join')
-
-            if join_spec:
-                inbounds = self.get_prev_sequences(next_task_id)
-                satisfied = [s for s in inbounds if s[3].get('satisfied')]
-                join_spec = len(inbounds) if join_spec == 'all' else join_spec
-
-                if len(satisfied) < join_spec:
-                    continue
-
-            tasks.append({'id': next_task_id, 'name': next_task['name']})
-
-        return sorted(tasks, key=lambda x: x['name'])
+        return (b is not None and b != '')
