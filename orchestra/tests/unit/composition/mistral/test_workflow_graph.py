@@ -125,17 +125,17 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         for i in range(1, 10):
             wf_graph.add_task('task' + str(i))
 
-    def _add_sequences(self, wf_graph):
-        wf_graph.add_sequence('task1', 'task2')
-        wf_graph.add_sequence('task2', 'task3')
-        wf_graph.add_sequence('task1', 'task4')
-        wf_graph.add_sequence('task3', 'task5')
-        wf_graph.add_sequence('task4', 'task5')
-        wf_graph.add_sequence('task5', 'task6')
-        wf_graph.add_sequence('task1', 'task7')
-        wf_graph.add_sequence('task7', 'task8')
-        wf_graph.add_sequence('task1', 'task9')
-        wf_graph.add_sequence('task8', 'task9')
+    def _add_transitions(self, wf_graph):
+        wf_graph.add_transition('task1', 'task2')
+        wf_graph.add_transition('task2', 'task3')
+        wf_graph.add_transition('task1', 'task4')
+        wf_graph.add_transition('task3', 'task5')
+        wf_graph.add_transition('task4', 'task5')
+        wf_graph.add_transition('task5', 'task6')
+        wf_graph.add_transition('task1', 'task7')
+        wf_graph.add_transition('task7', 'task8')
+        wf_graph.add_transition('task1', 'task9')
+        wf_graph.add_transition('task8', 'task9')
 
     def _update_tasks_attrs(self, wf_graph):
         wf_graph.update_task('task5', barrier='*')
@@ -143,14 +143,14 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
     def _prep_graph(self, wf_graph):
         self._add_tasks(wf_graph)
         self._update_tasks_attrs(wf_graph)
-        self._add_sequences(wf_graph)
+        self._add_transitions(wf_graph)
 
     def _is_join_task(self, wf_graph, task_name):
         return wf_graph.has_barrier(task_name)
 
     def _is_split_task(self, wf_graph, task_name):
         return (
-            len(wf_graph.get_prev_sequences(task_name)) > 1 and
+            len(wf_graph.get_prev_transitions(task_name)) > 1 and
             not self._is_join_task(wf_graph, task_name)
         )
 
@@ -162,7 +162,7 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
 
     def test_skip_add_tasks(self):
         wf_graph = composition.WorkflowGraph()
-        self._add_sequences(wf_graph)
+        self._add_transitions(wf_graph)
         self._update_tasks_attrs(wf_graph)
 
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
@@ -174,10 +174,10 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
 
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
-    def test_duplicate_add_sequences(self):
+    def test_duplicate_add_transitions(self):
         wf_graph = composition.WorkflowGraph()
         self._prep_graph(wf_graph)
-        self._add_sequences(wf_graph)
+        self._add_transitions(wf_graph)
 
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
@@ -189,11 +189,11 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
 
         self.assertListEqual(wf_graph.get_start_tasks(), expected_start_tasks)
 
-    def test_get_next_sequences(self):
+    def test_get_next_transitions(self):
         wf_graph = composition.WorkflowGraph()
         self._prep_graph(wf_graph)
 
-        expected_sequences = [
+        expected_transitions = [
             ('task1', 'task2', 0, {'criteria': None}),
             ('task1', 'task4', 0, {'criteria': None}),
             ('task1', 'task7', 0, {'criteria': None}),
@@ -201,22 +201,22 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         ]
 
         self.assertListEqual(
-            sorted(wf_graph.get_next_sequences('task1')),
-            sorted(expected_sequences)
+            sorted(wf_graph.get_next_transitions('task1')),
+            sorted(expected_transitions)
         )
 
-    def test_get_prev_sequences(self):
+    def test_get_prev_transitions(self):
         wf_graph = composition.WorkflowGraph()
         self._prep_graph(wf_graph)
 
-        expected_sequences = [
+        expected_transitions = [
             ('task3', 'task5', 0, {'criteria': None}),
             ('task4', 'task5', 0, {'criteria': None})
         ]
 
         self.assertListEqual(
-            sorted(wf_graph.get_prev_sequences('task5')),
-            sorted(expected_sequences)
+            sorted(wf_graph.get_prev_transitions('task5')),
+            sorted(expected_transitions)
         )
 
     def test_is_join_task(self):
