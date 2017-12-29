@@ -45,7 +45,7 @@ class SplitWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 },
                 {
                     'id': 'task7',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': ['task4']
                 }
             ],
@@ -158,7 +158,7 @@ class SplitWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 {
                     'id': 'task7__1',
                     'name': 'task7',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': [('task4', 1)]
                 },
                 {
@@ -183,7 +183,7 @@ class SplitWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 {
                     'id': 'task7__2',
                     'name': 'task7',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': [('task4', 2)]
                 },
                 {
@@ -345,7 +345,7 @@ class SplitWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 },
                 {
                     'id': 'task7',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': ['task4']
                 },
                 {
@@ -480,7 +480,7 @@ class SplitWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 {
                     'id': 'task7__1',
                     'name': 'task7',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': [('task4', 1)]
                 },
                 {
@@ -510,7 +510,7 @@ class SplitWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 {
                     'id': 'task7__2',
                     'name': 'task7',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': [('task4', 2)]
                 },
                 {
@@ -723,7 +723,7 @@ class SplitWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 },
                 {
                     'id': 'task10',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': ['task4', 'task7']
                 }
             ],
@@ -884,7 +884,7 @@ class SplitWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 {
                     'id': 'task10__1',
                     'name': 'task10',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': [('task4', 1), ('task7', 1)]
                 },
                 {
@@ -910,7 +910,7 @@ class SplitWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 {
                     'id': 'task10__2',
                     'name': 'task10',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': [('task4', 1), ('task7', 2)]
                 },
                 {
@@ -945,7 +945,7 @@ class SplitWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 {
                     'id': 'task10__3',
                     'name': 'task10',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': [('task4', 2), ('task7', 3)]
                 },
                 {
@@ -971,7 +971,7 @@ class SplitWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 {
                     'id': 'task10__4',
                     'name': 'task10',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': [('task4', 2), ('task7', 4)]
                 },
                 {
@@ -1287,12 +1287,12 @@ class SplitWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 },
                 {
                     'id': 'task7',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': ['task4']
                 },
                 {
                     'id': 'task8',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': ['task4']
                 }
             ],
@@ -1423,13 +1423,13 @@ class SplitWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 {
                     'id': 'task7__1',
                     'name': 'task7',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': [('task4', 1)]
                 },
                 {
                     'id': 'task8__1',
                     'name': 'task8',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': [('task4', 1)]
                 },
                 {
@@ -1454,13 +1454,13 @@ class SplitWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 {
                     'id': 'task7__2',
                     'name': 'task7',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': [('task4', 2)]
                 },
                 {
                     'id': 'task8__2',
                     'name': 'task8',
-                    'join': 'all',
+                    'barrier': '*',
                     'splits': [('task4', 2)]
                 },
                 {

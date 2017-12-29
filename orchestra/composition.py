@@ -106,14 +106,13 @@ class WorkflowGraph(object):
                     satisfied=True
                 )
 
-            join_spec = next_task.get('join')
-
-            if join_spec:
+            if self.has_barrier(next_task_id):
+                barrier = self.get_barrier(next_task_id)
                 inbounds = self.get_prev_sequences(next_task_id)
                 satisfied = [s for s in inbounds if s[3].get('satisfied')]
-                join_spec = len(inbounds) if join_spec == 'all' else join_spec
+                barrier = len(inbounds) if barrier == '*' else barrier
 
-                if len(satisfied) < join_spec:
+                if len(satisfied) < barrier:
                     continue
 
             tasks.append({'id': next_task_id, 'name': next_task['name']})
@@ -189,11 +188,13 @@ class WorkflowGraph(object):
     def in_cycle(self, task):
         return [c for c in nx.simple_cycles(self._graph) if task in c]
 
-    def is_join_task(self, task):
-        return self._graph.node[task].get('join') is not None
+    def set_barrier(self, task, value='*'):
+        self.update_task(task, barrier=value)
 
-    def is_split_task(self, task):
-        return (
-            len(self.get_prev_sequences(task)) > 1 and
-            not self.is_join_task(task)
-        )
+    def get_barrier(self, task):
+        return self.get_task(task).get('barrier')
+
+    def has_barrier(self, task):
+        b = self.get_barrier(task)
+
+        return (b is not None and b != '')
