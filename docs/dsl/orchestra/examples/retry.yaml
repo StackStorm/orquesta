@@ -1,0 +1,26 @@
+version: 1.0
+
+description: Make a REST API call.
+
+input:
+  - url
+  - headers
+  - body
+
+output:
+  result: <% $.result %>
+
+tasks:
+  task1:
+    action: http.post
+    input:
+      url: <% $.url %>
+      headers: <% $.headers %>
+      body: <% $.body %>
+    retry:
+      if: <% result().status_code not in [200, 201] %>
+      delay: 1
+      count: 3
+    on-complete:
+      - publish:
+        result: <% result().body %>

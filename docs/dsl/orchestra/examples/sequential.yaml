@@ -1,0 +1,36 @@
+version: 1.0
+
+description: Calculates ((a + b) * c) / d
+
+input:
+  - a: 0
+  - b: 0
+  - c: 0
+  - d: 0
+
+output:
+    result: <% $.abcd %>
+
+tasks:
+  task1:
+    action: math.add
+    input:
+      operand1: <% $.a %>
+      operand2: <% $.b %>
+    on-complete:
+      - if: <% state() = "succeeded" %>
+        publish:
+        ab: <% result() %>
+        next:
+          - task2
+  task2:
+    action: math.multiple operand1=<% $.ab %> operand2=<% $.c %>
+    on-complete:
+      - if: <% state() = "succeeded" %>
+        publish: abc=<% result() %>
+        next: task3
+  task3:
+    action: math.divide dividend=<% $.abc %> divisor=<% $.d %>
+    on-complete:
+      - if: <% state() = "succeeded" %>
+        publish: abcd=<% result() %>
