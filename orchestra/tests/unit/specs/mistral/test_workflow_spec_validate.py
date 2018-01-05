@@ -34,7 +34,7 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
                         action: std.noop
         """
 
-        wf_spec = self.convert_wf_def_to_spec(wf_def)
+        wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.validate(), {})
 
@@ -46,7 +46,7 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
                 description: A basic sequential workflow.
         """
 
-        wf_spec = self.convert_wf_def_to_spec(wf_def)
+        wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
             'syntax': [
@@ -69,7 +69,7 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
                 tasks: {}
         """
 
-        wf_spec = self.convert_wf_def_to_spec(wf_def)
+        wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
             'syntax': [
@@ -96,7 +96,7 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
                         action: std.noop
         """
 
-        wf_spec = self.convert_wf_def_to_spec(wf_def)
+        wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.validate(), {})
 
@@ -112,6 +112,6 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
                         action: std.noop
         """
 
-        wf_spec = self.convert_wf_def_to_spec(wf_def)
+        wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.validate(), {})

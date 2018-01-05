@@ -14,7 +14,7 @@ import yaml
 
 from orchestra.specs import loader
 from orchestra.tests.unit import base
-from orchestra.utils import specs as utils
+from orchestra.utils import specs
 
 
 class SpecsUtilTest(base.WorkflowSpecTest):
@@ -29,7 +29,7 @@ class SpecsUtilTest(base.WorkflowSpecTest):
 
         self.assertIsInstance(wf_def, dict)
 
-        wf_spec = utils.convert_wf_def_to_spec(self.spec_module_name, wf_def)
+        wf_spec = specs.instantiate(self.spec_module_name, wf_def)
 
         self.assertIsInstance(wf_spec, self.spec_module.WorkflowSpec)
         self.assertEqual(wf_name, wf_spec.name)
@@ -41,8 +41,58 @@ class SpecsUtilTest(base.WorkflowSpecTest):
 
         self.assertIsInstance(wf_def, str)
 
-        wf_spec = utils.convert_wf_def_to_spec(self.spec_module_name, wf_def)
+        wf_spec = specs.instantiate(self.spec_module_name, wf_def)
 
         self.assertIsInstance(wf_spec, self.spec_module.WorkflowSpec)
         self.assertEqual(wf_name, wf_spec.name)
         self.assertDictEqual(yaml.safe_load(wf_def)[wf_name], wf_spec.spec)
+
+    def test_bad_wf_def_none(self):
+        self.assertRaises(
+            ValueError,
+            specs.instantiate,
+            self.spec_module_name,
+            None
+        )
+
+    def test_bad_wf_def_empty(self):
+        self.assertRaises(
+            ValueError,
+            specs.instantiate,
+            self.spec_module_name,
+            dict()
+        )
+
+    def test_bad_wf_def_not_yaml(self):
+        self.assertRaises(
+            ValueError,
+            specs.instantiate,
+            self.spec_module_name,
+            'foobar'
+        )
+
+    def test_bad_wf_def_without_version(self):
+        wf_name = 'basic'
+        wf_def = self.get_wf_def(wf_name)
+        wf_def.pop('version')
+
+        self.assertIsNone(wf_def.get('version'))
+
+        self.assertRaises(
+            ValueError,
+            specs.instantiate,
+            self.spec_module_name,
+            wf_def
+        )
+
+    def test_bad_wf_def_unsupported_version(self):
+        wf_name = 'basic'
+        wf_def = self.get_wf_def(wf_name)
+        wf_def['version'] = 99.0
+
+        self.assertRaises(
+            ValueError,
+            specs.instantiate,
+            self.spec_module_name,
+            wf_def
+        )

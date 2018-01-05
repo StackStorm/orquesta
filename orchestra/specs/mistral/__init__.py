@@ -11,6 +11,7 @@
 # limitations under the License.
 
 from orchestra.specs.mistral import v2
+from orchestra.specs.mistral.v2 import instantiate
 from orchestra.specs.mistral.v2 import WorkflowSpec
 from orchestra.specs.mistral.v2 import TaskDefaultsSpec
 from orchestra.specs.mistral.v2 import TaskSpec
@@ -18,6 +19,7 @@ from orchestra.specs.mistral.v2 import TaskSpec
 VERSION = v2.VERSION
 
 __all__ = [
+    instantiate.__name__,
     WorkflowSpec.__name__,
     TaskDefaultsSpec.__name__,
     TaskSpec.__name__

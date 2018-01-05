@@ -20,6 +20,15 @@ from orchestra.specs.mistral.v2 import tasks
 LOG = logging.getLogger(__name__)
 
 
+def instantiate(definition):
+    if len(definition.keys()) > 1:
+        raise ValueError('Workflow definition contains more than one workflow.')
+
+    wf_name, wf_spec = list(definition.items())[0]
+
+    return WorkflowSpec(wf_spec, name=wf_name)
+
+
 class WorkflowSpec(base.Spec):
     _schema = {
         'type': 'object',

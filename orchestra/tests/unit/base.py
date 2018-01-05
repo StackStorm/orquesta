@@ -87,11 +87,11 @@ class WorkflowSpecTest(unittest.TestCase):
 
     def get_wf_spec(self, wf_name):
         wf_def = self.get_wf_def(wf_name)
-        wf_spec = specs.convert_wf_def_to_spec(self.spec_module_name, wf_def)
+        wf_spec = specs.instantiate(self.spec_module_name, wf_def)
         return wf_spec
 
-    def convert_wf_def_to_spec(self, wf_def):
-        return specs.convert_wf_def_to_spec(self.spec_module_name, wf_def)
+    def instantiate(self, wf_def):
+        return specs.instantiate(self.spec_module_name, wf_def)
 
 
 @six.add_metaclass(abc.ABCMeta)

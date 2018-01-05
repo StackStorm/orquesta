@@ -31,7 +31,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                         action: std.noop
         """
 
-        wf_spec = self.convert_wf_def_to_spec(wf_def)
+        wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
             'context': [
@@ -77,7 +77,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                         action: std.noop
         """
 
-        wf_spec = self.convert_wf_def_to_spec(wf_def)
+        wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
             'context': [
@@ -123,7 +123,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                         action: std.noop
         """
 
-        wf_spec = self.convert_wf_def_to_spec(wf_def)
+        wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
             'context': [
@@ -174,7 +174,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                             message: <% $.foo %>
         """
 
-        wf_spec = self.convert_wf_def_to_spec(wf_def)
+        wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
             'context': [
@@ -230,7 +230,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                             message: <% $.foo + $.bar %>
         """
 
-        wf_spec = self.convert_wf_def_to_spec(wf_def)
+        wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
             'context': [
@@ -306,7 +306,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                             message: <% $.foo %>
         """
 
-        wf_spec = self.convert_wf_def_to_spec(wf_def)
+        wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
             'context': [
@@ -394,6 +394,6 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                             message: <% $.foo + $.bar %>
         """
 
-        wf_spec = self.convert_wf_def_to_spec(wf_def)
+        wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.validate(), dict())
