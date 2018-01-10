@@ -10,12 +10,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra.tests.unit import base
+from orchestra.tests.unit import base as common_base
+from orchestra.tests.unit.composition.mistral import base as mistral_base
 
 
-class MistralWorkflowConductorTest(base.WorkflowConductorTest):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.spec_module_name = 'mistral'
-        super(MistralWorkflowConductorTest, cls).setUpClass()
+class MistralWorkflowConductorTest(
+    mistral_base.MistralWorkflowComposerTest,
+    common_base.WorkflowConductorTest
+):
+    pass

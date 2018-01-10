@@ -111,12 +111,9 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
         cls.spec_module = specs_loader.get_spec_module(cls.spec_module_name)
         cls.wf_spec_type = cls.spec_module.WorkflowSpec
 
-    def compose_seq_expr(self, name, *args, **kwargs):
-        return self.composer._compose_transition_criteria(name, *args, **kwargs)
-
     def compose_wf_graph(self, wf_name):
         wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.wf_spec_type(wf_def[wf_name], name=wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
 
         return self.composer._compose_wf_graph(wf_spec)
 
@@ -127,7 +124,7 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
 
     def compose_wf_ex_graph(self, wf_name):
         wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.wf_spec_type(wf_def[wf_name], name=wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
 
         return self.composer.compose(wf_spec)
 

@@ -21,6 +21,8 @@ LOG = logging.getLogger(__name__)
 
 
 def instantiate(definition):
+    definition.pop('version', None)
+
     if len(definition.keys()) > 1:
         raise ValueError('Workflow definition contains more than one workflow.')
 

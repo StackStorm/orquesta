@@ -19,3 +19,6 @@ class MistralWorkflowComposerTest(base.WorkflowComposerTest):
     def setUpClass(cls):
         cls.spec_module_name = 'mistral'
         super(MistralWorkflowComposerTest, cls).setUpClass()
+
+    def compose_seq_expr(self, name, *args, **kwargs):
+        return self.composer._compose_transition_criteria(name, *args, **kwargs)
