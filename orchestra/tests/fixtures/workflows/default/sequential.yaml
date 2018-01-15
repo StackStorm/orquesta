@@ -1,0 +1,19 @@
+version: 1.0
+
+description: A basic sequential workflow.
+
+tasks:
+  task1:
+    action: std.noop
+    on-complete:
+      - if: <% task_state(task1) = "SUCCESS" %>
+        next:
+          - task2
+  task2:
+    action: std.noop
+    on-complete:
+      - if: <% task_state(task2) = "SUCCESS" %>
+        next:
+          - task3
+  task3:
+    action: std.noop

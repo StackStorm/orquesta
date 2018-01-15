@@ -1,0 +1,36 @@
+version: 1.0
+
+description: A set of parallel workflows.
+
+tasks:
+  # Branch 1
+  task1:
+    action: std.noop
+    on-complete:
+       - if: <% task_state(task1) = "SUCCESS" %>
+         next:
+           - task2
+  task2:
+    action: std.noop
+    on-complete:
+      - if: <% task_state(task2) = "SUCCESS" %>
+        next:
+          - task3
+  task3:
+    action: std.noop
+
+  # Branch 2
+  task4:
+    action: std.noop
+    on-complete:
+      - if: <% task_state(task4) = "SUCCESS" %>
+        next:
+          - task5
+  task5:
+    action: std.noop
+    on-complete:
+      - if: <% task_state(task5) = "SUCCESS" %>
+        next:
+          - task6
+  task6:
+    action: std.noop

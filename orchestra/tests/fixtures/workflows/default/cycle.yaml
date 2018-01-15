@@ -1,0 +1,34 @@
+version: 1.0
+
+description: A sample workflow with a cycle.
+
+input:
+  - count: 0
+
+tasks:
+  prep:
+    action: std.noop
+    on-complete:
+      - if: <% task_state(prep) = "SUCCESS" %>
+        next:
+          - task1
+  task1:
+    action: std.noop
+    on-complete:
+      - if: <% task_state(task1) = "SUCCESS" %>
+        next:
+          - task2
+  task2:
+    action: std.noop
+    on-complete:
+      - if: <% task_state(task2) = "SUCCESS" %>
+        next:
+          - task3
+  task3:
+    action: std.noop
+    on-complete:
+      - if: <% task_state(task3) = "SUCCESS" and $.count < 3 %>
+        publish:
+          count: <% $.count + 1 %>
+        next:
+          - task1

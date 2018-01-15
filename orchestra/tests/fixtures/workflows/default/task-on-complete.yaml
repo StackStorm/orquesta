@@ -1,0 +1,22 @@
+version: 1.0
+
+description: A basic workflow that demonstrates on-complete handler.
+
+tasks:
+  task1:
+    action: std.noop
+    on-complete:
+      - if: <% task_state(task1) = "SUCCESS" %>
+        next:
+          - task2
+      - if: <% task_state(task1) = "ERROR" %>
+        next:
+          - task3
+      - next:
+          - task4
+  task2:
+    action: std.noop
+  task3:
+    action: std.noop
+  task4:
+    action: std.noop

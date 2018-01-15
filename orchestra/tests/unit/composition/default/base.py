@@ -13,5 +13,9 @@
 from orchestra.tests.unit import base
 
 
-class OrchestraWorkflowSpecTest(base.WorkflowSpecTest):
-    spec_module_name = 'default'
+class OrchestraWorkflowComposerTest(base.WorkflowComposerTest):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.spec_module_name = 'default'
+        super(OrchestraWorkflowComposerTest, cls).setUpClass()
