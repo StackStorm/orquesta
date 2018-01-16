@@ -108,14 +108,12 @@ YAQL_OR_BOOLEAN = {
     ]
 }
 
-
 UNIQUE_STRING_OR_YAQL_CONDITION_LIST = {
     "type": "array",
     "items": STRING_OR_YAQL_CONDITION,
     "uniqueItems": True,
     "minItems": 1
 }
-
 
 VERSION = {
     "anyOf": [

@@ -7,13 +7,10 @@ tasks:
     action: std.noop
     on-complete:
       - if: <% task_state(task1) = "SUCCESS" %>
-        next:
-          - task2
+        next: task2
       - if: <% task_state(task1) = "ERROR" %>
-        next:
-          - task3
-      - next:
-          - task4
+        next: task3
+      - next: task4
   task2:
     action: std.noop
   task3:

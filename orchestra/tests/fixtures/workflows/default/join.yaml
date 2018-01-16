@@ -7,38 +7,32 @@ tasks:
     action: std.noop
     on-complete:
       - if: <% task_state(task1) = "SUCCESS" %>
-        next:
-          - task2
-          - task4
+        next: task2, task4
 
   # branch 1
   task2:
     action: std.noop
     on-complete:
       - if: <% task_state(task2) = "SUCCESS" %>
-        next:
-          - task3
+        next: task3
 
   task3:
     action: std.noop
     on-complete:
       - if: <% task_state(task3) = "SUCCESS" %>
-        next:
-          - task6
+        next: task6
 
   # branch 2
   task4:
     action: std.noop
     on-complete:
       - if: <% task_state(task4) = "SUCCESS" %>
-        next:
-          - task5
+        next: task5
   task5:
     action: std.noop
     on-complete:
       - if: <% task_state(task5) = "SUCCESS" %>
-        next:
-          - task6
+        next: task6
 
   # converge branch 1 and 2
   task6:
@@ -46,7 +40,6 @@ tasks:
     action: std.noop
     on-complete:
       - if: <% task_state(task6) = "SUCCESS" %>
-        next:
-          - task7
+        next: task7
   task7:
     action: std.noop

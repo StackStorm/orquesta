@@ -12,14 +12,11 @@ tasks:
     action: std.noop
     on-complete:
       - if: <% task_state(t1) = "SUCCESS" and $.which = "a" %>
-        next:
-          - a
+        next: a
       - if: <% task_state(t1) = "SUCCESS" and $.which = "b" %>
-        next:
-          - b
+        next: b
       - if: <% task_state(t1) = "SUCCESS" and not $.which in list(a, b) %>
-        next:
-          - c
+        next: c
   a:
     action: std.noop
   b:

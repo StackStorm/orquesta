@@ -32,7 +32,12 @@ class TaskTransitionSpec(base.Spec):
         'properties': {
             'if': types.NONEMPTY_STRING,
             'publish': types.NONEMPTY_DICT,
-            'next': types.UNIQUE_STRING_LIST
+            'next': {
+                'oneOf': [
+                    types.NONEMPTY_STRING,
+                    types.UNIQUE_STRING_LIST
+                ]
+            }
         },
         'additionalProperties': False
     }
@@ -120,6 +125,11 @@ class TaskMappingSpec(base.MappingSpec):
         for task_transition in task_transitions:
             condition = getattr(task_transition, 'if') or None
             next_task_names = getattr(task_transition, 'next') or []
+
+            if isinstance(next_task_names, six.string_types):
+                next_task_names = [
+                    x.strip() for x in next_task_names.split(',')
+                ]
 
             for next_task_name in next_task_names:
                 next_tasks.append((next_task_name, condition))
@@ -230,6 +240,12 @@ class TaskMappingSpec(base.MappingSpec):
 
             for task_transition_spec in task_transition_specs:
                 next_task_names = getattr(task_transition_spec, 'next') or []
+
+                if isinstance(next_task_names, six.string_types):
+                    next_task_names = [
+                        x.strip() for x in next_task_names.split(',')
+                    ]
+
                 for next_task_name in next_task_names:
                     next_tasks.append((next_task_name, task_transition_spec))
 

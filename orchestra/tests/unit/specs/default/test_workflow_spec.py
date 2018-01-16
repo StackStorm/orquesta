@@ -86,9 +86,9 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
             '<% task_state(task2) = "SUCCESS" %>'
         )
 
-        self.assertListEqual(
+        self.assertEqual(
             getattr(task2_transition_seqs[0], 'next'),
-            ['task3']
+            'task3'
         )
 
         # Verify model for task3.

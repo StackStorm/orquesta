@@ -160,8 +160,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                   message: <% $.foobar %>
                 on-complete:
                   - if: <% task_state(task1) = "SUCCESS" %>
-                    next:
-                      - task2
+                    next: task2
               task2:
                 action: std.echo
                 input:
@@ -203,13 +202,11 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                   - if: <% task_state(task1) = "SUCCESS" %>
                     publish:
                       foo: bar
-                    next:
-                      - task2
+                    next: task2
                   - if: <% task_state(task1) = "ERROR" %>
                     publish:
                       bar: foo
-                    next:
-                      - task3
+                    next: task3
               task2:
                 action: std.echo
                 input:
@@ -266,8 +263,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                   - if: <% task_state(task1) = "SUCCESS" %>
                     publish:
                       foo: bar
-                    next:
-                      - task2
+                    next: task2
               task2:
                 action: std.echo
                 input:
@@ -280,8 +276,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                   - if: <% task_state(task3) = "SUCCESS" %>
                     publish:
                       bar: foo
-                    next:
-                      - task4
+                    next: task4
               task4:
                 action: std.echo
                 input:
@@ -334,16 +329,14 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                   - if: <% task_state(task1) = "SUCCESS" %>
                     publish:
                       foo: bar
-                    next:
-                      - task2
+                    next: task2
               task2:
                 action: std.echo
                 input:
                   message: <% $.foo + $.bar %>
                 on-complete:
                   - if: <% task_state(task2) = "SUCCESS" %>
-                    next:
-                      - task5
+                    next: task5
               task3:
                 action: std.echo
                 input:
@@ -352,16 +345,14 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                   - if: <% task_state(task3) = "SUCCESS" %>
                     publish:
                       bar: foo
-                    next:
-                      - task4
+                    next: task4
               task4:
                 action: std.echo
                 input:
                   message: <% $.foo + $.bar %>
                 on-complete:
                   - if: <% task_state(task4) = "SUCCESS" %>
-                    next:
-                      - task5
+                    next: task5
               task5:
                 action: std.echo
                 input:
@@ -425,16 +416,14 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                   - if: <% task_state(task1) = "SUCCESS" %>
                     publish:
                       foo: bar
-                    next:
-                      - task2
+                    next: task2
               task2:
                 action: std.echo
                 input:
                   message: <% $.foo %>
                 on-complete:
                   - if: <% task_state(task2) = "SUCCESS" %>
-                    next:
-                      - task5
+                    next: task5
               task3:
                 action: std.echo
                 input:
@@ -443,16 +432,14 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                   - if: <% task_state(task3) = "SUCCESS" %>
                     publish:
                       bar: foo
-                    next:
-                      - task4
+                    next: task4
               task4:
                 action: std.echo
                 input:
                   message: <% $.bar %>
                 on-complete:
                   - if: <% task_state(task4) = "SUCCESS" %>
-                    next:
-                      - task5
+                    next: task5
               task5:
                 join: all
                 action: std.echo

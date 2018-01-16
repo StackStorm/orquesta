@@ -24,14 +24,16 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
                 action: std.noop
                 on-complete:
                   - if: <% task_state(task1) = "SUCCESS" %>
-                    next:
-                      - task2
+                    publish:
+                      foo: bar
+                    next: task2
               task2:
                 action: std.noop
                 on-complete:
                   - if: <% task_state(task2) = "SUCCESS" %>
-                    next:
-                      - task3
+                    publish:
+                      bar: foo
+                    next: task3
               task3:
                 action: std.noop
         """
@@ -66,11 +68,47 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
                       - task2
               task2:
                 action: std.noop
+                on-complete:
+                  - next: task3
+              task3:
+                action: std.noop
         """
 
         wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.validate(), {})
+
+    def test_bad_if_in_task_transition(self):
+        wf_def = """
+            version: 1.0
+            description: A basic sequential workflow.
+            tasks:
+              task1:
+                action: std.noop
+                on-complete:
+                  - if:
+                      - foobar
+                    next: task2
+              task2:
+                action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        expected_errors = {
+            'syntax': [
+                {
+                    'message': "['foobar'] is not of type 'string'",
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.on-complete.items.properties.if.type'
+                    ),
+                    'spec_path': 'tasks.task1.on-complete[0].if'
+                }
+            ]
+        }
+
+        self.assertDictEqual(wf_spec.validate(), expected_errors)
 
     def test_bad_publish_in_task_transition(self):
         wf_def = """
@@ -82,8 +120,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
                 on-complete:
                   - publish:
                       - foobar
-                    next:
-                      - task2
+                    next: task2
               task2:
                 action: std.noop
         """
@@ -99,6 +136,40 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
                         'properties.on-complete.items.properties.publish.type'
                     ),
                     'spec_path': 'tasks.task1.on-complete[0].publish'
+                }
+            ]
+        }
+
+        self.assertDictEqual(wf_spec.validate(), expected_errors)
+
+    def test_bad_next_in_task_transition(self):
+        wf_def = """
+            version: 1.0
+            description: A basic sequential workflow.
+            tasks:
+              task1:
+                action: std.noop
+                on-complete:
+                  - next:
+                      task2: foobar
+              task2:
+                action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        expected_errors = {
+            'syntax': [
+                {
+                    'message': (
+                        "{'task2': 'foobar'} is not valid "
+                        "under any of the given schemas"
+                    ),
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.on-complete.items.properties.next.oneOf'
+                    ),
+                    'spec_path': 'tasks.task1.on-complete[0].next'
                 }
             ]
         }
