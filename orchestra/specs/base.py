@@ -23,6 +23,7 @@ from orchestra import exceptions as exc
 from orchestra.expressions import base as expr
 from orchestra.utils import dictionary as dict_utils
 from orchestra.utils import expression as expr_utils
+from orchestra.utils import parameters as args_utils
 from orchestra.utils import schema as schema_utils
 from orchestra.specs import types
 
@@ -394,6 +395,12 @@ class Spec(object):
                 rolling_ctx = list(set(rolling_ctx + result[1]))
 
                 continue
+
+            if isinstance(prop_value, six.string_types):
+                inline_params = args_utils.parse_inline_params(prop_value)
+
+                if inline_params:
+                    prop_value = inline_params
 
             for var in expr.extract_vars(prop_value):
                 ctx_vars.append(decorate_ctx_var(var, spec_path, schema_path))

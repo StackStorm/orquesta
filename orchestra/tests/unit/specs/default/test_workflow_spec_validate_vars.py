@@ -200,12 +200,10 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                   message: <% $.foobar %>
                 on-complete:
                   - if: <% task_state(task1) = "SUCCESS" %>
-                    publish:
-                      foo: bar
+                    publish: foo="bar"
                     next: task2
                   - if: <% task_state(task1) = "ERROR" %>
-                    publish:
-                      bar: foo
+                    publish: bar="foo"
                     next: task3
               task2:
                 action: std.echo
@@ -261,8 +259,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                   message: <% $.foobar %>
                 on-complete:
                   - if: <% task_state(task1) = "SUCCESS" %>
-                    publish:
-                      foo: bar
+                    publish: foo="bar"
                     next: task2
               task2:
                 action: std.echo
@@ -274,8 +271,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                   message: <% $.foobar %>
                 on-complete:
                   - if: <% task_state(task3) = "SUCCESS" %>
-                    publish:
-                      bar: foo
+                    publish: bar="foo"
                     next: task4
               task4:
                 action: std.echo
@@ -327,8 +323,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                   message: <% $.foobar %>
                 on-complete:
                   - if: <% task_state(task1) = "SUCCESS" %>
-                    publish:
-                      foo: bar
+                    publish: foo="bar"
                     next: task2
               task2:
                 action: std.echo
@@ -343,8 +338,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                   message: <% $.foobar %>
                 on-complete:
                   - if: <% task_state(task3) = "SUCCESS" %>
-                    publish:
-                      bar: foo
+                    publish: bar="foo"
                     next: task4
               task4:
                 action: std.echo
@@ -414,8 +408,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                   message: <% $.foobar %>
                 on-complete:
                   - if: <% task_state(task1) = "SUCCESS" %>
-                    publish:
-                      foo: bar
+                    publish: foo="bar"
                     next: task2
               task2:
                 action: std.echo
@@ -430,8 +423,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                   message: <% $.foobar %>
                 on-complete:
                   - if: <% task_state(task3) = "SUCCESS" %>
-                    publish:
-                      bar: foo
+                    publish: bar="foo"
                     next: task4
               task4:
                 action: std.echo
@@ -450,3 +442,112 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.validate(), dict())
+
+    def test_bad_vars_in_publish(self):
+        wf_def = """
+            version: 1.0
+            description: A basic workflow.
+            tasks:
+              task1:
+                action: std.noop
+                on-complete:
+                  - publish: foo="bar" bar="foo"
+                    next: task2
+              task2:
+                action: std.echo
+                input:
+                  message: <% $.foo + $.bar %>
+                on-complete:
+                  - publish: foobar=<% $.fu + $.bar %>
+                    next: task3
+              task3:
+                action: std.echo
+                input:
+                  message: <% $.fu + $.bar %>
+                on-complete:
+                  - publish: foobar=<% $.fu + $.bar %>
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        expected_errors = {
+            'context': [
+                {
+                    'type': 'yaql',
+                    'expression': '<% $.fu + $.bar %>',
+                    'message': (
+                        'Variable "fu" is referenced before assignment.'
+                    ),
+                    'schema_path': (
+                        'properties.tasks.properties.task2.properties.'
+                        'on-complete.items.properties.publish'
+                    ),
+                    'spec_path': 'tasks.task2.on-complete[0].publish'
+                },
+                {
+                    'type': 'yaql',
+                    'expression': '<% $.fu + $.bar %>',
+                    'message': (
+                        'Variable "fu" is referenced before assignment.'
+                    ),
+                    'schema_path': (
+                        'properties.tasks.properties.task3.properties.input'
+                    ),
+                    'spec_path': 'tasks.task3.input'
+                },
+                {
+                    'type': 'yaql',
+                    'expression': '<% $.fu + $.bar %>',
+                    'message': (
+                        'Variable "fu" is referenced before assignment.'
+                    ),
+                    'schema_path': (
+                        'properties.tasks.properties.task3.properties.'
+                        'on-complete.items.properties.publish'
+                    ),
+                    'spec_path': 'tasks.task3.on-complete[0].publish'
+                }
+            ]
+        }
+
+        self.assertDictEqual(wf_spec.validate(), expected_errors)
+
+    def test_publish_inline_params(self):
+        wf_def = """
+            version: 1.0
+            description: A basic workflow.
+            tasks:
+              task1:
+                action: std.noop
+                on-complete:
+                  - publish: foo="bar" bar="foo"
+                    next: task2, task3
+              task2:
+                action: std.echo
+                input:
+                  message: <% $.foo + $.bar %>
+              task3:
+                action: std.echo
+                input:
+                  message: <% $.fu + $.bar %>
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        expected_errors = {
+            'context': [
+                {
+                    'type': 'yaql',
+                    'expression': '<% $.fu + $.bar %>',
+                    'message': (
+                        'Variable "fu" is referenced before assignment.'
+                    ),
+                    'schema_path': (
+                        'properties.tasks.properties.task3.properties.input'
+                    ),
+                    'spec_path': 'tasks.task3.input'
+                }
+            ]
+        }
+
+        self.assertDictEqual(wf_spec.validate(), expected_errors)

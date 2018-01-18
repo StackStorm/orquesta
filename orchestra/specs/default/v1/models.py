@@ -31,7 +31,12 @@ class TaskTransitionSpec(base.Spec):
         'type': 'object',
         'properties': {
             'if': types.NONEMPTY_STRING,
-            'publish': types.NONEMPTY_DICT,
+            'publish': {
+                'oneOf': [
+                    types.NONEMPTY_STRING,
+                    types.NONEMPTY_DICT
+                ]
+            },
             'next': {
                 'oneOf': [
                     types.NONEMPTY_STRING,
@@ -235,11 +240,16 @@ class TaskMappingSpec(base.MappingSpec):
             rolling_ctx = list(set(rolling_ctx + task_ctx))
 
             # Identify the next set of tasks and related transition specs.
-            next_tasks = []
+            transitions = []
             task_transition_specs = getattr(task_spec, 'on-complete') or []
 
-            for task_transition_spec in task_transition_specs:
+            for i in range(0, len(task_transition_specs)):
+                task_transition_spec = task_transition_specs[i]
                 next_task_names = getattr(task_transition_spec, 'next') or []
+
+                if not next_task_names:
+                    transitions.append((None, task_transition_spec, str(i)))
+                    continue
 
                 if isinstance(next_task_names, six.string_types):
                     next_task_names = [
@@ -247,19 +257,35 @@ class TaskMappingSpec(base.MappingSpec):
                     ]
 
                 for next_task_name in next_task_names:
-                    next_tasks.append((next_task_name, task_transition_spec))
+                    entry = (next_task_name, task_transition_spec, str(i))
+                    transitions.append(entry)
 
-            for entry in next_tasks:
-                next_task_spec = self.get_task(entry[0])
-                result = entry[1]._validate_context(parent=task_parent)
+            for entry in transitions:
+                next_task_name = entry[0]
+                task_transition_spec = entry[1]
+                seq_num = entry[2]
+
+                parent_ctx = {
+                    'ctx': task_ctx,
+                    'spec_path': spec_path + '.on-complete[' + seq_num + ']',
+                    'schema_path': schema_path + '.properties.on-complete.items'
+                }
+
+                result = task_transition_spec._validate_context(parent_ctx)
+                errors.extend(result[0])
                 branch_ctx = list(set(task_ctx + result[1]))
 
+                if not next_task_name:
+                    continue
+
+                next_task_spec = self.get_task(next_task_name)
+
                 if not next_task_spec.has_join():
-                    q.put((entry[0], branch_ctx))
+                    q.put((next_task_name, branch_ctx))
                 else:
-                    next_task_ctx = ctxs.get(entry[0], [])
-                    ctxs[entry[0]] = list(set(next_task_ctx + branch_ctx))
-                    q.put((entry[0], None))
+                    next_task_ctx = ctxs.get(next_task_name, [])
+                    ctxs[next_task_name] = list(set(next_task_ctx + branch_ctx))
+                    q.put((next_task_name, None))
 
         return (errors, rolling_ctx)
 

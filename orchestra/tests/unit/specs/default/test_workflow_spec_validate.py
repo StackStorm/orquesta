@@ -24,15 +24,13 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
                 action: std.noop
                 on-complete:
                   - if: <% task_state(task1) = "SUCCESS" %>
-                    publish:
-                      foo: bar
+                    publish: foo="bar"
                     next: task2
               task2:
                 action: std.noop
                 on-complete:
                   - if: <% task_state(task2) = "SUCCESS" %>
-                    publish:
-                      bar: foo
+                    publish: bar="foo"
                     next: task3
               task3:
                 action: std.noop
@@ -70,6 +68,33 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
                 action: std.noop
                 on-complete:
                   - next: task3
+              task3:
+                action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.validate(), {})
+
+    def test_publish_in_task_transition(self):
+        wf_def = """
+            version: 1.0
+            description: A basic sequential workflow.
+            tasks:
+              task1:
+                action: std.noop
+                on-complete:
+                  - publish: foo="bar" bar="foo"
+                    next: task2
+              task2:
+                action: std.echo
+                input:
+                    message: <% $.foo + $.bar %>
+                on-complete:
+                  - publish:
+                        foobar: fubar
+                        fubar: foobar
+                    next: task3
               task3:
                 action: std.noop
         """
@@ -130,10 +155,13 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
         expected_errors = {
             'syntax': [
                 {
-                    'message': "['foobar'] is not of type 'object'",
+                    'message': (
+                        "['foobar'] is not valid under "
+                        "any of the given schemas"
+                    ),
                     'schema_path': (
                         'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.on-complete.items.properties.publish.type'
+                        'properties.on-complete.items.properties.publish.oneOf'
                     ),
                     'spec_path': 'tasks.task1.on-complete[0].publish'
                 }
