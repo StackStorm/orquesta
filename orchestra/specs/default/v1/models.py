@@ -30,14 +30,14 @@ class TaskTransitionSpec(base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
-            'if': types.NONEMPTY_STRING,
+            'when': types.NONEMPTY_STRING,
             'publish': {
                 'oneOf': [
                     types.NONEMPTY_STRING,
                     types.NONEMPTY_DICT
                 ]
             },
-            'next': {
+            'do': {
                 'oneOf': [
                     types.NONEMPTY_STRING,
                     types.UNIQUE_STRING_LIST
@@ -48,9 +48,9 @@ class TaskTransitionSpec(base.Spec):
     }
 
     _context_evaluation_sequence = [
-        'if',
+        'when',
         'publish',
-        'next'
+        'do'
     ]
 
     _context_inputs = [
@@ -93,7 +93,7 @@ class TaskSpec(base.Spec):
             'with': ItemizedSpec,
             'action': types.NONEMPTY_STRING,
             'input': types.NONEMPTY_DICT,
-            'on-complete': TaskTransitionSequenceSpec,
+            'next': TaskTransitionSequenceSpec,
         },
         'additionalProperties': False
     }
@@ -101,7 +101,7 @@ class TaskSpec(base.Spec):
     _context_evaluation_sequence = [
         'action',
         'input',
-        'on-complete'
+        'next'
     ]
 
     def has_join(self):
@@ -125,11 +125,11 @@ class TaskMappingSpec(base.MappingSpec):
 
         next_tasks = []
 
-        task_transitions = getattr(task_spec, 'on-complete') or []
+        task_transitions = getattr(task_spec, 'next') or []
 
         for task_transition in task_transitions:
-            condition = getattr(task_transition, 'if') or None
-            next_task_names = getattr(task_transition, 'next') or []
+            condition = getattr(task_transition, 'when') or None
+            next_task_names = getattr(task_transition, 'do') or []
 
             if isinstance(next_task_names, six.string_types):
                 next_task_names = [
@@ -241,11 +241,11 @@ class TaskMappingSpec(base.MappingSpec):
 
             # Identify the next set of tasks and related transition specs.
             transitions = []
-            task_transition_specs = getattr(task_spec, 'on-complete') or []
+            task_transition_specs = getattr(task_spec, 'next') or []
 
             for i in range(0, len(task_transition_specs)):
                 task_transition_spec = task_transition_specs[i]
-                next_task_names = getattr(task_transition_spec, 'next') or []
+                next_task_names = getattr(task_transition_spec, 'do') or []
 
                 if not next_task_names:
                     transitions.append((None, task_transition_spec, str(i)))
@@ -267,8 +267,8 @@ class TaskMappingSpec(base.MappingSpec):
 
                 parent_ctx = {
                     'ctx': task_ctx,
-                    'spec_path': spec_path + '.on-complete[' + seq_num + ']',
-                    'schema_path': schema_path + '.properties.on-complete.items'
+                    'spec_path': spec_path + '.next[' + seq_num + ']',
+                    'schema_path': schema_path + '.properties.next.items'
                 }
 
                 result = task_transition_spec._validate_context(parent_ctx)

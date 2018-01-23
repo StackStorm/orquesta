@@ -7,7 +7,7 @@
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
+# See the License for the specwhenic language governing permissions and
 # limitations under the License.
 
 from orchestra.tests.unit.specs.default import base
@@ -22,16 +22,16 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             tasks:
               task1:
                 action: std.noop
-                on-complete:
-                  - if: <% task_state(task1) = "SUCCESS" %>
+                next:
+                  - when: <% task_state(task1) = "SUCCESS" %>
                     publish: foo="bar"
-                    next: task2
+                    do: task2
               task2:
                 action: std.noop
-                on-complete:
-                  - if: <% task_state(task2) = "SUCCESS" %>
+                next:
+                  - when: <% task_state(task2) = "SUCCESS" %>
                     publish: bar="foo"
-                    next: task3
+                    do: task3
               task3:
                 action: std.noop
         """
@@ -47,7 +47,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             tasks:
               task1:
                 action: std.noop
-                on-complete: []
+                next: []
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -61,13 +61,13 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             tasks:
               task1:
                 action: std.noop
-                on-complete:
-                  - next:
+                next:
+                  - do:
                       - task2
               task2:
                 action: std.noop
-                on-complete:
-                  - next: task3
+                next:
+                  - do: task3
               task3:
                 action: std.noop
         """
@@ -83,18 +83,18 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             tasks:
               task1:
                 action: std.noop
-                on-complete:
+                next:
                   - publish: foo="bar" bar="foo"
-                    next: task2
+                    do: task2
               task2:
                 action: std.echo
                 input:
                     message: <% $.foo + $.bar %>
-                on-complete:
+                next:
                   - publish:
                         foobar: fubar
                         fubar: foobar
-                    next: task3
+                    do: task3
               task3:
                 action: std.noop
         """
@@ -103,17 +103,17 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
 
         self.assertDictEqual(wf_spec.validate(), {})
 
-    def test_bad_if_in_task_transition(self):
+    def test_bad_when_in_task_transition(self):
         wf_def = """
             version: 1.0
             description: A basic sequential workflow.
             tasks:
               task1:
                 action: std.noop
-                on-complete:
-                  - if:
+                next:
+                  - when:
                       - foobar
-                    next: task2
+                    do: task2
               task2:
                 action: std.noop
         """
@@ -126,9 +126,9 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
                     'message': "['foobar'] is not of type 'string'",
                     'schema_path': (
                         'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.on-complete.items.properties.if.type'
+                        'properties.next.items.properties.when.type'
                     ),
-                    'spec_path': 'tasks.task1.on-complete[0].if'
+                    'spec_path': 'tasks.task1.next[0].when'
                 }
             ]
         }
@@ -142,10 +142,10 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             tasks:
               task1:
                 action: std.noop
-                on-complete:
+                next:
                   - publish:
                       - foobar
-                    next: task2
+                    do: task2
               task2:
                 action: std.noop
         """
@@ -161,24 +161,24 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
                     ),
                     'schema_path': (
                         'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.on-complete.items.properties.publish.oneOf'
+                        'properties.next.items.properties.publish.oneOf'
                     ),
-                    'spec_path': 'tasks.task1.on-complete[0].publish'
+                    'spec_path': 'tasks.task1.next[0].publish'
                 }
             ]
         }
 
         self.assertDictEqual(wf_spec.validate(), expected_errors)
 
-    def test_bad_next_in_task_transition(self):
+    def test_bad_do_in_task_transition(self):
         wf_def = """
             version: 1.0
             description: A basic sequential workflow.
             tasks:
               task1:
                 action: std.noop
-                on-complete:
-                  - next:
+                next:
+                  - do:
                       task2: foobar
               task2:
                 action: std.noop
@@ -195,9 +195,9 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
                     ),
                     'schema_path': (
                         'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.on-complete.items.properties.next.oneOf'
+                        'properties.next.items.properties.do.oneOf'
                     ),
-                    'spec_path': 'tasks.task1.on-complete[0].next'
+                    'spec_path': 'tasks.task1.next[0].do'
                 }
             ]
         }

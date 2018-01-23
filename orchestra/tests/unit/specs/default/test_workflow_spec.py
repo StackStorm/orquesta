@@ -41,7 +41,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
         self.assertIsInstance(task1, specs.TaskSpec)
         self.assertEqual(task1.action, 'std.noop')
 
-        task1_transition_seqs = getattr(task1, 'on-complete')
+        task1_transition_seqs = getattr(task1, 'next')
 
         self.assertIsInstance(
             task1_transition_seqs,
@@ -54,12 +54,12 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
         )
 
         self.assertEqual(
-            getattr(task1_transition_seqs[0], 'if'),
+            getattr(task1_transition_seqs[0], 'when'),
             '<% task_state(task1) = "SUCCESS" %>'
         )
 
         self.assertListEqual(
-            getattr(task1_transition_seqs[0], 'next'),
+            getattr(task1_transition_seqs[0], 'do'),
             ['task2']
         )
 
@@ -69,7 +69,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
         self.assertIsInstance(task2, specs.TaskSpec)
         self.assertEqual(task2.action, 'std.noop')
 
-        task2_transition_seqs = getattr(task2, 'on-complete')
+        task2_transition_seqs = getattr(task2, 'next')
 
         self.assertIsInstance(
             task2_transition_seqs,
@@ -82,12 +82,12 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
         )
 
         self.assertEqual(
-            getattr(task2_transition_seqs[0], 'if'),
+            getattr(task2_transition_seqs[0], 'when'),
             '<% task_state(task2) = "SUCCESS" %>'
         )
 
         self.assertEqual(
-            getattr(task2_transition_seqs[0], 'next'),
+            getattr(task2_transition_seqs[0], 'do'),
             'task3'
         )
 
@@ -96,7 +96,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
 
         self.assertIsInstance(task3, specs.TaskSpec)
         self.assertEqual(task3.action, 'std.noop')
-        self.assertIsNone(getattr(task3, 'on-complete'))
+        self.assertIsNone(getattr(task3, 'next'))
 
     def test_get_start_tasks(self):
         wf_name = 'split'

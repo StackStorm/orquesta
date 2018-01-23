@@ -8,39 +8,38 @@ input:
 tasks:
   prep:
     action: std.noop
-    on-complete:
-      - if: <% task_state(prep) = "SUCCESS" %>
-        next: task1
+    next:
+      - when: <% task_state(prep) = "SUCCESS" %>
+        do: task1
   task1:
     action: std.noop
-    on-complete:
-      - if: <% task_state(task1) = "SUCCESS" %>
+    next:
+      - when: <% task_state(task1) = "SUCCESS" %>
         publish:
           proceed: False
-        next: task2
+        do: task2
   task2:
     action: std.noop
-    on-complete:
-      - if: <% task_state(task2) = "SUCCESS" and not $.proceed %>
-        next: task3
-      - if: <% task_state(task2) = "SUCCESS" and $.proceed %>
-        next: task5
+    next:
+      - when: <% task_state(task2) = "SUCCESS" and not $.proceed %>
+        do: task3
+      - when: <% task_state(task2) = "SUCCESS" and $.proceed %>
+        do: task5
   task3:
     action: std.noop
-    on-complete:
-      - if: <% task_state(task3) = "SUCCESS" %>
-        next: task4
+    next:
+      - when: <% task_state(task3) = "SUCCESS" %>
+        do: task4
   task4:
     action: std.noop
-    on-complete:
-      - if: <% task_state(task4) = "SUCCESS" %>
+    next:
+      - when: <% task_state(task4) = "SUCCESS" %>
         publish:
           proceed: True
-        next: task2
+        do: task2
   task5:
     action: std.noop
-    on-complete:
-      - if: <% task_state(task5) = "SUCCESS" and $.count < 3 %>
-        publish:
-          count: <% $.count + 1 %>
-        next: task1
+    next:
+      - when: <% task_state(task5) = "SUCCESS" and $.count < 3 %>
+        publish: count=<% $.count + 1 %>
+        do: task1

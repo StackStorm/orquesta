@@ -7,7 +7,7 @@
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
+# See the License for the specwhenic language governing permissions and
 # limitations under the License.
 
 from orchestra.tests.unit.specs.default import base
@@ -158,9 +158,9 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                 action: std.echo
                 input:
                   message: <% $.foobar %>
-                on-complete:
-                  - if: <% task_state(task1) = "SUCCESS" %>
-                    next: task2
+                next:
+                  - when: <% task_state(task1) = "SUCCESS" %>
+                    do: task2
               task2:
                 action: std.echo
                 input:
@@ -198,13 +198,13 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                 action: std.echo
                 input:
                   message: <% $.foobar %>
-                on-complete:
-                  - if: <% task_state(task1) = "SUCCESS" %>
+                next:
+                  - when: <% task_state(task1) = "SUCCESS" %>
                     publish: foo="bar"
-                    next: task2
-                  - if: <% task_state(task1) = "ERROR" %>
+                    do: task2
+                  - when: <% task_state(task1) = "ERROR" %>
                     publish: bar="foo"
-                    next: task3
+                    do: task3
               task2:
                 action: std.echo
                 input:
@@ -257,10 +257,10 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                 action: std.echo
                 input:
                   message: <% $.foobar %>
-                on-complete:
-                  - if: <% task_state(task1) = "SUCCESS" %>
+                next:
+                  - when: <% task_state(task1) = "SUCCESS" %>
                     publish: foo="bar"
-                    next: task2
+                    do: task2
               task2:
                 action: std.echo
                 input:
@@ -269,10 +269,10 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                 action: std.echo
                 input:
                   message: <% $.foobar %>
-                on-complete:
-                  - if: <% task_state(task3) = "SUCCESS" %>
+                next:
+                  - when: <% task_state(task3) = "SUCCESS" %>
                     publish: bar="foo"
-                    next: task4
+                    do: task4
               task4:
                 action: std.echo
                 input:
@@ -321,32 +321,32 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                 action: std.echo
                 input:
                   message: <% $.foobar %>
-                on-complete:
-                  - if: <% task_state(task1) = "SUCCESS" %>
+                next:
+                  - when: <% task_state(task1) = "SUCCESS" %>
                     publish: foo="bar"
-                    next: task2
+                    do: task2
               task2:
                 action: std.echo
                 input:
                   message: <% $.foo + $.bar %>
-                on-complete:
-                  - if: <% task_state(task2) = "SUCCESS" %>
-                    next: task5
+                next:
+                  - when: <% task_state(task2) = "SUCCESS" %>
+                    do: task5
               task3:
                 action: std.echo
                 input:
                   message: <% $.foobar %>
-                on-complete:
-                  - if: <% task_state(task3) = "SUCCESS" %>
+                next:
+                  - when: <% task_state(task3) = "SUCCESS" %>
                     publish: bar="foo"
-                    next: task4
+                    do: task4
               task4:
                 action: std.echo
                 input:
                   message: <% $.foo + $.bar %>
-                on-complete:
-                  - if: <% task_state(task4) = "SUCCESS" %>
-                    next: task5
+                next:
+                  - when: <% task_state(task4) = "SUCCESS" %>
+                    do: task5
               task5:
                 action: std.echo
                 input:
@@ -406,32 +406,32 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                 action: std.echo
                 input:
                   message: <% $.foobar %>
-                on-complete:
-                  - if: <% task_state(task1) = "SUCCESS" %>
+                next:
+                  - when: <% task_state(task1) = "SUCCESS" %>
                     publish: foo="bar"
-                    next: task2
+                    do: task2
               task2:
                 action: std.echo
                 input:
                   message: <% $.foo %>
-                on-complete:
-                  - if: <% task_state(task2) = "SUCCESS" %>
-                    next: task5
+                next:
+                  - when: <% task_state(task2) = "SUCCESS" %>
+                    do: task5
               task3:
                 action: std.echo
                 input:
                   message: <% $.foobar %>
-                on-complete:
-                  - if: <% task_state(task3) = "SUCCESS" %>
+                next:
+                  - when: <% task_state(task3) = "SUCCESS" %>
                     publish: bar="foo"
-                    next: task4
+                    do: task4
               task4:
                 action: std.echo
                 input:
                   message: <% $.bar %>
-                on-complete:
-                  - if: <% task_state(task4) = "SUCCESS" %>
-                    next: task5
+                next:
+                  - when: <% task_state(task4) = "SUCCESS" %>
+                    do: task5
               task5:
                 join: all
                 action: std.echo
@@ -450,21 +450,21 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             tasks:
               task1:
                 action: std.noop
-                on-complete:
+                next:
                   - publish: foo="bar" bar="foo"
-                    next: task2
+                    do: task2
               task2:
                 action: std.echo
                 input:
                   message: <% $.foo + $.bar %>
-                on-complete:
+                next:
                   - publish: foobar=<% $.fu + $.bar %>
-                    next: task3
+                    do: task3
               task3:
                 action: std.echo
                 input:
                   message: <% $.fu + $.bar %>
-                on-complete:
+                next:
                   - publish: foobar=<% $.fu + $.bar %>
         """
 
@@ -480,9 +480,9 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     ),
                     'schema_path': (
                         'properties.tasks.properties.task2.properties.'
-                        'on-complete.items.properties.publish'
+                        'next.items.properties.publish'
                     ),
-                    'spec_path': 'tasks.task2.on-complete[0].publish'
+                    'spec_path': 'tasks.task2.next[0].publish'
                 },
                 {
                     'type': 'yaql',
@@ -503,9 +503,9 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     ),
                     'schema_path': (
                         'properties.tasks.properties.task3.properties.'
-                        'on-complete.items.properties.publish'
+                        'next.items.properties.publish'
                     ),
-                    'spec_path': 'tasks.task3.on-complete[0].publish'
+                    'spec_path': 'tasks.task3.next[0].publish'
                 }
             ]
         }
@@ -519,9 +519,9 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             tasks:
               task1:
                 action: std.noop
-                on-complete:
+                next:
                   - publish: foo="bar" bar="foo"
-                    next: task2, task3
+                    do: task2, task3
               task2:
                 action: std.echo
                 input:
