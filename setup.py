@@ -62,7 +62,7 @@ setup(
     ],
     entry_points={
         'orchestra.composers': [
-            'default = orchestra.composers.default:WorkflowComposer',
+            'native = orchestra.composers.native:WorkflowComposer',
             'mistral = orchestra.composers.mistral:WorkflowComposer'
         ],
         'orchestra.expressions.evaluators': [

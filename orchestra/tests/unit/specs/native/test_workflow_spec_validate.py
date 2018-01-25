@@ -10,7 +10,7 @@
 # See the License for the specwhenic language governing permissions and
 # limitations under the License.
 
-from orchestra.tests.unit.specs.default import base
+from orchestra.tests.unit.specs.native import base
 
 
 class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):

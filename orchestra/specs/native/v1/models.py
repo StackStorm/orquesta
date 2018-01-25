@@ -16,7 +16,7 @@ import six
 from six.moves import queue
 
 from orchestra.specs import types
-from orchestra.specs.default.v1 import base
+from orchestra.specs.native.v1 import base
 
 
 LOG = logging.getLogger(__name__)

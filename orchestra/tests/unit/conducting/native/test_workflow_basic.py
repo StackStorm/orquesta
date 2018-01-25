@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra.tests.unit.conducting.default import base
+from orchestra.tests.unit.conducting.native import base
 
 
 class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):

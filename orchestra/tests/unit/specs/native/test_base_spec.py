@@ -13,15 +13,15 @@
 import unittest
 
 from orchestra.specs import loader
-from orchestra.specs import default as orchestra_specs
-from orchestra.specs.default import v1 as orchestra_specs_v1
+from orchestra.specs import native as orchestra_specs
+from orchestra.specs.native import v1 as orchestra_specs_v1
 
 
 class SpecTest(unittest.TestCase):
 
     def setUp(self):
         super(SpecTest, self).setUp()
-        self.spec_module_name = 'default'
+        self.spec_module_name = 'native'
 
     def test_get_module(self):
         self.assertEqual(

@@ -10,8 +10,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra.specs import default as specs
-from orchestra.tests.unit.specs.default import base
+from orchestra.specs import native as specs
+from orchestra.tests.unit.specs.native import base
 
 
 class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):

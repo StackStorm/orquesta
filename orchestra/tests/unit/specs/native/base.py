@@ -14,4 +14,4 @@ from orchestra.tests.unit import base
 
 
 class OrchestraWorkflowSpecTest(base.WorkflowSpecTest):
-    spec_module_name = 'default'
+    spec_module_name = 'native'

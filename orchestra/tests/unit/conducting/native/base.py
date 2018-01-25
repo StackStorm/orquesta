@@ -10,15 +10,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra.composers import default as composers
-from orchestra.utils import plugin
-from orchestra.tests.unit.composition.default import base
+from orchestra.tests.unit import base
 
 
-class WorkflowComposerTest(base.OrchestraWorkflowComposerTest):
+class OrchestraWorkflowConductorTest(base.WorkflowConductorTest):
 
-    def test_get_composer(self):
-        self.assertEqual(
-            plugin.get_module('orchestra.composers', self.spec_module_name),
-            composers.WorkflowComposer
-        )
+    @classmethod
+    def setUpClass(cls):
+        cls.spec_module_name = 'native'
+        super(OrchestraWorkflowConductorTest, cls).setUpClass()

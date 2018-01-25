@@ -10,13 +10,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra.specs.default import v1
-from orchestra.specs.default.v1 import instantiate
-from orchestra.specs.default.v1 import TaskMappingSpec
-from orchestra.specs.default.v1 import TaskSpec
-from orchestra.specs.default.v1 import TaskTransitionSequenceSpec
-from orchestra.specs.default.v1 import TaskTransitionSpec
-from orchestra.specs.default.v1 import WorkflowSpec
+from orchestra.specs.native import v1
+from orchestra.specs.native.v1 import instantiate
+from orchestra.specs.native.v1 import TaskMappingSpec
+from orchestra.specs.native.v1 import TaskSpec
+from orchestra.specs.native.v1 import TaskTransitionSequenceSpec
+from orchestra.specs.native.v1 import TaskTransitionSpec
+from orchestra.specs.native.v1 import WorkflowSpec
 
 VERSION = v1.VERSION
 

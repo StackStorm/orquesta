@@ -11,7 +11,7 @@
 # limitations under the License.
 
 from orchestra import states
-from orchestra.tests.unit.conducting.default import base
+from orchestra.tests.unit.conducting.native import base
 
 
 class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
