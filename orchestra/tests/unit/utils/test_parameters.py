@@ -21,6 +21,9 @@ class InlineParametersTest(unittest.TestCase):
         tests = [
             ('x=null', {'x': None}),
             ('x=123', {'x': 123}),
+            ('x=-123', {'x': -123}),
+            ('x=0.123', {'x': 0.123}),
+            ('x=-0.123', {'x': -0.123}),
             ('x=true', {'x': True}),
             ('x=false', {'x': False}),
             ('x="abc"', {'x': 'abc'}),
