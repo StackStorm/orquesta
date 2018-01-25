@@ -15,8 +15,7 @@ tasks:
     action: std.noop
     next:
       - when: <% task_state(task1) = "SUCCESS" %>
-        publish:
-          proceed: False
+        publish: proceed=false
         do: task2
   task2:
     action: std.noop
@@ -34,8 +33,7 @@ tasks:
     action: std.noop
     next:
       - when: <% task_state(task4) = "SUCCESS" %>
-        publish:
-          proceed: True
+        publish: proceed=true
         do: task2
   task5:
     action: std.noop
