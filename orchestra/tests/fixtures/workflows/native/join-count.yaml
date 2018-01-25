@@ -6,43 +6,43 @@ tasks:
   task1:
     action: std.noop
     next:
-      - when: <% task_state(task1) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task2, task4, task6
 
   # branch 1
   task2:
     action: std.noop
     next:
-      - when: <% task_state(task2) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task3
   task3:
     action: std.noop
     next:
-      - when: <% task_state(task3) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task8
 
   # branch 2
   task4:
     action: std.noop
     next:
-      - when: <% task_state(task4) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task5
   task5:
     action: std.noop
     next:
-      - when: <% task_state(task5) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task8
 
   # branch 3
   task6:
     action: std.noop
     next:
-      - when: <% task_state(task6) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task7
   task7:
     action: std.noop
     next:
-      - when: <% task_state(task7) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task8
 
   # converge branches

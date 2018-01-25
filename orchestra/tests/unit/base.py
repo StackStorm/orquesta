@@ -182,6 +182,11 @@ class WorkflowConductorTest(WorkflowComposerTest):
             if not ctx_q.empty():
                 context = ctx_q.get()
 
+            # set current task in context
+            context['__current_task'] = {
+                'name': completed_task['id']
+            }
+
             next_tasks = wf_ex_graph.get_next_tasks(
                 completed_task,
                 context=context

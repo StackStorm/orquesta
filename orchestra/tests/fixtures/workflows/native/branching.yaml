@@ -6,14 +6,14 @@ tasks:
   task1:
     action: std.noop
     next:
-      - when: <% task_state(task1) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task2, task4
 
   # branch 1
   task2:
     action: std.noop
     next:
-      - when: <% task_state(task2) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task3
   task3:
     action: std.noop
@@ -22,7 +22,7 @@ tasks:
   task4:
     action: std.noop
     next:
-      - when: <% task_state(task4) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task5
   task5:
     action: std.noop

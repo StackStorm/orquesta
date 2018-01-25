@@ -9,38 +9,38 @@ tasks:
   task1:
     action: std.noop
     next:
-      - when: <% task_state(task1) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task2, task3
 
   # branch 1
   task2:
     action: std.noop
     next:
-      - when: <% task_state(task2) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task4
 
   # branch 2
   task3:
     action: std.noop
     next:
-      - when: <% task_state(task3) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task4
 
   # split branch
   task4:
     action: std.noop
     next:
-      - when: <% task_state(task4) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task5, task6
   task5:
     action: std.noop
     next:
-      - when: <% task_state(task5) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task7
   task6:
     action: std.noop
     next:
-      - when: <% task_state(task6) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task7
   task7:
     join: all

@@ -9,21 +9,21 @@ tasks:
   prep:
     action: std.noop
     next:
-      - when: <% task_state(prep) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task1
   task1:
     action: std.noop
     next:
-      - when: <% task_state(task1) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task2
   task2:
     action: std.noop
     next:
-      - when: <% task_state(task2) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task3
   task3:
     action: std.noop
     next:
-      - when: <% task_state(task3) = "SUCCESS" and $.count < 3 %>
+      - when: <% succeeded() and $.count < 3 %>
         publish: count=<% $.count + 1 %>
         do: task1

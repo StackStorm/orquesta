@@ -37,14 +37,14 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 []
@@ -76,14 +76,14 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 []
@@ -124,14 +124,14 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
@@ -139,14 +139,14 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': ['<% task_state(task4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task6',
                         'key': 0,
-                        'criteria': ['<% task_state(task5) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 []
@@ -190,14 +190,14 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
@@ -205,14 +205,14 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': ['<% task_state(task4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task6',
                         'key': 0,
-                        'criteria': ['<% task_state(task5) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 []
@@ -250,19 +250,19 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
@@ -270,7 +270,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': ['<% task_state(task4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 []
@@ -310,19 +310,19 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
@@ -330,7 +330,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': ['<% task_state(task4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 []
@@ -365,25 +365,18 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'a',
                         'key': 0,
-                        'criteria': [
-                            '<% task_state(t1) = "SUCCESS" and '
-                            '$.which = "a" %>'
-                        ]
+                        'criteria': ['<% succeeded() and $.which = "a" %>']
                     },
                     {
                         'id': 'b',
                         'key': 0,
-                        'criteria': [
-                            '<% task_state(t1) = "SUCCESS" and '
-                            '$.which = "b" %>'
-                        ]
+                        'criteria': ['<% succeeded() and $.which = "b" %>']
                     },
                     {
                         'id': 'c',
                         'key': 0,
                         'criteria': [
-                            '<% task_state(t1) = "SUCCESS" and '
-                            'not $.which in list(a, b) %>'
+                            '<% succeeded() and not $.which in list(a, b) %>'
                         ]
                     }
                 ],
@@ -422,25 +415,18 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'a',
                         'key': 0,
-                        'criteria': [
-                            '<% task_state(t1) = "SUCCESS" and '
-                            '$.which = "a" %>'
-                        ]
+                        'criteria': ['<% succeeded() and $.which = "a" %>']
                     },
                     {
                         'id': 'b',
                         'key': 0,
-                        'criteria': [
-                            '<% task_state(t1) = "SUCCESS" and '
-                            '$.which = "b" %>'
-                        ]
+                        'criteria': ['<% succeeded() and $.which = "b" %>']
                     },
                     {
                         'id': 'c',
                         'key': 0,
                         'criteria': [
-                            '<% task_state(t1) = "SUCCESS" and '
-                            'not $.which in list(a, b) %>'
+                            '<% succeeded() and not $.which in list(a, b) %>'
                         ]
                     }
                 ],

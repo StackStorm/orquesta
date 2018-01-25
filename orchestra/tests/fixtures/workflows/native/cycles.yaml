@@ -9,35 +9,35 @@ tasks:
   prep:
     action: std.noop
     next:
-      - when: <% task_state(prep) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task1
   task1:
     action: std.noop
     next:
-      - when: <% task_state(task1) = "SUCCESS" %>
+      - when: <% succeeded() %>
         publish: proceed=false
         do: task2
   task2:
     action: std.noop
     next:
-      - when: <% task_state(task2) = "SUCCESS" and not $.proceed %>
+      - when: <% succeeded() and not $.proceed %>
         do: task3
-      - when: <% task_state(task2) = "SUCCESS" and $.proceed %>
+      - when: <% succeeded() and $.proceed %>
         do: task5
   task3:
     action: std.noop
     next:
-      - when: <% task_state(task3) = "SUCCESS" %>
+      - when: <% succeeded() %>
         do: task4
   task4:
     action: std.noop
     next:
-      - when: <% task_state(task4) = "SUCCESS" %>
+      - when: <% succeeded() %>
         publish: proceed=true
         do: task2
   task5:
     action: std.noop
     next:
-      - when: <% task_state(task5) = "SUCCESS" and $.count < 3 %>
+      - when: <% succeeded() and $.count < 3 %>
         publish: count=<% $.count + 1 %>
         do: task1

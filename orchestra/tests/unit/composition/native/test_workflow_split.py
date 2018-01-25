@@ -54,52 +54,52 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': ['<% task_state(task2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': ['<% task_state(task3) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': ['<% task_state(task4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6',
                         'key': 0,
-                        'criteria': ['<% task_state(task4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': ['<% task_state(task5) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': ['<% task_state(task6) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 []
@@ -173,38 +173,38 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task5__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task4__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task4__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                 ],
                 [
                     {
                         'id': 'task7__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task5__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
@@ -212,33 +212,33 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task6__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task3) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task5__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task4__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task4__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                 ],
                 [
                     {
                         'id': 'task7__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task5__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
@@ -246,7 +246,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task6__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ]
             ],
@@ -298,64 +298,64 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task8',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': ['<% task_state(task2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': ['<% task_state(task3) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': ['<% task_state(task4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6',
                         'key': 0,
-                        'criteria': ['<% task_state(task4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': ['<% task_state(task5) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': ['<% task_state(task6) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task8',
                         'key': 0,
-                        'criteria': ['<% task_state(task7) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 []
@@ -444,50 +444,50 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task8__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task5__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task4__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task4__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                 ],
                 [
                     {
                         'id': 'task7__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task5__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task8__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task7__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
@@ -495,40 +495,40 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task6__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task3) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task5__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task4__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task4__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                 ],
                 [
                     {
                         'id': 'task7__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task5__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task8__3',
                         'key': 0,
-                        'criteria': ['<% task_state(task7__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
@@ -536,7 +536,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task6__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 []
@@ -597,78 +597,78 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': ['<% task_state(task2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': ['<% task_state(task3) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': ['<% task_state(task4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6',
                         'key': 0,
-                        'criteria': ['<% task_state(task4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': ['<% task_state(task5) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': ['<% task_state(task6) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task8',
                         'key': 0,
-                        'criteria': ['<% task_state(task7) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task9',
                         'key': 0,
-                        'criteria': ['<% task_state(task7) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task10',
                         'key': 0,
-                        'criteria': ['<% task_state(task8) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task10',
                         'key': 0,
-                        'criteria': ['<% task_state(task9) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 []
@@ -814,57 +814,57 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task5__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task4__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task4__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                 ],
                 [
                     {
                         'id': 'task7__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task5__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task8__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task7__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task9__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task7__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task10__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task8__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
@@ -872,33 +872,33 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task10__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task9__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task7__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task6__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task8__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task7__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task9__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task7__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task10__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task8__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
@@ -906,52 +906,52 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task10__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task9__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task3) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task5__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task4__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task4__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                 ],
                 [
                     {
                         'id': 'task7__3',
                         'key': 0,
-                        'criteria': ['<% task_state(task5__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task8__3',
                         'key': 0,
-                        'criteria': ['<% task_state(task7__3) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task9__3',
                         'key': 0,
-                        'criteria': ['<% task_state(task7__3) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task10__3',
                         'key': 0,
-                        'criteria': ['<% task_state(task8__3) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
@@ -959,33 +959,33 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task10__3',
                         'key': 0,
-                        'criteria': ['<% task_state(task9__3) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task7__4',
                         'key': 0,
-                        'criteria': ['<% task_state(task6__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task8__4',
                         'key': 0,
-                        'criteria': ['<% task_state(task7__4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task9__4',
                         'key': 0,
-                        'criteria': ['<% task_state(task7__4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task10__4',
                         'key': 0,
-                        'criteria': ['<% task_state(task8__4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
@@ -993,7 +993,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task10__4',
                         'key': 0,
-                        'criteria': ['<% task_state(task9__4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ]
             ],
@@ -1046,64 +1046,64 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task8',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': ['<% task_state(task2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': ['<% task_state(task3) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': ['<% task_state(task4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6',
                         'key': 0,
-                        'criteria': ['<% task_state(task4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': ['<% task_state(task5) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task7',
                         'key': 0,
-                        'criteria': ['<% task_state(task6) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task8',
                         'key': 0,
-                        'criteria': ['<% task_state(task7) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 []
@@ -1189,55 +1189,55 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task8__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task8__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task5__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task4__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task4__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                 ],
                 [
                     {
                         'id': 'task7__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task5__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task8__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task7__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
@@ -1245,40 +1245,40 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
-                        'criteria': ['<% task_state(task6__1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task3) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task5__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task4__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task4__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                 ],
                 [
                     {
                         'id': 'task7__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task5__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task8__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task7__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
@@ -1286,7 +1286,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task6__2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ]
             ],

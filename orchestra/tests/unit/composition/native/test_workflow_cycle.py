@@ -40,31 +40,28 @@ class CyclicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': ['<% task_state(prep) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': [
-                            '<% task_state(task3) = "SUCCESS" and '
-                            '$.count < 3 %>'
-                        ]
+                        'criteria': ['<% succeeded() and $.count < 3 %>']
                     }
                 ]
             ],
@@ -99,31 +96,28 @@ class CyclicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': ['<% task_state(prep) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task2) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': [
-                            '<% task_state(task3) = "SUCCESS" and '
-                            '$.count < 3 %>'
-                        ]
+                        'criteria': ['<% succeeded() and $.count < 3 %>']
                     }
                 ]
             ],
@@ -163,56 +157,47 @@ class CyclicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': ['<% task_state(prep) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': [
-                            '<% task_state(task2) = "SUCCESS" and '
-                            'not $.proceed %>'
-                        ]
+                        'criteria': ['<% succeeded() and not $.proceed %>']
                     },
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': [
-                            '<% task_state(task2) = "SUCCESS" and '
-                            '$.proceed %>'
-                        ]
+                        'criteria': ['<% succeeded() and $.proceed %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': ['<% task_state(task3) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': [
-                            '<% task_state(task5) = "SUCCESS" and '
-                            '$.count < 3 %>'
-                        ]
+                        'criteria': ['<% succeeded() and $.count < 3 %>']
                     }
                 ]
             ],
@@ -255,56 +240,47 @@ class CyclicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': ['<% task_state(prep) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': [
-                            '<% task_state(task2) = "SUCCESS" and '
-                            'not $.proceed %>'
-                        ]
+                        'criteria': ['<% succeeded() and not $.proceed %>']
                     },
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': [
-                            '<% task_state(task2) = "SUCCESS" and '
-                            '$.proceed %>'
-                        ]
+                        'criteria': ['<% succeeded() and $.proceed %>']
                     }
                 ],
                 [
                     {
                         'id': 'task4',
                         'key': 0,
-                        'criteria': ['<% task_state(task3) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task4) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': [
-                            '<% task_state(task5) = "SUCCESS" and '
-                            '$.count < 3 %>'
-                        ]
+                        'criteria': ['<% succeeded() and $.count < 3 %>']
                     }
                 ]
             ],

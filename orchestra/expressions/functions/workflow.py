@@ -10,10 +10,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from orchestra import exceptions
 from orchestra import states
+
+
+def _get_current_task(context):
+    current_task = context['__current_task'] or {}
+
+    if not current_task:
+        raise exceptions.ContextValueError(
+            'The current task is unset in the context.'
+        )
+
+    return current_task
 
 
 def task_state_(context, task_name):
     task_states = context['__task_states'] or {}
 
     return task_states.get(task_name, states.UNKNOWN)
+
+
+def succeeded_(context):
+    current_task = _get_current_task(context)
+
+    return (task_state_(context, current_task.get('name')) == states.SUCCESS)
+
+
+def failed_(context):
+    current_task = _get_current_task(context)
+
+    return (task_state_(context, current_task.get('name')) == states.ERROR)
+
+
+def completed_(context):
+    return (succeeded_(context) or failed_(context))

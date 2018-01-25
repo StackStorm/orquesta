@@ -11,11 +11,11 @@ tasks:
   t1:
     action: std.noop
     next:
-      - when: <% task_state(t1) = "SUCCESS" and $.which = "a" %>
+      - when: <% succeeded() and $.which = "a" %>
         do: a
-      - when: <% task_state(t1) = "SUCCESS" and $.which = "b" %>
+      - when: <% succeeded() and $.which = "b" %>
         do: b
-      - when: <% task_state(t1) = "SUCCESS" and not $.which in list(a, b) %>
+      - when: <% succeeded() and not $.which in list(a, b) %>
         do: c
   a:
     action: std.noop

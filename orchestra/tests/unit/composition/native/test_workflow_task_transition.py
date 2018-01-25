@@ -37,12 +37,12 @@ class TaskTransitionWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "ERROR" %>']
+                        'criteria': ['<% failed() %>']
                     }
                 ],
                 [],
@@ -75,12 +75,12 @@ class TaskTransitionWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "ERROR" %>']
+                        'criteria': ['<% failed() %>']
                     }
                 ],
                 [],
@@ -116,12 +116,12 @@ class TaskTransitionWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "ERROR" %>']
+                        'criteria': ['<% failed() %>']
                     },
                     {
                         'id': 'task4',
@@ -164,12 +164,12 @@ class TaskTransitionWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "ERROR" %>']
+                        'criteria': ['<% failed() %>']
                     },
                     {
                         'id': 'task4',
@@ -211,12 +211,12 @@ class TaskTransitionWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 1,
-                        'criteria': ['<% task_state(task1) = "ERROR" %>']
+                        'criteria': ['<% failed() %>']
                     },
                     {
                         'id': 'task2',
                         'key': 2,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 []
@@ -260,12 +260,12 @@ class TaskTransitionWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2__2',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "ERROR" %>']
+                        'criteria': ['<% failed() %>']
                     },
                     {
                         'id': 'task2__3',
                         'key': 0,
-                        'criteria': ['<% task_state(task1) = "SUCCESS" %>']
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],

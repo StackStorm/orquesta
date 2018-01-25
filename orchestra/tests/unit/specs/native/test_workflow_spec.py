@@ -55,7 +55,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
 
         self.assertEqual(
             getattr(task1_transition_seqs[0], 'when'),
-            '<% task_state(task1) = "SUCCESS" %>'
+            '<% succeeded() %>'
         )
 
         self.assertListEqual(
@@ -83,7 +83,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
 
         self.assertEqual(
             getattr(task2_transition_seqs[0], 'when'),
-            '<% task_state(task2) = "SUCCESS" %>'
+            '<% succeeded() %>'
         )
 
         self.assertEqual(
