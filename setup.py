@@ -62,6 +62,7 @@ setup(
     ],
     entry_points={
         'orchestra.composers': [
+            'native = orchestra.composers.native:WorkflowComposer',
             'mistral = orchestra.composers.mistral:WorkflowComposer'
         ],
         'orchestra.expressions.evaluators': [
@@ -71,6 +72,9 @@ setup(
         'orchestra.expressions.functions': [
             'json = orchestra.expressions.functions.common:json_',
             'task_state = orchestra.expressions.functions.workflow:task_state_',
+            'succeeded = orchestra.expressions.functions.workflow:succeeded_',
+            'failed = orchestra.expressions.functions.workflow:failed_',
+            'completed = orchestra.expressions.functions.workflow:completed_',
         ],
         'orchestra.tests': [
             'fake = orchestra.tests.unit.utils.test_plugin:FakePlugin'

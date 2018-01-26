@@ -10,12 +10,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra.tests.unit import base as common_base
-from orchestra.tests.unit.composition.mistral import base as mistral_base
+from orchestra.composers import native as composers
+from orchestra.utils import plugin
+from orchestra.tests.unit.composition.native import base
 
 
-class MistralWorkflowConductorTest(
-    mistral_base.MistralWorkflowComposerTest,
-    common_base.WorkflowConductorTest
-):
-    pass
+class WorkflowComposerTest(base.OrchestraWorkflowComposerTest):
+
+    def test_get_composer(self):
+        self.assertEqual(
+            plugin.get_module('orchestra.composers', self.spec_module_name),
+            composers.WorkflowComposer
+        )

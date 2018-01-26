@@ -1,0 +1,17 @@
+version: 1.0
+
+description: >
+  A workflow that demonstrates various conditional handlers
+  referencing the same task.
+
+tasks:
+  task1:
+    action: std.noop
+    next:
+      - do: task2
+      - when: <% failed() %>
+        do: task2
+      - when: <% succeeded() %>
+        do: task2
+  task2:
+    action: std.noop

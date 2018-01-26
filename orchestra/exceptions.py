@@ -34,3 +34,7 @@ class SchemaDefinitionError(Exception):
 
 class SchemaIncompatibleError(Exception):
     pass
+
+
+class ContextValueError(Exception):
+    pass

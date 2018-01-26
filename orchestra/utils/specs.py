@@ -11,6 +11,7 @@
 # limitations under the License.
 
 import logging
+import six
 import yaml
 
 from orchestra.specs import loader
@@ -19,32 +20,32 @@ from orchestra.specs import loader
 LOG = logging.getLogger(__name__)
 
 
-def convert_wf_def_to_spec(spec_type, definition):
+def instantiate(spec_type, definition):
     if not definition:
         raise ValueError('Workflow definition is empty.')
 
-    wf_def = (
-        definition
-        if isinstance(definition, dict)
-        else yaml.safe_load(definition)
-    )
+    if isinstance(definition, six.string_types):
+        definition = yaml.load(definition)
+
+    if not isinstance(definition, dict):
+        raise ValueError('Unable to convert workflow definition into dict.')
 
     spec_module = loader.get_spec_module(spec_type)
 
-    version = str(wf_def.pop('version', spec_module.VERSION))
+    version = definition.pop('version', None)
 
-    if version != str(spec_module.VERSION):
+    if not version:
+        raise ValueError('Version of the workflow definition is not provided.')
+
+    spec_version = spec_module.VERSION
+
+    if str(version) != str(spec_version):
         raise ValueError(
             'Workflow definition is not the supported version "%s".',
-            spec_module.VERSION
+            spec_version
         )
 
-    if not wf_def.keys():
+    if not definition.keys():
         raise ValueError('Workflow definition contains no workflow.')
 
-    if len(wf_def.keys()) > 1:
-        raise ValueError('Workflow definition contains more than one workflow.')
-
-    wf_name, wf_spec = list(wf_def.items())[0]
-
-    return spec_module.WorkflowSpec(wf_spec, name=wf_name)
+    return spec_module.instantiate(definition)

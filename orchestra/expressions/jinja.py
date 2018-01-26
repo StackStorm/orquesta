@@ -77,6 +77,7 @@ class JinjaEvaluator(base.Evaluator):
 
         if isinstance(data, dict):
             ctx['__task_states'] = data.get('__task_states')
+            ctx['__current_task'] = data.get('__current_task')
 
         return ctx
 

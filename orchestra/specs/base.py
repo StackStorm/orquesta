@@ -23,6 +23,7 @@ from orchestra import exceptions as exc
 from orchestra.expressions import base as expr
 from orchestra.utils import dictionary as dict_utils
 from orchestra.utils import expression as expr_utils
+from orchestra.utils import parameters as args_utils
 from orchestra.utils import schema as schema_utils
 from orchestra.specs import types
 
@@ -200,6 +201,17 @@ class Spec(object):
             if inspect.isclass(v) and issubclass(v, Spec):
                 schema['patternProperties'][k] = v.get_schema(includes=None)
 
+        # Resolve the schema for children specs under items.
+        items_schema = schema.get('items', {})
+
+        if (inspect.isclass(items_schema) and issubclass(items_schema, Spec)):
+            schema['items'] = items_schema.get_schema(includes=None)
+        elif isinstance(items_schema, dict):
+            for k, v in six.iteritems(items_schema.get('properties', {})):
+                if inspect.isclass(v) and issubclass(v, Spec):
+                    schema_properties = schema['items']['properties']
+                    schema_properties[k] = v.get_schema(includes=None)
+
         return schema
 
     @classmethod
@@ -251,16 +263,36 @@ class Spec(object):
         return errors
 
     def _validate_syntax(self):
+        result = []
+
         validator = self.get_schema_validator()
 
-        return [
-            {
-                'message': e.message,
-                'spec_path': '.'.join(list(e.absolute_path)) or None,
-                'schema_path': '.'.join(list(e.absolute_schema_path)) or None
+        for e in validator.iter_errors(self.spec):
+            message = e.message
+            spec_path = ''
+            schema_path = ''
+
+            for s in list(e.absolute_path):
+                spec_path += (
+                    '[' + str(s) + ']' if isinstance(s, int) else
+                    '.' + s if spec_path else s
+                )
+
+            for s in list(e.absolute_schema_path):
+                schema_path += (
+                    '[' + str(s) + ']' if isinstance(s, int) else
+                    '.' + s if schema_path else s
+                )
+
+            entry = {
+                'message': message,
+                'spec_path': spec_path or None,
+                'schema_path': schema_path or None
             }
-            for e in validator.iter_errors(self.spec)
-        ]
+
+            result.append(entry)
+
+        return result
 
     def _validate_expressions(self):
         result = []
@@ -339,10 +371,12 @@ class Spec(object):
 
             ctx_vars = []
 
-            spec_path = (
-                parent.get('spec_path') + '.' + prop_name
-                if parent else self.name + '.' + prop_name
-            )
+            if parent:
+                spec_path = parent.get('spec_path') + '.' + prop_name
+            elif not parent and self.name:
+                spec_path = self.name + '.' + prop_name
+            else:
+                spec_path = prop_name
 
             schema_path = (
                 parent.get('schema_path') + '.' + 'properties.' + prop_name
@@ -361,6 +395,12 @@ class Spec(object):
                 rolling_ctx = list(set(rolling_ctx + result[1]))
 
                 continue
+
+            if isinstance(prop_value, six.string_types):
+                inline_params = args_utils.parse_inline_params(prop_value)
+
+                if inline_params:
+                    prop_value = inline_params
 
             for var in expr.extract_vars(prop_value):
                 ctx_vars.append(decorate_ctx_var(var, spec_path, schema_path))

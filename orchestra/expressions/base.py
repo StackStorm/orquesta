@@ -111,7 +111,6 @@ def validate(statement):
 
 
 def evaluate(statement, data=None):
-
     if isinstance(statement, dict):
         return {
             evaluate(k, data=data): evaluate(v, data=data)

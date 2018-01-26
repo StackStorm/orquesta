@@ -145,15 +145,6 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         self._update_tasks_attrs(wf_graph)
         self._add_transitions(wf_graph)
 
-    def _is_join_task(self, wf_graph, task_name):
-        return wf_graph.has_barrier(task_name)
-
-    def _is_split_task(self, wf_graph, task_name):
-        return (
-            len(wf_graph.get_prev_transitions(task_name)) > 1 and
-            not self._is_join_task(wf_graph, task_name)
-        )
-
     def test_basic_graph(self):
         wf_graph = composition.WorkflowGraph()
         self._prep_graph(wf_graph)
@@ -219,16 +210,23 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
             sorted(expected_transitions)
         )
 
-    def test_is_join_task(self):
+    def test_barrier_task(self):
         wf_graph = composition.WorkflowGraph()
         self._prep_graph(wf_graph)
 
-        self.assertTrue(self._is_join_task(wf_graph, 'task5'))
-        self.assertFalse(self._is_join_task(wf_graph, 'task9'))
+        self.assertTrue(wf_graph.has_barrier('task5'))
+        self.assertFalse(wf_graph.has_barrier('task9'))
 
-    def test_is_split_task(self):
+    def test_split_from_reused_task(self):
         wf_graph = composition.WorkflowGraph()
         self._prep_graph(wf_graph)
 
-        self.assertFalse(self._is_split_task(wf_graph, 'task5'))
-        self.assertTrue(self._is_split_task(wf_graph, 'task9'))
+        self.assertFalse(
+            len(wf_graph.get_prev_transitions('task5')) > 1 and
+            not wf_graph.has_barrier('task5')
+        )
+
+        self.assertTrue(
+            len(wf_graph.get_prev_transitions('task9')) > 1 and
+            not wf_graph.has_barrier('task9')
+        )

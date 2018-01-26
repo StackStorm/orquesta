@@ -10,13 +10,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra.specs import base
-from orchestra.specs.mock.workflows import instantiate
-from orchestra.specs.mock.workflows import WorkflowSpec
+from orchestra.specs.native import v1
+from orchestra.specs.native.v1 import instantiate
+from orchestra.specs.native.v1 import TaskMappingSpec
+from orchestra.specs.native.v1 import TaskSpec
+from orchestra.specs.native.v1 import TaskTransitionSequenceSpec
+from orchestra.specs.native.v1 import TaskTransitionSpec
+from orchestra.specs.native.v1 import WorkflowSpec
 
-VERSION = base.Spec.get_version()
+VERSION = v1.VERSION
 
 __all__ = [
     instantiate.__name__,
-    WorkflowSpec.__name__
+    WorkflowSpec.__name__,
+    TaskMappingSpec.__name__,
+    TaskSpec.__name__,
+    TaskTransitionSequenceSpec.__name__,
+    TaskTransitionSpec.__name__
 ]
