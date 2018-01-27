@@ -14,7 +14,7 @@ import logging
 from six.moves import queue
 
 from orchestra.composers import base
-from orchestra import composition
+from orchestra import graphing
 from orchestra import states
 from orchestra.specs import mistral as specs
 
@@ -72,7 +72,7 @@ class WorkflowComposer(base.WorkflowComposer):
             )
 
         q = queue.Queue()
-        wf_graph = composition.WorkflowGraph()
+        wf_graph = graphing.WorkflowGraph()
 
         for task_name, expr, condition in wf_spec.tasks.get_start_tasks():
             q.put((task_name, []))
@@ -129,7 +129,7 @@ class WorkflowComposer(base.WorkflowComposer):
     def _compose_wf_ex_graph(cls, wf_graph):
         q = queue.Queue()
         split_counter = {}
-        wf_ex_graph = composition.WorkflowGraph()
+        wf_ex_graph = graphing.WorkflowGraph()
 
         def _create_task_ex_name(task_name, split_id):
             return (

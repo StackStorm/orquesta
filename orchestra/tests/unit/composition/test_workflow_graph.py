@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra import composition
+from orchestra import graphing
 from orchestra.tests.unit import base
 
 
@@ -146,34 +146,34 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         self._add_transitions(wf_graph)
 
     def test_basic_graph(self):
-        wf_graph = composition.WorkflowGraph()
+        wf_graph = graphing.WorkflowGraph()
         self._prep_graph(wf_graph)
 
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
     def test_skip_add_tasks(self):
-        wf_graph = composition.WorkflowGraph()
+        wf_graph = graphing.WorkflowGraph()
         self._add_transitions(wf_graph)
         self._update_tasks_attrs(wf_graph)
 
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
     def test_duplicate_add_tasks(self):
-        wf_graph = composition.WorkflowGraph()
+        wf_graph = graphing.WorkflowGraph()
         self._add_tasks(wf_graph)
         self._prep_graph(wf_graph)
 
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
     def test_duplicate_add_transitions(self):
-        wf_graph = composition.WorkflowGraph()
+        wf_graph = graphing.WorkflowGraph()
         self._prep_graph(wf_graph)
         self._add_transitions(wf_graph)
 
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
     def test_get_start_tasks(self):
-        wf_graph = composition.WorkflowGraph()
+        wf_graph = graphing.WorkflowGraph()
         self._prep_graph(wf_graph)
 
         expected_start_tasks = [{'id': 'task1', 'name': 'task1'}]
@@ -181,7 +181,7 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         self.assertListEqual(wf_graph.get_start_tasks(), expected_start_tasks)
 
     def test_get_next_transitions(self):
-        wf_graph = composition.WorkflowGraph()
+        wf_graph = graphing.WorkflowGraph()
         self._prep_graph(wf_graph)
 
         expected_transitions = [
@@ -197,7 +197,7 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         )
 
     def test_get_prev_transitions(self):
-        wf_graph = composition.WorkflowGraph()
+        wf_graph = graphing.WorkflowGraph()
         self._prep_graph(wf_graph)
 
         expected_transitions = [
@@ -211,14 +211,14 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         )
 
     def test_barrier_task(self):
-        wf_graph = composition.WorkflowGraph()
+        wf_graph = graphing.WorkflowGraph()
         self._prep_graph(wf_graph)
 
         self.assertTrue(wf_graph.has_barrier('task5'))
         self.assertFalse(wf_graph.has_barrier('task9'))
 
     def test_split_from_reused_task(self):
-        wf_graph = composition.WorkflowGraph()
+        wf_graph = graphing.WorkflowGraph()
         self._prep_graph(wf_graph)
 
         self.assertFalse(

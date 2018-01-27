@@ -16,7 +16,7 @@ import six
 from six.moves import queue
 import unittest
 
-from orchestra import composition
+from orchestra import graphing
 from orchestra.expressions import base as expressions
 from orchestra.specs import loader as specs_loader
 from orchestra import states
@@ -157,7 +157,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
             for item in mock_states:
                 state_q.put(item)
 
-        wf_ex_graph = composition.WorkflowGraph.deserialize(wf_ex_graph_json)
+        wf_ex_graph = graphing.WorkflowGraph.deserialize(wf_ex_graph_json)
 
         for task in wf_ex_graph.get_start_tasks():
             q.put(task)
@@ -175,7 +175,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
             completed_task['state'] = state
 
             # deserialize workflow execution graph to mock async execution
-            wf_ex_graph = composition.WorkflowGraph.deserialize(
+            wf_ex_graph = graphing.WorkflowGraph.deserialize(
                 wf_ex_graph_json
             )
 
