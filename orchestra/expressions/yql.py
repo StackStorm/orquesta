@@ -82,9 +82,7 @@ class YAQLEvaluator(base.Evaluator):
             try:
                 cls._engine(cls.strip_delimiter(expr))
             except (yaql_exc.YaqlException, ValueError, TypeError) as e:
-                errors.append(
-                    utils.format_error(cls._type, expr, e)
-                )
+                errors.append(utils.format_error(cls._type, expr, e))
 
         return errors
 
@@ -111,19 +109,12 @@ class YAQLEvaluator(base.Evaluator):
                 if isinstance(result, six.string_types):
                     result = cls.evaluate(result, data)
 
-                output = (
-                    output.replace(expr, str(result))
-                    if len(exprs) > 1
-                    else result
-                )
+                output = output.replace(expr, str(result)) if len(exprs) > 1 else result
 
         except KeyError as e:
             raise YaqlEvaluationException(
-                'Unable to resolve key \'%s\' in expression '
-                '\'%s\' from context.' % (
-                    str(getattr(e, 'message', e)),
-                    expr
-                )
+                'Unable to resolve key \'%s\' in expression \'%s\' from context.' %
+                (str(getattr(e, 'message', e)), expr)
             )
         except (yaql_exc.YaqlException, ValueError, TypeError) as e:
             raise YaqlEvaluationException(str(getattr(e, 'message', e)))

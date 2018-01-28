@@ -40,10 +40,7 @@ def instantiate(spec_type, definition):
     spec_version = spec_module.VERSION
 
     if str(version) != str(spec_version):
-        raise ValueError(
-            'Workflow definition is not the supported version "%s".',
-            spec_version
-        )
+        raise ValueError('Workflow definition is not the supported version "%s".', spec_version)
 
     if not definition.keys():
         raise ValueError('Workflow definition contains no workflow.')

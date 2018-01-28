@@ -32,10 +32,7 @@ class ExpressionEvaluatorTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.evaluator = plugin.get_module(
-            'orchestra.expressions.evaluators',
-            cls.language
-        )
+        cls.evaluator = plugin.get_module('orchestra.expressions.evaluators', cls.language)
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -103,11 +100,7 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
         WorkflowGraphTest.setUpClass()
         WorkflowSpecTest.setUpClass()
 
-        cls.composer = plugin.get_module(
-            'orchestra.composers',
-            cls.spec_module_name
-        )
-
+        cls.composer = plugin.get_module('orchestra.composers', cls.spec_module_name)
         cls.spec_module = specs_loader.get_spec_module(cls.spec_module_name)
         cls.wf_spec_type = cls.spec_module.WorkflowSpec
 
@@ -175,9 +168,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
             completed_task['state'] = state
 
             # deserialize workflow execution graph to mock async execution
-            wf_ex_graph = graphing.WorkflowGraph.deserialize(
-                wf_ex_graph_json
-            )
+            wf_ex_graph = graphing.WorkflowGraph.deserialize(wf_ex_graph_json)
 
             if not ctx_q.empty():
                 context = ctx_q.get()
@@ -187,10 +178,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
                 'name': completed_task['id']
             }
 
-            next_tasks = wf_ex_graph.get_next_tasks(
-                completed_task,
-                context=context
-            )
+            next_tasks = wf_ex_graph.get_next_tasks(completed_task, context=context)
 
             for next_task in next_tasks:
                 q.put(next_task)

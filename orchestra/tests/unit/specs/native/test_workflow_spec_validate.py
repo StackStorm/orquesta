@@ -155,10 +155,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
         expected_errors = {
             'syntax': [
                 {
-                    'message': (
-                        "['foobar'] is not valid under "
-                        "any of the given schemas"
-                    ),
+                    'message': "['foobar'] is not valid under any of the given schemas",
                     'schema_path': (
                         'properties.tasks.patternProperties.^\\w+$.'
                         'properties.next.items.properties.publish.oneOf'
@@ -189,10 +186,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
         expected_errors = {
             'syntax': [
                 {
-                    'message': (
-                        "{'task2': 'foobar'} is not valid "
-                        "under any of the given schemas"
-                    ),
+                    'message': "{'task2': 'foobar'} is not valid under any of the given schemas",
                     'schema_path': (
                         'properties.tasks.patternProperties.^\\w+$.'
                         'properties.next.items.properties.do.oneOf'

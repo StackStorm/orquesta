@@ -51,10 +51,7 @@ class WorkflowComposer(base.WorkflowComposer):
         expr = kwargs.get('expr')
 
         task_state_criterion = (
-            'task_state(%s) in %s' % (
-                task_name,
-                str(TASK_TRANSITION_MAP[condition])
-            )
+            'task_state(%s) in %s' % (task_name, str(TASK_TRANSITION_MAP[condition]))
         )
 
         criteria.append('<% ' + task_state_criterion + ' %>')
@@ -67,9 +64,7 @@ class WorkflowComposer(base.WorkflowComposer):
     @classmethod
     def _compose_wf_graph(cls, wf_spec):
         if not isinstance(wf_spec, cls.wf_spec_type):
-            raise TypeError(
-                'Workflow spec is not typeof %s.' % cls.wf_spec_type.__name__
-            )
+            raise TypeError('Workflow spec is not typeof %s.' % cls.wf_spec_type.__name__)
 
         q = queue.Queue()
         wf_graph = graphing.WorkflowGraph()
@@ -87,11 +82,9 @@ class WorkflowComposer(base.WorkflowComposer):
                 barrier = '*' if task_spec.join == 'all' else task_spec.join
                 wf_graph.set_barrier(task_name, value=barrier)
 
-            # Determine if the task is a split task and if it is in a cycle.
-            # If the task is a split task, keep track of where the split(s)
-            # occurs.
-            if (wf_spec.tasks.is_split_task(task_name) and
-                    not wf_spec.tasks.in_cycle(task_name)):
+            # Determine if the task is a split task and if it is in a cycle. If the task is a
+            # split task, keep track of where the split(s) occurs.
+            if wf_spec.tasks.is_split_task(task_name) and not wf_spec.tasks.in_cycle(task_name):
                 splits.append(task_name)
 
             if splits:
@@ -104,24 +97,11 @@ class WorkflowComposer(base.WorkflowComposer):
                         not wf_spec.tasks.in_cycle(next_task_name)):
                     q.put((next_task_name, list(splits)))
 
-                criteria = cls._compose_transition_criteria(
-                    task_name,
-                    condition=condition,
-                    expr=expr
-                )
-
-                seqs = wf_graph.has_transition(
-                    task_name,
-                    next_task_name,
-                    criteria=criteria
-                )
+                crta = cls._compose_transition_criteria(task_name, condition=condition, expr=expr)
+                seqs = wf_graph.has_transition(task_name, next_task_name, criteria=crta)
 
                 if not seqs:
-                    wf_graph.add_transition(
-                        task_name,
-                        next_task_name,
-                        criteria=criteria
-                    )
+                    wf_graph.add_transition(task_name, next_task_name, criteria=crta)
 
         return wf_graph
 
@@ -132,11 +112,7 @@ class WorkflowComposer(base.WorkflowComposer):
         wf_ex_graph = graphing.WorkflowGraph()
 
         def _create_task_ex_name(task_name, split_id):
-            return (
-                task_name + '__' + str(split_id)
-                if split_id > 0
-                else task_name
-            )
+            return task_name + '__' + str(split_id) if split_id > 0 else task_name
 
         for task in wf_graph.get_start_tasks():
             q.put((task['id'], None, None, []))
@@ -146,25 +122,20 @@ class WorkflowComposer(base.WorkflowComposer):
             task_ex_attrs = wf_graph.get_task(task_name)
             task_ex_attrs['name'] = task_name
 
-            # For complex multi-level splits and joins, if a task from higher
-            # in the hierarchy is processed first, then ignore the task for
-            # now. This task will be processed again later in the hierarchy.
-            # Otherwise, if this task is processed now, it will be placed in a
-            # separate workflow branch.
+            # For complex multi-level splits and joins, if a task from higher in the hierarchy is
+            # processed first, then ignore the task for now. This task will be processed again
+            # later in the hierarchy. Otherwise, if this task is processed now, it will be placed
+            # in a separate workflow branch.
             expected_splits = task_ex_attrs.pop('splits', [])
-            prev_task_ex = (
-                wf_ex_graph.get_task(prev_task_ex_name)
-                if prev_task_ex_name else {}
-            )
+            prev_task_ex = wf_ex_graph.get_task(prev_task_ex_name) if prev_task_ex_name else {}
 
             if (expected_splits and
                     task_name not in expected_splits and
                     not prev_task_ex.get('splits', [])):
                 continue
 
-            # Determine if the task is a split task and if it is in a cycle.
-            # If the task is a split task, keep track of how many instances
-            # and which branch the instance belongs to.
+            # Determine if the task is a split task and if it is in a cycle. If the task is a split
+            # task, keep track of how many instances and which branch the instance belongs to.
             is_split_task = (
                 len(wf_graph.get_prev_transitions(task_name)) > 1 and
                 not wf_graph.has_barrier(task_name)
@@ -179,13 +150,10 @@ class WorkflowComposer(base.WorkflowComposer):
             if splits:
                 task_ex_attrs['splits'] = splits
 
-            task_ex_name = _create_task_ex_name(
-                task_name,
-                splits[-1][1] if splits else 0
-            )
+            task_ex_name = _create_task_ex_name(task_name, splits[-1][1] if splits else 0)
 
-            # If the task already exists in the execution graph, the task is
-            # already processed and this is a cycle in the graph.
+            # If the task already exists in the execution graph, the task is already processed
+            # and this is a cycle in the graph.
             if wf_ex_graph.has_task(task_ex_name):
                 wf_ex_graph.update_task(task_ex_name, **task_ex_attrs)
             else:
@@ -193,39 +161,22 @@ class WorkflowComposer(base.WorkflowComposer):
 
                 for next_seq in wf_graph.get_next_transitions(task_name):
                     next_seq_criteria = [
-                        criterion.replace(
-                            'task_state(%s)' % task_name,
-                            'task_state(%s)' % task_ex_name
-                        )
-                        for criterion in next_seq[3]['criteria']
+                        c.replace('task_state(%s)' % task_name, 'task_state(%s)' % task_ex_name)
+                        for c in next_seq[3]['criteria']
                     ]
 
-                    item = (
-                        next_seq[1],
-                        task_ex_name,
-                        next_seq_criteria,
-                        list(splits)
-                    )
+                    q.put((next_seq[1], task_ex_name, next_seq_criteria, list(splits)))
 
-                    q.put(item)
-
-            # A split task should only have one previous transition even if
-            # there are multiple different tasks transitioning to it. Since
-            # it has no join requirement, the split task will create a new
-            # instance and execute.
+            # A split task should only have one previous transition even if there are multiple
+            # different tasks transitioning to it. Since it has no join requirement, the split
+            # task will create a new instance and execute.
             if is_split_task and prev_task_ex_name:
-                wf_ex_graph.add_transition(
-                    prev_task_ex_name,
-                    task_ex_name,
-                    criteria=criteria
-                )
-
+                wf_ex_graph.add_transition(prev_task_ex_name, task_ex_name, criteria=criteria)
                 continue
 
             # Finally, process all inbound task transitions.
             for prev_seq in wf_graph.get_prev_transitions(task_name):
                 prev_task = wf_graph.get_task(prev_seq[0])
-
                 split_id = 0
 
                 for prev_task_split in prev_task.get('splits', []):
@@ -236,17 +187,10 @@ class WorkflowComposer(base.WorkflowComposer):
                 p_task_ex_name = _create_task_ex_name(p_task_name, split_id)
 
                 p_seq_criteria = [
-                    criterion.replace(
-                        'task_state(%s)' % p_task_name,
-                        'task_state(%s)' % p_task_ex_name
-                    )
-                    for criterion in prev_seq[3]['criteria']
+                    c.replace('task_state(%s)' % p_task_name, 'task_state(%s)' % p_task_ex_name)
+                    for c in prev_seq[3]['criteria']
                 ]
 
-                wf_ex_graph.add_transition(
-                    p_task_ex_name,
-                    task_ex_name,
-                    criteria=p_seq_criteria
-                )
+                wf_ex_graph.add_transition(p_task_ex_name, task_ex_name, criteria=p_seq_criteria)
 
         return wf_ex_graph

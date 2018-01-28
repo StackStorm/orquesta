@@ -32,12 +32,7 @@ class FixtureTest(unittest.TestCase):
 
     def test_fixture_loader_raw(self):
         expected = "version: 1.0\nbasic:\n  tasks:\n    - task1: foobar\n"
-
-        content = loader.get_fixture_content(
-            'mock/basic.yaml',
-            'workflows',
-            raw=True
-        )
+        content = loader.get_fixture_content('mock/basic.yaml', 'workflows', raw=True)
 
         self.assertIsInstance(content, str)
         self.assertEqual(content, expected)

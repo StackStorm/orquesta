@@ -18,9 +18,7 @@ def _get_current_task(context):
     current_task = context['__current_task'] or {}
 
     if not current_task:
-        raise exceptions.ContextValueError(
-            'The current task is unset in the context.'
-        )
+        raise exceptions.ContextValueError('The current task is unset in the context.')
 
     return current_task
 
