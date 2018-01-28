@@ -181,12 +181,8 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo %>',
-                    'message': (
-                        'Variable "foo" is referenced before assignment.'
-                    ),
-                    'schema_path': (
-                        'properties.tasks.properties.task2.properties.input'
-                    ),
+                    'message': 'Variable "foo" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.properties.task2.properties.input',
                     'spec_path': 'sequential.tasks.task2.input'
                 }
             ]
@@ -237,23 +233,15 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo + $.bar %>',
-                    'message': (
-                        'Variable "bar" is referenced before assignment.'
-                    ),
-                    'schema_path': (
-                        'properties.tasks.properties.task2.properties.input'
-                    ),
+                    'message': 'Variable "bar" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.properties.task2.properties.input',
                     'spec_path': 'sequential.tasks.task2.input'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo + $.bar %>',
-                    'message': (
-                        'Variable "foo" is referenced before assignment.'
-                    ),
-                    'schema_path': (
-                        'properties.tasks.properties.task4.properties.input'
-                    ),
+                    'message': 'Variable "foo" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.properties.task4.properties.input',
                     'spec_path': 'sequential.tasks.task4.input'
                 }
             ]
@@ -313,34 +301,22 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo + $.bar %>',
-                    'message': (
-                        'Variable "bar" is referenced before assignment.'
-                    ),
-                    'schema_path': (
-                        'properties.tasks.properties.task2.properties.input'
-                    ),
+                    'message': 'Variable "bar" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.properties.task2.properties.input',
                     'spec_path': 'sequential.tasks.task2.input'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo + $.bar %>',
-                    'message': (
-                        'Variable "foo" is referenced before assignment.'
-                    ),
-                    'schema_path': (
-                        'properties.tasks.properties.task4.properties.input'
-                    ),
+                    'message': 'Variable "foo" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.properties.task4.properties.input',
                     'spec_path': 'sequential.tasks.task4.input'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo %>',
-                    'message': (
-                        'Variable "foo" is referenced before assignment.'
-                    ),
-                    'schema_path': (
-                        'properties.tasks.properties.task5.properties.input'
-                    ),
+                    'message': 'Variable "foo" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.properties.task5.properties.input',
                     'spec_path': 'sequential.tasks.task5.input'
                 }
             ]

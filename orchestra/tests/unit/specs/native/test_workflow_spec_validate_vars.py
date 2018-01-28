@@ -174,12 +174,8 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo %>',
-                    'message': (
-                        'Variable "foo" is referenced before assignment.'
-                    ),
-                    'schema_path': (
-                        'properties.tasks.properties.task2.properties.input'
-                    ),
+                    'message': 'Variable "foo" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.properties.task2.properties.input',
                     'spec_path': 'tasks.task2.input'
                 }
             ]
@@ -222,23 +218,15 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo + $.bar %>',
-                    'message': (
-                        'Variable "bar" is referenced before assignment.'
-                    ),
-                    'schema_path': (
-                        'properties.tasks.properties.task2.properties.input'
-                    ),
+                    'message': 'Variable "bar" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.properties.task2.properties.input',
                     'spec_path': 'tasks.task2.input'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo + $.bar %>',
-                    'message': (
-                        'Variable "foo" is referenced before assignment.'
-                    ),
-                    'schema_path': (
-                        'properties.tasks.properties.task3.properties.input'
-                    ),
+                    'message': 'Variable "foo" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.properties.task3.properties.input',
                     'spec_path': 'tasks.task3.input'
                 }
             ]
@@ -286,23 +274,15 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo + $.bar %>',
-                    'message': (
-                        'Variable "bar" is referenced before assignment.'
-                    ),
-                    'schema_path': (
-                        'properties.tasks.properties.task2.properties.input'
-                    ),
+                    'message': 'Variable "bar" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.properties.task2.properties.input',
                     'spec_path': 'tasks.task2.input'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo + $.bar %>',
-                    'message': (
-                        'Variable "foo" is referenced before assignment.'
-                    ),
-                    'schema_path': (
-                        'properties.tasks.properties.task4.properties.input'
-                    ),
+                    'message': 'Variable "foo" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.properties.task4.properties.input',
                     'spec_path': 'tasks.task4.input'
                 }
             ]
@@ -360,34 +340,22 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo + $.bar %>',
-                    'message': (
-                        'Variable "bar" is referenced before assignment.'
-                    ),
-                    'schema_path': (
-                        'properties.tasks.properties.task2.properties.input'
-                    ),
+                    'message': 'Variable "bar" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.properties.task2.properties.input',
                     'spec_path': 'tasks.task2.input'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo + $.bar %>',
-                    'message': (
-                        'Variable "foo" is referenced before assignment.'
-                    ),
-                    'schema_path': (
-                        'properties.tasks.properties.task4.properties.input'
-                    ),
+                    'message': 'Variable "foo" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.properties.task4.properties.input',
                     'spec_path': 'tasks.task4.input'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo %>',
-                    'message': (
-                        'Variable "foo" is referenced before assignment.'
-                    ),
-                    'schema_path': (
-                        'properties.tasks.properties.task5.properties.input'
-                    ),
+                    'message': 'Variable "foo" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.properties.task5.properties.input',
                     'spec_path': 'tasks.task5.input'
                 }
             ]
@@ -475,9 +443,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                 {
                     'type': 'yaql',
                     'expression': '<% $.fu + $.bar %>',
-                    'message': (
-                        'Variable "fu" is referenced before assignment.'
-                    ),
+                    'message': 'Variable "fu" is referenced before assignment.',
                     'schema_path': (
                         'properties.tasks.properties.task2.properties.'
                         'next.items.properties.publish'
@@ -487,20 +453,14 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                 {
                     'type': 'yaql',
                     'expression': '<% $.fu + $.bar %>',
-                    'message': (
-                        'Variable "fu" is referenced before assignment.'
-                    ),
-                    'schema_path': (
-                        'properties.tasks.properties.task3.properties.input'
-                    ),
+                    'message': 'Variable "fu" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.properties.task3.properties.input',
                     'spec_path': 'tasks.task3.input'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.fu + $.bar %>',
-                    'message': (
-                        'Variable "fu" is referenced before assignment.'
-                    ),
+                    'message': 'Variable "fu" is referenced before assignment.',
                     'schema_path': (
                         'properties.tasks.properties.task3.properties.'
                         'next.items.properties.publish'
@@ -539,12 +499,8 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                 {
                     'type': 'yaql',
                     'expression': '<% $.fu + $.bar %>',
-                    'message': (
-                        'Variable "fu" is referenced before assignment.'
-                    ),
-                    'schema_path': (
-                        'properties.tasks.properties.task3.properties.input'
-                    ),
+                    'message': 'Variable "fu" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.properties.task3.properties.input',
                     'spec_path': 'tasks.task3.input'
                 }
             ]

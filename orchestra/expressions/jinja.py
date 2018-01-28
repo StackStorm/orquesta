@@ -141,11 +141,10 @@ class JinjaEvaluator(base.Evaluator):
                 if isinstance(result, six.string_types):
                     result = cls._evaluate_and_expand(result, data)
 
-                # For StrictUndefined values, UndefinedError only gets raised
-                # when the value is accessed, not when it gets created. The
-                # simplest way to access it is to try and cast it to string.
-                # When StrictUndefined is cast to str below, this will raise
-                # an exception with error description.
+                # For StrictUndefined values, UndefinedError only gets raised when the value is
+                # accessed, not when it gets created. The simplest way to access it is to try
+                # and cast it to string. When StrictUndefined is cast to str below, this will
+                # raise an exception with error description.
                 if not isinstance(result, jinja2.runtime.StrictUndefined):
                     output = (
                         output.replace(expr, str(result))
@@ -157,8 +156,8 @@ class JinjaEvaluator(base.Evaluator):
             if block_exprs and isinstance(output, six.string_types):
                 output = cls._jinja_env.from_string(output).render(ctx)
 
-                # Traverse and evaulate again in case additional inline
-                # epxressions are introduced after the jinja block is evaluated.
+                # Traverse and evaulate again in case additional inline epxressions are
+                # introduced after the jinja block is evaluated.
                 output = cls._evaluate_and_expand(output, data)
 
         except jinja2.exceptions.UndefinedError as e:
@@ -184,10 +183,7 @@ class JinjaEvaluator(base.Evaluator):
         output = cls._evaluate_and_expand(text, data=data)
 
         if isinstance(output, six.string_types):
-            exprs = [
-                cls.strip_delimiter(expr)
-                for expr in cls._regex_parser.findall(output)
-            ]
+            exprs = [cls.strip_delimiter(expr) for expr in cls._regex_parser.findall(output)]
 
             if exprs:
                 raise JinjaEvaluationException(

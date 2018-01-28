@@ -37,10 +37,7 @@ REGEX_INLINE_PARAM_VARIATIONS = [
     REGEX_NULL
 ]
 
-REGEX_INLINE_PARAM_VARIATIONS.extend(
-    [e._regex_pattern for e in expr.get_evaluators().values()]
-)
-
+REGEX_INLINE_PARAM_VARIATIONS.extend([e._regex_pattern for e in expr.get_evaluators().values()])
 REGEX_INLINE_PARAMS = '([\w]+)=(%s)' % '|'.join(REGEX_INLINE_PARAM_VARIATIONS)
 
 

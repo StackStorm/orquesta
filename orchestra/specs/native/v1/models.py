@@ -132,9 +132,7 @@ class TaskMappingSpec(base.MappingSpec):
             next_task_names = getattr(task_transition, 'do') or []
 
             if isinstance(next_task_names, six.string_types):
-                next_task_names = [
-                    x.strip() for x in next_task_names.split(',')
-                ]
+                next_task_names = [x.strip() for x in next_task_names.split(',')]
 
             for next_task_name in next_task_names:
                 next_tasks.append((next_task_name, condition))
@@ -224,9 +222,7 @@ class TaskMappingSpec(base.MappingSpec):
             task_spec = self.get_task(task_name)
 
             spec_path = parent.get('spec_path') + '.' + task_name
-            schema_path = (
-                parent.get('schema_path') + '.' + 'properties.' + task_name
-            )
+            schema_path = parent.get('schema_path') + '.' + 'properties.' + task_name
 
             task_parent = {
                 'ctx': task_ctx,
@@ -252,9 +248,7 @@ class TaskMappingSpec(base.MappingSpec):
                     continue
 
                 if isinstance(next_task_names, six.string_types):
-                    next_task_names = [
-                        x.strip() for x in next_task_names.split(',')
-                    ]
+                    next_task_names = [x.strip() for x in next_task_names.split(',')]
 
                 for next_task_name in next_task_names:
                     entry = (next_task_name, task_transition_spec, str(i))

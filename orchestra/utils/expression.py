@@ -17,11 +17,7 @@ def format_error(expr_type, expr, exc, spec_path=None, schema_path=None):
     error = {
         'type': expr_type,
         'expression': expr,
-        'message': (
-            exc
-            if isinstance(exc, six.string_types)
-            else str(getattr(exc, 'message', exc))
-        )
+        'message': exc if isinstance(exc, six.string_types) else str(getattr(exc, 'message', exc))
     }
 
     if spec_path:

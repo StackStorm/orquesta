@@ -99,12 +99,7 @@ class WorkflowGraph(object):
             next_task = self.get_task(next_task_id)
 
             if not attrs.get('satisfied', False):
-                self.update_transition(
-                    task['id'],
-                    next_task_id,
-                    key=seq_key,
-                    satisfied=True
-                )
+                self.update_transition(task['id'], next_task_id, key=seq_key, satisfied=True)
 
             if self.has_barrier(next_task_id):
                 barrier = self.get_barrier(next_task_id)
@@ -160,12 +155,7 @@ class WorkflowGraph(object):
         if not seqs:
             self._graph.add_edge(source, destination, criteria=criteria)
         else:
-            self.update_transition(
-                source,
-                destination,
-                key=seqs[0][2],
-                criteria=criteria
-            )
+            self.update_transition(source, destination, key=seqs[0][2], criteria=criteria)
 
     def update_transition(self, source, destination, key, **kwargs):
         seq = self.get_transition(source, destination, key=key)

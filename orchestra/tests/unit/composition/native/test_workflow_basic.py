@@ -375,9 +375,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'c',
                         'key': 0,
-                        'criteria': [
-                            '<% succeeded() and not $.which in list(a, b) %>'
-                        ]
+                        'criteria': ['<% succeeded() and not $.which in list(a, b) %>']
                     }
                 ],
                 [],
@@ -425,9 +423,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'c',
                         'key': 0,
-                        'criteria': [
-                            '<% succeeded() and not $.which in list(a, b) %>'
-                        ]
+                        'criteria': ['<% succeeded() and not $.which in list(a, b) %>']
                     }
                 ],
                 [],

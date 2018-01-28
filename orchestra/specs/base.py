@@ -64,11 +64,10 @@ class Spec(object):
 
     def __getattr__(self, name):
         """
-        Override __getattr__ so we can dynamically map class attributes
-        to spec properties. Per documentation, __getattr__ is called by
-        __getattribute__ on AttributeError. In this case, the attribute
-        does not physically exist on the class and so __getattr__ is
-        called which it is overridden here to access the spec dict.
+        Override __getattr__ so we can dynamically map class attributes to spec properties.
+        Per documentation, __getattr__ is called by __getattribute__ on AttributeError. In
+        this case, the attribute does not physically exist on the class and so __getattr__
+        is called which it is overridden here to access the spec dict.
         """
         # Retrieve from spec if attribute is a meta schema property.
         if name in self._meta_schema.get('properties', {}):
@@ -165,10 +164,7 @@ class Spec(object):
 
         for base_cls in bases:
             parent_meta_schema = base_cls.get_meta_schema()
-            meta_schema = schema_utils.merge_schema(
-                meta_schema,
-                parent_meta_schema
-            )
+            meta_schema = schema_utils.merge_schema(meta_schema, parent_meta_schema)
 
         return schema_utils.merge_schema(meta_schema, cls._meta_schema)
 
@@ -239,18 +235,12 @@ class Spec(object):
     def validate(self):
         errors = {}
 
-        syntax_errors = sorted(
-            self._validate_syntax(),
-            key=lambda e: e['schema_path']
-        )
+        syntax_errors = sorted(self._validate_syntax(), key=lambda e: e['schema_path'])
 
         if syntax_errors:
             errors['syntax'] = syntax_errors
 
-        expr_errors = sorted(
-            self._validate_expressions(),
-            key=lambda e: e['schema_path']
-        )
+        expr_errors = sorted(self._validate_expressions(), key=lambda e: e['schema_path'])
 
         if expr_errors:
             errors['expressions'] = expr_errors
@@ -331,15 +321,10 @@ class Spec(object):
             }
 
         def decorate_ctx_var_error(var):
-            message = (
-                'Variable "%s" is referenced before assignment.'
-                % var['name']
-            )
-
             error = expr_utils.format_error(
                 var['type'],
                 var['expression'],
-                message,
+                'Variable "%s" is referenced before assignment.' % var['name'],
                 var['spec_path'],
                 var['schema_path']
             )
@@ -357,8 +342,7 @@ class Spec(object):
                 for prop_value_item in prop_value:
                     if isinstance(prop_value_item, six.string_types):
                         ctx_inputs.append(prop_value_item)
-                    elif (isinstance(prop_value_item, dict) and
-                            len(prop_value_item) == 1):
+                    elif isinstance(prop_value_item, dict) and len(prop_value_item) == 1:
                         ctx_inputs.extend(list(prop_value_item.keys()))
 
             return ctx_inputs
@@ -413,10 +397,7 @@ class Spec(object):
                 updated_ctx = get_ctx_inputs(prop_name, prop_value)
                 rolling_ctx = list(set(rolling_ctx + updated_ctx))
 
-        return (
-            sorted(errors, key=lambda x: x['spec_path']),
-            rolling_ctx
-        )
+        return (sorted(errors, key=lambda x: x['spec_path']), rolling_ctx)
 
 
 class MappingSpec(Spec):
@@ -457,11 +438,7 @@ class MappingSpec(Spec):
         return unicode(repr(self.spec))
 
     def copy(self):
-        name = (
-            self.name
-            if 'name' not in self.spec and hasattr(self, 'name')
-            else None
-        )
+        name = self.name if 'name' not in self.spec and hasattr(self, 'name') else None
 
         return self.__class__(
             self.spec.copy(),
@@ -503,12 +480,10 @@ class SequenceSpec(Spec, collections.MutableSequence):
         )
 
         if schema.get('type') != 'array':
-            msg = 'The schema for SequenceSpec must be type of array.'
-            raise exc.SchemaDefinitionError(msg)
+            raise exc.SchemaDefinitionError('The schema for SequenceSpec must be type of array.')
 
         if not isspec(schema.get('items')):
-            msg = 'The item type for the array must be type of Spec.'
-            raise exc.SchemaDefinitionError(msg)
+            raise exc.SchemaDefinitionError('The item type for the array must be type of Spec.')
 
         if not isinstance(self.spec, list):
             raise ValueError('The spec is not type of list.')

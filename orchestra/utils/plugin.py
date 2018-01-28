@@ -22,9 +22,11 @@ LOG = logging.getLogger(__name__)
 
 def get_module(namespace, name):
     try:
-        mgr = driver.DriverManager(namespace=namespace,
-                                   name=name,
-                                   invoke_on_load=False)
+        mgr = driver.DriverManager(
+            namespace=namespace,
+            name=name,
+            invoke_on_load=False
+        )
     except RuntimeError as e:
         raise exceptions.PluginFactoryError(
             'Unable to load plugin %s.%s. %s' % (namespace, name, str(e)))
@@ -34,11 +36,13 @@ def get_module(namespace, name):
 
 def get_instance(namespace, name, *args, **kwargs):
     try:
-        mgr = driver.DriverManager(namespace=namespace,
-                                   name=name,
-                                   invoke_on_load=True,
-                                   invoke_args=args,
-                                   invoke_kwds=kwargs)
+        mgr = driver.DriverManager(
+            namespace=namespace,
+            name=name,
+            invoke_on_load=True,
+            invoke_args=args,
+            invoke_kwds=kwargs
+        )
     except RuntimeError as e:
         raise exceptions.PluginFactoryError(
             'Unable to load plugin %s.%s. %s' % (namespace, name, str(e)))
