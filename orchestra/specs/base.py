@@ -235,24 +235,24 @@ class Spec(object):
     def validate(self):
         errors = {}
 
-        syntax_errors = sorted(self._validate_syntax(), key=lambda e: e['schema_path'])
+        syntax_errors = sorted(self.validate_syntax(), key=lambda e: e['schema_path'])
 
         if syntax_errors:
             errors['syntax'] = syntax_errors
 
-        expr_errors = sorted(self._validate_expressions(), key=lambda e: e['schema_path'])
+        expr_errors = sorted(self.validate_expressions(), key=lambda e: e['schema_path'])
 
         if expr_errors:
             errors['expressions'] = expr_errors
 
-        ctx_errors, _ = self._validate_context()
+        ctx_errors, _ = self.validate_context()
 
         if ctx_errors:
             errors['context'] = ctx_errors
 
         return errors
 
-    def _validate_syntax(self):
+    def validate_syntax(self):
         result = []
 
         validator = self.get_schema_validator()
@@ -284,7 +284,7 @@ class Spec(object):
 
         return result
 
-    def _validate_expressions(self):
+    def validate_expressions(self):
         result = []
         expr_schema_paths = self.get_expr_schema_paths()
 
@@ -300,7 +300,7 @@ class Spec(object):
 
         return result
 
-    def _validate_context(self, parent=None):
+    def validate_context(self, parent=None):
         errors = []
         parent_ctx = parent.get('ctx', []) if parent else []
         rolling_ctx = list(set(parent_ctx))
@@ -374,7 +374,7 @@ class Spec(object):
                     'schema_path': schema_path
                 }
 
-                result = prop_value._validate_context(parent=parent)
+                result = prop_value.validate_context(parent=parent)
                 errors.extend(result[0])
                 rolling_ctx = list(set(rolling_ctx + result[1]))
 
