@@ -203,7 +203,7 @@ class TaskMappingSpec(base.MappingSpec):
 
         return False
 
-    def _validate_context(self, parent=None):
+    def validate_context(self, parent=None):
         ctxs = {}
         errors = []
         parent_ctx = parent.get('ctx', []) if parent else []
@@ -230,7 +230,7 @@ class TaskMappingSpec(base.MappingSpec):
                 'schema_path': schema_path
             }
 
-            result = task_spec._validate_context(parent=task_parent)
+            result = task_spec.validate_context(parent=task_parent)
             errors.extend(result[0])
             task_ctx = list(set(task_ctx + result[1]))
             rolling_ctx = list(set(rolling_ctx + task_ctx))
@@ -265,7 +265,7 @@ class TaskMappingSpec(base.MappingSpec):
                     'schema_path': schema_path + '.properties.next.items'
                 }
 
-                result = task_transition_spec._validate_context(parent_ctx)
+                result = task_transition_spec.validate_context(parent_ctx)
                 errors.extend(result[0])
                 branch_ctx = list(set(task_ctx + result[1]))
 
