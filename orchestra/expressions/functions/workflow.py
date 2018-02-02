@@ -32,14 +32,16 @@ def task_state_(context, task_name):
 def succeeded_(context):
     current_task = _get_current_task(context)
 
-    return (task_state_(context, current_task.get('name')) == states.SUCCESS)
+    return (task_state_(context, current_task.get('name')) == states.SUCCEEDED)
 
 
 def failed_(context):
     current_task = _get_current_task(context)
 
-    return (task_state_(context, current_task.get('name')) == states.ERROR)
+    return (task_state_(context, current_task.get('name')) == states.FAILED)
 
 
 def completed_(context):
-    return (succeeded_(context) or failed_(context))
+    current_task = _get_current_task(context)
+
+    return (task_state_(context, current_task.get('name')) in states.COMPLETED_STATES)

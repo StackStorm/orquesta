@@ -162,7 +162,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
             queued_task = q.get()
 
             # mock completion of the task
-            state = state_q.get() if not state_q.empty() else states.SUCCESS
+            state = state_q.get() if not state_q.empty() else states.SUCCEEDED
             actual_task_seq.append(queued_task['id'])
             completed_task = copy.deepcopy(queued_task)
             completed_task['state'] = state

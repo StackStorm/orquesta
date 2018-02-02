@@ -22,9 +22,9 @@ from orchestra.specs import mistral as specs
 LOG = logging.getLogger(__name__)
 
 TASK_TRANSITION_MAP = {
-    'on-success': [states.SUCCESS],
-    'on-error': [states.ERROR],
-    'on-complete': [states.SUCCESS, states.ERROR]
+    'on-success': [states.SUCCEEDED],
+    'on-error': states.ABENDED_STATES,
+    'on-complete': states.COMPLETED_STATES
 }
 
 

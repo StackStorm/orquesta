@@ -46,13 +46,13 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         ]
 
         mock_states = [
-            states.SUCCESS,     # task1
-            states.SUCCESS,     # task2
-            states.SUCCESS,     # task4
-            states.ERROR,       # task6
-            states.SUCCESS,     # task3
-            states.SUCCESS,     # task5
-            states.SUCCESS      # task8
+            states.SUCCEEDED,   # task1
+            states.SUCCEEDED,   # task2
+            states.SUCCEEDED,   # task4
+            states.FAILED,      # task6
+            states.SUCCEEDED,   # task3
+            states.SUCCEEDED,   # task5
+            states.SUCCEEDED    # task8
         ]
 
         self.assert_conducting_sequences(
@@ -74,14 +74,14 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         ]
 
         mock_states = [
-            states.SUCCESS,     # task1
-            states.SUCCESS,     # task2
-            states.SUCCESS,     # task4
-            states.SUCCESS,     # task6
-            states.SUCCESS,     # task3
-            states.SUCCESS,     # task5
-            states.ERROR,       # task7
-            states.SUCCESS      # task8
+            states.SUCCEEDED,   # task1
+            states.SUCCEEDED,   # task2
+            states.SUCCEEDED,   # task4
+            states.SUCCEEDED,   # task6
+            states.SUCCEEDED,   # task3
+            states.SUCCEEDED,   # task5
+            states.FAILED,      # task7
+            states.SUCCEEDED    # task8
         ]
 
         self.assert_conducting_sequences(
