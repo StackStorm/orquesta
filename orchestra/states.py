@@ -10,6 +10,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SUCCESS = 'SUCCESS'
-ERROR = 'ERROR'
-UNKNOWN = 'UNKNOWN'
+REQUESTED = 'requested'
+SCHEDULED = 'scheduled'
+DELAYED = 'delayed'
+RUNNING = 'running'
+PENDING = 'pending'
+PAUSING = 'pausing'
+PAUSED = 'paused'
+RESUMING = 'resuming'
+SUCCEEDED = 'succeeded'
+FAILED = 'failed'
+EXPIRED = 'timeout'
+ABANDONED = 'abandoned'
+CANCELING = 'canceling'
+CANCELED = 'canceled'
+UNKNOWN = 'unknown'
+
+ABENDED_STATES = [
+    FAILED,
+    EXPIRED,
+    ABANDONED
+]
+
+COMPLETED_STATES = [
+    SUCCEEDED,
+    FAILED,
+    EXPIRED,
+    ABANDONED,
+    CANCELED
+]
