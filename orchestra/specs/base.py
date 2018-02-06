@@ -21,7 +21,6 @@ import yaml
 
 from orchestra import exceptions as exc
 from orchestra.expressions import base as expr
-from orchestra.utils import dictionary as dict_utils
 from orchestra.utils import expression as expr_utils
 from orchestra.utils import parameters as args_utils
 from orchestra.utils import schema as schema_utils
@@ -210,27 +209,14 @@ class Spec(object):
 
         return schema
 
-    @classmethod
-    def get_expr_schema_paths(cls, schema=None):
-        expr_schema_paths = {}
+    def get_spec_path(self, prop_name, parent=None):
+        return parent.get('spec_path') + '.' + prop_name if parent else prop_name
 
-        if not schema:
-            schema = cls.get_schema(includes=None)
-
-        for prop_name, prop_type in six.iteritems(schema['properties']):
-            base_schema_path = 'properties.' + prop_name
-
-            if isinstance(prop_type, dict) and 'properties' in prop_type:
-                sub_paths = cls.get_expr_schema_paths(schema=prop_type)
-
-                for sub_expr_path, sub_schema_path in six.iteritems(sub_paths):
-                    expr_path = prop_name + '.' + sub_expr_path
-                    schema_path = base_schema_path + '.' + sub_schema_path
-                    expr_schema_paths[expr_path] = schema_path
-            else:
-                expr_schema_paths[prop_name] = base_schema_path
-
-        return expr_schema_paths
+    def get_schema_path(self, prop_name, parent=None):
+        return (
+            parent.get('schema_path') + '.' + 'properties.' + prop_name
+            if parent else 'properties.' + prop_name
+        )
 
     def validate(self):
         errors = {}
@@ -254,7 +240,6 @@ class Spec(object):
 
     def validate_syntax(self):
         result = []
-
         validator = self.get_schema_validator()
 
         for e in validator.iter_errors(self.spec):
@@ -284,27 +269,63 @@ class Spec(object):
 
         return result
 
-    def validate_expressions(self):
-        result = []
-        expr_schema_paths = self.get_expr_schema_paths()
+    def validate_expressions(self, parent=None):
+        if parent and not parent.get('spec_path', None):
+            raise ValueError('Parent context is missing spec path.')
 
-        for expr_path, schema_path in six.iteritems(expr_schema_paths):
-            statement = dict_utils.get_dict_value(self.spec, expr_path) or ''
-            errors = expr.validate(statement).get('errors', [])
+        if parent and not parent.get('schema_path', None):
+            raise ValueError('Parent context is missing schema path.')
 
-            for error in errors:
-                error['spec_path'] = expr_path
-                error['schema_path'] = schema_path
+        errors = []
+        properties = {}
+        schema = self.get_schema(includes=None)
 
-            result += errors
+        for prop_name, prop_type in six.iteritems(schema.get('properties', {})):
+            properties[prop_name] = getattr(self, prop_name)
 
-        return result
+        for prop_name_regex, prop_type in six.iteritems(schema.get('patternProperties', {})):
+            for prop_name in [key for key in self.keys() if re.findall(prop_name_regex, key)]:
+                properties[prop_name] = getattr(self, prop_name)
+
+        for prop_name, prop_value in six.iteritems(properties):
+            spec_path = self.get_spec_path(prop_name, parent=parent)
+            schema_path = self.get_schema_path(prop_name, parent=parent)
+
+            if isinstance(prop_value, SequenceSpec):
+                for i in range(0, len(prop_value)):
+                    item = prop_value[i]
+                    item_spec_path = spec_path + '[' + str(i) + ']'
+                    item_schema_path = schema_path + '.items'
+                    item_parent = {'spec_path': item_spec_path, 'schema_path': item_schema_path}
+                    errors.extend(item.validate_expressions(parent=item_parent))
+
+                continue
+
+            if isinstance(prop_value, MappingSpec):
+                for k, v in six.iteritems(prop_value):
+                    item_spec_path = spec_path + '.' + k
+                    item_schema_path = schema_path + '.patternProperties.^\\w+$'
+                    item_parent = {'spec_path': item_spec_path, 'schema_path': item_schema_path}
+                    errors.extend(v.validate_expressions(parent=item_parent))
+
+                continue
+
+            if isinstance(prop_value, Spec):
+                item_parent = {'spec_path': spec_path, 'schema_path': schema_path}
+                errors.extend(prop_value.validate_expressions(parent=item_parent))
+                continue
+
+            result = expr.validate(prop_value).get('errors', [])
+
+            for entry in result:
+                entry['spec_path'] = spec_path
+                entry['schema_path'] = schema_path
+
+            errors += result
+
+        return errors
 
     def validate_context(self, parent=None):
-        errors = []
-        parent_ctx = parent.get('ctx', []) if parent else []
-        rolling_ctx = list(set(parent_ctx))
-
         if parent and not parent.get('spec_path', None):
             raise ValueError('Parent context is missing spec path.')
 
@@ -347,6 +368,10 @@ class Spec(object):
 
             return ctx_inputs
 
+        errors = []
+        parent_ctx = parent.get('ctx', []) if parent else []
+        rolling_ctx = list(set(parent_ctx))
+
         for prop_name in self._context_evaluation_sequence:
             prop_value = getattr(self, prop_name)
 
@@ -354,27 +379,17 @@ class Spec(object):
                 continue
 
             ctx_vars = []
-
-            if parent:
-                spec_path = parent.get('spec_path') + '.' + prop_name
-            elif not parent and self.name:
-                spec_path = self.name + '.' + prop_name
-            else:
-                spec_path = prop_name
-
-            schema_path = (
-                parent.get('schema_path') + '.' + 'properties.' + prop_name
-                if parent else 'properties.' + prop_name
-            )
+            spec_path = self.get_spec_path(prop_name, parent=parent)
+            schema_path = self.get_schema_path(prop_name, parent=parent)
 
             if isinstance(prop_value, Spec):
-                parent = {
+                item_parent = {
                     'ctx': rolling_ctx,
                     'spec_path': spec_path,
                     'schema_path': schema_path
                 }
 
-                result = prop_value.validate_context(parent=parent)
+                result = prop_value.validate_context(parent=item_parent)
                 errors.extend(result[0])
                 rolling_ctx = list(set(rolling_ctx + result[1]))
 
@@ -421,11 +436,7 @@ class MappingSpec(Spec):
         return len(self.spec)
 
     def __cmp__(self, spec):
-        return (
-            cmp(self.spec, spec)
-            if isinstance(spec, dict)
-            else cmp(self.spec, spec.spec)
-        )
+        return cmp(self.spec, spec) if isinstance(spec, dict) else cmp(self.spec, spec.spec)
 
     def __contains__(self, item):
         return item in self.spec
@@ -440,11 +451,7 @@ class MappingSpec(Spec):
     def copy(self):
         name = self.name if 'name' not in self.spec and hasattr(self, 'name') else None
 
-        return self.__class__(
-            self.spec.copy(),
-            name=name,
-            member=self.member
-        )
+        return self.__class__(self.spec.copy(), name=name, member=self.member)
 
     def keys(self):
         return self.spec.keys()

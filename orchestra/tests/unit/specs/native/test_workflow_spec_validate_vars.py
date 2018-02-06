@@ -175,7 +175,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     'type': 'yaql',
                     'expression': '<% $.foo %>',
                     'message': 'Variable "foo" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.properties.task2.properties.input',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task2.input'
                 }
             ]
@@ -219,14 +219,14 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     'type': 'yaql',
                     'expression': '<% $.foo + $.bar %>',
                     'message': 'Variable "bar" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.properties.task2.properties.input',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task2.input'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo + $.bar %>',
                     'message': 'Variable "foo" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.properties.task3.properties.input',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task3.input'
                 }
             ]
@@ -275,14 +275,14 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     'type': 'yaql',
                     'expression': '<% $.foo + $.bar %>',
                     'message': 'Variable "bar" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.properties.task2.properties.input',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task2.input'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo + $.bar %>',
                     'message': 'Variable "foo" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.properties.task4.properties.input',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task4.input'
                 }
             ]
@@ -341,21 +341,21 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     'type': 'yaql',
                     'expression': '<% $.foo + $.bar %>',
                     'message': 'Variable "bar" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.properties.task2.properties.input',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task2.input'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo + $.bar %>',
                     'message': 'Variable "foo" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.properties.task4.properties.input',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task4.input'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.foo %>',
                     'message': 'Variable "foo" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.properties.task5.properties.input',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task5.input'
                 }
             ]
@@ -445,7 +445,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     'expression': '<% $.fu + $.bar %>',
                     'message': 'Variable "fu" is referenced before assignment.',
                     'schema_path': (
-                        'properties.tasks.properties.task2.properties.'
+                        'properties.tasks.patternProperties.^\\w+$.properties.'
                         'next.items.properties.publish'
                     ),
                     'spec_path': 'tasks.task2.next[0].publish'
@@ -454,7 +454,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     'type': 'yaql',
                     'expression': '<% $.fu + $.bar %>',
                     'message': 'Variable "fu" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.properties.task3.properties.input',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task3.input'
                 },
                 {
@@ -462,7 +462,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     'expression': '<% $.fu + $.bar %>',
                     'message': 'Variable "fu" is referenced before assignment.',
                     'schema_path': (
-                        'properties.tasks.properties.task3.properties.'
+                        'properties.tasks.patternProperties.^\\w+$.properties.'
                         'next.items.properties.publish'
                     ),
                     'spec_path': 'tasks.task3.next[0].publish'
@@ -500,7 +500,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     'type': 'yaql',
                     'expression': '<% $.fu + $.bar %>',
                     'message': 'Variable "fu" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.properties.task3.properties.input',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task3.input'
                 }
             ]

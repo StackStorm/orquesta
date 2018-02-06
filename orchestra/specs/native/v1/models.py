@@ -222,7 +222,7 @@ class TaskMappingSpec(base.MappingSpec):
             task_spec = self.get_task(task_name)
 
             spec_path = parent.get('spec_path') + '.' + task_name
-            schema_path = parent.get('schema_path') + '.' + 'properties.' + task_name
+            schema_path = parent.get('schema_path') + '.patternProperties.^\\w+$'
 
             task_parent = {
                 'ctx': task_ctx,
