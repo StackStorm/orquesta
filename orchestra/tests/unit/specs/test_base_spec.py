@@ -218,32 +218,6 @@ class SpecTest(unittest.TestCase):
 
         self.assertDictEqual(schema, MockSpec._schema)
 
-    def test_get_expr_paths(self):
-        expr_paths = {
-            'inputs': 'properties.inputs',
-            'vars': 'properties.vars',
-            'attr1': 'properties.attr1',
-            'attr1-1': 'properties.attr1-1',
-            'attr1_2': 'properties.attr1_2',
-            'attr2': 'properties.attr2',
-            'attr3': 'properties.attr3',
-            'attr4': 'properties.attr4',
-            'attr5.attr1.attr1': (
-                'properties.attr5.'
-                'properties.attr1.'
-                'properties.attr1'
-            ),
-            'attr5.attr1.attr2': (
-                'properties.attr5.'
-                'properties.attr1.'
-                'properties.attr2'
-            ),
-            'attr6': 'properties.attr6',
-            'attr7': 'properties.attr7'
-        }
-
-        self.assertDictEqual(expr_paths, MockSpec.get_expr_schema_paths())
-
     def test_spec_init_arg_none_type(self):
         self.assertRaises(
             ValueError,
@@ -627,7 +601,7 @@ class SpecTest(unittest.TestCase):
                 {
                     'type': 'yaql',
                     'expression': '<% $.fubar %>',
-                    'spec_path': 'mock.attr4',
+                    'spec_path': 'attr4',
                     'schema_path': 'properties.attr4',
                     'message': 'Variable "fubar" is referenced '
                                'before assignment.'
@@ -635,7 +609,7 @@ class SpecTest(unittest.TestCase):
                 {
                     'type': 'yaql',
                     'expression': '<% $.foobar %>',
-                    'spec_path': 'mock.attr5.attr1.attr2',
+                    'spec_path': 'attr5.attr1.attr2',
                     'schema_path': (
                         'properties.attr5.'
                         'properties.attr1.'

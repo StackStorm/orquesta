@@ -32,6 +32,14 @@ class Spec(base.Spec):
         }
     }
 
+    def get_spec_path(self, prop_name, parent=None):
+        if parent:
+            return parent.get('spec_path') + '.' + prop_name
+        elif not parent and self.name:
+            return self.name + '.' + prop_name
+        else:
+            return prop_name
+
 
 class MappingSpec(base.MappingSpec):
     _catalog = 'mistral'
