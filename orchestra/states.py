@@ -26,6 +26,25 @@ CANCELING = 'canceling'
 CANCELED = 'canceled'
 UNKNOWN = 'unknown'
 
+
+ALL_STATES = [
+    REQUESTED,
+    SCHEDULED,
+    DELAYED,
+    RUNNING,
+    PENDING,
+    PAUSING,
+    PAUSED,
+    RESUMING,
+    SUCCEEDED,
+    FAILED,
+    EXPIRED,
+    ABANDONED,
+    CANCELING,
+    CANCELED,
+    UNKNOWN
+]
+
 ABENDED_STATES = [
     FAILED,
     EXPIRED,

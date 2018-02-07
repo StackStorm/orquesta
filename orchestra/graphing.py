@@ -20,6 +20,7 @@ import six
 
 from orchestra.expressions import base as expressions
 from orchestra.utils import dictionary as dict_utils
+from orchestra import states
 
 
 LOG = logging.getLogger(__name__)
@@ -39,6 +40,17 @@ class WorkflowGraph(object):
         g = json_graph.adjacency_graph(data, directed=True, multigraph=True)
 
         return cls(graph=g)
+
+    @property
+    def state(self):
+        return self._graph.graph.get('state')
+
+    @state.setter
+    def state(self, value):
+        if value not in states.ALL_STATES:
+            raise ValueError('The value "%s" is not a valid state.', value)
+
+        self._graph.graph['state'] = value
 
     def has_task(self, task):
         return self._graph.has_node(task)

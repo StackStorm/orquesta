@@ -10,7 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
+
 from orchestra import graphing
+from orchestra import states
 from orchestra.tests.unit import base
 
 
@@ -149,6 +152,28 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         wf_graph = graphing.WorkflowGraph()
         self._prep_graph(wf_graph)
 
+        self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
+
+    def test_get_set_graph_state(self):
+        wf_graph = graphing.WorkflowGraph()
+        self._prep_graph(wf_graph)
+        expected_wf_graph = copy.deepcopy(EXPECTED_WF_GRAPH)
+
+        self.assert_graph_equal(wf_graph, expected_wf_graph)
+        self.assertIsNone(wf_graph.state)
+
+        wf_graph.state = states.RUNNING
+        expected_wf_graph['graph'] = [('state', states.RUNNING)]
+
+        self.assert_graph_equal(wf_graph, expected_wf_graph)
+        self.assertEqual(wf_graph.state, states.RUNNING)
+
+    def test_get_set_bad_graph_state(self):
+        wf_graph = graphing.WorkflowGraph()
+        self._prep_graph(wf_graph)
+
+        self.assertRaises(ValueError, wf_graph.state, 'foobar')
+        self.assertIsNone(wf_graph.state)
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
     def test_skip_add_tasks(self):
