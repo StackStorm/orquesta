@@ -227,7 +227,7 @@ class TaskMappingSpec(base.MappingSpec):
 
         return False
 
-    def validate_context(self, parent=None):
+    def inspect_context(self, parent=None):
         ctxs = {}
         errors = []
         parent_ctx = parent.get('ctx', []) if parent else []
@@ -256,7 +256,7 @@ class TaskMappingSpec(base.MappingSpec):
                 'schema_path': schema_path
             }
 
-            result = task_spec.validate_context(parent=task_parent)
+            result = task_spec.inspect_context(parent=task_parent)
             errors.extend(result[0])
             task_ctx = list(set(task_ctx + result[1]))
             rolling_ctx = list(set(rolling_ctx + task_ctx))

@@ -36,7 +36,7 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
 
         wf_spec = self.instantiate(wf_def)
 
-        self.assertDictEqual(wf_spec.validate(), {})
+        self.assertDictEqual(wf_spec.inspect(), {})
 
     def test_missing_task_list(self):
         wf_def = """
@@ -58,7 +58,7 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
             ]
         }
 
-        self.assertDictEqual(wf_spec.validate(), expected_errors)
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
     def test_empty_task_list(self):
         wf_def = """
@@ -81,7 +81,7 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
             ]
         }
 
-        self.assertDictEqual(wf_spec.validate(), expected_errors)
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
     def test_task_default_list(self):
         wf_def = """
@@ -98,7 +98,7 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
 
         wf_spec = self.instantiate(wf_def)
 
-        self.assertDictEqual(wf_spec.validate(), {})
+        self.assertDictEqual(wf_spec.inspect(), {})
 
     def test_empty_task_default_list(self):
         wf_def = """
@@ -114,4 +114,4 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
 
         wf_spec = self.instantiate(wf_def)
 
-        self.assertDictEqual(wf_spec.validate(), {})
+        self.assertDictEqual(wf_spec.inspect(), {})

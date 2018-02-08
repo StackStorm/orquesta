@@ -218,27 +218,27 @@ class Spec(object):
             if parent else 'properties.' + prop_name
         )
 
-    def validate(self):
+    def inspect(self):
         errors = {}
 
-        syntax_errors = sorted(self.validate_syntax(), key=lambda e: e['schema_path'])
+        syntax_errors = sorted(self.inspect_syntax(), key=lambda e: e['schema_path'])
 
         if syntax_errors:
             errors['syntax'] = syntax_errors
 
-        expr_errors = sorted(self.validate_expressions(), key=lambda e: e['schema_path'])
+        expr_errors = sorted(self.inspect_expressions(), key=lambda e: e['schema_path'])
 
         if expr_errors:
             errors['expressions'] = expr_errors
 
-        ctx_errors, _ = self.validate_context()
+        ctx_errors, _ = self.inspect_context()
 
         if ctx_errors:
             errors['context'] = ctx_errors
 
         return errors
 
-    def validate_syntax(self):
+    def inspect_syntax(self):
         result = []
         validator = self.get_schema_validator()
 
@@ -269,7 +269,7 @@ class Spec(object):
 
         return result
 
-    def validate_expressions(self, parent=None):
+    def inspect_expressions(self, parent=None):
         if parent and not parent.get('spec_path', None):
             raise ValueError('Parent context is missing spec path.')
 
@@ -297,7 +297,7 @@ class Spec(object):
                     item_spec_path = spec_path + '[' + str(i) + ']'
                     item_schema_path = schema_path + '.items'
                     item_parent = {'spec_path': item_spec_path, 'schema_path': item_schema_path}
-                    errors.extend(item.validate_expressions(parent=item_parent))
+                    errors.extend(item.inspect_expressions(parent=item_parent))
 
                 continue
 
@@ -306,13 +306,13 @@ class Spec(object):
                     item_spec_path = spec_path + '.' + k
                     item_schema_path = schema_path + '.patternProperties.^\\w+$'
                     item_parent = {'spec_path': item_spec_path, 'schema_path': item_schema_path}
-                    errors.extend(v.validate_expressions(parent=item_parent))
+                    errors.extend(v.inspect_expressions(parent=item_parent))
 
                 continue
 
             if isinstance(prop_value, Spec):
                 item_parent = {'spec_path': spec_path, 'schema_path': schema_path}
-                errors.extend(prop_value.validate_expressions(parent=item_parent))
+                errors.extend(prop_value.inspect_expressions(parent=item_parent))
                 continue
 
             result = expr.validate(prop_value).get('errors', [])
@@ -325,7 +325,7 @@ class Spec(object):
 
         return errors
 
-    def validate_context(self, parent=None):
+    def inspect_context(self, parent=None):
         if parent and not parent.get('spec_path', None):
             raise ValueError('Parent context is missing spec path.')
 
@@ -389,7 +389,7 @@ class Spec(object):
                     'schema_path': schema_path
                 }
 
-                result = prop_value.validate_context(parent=item_parent)
+                result = prop_value.inspect_context(parent=item_parent)
                 errors.extend(result[0])
                 rolling_ctx = list(set(rolling_ctx + result[1]))
 
