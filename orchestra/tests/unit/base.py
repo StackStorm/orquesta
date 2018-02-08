@@ -11,7 +11,6 @@
 # limitations under the License.
 
 import abc
-import copy
 import six
 from six.moves import queue
 import unittest
@@ -159,26 +158,25 @@ class WorkflowConductorTest(WorkflowComposerTest):
         wf_ex_graph_json = wf_ex_graph.serialize()
 
         while not q.empty():
-            queued_task = q.get()
-
-            # mock completion of the task
-            state = state_q.get() if not state_q.empty() else states.SUCCEEDED
-            actual_task_seq.append(queued_task['id'])
-            completed_task = copy.deepcopy(queued_task)
-            completed_task['state'] = state
-
             # deserialize workflow execution graph to mock async execution
             wf_ex_graph = graphing.WorkflowGraph.deserialize(wf_ex_graph_json)
+
+            # mock completion of the task
+            completed_task = q.get()
+            state = state_q.get() if not state_q.empty() else states.SUCCEEDED
+            wf_ex_graph.update_task(completed_task['id'], state=state)
+            actual_task_seq.append(completed_task['id'])
 
             if not ctx_q.empty():
                 context = ctx_q.get()
 
             # set current task in context
             context['__current_task'] = {
-                'name': completed_task['id']
+                'id': completed_task['id'],
+                'name': completed_task['name']
             }
 
-            next_tasks = wf_ex_graph.get_next_tasks(completed_task, context=context)
+            next_tasks = wf_ex_graph.get_next_tasks(completed_task['id'], context=context)
 
             for next_task in next_tasks:
                 q.put(next_task)

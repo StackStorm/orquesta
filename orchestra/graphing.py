@@ -48,34 +48,37 @@ class WorkflowGraph(object):
     @state.setter
     def state(self, value):
         if value not in states.ALL_STATES:
-            raise ValueError('The value "%s" is not a valid state.', value)
+            raise ValueError('State "%s" is not valid.', value)
 
         self._graph.graph['state'] = value
 
-    def has_task(self, task):
-        return self._graph.has_node(task)
+    def has_task(self, task_id):
+        return self._graph.has_node(task_id)
 
-    def get_task(self, task):
-        if not self.has_task(task):
-            raise Exception('Task does not exist.')
+    def get_task(self, task_id):
+        if not self.has_task(task_id):
+            raise Exception('Task "%s" does not exist.', task_id)
 
-        return copy.deepcopy(self._graph.node[task])
+        task = {'id': task_id}
+        task.update(copy.deepcopy(self._graph.node[task_id]))
+
+        return task
 
     def get_task_attributes(self, attribute):
         return nx.get_node_attributes(self._graph, attribute)
 
-    def add_task(self, task, **kwargs):
-        if not self.has_task(task):
-            self._graph.add_node(task, **kwargs)
+    def add_task(self, task_id, **kwargs):
+        if not self.has_task(task_id):
+            self._graph.add_node(task_id, **kwargs)
         else:
-            self.update_task(task, **kwargs)
+            self.update_task(task_id, **kwargs)
 
-    def update_task(self, task, **kwargs):
-        if not self.has_task(task):
-            raise Exception('Task does not exist.')
+    def update_task(self, task_id, **kwargs):
+        if not self.has_task(task_id):
+            raise Exception('Task "%s" does not exist.', task_id)
 
         for key, value in six.iteritems(kwargs):
-            self._graph.node[task][key] = value
+            self._graph.node[task_id][key] = value
 
     def get_start_tasks(self):
         tasks = [
@@ -85,8 +88,11 @@ class WorkflowGraph(object):
 
         return sorted(tasks, key=lambda x: x['name'])
 
-    def get_next_tasks(self, task, context=None):
-        self.update_task(task['id'], state=task['state'])
+    def get_next_tasks(self, task_id, context=None):
+        task = self.get_task(task_id)
+
+        if task['state'] not in states.COMPLETED_STATES:
+            return []
 
         context = dict_utils.merge_dicts(
             context or {},
@@ -97,7 +103,7 @@ class WorkflowGraph(object):
         tasks = []
         outbounds = []
 
-        for seq in self.get_next_transitions(task['id']):
+        for seq in self.get_next_transitions(task_id):
             evaluated_criteria = [
                 expressions.evaluate(criterion, context)
                 for criterion in seq[3]['criteria']
@@ -108,10 +114,9 @@ class WorkflowGraph(object):
 
         for seq in outbounds:
             next_task_id, seq_key, attrs = seq[1], seq[2], seq[3]
-            next_task = self.get_task(next_task_id)
 
             if not attrs.get('satisfied', False):
-                self.update_transition(task['id'], next_task_id, key=seq_key, satisfied=True)
+                self.update_transition(task_id, next_task_id, key=seq_key, satisfied=True)
 
             if self.has_barrier(next_task_id):
                 barrier = self.get_barrier(next_task_id)
@@ -122,6 +127,7 @@ class WorkflowGraph(object):
                 if len(satisfied) < barrier:
                     continue
 
+            next_task = self.get_task(next_task_id)
             tasks.append({'id': next_task_id, 'name': next_task['name']})
 
         return sorted(tasks, key=lambda x: x['name'])
@@ -187,16 +193,16 @@ class WorkflowGraph(object):
             key=lambda x: x[1]
         )
 
-    def in_cycle(self, task):
-        return [c for c in nx.simple_cycles(self._graph) if task in c]
+    def in_cycle(self, task_id):
+        return [c for c in nx.simple_cycles(self._graph) if task_id in c]
 
-    def set_barrier(self, task, value='*'):
-        self.update_task(task, barrier=value)
+    def set_barrier(self, task_id, value='*'):
+        self.update_task(task_id, barrier=value)
 
-    def get_barrier(self, task):
-        return self.get_task(task).get('barrier')
+    def get_barrier(self, task_id):
+        return self.get_task(task_id).get('barrier')
 
-    def has_barrier(self, task):
-        b = self.get_barrier(task)
+    def has_barrier(self, task_id):
+        b = self.get_barrier(task_id)
 
         return (b is not None and b != '')
