@@ -65,7 +65,11 @@ class WorkflowGraph(object):
         return task
 
     def get_task_attributes(self, attribute):
-        return nx.get_node_attributes(self._graph, attribute)
+        return dict_utils.merge_dicts(
+            {n: None for n in self._graph.nodes()},
+            nx.get_node_attributes(self._graph, attribute),
+            overwrite=True
+        )
 
     def add_task(self, task_id, **kwargs):
         if not self.has_task(task_id):

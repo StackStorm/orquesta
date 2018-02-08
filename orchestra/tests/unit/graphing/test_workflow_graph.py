@@ -140,13 +140,13 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         wf_graph.add_transition('task1', 'task9')
         wf_graph.add_transition('task8', 'task9')
 
-    def _update_tasks_attrs(self, wf_graph):
+    def _add_barriers(self, wf_graph):
         wf_graph.update_task('task5', barrier='*')
 
     def _prep_graph(self, wf_graph):
         self._add_tasks(wf_graph)
-        self._update_tasks_attrs(wf_graph)
         self._add_transitions(wf_graph)
+        self._add_barriers(wf_graph)
 
     def test_basic_graph(self):
         wf_graph = graphing.WorkflowGraph()
@@ -179,7 +179,7 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
     def test_skip_add_tasks(self):
         wf_graph = graphing.WorkflowGraph()
         self._add_transitions(wf_graph)
-        self._update_tasks_attrs(wf_graph)
+        self._add_barriers(wf_graph)
 
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
@@ -255,3 +255,25 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
             len(wf_graph.get_prev_transitions('task9')) > 1 and
             not wf_graph.has_barrier('task9')
         )
+
+    def test_get_task_attributes(self):
+        wf_graph = graphing.WorkflowGraph()
+        self._prep_graph(wf_graph)
+
+        wf_graph.update_task('task1', state=states.RUNNING)
+        wf_graph.update_task('task2', state=states.RUNNING)
+        wf_graph.update_task('task4', state=states.RUNNING)
+
+        expected = {
+            'task1': states.RUNNING,
+            'task2': states.RUNNING,
+            'task3': None,
+            'task4': states.RUNNING,
+            'task5': None,
+            'task6': None,
+            'task7': None,
+            'task8': None,
+            'task9': None
+        }
+
+        self.assertDictEqual(wf_graph.get_task_attributes('state'), expected)
