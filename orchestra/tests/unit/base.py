@@ -19,6 +19,7 @@ from orchestra import graphing
 from orchestra.expressions import base as expressions
 from orchestra.specs import loader as specs_loader
 from orchestra import states
+from orchestra.utils import context as ctx
 from orchestra.utils import plugin
 from orchestra.utils import specs
 from orchestra.tests.fixtures import loader as fixture_loader
@@ -171,10 +172,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
                 context = ctx_q.get()
 
             # set current task in context
-            context['__current_task'] = {
-                'id': completed_task['id'],
-                'name': completed_task['name']
-            }
+            context = ctx.set_current_task(context, completed_task)
 
             next_tasks = wf_ex_graph.get_next_tasks(completed_task['id'], context=context)
 
