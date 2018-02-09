@@ -38,3 +38,11 @@ class SchemaIncompatibleError(Exception):
 
 class ContextValueError(Exception):
     pass
+
+
+class InvalidState(Exception):
+    pass
+
+
+class InvalidStateTransition(Exception):
+    pass

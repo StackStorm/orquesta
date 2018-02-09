@@ -26,7 +26,7 @@ def _get_current_task(context):
 def task_state_(context, task_id):
     task_states = context['__task_states'] or {}
 
-    return task_states.get(task_id, states.UNKNOWN)
+    return task_states.get(task_id, states.UNSET)
 
 
 def succeeded_(context):
