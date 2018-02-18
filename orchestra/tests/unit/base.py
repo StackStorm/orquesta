@@ -152,6 +152,9 @@ class WorkflowConductorTest(WorkflowComposerTest):
 
         wf_ex_graph = graphing.WorkflowGraph.deserialize(wf_ex_graph_json)
 
+        # set graph state to running
+        wf_ex_graph.state = states.RUNNING
+
         for task in wf_ex_graph.get_start_tasks():
             q.put(task)
 
@@ -159,11 +162,19 @@ class WorkflowConductorTest(WorkflowComposerTest):
         wf_ex_graph_json = wf_ex_graph.serialize()
 
         while not q.empty():
+            completed_task = q.get()
+
             # deserialize workflow execution graph to mock async execution
             wf_ex_graph = graphing.WorkflowGraph.deserialize(wf_ex_graph_json)
 
+            # check if task is in cycle
+            if wf_ex_graph.in_cycle(completed_task['id']):
+                wf_ex_graph.reset_task(completed_task['id'])
+
+            # set task state to running
+            wf_ex_graph.update_task(completed_task['id'], state=states.RUNNING)
+
             # mock completion of the task
-            completed_task = q.get()
             state = state_q.get() if not state_q.empty() else states.SUCCEEDED
             wf_ex_graph.update_task(completed_task['id'], state=state)
             actual_task_seq.append(completed_task['id'])

@@ -277,3 +277,35 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         }
 
         self.assertDictEqual(wf_graph.get_task_attributes('state'), expected)
+
+    def test_task_reset(self):
+        wf_graph = graphing.WorkflowGraph()
+        self._prep_graph(wf_graph)
+
+        # Reset a task with name attribute set.
+        self.assertDictEqual(wf_graph.get_task('task1'), {'id': 'task1'})
+
+        wf_graph.update_task('task1', name='task1', state=states.RUNNING)
+
+        self.assertDictEqual(
+            wf_graph.get_task('task1'),
+            {'id': 'task1', 'name': 'task1', 'state': states.RUNNING}
+        )
+
+        wf_graph.reset_task('task1')
+
+        self.assertDictEqual(wf_graph.get_task('task1'), {'id': 'task1', 'name': 'task1'})
+
+        # Reset a task with barrier attribute set.
+        self.assertDictEqual(wf_graph.get_task('task5'), {'id': 'task5', 'barrier': '*'})
+
+        wf_graph.update_task('task5', state=states.RUNNING)
+
+        self.assertDictEqual(
+            wf_graph.get_task('task5'),
+            {'id': 'task5', 'barrier': '*', 'state': states.RUNNING}
+        )
+
+        wf_graph.reset_task('task5')
+
+        self.assertDictEqual(wf_graph.get_task('task5'), {'id': 'task5', 'barrier': '*'})

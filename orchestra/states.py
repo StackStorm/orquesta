@@ -88,15 +88,15 @@ CANCEL_STATES = [
 
 
 VALID_STATE_TRANSITION_MAP = {
-    UNSET: [REQUESTED],
-    REQUESTED: [SCHEDULED, DELAYED],
-    DELAYED: [SCHEDULED] + PAUSE_STATES + CANCEL_STATES,
-    SCHEDULED: [DELAYED] + PAUSE_STATES + CANCEL_STATES,
+    UNSET: [REQUESTED, DELAYED, SCHEDULED, RUNNING],
+    REQUESTED: [SCHEDULED, DELAYED, RUNNING] + PAUSE_STATES + CANCEL_STATES,
+    DELAYED: [SCHEDULED, RUNNING] + PAUSE_STATES + CANCEL_STATES,
+    SCHEDULED: [DELAYED, RUNNING] + PAUSE_STATES + CANCEL_STATES,
     RUNNING: COMPLETED_STATES + PAUSE_STATES + CANCEL_STATES,
-    PENDING: [RESUMING],
-    PAUSING: [PAUSED],
-    PAUSED: [RESUMING] + CANCEL_STATES,
-    RESUMING: [RUNNING],
+    PENDING: [RESUMING, RUNNING] + CANCEL_STATES,
+    PAUSING: [PAUSED] + CANCEL_STATES,
+    PAUSED: [RESUMING, RUNNING] + CANCEL_STATES,
+    RESUMING: [RUNNING] + CANCEL_STATES,
     SUCCEEDED: [],
     FAILED: [],
     EXPIRED: [],
@@ -117,7 +117,7 @@ def is_transition_valid(old_state, new_state):
         raise exc.InvalidState('State "%s" is not valid.', old_state)
 
     if old_state not in VALID_STATE_TRANSITION_MAP:
-        raise exc.InvalidStateTransition('State "%s" is not in transition map.', old_state)
+        raise exc.InvalidState('State "%s" is not in transition map.', old_state)
 
     if new_state not in ALL_STATES:
         raise exc.InvalidState('State "%s" is not valid.', new_state)

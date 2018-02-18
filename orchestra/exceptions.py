@@ -45,4 +45,6 @@ class InvalidState(Exception):
 
 
 class InvalidStateTransition(Exception):
-    pass
+
+    def __init__(self, old, new):
+        Exception.__init__(self, 'State transition from "%s" to "%s" is invalid.' % (old, new))
