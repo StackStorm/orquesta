@@ -10,7 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
+
 from orchestra import graphing
+from orchestra import states
 from orchestra.tests.unit import base
 
 
@@ -137,13 +140,13 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         wf_graph.add_transition('task1', 'task9')
         wf_graph.add_transition('task8', 'task9')
 
-    def _update_tasks_attrs(self, wf_graph):
+    def _add_barriers(self, wf_graph):
         wf_graph.update_task('task5', barrier='*')
 
     def _prep_graph(self, wf_graph):
         self._add_tasks(wf_graph)
-        self._update_tasks_attrs(wf_graph)
         self._add_transitions(wf_graph)
+        self._add_barriers(wf_graph)
 
     def test_basic_graph(self):
         wf_graph = graphing.WorkflowGraph()
@@ -151,10 +154,32 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
 
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
+    def test_get_set_graph_state(self):
+        wf_graph = graphing.WorkflowGraph()
+        self._prep_graph(wf_graph)
+        expected_wf_graph = copy.deepcopy(EXPECTED_WF_GRAPH)
+
+        self.assert_graph_equal(wf_graph, expected_wf_graph)
+        self.assertIsNone(wf_graph.state)
+
+        wf_graph.state = states.RUNNING
+        expected_wf_graph['graph'] = [('state', states.RUNNING)]
+
+        self.assert_graph_equal(wf_graph, expected_wf_graph)
+        self.assertEqual(wf_graph.state, states.RUNNING)
+
+    def test_get_set_bad_graph_state(self):
+        wf_graph = graphing.WorkflowGraph()
+        self._prep_graph(wf_graph)
+
+        self.assertRaises(ValueError, wf_graph.state, 'foobar')
+        self.assertIsNone(wf_graph.state)
+        self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
+
     def test_skip_add_tasks(self):
         wf_graph = graphing.WorkflowGraph()
         self._add_transitions(wf_graph)
-        self._update_tasks_attrs(wf_graph)
+        self._add_barriers(wf_graph)
 
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
@@ -230,3 +255,57 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
             len(wf_graph.get_prev_transitions('task9')) > 1 and
             not wf_graph.has_barrier('task9')
         )
+
+    def test_get_task_attributes(self):
+        wf_graph = graphing.WorkflowGraph()
+        self._prep_graph(wf_graph)
+
+        wf_graph.update_task('task1', state=states.RUNNING)
+        wf_graph.update_task('task2', state=states.RUNNING)
+        wf_graph.update_task('task4', state=states.RUNNING)
+
+        expected = {
+            'task1': states.RUNNING,
+            'task2': states.RUNNING,
+            'task3': None,
+            'task4': states.RUNNING,
+            'task5': None,
+            'task6': None,
+            'task7': None,
+            'task8': None,
+            'task9': None
+        }
+
+        self.assertDictEqual(wf_graph.get_task_attributes('state'), expected)
+
+    def test_task_reset(self):
+        wf_graph = graphing.WorkflowGraph()
+        self._prep_graph(wf_graph)
+
+        # Reset a task with name attribute set.
+        self.assertDictEqual(wf_graph.get_task('task1'), {'id': 'task1'})
+
+        wf_graph.update_task('task1', name='task1', state=states.RUNNING)
+
+        self.assertDictEqual(
+            wf_graph.get_task('task1'),
+            {'id': 'task1', 'name': 'task1', 'state': states.RUNNING}
+        )
+
+        wf_graph.reset_task('task1')
+
+        self.assertDictEqual(wf_graph.get_task('task1'), {'id': 'task1', 'name': 'task1'})
+
+        # Reset a task with barrier attribute set.
+        self.assertDictEqual(wf_graph.get_task('task5'), {'id': 'task5', 'barrier': '*'})
+
+        wf_graph.update_task('task5', state=states.RUNNING)
+
+        self.assertDictEqual(
+            wf_graph.get_task('task5'),
+            {'id': 'task5', 'barrier': '*', 'state': states.RUNNING}
+        )
+
+        wf_graph.reset_task('task5')
+
+        self.assertDictEqual(wf_graph.get_task('task5'), {'id': 'task5', 'barrier': '*'})

@@ -493,7 +493,7 @@ class SpecTest(unittest.TestCase):
         spec_obj = MockSpec(spec)
 
         self.assertDictEqual(spec_obj.spec, spec)
-        self.assertDictEqual(spec_obj.validate(), {})
+        self.assertDictEqual(spec_obj.inspect(), {})
 
     def test_spec_valid_yaml(self):
         spec = """
@@ -520,7 +520,7 @@ class SpecTest(unittest.TestCase):
         spec_obj = MockSpec(spec)
 
         self.assertDictEqual(spec_obj.spec, yaml.safe_load(spec))
-        self.assertDictEqual(spec_obj.validate(), {})
+        self.assertDictEqual(spec_obj.inspect(), {})
 
     def test_spec_invalid(self):
         spec = {
@@ -623,4 +623,4 @@ class SpecTest(unittest.TestCase):
 
         spec_obj = MockSpec(spec)
 
-        self.assertDictEqual(spec_obj.validate(), errors)
+        self.assertDictEqual(spec_obj.inspect(), errors)

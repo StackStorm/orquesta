@@ -11,7 +11,6 @@
 # limitations under the License.
 
 import abc
-import copy
 import six
 from six.moves import queue
 import unittest
@@ -20,6 +19,7 @@ from orchestra import graphing
 from orchestra.expressions import base as expressions
 from orchestra.specs import loader as specs_loader
 from orchestra import states
+from orchestra.utils import context as ctx
 from orchestra.utils import plugin
 from orchestra.utils import specs
 from orchestra.tests.fixtures import loader as fixture_loader
@@ -152,6 +152,9 @@ class WorkflowConductorTest(WorkflowComposerTest):
 
         wf_ex_graph = graphing.WorkflowGraph.deserialize(wf_ex_graph_json)
 
+        # set graph state to running
+        wf_ex_graph.state = states.RUNNING
+
         for task in wf_ex_graph.get_start_tasks():
             q.put(task)
 
@@ -159,26 +162,30 @@ class WorkflowConductorTest(WorkflowComposerTest):
         wf_ex_graph_json = wf_ex_graph.serialize()
 
         while not q.empty():
-            queued_task = q.get()
-
-            # mock completion of the task
-            state = state_q.get() if not state_q.empty() else states.SUCCEEDED
-            actual_task_seq.append(queued_task['id'])
-            completed_task = copy.deepcopy(queued_task)
-            completed_task['state'] = state
+            completed_task = q.get()
 
             # deserialize workflow execution graph to mock async execution
             wf_ex_graph = graphing.WorkflowGraph.deserialize(wf_ex_graph_json)
+
+            # check if task is in cycle
+            if wf_ex_graph.in_cycle(completed_task['id']):
+                wf_ex_graph.reset_task(completed_task['id'])
+
+            # set task state to running
+            wf_ex_graph.update_task(completed_task['id'], state=states.RUNNING)
+
+            # mock completion of the task
+            state = state_q.get() if not state_q.empty() else states.SUCCEEDED
+            wf_ex_graph.update_task(completed_task['id'], state=state)
+            actual_task_seq.append(completed_task['id'])
 
             if not ctx_q.empty():
                 context = ctx_q.get()
 
             # set current task in context
-            context['__current_task'] = {
-                'name': completed_task['id']
-            }
+            context = ctx.set_current_task(context, completed_task)
 
-            next_tasks = wf_ex_graph.get_next_tasks(completed_task, context=context)
+            next_tasks = wf_ex_graph.get_next_tasks(completed_task['id'], context=context)
 
             for next_task in next_tasks:
                 q.put(next_task)

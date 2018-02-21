@@ -18,8 +18,10 @@ import networkx as nx
 from networkx.readwrite import json_graph
 import six
 
+from orchestra import exceptions as exc
 from orchestra.expressions import base as expressions
 from orchestra.utils import dictionary as dict_utils
+from orchestra import states
 
 
 LOG = logging.getLogger(__name__)
@@ -40,30 +42,73 @@ class WorkflowGraph(object):
 
         return cls(graph=g)
 
-    def has_task(self, task):
-        return self._graph.has_node(task)
+    @property
+    def state(self):
+        return self._graph.graph.get('state', None)
 
-    def get_task(self, task):
-        if not self.has_task(task):
-            raise Exception('Task does not exist.')
+    @state.setter
+    def state(self, value):
+        if value not in states.ALL_STATES:
+            raise ValueError('State "%s" is not valid.', value)
 
-        return copy.deepcopy(self._graph.node[task])
+        if not states.is_transition_valid(self.state, value):
+            raise exc.InvalidStateTransition(self.state, value)
+
+        self._graph.graph['state'] = value
+
+    def has_task(self, task_id):
+        return self._graph.has_node(task_id)
+
+    def get_task(self, task_id):
+        if not self.has_task(task_id):
+            raise Exception('Task "%s" does not exist.', task_id)
+
+        task = {'id': task_id}
+        task.update(copy.deepcopy(self._graph.node[task_id]))
+
+        return task
 
     def get_task_attributes(self, attribute):
-        return nx.get_node_attributes(self._graph, attribute)
+        return dict_utils.merge_dicts(
+            {n: None for n in self._graph.nodes()},
+            nx.get_node_attributes(self._graph, attribute),
+            overwrite=True
+        )
 
-    def add_task(self, task, **kwargs):
-        if not self.has_task(task):
-            self._graph.add_node(task, **kwargs)
+    def add_task(self, task_id, **kwargs):
+        if not self.has_task(task_id):
+            self._graph.add_node(task_id, **kwargs)
         else:
-            self.update_task(task, **kwargs)
+            self.update_task(task_id, **kwargs)
 
-    def update_task(self, task, **kwargs):
-        if not self.has_task(task):
-            raise Exception('Task does not exist.')
+    def update_task(self, task_id, **kwargs):
+        if not self.has_task(task_id):
+            raise Exception('Task "%s" does not exist.', task_id)
 
+        # Check if change in task state is valid.
+        old_state = self._graph.node[task_id].get('state', None)
+        new_state = kwargs.get('state', None)
+
+        if not states.is_transition_valid(old_state, new_state):
+            raise exc.InvalidStateTransition(old_state, new_state)
+
+        # Update the task attributes.
         for key, value in six.iteritems(kwargs):
-            self._graph.node[task][key] = value
+            self._graph.node[task_id][key] = value
+
+    def reset_task(self, task_id):
+        if not self.has_task(task_id):
+            raise Exception('Task "%s" does not exist.', task_id)
+
+        task_attrs = {}
+
+        if 'name' in self._graph.node[task_id]:
+            task_attrs['name'] = self._graph.node[task_id]['name']
+
+        if 'barrier' in self._graph.node[task_id]:
+            task_attrs['barrier'] = self._graph.node[task_id]['barrier']
+
+        self._graph.node[task_id] = task_attrs
 
     def get_start_tasks(self):
         tasks = [
@@ -73,8 +118,11 @@ class WorkflowGraph(object):
 
         return sorted(tasks, key=lambda x: x['name'])
 
-    def get_next_tasks(self, task, context=None):
-        self.update_task(task['id'], state=task['state'])
+    def get_next_tasks(self, task_id, context=None):
+        task = self.get_task(task_id)
+
+        if task['state'] not in states.COMPLETED_STATES:
+            return []
 
         context = dict_utils.merge_dicts(
             context or {},
@@ -85,7 +133,7 @@ class WorkflowGraph(object):
         tasks = []
         outbounds = []
 
-        for seq in self.get_next_transitions(task['id']):
+        for seq in self.get_next_transitions(task_id):
             evaluated_criteria = [
                 expressions.evaluate(criterion, context)
                 for criterion in seq[3]['criteria']
@@ -96,10 +144,9 @@ class WorkflowGraph(object):
 
         for seq in outbounds:
             next_task_id, seq_key, attrs = seq[1], seq[2], seq[3]
-            next_task = self.get_task(next_task_id)
 
             if not attrs.get('satisfied', False):
-                self.update_transition(task['id'], next_task_id, key=seq_key, satisfied=True)
+                self.update_transition(task_id, next_task_id, key=seq_key, satisfied=True)
 
             if self.has_barrier(next_task_id):
                 barrier = self.get_barrier(next_task_id)
@@ -110,6 +157,7 @@ class WorkflowGraph(object):
                 if len(satisfied) < barrier:
                     continue
 
+            next_task = self.get_task(next_task_id)
             tasks.append({'id': next_task_id, 'name': next_task['name']})
 
         return sorted(tasks, key=lambda x: x['name'])
@@ -163,28 +211,28 @@ class WorkflowGraph(object):
         for attr, value in six.iteritems(kwargs):
             self._graph[source][destination][seq[2]][attr] = value
 
-    def get_next_transitions(self, task):
+    def get_next_transitions(self, task_id):
         return sorted(
-            [e for e in self._graph.out_edges([task], data=True, keys=True)],
+            [e for e in self._graph.out_edges([task_id], data=True, keys=True)],
             key=lambda x: x[1]
         )
 
-    def get_prev_transitions(self, task):
+    def get_prev_transitions(self, task_id):
         return sorted(
-            [e for e in self._graph.in_edges([task], data=True, keys=True)],
+            [e for e in self._graph.in_edges([task_id], data=True, keys=True)],
             key=lambda x: x[1]
         )
 
-    def in_cycle(self, task):
-        return [c for c in nx.simple_cycles(self._graph) if task in c]
+    def set_barrier(self, task_id, value='*'):
+        self.update_task(task_id, barrier=value)
 
-    def set_barrier(self, task, value='*'):
-        self.update_task(task, barrier=value)
+    def get_barrier(self, task_id):
+        return self.get_task(task_id).get('barrier')
 
-    def get_barrier(self, task):
-        return self.get_task(task).get('barrier')
-
-    def has_barrier(self, task):
-        b = self.get_barrier(task)
+    def has_barrier(self, task_id):
+        b = self.get_barrier(task_id)
 
         return (b is not None and b != '')
+
+    def in_cycle(self, task_id):
+        return [c for c in nx.simple_cycles(self._graph) if task_id in c]

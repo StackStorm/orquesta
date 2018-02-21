@@ -38,7 +38,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
 
         wf_spec = self.instantiate(wf_def)
 
-        self.assertDictEqual(wf_spec.validate(), {})
+        self.assertDictEqual(wf_spec.inspect(), {})
 
     def test_empty_task_transition(self):
         wf_def = """
@@ -52,7 +52,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
 
         wf_spec = self.instantiate(wf_def)
 
-        self.assertDictEqual(wf_spec.validate(), {})
+        self.assertDictEqual(wf_spec.inspect(), {})
 
     def test_basic_task_transition(self):
         wf_def = """
@@ -74,7 +74,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
 
         wf_spec = self.instantiate(wf_def)
 
-        self.assertDictEqual(wf_spec.validate(), {})
+        self.assertDictEqual(wf_spec.inspect(), {})
 
     def test_publish_in_task_transition(self):
         wf_def = """
@@ -101,7 +101,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
 
         wf_spec = self.instantiate(wf_def)
 
-        self.assertDictEqual(wf_spec.validate(), {})
+        self.assertDictEqual(wf_spec.inspect(), {})
 
     def test_bad_when_in_task_transition(self):
         wf_def = """
@@ -133,7 +133,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             ]
         }
 
-        self.assertDictEqual(wf_spec.validate(), expected_errors)
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
     def test_bad_publish_in_task_transition(self):
         wf_def = """
@@ -165,7 +165,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             ]
         }
 
-        self.assertDictEqual(wf_spec.validate(), expected_errors)
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
     def test_bad_do_in_task_transition(self):
         wf_def = """
@@ -196,7 +196,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             ]
         }
 
-        self.assertDictEqual(wf_spec.validate(), expected_errors)
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
     def test_missing_task_list(self):
         wf_def = """
@@ -216,7 +216,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             ]
         }
 
-        self.assertDictEqual(wf_spec.validate(), expected_errors)
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
     def test_empty_task_list(self):
         wf_def = """
@@ -237,7 +237,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             ]
         }
 
-        self.assertDictEqual(wf_spec.validate(), expected_errors)
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
     def test_fail_multiple_inspection(self):
         wf_def = """
@@ -299,4 +299,4 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             ]
         }
 
-        self.assertDictEqual(wf_spec.validate(), expected_errors)
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)

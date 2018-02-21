@@ -59,7 +59,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
             ]
         }
 
-        self.assertDictEqual(wf_spec.validate(), expected_errors)
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
     def test_bad_vars_jinja(self):
         wf_def = """
@@ -105,7 +105,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
             ]
         }
 
-        self.assertDictEqual(wf_spec.validate(), expected_errors)
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
     def test_bad_vars_mix_yaql_and_jinja(self):
         wf_def = """
@@ -151,7 +151,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
             ]
         }
 
-        self.assertDictEqual(wf_spec.validate(), expected_errors)
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
     def test_bad_vars_in_sequential_tasks(self):
         wf_def = """
@@ -188,7 +188,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
             ]
         }
 
-        self.assertDictEqual(wf_spec.validate(), expected_errors)
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
     def test_bad_vars_in_branching_tasks(self):
         wf_def = """
@@ -247,7 +247,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
             ]
         }
 
-        self.assertDictEqual(wf_spec.validate(), expected_errors)
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
     def test_bad_vars_in_reusable_split_tasks(self):
         wf_def = """
@@ -322,7 +322,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
             ]
         }
 
-        self.assertDictEqual(wf_spec.validate(), expected_errors)
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
     def test_vars_in_join_task(self):
         wf_def = """
@@ -372,4 +372,4 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
 
         wf_spec = self.instantiate(wf_def)
 
-        self.assertDictEqual(wf_spec.validate(), dict())
+        self.assertDictEqual(wf_spec.inspect(), dict())

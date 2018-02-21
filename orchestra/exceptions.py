@@ -38,3 +38,13 @@ class SchemaIncompatibleError(Exception):
 
 class ContextValueError(Exception):
     pass
+
+
+class InvalidState(Exception):
+    pass
+
+
+class InvalidStateTransition(Exception):
+
+    def __init__(self, old, new):
+        Exception.__init__(self, 'State transition from "%s" to "%s" is invalid.' % (old, new))
