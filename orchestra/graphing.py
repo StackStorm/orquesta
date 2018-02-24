@@ -30,38 +30,47 @@ LOG = logging.getLogger(__name__)
 @six.add_metaclass(abc.ABCMeta)
 class WorkflowGraph(object):
 
-    def __init__(self, graph=None):
+    def __init__(self, graph=None, flow=None):
+        # self._graph is the graph model for the workflow. The tracking of workflow and task
+        # progress and state is separate from the graph model. There are use cases where tasks
+        # may be cycled and states overwritten. Therefore, use the var _flow to track progress
+        # and states.
         self._graph = graph if graph else nx.MultiDiGraph()
 
+        # self._flow tracks the workflow and task progress, states, and flow.
+        self._flow = flow if flow else dict()
+
+        # self.flow['state'] tracks the state of the workflow execution.
+        if not self._flow.get('state'):
+            self._flow['state'] = None
+
+        # self._flow['sequence'] tracks the progress and state of task executions.
+        if not self._flow.get('sequence'):
+            self._flow['sequence'] = list()
+
+        # self._flow['tasks'] references current instance of tasks.
+        if not self._flow.get('tasks'):
+            self._flow['tasks'] = dict()
+
     def serialize(self):
-        return json_graph.adjacency_data(self._graph)
+        return {
+            'graph': json_graph.adjacency_data(self._graph),
+            'flow': copy.deepcopy(self._flow)
+        }
 
     @classmethod
     def deserialize(cls, data):
-        g = json_graph.adjacency_graph(data, directed=True, multigraph=True)
+        g = json_graph.adjacency_graph(copy.deepcopy(data['graph']), directed=True, multigraph=True)
+        f = copy.deepcopy(data['flow'])
 
-        return cls(graph=g)
-
-    @property
-    def state(self):
-        return self._graph.graph.get('state', None)
-
-    @state.setter
-    def state(self, value):
-        if value not in states.ALL_STATES:
-            raise ValueError('State "%s" is not valid.', value)
-
-        if not states.is_transition_valid(self.state, value):
-            raise exc.InvalidStateTransition(self.state, value)
-
-        self._graph.graph['state'] = value
+        return cls(graph=g, flow=f)
 
     def has_task(self, task_id):
         return self._graph.has_node(task_id)
 
     def get_task(self, task_id):
         if not self.has_task(task_id):
-            raise Exception('Task "%s" does not exist.', task_id)
+            raise exc.InvalidTask(task_id)
 
         task = {'id': task_id}
         task.update(copy.deepcopy(self._graph.node[task_id]))
@@ -83,32 +92,10 @@ class WorkflowGraph(object):
 
     def update_task(self, task_id, **kwargs):
         if not self.has_task(task_id):
-            raise Exception('Task "%s" does not exist.', task_id)
+            raise exc.InvalidTask(task_id)
 
-        # Check if change in task state is valid.
-        old_state = self._graph.node[task_id].get('state', None)
-        new_state = kwargs.get('state', None)
-
-        if not states.is_transition_valid(old_state, new_state):
-            raise exc.InvalidStateTransition(old_state, new_state)
-
-        # Update the task attributes.
         for key, value in six.iteritems(kwargs):
             self._graph.node[task_id][key] = value
-
-    def reset_task(self, task_id):
-        if not self.has_task(task_id):
-            raise Exception('Task "%s" does not exist.', task_id)
-
-        task_attrs = {}
-
-        if 'name' in self._graph.node[task_id]:
-            task_attrs['name'] = self._graph.node[task_id]['name']
-
-        if 'barrier' in self._graph.node[task_id]:
-            task_attrs['barrier'] = self._graph.node[task_id]['barrier']
-
-        self._graph.node[task_id] = task_attrs
 
     def get_start_tasks(self):
         tasks = [
@@ -118,49 +105,45 @@ class WorkflowGraph(object):
 
         return sorted(tasks, key=lambda x: x['name'])
 
-    def get_next_tasks(self, task_id, context=None):
-        task = self.get_task(task_id)
+    def get_next_tasks(self, task_id):
+        task_flow_item = self.get_task_flow_item(task_id)
 
-        if task['state'] not in states.COMPLETED_STATES:
+        if not task_flow_item or task_flow_item.get('state') not in states.COMPLETED_STATES:
             return []
 
-        context = dict_utils.merge_dicts(
-            context or {},
-            {'__task_states': self.get_task_attributes('state')},
-            overwrite=True
-        )
+        next_tasks = []
+        outbounds = self.get_next_transitions(task_id)
 
-        tasks = []
-        outbounds = []
+        for next_seq in outbounds:
+            next_task_id, seq_key = next_seq[1], next_seq[2]
+            task_transition_id = next_task_id + '__' + str(seq_key)
 
-        for seq in self.get_next_transitions(task_id):
-            evaluated_criteria = [
-                expressions.evaluate(criterion, context)
-                for criterion in seq[3]['criteria']
-            ]
+            # Evaluate if outbound criteria is satisfied.
+            if not task_flow_item.get(task_transition_id):
+                continue
 
-            if all(evaluated_criteria):
-                outbounds.append(seq)
-
-        for seq in outbounds:
-            next_task_id, seq_key, attrs = seq[1], seq[2], seq[3]
-
-            if not attrs.get('satisfied', False):
-                self.update_transition(task_id, next_task_id, key=seq_key, satisfied=True)
-
+            # Evaluate if the next task has a barrier waiting for other tasks to complete.
             if self.has_barrier(next_task_id):
                 barrier = self.get_barrier(next_task_id)
                 inbounds = self.get_prev_transitions(next_task_id)
-                satisfied = [s for s in inbounds if s[3].get('satisfied')]
+
                 barrier = len(inbounds) if barrier == '*' else barrier
+                satisfied = []
+
+                for prev_seq in inbounds:
+                    prev_task_flow_item = self.get_task_flow_item(prev_seq[0])
+
+                    if prev_task_flow_item:
+                        prev_task_transition_id = prev_seq[1] + '__' + str(prev_seq[2])
+                        satisfied.append(prev_task_flow_item.get(prev_task_transition_id))
 
                 if len(satisfied) < barrier:
                     continue
 
             next_task = self.get_task(next_task_id)
-            tasks.append({'id': next_task_id, 'name': next_task['name']})
+            next_tasks.append({'id': next_task_id, 'name': next_task['name']})
 
-        return sorted(tasks, key=lambda x: x['name'])
+        return sorted(next_tasks, key=lambda x: x['name'])
 
     def has_transition(self, source, destination, criteria=None):
         return [
@@ -178,10 +161,10 @@ class WorkflowGraph(object):
         ]
 
         if not seqs:
-            raise Exception('Task transition does not exist.')
+            raise exc.InvalidTaskTransition(source, destination)
 
         if len(seqs) > 1:
-            raise Exception('More than one task transitions found.')
+            raise exc.AmbiguousTaskTransition(source, destination)
 
         return seqs[0]
 
@@ -198,7 +181,7 @@ class WorkflowGraph(object):
         seqs = self.has_transition(source, destination, criteria)
 
         if len(seqs) > 1:
-            raise Exception('More than one task transitions found.')
+            raise exc.AmbiguousTaskTransition(source, destination)
 
         if not seqs:
             self._graph.add_edge(source, destination, criteria=criteria)
@@ -236,3 +219,73 @@ class WorkflowGraph(object):
 
     def in_cycle(self, task_id):
         return [c for c in nx.simple_cycles(self._graph) if task_id in c]
+
+    @property
+    def state(self):
+        return self._flow.get('state', None)
+
+    @state.setter
+    def state(self, value):
+        if not states.is_valid(value):
+            raise exc.InvalidState(value)
+
+        if not states.is_transition_valid(self.state, value):
+            raise exc.InvalidStateTransition(self.state, value)
+
+        self._flow['state'] = value
+
+    @property
+    def sequence(self):
+        return self._flow['sequence']
+
+    def get_task_flow_idx(self, task_id):
+        return self._flow['tasks'].get(task_id)
+
+    def get_task_flow_item(self, task_id):
+        flow_idx = self.get_task_flow_idx(task_id)
+
+        return self.sequence[flow_idx] if flow_idx is not None else None
+
+    def add_task_flow_item(self, task_id):
+        if not self.has_task(task_id):
+            raise exc.InvalidTask(task_id)
+
+        task_flow_item = {'id': task_id}
+        self.sequence.append(task_flow_item)
+        self._flow['tasks'][task_id] = len(self.sequence) - 1
+
+        return task_flow_item
+
+    def update_task_flow_item(self, task_id, state, context=None):
+        if not states.is_valid(state):
+            raise exc.InvalidState(state)
+
+        task_flow_item = self.get_task_flow_item(task_id)
+
+        # Create new task flow entry if it does not exist.
+        if not task_flow_item:
+            task_flow_item = self.add_task_flow_item(task_id)
+
+        # If task is already completed and in cycle, then create new task flow entry.
+        if self.in_cycle(task_id) and task_flow_item.get('state') in states.COMPLETED_STATES:
+            task_flow_item = self.add_task_flow_item(task_id)
+
+        # Check if the task state change is valid.
+        if not states.is_transition_valid(task_flow_item.get('state'), state):
+            raise exc.InvalidStateTransition(task_flow_item.get('state'), state)
+
+        task_flow_item['state'] = state
+
+        # Evaluate task transitions if task is in completed state.
+        if state in states.COMPLETED_STATES:
+            # Setup context for evaluating expressions in task transition criteria.
+            ctx = dict_utils.merge_dicts(context or {}, {'__flow': self._flow}, overwrite=True)
+
+            # Iterate thru each outbound task transitions.
+            for t in self.get_next_transitions(task_id):
+                criteria = t[3].get('criteria') or []
+                evaluated_criteria = [expressions.evaluate(c, ctx) for c in criteria]
+                task_transition_id = t[1] + '__' + str(t[2])
+                task_flow_item[task_transition_id] = all(evaluated_criteria)
+
+        return task_flow_item
