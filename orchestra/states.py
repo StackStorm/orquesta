@@ -124,7 +124,7 @@ def is_transition_valid(old_state, new_state):
         raise exc.InvalidState(new_state)
 
     if old_state not in VALID_STATE_TRANSITION_MAP:
-        raise exc.InvalidStateTransition(old_state, new_state)
+        return False
 
     if old_state == new_state or new_state in VALID_STATE_TRANSITION_MAP[old_state]:
         return True

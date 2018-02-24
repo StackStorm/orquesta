@@ -32,8 +32,8 @@ class FailedStateTransitionTest(unittest.TestCase):
         self.assertRaises(exc.InvalidState, states.is_transition_valid, 'foobar', states.REQUESTED)
         self.assertRaises(exc.InvalidState, states.is_transition_valid, states.UNSET, 'foobar')
 
-    def test_invalid_state_transition(self):
-        self.assertRaises(exc.InvalidStateTransition, states.is_transition_valid, 'mock', None)
+    def test_original_state_not_in_transition_map(self):
+        self.assertFalse(states.is_transition_valid('mock', None))
 
 
 class StateTransitionTest(unittest.TestCase):
