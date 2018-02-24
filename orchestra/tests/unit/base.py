@@ -59,7 +59,8 @@ class WorkflowGraphTest(unittest.TestCase):
         return wf_graph_meta
 
     def assert_graph_equal(self, wf_graph, expected_wf_graph):
-        wf_graph_meta = self._zip_wf_graph_meta(wf_graph.serialize())
+        wf_graph_json = wf_graph.serialize()
+        wf_graph_meta = self._zip_wf_graph_meta(wf_graph_json.get('graph', {}))
         expected_wf_graph_meta = self._zip_wf_graph_meta(expected_wf_graph)
 
         self.assertListEqual(wf_graph_meta, expected_wf_graph_meta)
@@ -137,7 +138,6 @@ class WorkflowConductorTest(WorkflowComposerTest):
         wf_ex_graph_json = wf_ex_graph.serialize()
 
         context = {}
-        actual_task_seq = []
         q = queue.Queue()
         ctx_q = queue.Queue()
         state_q = queue.Queue()
@@ -162,30 +162,28 @@ class WorkflowConductorTest(WorkflowComposerTest):
         wf_ex_graph_json = wf_ex_graph.serialize()
 
         while not q.empty():
-            completed_task = q.get()
+            current_task = q.get()
+            current_task_id = current_task['id']
 
             # deserialize workflow execution graph to mock async execution
             wf_ex_graph = graphing.WorkflowGraph.deserialize(wf_ex_graph_json)
 
-            # check if task is in cycle
-            if wf_ex_graph.in_cycle(completed_task['id']):
-                wf_ex_graph.reset_task(completed_task['id'])
-
             # set task state to running
-            wf_ex_graph.update_task(completed_task['id'], state=states.RUNNING)
+            wf_ex_graph.update_task_flow_item(current_task_id, states.RUNNING)
 
-            # mock completion of the task
-            state = state_q.get() if not state_q.empty() else states.SUCCEEDED
-            wf_ex_graph.update_task(completed_task['id'], state=state)
-            actual_task_seq.append(completed_task['id'])
-
+            # setup context
             if not ctx_q.empty():
                 context = ctx_q.get()
 
             # set current task in context
-            context = ctx.set_current_task(context, completed_task)
+            context = ctx.set_current_task(context, current_task)
 
-            next_tasks = wf_ex_graph.get_next_tasks(completed_task['id'], context=context)
+            # mock completion of the task
+            state = state_q.get() if not state_q.empty() else states.SUCCEEDED
+            wf_ex_graph.update_task_flow_item(current_task_id, state, context)
+
+            # identify the next set of tasks
+            next_tasks = wf_ex_graph.get_next_tasks(current_task_id)
 
             for next_task in next_tasks:
                 q.put(next_task)
@@ -193,4 +191,4 @@ class WorkflowConductorTest(WorkflowComposerTest):
             # serialize workflow execution graph to mock async execution
             wf_ex_graph_json = wf_ex_graph.serialize()
 
-        self.assertListEqual(expected_task_seq, actual_task_seq)
+        self.assertListEqual(expected_task_seq, [entry['id'] for entry in wf_ex_graph.sequence])

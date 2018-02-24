@@ -40,8 +40,29 @@ class ContextValueError(Exception):
     pass
 
 
+class InvalidTask(Exception):
+
+    def __init__(self, task_id):
+        Exception.__init__(self, 'Task "%s" does not exist.' % task_id)
+
+
+class InvalidTaskTransition(Exception):
+
+    def __init__(self, src, dest):
+        Exception.__init__(self, 'Task transition from "%s" to "%s" does not exist.' % (src, dest))
+
+
+class AmbiguousTaskTransition(Exception):
+
+    def __init__(self, src, dest):
+        message = 'More than one task transitions found from "%s" to "%s".' % (src, dest)
+        Exception.__init__(self, message)
+
+
 class InvalidState(Exception):
-    pass
+
+    def __init__(self, value):
+        Exception.__init__(self, 'State "%s" is not valid.' % value)
 
 
 class InvalidStateTransition(Exception):

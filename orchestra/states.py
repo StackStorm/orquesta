@@ -106,6 +106,10 @@ VALID_STATE_TRANSITION_MAP = {
 }
 
 
+def is_valid(state):
+    return (state is None or state in ALL_STATES)
+
+
 def is_transition_valid(old_state, new_state):
     if old_state is None:
         old_state = 'null'
@@ -114,13 +118,13 @@ def is_transition_valid(old_state, new_state):
         new_state = 'null'
 
     if old_state not in ALL_STATES:
-        raise exc.InvalidState('State "%s" is not valid.', old_state)
+        raise exc.InvalidState(old_state)
 
     if old_state not in VALID_STATE_TRANSITION_MAP:
-        raise exc.InvalidState('State "%s" is not in transition map.', old_state)
+        raise exc.InvalidState(old_state)
 
     if new_state not in ALL_STATES:
-        raise exc.InvalidState('State "%s" is not valid.', new_state)
+        raise exc.InvalidState(new_state)
 
     if old_state == new_state or new_state in VALID_STATE_TRANSITION_MAP[old_state]:
         return True

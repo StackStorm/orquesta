@@ -24,9 +24,18 @@ def _get_current_task(context):
 
 
 def task_state_(context, task_id):
-    task_states = context['__task_states'] or {}
+    task_flow = context['__flow'] or {}
+    task_flow_item_idx = task_flow['tasks'].get(task_id)
 
-    return task_states.get(task_id, states.UNSET)
+    if task_flow_item_idx is None:
+        return states.UNSET
+
+    task_flow_item = task_flow['sequence'][task_flow_item_idx]
+
+    if task_flow_item is None:
+        return states.UNSET
+
+    return task_flow_item.get('state', states.UNSET)
 
 
 def succeeded_(context):
