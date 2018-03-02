@@ -15,22 +15,30 @@ from orchestra import states
 
 
 def _get_current_task(context):
+    if not context:
+        raise exceptions.ContextValueError('The context is not set.')
+
     current_task = context['__current_task'] or {}
 
     if not current_task:
-        raise exceptions.ContextValueError('The current task is unset in the context.')
+        raise exceptions.ContextValueError('The current task is not set in the context.')
 
     return current_task
 
 
 def task_state_(context, task_id):
+    if not context:
+        return states.UNSET
+
     task_flow = context['__flow'] or {}
-    task_flow_item_idx = task_flow['tasks'].get(task_id)
+    task_flow_pointers = task_flow.get('tasks') or {}
+    task_flow_item_idx = task_flow_pointers.get(task_id)
 
     if task_flow_item_idx is None:
         return states.UNSET
 
-    task_flow_item = task_flow['sequence'][task_flow_item_idx]
+    task_flow_seqs = task_flow.get('sequence') or []
+    task_flow_item = task_flow_seqs[task_flow_item_idx]
 
     if task_flow_item is None:
         return states.UNSET
