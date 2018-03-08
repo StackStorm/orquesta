@@ -69,3 +69,8 @@ class InvalidStateTransition(Exception):
 
     def __init__(self, old, new):
         Exception.__init__(self, 'State transition from "%s" to "%s" is invalid.' % (old, new))
+
+
+class WorkflowInspectionError(Exception):
+    def __init__(self, errors):
+        Exception.__init__(self, 'Workflow definition failed inspection.', errors)

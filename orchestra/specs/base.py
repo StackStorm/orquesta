@@ -218,7 +218,7 @@ class Spec(object):
             if parent else 'properties.' + prop_name
         )
 
-    def inspect(self):
+    def inspect(self, raise_exception=False):
         errors = {}
 
         syntax_errors = sorted(self.inspect_syntax(), key=lambda e: e['schema_path'])
@@ -235,6 +235,9 @@ class Spec(object):
 
         if ctx_errors:
             errors['context'] = ctx_errors
+
+        if errors and raise_exception:
+            raise exc.WorkflowInspectionError(errors)
 
         return errors
 

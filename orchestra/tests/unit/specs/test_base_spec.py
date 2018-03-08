@@ -14,6 +14,7 @@ import six
 import unittest
 import yaml
 
+from orchestra import exceptions as exc
 from orchestra.specs import types
 from orchestra.specs import base
 
@@ -624,3 +625,111 @@ class SpecTest(unittest.TestCase):
         spec_obj = MockSpec(spec)
 
         self.assertDictEqual(spec_obj.inspect(), errors)
+
+    def test_spec_invalid_raise_exception(self):
+        spec = {
+            'name': 'mock',
+            'version': None,
+            'description': 'This is a mock spec.',
+            'inputs': [
+                'x',
+                {'y': 'polo'}
+            ],
+            'vars': {
+                'var1': 'foobar',
+                'var2': '<% $.x %>',
+                'var3': '<% $.y %>'
+            },
+            'attr2': {
+                'macro': 'polo'
+            },
+            'attr3': [
+                '<% 1 +/ 2 %> and <% {"a": 123} %>'
+            ],
+            'attr4': [
+                {'var1': '<% $.fubar %>'}
+            ],
+            'attr5': {
+                'attr1': {
+                    'attr1': '<% <% $.var1 %> %>',
+                    'attr2': '<% $.foobar %>'
+                }
+            }
+        }
+
+        errors = {
+            'syntax': [
+                {
+                    'spec_path': 'version',
+                    'schema_path': 'properties.version.anyOf',
+                    'message': 'None is not valid under any '
+                               'of the given schemas',
+                },
+                {
+                    'spec_path': None,
+                    'schema_path': 'required',
+                    'message': '\'attr1\' is a required property'
+                }
+            ],
+            'expressions': [
+                {
+                    'type': 'yaql',
+                    'expression': '<% 1 +/ 2 %>',
+                    'spec_path': 'attr3',
+                    'schema_path': 'properties.attr3',
+                    'message': 'Parse error: unexpected \'/\' at '
+                               'position 3 of expression \'1 +/ 2\''
+                },
+                {
+                    'type': 'yaql',
+                    'expression': '<% {"a": 123} %>',
+                    'spec_path': 'attr3',
+                    'schema_path': 'properties.attr3',
+                    'message': 'Lexical error: illegal character '
+                               '\':\' at position 4',
+                },
+                {
+                    'type': 'yaql',
+                    'expression': '<% <% $.var1 %>',
+                    'spec_path': 'attr5.attr1.attr1',
+                    'schema_path': (
+                        'properties.attr5.'
+                        'properties.attr1.'
+                        'properties.attr1'
+                    ),
+                    'message': 'Parse error: unexpected \'<\' at position 0 '
+                               'of expression \'<% $.var1\''
+                }
+            ],
+            'context': [
+                {
+                    'type': 'yaql',
+                    'expression': '<% $.fubar %>',
+                    'spec_path': 'attr4',
+                    'schema_path': 'properties.attr4',
+                    'message': 'Variable "fubar" is referenced '
+                               'before assignment.'
+                },
+                {
+                    'type': 'yaql',
+                    'expression': '<% $.foobar %>',
+                    'spec_path': 'attr5.attr1.attr2',
+                    'schema_path': (
+                        'properties.attr5.'
+                        'properties.attr1.'
+                        'properties.attr2'
+                    ),
+                    'message': 'Variable "foobar" is referenced '
+                               'before assignment.'
+                }
+            ]
+        }
+
+        spec_obj = MockSpec(spec)
+
+        with self.assertRaises(exc.WorkflowInspectionError) as ctx:
+            spec_obj.inspect(raise_exception=True)
+
+        self.assertEqual(len(ctx.exception.args), 2)
+        self.assertEqual(ctx.exception.args[0], 'Workflow definition failed inspection.')
+        self.assertDictEqual(ctx.exception.args[1], errors)
