@@ -26,6 +26,10 @@ def instantiate(definition):
     return WorkflowSpec(definition)
 
 
+def deserialize(data):
+    return WorkflowSpec.deserialize(data)
+
+
 class TaskTransitionSpec(base.Spec):
     _schema = {
         'type': 'object',

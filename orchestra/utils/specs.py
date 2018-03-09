@@ -46,3 +46,10 @@ def instantiate(spec_type, definition):
         raise ValueError('Workflow definition contains no workflow.')
 
     return spec_module.instantiate(definition)
+
+
+def deserialize(data):
+    spec_type = data.get('catalog')
+    spec_module = loader.get_spec_module(spec_type)
+
+    return spec_module.deserialize(data)

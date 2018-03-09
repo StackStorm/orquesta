@@ -96,3 +96,13 @@ class SpecsUtilTest(base.WorkflowSpecTest):
             self.spec_module_name,
             wf_def
         )
+
+    def test_deserialize(self):
+        wf_name = 'basic'
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec_1 = specs.instantiate(self.spec_module_name, wf_def)
+        wf_spec_2 = specs.deserialize(wf_spec_1.serialize())
+
+        self.assertIsInstance(wf_spec_2, self.spec_module.WorkflowSpec)
+        self.assertEqual(wf_name, wf_spec_2.name)
+        self.assertDictEqual(wf_def[wf_name], wf_spec_2.spec)

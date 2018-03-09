@@ -14,12 +14,13 @@ from orchestra.specs.mistral.v2 import base
 from orchestra.specs.mistral.v2.tasks import TaskSpec
 from orchestra.specs.mistral.v2.tasks import TaskDefaultsSpec
 from orchestra.specs.mistral.v2.workflows import WorkflowSpec
-from orchestra.specs.mistral.v2.workflows import instantiate
+from orchestra.specs.mistral.v2.workflows import instantiate, deserialize
 
 VERSION = base.Spec.get_version()
 
 __all__ = [
     instantiate.__name__,
+    deserialize.__name__,
     WorkflowSpec.__name__,
     TaskDefaultsSpec.__name__,
     TaskSpec.__name__
