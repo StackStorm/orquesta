@@ -98,6 +98,13 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
         self.assertEqual(task3.action, 'std.noop')
         self.assertIsNone(getattr(task3, 'next'))
 
+    def test_basic_spec_serialization(self):
+        wf_name = 'sequential'
+        wf_spec_1 = self.get_wf_spec(wf_name)
+        wf_spec_2 = specs.WorkflowSpec.deserialize(wf_spec_1.serialize())
+
+        self.assertDictEqual(wf_spec_2.serialize(), wf_spec_1.serialize())
+
     def test_get_start_tasks(self):
         wf_name = 'split'
         wf_spec = self.get_wf_spec(wf_name)

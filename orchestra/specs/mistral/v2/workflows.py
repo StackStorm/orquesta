@@ -31,6 +31,10 @@ def instantiate(definition):
     return WorkflowSpec(wf_spec, name=wf_name)
 
 
+def deserialize(data):
+    return WorkflowSpec.deserialize(data)
+
+
 class WorkflowSpec(base.Spec):
     _schema = {
         'type': 'object',

@@ -140,6 +140,31 @@ class Spec(object):
                 if re.match(pattern, name) and value:
                     setattr(self, name, spec_cls(value, member=True))
 
+    def serialize(self):
+        value = {
+            'catalog': self.get_catalog(),
+            'version': self.get_version(),
+            'spec': self.spec
+        }
+
+        if hasattr(self, 'name') and self.name:
+            value['name'] = self.name
+
+        if hasattr(self, 'member') and self.member:
+            value['member'] = self.member
+
+        return value
+
+    @classmethod
+    def deserialize(cls, data):
+        if data.get('catalog') != cls.get_catalog():
+            raise ValueError('Serialized spec catalog does not match "%s".' % cls.get_catalog())
+
+        if data.get('version') != cls.get_version():
+            raise ValueError('Serialized spec version does not match "%s".' % cls.get_version())
+
+        return cls(data['spec'], name=data.get('name'), member=data.get('member', False))
+
     @classmethod
     def get_catalog(cls):
         return cls._catalog
