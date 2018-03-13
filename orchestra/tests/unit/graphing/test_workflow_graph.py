@@ -141,48 +141,57 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
     def _add_barriers(self, wf_graph):
         wf_graph.update_task('task5', barrier='*')
 
-    def _prep_graph(self, wf_graph):
+    def _prep_graph(self):
+        wf_graph = graphing.WorkflowGraph()
+
         self._add_tasks(wf_graph)
         self._add_transitions(wf_graph)
         self._add_barriers(wf_graph)
 
-    def test_basic_graph(self):
-        wf_graph = graphing.WorkflowGraph()
-        self._prep_graph(wf_graph)
+        return wf_graph
+
+    def test_graph(self):
+        wf_graph = self._prep_graph()
 
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
+    def test_graph_roots(self):
+        wf_graph = self._prep_graph()
+
+        expected = [{'id': 'task1', 'name': 'task1'}]
+
+        self.assertListEqual(wf_graph.roots, expected)
+
     def test_skip_add_tasks(self):
         wf_graph = graphing.WorkflowGraph()
+
         self._add_transitions(wf_graph)
         self._add_barriers(wf_graph)
 
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
     def test_duplicate_add_tasks(self):
-        wf_graph = graphing.WorkflowGraph()
+        wf_graph = self._prep_graph()
+
         self._add_tasks(wf_graph)
-        self._prep_graph(wf_graph)
 
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
     def test_duplicate_add_transitions(self):
-        wf_graph = graphing.WorkflowGraph()
-        self._prep_graph(wf_graph)
+        wf_graph = self._prep_graph()
+
         self._add_transitions(wf_graph)
 
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
     def test_get_task(self):
-        wf_graph = graphing.WorkflowGraph()
-        self._prep_graph(wf_graph)
+        wf_graph = self._prep_graph()
 
         expected = {'id': 'task1'}
         self.assertDictEqual(wf_graph.get_task('task1'), expected)
 
     def test_get_nonexistent_task(self):
-        wf_graph = graphing.WorkflowGraph()
-        self._prep_graph(wf_graph)
+        wf_graph = self._prep_graph()
 
         self.assertRaises(
             exc.InvalidTask,
@@ -191,8 +200,7 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         )
 
     def test_update_task(self):
-        wf_graph = graphing.WorkflowGraph()
-        self._prep_graph(wf_graph)
+        wf_graph = self._prep_graph()
 
         expected = {'id': 'task1'}
         self.assertDictEqual(wf_graph.get_task('task1'), expected)
@@ -208,8 +216,7 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         self.assertDictEqual(wf_graph.get_task('task1'), expected)
 
     def test_update_nonexistent_task(self):
-        wf_graph = graphing.WorkflowGraph()
-        self._prep_graph(wf_graph)
+        wf_graph = self._prep_graph()
 
         self.assertRaises(
             exc.InvalidTask,
@@ -219,8 +226,7 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         )
 
     def test_get_task_attributes(self):
-        wf_graph = graphing.WorkflowGraph()
-        self._prep_graph(wf_graph)
+        wf_graph = self._prep_graph()
 
         wf_graph.update_task('task1', attr1='foobar')
         wf_graph.update_task('task2', attr1='foobar')
@@ -240,24 +246,14 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
 
         self.assertDictEqual(wf_graph.get_task_attributes('attr1'), expected)
 
-    def test_get_start_tasks(self):
-        wf_graph = graphing.WorkflowGraph()
-        self._prep_graph(wf_graph)
-
-        expected_start_tasks = [{'id': 'task1', 'name': 'task1'}]
-
-        self.assertListEqual(wf_graph.get_start_tasks(), expected_start_tasks)
-
     def test_get_transition(self):
-        wf_graph = graphing.WorkflowGraph()
-        self._prep_graph(wf_graph)
+        wf_graph = self._prep_graph()
 
         expected = ('task1', 'task2', 0, {'criteria': None})
         self.assertEqual(wf_graph.get_transition('task1', 'task2'), expected)
 
     def test_get_nonexistent_transition(self):
-        wf_graph = graphing.WorkflowGraph()
-        self._prep_graph(wf_graph)
+        wf_graph = self._prep_graph()
 
         self.assertRaises(
             exc.InvalidTaskTransition,
@@ -268,7 +264,9 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
 
     def test_get_ambiguous_transition(self):
         wf_graph = graphing.WorkflowGraph()
+
         self._add_tasks(wf_graph)
+
         wf_graph._graph.add_edge('task1', 'task2')
         wf_graph._graph.add_edge('task1', 'task2')
 
@@ -281,7 +279,9 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
 
     def test_add_ambiguous_transition(self):
         wf_graph = graphing.WorkflowGraph()
+
         self._add_tasks(wf_graph)
+
         wf_graph._graph.add_edge('task1', 'task2')
         wf_graph._graph.add_edge('task1', 'task2')
 
@@ -293,8 +293,7 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         )
 
     def test_get_next_transitions(self):
-        wf_graph = graphing.WorkflowGraph()
-        self._prep_graph(wf_graph)
+        wf_graph = self._prep_graph()
 
         expected_transitions = [
             ('task1', 'task2', 0, {'criteria': None}),
@@ -309,8 +308,7 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         )
 
     def test_get_prev_transitions(self):
-        wf_graph = graphing.WorkflowGraph()
-        self._prep_graph(wf_graph)
+        wf_graph = self._prep_graph()
 
         expected_transitions = [
             ('task3', 'task5', 0, {'criteria': None}),
@@ -323,15 +321,13 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         )
 
     def test_barrier_task(self):
-        wf_graph = graphing.WorkflowGraph()
-        self._prep_graph(wf_graph)
+        wf_graph = self._prep_graph()
 
         self.assertTrue(wf_graph.has_barrier('task5'))
         self.assertFalse(wf_graph.has_barrier('task9'))
 
     def test_split_from_reused_task(self):
-        wf_graph = graphing.WorkflowGraph()
-        self._prep_graph(wf_graph)
+        wf_graph = self._prep_graph()
 
         self.assertFalse(
             len(wf_graph.get_prev_transitions('task5')) > 1 and
