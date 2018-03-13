@@ -11,8 +11,8 @@
 # limitations under the License.
 
 from orchestra.specs import base
-from orchestra.specs.mock.workflows import instantiate, deserialize
-from orchestra.specs.mock.workflows import WorkflowSpec
+from orchestra.specs.mock.models import instantiate, deserialize
+from orchestra.specs.mock.models import WorkflowSpec
 
 VERSION = base.Spec.get_version()
 

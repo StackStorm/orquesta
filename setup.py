@@ -63,7 +63,8 @@ setup(
     entry_points={
         'orchestra.composers': [
             'native = orchestra.composers.native:WorkflowComposer',
-            'mistral = orchestra.composers.mistral:WorkflowComposer'
+            'mistral = orchestra.composers.mistral:WorkflowComposer',
+            'mock = orchestra.composers.mock:WorkflowComposer'
         ],
         'orchestra.expressions.evaluators': [
             'yaql = orchestra.expressions.yql:YAQLEvaluator',

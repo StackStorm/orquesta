@@ -89,7 +89,7 @@ class WorkflowComposer(base.WorkflowComposer):
         def _create_task_ex_name(task_name, split_id):
             return task_name + '__' + str(split_id) if split_id > 0 else task_name
 
-        for task in wf_graph.get_start_tasks():
+        for task in wf_graph.roots:
             q.put((task['id'], None, None, []))
 
         while not q.empty():

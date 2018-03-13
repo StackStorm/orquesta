@@ -15,7 +15,7 @@ import six
 from six.moves import queue
 import unittest
 
-from orchestra import graphing
+from orchestra import conducting
 from orchestra.expressions import base as expressions
 from orchestra.specs import loader as specs_loader
 from orchestra import states
@@ -60,7 +60,7 @@ class WorkflowGraphTest(unittest.TestCase):
 
     def assert_graph_equal(self, wf_graph, expected_wf_graph):
         wf_graph_json = wf_graph.serialize()
-        wf_graph_meta = self._zip_wf_graph_meta(wf_graph_json.get('graph', {}))
+        wf_graph_meta = self._zip_wf_graph_meta(wf_graph_json)
         expected_wf_graph_meta = self._zip_wf_graph_meta(expected_wf_graph)
 
         self.assertListEqual(wf_graph_meta, expected_wf_graph_meta)
@@ -134,8 +134,9 @@ class WorkflowConductorTest(WorkflowComposerTest):
     def assert_conducting_sequences(self, wf_name, expected_task_seq,
                                     mock_contexts=None, mock_states=None):
 
-        wf_ex_graph = self.compose_wf_ex_graph(wf_name)
-        wf_ex_graph_json = wf_ex_graph.serialize()
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        conductor = conducting.WorkflowConductor(wf_spec)
 
         context = {}
         q = queue.Queue()
@@ -150,45 +151,41 @@ class WorkflowConductorTest(WorkflowComposerTest):
             for item in mock_states:
                 state_q.put(item)
 
-        wf_ex_graph = graphing.WorkflowGraph.deserialize(wf_ex_graph_json)
-
-        # set graph state to running
-        wf_ex_graph.state = states.RUNNING
-
-        for task in wf_ex_graph.get_start_tasks():
+        # Get start tasks and being conducting workflow.
+        for task in conductor.get_start_tasks():
             q.put(task)
 
-        # serialize workflow execution graph to mock async execution
-        wf_ex_graph_json = wf_ex_graph.serialize()
+        # Serialize workflow conductor to mock async execution.
+        wf_conducting_state = conductor.serialize()
 
         while not q.empty():
             current_task = q.get()
             current_task_id = current_task['id']
 
-            # deserialize workflow execution graph to mock async execution
-            wf_ex_graph = graphing.WorkflowGraph.deserialize(wf_ex_graph_json)
+            # Deserialize workflow conductor to mock async execution.
+            conductor = conducting.WorkflowConductor.deserialize(wf_conducting_state)
 
-            # set task state to running
-            wf_ex_graph.update_task_flow_item(current_task_id, states.RUNNING)
+            # Set task state to running.
+            conductor.update_task_flow_entry(current_task_id, states.RUNNING)
 
-            # setup context
+            # Setup context.
             if not ctx_q.empty():
                 context = ctx_q.get()
 
-            # set current task in context
+            # Set current task in context.
             context = ctx.set_current_task(context, current_task)
 
-            # mock completion of the task
+            # Mock completion of the task.
             state = state_q.get() if not state_q.empty() else states.SUCCEEDED
-            wf_ex_graph.update_task_flow_item(current_task_id, state, context)
+            conductor.update_task_flow_entry(current_task_id, state, context)
 
-            # identify the next set of tasks
-            next_tasks = wf_ex_graph.get_next_tasks(current_task_id)
+            # Identify the next set of tasks.
+            next_tasks = conductor.get_next_tasks(current_task_id)
 
             for next_task in next_tasks:
                 q.put(next_task)
 
-            # serialize workflow execution graph to mock async execution
-            wf_ex_graph_json = wf_ex_graph.serialize()
+            # Serialize workflow execution graph to mock async execution.
+            wf_conducting_state = conductor.serialize()
 
-        self.assertListEqual(expected_task_seq, [entry['id'] for entry in wf_ex_graph.sequence])
+        self.assertListEqual(expected_task_seq, [entry['id'] for entry in conductor.flow.sequence])
