@@ -59,6 +59,7 @@ class WorkflowConductorBasicTest(base.WorkflowConductorTest):
         expected_data = {
             'spec': conductor.spec.serialize(),
             'graph': conductor.graph.serialize(),
+            'state': conductor.state,
             'flow': conductor.flow.serialize()
         }
 
@@ -71,6 +72,7 @@ class WorkflowConductorBasicTest(base.WorkflowConductorTest):
         self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
+        self.assertEqual(conductor.state, states.SUCCEEDED)
         self.assertIsInstance(conductor.flow, conducting.TaskFlow)
         self.assertEqual(len(conductor.flow.sequence), 5)
 
