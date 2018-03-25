@@ -137,6 +137,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
         conductor = conducting.WorkflowConductor(wf_spec)
+        conductor.set_workflow_state(states.RUNNING)
 
         context = {}
         q = queue.Queue()
@@ -189,3 +190,24 @@ class WorkflowConductorTest(WorkflowComposerTest):
             wf_conducting_state = conductor.serialize()
 
         self.assertListEqual(expected_task_seq, [entry['id'] for entry in conductor.flow.sequence])
+
+    def assert_workflow_state(self, wf_name, mock_flow_entries, expected_wf_states):
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        conductor = conducting.WorkflowConductor(wf_spec)
+        conductor.set_workflow_state(states.RUNNING)
+
+        for task_flow_entry, expected_wf_state in zip(mock_flow_entries, expected_wf_states):
+            task_id = task_flow_entry['id']
+            task_name = task_flow_entry['name']
+            task_state = task_flow_entry['state']
+            context = ctx.set_current_task(dict(), {'id': task_id, 'name': task_name})
+            conductor.update_task_flow_entry(task_id, task_state, context)
+
+            err_ctx = (
+                'Workflow state "%s" is not the expected state "%s". '
+                'Updated task "%s" with state "%s".' %
+                (conductor.state, expected_wf_state, task_id, task_state)
+            )
+
+            self.assertEqual(conductor.state, expected_wf_state, err_ctx)
