@@ -31,11 +31,13 @@ class TaskFlow(object):
     def __init__(self):
         self.tasks = dict()
         self.sequence = list()
+        self.ready = list()
 
     def serialize(self):
         return {
             'tasks': copy.deepcopy(self.tasks),
-            'sequence': copy.deepcopy(self.sequence)
+            'sequence': copy.deepcopy(self.sequence),
+            'ready': copy.deepcopy(self.ready)
         }
 
     @classmethod
@@ -43,6 +45,7 @@ class TaskFlow(object):
         instance = cls()
         instance.tasks = copy.deepcopy(data.get('tasks', dict()))
         instance.sequence = copy.deepcopy(data.get('sequence', list()))
+        instance.ready = copy.deepcopy(data.get('ready', list()))
 
         return instance
 
@@ -106,6 +109,9 @@ class WorkflowConductor(object):
         self._workflow_state = value
 
     def get_start_tasks(self):
+        if self.state not in states.RUNNING_STATES:
+            return []
+
         tasks = [
             {'id': n, 'name': self.graph._graph.node[n].get('name', n)}
             for n, d in self.graph._graph.in_degree().items() if d == 0
@@ -114,6 +120,9 @@ class WorkflowConductor(object):
         return sorted(tasks, key=lambda x: x['name'])
 
     def get_next_tasks(self, task_id):
+        if self.state not in states.RUNNING_STATES:
+            return []
+
         task_flow_entry = self.get_task_flow_entry(task_id)
 
         if not task_flow_entry or task_flow_entry.get('state') not in states.COMPLETED_STATES:
@@ -191,6 +200,10 @@ class WorkflowConductor(object):
 
         task_flow_entry['state'] = state
 
+        # Remove the task from the ready list if it becomes active.
+        if state in states.ACTIVE_STATES and task_id in self.flow.ready:
+            self.flow.ready.remove(task_id)
+
         # Evaluate task transitions if task is in completed state.
         if state in states.COMPLETED_STATES:
             # Setup context for evaluating expressions in task transition criteria.
@@ -206,6 +219,8 @@ class WorkflowConductor(object):
                 evaluated_criteria = [expressions.evaluate(c, ctx) for c in criteria]
                 task_transition_id = t[1] + '__' + str(t[2])
                 task_flow_entry[task_transition_id] = all(evaluated_criteria)
+                if task_flow_entry[task_transition_id]:
+                    self.flow.ready.append(t[1])
 
         # Identify if there are task transitions.
         any_next_tasks = False
@@ -218,6 +233,9 @@ class WorkflowConductor(object):
 
         # Identify if there are any other active tasks.
         any_active_tasks = any([t['state'] in states.ACTIVE_STATES for t in self.flow.sequence])
+
+        # Identify if there are any other ready tasks.
+        any_ready_tasks = len(self.flow.ready) > 0
 
         # Update workflow state.
         state = self.state
@@ -239,7 +257,8 @@ class WorkflowConductor(object):
         elif task_flow_entry['state'] in states.ABENDED_STATES:
             state = states.RUNNING if any_next_tasks else states.FAILED
         elif task_flow_entry['state'] == states.SUCCEEDED:
-            state = states.RUNNING if any_active_tasks or any_next_tasks else states.SUCCEEDED
+            is_wf_running = any_active_tasks or any_next_tasks or any_ready_tasks
+            state = states.RUNNING if is_wf_running else states.SUCCEEDED
 
         if self.state != state and states.is_transition_valid(self.state, state):
             self.set_workflow_state(state)

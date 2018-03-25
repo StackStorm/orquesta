@@ -49,7 +49,7 @@ class WorkflowConductorBasicTest(base.WorkflowConductorTest):
         wf_spec = specs.WorkflowSpec(wf_def)
         wf_graph = self._prep_graph()
 
-        return conducting.WorkflowConductor(wf_spec, graph=wf_graph)
+        return conducting.WorkflowConductor(wf_spec, graph=wf_graph, state=states.RUNNING)
 
     def test_serialization(self):
         conductor = self._prep_conductor()
@@ -83,6 +83,30 @@ class WorkflowConductorBasicTest(base.WorkflowConductorTest):
 
         self.assertListEqual(conductor.get_start_tasks(), expected)
 
+    def test_get_start_tasks_when_graph_paused(self):
+        conductor = self._prep_conductor()
+
+        conductor.set_workflow_state(states.PAUSING)
+        self.assertListEqual(conductor.get_start_tasks(), [])
+
+        conductor.set_workflow_state(states.PAUSED)
+        self.assertListEqual(conductor.get_start_tasks(), [])
+
+    def test_get_start_tasks_when_graph_canceled(self):
+        conductor = self._prep_conductor()
+
+        conductor.set_workflow_state(states.CANCELING)
+        self.assertListEqual(conductor.get_start_tasks(), [])
+
+        conductor.set_workflow_state(states.CANCELED)
+        self.assertListEqual(conductor.get_start_tasks(), [])
+
+    def test_get_start_tasks_when_graph_abended(self):
+        conductor = self._prep_conductor()
+
+        conductor.set_workflow_state(states.FAILED)
+        self.assertListEqual(conductor.get_start_tasks(), [])
+
     def test_get_next_tasks(self):
         conductor = self._prep_conductor()
 
@@ -96,3 +120,121 @@ class WorkflowConductorBasicTest(base.WorkflowConductorTest):
             expected = [{'id': next_task_name, 'name': next_task_name}]
 
             self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+
+    def test_get_next_tasks_when_this_task_paused(self):
+        conductor = self._prep_conductor()
+
+        task_name = 'task1'
+        next_task_name = 'task2'
+        context = ctx.set_current_task(dict(), {'id': task_name, 'name': task_name})
+        conductor.update_task_flow_entry(task_name, states.RUNNING, context)
+        conductor.update_task_flow_entry(task_name, states.SUCCEEDED, context)
+        expected = [{'id': next_task_name, 'name': next_task_name}]
+        self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+
+        task_name = 'task2'
+        next_task_name = 'task3'
+        context = ctx.set_current_task(dict(), {'id': task_name, 'name': task_name})
+        conductor.update_task_flow_entry(task_name, states.RUNNING, context)
+        conductor.update_task_flow_entry(task_name, states.PAUSING, context)
+        self.assertListEqual(conductor.get_next_tasks(task_name), [])
+        conductor.update_task_flow_entry(task_name, states.PAUSED, context)
+        self.assertListEqual(conductor.get_next_tasks(task_name), [])
+        conductor.update_task_flow_entry(task_name, states.RESUMING, context)
+        conductor.update_task_flow_entry(task_name, states.RUNNING, context)
+        conductor.update_task_flow_entry(task_name, states.SUCCEEDED, context)
+        expected = [{'id': next_task_name, 'name': next_task_name}]
+        self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+
+    def test_get_next_tasks_when_graph_paused(self):
+        conductor = self._prep_conductor()
+
+        task_name = 'task1'
+        next_task_name = 'task2'
+        context = ctx.set_current_task(dict(), {'id': task_name, 'name': task_name})
+        conductor.update_task_flow_entry(task_name, states.RUNNING, context)
+        conductor.update_task_flow_entry(task_name, states.SUCCEEDED, context)
+
+        expected = [{'id': next_task_name, 'name': next_task_name}]
+        self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+
+        conductor.set_workflow_state(states.PAUSING)
+        self.assertListEqual(conductor.get_next_tasks(task_name), [])
+
+        conductor.set_workflow_state(states.PAUSED)
+        self.assertListEqual(conductor.get_next_tasks(task_name), [])
+
+        conductor.set_workflow_state(states.RESUMING)
+        expected = [{'id': next_task_name, 'name': next_task_name}]
+        self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+
+    def test_get_next_tasks_when_this_task_canceled(self):
+        conductor = self._prep_conductor()
+
+        task_name = 'task1'
+        next_task_name = 'task2'
+        context = ctx.set_current_task(dict(), {'id': task_name, 'name': task_name})
+        conductor.update_task_flow_entry(task_name, states.RUNNING, context)
+        conductor.update_task_flow_entry(task_name, states.SUCCEEDED, context)
+        expected = [{'id': next_task_name, 'name': next_task_name}]
+        self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+
+        task_name = 'task2'
+        context = ctx.set_current_task(dict(), {'id': task_name, 'name': task_name})
+        conductor.update_task_flow_entry(task_name, states.RUNNING, context)
+        conductor.update_task_flow_entry(task_name, states.CANCELING, context)
+        self.assertListEqual(conductor.get_next_tasks(task_name), [])
+        conductor.update_task_flow_entry(task_name, states.CANCELED, context)
+        self.assertListEqual(conductor.get_next_tasks(task_name), [])
+
+    def test_get_next_tasks_when_graph_canceled(self):
+        conductor = self._prep_conductor()
+
+        task_name = 'task1'
+        next_task_name = 'task2'
+        context = ctx.set_current_task(dict(), {'id': task_name, 'name': task_name})
+        conductor.update_task_flow_entry(task_name, states.RUNNING, context)
+        conductor.update_task_flow_entry(task_name, states.SUCCEEDED, context)
+
+        expected = [{'id': next_task_name, 'name': next_task_name}]
+        self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+
+        conductor.set_workflow_state(states.CANCELING)
+        self.assertListEqual(conductor.get_next_tasks(task_name), [])
+
+        conductor.set_workflow_state(states.CANCELED)
+        self.assertListEqual(conductor.get_next_tasks(task_name), [])
+
+    def test_get_next_tasks_when_this_task_abended(self):
+        conductor = self._prep_conductor()
+
+        task_name = 'task1'
+        next_task_name = 'task2'
+        context = ctx.set_current_task(dict(), {'id': task_name, 'name': task_name})
+        conductor.update_task_flow_entry(task_name, states.RUNNING, context)
+        conductor.update_task_flow_entry(task_name, states.SUCCEEDED, context)
+        expected = [{'id': next_task_name, 'name': next_task_name}]
+        self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+
+        task_name = 'task2'
+        conductor.graph.update_transition('task2', 'task3', 0, criteria=['<% succeeded() %>'])
+        context = ctx.set_current_task(dict(), {'id': task_name, 'name': task_name})
+        conductor.update_task_flow_entry(task_name, states.RUNNING, context)
+        conductor.update_task_flow_entry(task_name, states.FAILED, context)
+        self.assertEqual(conductor.state, states.FAILED)
+        self.assertListEqual(conductor.get_next_tasks(task_name), [])
+
+    def test_get_next_tasks_when_graph_abended(self):
+        conductor = self._prep_conductor()
+
+        task_name = 'task1'
+        next_task_name = 'task2'
+        context = ctx.set_current_task(dict(), {'id': task_name, 'name': task_name})
+        conductor.update_task_flow_entry(task_name, states.RUNNING, context)
+        conductor.update_task_flow_entry(task_name, states.SUCCEEDED, context)
+
+        expected = [{'id': next_task_name, 'name': next_task_name}]
+        self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+
+        conductor.set_workflow_state(states.FAILED)
+        self.assertListEqual(conductor.get_next_tasks(task_name), [])

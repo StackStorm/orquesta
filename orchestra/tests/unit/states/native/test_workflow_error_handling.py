@@ -49,8 +49,8 @@ class ErrorHandlingWorkflowStateTest(base.OrchestraWorkflowConductorTest):
         mock_flow_entries = [
             {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
             {'id': 'task1', 'name': 'task1', 'state': states.FAILED},
-            {'id': 'task2', 'name': 'task3', 'state': states.RUNNING},
-            {'id': 'task2', 'name': 'task3', 'state': states.SUCCEEDED}
+            {'id': 'task3', 'name': 'task3', 'state': states.RUNNING},
+            {'id': 'task3', 'name': 'task3', 'state': states.SUCCEEDED}
         ]
 
         expected_wf_states = [

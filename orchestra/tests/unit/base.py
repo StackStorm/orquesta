@@ -137,6 +137,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
         conductor = conducting.WorkflowConductor(wf_spec)
+        conductor.set_workflow_state(states.RUNNING)
 
         context = {}
         q = queue.Queue()
@@ -194,6 +195,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
         conductor = conducting.WorkflowConductor(wf_spec)
+        conductor.set_workflow_state(states.RUNNING)
 
         for task_flow_entry, expected_wf_state in zip(mock_flow_entries, expected_wf_states):
             task_id = task_flow_entry['id']
