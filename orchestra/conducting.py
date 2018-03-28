@@ -113,12 +113,7 @@ class WorkflowConductor(object):
         if self.state not in states.RUNNING_STATES:
             return []
 
-        tasks = [
-            {'id': n, 'name': self.graph._graph.node[n].get('name', n)}
-            for n, d in self.graph._graph.in_degree().items() if d == 0
-        ]
-
-        return sorted(tasks, key=lambda x: x['name'])
+        return self.graph.roots
 
     def get_next_tasks(self, task_id):
         if self.state not in states.RUNNING_STATES:
