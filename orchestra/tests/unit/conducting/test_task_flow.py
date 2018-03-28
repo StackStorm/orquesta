@@ -22,7 +22,8 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
 
     def _add_tasks(self, wf_graph):
         for i in range(1, 6):
-            wf_graph.add_task('task' + str(i))
+            task_name = 'task' + str(i)
+            wf_graph.add_task(task_name, name=task_name)
 
     def _add_transitions(self, wf_graph):
         wf_graph.add_transition('task1', 'task2')
