@@ -199,10 +199,8 @@ class WorkflowConductorTest(WorkflowComposerTest):
 
         for task_flow_entry, expected_wf_state in zip(mock_flow_entries, expected_wf_states):
             task_id = task_flow_entry['id']
-            task_name = task_flow_entry['name']
             task_state = task_flow_entry['state']
-            context = ctx.set_current_task(dict(), {'id': task_id, 'name': task_name})
-            conductor.update_task_flow_entry(task_id, task_state, context)
+            conductor.update_task_flow_entry(task_id, task_state)
 
             err_ctx = (
                 'Workflow state "%s" is not the expected state "%s". '

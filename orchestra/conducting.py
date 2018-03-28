@@ -19,6 +19,7 @@ from orchestra import graphing
 from orchestra.specs import base as specs
 from orchestra.specs import loader as specs_loader
 from orchestra import states
+from orchestra.utils import context as ctx
 from orchestra.utils import dictionary as dict_utils
 from orchestra.utils import plugin
 
@@ -184,9 +185,9 @@ class WorkflowConductor(object):
         if not states.is_valid(state):
             raise exc.InvalidState(state)
 
+        # Get task flow entry and create new if it does not exist.
         task_flow_entry = self.get_task_flow_entry(task_id)
 
-        # Create new task flow entry if it does not exist.
         if not task_flow_entry:
             task_flow_entry = self.add_task_flow_entry(task_id)
 
@@ -204,10 +205,15 @@ class WorkflowConductor(object):
         if state in states.ACTIVE_STATES and task_id in self.flow.ready:
             self.flow.ready.remove(task_id)
 
+        # Set current task in the context.
+        task_node = self.graph.get_task(task_id)
+        current_task = {'id': task_node['id'], 'name': task_node['name']}
+        context = ctx.set_current_task(context, current_task)
+
         # Evaluate task transitions if task is in completed state.
         if state in states.COMPLETED_STATES:
             # Setup context for evaluating expressions in task transition criteria.
-            ctx = dict_utils.merge_dicts(
+            context = dict_utils.merge_dicts(
                 context or {},
                 {'__flow': self.flow.serialize()},
                 overwrite=True
@@ -216,7 +222,7 @@ class WorkflowConductor(object):
             # Iterate thru each outbound task transitions.
             for t in self.graph.get_next_transitions(task_id):
                 criteria = t[3].get('criteria') or []
-                evaluated_criteria = [expressions.evaluate(c, ctx) for c in criteria]
+                evaluated_criteria = [expressions.evaluate(c, context) for c in criteria]
                 task_transition_id = t[1] + '__' + str(t[2])
                 task_flow_entry[task_transition_id] = all(evaluated_criteria)
                 if task_flow_entry[task_transition_id]:
