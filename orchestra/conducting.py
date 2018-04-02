@@ -14,13 +14,13 @@ import copy
 import logging
 
 from orchestra import exceptions as exc
-from orchestra.expressions import base as expressions
+from orchestra.expressions import base as expr
 from orchestra import graphing
 from orchestra.specs import base as specs
 from orchestra.specs import loader as specs_loader
 from orchestra import states
 from orchestra.utils import context as ctx
-from orchestra.utils import dictionary as dict_utils
+from orchestra.utils import dictionary as dx
 from orchestra.utils import plugin
 
 
@@ -53,7 +53,7 @@ class TaskFlow(object):
 
 class WorkflowConductor(object):
 
-    def __init__(self, spec, graph=None, state=None, flow=None):
+    def __init__(self, spec, **kwargs):
         if not spec or not isinstance(spec, specs.Spec):
             raise ValueError('The value of "spec" is not type of Spec.')
 
@@ -62,43 +62,94 @@ class WorkflowConductor(object):
         self.spec_module = specs_loader.get_spec_module(self.catalog)
         self.composer = plugin.get_module('orchestra.composers', self.catalog)
 
-        if not self.spec or not isinstance(self.spec, self.spec_module.WorkflowSpec):
-            raise ValueError('The value of "spec" is not type of WorkflowSpec.')
+        self._workflow_state = None
+        self._graph = None
+        self._flow = None
+        self._inputs = kwargs
+        self._context = None
 
-        if graph and not isinstance(graph, graphing.WorkflowGraph):
+    def restore(self, graph, state=None, flow=None, inputs=None, context=None):
+        if not graph or not isinstance(graph, graphing.WorkflowGraph):
             raise ValueError('The value of "graph" is not type of WorkflowGraph.')
+
+        if not flow or not isinstance(flow, TaskFlow):
+            raise ValueError('The value of "flow" is not type of TaskFlow.')
 
         if state and not states.is_valid(state):
             raise exc.InvalidState(state)
 
-        if flow and not isinstance(flow, TaskFlow):
-            raise ValueError('The value of "flow" is not type of TaskFlow.')
+        if inputs is not None and not isinstance(inputs, dict):
+            raise ValueError('The value of "inputs" is not type of dict.')
 
-        self._workflow_state = state if state else None
-        self.graph = graph if graph else self.composer.compose(self.spec)
-        self.flow = flow if flow else TaskFlow()
+        if context is not None and not isinstance(context, dict):
+            raise ValueError('The value of "context" is not type of dict.')
+
+        self._workflow_state = state
+        self._graph = graph
+        self._flow = flow
+        self._inputs = inputs or {}
+        self._context = context or {}
 
     def serialize(self):
         return {
             'spec': self.spec.serialize(),
             'graph': self.graph.serialize(),
             'state': self.state,
-            'flow': self.flow.serialize()
+            'flow': self.flow.serialize(),
+            'inputs': copy.deepcopy(self.inputs),
+            'context': copy.deepcopy(self.context)
         }
 
     @classmethod
     def deserialize(cls, data):
         spec_module = specs_loader.get_spec_module(data['spec']['catalog'])
         spec = spec_module.WorkflowSpec.deserialize(data['spec'])
+
         graph = graphing.WorkflowGraph.deserialize(data['graph'])
         state = data['state']
         flow = TaskFlow.deserialize(data['flow'])
+        inputs = copy.deepcopy(data['inputs'])
+        context = copy.deepcopy(data['context'])
 
-        return cls(spec, graph=graph, state=state, flow=flow)
+        instance = cls(spec)
+        instance.restore(graph, state, flow, inputs, context)
+
+        return instance
 
     @property
     def state(self):
         return self._workflow_state
+
+    @property
+    def graph(self):
+        if not self._graph:
+            self._graph = self.composer.compose(self.spec)
+
+        return self._graph
+
+    @property
+    def flow(self):
+        if not self._flow:
+            self._flow = TaskFlow()
+
+        return self._flow
+
+    @property
+    def inputs(self):
+        return self._inputs
+
+    @property
+    def context(self):
+        if self._context is not None:
+            return self._context
+
+        self._context = {}
+
+        if self.inputs:
+            rendered_vars = expr.evaluate(getattr(self.spec, 'vars', {}), self.inputs)
+            self._context = dx.merge_dicts(rendered_vars, self.inputs)
+
+        return self._context
 
     def set_workflow_state(self, value):
         if not states.is_valid(value):
@@ -203,21 +254,17 @@ class WorkflowConductor(object):
         # Set current task in the context.
         task_node = self.graph.get_task(task_id)
         current_task = {'id': task_node['id'], 'name': task_node['name']}
-        context = ctx.set_current_task(context, current_task)
+        context = ctx.set_current_task(context or {}, current_task)
 
         # Evaluate task transitions if task is in completed state.
         if state in states.COMPLETED_STATES:
             # Setup context for evaluating expressions in task transition criteria.
-            context = dict_utils.merge_dicts(
-                context or {},
-                {'__flow': self.flow.serialize()},
-                overwrite=True
-            )
+            context = dx.merge_dicts(context, {'__flow': self.flow.serialize()}, True)
 
             # Iterate thru each outbound task transitions.
             for t in self.graph.get_next_transitions(task_id):
                 criteria = t[3].get('criteria') or []
-                evaluated_criteria = [expressions.evaluate(c, context) for c in criteria]
+                evaluated_criteria = [expr.evaluate(c, context) for c in criteria]
                 task_transition_id = t[1] + '__' + str(t[2])
                 task_flow_entry[task_transition_id] = all(evaluated_criteria)
                 if task_flow_entry[task_transition_id]:
