@@ -62,3 +62,9 @@ def completed_(context):
     current_task = _get_current_task(context)
 
     return (task_state_(context, current_task.get('id')) in states.COMPLETED_STATES)
+
+
+def result_(context):
+    current_task = _get_current_task(context)
+
+    return current_task.get('result')

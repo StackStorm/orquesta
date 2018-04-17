@@ -24,7 +24,18 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task3'
         ]
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq)
+        mock_results = [
+            'Stanley',
+            'All your base are belong to us!',
+            'Stanley, All your base are belong to us!'
+        ]
+
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            inputs={'name': 'Stanley'},
+            mock_results=mock_results
+        )
 
     def test_parallel(self):
         wf_name = 'parallel'

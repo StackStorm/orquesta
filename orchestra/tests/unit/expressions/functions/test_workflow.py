@@ -121,3 +121,21 @@ class WorkflowFunctionTest(unittest.TestCase):
         }
 
         self.assertTrue(funcs.completed_(context))
+
+    def test_result(self):
+        context = {'__current_task': None}
+        self.assertRaises(exc.ContextValueError, funcs.result_, context)
+
+        context = {
+            '__current_task': {'id': 't1', 'result': 'foobar'},
+            '__flow': {'tasks': {'t1': 0}, 'sequence': [{'state': states.SUCCEEDED}]}
+        }
+
+        self.assertEqual(funcs.result_(context), 'foobar')
+
+        context = {
+            '__current_task': {'id': 't1', 'result': {'fu': 'bar'}},
+            '__flow': {'tasks': {'t1': 0}, 'sequence': [{'state': states.SUCCEEDED}]}
+        }
+
+        self.assertDictEqual(funcs.result_(context), {'fu': 'bar'})

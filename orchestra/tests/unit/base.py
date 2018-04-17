@@ -131,8 +131,8 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
 @six.add_metaclass(abc.ABCMeta)
 class WorkflowConductorTest(WorkflowComposerTest):
 
-    def assert_conducting_sequences(self, wf_name, expected_task_seq,
-                                    inputs=None, mock_states=None):
+    def assert_conducting_sequences(self, wf_name, expected_task_seq, inputs=None,
+                                    mock_states=None, mock_results=None):
         if inputs is None:
             inputs = {}
 
@@ -144,10 +144,15 @@ class WorkflowConductorTest(WorkflowComposerTest):
         context = {}
         q = queue.Queue()
         state_q = queue.Queue()
+        result_q = queue.Queue()
 
         if mock_states:
             for item in mock_states:
                 state_q.put(item)
+
+        if mock_results:
+            for item in mock_results:
+                result_q.put(item)
 
         # Get start tasks and being conducting workflow.
         for task in conductor.get_start_tasks():
@@ -171,7 +176,8 @@ class WorkflowConductorTest(WorkflowComposerTest):
 
             # Mock completion of the task.
             state = state_q.get() if not state_q.empty() else states.SUCCEEDED
-            conductor.update_task_flow_entry(current_task_id, state, context)
+            result = result_q.get() if not result_q.empty() else None
+            conductor.update_task_flow_entry(current_task_id, state, result=result)
 
             # Identify the next set of tasks.
             next_tasks = conductor.get_next_tasks(current_task_id)
