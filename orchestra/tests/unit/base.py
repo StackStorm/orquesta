@@ -132,21 +132,18 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
 class WorkflowConductorTest(WorkflowComposerTest):
 
     def assert_conducting_sequences(self, wf_name, expected_task_seq,
-                                    mock_contexts=None, mock_states=None):
+                                    inputs=None, mock_states=None):
+        if inputs is None:
+            inputs = {}
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        conductor = conducting.WorkflowConductor(wf_spec)
+        conductor = conducting.WorkflowConductor(wf_spec, **inputs)
         conductor.set_workflow_state(states.RUNNING)
 
         context = {}
         q = queue.Queue()
-        ctx_q = queue.Queue()
         state_q = queue.Queue()
-
-        if mock_contexts:
-            for item in mock_contexts:
-                ctx_q.put(item)
 
         if mock_states:
             for item in mock_states:
@@ -168,10 +165,6 @@ class WorkflowConductorTest(WorkflowComposerTest):
 
             # Set task state to running.
             conductor.update_task_flow_entry(current_task_id, states.RUNNING)
-
-            # Setup context.
-            if not ctx_q.empty():
-                context = ctx_q.get()
 
             # Set current task in context.
             context = ctx.set_current_task(context, current_task)

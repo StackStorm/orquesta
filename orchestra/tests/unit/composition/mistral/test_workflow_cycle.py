@@ -73,7 +73,7 @@ class CyclicWorkflowComposerTest(base.MistralWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             'task3',
                             condition='on-success',
-                            expr="<% $.count < 3 %>"
+                            expr="<% $.count < 2 %>"
                         )
                     }
                 ]
@@ -142,7 +142,7 @@ class CyclicWorkflowComposerTest(base.MistralWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             'task3',
                             condition='on-success',
-                            expr="<% $.count < 3 %>"
+                            expr="<% $.count < 2 %>"
                         )
                     }
                 ]
@@ -246,7 +246,7 @@ class CyclicWorkflowComposerTest(base.MistralWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             'task5',
                             condition='on-success',
-                            expr="<% $.count < 3 %>"
+                            expr="<% $.count < 2 %>"
                         )
                     }
                 ]
@@ -353,7 +353,7 @@ class CyclicWorkflowComposerTest(base.MistralWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             'task5',
                             condition='on-success',
-                            expr="<% $.count < 3 %>"
+                            expr="<% $.count < 2 %>"
                         )
                     }
                 ]

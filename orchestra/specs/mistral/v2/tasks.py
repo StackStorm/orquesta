@@ -12,12 +12,15 @@
 
 import copy
 import logging
+import re
 import six
 from six.moves import queue
 
+from orchestra.expressions import base as expr
 from orchestra.specs import types
 from orchestra.specs.mistral.v2 import base
 from orchestra.specs.mistral.v2 import policies
+from orchestra.utils import dictionary as dx
 
 
 LOG = logging.getLogger(__name__)
@@ -121,6 +124,27 @@ class TaskSpec(base.Spec):
 
     def has_join(self):
         return hasattr(self, 'join') and self.join
+
+    def finalize_context(self, next_task_name, criteria, in_ctx):
+        expected_criteria_pattern = "<\% task_state\(\w+\) in \['succeeded'\] \%>"
+
+        if not re.match(expected_criteria_pattern, criteria[0]):
+            return in_ctx
+
+        task_publish_spec = getattr(self, 'publish') or {}
+
+        new_ctx = {
+            var_name: expr.evaluate(var_expr, in_ctx)
+            for var_name, var_expr in six.iteritems(task_publish_spec)
+        }
+
+        out_ctx = dx.merge_dicts(in_ctx, new_ctx, overwrite=True)
+
+        for key in list(out_ctx.keys()):
+            if key.startswith('__'):
+                out_ctx.pop(key)
+
+        return out_ctx
 
 
 class TaskMappingSpec(base.MappingSpec):

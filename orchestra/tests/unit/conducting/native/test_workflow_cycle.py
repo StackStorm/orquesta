@@ -31,24 +31,7 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task3'
         ]
 
-        mock_contexts = [
-            {'count': 0},   # prep
-            {'count': 0},   # task1
-            {'count': 0},   # task2
-            {'count': 1},   # task3
-            {'count': 1},   # task1
-            {'count': 1},   # task2
-            {'count': 2},   # task3
-            {'count': 2},   # task1
-            {'count': 2},   # task2
-            {'count': 3}    # task3
-        ]
-
-        self.assert_conducting_sequences(
-            wf_name,
-            expected_task_seq,
-            mock_contexts=mock_contexts
-        )
+        self.assert_conducting_sequences(wf_name, expected_task_seq)
 
     def test_cycles(self):
         wf_name = 'cycles'
@@ -75,30 +58,4 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task5'
         ]
 
-        mock_contexts = [
-            {'count': 0},                       # prep
-            {'count': 0, 'proceed': False},     # task1
-            {'count': 0, 'proceed': False},     # task2
-            {'count': 0, 'proceed': False},     # task3
-            {'count': 0, 'proceed': True},      # task4
-            {'count': 0, 'proceed': True},      # task2
-            {'count': 1, 'proceed': True},      # task5
-            {'count': 1, 'proceed': False},     # task1
-            {'count': 1, 'proceed': False},     # task2
-            {'count': 1, 'proceed': False},     # task3
-            {'count': 1, 'proceed': True},      # task4
-            {'count': 1, 'proceed': True},      # task2
-            {'count': 2, 'proceed': True},      # task5
-            {'count': 2, 'proceed': False},     # task1
-            {'count': 2, 'proceed': False},     # task2
-            {'count': 2, 'proceed': False},     # task3
-            {'count': 2, 'proceed': True},      # task4
-            {'count': 2, 'proceed': True},      # task2
-            {'count': 3, 'proceed': True}       # task5
-        ]
-
-        self.assert_conducting_sequences(
-            wf_name,
-            expected_task_seq,
-            mock_contexts=mock_contexts
-        )
+        self.assert_conducting_sequences(wf_name, expected_task_seq)
