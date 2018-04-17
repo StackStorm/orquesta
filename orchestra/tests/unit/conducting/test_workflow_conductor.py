@@ -32,6 +32,12 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
           - a
           - b: False
 
+        output:
+          data:
+            a: <% $.a %>
+            b: <% $.b %>
+            c: <% $.c %>
+
         tasks:
           task1:
             action: core.noop
@@ -460,3 +466,44 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         expected_ctx_entry = {'src': [4], 'term': True, 'value': expected_ctx_value}
         self.assertEqual(conductor.state, states.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_ctx_entry)
+
+    def test_get_workflow_output_when_workflow_incomplete(self):
+        inputs = {'a': 123, 'b': True}
+        conductor = self._prep_conductor(inputs, states.RUNNING)
+
+        for i in range(1, 5):
+            task_name = 'task' + str(i)
+            conductor.update_task_flow_entry(task_name, states.RUNNING)
+            conductor.update_task_flow_entry(task_name, states.SUCCEEDED)
+
+        self.assertEqual(conductor.state, states.RUNNING)
+        self.assertIsNone(conductor.get_workflow_output())
+
+    def test_get_workflow_output_when_workflow_failed(self):
+        inputs = {'a': 123, 'b': True}
+        conductor = self._prep_conductor(inputs, states.RUNNING)
+
+        for i in range(1, 5):
+            task_name = 'task' + str(i)
+            conductor.update_task_flow_entry(task_name, states.RUNNING)
+            conductor.update_task_flow_entry(task_name, states.SUCCEEDED)
+
+        task_name = 'task5'
+        conductor.update_task_flow_entry(task_name, states.RUNNING)
+        conductor.update_task_flow_entry(task_name, states.FAILED)
+
+        self.assertEqual(conductor.state, states.FAILED)
+        self.assertIsNone(conductor.get_workflow_output())
+
+    def test_get_workflow_output_when_workflow_succeeded(self):
+        inputs = {'a': 123, 'b': True}
+        conductor = self._prep_conductor(inputs, states.RUNNING)
+
+        for i in range(1, 6):
+            task_name = 'task' + str(i)
+            conductor.update_task_flow_entry(task_name, states.RUNNING)
+            conductor.update_task_flow_entry(task_name, states.SUCCEEDED)
+
+        expected_output = {'data': {'a': 123, 'b': True, 'c': 'xyz'}}
+        self.assertEqual(conductor.state, states.SUCCEEDED)
+        self.assertDictEqual(conductor.get_workflow_output(), expected_output)

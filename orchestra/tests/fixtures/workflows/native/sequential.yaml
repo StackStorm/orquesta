@@ -8,6 +8,9 @@ input:
 vars:
   greeting: null 
 
+output:
+  greeting: <% $.greeting %>
+
 tasks:
   task1:
     action: core.echo

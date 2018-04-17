@@ -132,7 +132,8 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
 class WorkflowConductorTest(WorkflowComposerTest):
 
     def assert_conducting_sequences(self, wf_name, expected_task_seq, inputs=None,
-                                    mock_states=None, mock_results=None):
+                                    mock_states=None, mock_results=None,
+                                    expected_output=None):
         if inputs is None:
             inputs = {}
 
@@ -189,6 +190,9 @@ class WorkflowConductorTest(WorkflowComposerTest):
             wf_conducting_state = conductor.serialize()
 
         self.assertListEqual(expected_task_seq, [entry['id'] for entry in conductor.flow.sequence])
+
+        if expected_output is not None:
+            self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
     def assert_workflow_state(self, wf_name, mock_flow_entries, expected_wf_states):
         wf_def = self.get_wf_def(wf_name)

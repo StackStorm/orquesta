@@ -12,6 +12,7 @@
 
 import copy
 import logging
+import six
 
 from orchestra import exceptions as exc
 from orchestra.expressions import base as expr
@@ -196,6 +197,20 @@ class WorkflowConductor(object):
             term_ctx_val = dx.merge_dicts(term_ctx_entry['value'], ctx_diff, True)
             term_ctx_entry['src'].append(task_flow_idx)
             term_ctx_entry['value'] = term_ctx_val
+
+    def get_workflow_output(self):
+        if self.state != states.SUCCEEDED:
+            return None
+
+        wf_output_spec = getattr(self.spec, 'output') or {}
+        wf_term_ctx = self.get_workflow_terminal_context()
+
+        wf_output = {
+            var_name: expr.evaluate(var_expr, wf_term_ctx['value'])
+            for var_name, var_expr in six.iteritems(wf_output_spec)
+        }
+
+        return wf_output
 
     def get_start_tasks(self):
         if self.state not in states.RUNNING_STATES:
