@@ -40,6 +40,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
 
         self.assertIsInstance(task1, specs.TaskSpec)
         self.assertEqual(task1.action, 'core.echo')
+        self.assertDictEqual(task1.input, {'message': '<% $.name %>'})
 
         task1_transition_seqs = getattr(task1, 'next')
 
@@ -58,9 +59,14 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
             '<% succeeded() %>'
         )
 
-        self.assertListEqual(
+        self.assertDictEqual(
+            getattr(task1_transition_seqs[0], 'publish'),
+            {'greeting': '<% result() %>'}
+        )
+
+        self.assertEqual(
             getattr(task1_transition_seqs[0], 'do'),
-            ['task2']
+            'task2'
         )
 
         # Verify model for task2.
@@ -68,6 +74,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
 
         self.assertIsInstance(task2, specs.TaskSpec)
         self.assertEqual(task2.action, 'core.echo')
+        self.assertDictEqual(task2.input, {'message': 'All your base are belong to us!'})
 
         task2_transition_seqs = getattr(task2, 'next')
 
@@ -86,9 +93,14 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
             '<% succeeded() %>'
         )
 
-        self.assertEqual(
+        self.assertDictEqual(
+            getattr(task2_transition_seqs[0], 'publish'),
+            {'greeting': '<% $.greeting %>, <% result() %>'}
+        )
+
+        self.assertListEqual(
             getattr(task2_transition_seqs[0], 'do'),
-            'task3'
+            ['task3']
         )
 
         # Verify model for task3.

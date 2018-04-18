@@ -283,11 +283,11 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             ],
             'context': [
                 {
-                    'spec_path': 'tasks.task1.action',
+                    'spec_path': 'tasks.task1.input',
                     'expression': '<% $.foobar %>',
                     'message': 'Variable "foobar" is referenced before assignment.',
                     'type': 'yaql',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.action'
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input'
                 }
             ],
             'syntax': [
