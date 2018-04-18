@@ -19,6 +19,7 @@ from orchestra.expressions import base as expr
 from orchestra.specs import types
 from orchestra.specs.native.v1 import base
 from orchestra.utils import dictionary as dx
+from orchestra.utils import parameters as args_utils
 
 
 LOG = logging.getLogger(__name__)
@@ -62,6 +63,14 @@ class TaskTransitionSpec(base.Spec):
     _context_inputs = [
         'publish'
     ]
+
+    def __init__(self, *args, **kwargs):
+        super(TaskTransitionSpec, self).__init__(*args, **kwargs)
+
+        publish_spec = getattr(self, 'publish', None)
+
+        if publish_spec and isinstance(publish_spec, six.string_types):
+            self.publish = args_utils.parse_inline_params(publish_spec or str())
 
 
 class TaskTransitionSequenceSpec(base.SequenceSpec):
@@ -109,6 +118,16 @@ class TaskSpec(base.Spec):
         'input',
         'next'
     ]
+
+    def __init__(self, *args, **kwargs):
+        super(TaskSpec, self).__init__(*args, **kwargs)
+
+        action_spec = getattr(self, 'action', str())
+        input_spec = args_utils.parse_inline_params(action_spec)
+
+        if input_spec:
+            self.action = action_spec[:action_spec.index(' ')]
+            self.input = input_spec
 
     def has_join(self):
         return hasattr(self, 'join') and self.join
