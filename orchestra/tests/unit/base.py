@@ -131,26 +131,29 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
 @six.add_metaclass(abc.ABCMeta)
 class WorkflowConductorTest(WorkflowComposerTest):
 
-    def assert_conducting_sequences(self, wf_name, expected_task_seq,
-                                    mock_contexts=None, mock_states=None):
+    def assert_conducting_sequences(self, wf_name, expected_task_seq, inputs=None,
+                                    mock_states=None, mock_results=None,
+                                    expected_output=None):
+        if inputs is None:
+            inputs = {}
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        conductor = conducting.WorkflowConductor(wf_spec)
+        conductor = conducting.WorkflowConductor(wf_spec, **inputs)
         conductor.set_workflow_state(states.RUNNING)
 
         context = {}
         q = queue.Queue()
-        ctx_q = queue.Queue()
         state_q = queue.Queue()
-
-        if mock_contexts:
-            for item in mock_contexts:
-                ctx_q.put(item)
+        result_q = queue.Queue()
 
         if mock_states:
             for item in mock_states:
                 state_q.put(item)
+
+        if mock_results:
+            for item in mock_results:
+                result_q.put(item)
 
         # Get start tasks and being conducting workflow.
         for task in conductor.get_start_tasks():
@@ -169,16 +172,13 @@ class WorkflowConductorTest(WorkflowComposerTest):
             # Set task state to running.
             conductor.update_task_flow_entry(current_task_id, states.RUNNING)
 
-            # Setup context.
-            if not ctx_q.empty():
-                context = ctx_q.get()
-
             # Set current task in context.
             context = ctx.set_current_task(context, current_task)
 
             # Mock completion of the task.
             state = state_q.get() if not state_q.empty() else states.SUCCEEDED
-            conductor.update_task_flow_entry(current_task_id, state, context)
+            result = result_q.get() if not result_q.empty() else None
+            conductor.update_task_flow_entry(current_task_id, state, result=result)
 
             # Identify the next set of tasks.
             next_tasks = conductor.get_next_tasks(current_task_id)
@@ -190,6 +190,9 @@ class WorkflowConductorTest(WorkflowComposerTest):
             wf_conducting_state = conductor.serialize()
 
         self.assertListEqual(expected_task_seq, [entry['id'] for entry in conductor.flow.sequence])
+
+        if expected_output is not None:
+            self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
     def assert_workflow_state(self, wf_name, mock_flow_entries, expected_wf_states):
         wf_def = self.get_wf_def(wf_name)

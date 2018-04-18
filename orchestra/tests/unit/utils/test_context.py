@@ -27,6 +27,15 @@ class ContextUtilTest(unittest.TestCase):
 
         self.assertDictEqual(context, expected_context)
 
+    def test_set_current_task_with_result(self):
+        context = {'var1': 'foobar'}
+        task = {'id': 't1_1', 'name': 't1', 'result': 'foobar'}
+
+        context = ctx.set_current_task(context, task)
+        expected_context = dict([('__current_task', copy.deepcopy(task))] + list(context.items()))
+
+        self.assertDictEqual(context, expected_context)
+
     def test_set_current_task_nonetype_context(self):
         task = {'id': 't1_1', 'name': 't1'}
 

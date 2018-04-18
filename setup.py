@@ -76,6 +76,7 @@ setup(
             'succeeded = orchestra.expressions.functions.workflow:succeeded_',
             'failed = orchestra.expressions.functions.workflow:failed_',
             'completed = orchestra.expressions.functions.workflow:completed_',
+            'result = orchestra.expressions.functions.workflow:result_' 
         ],
         'orchestra.tests': [
             'fake = orchestra.tests.unit.utils.test_plugin:FakePlugin'

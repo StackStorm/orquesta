@@ -24,6 +24,7 @@ tasks:
   task3:
     action: std.noop
     next:
-      - when: <% succeeded() and $.count < 3 %>
-        publish: count=<% $.count + 1 %>
+      - when: <% succeeded() and $.count < 2 %>
+        publish:
+          count: <% $.count + 1 %>
         do: task1

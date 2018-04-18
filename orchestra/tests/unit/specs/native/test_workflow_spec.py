@@ -39,7 +39,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
         task1 = wf_spec.tasks['task1']
 
         self.assertIsInstance(task1, specs.TaskSpec)
-        self.assertEqual(task1.action, 'std.noop')
+        self.assertEqual(task1.action, 'core.echo')
 
         task1_transition_seqs = getattr(task1, 'next')
 
@@ -67,7 +67,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
         task2 = wf_spec.tasks['task2']
 
         self.assertIsInstance(task2, specs.TaskSpec)
-        self.assertEqual(task2.action, 'std.noop')
+        self.assertEqual(task2.action, 'core.echo')
 
         task2_transition_seqs = getattr(task2, 'next')
 
@@ -95,7 +95,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
         task3 = wf_spec.tasks['task3']
 
         self.assertIsInstance(task3, specs.TaskSpec)
-        self.assertEqual(task3.action, 'std.noop')
+        self.assertEqual(task3.action, 'core.echo')
         self.assertIsNone(getattr(task3, 'next'))
 
     def test_basic_spec_serialization(self):

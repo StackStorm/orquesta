@@ -27,7 +27,7 @@ class JinjaCriteriaConductorTest(base.MistralWorkflowConductorTest):
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_contexts=[{'which': 'a'}]
+            inputs={'which': 'a'}
         )
 
         # Test branch "b"
@@ -39,7 +39,7 @@ class JinjaCriteriaConductorTest(base.MistralWorkflowConductorTest):
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_contexts=[{'which': 'b'}]
+            inputs={'which': 'b'}
         )
 
         # Test branch "c"
@@ -51,5 +51,5 @@ class JinjaCriteriaConductorTest(base.MistralWorkflowConductorTest):
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_contexts=[{'which': 'c'}]
+            inputs={'which': 'c'}
         )

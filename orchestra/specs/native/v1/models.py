@@ -15,8 +15,10 @@ import logging
 import six
 from six.moves import queue
 
+from orchestra.expressions import base as expr
 from orchestra.specs import types
 from orchestra.specs.native.v1 import base
+from orchestra.utils import dictionary as dx
 
 
 LOG = logging.getLogger(__name__)
@@ -110,6 +112,39 @@ class TaskSpec(base.Spec):
 
     def has_join(self):
         return hasattr(self, 'join') and self.join
+
+    def finalize_context(self, next_task_name, criteria, in_ctx):
+        new_ctx = {}
+
+        task_transition_specs = getattr(self, 'next') or []
+
+        for task_transition_spec in task_transition_specs:
+            condition = getattr(task_transition_spec, 'when') or None
+            next_task_names = getattr(task_transition_spec, 'do') or []
+
+            if next_task_name in next_task_names:
+                if (condition and len(criteria) <= 0) or (not condition and len(criteria) > 0):
+                    continue
+
+                if condition and len(criteria) > 0 and condition != criteria[0]:
+                    continue
+
+                task_publish_spec = getattr(task_transition_spec, 'publish') or {}
+
+                new_ctx = {
+                    var_name: expr.evaluate(var_expr, in_ctx)
+                    for var_name, var_expr in six.iteritems(task_publish_spec)
+                }
+
+                break
+
+        out_ctx = dx.merge_dicts(in_ctx, new_ctx, overwrite=True)
+
+        for key in list(out_ctx.keys()):
+            if key.startswith('__'):
+                out_ctx.pop(key)
+
+        return out_ctx
 
 
 class TaskMappingSpec(base.MappingSpec):

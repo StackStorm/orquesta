@@ -35,4 +35,4 @@ cycles:
             publish:
                 count: <% $.count + 1 %>
             on-success:
-                - task1: <% $.count < 3 %>
+                - task1: <% $.count < 2 %>

@@ -2,17 +2,36 @@ version: 1.0
 
 description: A basic sequential workflow.
 
+input:
+  - name
+
+vars:
+  greeting: null 
+
+output:
+  greeting: <% $.greeting %>
+
 tasks:
   task1:
-    action: std.noop
+    action: core.echo
+    input:
+      message: <% $.name %>
     next:
       - when: <% succeeded() %>
+        publish:
+          greeting: <% result() %> 
         do:
           - task2
   task2:
-    action: std.noop
+    action: core.echo
+    input:
+      message: "All your base are belong to us!"
     next:
       - when: <% succeeded() %>
+        publish:
+          greeting: <% $.greeting %>, <% result() %>
         do: task3
   task3:
-    action: std.noop
+    action: core.echo
+    input:
+      message: <% $.greeting %>
