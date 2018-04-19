@@ -30,3 +30,6 @@ tasks:
           - task3
   task3:
     action: core.echo message=<% $.greeting %>
+    next:
+      - when: <% succeeded() %>
+        publish: greeting=<% result() %>

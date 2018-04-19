@@ -108,7 +108,34 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
 
         self.assertIsInstance(task3, specs.TaskSpec)
         self.assertEqual(task3.action, 'core.echo')
-        self.assertIsNone(getattr(task3, 'next'))
+        self.assertDictEqual(task3.input, {'message': '<% $.greeting %>'})
+
+        task3_transition_seqs = getattr(task3, 'next')
+
+        self.assertIsInstance(
+            task3_transition_seqs,
+            specs.TaskTransitionSequenceSpec
+        )
+
+        self.assertIsInstance(
+            task3_transition_seqs[0],
+            specs.TaskTransitionSpec
+        )
+
+        self.assertEqual(
+            getattr(task3_transition_seqs[0], 'when'),
+            '<% succeeded() %>'
+        )
+
+        self.assertDictEqual(
+            getattr(task3_transition_seqs[0], 'publish'),
+            {'greeting': '<% result() %>'}
+        )
+
+        self.assertEqual(
+            getattr(task3_transition_seqs[0], 'do'),
+            'noop'
+        )
 
     def test_basic_spec_serialization(self):
         wf_name = 'sequential'

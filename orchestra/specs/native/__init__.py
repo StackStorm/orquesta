@@ -12,6 +12,7 @@
 
 from orchestra.specs.native import v1
 from orchestra.specs.native.v1 import instantiate, deserialize
+from orchestra.specs.native.v1 import get_reserved_task_names
 from orchestra.specs.native.v1 import TaskMappingSpec
 from orchestra.specs.native.v1 import TaskSpec
 from orchestra.specs.native.v1 import TaskTransitionSequenceSpec
@@ -23,6 +24,7 @@ VERSION = v1.VERSION
 __all__ = [
     instantiate.__name__,
     deserialize.__name__,
+    get_reserved_task_names.__name__,
     WorkflowSpec.__name__,
     TaskMappingSpec.__name__,
     TaskSpec.__name__,

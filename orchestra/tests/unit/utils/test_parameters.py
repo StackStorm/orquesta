@@ -73,3 +73,15 @@ class InlineParametersTest(unittest.TestCase):
         }
 
         self.assertDictEqual(params.parse_inline_params(s), d)
+
+    def test_parse_empty_string(self):
+        self.assertDictEqual(params.parse_inline_params(str()), {})
+
+    def test_parse_null_type(self):
+        self.assertDictEqual(params.parse_inline_params(None), {})
+
+    def test_parse_other_types(self):
+        self.assertDictEqual(params.parse_inline_params(123), {})
+        self.assertDictEqual(params.parse_inline_params(True), {})
+        self.assertDictEqual(params.parse_inline_params([1, 2, 3]), {})
+        self.assertDictEqual(params.parse_inline_params({'a': 123}), {})

@@ -24,6 +24,10 @@ from orchestra.utils import parameters as args_utils
 
 LOG = logging.getLogger(__name__)
 
+RESERVED_TASK_NAMES = [
+    'noop'
+]
+
 
 def instantiate(definition):
     return WorkflowSpec(definition)
@@ -71,6 +75,11 @@ class TaskTransitionSpec(base.Spec):
 
         if publish_spec and isinstance(publish_spec, six.string_types):
             self.publish = args_utils.parse_inline_params(publish_spec or str())
+
+        do_spec = getattr(self, 'do', None)
+
+        if not do_spec:
+            self.do = 'noop'
 
 
 class TaskTransitionSequenceSpec(base.SequenceSpec):
@@ -176,6 +185,9 @@ class TaskMappingSpec(base.MappingSpec):
     }
 
     def get_task(self, task_name):
+        if task_name in RESERVED_TASK_NAMES:
+            return TaskSpec({'name': task_name})
+
         return self[task_name]
 
     def get_next_tasks(self, task_name, *args, **kwargs):

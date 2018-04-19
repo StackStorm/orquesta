@@ -12,6 +12,7 @@
 
 import json
 import re
+import six
 
 from orchestra.expressions import base as expr
 
@@ -43,6 +44,9 @@ REGEX_INLINE_PARAMS = '([\w]+)=(%s)' % '|'.join(REGEX_INLINE_PARAM_VARIATIONS)
 
 def parse_inline_params(s):
     params = {}
+
+    if s is None or not isinstance(s, six.string_types) or s == str():
+        return params
 
     for k, v in re.findall(REGEX_INLINE_PARAMS, s):
         # Remove leading and trailing whitespaces.

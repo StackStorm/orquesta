@@ -21,7 +21,8 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_task_seq = [
             'task1',
             'task2',
-            'task3'
+            'task3',
+            'noop'
         ]
 
         mock_results = [
