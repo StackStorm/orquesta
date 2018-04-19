@@ -268,6 +268,11 @@ class WorkflowConductor(object):
             next_task_node = self.graph.get_task(next_task_id)
             next_task_id = next_task_node['id']
             next_task_name = next_task_node['name']
+
+            # If the next task is named noop which is a reserved task name, then skip the task.
+            if next_task_name == 'noop':
+                continue
+
             next_task_ctx = self.get_task_initial_context(next_task_id)['value']
             next_task = {'id': next_task_id, 'name': next_task_name, 'ctx': next_task_ctx}
             next_tasks.append(next_task)
@@ -359,7 +364,7 @@ class WorkflowConductor(object):
                 task_transition_id = task_transition[1] + '__' + str(task_transition[2])
                 task_flow_entry[task_transition_id] = all(evaluated_criteria)
 
-                # If criteria met, then mark the next task staged and alculate outgoing context.
+                # If criteria met, then mark the next task staged and calculate outgoing context.
                 if task_flow_entry[task_transition_id]:
                     next_task_node = self.graph.get_task(task_transition[1])
                     next_task_name = next_task_node['name']
@@ -382,6 +387,12 @@ class WorkflowConductor(object):
                         self.flow.staged[task_transition[1]]['ctxs'].append(out_ctx_idx)
                     else:
                         self.flow.staged[task_transition[1]] = {'ctxs': [out_ctx_idx]}
+
+                    # If the next task is noop, then mark the task as completed.
+                    if next_task_name == 'noop':
+                        next_task_id = next_task_node['id']
+                        self.update_task_flow_entry(next_task_id, states.RUNNING)
+                        self.update_task_flow_entry(next_task_id, states.SUCCEEDED)
 
         # Identify if there are task transitions.
         any_next_tasks = False
