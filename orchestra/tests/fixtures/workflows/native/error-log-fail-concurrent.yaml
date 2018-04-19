@@ -1,0 +1,15 @@
+version: 1.0
+  
+description: A basic workflow that demonstrates error handling, logging, and then failing workflow.
+
+tasks:
+  task1:
+    action: core.noop
+    next:
+      - when: <% failed() %>
+        publish: error=<% result() %>
+        do: log, fail
+  log:
+    action: core.echo message=<% $.error %>
+    next:
+      - when: <% succeeded() %>

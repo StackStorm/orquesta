@@ -42,3 +42,27 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
             mock_results=mock_results,
             expected_workflow_state=states.FAILED
         )
+
+    def test_error_concurrent_log_fail(self):
+        wf_name = 'error-log-fail-concurrent'
+
+        expected_task_seq = [
+            'task1',
+            'fail'
+        ]
+
+        mock_states = [
+            states.FAILED       # task1
+        ]
+
+        mock_results = [
+            'All your base are belong to us!'   # task1
+        ]
+
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            mock_states=mock_states,
+            mock_results=mock_results,
+            expected_workflow_state=states.FAILED
+        )
