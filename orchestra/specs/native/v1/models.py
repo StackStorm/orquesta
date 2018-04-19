@@ -25,6 +25,7 @@ from orchestra.utils import parameters as args_utils
 LOG = logging.getLogger(__name__)
 
 RESERVED_TASK_NAMES = [
+    'fail',
     'noop'
 ]
 
