@@ -212,16 +212,28 @@ class WorkflowConductor(object):
 
         return wf_output
 
+    def render_task_spec(self, task_name, ctx_value):
+        task_spec = self.spec.tasks.get_task(task_name).copy()
+        task_spec.action = expr.evaluate(task_spec.action, ctx_value)
+        task_spec.input = expr.evaluate(task_spec.input, ctx_value)
+        return task_spec
+
     def get_start_tasks(self):
         if self.state not in states.RUNNING_STATES:
             return []
 
+        tasks = []
         ctx_entry = self.get_workflow_initial_context()
 
-        tasks = [
-            {'id': node['id'], 'name': node['name'], 'ctx': ctx_entry['value']}
-            for node in self.graph.roots
-        ]
+        for task_node in self.graph.roots:
+            tasks.append(
+                {
+                    'id': task_node['id'],
+                    'name': task_node['name'],
+                    'ctx': ctx_entry['value'],
+                    'spec': self.render_task_spec(task_node['name'], ctx_entry['value'])
+                }
+            )
 
         return sorted(tasks, key=lambda x: x['name'])
 
@@ -274,7 +286,15 @@ class WorkflowConductor(object):
                 continue
 
             next_task_ctx = self.get_task_initial_context(next_task_id)['value']
-            next_task = {'id': next_task_id, 'name': next_task_name, 'ctx': next_task_ctx}
+            next_task_spec = self.render_task_spec(next_task_name, next_task_ctx)
+
+            next_task = {
+                'id': next_task_id,
+                'name': next_task_name,
+                'ctx': next_task_ctx,
+                'spec': next_task_spec
+            }
+
             next_tasks.append(next_task)
 
         return sorted(next_tasks, key=lambda x: x['name'])

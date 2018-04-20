@@ -249,9 +249,11 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
     def test_get_start_tasks(self):
         conductor = self._prep_conductor(state=states.RUNNING)
 
-        expected = [{'id': 'task1', 'name': 'task1', 'ctx': {'b': False}}]
-
-        self.assertListEqual(conductor.get_start_tasks(), expected)
+        next_task_name = 'task1'
+        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
+        expected_ctx_value = {'b': False}
+        expected_tasks = [self.format_task_item(next_task_name, expected_ctx_value, next_task_spec)]
+        self.assert_task_list(conductor.get_start_tasks(), expected_tasks)
 
     def test_get_start_tasks_when_graph_paused(self):
         conductor = self._prep_conductor(state=states.RUNNING)
@@ -286,24 +288,26 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             conductor.update_task_flow_entry(task_name, states.SUCCEEDED)
 
             next_task_name = 'task' + str(i + 1)
-            ctx_value = {'b': False, 'c': 'xyz'}
-            expected = [{'id': next_task_name, 'name': next_task_name, 'ctx': ctx_value}]
-
-            self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+            next_task_spec = conductor.spec.tasks.get_task(next_task_name)
+            expected_ctx_val = {'b': False, 'c': 'xyz'}
+            expected_task = self.format_task_item(next_task_name, expected_ctx_val, next_task_spec)
+            self.assert_task_list(conductor.get_next_tasks(task_name), [expected_task])
 
     def test_get_next_tasks_when_this_task_paused(self):
         conductor = self._prep_conductor(state=states.RUNNING)
 
         task_name = 'task1'
         next_task_name = 'task2'
+        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         ctx_value = {'b': False, 'c': 'xyz'}
         conductor.update_task_flow_entry(task_name, states.RUNNING)
         conductor.update_task_flow_entry(task_name, states.SUCCEEDED)
-        expected = [{'id': next_task_name, 'name': next_task_name, 'ctx': ctx_value}]
-        self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+        expected_tasks = [self.format_task_item(next_task_name, ctx_value, next_task_spec)]
+        self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
 
         task_name = 'task2'
         next_task_name = 'task3'
+        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         conductor.update_task_flow_entry(task_name, states.RUNNING)
         conductor.update_task_flow_entry(task_name, states.PAUSING)
         self.assertListEqual(conductor.get_next_tasks(task_name), [])
@@ -312,20 +316,20 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor.update_task_flow_entry(task_name, states.RESUMING)
         conductor.update_task_flow_entry(task_name, states.RUNNING)
         conductor.update_task_flow_entry(task_name, states.SUCCEEDED)
-        expected = [{'id': next_task_name, 'name': next_task_name, 'ctx': ctx_value}]
-        self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+        expected_tasks = [self.format_task_item(next_task_name, ctx_value, next_task_spec)]
+        self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
 
     def test_get_next_tasks_when_graph_paused(self):
         conductor = self._prep_conductor(state=states.RUNNING)
 
         task_name = 'task1'
         next_task_name = 'task2'
+        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         ctx_value = {'b': False, 'c': 'xyz'}
         conductor.update_task_flow_entry(task_name, states.RUNNING)
         conductor.update_task_flow_entry(task_name, states.SUCCEEDED)
-
-        expected = [{'id': next_task_name, 'name': next_task_name, 'ctx': ctx_value}]
-        self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+        expected_tasks = [self.format_task_item(next_task_name, ctx_value, next_task_spec)]
+        self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
 
         conductor.set_workflow_state(states.PAUSING)
         self.assertListEqual(conductor.get_next_tasks(task_name), [])
@@ -334,19 +338,20 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         self.assertListEqual(conductor.get_next_tasks(task_name), [])
 
         conductor.set_workflow_state(states.RESUMING)
-        expected = [{'id': next_task_name, 'name': next_task_name, 'ctx': ctx_value}]
-        self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+        expected_tasks = [self.format_task_item(next_task_name, ctx_value, next_task_spec)]
+        self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
 
     def test_get_next_tasks_when_this_task_canceled(self):
         conductor = self._prep_conductor(state=states.RUNNING)
 
         task_name = 'task1'
         next_task_name = 'task2'
+        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         ctx_value = {'b': False, 'c': 'xyz'}
         conductor.update_task_flow_entry(task_name, states.RUNNING)
         conductor.update_task_flow_entry(task_name, states.SUCCEEDED)
-        expected = [{'id': next_task_name, 'name': next_task_name, 'ctx': ctx_value}]
-        self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+        expected_tasks = [self.format_task_item(next_task_name, ctx_value, next_task_spec)]
+        self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
 
         task_name = 'task2'
         conductor.update_task_flow_entry(task_name, states.RUNNING)
@@ -360,12 +365,12 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         task_name = 'task1'
         next_task_name = 'task2'
+        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         ctx_value = {'b': False, 'c': 'xyz'}
         conductor.update_task_flow_entry(task_name, states.RUNNING)
         conductor.update_task_flow_entry(task_name, states.SUCCEEDED)
-
-        expected = [{'id': next_task_name, 'name': next_task_name, 'ctx': ctx_value}]
-        self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+        expected_tasks = [self.format_task_item(next_task_name, ctx_value, next_task_spec)]
+        self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
 
         conductor.set_workflow_state(states.CANCELING)
         self.assertListEqual(conductor.get_next_tasks(task_name), [])
@@ -378,11 +383,12 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         task_name = 'task1'
         next_task_name = 'task2'
+        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         ctx_value = {'b': False, 'c': 'xyz'}
         conductor.update_task_flow_entry(task_name, states.RUNNING)
         conductor.update_task_flow_entry(task_name, states.SUCCEEDED)
-        expected = [{'id': next_task_name, 'name': next_task_name, 'ctx': ctx_value}]
-        self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+        expected_tasks = [self.format_task_item(next_task_name, ctx_value, next_task_spec)]
+        self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
 
         task_name = 'task2'
         conductor.graph.update_transition('task2', 'task3', 0, criteria=['<% succeeded() %>'])
@@ -396,12 +402,14 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         task_name = 'task1'
         next_task_name = 'task2'
+        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         ctx_value = {'b': False, 'c': 'xyz'}
         conductor.update_task_flow_entry(task_name, states.RUNNING)
         conductor.update_task_flow_entry(task_name, states.SUCCEEDED)
-
-        expected = [{'id': next_task_name, 'name': next_task_name, 'ctx': ctx_value}]
-        self.assertListEqual(conductor.get_next_tasks(task_name), expected)
+        expected_tasks = [self.format_task_item(next_task_name, ctx_value, next_task_spec)]
+        self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
+        expected_tasks = [self.format_task_item(next_task_name, ctx_value, next_task_spec)]
+        self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
 
         conductor.set_workflow_state(states.FAILED)
         self.assertListEqual(conductor.get_next_tasks(task_name), [])

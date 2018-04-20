@@ -140,6 +140,9 @@ class Spec(object):
                 if re.match(pattern, name) and value:
                     setattr(self, name, spec_cls(value, member=True))
 
+    def copy(self):
+        return self.deserialize(self.serialize())
+
     def serialize(self):
         value = {
             'catalog': self.get_catalog(),
