@@ -11,6 +11,7 @@
 # limitations under the License.
 
 import abc
+import copy
 import six
 from six.moves import queue
 import unittest
@@ -130,6 +131,32 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
 
 @six.add_metaclass(abc.ABCMeta)
 class WorkflowConductorTest(WorkflowComposerTest):
+
+    def format_task_item(self, task_name, task_init_ctx, task_spec, task_id=None):
+        return {
+            'id': task_id or task_name,
+            'name': task_name,
+            'ctx': task_init_ctx,
+            'spec': task_spec
+        }
+
+    def assert_task_list(self, actual, expected):
+        """
+        The conductor.get_start_tasks and conductor.get_next_tasks make copies of the
+        task specs and render expressions in the task action and task input. So comparing
+        the task specs will not match. In order to match in unit tests. This method is
+        used to serialize the task specs and compare the lists.
+        """
+        actual_copy = copy.deepcopy(actual)
+        expected_copy = copy.deepcopy(expected)
+
+        for task in actual_copy:
+            task['spec'] = task['spec'].serialize()
+
+        for task in expected_copy:
+            task['spec'] = task['spec'].serialize()
+
+        self.assertListEqual(actual_copy, expected_copy)
 
     def assert_conducting_sequences(self, wf_name, expected_task_seq, inputs=None,
                                     mock_states=None, mock_results=None,
