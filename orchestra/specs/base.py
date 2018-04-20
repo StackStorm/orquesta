@@ -251,6 +251,11 @@ class Spec(object):
         if syntax_errors:
             errors['syntax'] = syntax_errors
 
+        semantic_errors = sorted(self.inspect_semantics(), key=lambda e: e['schema_path'])
+
+        if semantic_errors:
+            errors['semantics'] = semantic_errors
+
         expr_errors = sorted(self.inspect_expressions(), key=lambda e: e['schema_path'])
 
         if expr_errors:
@@ -296,6 +301,58 @@ class Spec(object):
             result.append(entry)
 
         return result
+
+    def inspect_semantics(self, parent=None):
+        if parent and not parent.get('spec_path', None):
+            raise ValueError('Parent context is missing spec path.')
+
+        if parent and not parent.get('schema_path', None):
+            raise ValueError('Parent context is missing schema path.')
+
+        errors = []
+        properties = {}
+        schema = self.get_schema(includes=None)
+
+        for prop_name, prop_type in six.iteritems(schema.get('properties', {})):
+            properties[prop_name] = getattr(self, prop_name)
+
+        for prop_name_regex, prop_type in six.iteritems(schema.get('patternProperties', {})):
+            for prop_name in [key for key in self.keys() if re.findall(prop_name_regex, key)]:
+                properties[prop_name] = getattr(self, prop_name)
+
+        for prop_name, prop_value in six.iteritems(properties):
+            spec_path = self.get_spec_path(prop_name, parent=parent)
+            schema_path = self.get_schema_path(prop_name, parent=parent)
+            prop_parent = {'spec_path': spec_path, 'schema_path': schema_path}
+
+            if isinstance(prop_value, SequenceSpec):
+                errors.extend(prop_value.inspect_semantics(parent=prop_parent))
+
+                for i in range(0, len(prop_value)):
+                    item = prop_value[i]
+                    item_spec_path = spec_path + '[' + str(i) + ']'
+                    item_schema_path = schema_path + '.items'
+                    item_parent = {'spec_path': item_spec_path, 'schema_path': item_schema_path}
+                    errors.extend(item.inspect_semantics(parent=item_parent))
+
+                continue
+
+            if isinstance(prop_value, MappingSpec):
+                errors.extend(prop_value.inspect_semantics(parent=prop_parent))
+
+                for k, v in six.iteritems(prop_value):
+                    item_spec_path = spec_path + '.' + k
+                    item_schema_path = schema_path + '.patternProperties.^\\w+$'
+                    item_parent = {'spec_path': item_spec_path, 'schema_path': item_schema_path}
+                    errors.extend(v.inspect_semantics(parent=item_parent))
+
+                continue
+
+            if isinstance(prop_value, Spec):
+                errors.extend(prop_value.inspect_semantics(parent=prop_parent))
+                continue
+
+        return errors
 
     def inspect_expressions(self, parent=None):
         if parent and not parent.get('spec_path', None):

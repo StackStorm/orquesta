@@ -394,6 +394,12 @@ class WorkflowConductor(object):
                         self.update_task_flow_entry(next_task_id, states.RUNNING)
                         self.update_task_flow_entry(next_task_id, states.SUCCEEDED)
 
+                    # If the next task is fail, then fail the workflow..
+                    if next_task_name == 'fail':
+                        next_task_id = next_task_node['id']
+                        self.update_task_flow_entry(next_task_id, states.RUNNING)
+                        self.update_task_flow_entry(next_task_id, states.FAILED)
+
         # Identify if there are task transitions.
         any_next_tasks = False
 

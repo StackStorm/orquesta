@@ -25,6 +25,7 @@ from orchestra.utils import parameters as args_utils
 LOG = logging.getLogger(__name__)
 
 RESERVED_TASK_NAMES = [
+    'fail',
     'noop'
 ]
 
@@ -184,6 +185,12 @@ class TaskMappingSpec(base.MappingSpec):
         }
     }
 
+    def has_task(self, task_name):
+        if task_name in RESERVED_TASK_NAMES:
+            return True
+
+        return task_name in self
+
     def get_task(self, task_name):
         if task_name in RESERVED_TASK_NAMES:
             return TaskSpec({'name': task_name})
@@ -273,6 +280,57 @@ class TaskMappingSpec(base.MappingSpec):
 
         return False
 
+    def inspect_semantics(self, parent=None):
+        result = []
+
+        # Identify use of reserved words in task names.
+        for task_name, task_spec in six.iteritems(self):
+            if task_name in RESERVED_TASK_NAMES:
+                message = 'The task name "%s" is reserved with special function.' % task_name
+                spec_path = parent.get('spec_path') + '.' + task_name
+                schema_path = parent.get('schema_path') + '.patternProperties.^\\w+$'
+                entry = {'message': message, 'spec_path': spec_path, 'schema_path': schema_path}
+                result.append(entry)
+
+        # Identify the undefined task in task transitions.
+        q = queue.Queue()
+
+        for task in self.get_start_tasks():
+            q.put(task[0])
+
+        while not q.empty():
+            task_name = q.get()
+
+            # Identify the next set of tasks and related transition specs.
+            # The get_next_tasks function is not used here because it doesn't
+            # provide the specific info required to identify spec/schema paths.
+            task_spec = self.get_task(task_name)
+            task_transition_specs = getattr(task_spec, 'next') or []
+            spec_path = parent.get('spec_path') + '.' + task_name
+            schema_path = parent.get('schema_path') + '.patternProperties.^\\w+$'
+
+            for i in range(0, len(task_transition_specs)):
+                task_transition_spec = task_transition_specs[i]
+                next_task_names = getattr(task_transition_spec, 'do') or []
+
+                if isinstance(next_task_names, six.string_types):
+                    next_task_names = [x.strip() for x in next_task_names.split(',')]
+
+                for next_task_name in next_task_names:
+                    if self.has_task(next_task_name):
+                        if next_task_name not in RESERVED_TASK_NAMES:
+                            q.put(next_task_name)
+                    else:
+                        entry = {
+                            'message': 'The task "%s" is not defined.' % next_task_name,
+                            'spec_path': spec_path + '.next[' + str(i) + '].do',
+                            'schema_path': schema_path + '.properties.next.items.properties.do'
+                        }
+
+                        result.append(entry)
+
+        return result
+
     def inspect_context(self, parent=None):
         ctxs = {}
         errors = []
@@ -339,7 +397,7 @@ class TaskMappingSpec(base.MappingSpec):
                 errors.extend(result[0])
                 branch_ctx = list(set(task_ctx + result[1]))
 
-                if not next_task_name:
+                if not next_task_name or not self.has_task(next_task_name):
                     continue
 
                 next_task_spec = self.get_task(next_task_name)
