@@ -21,19 +21,19 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             description: A basic sequential workflow.
             tasks:
               task1:
-                action: std.noop
+                action: core.noop
                 next:
                   - when: <% task_state(task1) = "SUCCESS" %>
                     publish: foo="bar"
                     do: task2
               task2:
-                action: std.noop
+                action: core.noop
                 next:
                   - when: <% task_state(task2) = "SUCCESS" %>
                     publish: bar="foo"
                     do: task3
               task3:
-                action: std.noop
+                action: core.noop
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -46,7 +46,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             description: A basic sequential workflow.
             tasks:
               task1:
-                action: std.noop
+                action: core.noop
                 next: []
         """
 
@@ -60,16 +60,16 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             description: A basic sequential workflow.
             tasks:
               task1:
-                action: std.noop
+                action: core.noop
                 next:
                   - do:
                       - task2
               task2:
-                action: std.noop
+                action: core.noop
                 next:
                   - do: task3
               task3:
-                action: std.noop
+                action: core.noop
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -82,7 +82,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             description: A basic sequential workflow.
             tasks:
               task1:
-                action: std.noop
+                action: core.noop
                 next:
                   - publish: foo="bar" bar="foo"
                     do: task2
@@ -96,7 +96,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
                         fubar: foobar
                     do: task3
               task3:
-                action: std.noop
+                action: core.noop
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -109,13 +109,13 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             description: A basic sequential workflow.
             tasks:
               task1:
-                action: std.noop
+                action: core.noop
                 next:
                   - when:
                       - foobar
                     do: task2
               task2:
-                action: std.noop
+                action: core.noop
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -141,13 +141,13 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             description: A basic sequential workflow.
             tasks:
               task1:
-                action: std.noop
+                action: core.noop
                 next:
                   - publish:
                       - foobar
                     do: task2
               task2:
-                action: std.noop
+                action: core.noop
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -173,12 +173,12 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             description: A basic sequential workflow.
             tasks:
               task1:
-                action: std.noop
+                action: core.noop
                 next:
                   - do:
                       task2: foobar
               task2:
-                action: std.noop
+                action: core.noop
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -260,7 +260,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
                   - when: <% <% succeeded() %>
                     do: task3
               task3:
-                action: std.noop
+                action: core.noop
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -295,6 +295,61 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
                     'spec_path': 'tasks.task2.input',
                     'message': '[{\'cmd\': \'echo <% $.macro %>\'}] is not of type \'object\'',
                     'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input.type'
+                }
+            ]
+        }
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_missing_task_node(self):
+        wf_def = """
+            version: 1.0
+            description: A basic sequential workflow.
+            tasks:
+              task1:
+                action: core.noop
+                next:
+                  - do: task2
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        expected_errors = {
+            'semantics': [
+                {
+                    'message': 'The task "task2" is not defined.',
+                    'spec_path': 'tasks.task1.next[0].do',
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.next.items.properties.do'
+                    )
+                }
+            ]
+        }
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_reserved_task_name_used(self):
+        wf_def = """
+            version: 1.0
+            description: A basic sequential workflow.
+            tasks:
+              task1:
+                action: core.noop
+                next:
+                  - do: noop
+              noop:
+                action: core.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        expected_errors = {
+            'semantics': [
+                {
+                    'message': 'The task name "noop" is reserved with special function.',
+                    'spec_path': 'tasks.noop',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$'
                 }
             ]
         }
