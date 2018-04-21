@@ -215,7 +215,7 @@ class WorkflowConductor(object):
     def render_task_spec(self, task_name, ctx_value):
         task_spec = self.spec.tasks.get_task(task_name).copy()
         task_spec.action = expr.evaluate(task_spec.action, ctx_value)
-        task_spec.input = expr.evaluate(task_spec.input, ctx_value)
+        task_spec.input = expr.evaluate(getattr(task_spec, 'input', {}), ctx_value)
         return task_spec
 
     def get_start_tasks(self):

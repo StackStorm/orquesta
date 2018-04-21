@@ -33,9 +33,16 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
             action: <% $.action_name %>
             input: <% $.action_input %>
             next:
-              - do: task2
+              - publish: message=<% result() %>
+                do: task2
           task2:
-            action: core.noop
+            action: core.echo message=<% $.message %>
+            next:
+              - do: task3
+          task3:
+            action: core.echo
+            input:
+              message: <% $.message %>
         """
 
         spec = specs.WorkflowSpec(wf_def)
@@ -58,10 +65,38 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         inputs = {'action_name': action_name, 'action_input': action_input}
         conductor = self._prep_conductor(inputs, state=states.RUNNING)
 
-        task1_spec = conductor.spec.tasks.get_task('task1').copy()
+        # Test that the action and input are rendered entirely from context.
+        task_name = 'task1'
+        task1_spec = conductor.spec.tasks.get_task(task_name).copy()
         task1_spec.action = action_name
         task1_spec.input = action_input
+        expected = [self.format_task_item(task_name, inputs, task1_spec)]
+        self.assert_task_list(conductor.get_start_tasks(), expected)
 
-        expected = [self.format_task_item('task1', inputs, task1_spec)]
-        actual = conductor.get_start_tasks()
-        self.assert_task_list(actual, expected)
+        # Test that the inline parameter in action is rendered.
+        task_name = 'task1'
+        next_task_name = 'task2'
+        mock_result = action_input['message']
+        conductor.update_task_flow_entry(task_name, states.RUNNING)
+        conductor.update_task_flow_entry(task_name, states.SUCCEEDED, result=mock_result)
+        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
+        next_task_spec.action = 'core.echo'
+        next_task_spec.input = {'message': mock_result}
+        expected_ctx_value = {'message': mock_result}
+        expected_ctx_value.update(inputs)
+        expected_tasks = [self.format_task_item(next_task_name, expected_ctx_value, next_task_spec)]
+        self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
+
+        # Test that the individual expression in input is rendered.
+        task_name = 'task2'
+        next_task_name = 'task3'
+        mock_result = action_input['message']
+        conductor.update_task_flow_entry(task_name, states.RUNNING)
+        conductor.update_task_flow_entry(task_name, states.SUCCEEDED, result=mock_result)
+        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
+        next_task_spec.action = 'core.echo'
+        next_task_spec.input = {'message': mock_result}
+        expected_ctx_value = {'message': mock_result}
+        expected_ctx_value.update(inputs)
+        expected_tasks = [self.format_task_item(next_task_name, expected_ctx_value, next_task_spec)]
+        self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
