@@ -99,7 +99,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
         # Check workflow state and context.
         expected_ctx_value = {'var1': 'xyz', 'var2': 123, 'var3': True}
         expected_ctx_entry = {'src': [3], 'term': True, 'value': expected_ctx_value}
-        self.assertEqual(conductor.state, states.SUCCEEDED)
+        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_ctx_entry)
 
     def test_join_with_no_input_and_no_context_changes(self):
@@ -175,7 +175,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
 
         # Check workflow state and context.
         expected_ctx_entry = {'src': [3], 'term': True, 'value': {}}
-        self.assertEqual(conductor.state, states.SUCCEEDED)
+        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_ctx_entry)
 
     def test_join_with_input_and_no_context_changes(self):
@@ -255,7 +255,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
 
         # Check workflow state and context.
         expected_ctx_entry = {'src': [3], 'term': True, 'value': inputs}
-        self.assertEqual(conductor.state, states.SUCCEEDED)
+        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_ctx_entry)
 
     def test_parallel(self):
@@ -332,5 +332,5 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
 
         # Check workflow state and context.
         expected_ctx_entry = {'src': [2, 3], 'term': True, 'value': {'var1': 'xyz', 'var2': 123}}
-        self.assertEqual(conductor.state, states.SUCCEEDED)
+        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_ctx_entry)

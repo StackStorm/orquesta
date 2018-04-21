@@ -219,7 +219,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
         self.assertListEqual(expected_task_seq, [entry['id'] for entry in conductor.flow.sequence])
 
         if expected_workflow_state is not None:
-            self.assertEqual(conductor.state, expected_workflow_state)
+            self.assertEqual(conductor.get_workflow_state(), expected_workflow_state)
 
         if expected_output is not None:
             self.assertDictEqual(conductor.get_workflow_output(), expected_output)
@@ -238,7 +238,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
             err_ctx = (
                 'Workflow state "%s" is not the expected state "%s". '
                 'Updated task "%s" with state "%s".' %
-                (conductor.state, expected_wf_state, task_id, task_state)
+                (conductor.get_workflow_state(), expected_wf_state, task_id, task_state)
             )
 
-            self.assertEqual(conductor.state, expected_wf_state, err_ctx)
+            self.assertEqual(conductor.get_workflow_state(), expected_wf_state, err_ctx)
