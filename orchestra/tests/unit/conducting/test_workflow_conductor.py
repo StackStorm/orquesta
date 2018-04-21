@@ -74,13 +74,13 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         if state:
             self.assertIsNone(conductor._workflow_state)
-            self.assertIsNone(conductor.state)
+            self.assertIsNone(conductor.get_workflow_state())
             conductor.set_workflow_state(state)
             self.assertEqual(conductor._workflow_state, state)
-            self.assertEqual(conductor.state, state)
+            self.assertEqual(conductor.get_workflow_state(), state)
         else:
             self.assertIsNone(conductor._workflow_state)
-            self.assertIsNone(conductor.state)
+            self.assertIsNone(conductor.get_workflow_state())
 
         self.assertIsNone(conductor._graph)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
@@ -126,7 +126,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
         self.assertIsNone(conductor._workflow_state)
-        self.assertIsNone(conductor.state)
+        self.assertIsNone(conductor.get_workflow_state())
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
         self.assertIsInstance(conductor.flow, conducting.TaskFlow)
@@ -158,7 +158,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
         self.assertIsNone(conductor._workflow_state)
-        self.assertIsNone(conductor.state)
+        self.assertIsNone(conductor.get_workflow_state())
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
         self.assertIsInstance(conductor.flow, conducting.TaskFlow)
@@ -192,7 +192,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
         self.assertIsNone(conductor._workflow_state)
-        self.assertIsNone(conductor.state)
+        self.assertIsNone(conductor.get_workflow_state())
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
         self.assertIsInstance(conductor.flow, conducting.TaskFlow)
@@ -213,7 +213,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         expected_data = {
             'spec': conductor.spec.serialize(),
             'graph': conductor.graph.serialize(),
-            'state': conductor.state,
+            'state': conductor.get_workflow_state(),
             'flow': conductor.flow.serialize(),
             'inputs': conductor.inputs
         }
@@ -226,7 +226,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
-        self.assertEqual(conductor.state, states.SUCCEEDED)
+        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
         self.assertIsInstance(conductor.flow, conducting.TaskFlow)
         self.assertEqual(len(conductor.flow.tasks), 5)
         self.assertEqual(len(conductor.flow.sequence), 5)
@@ -394,7 +394,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor.graph.update_transition('task2', 'task3', 0, criteria=['<% succeeded() %>'])
         conductor.update_task_flow_entry(task_name, states.RUNNING)
         conductor.update_task_flow_entry(task_name, states.FAILED)
-        self.assertEqual(conductor.state, states.FAILED)
+        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
         self.assertListEqual(conductor.get_next_tasks(task_name), [])
 
     def test_get_next_tasks_when_graph_abended(self):
@@ -472,7 +472,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         expected_ctx_value = {'a': 123, 'b': True, 'c': 'xyz'}
         expected_ctx_entry = {'src': [4], 'term': True, 'value': expected_ctx_value}
-        self.assertEqual(conductor.state, states.SUCCEEDED)
+        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_ctx_entry)
 
     def test_get_workflow_output_when_workflow_incomplete(self):
@@ -484,7 +484,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             conductor.update_task_flow_entry(task_name, states.RUNNING)
             conductor.update_task_flow_entry(task_name, states.SUCCEEDED)
 
-        self.assertEqual(conductor.state, states.RUNNING)
+        self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
         self.assertIsNone(conductor.get_workflow_output())
 
     def test_get_workflow_output_when_workflow_failed(self):
@@ -500,7 +500,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor.update_task_flow_entry(task_name, states.RUNNING)
         conductor.update_task_flow_entry(task_name, states.FAILED)
 
-        self.assertEqual(conductor.state, states.FAILED)
+        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
         self.assertIsNone(conductor.get_workflow_output())
 
     def test_get_workflow_output_when_workflow_succeeded(self):
@@ -513,5 +513,5 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             conductor.update_task_flow_entry(task_name, states.SUCCEEDED)
 
         expected_output = {'data': {'a': 123, 'b': True, 'c': 'xyz'}}
-        self.assertEqual(conductor.state, states.SUCCEEDED)
+        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)

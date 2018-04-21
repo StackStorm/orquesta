@@ -93,7 +93,7 @@ class WorkflowConductor(object):
         return {
             'spec': self.spec.serialize(),
             'graph': self.graph.serialize(),
-            'state': self.state,
+            'state': self.get_workflow_state(),
             'flow': self.flow.serialize(),
             'inputs': copy.deepcopy(self.inputs)
         }
@@ -112,10 +112,6 @@ class WorkflowConductor(object):
         instance.restore(graph, state, flow, inputs)
 
         return instance
-
-    @property
-    def state(self):
-        return self._workflow_state
 
     @property
     def graph(self):
@@ -149,12 +145,15 @@ class WorkflowConductor(object):
     def inputs(self):
         return self._inputs
 
+    def get_workflow_state(self):
+        return self._workflow_state
+
     def set_workflow_state(self, value):
         if not states.is_valid(value):
             raise exc.InvalidState(value)
 
-        if not states.is_transition_valid(self.state, value):
-            raise exc.InvalidStateTransition(self.state, value)
+        if not states.is_transition_valid(self._workflow_state, value):
+            raise exc.InvalidStateTransition(self._workflow_state, value)
 
         self._workflow_state = value
 
@@ -174,7 +173,7 @@ class WorkflowConductor(object):
         return match[0][0]
 
     def get_workflow_terminal_context(self):
-        if self.state not in states.COMPLETED_STATES:
+        if self.get_workflow_state() not in states.COMPLETED_STATES:
             raise Exception('Workflow is not in completed state.')
 
         term_ctx_idx = self.get_workflow_terminal_context_idx()
@@ -199,7 +198,7 @@ class WorkflowConductor(object):
             term_ctx_entry['value'] = term_ctx_val
 
     def get_workflow_output(self):
-        if self.state != states.SUCCEEDED:
+        if self.get_workflow_state() != states.SUCCEEDED:
             return None
 
         wf_output_spec = getattr(self.spec, 'output') or {}
@@ -219,7 +218,7 @@ class WorkflowConductor(object):
         return task_spec
 
     def get_start_tasks(self):
-        if self.state not in states.RUNNING_STATES:
+        if self.get_workflow_state() not in states.RUNNING_STATES:
             return []
 
         tasks = []
@@ -238,7 +237,7 @@ class WorkflowConductor(object):
         return sorted(tasks, key=lambda x: x['name'])
 
     def get_next_tasks(self, task_id):
-        if self.state not in states.RUNNING_STATES:
+        if self.get_workflow_state() not in states.RUNNING_STATES:
             return []
 
         task_flow_entry = self.get_task_flow_entry(task_id)
@@ -436,21 +435,21 @@ class WorkflowConductor(object):
         any_staged_tasks = len(self.flow.staged) > 0
 
         # Update workflow state.
-        state = self.state
+        state = self.get_workflow_state()
 
         if task_flow_entry['state'] == states.RESUMING:
             state = states.RESUMING
         elif task_flow_entry['state'] in states.RUNNING_STATES:
             state = states.RUNNING
-        elif task_flow_entry['state'] in states.PAUSE_STATES and self.state == states.CANCELING:
+        elif task_flow_entry['state'] in states.PAUSE_STATES and state == states.CANCELING:
             state = states.CANCELING if any_active_tasks else states.CANCELED
         elif task_flow_entry['state'] in states.PAUSE_STATES:
             state = states.PAUSING if any_active_tasks else states.PAUSED
         elif task_flow_entry['state'] in states.CANCEL_STATES:
             state = states.CANCELING if any_active_tasks else states.CANCELED
-        elif task_flow_entry['state'] in states.COMPLETED_STATES and self.state == states.PAUSING:
+        elif task_flow_entry['state'] in states.COMPLETED_STATES and state == states.PAUSING:
             state = states.PAUSING if any_active_tasks else states.PAUSED
-        elif task_flow_entry['state'] in states.COMPLETED_STATES and self.state == states.CANCELING:
+        elif task_flow_entry['state'] in states.COMPLETED_STATES and state == states.CANCELING:
             state = states.CANCELING if any_active_tasks else states.CANCELED
         elif task_flow_entry['state'] in states.ABENDED_STATES:
             state = states.RUNNING if any_next_tasks else states.FAILED
@@ -458,7 +457,8 @@ class WorkflowConductor(object):
             is_wf_running = any_active_tasks or any_next_tasks or any_staged_tasks
             state = states.RUNNING if is_wf_running else states.SUCCEEDED
 
-        if self.state != state and states.is_transition_valid(self.state, state):
+        if (self.get_workflow_state() != state and
+                states.is_transition_valid(self.get_workflow_state(), state)):
             self.set_workflow_state(state)
 
         return task_flow_entry
