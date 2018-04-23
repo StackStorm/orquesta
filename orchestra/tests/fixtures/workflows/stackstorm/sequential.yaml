@@ -1,0 +1,23 @@
+---
+vars:
+  greeting: null
+
+chain:
+  - name: task1
+    ref: core.echo
+    parameters:
+      message: {{ name }}
+    publish:
+      greeting: {{ task1.stdout }}
+    on-success: task2
+  - name: task2
+    ref: core.echo
+    parameters:
+      message: "All your base are belong to us!"
+    publish:
+      greeting: "{{ greeting }}, {{ task2.stdout }}"
+    on-success: task2
+  - name: task3
+    ref: core.echo
+    parameters:
+      message: {{ greeting }}
