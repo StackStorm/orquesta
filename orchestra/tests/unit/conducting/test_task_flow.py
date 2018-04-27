@@ -81,34 +81,34 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
 
         return conductor
 
-    def test_add_task_flow_entry(self):
+    def test_add_task_flow(self):
         conductor = self._prep_conductor(state=states.RUNNING)
 
-        conductor.add_task_flow_entry('task1', in_ctx_idx=0)
+        conductor.add_task_flow('task1', in_ctx_idx=0)
         expected_task_flow_item = {'id': 'task1', 'ctx': 0}
 
         self.assertEqual(conductor.get_task_flow_idx('task1'), 0)
         self.assertDictEqual(conductor.get_task_flow_entry('task1'), expected_task_flow_item)
 
-    def test_add_task_flow_entry_no_context(self):
+    def test_add_task_flow_no_context(self):
         conductor = self._prep_conductor(state=states.RUNNING)
 
-        conductor.add_task_flow_entry('task1')
+        conductor.add_task_flow('task1')
         expected_task_flow_item = {'id': 'task1', 'ctx': None}
 
         self.assertEqual(conductor.get_task_flow_idx('task1'), 0)
         self.assertDictEqual(conductor.get_task_flow_entry('task1'), expected_task_flow_item)
 
-    def test_update_task_flow_entry(self):
+    def test_update_task_flow(self):
         conductor = self._prep_conductor(state=states.RUNNING)
 
-        conductor.update_task_flow_entry('task1', states.RUNNING)
+        conductor.update_task_flow('task1', states.RUNNING)
         expected_task_flow_item = {'id': 'task1', 'state': 'running', 'ctx': 0}
 
         self.assertEqual(conductor.get_task_flow_idx('task1'), 0)
         self.assertDictEqual(conductor.get_task_flow_entry('task1'), expected_task_flow_item)
 
-        conductor.update_task_flow_entry('task1', states.SUCCEEDED, result='foobar')
+        conductor.update_task_flow('task1', states.SUCCEEDED, result='foobar')
 
         expected_task_flow_item = {
             'id': 'task1',
@@ -121,12 +121,12 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         self.assertEqual(conductor.get_task_flow_idx('task1'), 0)
         self.assertDictEqual(conductor.get_task_flow_entry('task1'), expected_task_flow_item)
 
-    def test_update_task_flow_entry_for_nonexistent_task(self):
+    def test_update_task_flow_for_nonexistent_task(self):
         conductor = self._prep_conductor(state=states.RUNNING)
 
         self.assertRaises(
             exc.InvalidTask,
-            conductor.update_task_flow_entry,
+            conductor.update_task_flow,
             'task999',
             states.RUNNING
         )
@@ -136,14 +136,14 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
 
         self.assertRaises(
             exc.InvalidState,
-            conductor.update_task_flow_entry,
+            conductor.update_task_flow,
             'task1',
             'foobar'
         )
 
         self.assertRaises(
             exc.InvalidStateTransition,
-            conductor.update_task_flow_entry,
+            conductor.update_task_flow,
             'task1',
             states.SUCCEEDED
         )
@@ -152,13 +152,13 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         conductor = self._prep_conductor(state=states.RUNNING)
 
         # Update progress of task1 to task flow.
-        conductor.update_task_flow_entry('task1', states.RUNNING)
+        conductor.update_task_flow('task1', states.RUNNING)
         expected_task_flow_item = {'id': 'task1', 'state': 'running', 'ctx': 0}
 
         self.assertEqual(conductor.get_task_flow_idx('task1'), 0)
         self.assertDictEqual(conductor.get_task_flow_entry('task1'), expected_task_flow_item)
 
-        conductor.update_task_flow_entry('task1', states.SUCCEEDED, result='foobar')
+        conductor.update_task_flow('task1', states.SUCCEEDED, result='foobar')
 
         expected_task_flow_item = {
             'id': 'task1',
@@ -175,13 +175,13 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         self.assertListEqual(conductor.flow.sequence, expected_sequence)
 
         # Update progress of task2 to task flow.
-        conductor.update_task_flow_entry('task2', states.RUNNING)
+        conductor.update_task_flow('task2', states.RUNNING)
         expected_task_flow_item = {'id': 'task2', 'state': 'running', 'ctx': 0}
 
         self.assertEqual(conductor.get_task_flow_idx('task2'), 1)
         self.assertDictEqual(conductor.get_task_flow_entry('task2'), expected_task_flow_item)
 
-        conductor.update_task_flow_entry('task2', states.SUCCEEDED, result='foobar')
+        conductor.update_task_flow('task2', states.SUCCEEDED, result='foobar')
         expected_task_flow_item = {'id': 'task2', 'state': 'succeeded', 'task3__0': True, 'ctx': 0}
 
         self.assertEqual(conductor.get_task_flow_idx('task2'), 1)
@@ -204,15 +204,15 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         self.assertTrue(conductor.graph.in_cycle('task4'))
 
         # Add a cycle to the task flow.
-        conductor.update_task_flow_entry('task1', states.RUNNING)
-        conductor.update_task_flow_entry('task1', states.SUCCEEDED)
-        conductor.update_task_flow_entry('task2', states.RUNNING)
-        conductor.update_task_flow_entry('task2', states.SUCCEEDED)
-        conductor.update_task_flow_entry('task3', states.RUNNING)
-        conductor.update_task_flow_entry('task3', states.SUCCEEDED)
-        conductor.update_task_flow_entry('task4', states.RUNNING)
-        conductor.update_task_flow_entry('task4', states.SUCCEEDED)
-        conductor.update_task_flow_entry('task2', states.RUNNING)
+        conductor.update_task_flow('task1', states.RUNNING)
+        conductor.update_task_flow('task1', states.SUCCEEDED)
+        conductor.update_task_flow('task2', states.RUNNING)
+        conductor.update_task_flow('task2', states.SUCCEEDED)
+        conductor.update_task_flow('task3', states.RUNNING)
+        conductor.update_task_flow('task3', states.SUCCEEDED)
+        conductor.update_task_flow('task4', states.RUNNING)
+        conductor.update_task_flow('task4', states.SUCCEEDED)
+        conductor.update_task_flow('task2', states.RUNNING)
 
         # Check the reference pointer. Task2 points to the latest instance.
         self.assertEqual(conductor.get_task_flow_idx('task1'), 0)
