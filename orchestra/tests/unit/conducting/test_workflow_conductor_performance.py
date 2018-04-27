@@ -58,8 +58,8 @@ class WorkflowConductorStressTest(base.WorkflowConductorTest):
 
         for i in range(1, num_tasks + 1):
             task_name = 't' + str(i)
-            conductor.update_task_flow_entry(task_name, states.RUNNING)
-            conductor.update_task_flow_entry(task_name, states.SUCCEEDED)
+            conductor.update_task_flow(task_name, states.RUNNING)
+            conductor.update_task_flow(task_name, states.SUCCEEDED)
 
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
 

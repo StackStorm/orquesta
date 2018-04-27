@@ -197,7 +197,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
             conductor = conducting.WorkflowConductor.deserialize(wf_conducting_state)
 
             # Set task state to running.
-            conductor.update_task_flow_entry(current_task_id, states.RUNNING)
+            conductor.update_task_flow(current_task_id, states.RUNNING)
 
             # Set current task in context.
             context = ctx.set_current_task(context, current_task)
@@ -205,7 +205,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
             # Mock completion of the task.
             state = state_q.get() if not state_q.empty() else states.SUCCEEDED
             result = result_q.get() if not result_q.empty() else None
-            conductor.update_task_flow_entry(current_task_id, state, result=result)
+            conductor.update_task_flow(current_task_id, state, result=result)
 
             # Identify the next set of tasks.
             next_tasks = conductor.get_next_tasks(current_task_id)
@@ -233,7 +233,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
         for task_flow_entry, expected_wf_state in zip(mock_flow_entries, expected_wf_states):
             task_id = task_flow_entry['id']
             task_state = task_flow_entry['state']
-            conductor.update_task_flow_entry(task_id, task_state)
+            conductor.update_task_flow(task_id, task_state)
 
             err_ctx = (
                 'Workflow state "%s" is not the expected state "%s". '

@@ -77,8 +77,8 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         task_name = 'task1'
         next_task_name = 'task2'
         mock_result = action_input['message']
-        conductor.update_task_flow_entry(task_name, states.RUNNING)
-        conductor.update_task_flow_entry(task_name, states.SUCCEEDED, result=mock_result)
+        conductor.update_task_flow(task_name, states.RUNNING)
+        conductor.update_task_flow(task_name, states.SUCCEEDED, result=mock_result)
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         next_task_spec.action = 'core.echo'
         next_task_spec.input = {'message': mock_result}
@@ -91,8 +91,8 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         task_name = 'task2'
         next_task_name = 'task3'
         mock_result = action_input['message']
-        conductor.update_task_flow_entry(task_name, states.RUNNING)
-        conductor.update_task_flow_entry(task_name, states.SUCCEEDED, result=mock_result)
+        conductor.update_task_flow(task_name, states.RUNNING)
+        conductor.update_task_flow(task_name, states.SUCCEEDED, result=mock_result)
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         next_task_spec.action = 'core.echo'
         next_task_spec.input = {'message': mock_result}

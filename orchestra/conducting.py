@@ -306,7 +306,7 @@ class WorkflowConductor(object):
 
         return self.flow.sequence[flow_idx] if flow_idx is not None else None
 
-    def add_task_flow_entry(self, task_id, in_ctx_idx=None):
+    def add_task_flow(self, task_id, in_ctx_idx=None):
         if not self.graph.has_task(task_id):
             raise exc.InvalidTask(task_id)
 
@@ -316,7 +316,7 @@ class WorkflowConductor(object):
 
         return task_flow_entry
 
-    def update_task_flow_entry(self, task_id, state, result=None):
+    def update_task_flow(self, task_id, state, result=None):
         in_ctx_idx = 0
 
         if not states.is_valid(state):
@@ -339,11 +339,11 @@ class WorkflowConductor(object):
         task_flow_entry = self.get_task_flow_entry(task_id)
 
         if not task_flow_entry:
-            task_flow_entry = self.add_task_flow_entry(task_id, in_ctx_idx=in_ctx_idx)
+            task_flow_entry = self.add_task_flow(task_id, in_ctx_idx=in_ctx_idx)
 
         # If task is alstaged completed and in cycle, then create new task flow entry.
         if self.graph.in_cycle(task_id) and task_flow_entry.get('state') in states.COMPLETED_STATES:
-            task_flow_entry = self.add_task_flow_entry(task_id, in_ctx_idx=in_ctx_idx)
+            task_flow_entry = self.add_task_flow(task_id, in_ctx_idx=in_ctx_idx)
 
         # If the task state change is valid, update state in task flow entry.
         if not states.is_transition_valid(task_flow_entry.get('state'), state):
@@ -410,14 +410,14 @@ class WorkflowConductor(object):
                     # If the next task is noop, then mark the task as completed.
                     if next_task_name == 'noop':
                         next_task_id = next_task_node['id']
-                        self.update_task_flow_entry(next_task_id, states.RUNNING)
-                        self.update_task_flow_entry(next_task_id, states.SUCCEEDED)
+                        self.update_task_flow(next_task_id, states.RUNNING)
+                        self.update_task_flow(next_task_id, states.SUCCEEDED)
 
                     # If the next task is fail, then fail the workflow..
                     if next_task_name == 'fail':
                         next_task_id = next_task_node['id']
-                        self.update_task_flow_entry(next_task_id, states.RUNNING)
-                        self.update_task_flow_entry(next_task_id, states.FAILED)
+                        self.update_task_flow(next_task_id, states.RUNNING)
+                        self.update_task_flow(next_task_id, states.FAILED)
 
         # Identify if there are task transitions.
         any_next_tasks = False
