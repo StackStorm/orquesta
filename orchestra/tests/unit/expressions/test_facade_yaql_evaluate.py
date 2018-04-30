@@ -19,11 +19,10 @@ from orchestra.expressions import base as expressions
 class YAQLFacadeEvaluationTest(unittest.TestCase):
 
     def test_basic_eval(self):
-        expr = '<% $.foo %>'
-
         data = {'foo': 'bar'}
 
-        self.assertEqual('bar', expressions.evaluate(expr, data))
+        self.assertEqual('bar', expressions.evaluate('<% $.foo %>', data))
+        self.assertEqual('foobar', expressions.evaluate('foo<% $.foo %>', data))
 
     def test_basic_eval_undefined(self):
         expr = '<% $.foo %>'
@@ -90,7 +89,8 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
     def test_eval_list(self):
         expr = [
             '<% $.foo %>',
-            '<% $.marco %>'
+            '<% $.marco %>',
+            'foo<% $.foo %>'
         ]
 
         data = {
@@ -98,7 +98,7 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
             'marco': 'polo'
         }
 
-        self.assertListEqual(['bar', 'polo'], expressions.evaluate(expr, data))
+        self.assertListEqual(['bar', 'polo', 'foobar'], expressions.evaluate(expr, data))
 
     def test_eval_list_of_list(self):
         expr = [
@@ -142,7 +142,8 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
     def test_eval_dict(self):
         expr = {
             'foo': '<% $.bar %>',
-            '<% $.marco %>': 'polo'
+            '<% $.marco %>': 'polo',
+            'foobar': 'foo<% $.bar %>'
         }
 
         data = {
@@ -152,7 +153,8 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
 
         expected = {
             'foo': 'bar',
-            'marco': 'polo'
+            'marco': 'polo',
+            'foobar': 'foobar'
         }
 
         self.assertDictEqual(expected, expressions.evaluate(expr, data))

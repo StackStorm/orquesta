@@ -109,7 +109,10 @@ class YAQLEvaluator(base.Evaluator):
                 if isinstance(result, six.string_types):
                     result = cls.evaluate(result, data)
 
-                output = output.replace(expr, str(result)) if len(exprs) > 1 else result
+                if len(exprs) > 1 or len(output) > len(expr):
+                    output = output.replace(expr, str(result))
+                else:
+                    output = result
 
         except KeyError as e:
             raise YaqlEvaluationException(

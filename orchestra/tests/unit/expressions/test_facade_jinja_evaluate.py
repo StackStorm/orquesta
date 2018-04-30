@@ -19,11 +19,10 @@ from orchestra.expressions import base as expressions
 class JinjaFacadeEvaluationTest(unittest.TestCase):
 
     def test_basic_eval(self):
-        expr = '{{ _.foo }}'
-
         data = {'foo': 'bar'}
 
-        self.assertEqual('bar', expressions.evaluate(expr, data))
+        self.assertEqual('bar', expressions.evaluate('{{ _.foo }}', data))
+        self.assertEqual('foobar', expressions.evaluate('foo{{ _.foo }}', data))
 
     def test_basic_eval_undefined(self):
         expr = '{{ _.foo }}'
@@ -106,7 +105,8 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
     def test_eval_list(self):
         expr = [
             '{{ _.foo }}',
-            '{{ _.marco }}'
+            '{{ _.marco }}',
+            'foo{{ _.foo }}'
         ]
 
         data = {
@@ -114,7 +114,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
             'marco': 'polo'
         }
 
-        self.assertListEqual(['bar', 'polo'], expressions.evaluate(expr, data))
+        self.assertListEqual(['bar', 'polo', 'foobar'], expressions.evaluate(expr, data))
 
     def test_eval_list_of_list(self):
         expr = [
@@ -158,7 +158,8 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
     def test_eval_dict(self):
         expr = {
             'foo': '{{ _.bar }}',
-            '{{ _.marco }}': 'polo'
+            '{{ _.marco }}': 'polo',
+            'foobar': 'foo{{ _.bar }}'
         }
 
         data = {
@@ -168,7 +169,8 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
 
         expected = {
             'foo': 'bar',
-            'marco': 'polo'
+            'marco': 'polo',
+            'foobar': 'foobar'
         }
 
         self.assertDictEqual(expected, expressions.evaluate(expr, data))
