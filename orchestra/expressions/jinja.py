@@ -146,11 +146,10 @@ class JinjaEvaluator(base.Evaluator):
                 # and cast it to string. When StrictUndefined is cast to str below, this will
                 # raise an exception with error description.
                 if not isinstance(result, jinja2.runtime.StrictUndefined):
-                    output = (
-                        output.replace(expr, str(result))
-                        if len(exprs) > 1 or block_exprs
-                        else result
-                    )
+                    if len(exprs) > 1 or block_exprs or len(output) > len(expr):
+                        output = output.replace(expr, str(result))
+                    else:
+                        output = result
 
             # Evaluate jinja block(s) after inline expressions are evaluated.
             if block_exprs and isinstance(output, six.string_types):
