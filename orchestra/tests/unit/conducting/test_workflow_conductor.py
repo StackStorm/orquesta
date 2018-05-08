@@ -515,3 +515,71 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         expected_output = {'data': {'a': 123, 'b': True, 'c': 'xyz'}}
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
+
+    def test_set_workflow_canceling_when_no_active_tasks(self):
+        conductor = self._prep_conductor(state=states.RUNNING)
+
+        task_name = 'task1'
+        conductor.update_task_flow(task_name, states.RUNNING)
+        conductor.update_task_flow(task_name, states.SUCCEEDED)
+        conductor.set_workflow_state(states.CANCELING)
+        self.assertEqual(conductor.get_workflow_state(), states.CANCELED)
+
+    def test_set_workflow_canceled_when_no_active_tasks(self):
+        conductor = self._prep_conductor(state=states.RUNNING)
+
+        task_name = 'task1'
+        conductor.update_task_flow(task_name, states.RUNNING)
+        conductor.update_task_flow(task_name, states.SUCCEEDED)
+        conductor.set_workflow_state(states.CANCELED)
+        self.assertEqual(conductor.get_workflow_state(), states.CANCELED)
+
+    def test_set_workflow_canceling_when_has_active_tasks(self):
+        conductor = self._prep_conductor(state=states.RUNNING)
+
+        task_name = 'task1'
+        conductor.update_task_flow(task_name, states.RUNNING)
+        conductor.set_workflow_state(states.CANCELING)
+        self.assertEqual(conductor.get_workflow_state(), states.CANCELING)
+
+    def test_set_workflow_canceled_when_has_active_tasks(self):
+        conductor = self._prep_conductor(state=states.RUNNING)
+
+        task_name = 'task1'
+        conductor.update_task_flow(task_name, states.RUNNING)
+        conductor.set_workflow_state(states.CANCELED)
+        self.assertEqual(conductor.get_workflow_state(), states.CANCELING)
+
+    def test_set_workflow_pausing_when_no_active_tasks(self):
+        conductor = self._prep_conductor(state=states.RUNNING)
+
+        task_name = 'task1'
+        conductor.update_task_flow(task_name, states.RUNNING)
+        conductor.update_task_flow(task_name, states.SUCCEEDED)
+        conductor.set_workflow_state(states.PAUSING)
+        self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
+
+    def test_set_workflow_paused_when_no_active_tasks(self):
+        conductor = self._prep_conductor(state=states.RUNNING)
+
+        task_name = 'task1'
+        conductor.update_task_flow(task_name, states.RUNNING)
+        conductor.update_task_flow(task_name, states.SUCCEEDED)
+        conductor.set_workflow_state(states.PAUSED)
+        self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
+
+    def test_set_workflow_pausing_when_has_active_tasks(self):
+        conductor = self._prep_conductor(state=states.RUNNING)
+
+        task_name = 'task1'
+        conductor.update_task_flow(task_name, states.RUNNING)
+        conductor.set_workflow_state(states.PAUSING)
+        self.assertEqual(conductor.get_workflow_state(), states.PAUSING)
+
+    def test_set_workflow_paused_when_has_active_tasks(self):
+        conductor = self._prep_conductor(state=states.RUNNING)
+
+        task_name = 'task1'
+        conductor.update_task_flow(task_name, states.RUNNING)
+        conductor.set_workflow_state(states.PAUSED)
+        self.assertEqual(conductor.get_workflow_state(), states.PAUSING)
