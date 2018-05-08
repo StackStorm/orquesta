@@ -155,6 +155,14 @@ class WorkflowConductor(object):
         if not states.is_transition_valid(self._workflow_state, value):
             raise exc.InvalidStateTransition(self._workflow_state, value)
 
+        # Determine if workflow is pausing or paused or canceling or canceled.
+        if value in states.PAUSE_STATES or value in states.CANCEL_STATES:
+            any_active_tasks = any([t['state'] in states.ACTIVE_STATES for t in self.flow.sequence])
+            value = states.PAUSING if any_active_tasks and value == states.PAUSED else value
+            value = states.PAUSED if not any_active_tasks and value == states.PAUSING else value
+            value = states.CANCELING if any_active_tasks and value == states.CANCELED else value
+            value = states.CANCELED if not any_active_tasks and value == states.CANCELING else value
+
         self._workflow_state = value
 
     def get_workflow_initial_context(self):
