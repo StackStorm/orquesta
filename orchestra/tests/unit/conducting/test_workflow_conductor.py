@@ -279,6 +279,23 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor.set_workflow_state(states.FAILED)
         self.assertListEqual(conductor.get_start_tasks(), [])
 
+    def test_get_task(self):
+        conductor = self._prep_conductor(state=states.RUNNING)
+
+        task_name = 'task1'
+        task = conductor.get_task(task_name)
+        self.assertEqual(task['id'], task_name)
+        self.assertEqual(task['name'], task_name)
+        self.assertDictEqual(task['ctx'], {'b': False})
+        conductor.update_task_flow(task_name, states.RUNNING)
+        conductor.update_task_flow(task_name, states.SUCCEEDED)
+
+        task_name = 'task2'
+        task = conductor.get_task(task_name)
+        self.assertEqual(task['id'], task_name)
+        self.assertEqual(task['name'], task_name)
+        self.assertDictEqual(task['ctx'], {'b': False, 'c': 'xyz'})
+
     def test_get_next_tasks(self):
         conductor = self._prep_conductor(state=states.RUNNING)
 

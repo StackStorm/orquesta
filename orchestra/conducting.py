@@ -225,22 +225,29 @@ class WorkflowConductor(object):
         task_spec.input = expr.evaluate(getattr(task_spec, 'input', {}), ctx_value)
         return task_spec
 
+    def get_task(self, task_id):
+        task_node = self.graph.get_task(task_id)
+        task_name = task_node['name']
+
+        try:
+            task_ctx = self.get_task_initial_context(task_id)['value']
+        except ValueError:
+            task_ctx = self.get_workflow_initial_context()
+
+        task_spec = self.render_task_spec(task_name, task_ctx)
+
+        return {
+            'id': task_id,
+            'name': task_name,
+            'ctx': task_ctx,
+            'spec': task_spec
+        }
+
     def get_start_tasks(self):
         if self.get_workflow_state() not in states.RUNNING_STATES:
             return []
 
-        tasks = []
-        ctx_entry = self.get_workflow_initial_context()
-
-        for task_node in self.graph.roots:
-            tasks.append(
-                {
-                    'id': task_node['id'],
-                    'name': task_node['name'],
-                    'ctx': ctx_entry['value'],
-                    'spec': self.render_task_spec(task_node['name'], ctx_entry['value'])
-                }
-            )
+        tasks = [self.get_task(task_node['id']) for task_node in self.graph.roots]
 
         return sorted(tasks, key=lambda x: x['name'])
 
@@ -285,24 +292,12 @@ class WorkflowConductor(object):
                     continue
 
             next_task_node = self.graph.get_task(next_task_id)
-            next_task_id = next_task_node['id']
-            next_task_name = next_task_node['name']
 
             # If the next task is named noop which is a reserved task name, then skip the task.
-            if next_task_name == 'noop':
+            if next_task_node['name'] == 'noop':
                 continue
 
-            next_task_ctx = self.get_task_initial_context(next_task_id)['value']
-            next_task_spec = self.render_task_spec(next_task_name, next_task_ctx)
-
-            next_task = {
-                'id': next_task_id,
-                'name': next_task_name,
-                'ctx': next_task_ctx,
-                'spec': next_task_spec
-            }
-
-            next_tasks.append(next_task)
+            next_tasks.append(self.get_task(next_task_id))
 
         return sorted(next_tasks, key=lambda x: x['name'])
 
