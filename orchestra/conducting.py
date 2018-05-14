@@ -225,84 +225,86 @@ class WorkflowConductor(object):
         task_spec.input = expr.evaluate(getattr(task_spec, 'input', {}), ctx_value)
         return task_spec
 
+    def get_task(self, task_id):
+        task_node = self.graph.get_task(task_id)
+        task_name = task_node['name']
+
+        try:
+            task_ctx = self.get_task_initial_context(task_id)['value']
+        except ValueError:
+            task_ctx = self.get_workflow_initial_context()
+
+        task_spec = self.render_task_spec(task_name, task_ctx)
+
+        return {
+            'id': task_id,
+            'name': task_name,
+            'ctx': task_ctx,
+            'spec': task_spec
+        }
+
     def get_start_tasks(self):
         if self.get_workflow_state() not in states.RUNNING_STATES:
             return []
 
-        tasks = []
-        ctx_entry = self.get_workflow_initial_context()
-
-        for task_node in self.graph.roots:
-            tasks.append(
-                {
-                    'id': task_node['id'],
-                    'name': task_node['name'],
-                    'ctx': ctx_entry['value'],
-                    'spec': self.render_task_spec(task_node['name'], ctx_entry['value'])
-                }
-            )
+        tasks = [self.get_task(task_node['id']) for task_node in self.graph.roots]
 
         return sorted(tasks, key=lambda x: x['name'])
 
-    def get_next_tasks(self, task_id):
+    def get_next_tasks(self, task_id=None):
         if self.get_workflow_state() not in states.RUNNING_STATES:
             return []
 
-        task_flow_entry = self.get_task_flow_entry(task_id)
-
-        if not task_flow_entry or task_flow_entry.get('state') not in states.COMPLETED_STATES:
-            return []
-
         next_tasks = []
-        outbounds = self.graph.get_next_transitions(task_id)
 
-        for next_seq in outbounds:
-            next_task_id, seq_key = next_seq[1], next_seq[2]
-            task_transition_id = next_task_id + '__' + str(seq_key)
+        if not task_id:
+            next_tasks = [
+                self.get_task(staged_task_id)
+                for staged_task_id in self.flow.staged.keys()
+            ]
+        else:
+            task_flow_entry = self.get_task_flow_entry(task_id)
 
-            # Evaluate if outbound criteria is satisfied.
-            if not task_flow_entry.get(task_transition_id):
-                continue
+            if not task_flow_entry or task_flow_entry.get('state') not in states.COMPLETED_STATES:
+                return []
 
-            # Evaluate if the next task has a barrier waiting for other tasks to complete.
-            if self.graph.has_barrier(next_task_id):
-                barrier = self.graph.get_barrier(next_task_id)
-                inbounds = self.graph.get_prev_transitions(next_task_id)
+            outbounds = self.graph.get_next_transitions(task_id)
 
-                barrier = len(inbounds) if barrier == '*' else barrier
-                satisfied = []
+            for next_seq in outbounds:
+                next_task_id, seq_key = next_seq[1], next_seq[2]
+                task_transition_id = next_task_id + '__' + str(seq_key)
 
-                for prev_seq in inbounds:
-                    prev_task_flow_entry = self.get_task_flow_entry(prev_seq[0])
-
-                    if prev_task_flow_entry:
-                        prev_task_transition_id = prev_seq[1] + '__' + str(prev_seq[2])
-
-                        if prev_task_flow_entry.get(prev_task_transition_id):
-                            satisfied.append(prev_task_transition_id)
-
-                if len(satisfied) < barrier:
+                # Evaluate if outbound criteria is satisfied.
+                if not task_flow_entry.get(task_transition_id):
                     continue
 
-            next_task_node = self.graph.get_task(next_task_id)
-            next_task_id = next_task_node['id']
-            next_task_name = next_task_node['name']
+                # Evaluate if the next task has a barrier waiting for other tasks to complete.
+                if self.graph.has_barrier(next_task_id):
+                    barrier = self.graph.get_barrier(next_task_id)
+                    inbounds = self.graph.get_prev_transitions(next_task_id)
 
-            # If the next task is named noop which is a reserved task name, then skip the task.
-            if next_task_name == 'noop':
-                continue
+                    barrier = len(inbounds) if barrier == '*' else barrier
+                    satisfied = []
 
-            next_task_ctx = self.get_task_initial_context(next_task_id)['value']
-            next_task_spec = self.render_task_spec(next_task_name, next_task_ctx)
+                    for prev_seq in inbounds:
+                        prev_task_flow_entry = self.get_task_flow_entry(prev_seq[0])
 
-            next_task = {
-                'id': next_task_id,
-                'name': next_task_name,
-                'ctx': next_task_ctx,
-                'spec': next_task_spec
-            }
+                        if prev_task_flow_entry:
+                            prev_task_transition_id = prev_seq[1] + '__' + str(prev_seq[2])
 
-            next_tasks.append(next_task)
+                            if prev_task_flow_entry.get(prev_task_transition_id):
+                                satisfied.append(prev_task_transition_id)
+
+                    if len(satisfied) < barrier:
+                        continue
+
+                next_task_node = self.graph.get_task(next_task_id)
+
+                # If the next task is named noop which is a reserved task name, then skip the task.
+                if next_task_node['name'] == 'noop':
+                    continue
+
+                next_tasks.append(self.get_task(next_task_id))
 
         return sorted(next_tasks, key=lambda x: x['name'])
 
