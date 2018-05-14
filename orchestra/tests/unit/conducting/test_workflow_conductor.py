@@ -310,6 +310,26 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             expected_task = self.format_task_item(next_task_name, expected_ctx_val, next_task_spec)
             self.assert_task_list(conductor.get_next_tasks(task_name), [expected_task])
 
+    def test_get_next_tasks_from_staged(self):
+        conductor = self._prep_conductor(state=states.RUNNING)
+
+        next_task_name = 'task1'
+        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
+        expected_ctx_val = {'b': False}
+        expected_task = self.format_task_item(next_task_name, expected_ctx_val, next_task_spec)
+        self.assert_task_list(conductor.get_next_tasks(), [expected_task])
+
+        for i in range(1, 5):
+            task_name = 'task' + str(i)
+            conductor.update_task_flow(task_name, states.RUNNING)
+            conductor.update_task_flow(task_name, states.SUCCEEDED)
+
+            next_task_name = 'task' + str(i + 1)
+            next_task_spec = conductor.spec.tasks.get_task(next_task_name)
+            expected_ctx_val = {'b': False, 'c': 'xyz'}
+            expected_task = self.format_task_item(next_task_name, expected_ctx_val, next_task_spec)
+            self.assert_task_list(conductor.get_next_tasks(), [expected_task])
+
     def test_get_next_tasks_when_this_task_paused(self):
         conductor = self._prep_conductor(state=states.RUNNING)
 

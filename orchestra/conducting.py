@@ -251,53 +251,60 @@ class WorkflowConductor(object):
 
         return sorted(tasks, key=lambda x: x['name'])
 
-    def get_next_tasks(self, task_id):
+    def get_next_tasks(self, task_id=None):
         if self.get_workflow_state() not in states.RUNNING_STATES:
             return []
 
-        task_flow_entry = self.get_task_flow_entry(task_id)
-
-        if not task_flow_entry or task_flow_entry.get('state') not in states.COMPLETED_STATES:
-            return []
-
         next_tasks = []
-        outbounds = self.graph.get_next_transitions(task_id)
 
-        for next_seq in outbounds:
-            next_task_id, seq_key = next_seq[1], next_seq[2]
-            task_transition_id = next_task_id + '__' + str(seq_key)
+        if not task_id:
+            next_tasks = [
+                self.get_task(staged_task_id)
+                for staged_task_id in self.flow.staged.keys()
+            ]
+        else:
+            task_flow_entry = self.get_task_flow_entry(task_id)
 
-            # Evaluate if outbound criteria is satisfied.
-            if not task_flow_entry.get(task_transition_id):
-                continue
+            if not task_flow_entry or task_flow_entry.get('state') not in states.COMPLETED_STATES:
+                return []
 
-            # Evaluate if the next task has a barrier waiting for other tasks to complete.
-            if self.graph.has_barrier(next_task_id):
-                barrier = self.graph.get_barrier(next_task_id)
-                inbounds = self.graph.get_prev_transitions(next_task_id)
+            outbounds = self.graph.get_next_transitions(task_id)
 
-                barrier = len(inbounds) if barrier == '*' else barrier
-                satisfied = []
+            for next_seq in outbounds:
+                next_task_id, seq_key = next_seq[1], next_seq[2]
+                task_transition_id = next_task_id + '__' + str(seq_key)
 
-                for prev_seq in inbounds:
-                    prev_task_flow_entry = self.get_task_flow_entry(prev_seq[0])
-
-                    if prev_task_flow_entry:
-                        prev_task_transition_id = prev_seq[1] + '__' + str(prev_seq[2])
-
-                        if prev_task_flow_entry.get(prev_task_transition_id):
-                            satisfied.append(prev_task_transition_id)
-
-                if len(satisfied) < barrier:
+                # Evaluate if outbound criteria is satisfied.
+                if not task_flow_entry.get(task_transition_id):
                     continue
 
-            next_task_node = self.graph.get_task(next_task_id)
+                # Evaluate if the next task has a barrier waiting for other tasks to complete.
+                if self.graph.has_barrier(next_task_id):
+                    barrier = self.graph.get_barrier(next_task_id)
+                    inbounds = self.graph.get_prev_transitions(next_task_id)
 
-            # If the next task is named noop which is a reserved task name, then skip the task.
-            if next_task_node['name'] == 'noop':
-                continue
+                    barrier = len(inbounds) if barrier == '*' else barrier
+                    satisfied = []
 
-            next_tasks.append(self.get_task(next_task_id))
+                    for prev_seq in inbounds:
+                        prev_task_flow_entry = self.get_task_flow_entry(prev_seq[0])
+
+                        if prev_task_flow_entry:
+                            prev_task_transition_id = prev_seq[1] + '__' + str(prev_seq[2])
+
+                            if prev_task_flow_entry.get(prev_task_transition_id):
+                                satisfied.append(prev_task_transition_id)
+
+                    if len(satisfied) < barrier:
+                        continue
+
+                next_task_node = self.graph.get_task(next_task_id)
+
+                # If the next task is named noop which is a reserved task name, then skip the task.
+                if next_task_node['name'] == 'noop':
+                    continue
+
+                next_tasks.append(self.get_task(next_task_id))
 
         return sorted(next_tasks, key=lambda x: x['name'])
 
