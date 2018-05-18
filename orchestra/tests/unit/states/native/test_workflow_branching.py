@@ -284,10 +284,10 @@ class BranchingWorkflowStateTest(base.OrchestraWorkflowConductorTest):
             states.RUNNING,
             states.PAUSING,
             states.PAUSING,
-            states.PAUSING,
-            states.PAUSING,
-            states.PAUSING,
-            states.PAUSED
+            states.RESUMING,
+            states.RUNNING,
+            states.RUNNING,
+            states.RUNNING
         ]
 
         self.assert_workflow_state(mock_flow_entries, expected_wf_states)
