@@ -67,11 +67,12 @@ class WorkflowConductor(object):
         self.composer = plugin.get_module('orchestra.composers', self.catalog)
 
         self._workflow_state = None
+        self._errors = []
         self._graph = None
         self._flow = None
         self._inputs = kwargs
 
-    def restore(self, graph, state=None, flow=None, inputs=None):
+    def restore(self, graph, state=None, errors=None, flow=None, inputs=None):
         if not graph or not isinstance(graph, graphing.WorkflowGraph):
             raise ValueError('The value of "graph" is not type of WorkflowGraph.')
 
@@ -88,6 +89,7 @@ class WorkflowConductor(object):
         self._graph = graph
         self._flow = flow
         self._inputs = inputs or {}
+        self._errors = errors or []
 
     def serialize(self):
         return {
@@ -95,7 +97,8 @@ class WorkflowConductor(object):
             'graph': self.graph.serialize(),
             'state': self.get_workflow_state(),
             'flow': self.flow.serialize(),
-            'inputs': copy.deepcopy(self.inputs)
+            'inputs': copy.deepcopy(self.inputs),
+            'errors': copy.deepcopy(self.errors)
         }
 
     @classmethod
@@ -107,9 +110,10 @@ class WorkflowConductor(object):
         state = data['state']
         flow = TaskFlow.deserialize(data['flow'])
         inputs = copy.deepcopy(data['inputs'])
+        errors = copy.deepcopy(data['errors'])
 
         instance = cls(spec)
-        instance.restore(graph, state, flow, inputs)
+        instance.restore(graph, state, errors, flow, inputs)
 
         return instance
 
@@ -144,6 +148,10 @@ class WorkflowConductor(object):
     @property
     def inputs(self):
         return self._inputs
+
+    @property
+    def errors(self):
+        return self._errors
 
     def get_workflow_state(self):
         return self._workflow_state
