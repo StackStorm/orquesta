@@ -111,6 +111,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'graph': conductor.graph.serialize(),
             'inputs': {},
             'state': None,
+            'errors': [],
             'flow': {
                 'staged': {'task1': {'ctxs': [0]}},
                 'tasks': {},
@@ -143,6 +144,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'graph': conductor.graph.serialize(),
             'inputs': inputs,
             'state': None,
+            'errors': [],
             'flow': {
                 'staged': {'task1': {'ctxs': [0]}},
                 'tasks': {},
@@ -177,6 +179,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'graph': conductor.graph.serialize(),
             'inputs': inputs,
             'state': None,
+            'errors': [],
             'flow': {
                 'staged': {'task1': {'ctxs': [0]}},
                 'tasks': {},
@@ -215,7 +218,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'graph': conductor.graph.serialize(),
             'state': conductor.get_workflow_state(),
             'flow': conductor.flow.serialize(),
-            'inputs': conductor.inputs
+            'inputs': conductor.inputs,
+            'errors': conductor.errors
         }
 
         self.assertDictEqual(data, expected_data)
