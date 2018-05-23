@@ -153,6 +153,17 @@ class WorkflowConductor(object):
     def errors(self):
         return self._errors
 
+    def log_error(self, error, task_id=None, task_transition_id=None):
+        entry = {'message': error}
+
+        if task_id:
+            entry['task_id'] = task_id
+
+        if task_transition_id:
+            entry['task_transition_id'] = task_transition_id
+
+        self.errors.append(entry)
+
     def get_workflow_state(self):
         return self._workflow_state
 
@@ -255,7 +266,19 @@ class WorkflowConductor(object):
         if self.get_workflow_state() not in states.RUNNING_STATES:
             return []
 
-        tasks = [self.get_task(task_node['id']) for task_node in self.graph.roots]
+        tasks = []
+
+        for task_node in self.graph.roots:
+            try:
+                tasks.append(self.get_task(task_node['id']))
+            except exc.ExpressionEvaluationException as e:
+                self.log_error(str(e), task_id=task_node['id'])
+                self.set_workflow_state(states.FAILED)
+                continue
+
+        # Return nothing if there is error(s) on determining start tasks.
+        if self.get_workflow_state() in states.COMPLETED_STATES:
+            return []
 
         return sorted(tasks, key=lambda x: x['name'])
 
@@ -266,10 +289,13 @@ class WorkflowConductor(object):
         next_tasks = []
 
         if not task_id:
-            next_tasks = [
-                self.get_task(staged_task_id)
-                for staged_task_id in self.flow.staged.keys()
-            ]
+            for staged_task_id in self.flow.staged.keys():
+                try:
+                    next_tasks.append(self.get_task(staged_task_id))
+                except exc.ExpressionEvaluationException as e:
+                    self.log_error(str(e), task_id=staged_task_id)
+                    self.set_workflow_state(states.FAILED)
+                    continue
         else:
             task_flow_entry = self.get_task_flow_entry(task_id)
 
@@ -312,7 +338,16 @@ class WorkflowConductor(object):
                 if next_task_node['name'] == 'noop':
                     continue
 
-                next_tasks.append(self.get_task(next_task_id))
+                try:
+                    next_tasks.append(self.get_task(next_task_id))
+                except exc.ExpressionEvaluationException as e:
+                    self.log_error(str(e), task_id=next_task_id)
+                    self.set_workflow_state(states.FAILED)
+                    continue
+
+        # Return nothing if there is error(s) on determining next tasks.
+        if self.get_workflow_state() in states.COMPLETED_STATES:
+            return []
 
         return sorted(next_tasks, key=lambda x: x['name'])
 
@@ -396,21 +431,34 @@ class WorkflowConductor(object):
 
             # Iterate thru each outbound task transitions.
             for task_transition in task_transitions:
-                criteria = task_transition[3].get('criteria') or []
-                evaluated_criteria = [expr.evaluate(c, current_ctx) for c in criteria]
                 task_transition_id = task_transition[1] + '__' + str(task_transition[2])
-                task_flow_entry[task_transition_id] = all(evaluated_criteria)
+
+                # Evaluate the criteria for task transition. If there is a failure while
+                # evaluating expression(s), fail the workflow.
+                try:
+                    criteria = task_transition[3].get('criteria') or []
+                    evaluated_criteria = [expr.evaluate(c, current_ctx) for c in criteria]
+                    task_flow_entry[task_transition_id] = all(evaluated_criteria)
+                except exc.ExpressionEvaluationException as e:
+                    self.log_error(str(e), task_id, task_transition_id)
+                    self.set_workflow_state(states.FAILED)
+                    continue
 
                 # If criteria met, then mark the next task staged and calculate outgoing context.
                 if task_flow_entry[task_transition_id]:
                     next_task_node = self.graph.get_task(task_transition[1])
                     next_task_name = next_task_node['name']
 
-                    out_ctx_val = task_spec.finalize_context(
-                        next_task_name,
-                        criteria,
-                        copy.deepcopy(current_ctx)
-                    )
+                    try:
+                        out_ctx_val = task_spec.finalize_context(
+                            next_task_name,
+                            criteria,
+                            copy.deepcopy(current_ctx)
+                        )
+                    except exc.ExpressionEvaluationException as e:
+                        self.log_error(str(e), task_id, task_transition_id)
+                        self.set_workflow_state(states.FAILED)
+                        continue
 
                     if out_ctx_val != in_ctx_val:
                         task_flow_idx = self.get_task_flow_idx(task_id)
