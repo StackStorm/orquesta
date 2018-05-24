@@ -67,12 +67,13 @@ class WorkflowConductor(object):
         self.composer = plugin.get_module('orchestra.composers', self.catalog)
 
         self._workflow_state = None
-        self._errors = []
         self._graph = None
         self._flow = None
         self._inputs = kwargs
+        self._outputs = None
+        self._errors = []
 
-    def restore(self, graph, state=None, errors=None, flow=None, inputs=None):
+    def restore(self, graph, state=None, errors=None, flow=None, inputs=None, outputs=None):
         if not graph or not isinstance(graph, graphing.WorkflowGraph):
             raise ValueError('The value of "graph" is not type of WorkflowGraph.')
 
@@ -85,10 +86,14 @@ class WorkflowConductor(object):
         if inputs is not None and not isinstance(inputs, dict):
             raise ValueError('The value of "inputs" is not type of dict.')
 
+        if outputs is not None and not isinstance(outputs, dict):
+            raise ValueError('The value of "outputs" is not type of dict.')
+
         self._workflow_state = state
         self._graph = graph
         self._flow = flow
         self._inputs = inputs or {}
+        self._outputs = outputs
         self._errors = errors or []
 
     def serialize(self):
@@ -97,7 +102,8 @@ class WorkflowConductor(object):
             'graph': self.graph.serialize(),
             'state': self.get_workflow_state(),
             'flow': self.flow.serialize(),
-            'inputs': copy.deepcopy(self.inputs),
+            'inputs': self.get_workflow_input(),
+            'outputs': self.get_workflow_output(),
             'errors': copy.deepcopy(self.errors)
         }
 
@@ -110,10 +116,11 @@ class WorkflowConductor(object):
         state = data['state']
         flow = TaskFlow.deserialize(data['flow'])
         inputs = copy.deepcopy(data['inputs'])
+        outputs = copy.deepcopy(data['outputs'])
         errors = copy.deepcopy(data['errors'])
 
         instance = cls(spec)
-        instance.restore(graph, state, errors, flow, inputs)
+        instance.restore(graph, state, errors, flow, inputs, outputs)
 
         return instance
 
@@ -129,25 +136,29 @@ class WorkflowConductor(object):
         if not self._flow:
             self._flow = TaskFlow()
 
-            # Get default workflow inputs.
+            # Render runtime and default workflow inputs and vars.
             spec_inputs = self.spec.input or []
             default_inputs = dict([list(i.items())[0] for i in spec_inputs if isinstance(i, dict)])
-            rendered_inputs = dx.merge_dicts(default_inputs, self.inputs, True)
+            merged_inputs = dx.merge_dicts(default_inputs, self.get_workflow_input(), True)
 
-            # Calculate and set the initial workflow context.
-            rendered_vars = expr.evaluate(getattr(self.spec, 'vars', {}), rendered_inputs)
-            ctx_value = dx.merge_dicts(rendered_inputs, rendered_vars)
-            self._flow.contexts.append({'srcs': [], 'value': ctx_value})
+            try:
+                rendered_inputs = expr.evaluate(merged_inputs, {})
+                rendered_vars = expr.evaluate(getattr(self.spec, 'vars', {}), rendered_inputs)
+            except exc.ExpressionEvaluationException as e:
+                self.log_error(str(e))
+                self.set_workflow_state(states.FAILED)
 
-            # Identify the starting tasks and set the pointer to the initial context entry.
-            for task_node in self.graph.roots:
-                self._flow.staged[task_node['id']] = {'ctxs': [0]}
+            # Proceed if there is no issue with rendering of inputs and vars.
+            if self.get_workflow_state() not in states.ABENDED_STATES:
+                # Set the initial workflow context.
+                ctx_value = dx.merge_dicts(rendered_inputs, rendered_vars)
+                self._flow.contexts.append({'srcs': [], 'value': ctx_value})
+
+                # Identify the starting tasks and set the pointer to the initial context entry.
+                for task_node in self.graph.roots:
+                    self._flow.staged[task_node['id']] = {'ctxs': [0]}
 
         return self._flow
-
-    @property
-    def inputs(self):
-        return self._inputs
 
     @property
     def errors(self):
@@ -163,6 +174,9 @@ class WorkflowConductor(object):
             entry['task_transition_id'] = task_transition_id
 
         self.errors.append(entry)
+
+    def get_workflow_input(self):
+        return copy.deepcopy(self._inputs)
 
     def get_workflow_state(self):
         return self._workflow_state
@@ -220,23 +234,27 @@ class WorkflowConductor(object):
             term_ctx_idx = len(self.flow.contexts) - 1
         else:
             term_ctx_entry = self.flow.contexts[term_ctx_idx]
-            term_ctx_val = dx.merge_dicts(term_ctx_entry['value'], ctx_diff, True)
-            term_ctx_entry['src'].append(task_flow_idx)
-            term_ctx_entry['value'] = term_ctx_val
+            if task_flow_idx not in term_ctx_entry['src']:
+                term_ctx_val = dx.merge_dicts(term_ctx_entry['value'], ctx_diff, True)
+                term_ctx_entry['src'].append(task_flow_idx)
+                term_ctx_entry['value'] = term_ctx_val
+
+    def render_workflow_outputs(self):
+        if self.get_workflow_state() == states.SUCCEEDED and not self._outputs:
+            wf_output_spec = getattr(self.spec, 'output') or {}
+            wf_term_ctx = self.get_workflow_terminal_context()
+
+            try:
+                self._outputs = {
+                    var_name: expr.evaluate(var_expr, wf_term_ctx['value'])
+                    for var_name, var_expr in six.iteritems(wf_output_spec)
+                }
+            except exc.ExpressionEvaluationException as e:
+                self.log_error(str(e))
+                self.set_workflow_state(states.FAILED)
 
     def get_workflow_output(self):
-        if self.get_workflow_state() != states.SUCCEEDED:
-            return None
-
-        wf_output_spec = getattr(self.spec, 'output') or {}
-        wf_term_ctx = self.get_workflow_terminal_context()
-
-        wf_output = {
-            var_name: expr.evaluate(var_expr, wf_term_ctx['value'])
-            for var_name, var_expr in six.iteritems(wf_output_spec)
-        }
-
-        return wf_output
+        return copy.deepcopy(self._outputs) if self._outputs else None
 
     def render_task_spec(self, task_name, ctx_value):
         task_spec = self.spec.tasks.get_task(task_name).copy()
@@ -501,31 +519,38 @@ class WorkflowConductor(object):
         any_staged_tasks = len(self.flow.staged) > 0
 
         # Update workflow state.
-        state = self.get_workflow_state()
+        old_state = self.get_workflow_state()
+        new_state = self.get_workflow_state()
 
         if task_flow_entry['state'] == states.RESUMING:
-            state = states.RESUMING
+            new_state = states.RESUMING
         elif task_flow_entry['state'] in states.RUNNING_STATES:
-            state = states.RUNNING
-        elif task_flow_entry['state'] in states.PAUSE_STATES and state == states.CANCELING:
-            state = states.CANCELING if any_active_tasks else states.CANCELED
+            new_state = states.RUNNING
+        elif task_flow_entry['state'] in states.PAUSE_STATES and old_state == states.CANCELING:
+            new_state = states.CANCELING if any_active_tasks else states.CANCELED
         elif task_flow_entry['state'] in states.PAUSE_STATES:
-            state = states.PAUSING if any_active_tasks else states.PAUSED
+            new_state = states.PAUSING if any_active_tasks else states.PAUSED
         elif task_flow_entry['state'] in states.CANCEL_STATES:
-            state = states.CANCELING if any_active_tasks else states.CANCELED
-        elif task_flow_entry['state'] in states.COMPLETED_STATES and state == states.PAUSING:
-            state = states.PAUSING if any_active_tasks else states.PAUSED
-        elif task_flow_entry['state'] in states.COMPLETED_STATES and state == states.CANCELING:
-            state = states.CANCELING if any_active_tasks else states.CANCELED
+            new_state = states.CANCELING if any_active_tasks else states.CANCELED
+        elif task_flow_entry['state'] in states.COMPLETED_STATES and old_state == states.PAUSING:
+            new_state = states.PAUSING if any_active_tasks else states.PAUSED
+        elif task_flow_entry['state'] in states.COMPLETED_STATES and old_state == states.CANCELING:
+            new_state = states.CANCELING if any_active_tasks else states.CANCELED
         elif task_flow_entry['state'] in states.ABENDED_STATES:
-            state = states.RUNNING if any_next_tasks else states.FAILED
+            new_state = states.RUNNING if any_next_tasks else states.FAILED
         elif task_flow_entry['state'] == states.SUCCEEDED:
             is_wf_running = any_active_tasks or any_next_tasks or any_staged_tasks
-            state = states.RUNNING if is_wf_running else states.SUCCEEDED
+            new_state = states.RUNNING if is_wf_running else states.SUCCEEDED
 
-        if (self.get_workflow_state() != state and
-                states.is_transition_valid(self.get_workflow_state(), state)):
-            self.set_workflow_state(state)
+        if old_state != new_state and states.is_transition_valid(old_state, new_state):
+            self.set_workflow_state(new_state)
+
+        if self.get_workflow_state() in states.COMPLETED_STATES:
+            in_ctx_idx = task_flow_entry['ctx']
+            in_ctx_val = self.flow.contexts[in_ctx_idx]['value']
+            task_flow_idx = self.get_task_flow_idx(task_id)
+            self.update_workflow_terminal_context(in_ctx_val, task_flow_idx)
+            self.render_workflow_outputs()
 
         return task_flow_entry
 

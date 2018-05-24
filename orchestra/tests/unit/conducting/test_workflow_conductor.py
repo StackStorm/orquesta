@@ -94,7 +94,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         expected_ctx_entry = {'srcs': [], 'value': init_ctx_value}
         self.assertDictEqual(conductor._inputs, user_inputs)
-        self.assertDictEqual(conductor.inputs, user_inputs)
+        self.assertDictEqual(conductor.get_workflow_input(), user_inputs)
         self.assertDictEqual(conductor.get_workflow_initial_context(), expected_ctx_entry)
 
         return conductor
@@ -110,6 +110,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'spec': conductor.spec.serialize(),
             'graph': conductor.graph.serialize(),
             'inputs': {},
+            'outputs': None,
             'state': None,
             'errors': [],
             'flow': {
@@ -143,6 +144,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'spec': conductor.spec.serialize(),
             'graph': conductor.graph.serialize(),
             'inputs': inputs,
+            'outputs': None,
             'state': None,
             'errors': [],
             'flow': {
@@ -178,6 +180,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'spec': conductor.spec.serialize(),
             'graph': conductor.graph.serialize(),
             'inputs': inputs,
+            'outputs': None,
             'state': None,
             'errors': [],
             'flow': {
@@ -218,7 +221,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'graph': conductor.graph.serialize(),
             'state': conductor.get_workflow_state(),
             'flow': conductor.flow.serialize(),
-            'inputs': conductor.inputs,
+            'inputs': conductor.get_workflow_input(),
+            'outputs': conductor.get_workflow_output(),
             'errors': conductor.errors
         }
 

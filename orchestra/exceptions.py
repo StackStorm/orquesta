@@ -36,10 +36,6 @@ class SchemaIncompatibleError(Exception):
     pass
 
 
-class ContextValueError(Exception):
-    pass
-
-
 class InvalidTask(Exception):
 
     def __init__(self, task_id):
