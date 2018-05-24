@@ -10,18 +10,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra import exceptions
+from orchestra import exceptions as exc
 from orchestra import states
 
 
 def _get_current_task(context):
     if not context:
-        raise exceptions.ContextValueError('The context is not set.')
+        raise exc.ExpressionEvaluationException('The context is not set.')
 
     current_task = context['__current_task'] or {}
 
     if not current_task:
-        raise exceptions.ContextValueError('The current task is not set in the context.')
+        raise exc.ExpressionEvaluationException('The current task is not set in the context.')
 
     return current_task
 

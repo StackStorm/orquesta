@@ -56,13 +56,13 @@ class WorkflowFunctionTest(unittest.TestCase):
         self.assertEqual(funcs.task_state_(context, 't1'), states.RUNNING)
 
     def test_get_current_task_empty(self):
-        self.assertRaises(exc.ContextValueError, funcs._get_current_task, None)
+        self.assertRaises(exc.ExpressionEvaluationException, funcs._get_current_task, None)
 
         context = {'__current_task': None}
-        self.assertRaises(exc.ContextValueError, funcs._get_current_task, context)
+        self.assertRaises(exc.ExpressionEvaluationException, funcs._get_current_task, context)
 
         context = {'__current_task': {}}
-        self.assertRaises(exc.ContextValueError, funcs._get_current_task, context)
+        self.assertRaises(exc.ExpressionEvaluationException, funcs._get_current_task, context)
 
     def test_get_current_task(self):
         context = {'__current_task': {'name': 't1'}}
@@ -70,7 +70,7 @@ class WorkflowFunctionTest(unittest.TestCase):
 
     def test_succeeded(self):
         context = {'__current_task': None}
-        self.assertRaises(exc.ContextValueError, funcs.succeeded_, context)
+        self.assertRaises(exc.ExpressionEvaluationException, funcs.succeeded_, context)
 
         context = {
             '__current_task': {'id': 't1'},
@@ -88,7 +88,7 @@ class WorkflowFunctionTest(unittest.TestCase):
 
     def test_failed(self):
         context = {'__current_task': None}
-        self.assertRaises(exc.ContextValueError, funcs.failed_, context)
+        self.assertRaises(exc.ExpressionEvaluationException, funcs.failed_, context)
 
         context = {
             '__current_task': {'id': 't1'},
@@ -106,7 +106,7 @@ class WorkflowFunctionTest(unittest.TestCase):
 
     def test_completed(self):
         context = {'__current_task': None}
-        self.assertRaises(exc.ContextValueError, funcs.completed_, context)
+        self.assertRaises(exc.ExpressionEvaluationException, funcs.completed_, context)
 
         context = {
             '__current_task': {'id': 't1'},
@@ -124,7 +124,7 @@ class WorkflowFunctionTest(unittest.TestCase):
 
     def test_result(self):
         context = {'__current_task': None}
-        self.assertRaises(exc.ContextValueError, funcs.result_, context)
+        self.assertRaises(exc.ExpressionEvaluationException, funcs.result_, context)
 
         context = {
             '__current_task': {'id': 't1', 'result': 'foobar'},

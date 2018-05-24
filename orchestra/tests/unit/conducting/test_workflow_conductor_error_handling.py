@@ -18,6 +18,48 @@ from orchestra.tests.unit import base
 
 class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
+    def test_workflow_input_error(self):
+        wf_def = """
+        version: 1.0
+
+        input:
+          - xyz: <% result().foobar %>
+
+        tasks:
+          task1:
+            action: core.noop
+        """
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.set_workflow_state(states.RUNNING)
+
+        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+
+    def test_workflow_vars_error(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          xyz: <% result().foobar %>
+
+        tasks:
+          task1:
+            action: core.noop
+        """
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.set_workflow_state(states.RUNNING)
+
+        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+
     def test_task_transition_criteria_error(self):
         wf_def = """
         version: 1.0
@@ -58,6 +100,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         ]
 
         spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
         conductor = conducting.WorkflowConductor(spec)
         conductor.set_workflow_state(states.RUNNING)
 
@@ -121,6 +165,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         ]
 
         spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
         conductor = conducting.WorkflowConductor(spec)
         conductor.set_workflow_state(states.RUNNING)
 
@@ -176,6 +222,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         ]
 
         spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
         conductor = conducting.WorkflowConductor(spec)
         conductor.set_workflow_state(states.RUNNING)
 
@@ -218,6 +266,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         ]
 
         spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
         conductor = conducting.WorkflowConductor(spec)
         conductor.set_workflow_state(states.RUNNING)
 
@@ -256,6 +306,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         ]
 
         spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
         conductor = conducting.WorkflowConductor(spec)
         conductor.set_workflow_state(states.RUNNING)
 
@@ -294,6 +346,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         ]
 
         spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
         conductor = conducting.WorkflowConductor(spec)
         conductor.set_workflow_state(states.RUNNING)
 
@@ -339,6 +393,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         ]
 
         spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
         conductor = conducting.WorkflowConductor(spec)
         conductor.set_workflow_state(states.RUNNING)
 
@@ -379,6 +435,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         ]
 
         spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
         conductor = conducting.WorkflowConductor(spec)
         conductor.set_workflow_state(states.RUNNING)
 
@@ -419,6 +477,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         ]
 
         spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
         conductor = conducting.WorkflowConductor(spec)
         conductor.set_workflow_state(states.RUNNING)
 
@@ -473,6 +533,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         ]
 
         spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
         conductor = conducting.WorkflowConductor(spec)
         conductor.set_workflow_state(states.RUNNING)
 
@@ -522,6 +584,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         ]
 
         spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
         conductor = conducting.WorkflowConductor(spec)
         conductor.set_workflow_state(states.RUNNING)
 
@@ -567,6 +631,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         ]
 
         spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
         conductor = conducting.WorkflowConductor(spec)
         conductor.set_workflow_state(states.RUNNING)
 
@@ -582,3 +648,29 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
+
+    def test_workflow_output_error(self):
+        wf_def = """
+        version: 1.0
+
+        output:
+          xyz: <% result().foobar %>
+
+        tasks:
+          task1:
+            action: core.noop
+        """
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.set_workflow_state(states.RUNNING)
+
+        # Manually complete task1.
+        task_name = 'task1'
+        conductor.update_task_flow(task_name, states.RUNNING)
+        conductor.update_task_flow(task_name, states.SUCCEEDED)
+
+        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertIsNone(conductor.get_workflow_output())

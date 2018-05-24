@@ -15,6 +15,33 @@ from orchestra.tests.unit.specs.native import base
 
 class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
 
+    def test_bad_input(self):
+        wf_def = """
+            version: 1.0
+            description: A basic sequential workflow.
+            input:
+              - y: <% $.a %>
+            tasks:
+              task1:
+                action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        expected_errors = {
+            'context': [
+                {
+                    'type': 'yaql',
+                    'expression': '<% $.a %>',
+                    'message': 'Variable "a" is referenced before assignment.',
+                    'schema_path': 'properties.input',
+                    'spec_path': 'input'
+                }
+            ]
+        }
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
     def test_bad_vars_yaql(self):
         wf_def = """
             version: 1.0
