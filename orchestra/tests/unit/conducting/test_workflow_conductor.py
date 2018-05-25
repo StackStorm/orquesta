@@ -109,8 +109,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         expected_data = {
             'spec': conductor.spec.serialize(),
             'graph': conductor.graph.serialize(),
-            'inputs': {},
-            'outputs': None,
+            'input': {},
+            'output': None,
             'state': None,
             'errors': [],
             'flow': {
@@ -143,8 +143,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         expected_data = {
             'spec': conductor.spec.serialize(),
             'graph': conductor.graph.serialize(),
-            'inputs': inputs,
-            'outputs': None,
+            'input': inputs,
+            'output': None,
             'state': None,
             'errors': [],
             'flow': {
@@ -179,8 +179,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         expected_data = {
             'spec': conductor.spec.serialize(),
             'graph': conductor.graph.serialize(),
-            'inputs': inputs,
-            'outputs': None,
+            'input': inputs,
+            'output': None,
             'state': None,
             'errors': [],
             'flow': {
@@ -221,8 +221,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'graph': conductor.graph.serialize(),
             'state': conductor.get_workflow_state(),
             'flow': conductor.flow.serialize(),
-            'inputs': conductor.get_workflow_input(),
-            'outputs': conductor.get_workflow_output(),
+            'input': conductor.get_workflow_input(),
+            'output': conductor.get_workflow_output(),
             'errors': conductor.errors
         }
 
