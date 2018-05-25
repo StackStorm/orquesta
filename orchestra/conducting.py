@@ -100,11 +100,11 @@ class WorkflowConductor(object):
         return {
             'spec': self.spec.serialize(),
             'graph': self.graph.serialize(),
-            'state': self.get_workflow_state(),
             'flow': self.flow.serialize(),
             'inputs': self.get_workflow_input(),
             'outputs': self.get_workflow_output(),
-            'errors': copy.deepcopy(self.errors)
+            'errors': copy.deepcopy(self.errors),
+            'state': self.get_workflow_state()
         }
 
     @classmethod
