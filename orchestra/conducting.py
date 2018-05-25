@@ -101,8 +101,8 @@ class WorkflowConductor(object):
             'spec': self.spec.serialize(),
             'graph': self.graph.serialize(),
             'flow': self.flow.serialize(),
-            'inputs': self.get_workflow_input(),
-            'outputs': self.get_workflow_output(),
+            'input': self.get_workflow_input(),
+            'output': self.get_workflow_output(),
             'errors': copy.deepcopy(self.errors),
             'state': self.get_workflow_state()
         }
@@ -115,8 +115,8 @@ class WorkflowConductor(object):
         graph = graphing.WorkflowGraph.deserialize(data['graph'])
         state = data['state']
         flow = TaskFlow.deserialize(data['flow'])
-        inputs = copy.deepcopy(data['inputs'])
-        outputs = copy.deepcopy(data['outputs'])
+        inputs = copy.deepcopy(data['input'])
+        outputs = copy.deepcopy(data['output'])
         errors = copy.deepcopy(data['errors'])
 
         instance = cls(spec)
