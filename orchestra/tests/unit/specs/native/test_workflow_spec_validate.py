@@ -92,8 +92,8 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
                     message: <% $.foo + $.bar %>
                 next:
                   - publish:
-                        foobar: fubar
-                        fubar: foobar
+                      - foobar: fubar
+                      - fubar: foobar
                     do: task3
               task3:
                 action: core.noop
@@ -244,7 +244,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             version: 1.0
             description: A basic sequential workflow.
             vars:
-                macro: polo
+              - macro: polo
             tasks:
               task1:
                 action: core.local cmd=<% $.foobar %>

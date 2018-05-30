@@ -443,8 +443,8 @@ class Spec(object):
         def get_ctx_inputs(prop_name, prop_value):
             ctx_inputs = []
 
-            # By default, context inputs support only dictionary
-            # or list of single item dictionaries.
+            # By default, context inputs support only dictionary,
+            # list of single item dictionaries, or string types.
             if isinstance(prop_value, dict):
                 ctx_inputs = list(prop_value.keys())
             elif isinstance(prop_value, list):
@@ -453,8 +453,26 @@ class Spec(object):
                         ctx_inputs.append(prop_value_item)
                     elif isinstance(prop_value_item, dict) and len(prop_value_item) == 1:
                         ctx_inputs.extend(list(prop_value_item.keys()))
+            elif isinstance(prop_value, six.string_types):
+                ctx_inputs.append(prop_value)
 
             return ctx_inputs
+
+        def inspect_ctx(prop_name, prop_value, spec_path, schema_path, rolling_ctx, errors):
+            ctx_vars = []
+
+            for var in expr.extract_vars(prop_value):
+                ctx_vars.append(decorate_ctx_var(var, spec_path, schema_path))
+
+            for ctx_var in ctx_vars:
+                if ctx_var['name'] not in rolling_ctx:
+                    errors.append(decorate_ctx_var_error(ctx_var))
+
+            if prop_name in self._context_inputs:
+                updated_ctx = get_ctx_inputs(prop_name, prop_value)
+                rolling_ctx = list(set(rolling_ctx + updated_ctx))
+
+            return rolling_ctx, errors
 
         errors = []
         parent_ctx = parent.get('ctx', []) if parent else []
@@ -466,10 +484,10 @@ class Spec(object):
             if not prop_value:
                 continue
 
-            ctx_vars = []
             spec_path = self.get_spec_path(prop_name, parent=parent)
             schema_path = self.get_schema_path(prop_name, parent=parent)
 
+            # Pass the inspection downstream if value is a spec.
             if isinstance(prop_value, Spec):
                 item_parent = {
                     'ctx': rolling_ctx,
@@ -483,22 +501,36 @@ class Spec(object):
 
                 continue
 
+            # Parse inline parameters from value if value is a string.
             if isinstance(prop_value, six.string_types):
                 inline_params = args_utils.parse_inline_params(prop_value)
 
                 if inline_params:
                     prop_value = inline_params
 
-            for var in expr.extract_vars(prop_value):
-                ctx_vars.append(decorate_ctx_var(var, spec_path, schema_path))
+            # Preserve evaluation order if value is a list.
+            if isinstance(prop_value, list):
+                for i in range(0, len(prop_value)):
+                    rolling_ctx, errors = inspect_ctx(
+                        prop_name,
+                        prop_value[i],
+                        spec_path + '[' + str(i) + ']',
+                        schema_path,
+                        rolling_ctx,
+                        errors
+                    )
 
-            for ctx_var in ctx_vars:
-                if ctx_var['name'] not in rolling_ctx:
-                    errors.append(decorate_ctx_var_error(ctx_var))
+                continue
 
-            if prop_name in self._context_inputs:
-                updated_ctx = get_ctx_inputs(prop_name, prop_value)
-                rolling_ctx = list(set(rolling_ctx + updated_ctx))
+            # Otherwise evaluate the value as is.
+            rolling_ctx, errors = inspect_ctx(
+                prop_name,
+                prop_value,
+                spec_path,
+                schema_path,
+                rolling_ctx,
+                errors
+            )
 
         return (sorted(errors, key=lambda x: x['spec_path']), rolling_ctx)
 

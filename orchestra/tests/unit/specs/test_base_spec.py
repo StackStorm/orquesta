@@ -581,7 +581,7 @@ class SpecTest(unittest.TestCase):
                 {
                     'type': 'yaql',
                     'expression': '<% $.fubar %>',
-                    'spec_path': 'attr4',
+                    'spec_path': 'attr4[0]',
                     'schema_path': 'properties.attr4',
                     'message': 'Variable "fubar" is referenced '
                                'before assignment.'
@@ -684,7 +684,7 @@ class SpecTest(unittest.TestCase):
                 {
                     'type': 'yaql',
                     'expression': '<% $.fubar %>',
-                    'spec_path': 'attr4',
+                    'spec_path': 'attr4[0]',
                     'schema_path': 'properties.attr4',
                     'message': 'Variable "fubar" is referenced '
                                'before assignment.'

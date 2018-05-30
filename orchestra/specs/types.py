@@ -140,3 +140,10 @@ UNIQUE_STRING_OR_ONE_KEY_DICT_LIST = {
     "uniqueItems": True,
     "minItems": 1
 }
+
+UNIQUE_ONE_KEY_DICT_LIST = {
+    "type": "array",
+    "items": ONE_KEY_DICT,
+    "uniqueItems": True,
+    "minItems": 1
+}
