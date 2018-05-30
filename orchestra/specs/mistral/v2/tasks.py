@@ -16,6 +16,7 @@ import re
 import six
 from six.moves import queue
 
+from orchestra import exceptions as exc
 from orchestra.expressions import base as expr
 from orchestra.specs import types
 from orchestra.specs.mistral.v2 import base
@@ -127,16 +128,21 @@ class TaskSpec(base.Spec):
 
     def finalize_context(self, next_task_name, criteria, in_ctx):
         expected_criteria_pattern = "<\% task_state\(\w+\) in \['succeeded'\] \%>"
+        new_ctx = {}
+        errors = []
 
         if not re.match(expected_criteria_pattern, criteria[0]):
-            return in_ctx
+            return in_ctx, errors
 
         task_publish_spec = getattr(self, 'publish') or {}
 
-        new_ctx = {
-            var_name: expr.evaluate(var_expr, in_ctx)
-            for var_name, var_expr in six.iteritems(task_publish_spec)
-        }
+        try:
+            new_ctx = {
+                var_name: expr.evaluate(var_expr, in_ctx)
+                for var_name, var_expr in six.iteritems(task_publish_spec)
+            }
+        except exc.ExpressionEvaluationException as e:
+            errors.append(str(e))
 
         out_ctx = dx.merge_dicts(in_ctx, new_ctx, overwrite=True)
 
@@ -144,7 +150,7 @@ class TaskSpec(base.Spec):
             if key.startswith('__'):
                 out_ctx.pop(key)
 
-        return out_ctx
+        return out_ctx, errors
 
 
 class TaskMappingSpec(base.MappingSpec):

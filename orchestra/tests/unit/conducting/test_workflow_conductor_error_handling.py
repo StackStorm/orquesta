@@ -39,12 +39,40 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertListEqual(conductor.get_next_tasks(), [])
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
 
+    def test_workflow_input_seq_ref_error(self):
+        wf_def = """
+        version: 1.0
+
+        input:
+          - x
+          - y: <% $.x %>
+          - z: <% $.y.value %>
+
+        tasks:
+          task1:
+            action: core.noop
+        """
+
+        expected_errors = [
+            {'message': 'Unknown function "#property#value"'}
+        ]
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.set_workflow_state(states.RUNNING)
+
+        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertListEqual(conductor.errors, expected_errors)
+
     def test_workflow_vars_error(self):
         wf_def = """
         version: 1.0
 
         vars:
-          xyz: <% result().foobar %>
+          - xyz: <% result().foobar %>
 
         tasks:
           task1:
@@ -60,6 +88,34 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertListEqual(conductor.get_next_tasks(), [])
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
 
+    def test_workflow_vars_seq_ref_error(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - x: 123
+          - y: <% $.x %>
+          - z: <% $.y.value %>
+
+        tasks:
+          task1:
+            action: core.noop
+        """
+
+        expected_errors = [
+            {'message': 'Unknown function "#property#value"'}
+        ]
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.set_workflow_state(states.RUNNING)
+
+        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertListEqual(conductor.errors, expected_errors)
+
     def test_task_transition_criteria_error(self):
         wf_def = """
         version: 1.0
@@ -67,7 +123,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         description: A basic branching workflow.
 
         vars:
-          foobar: fubar
+          - foobar: fubar
 
         tasks:
           task1:
@@ -75,7 +131,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             next:
               - when: <% $.foobar.fubar %>
                 publish:
-                  var1: 'xyz'
+                  - var1: 'xyz'
                 do: task2
               - when: <% succeeded() %>
                 do: task3
@@ -84,7 +140,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             next:
               - when: <% succeeded() %>
                 publish:
-                  var2: 123
+                  - var2: 123
                 do: task3
           task3:
             join: all
@@ -128,8 +184,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         description: A basic branching workflow.
 
         vars:
-          foobar: fubar
-          fubar: foobar
+          - foobar: fubar
+          - fubar: foobar
 
         tasks:
           task1:
@@ -137,14 +193,14 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             next:
               - when: <% $.foobar.fubar %>
                 publish:
-                  var1: 'xyz'
+                  - var1: 'xyz'
                 do: task3
           task2:
             action: core.noop
             next:
               - when: <% $.fubar.foobar %>
                 publish:
-                  var2: 123
+                  - var2: 123
                 do: task3
           task3:
             join: all
@@ -195,7 +251,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         description: A basic branching workflow.
 
         vars:
-          foobar: fubar
+          - foobar: fubar
 
         tasks:
           task1:
@@ -203,19 +259,72 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             next:
               - when: <% succeeded() %>
                 publish:
-                  var1: <% $.foobar.fubar %>
+                  - var1: <% $.foobar.fubar %>
                 do: task2
           task2:
             action: core.noop
             next:
               - when: <% succeeded() %>
                 publish:
-                  var2: 123
+                  - var2: 123
         """
 
         expected_errors = [
             {
                 'message': 'Unknown function "#property#fubar"',
+                'task_id': 'task1',
+                'task_transition_id': 'task2__0'
+            }
+        ]
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.set_workflow_state(states.RUNNING)
+
+        # The workflow should fail on completion of task1 while evaluating task transition.
+        task_name = 'task1'
+        conductor.update_task_flow(task_name, states.RUNNING)
+        conductor.update_task_flow(task_name, states.SUCCEEDED)
+
+        # The workflow should fail with the expected errors.
+        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
+        self.assertListEqual(actual_errors, expected_errors)
+        self.assertNotIn('task2', conductor.flow.staged)
+        self.assertListEqual(conductor.get_next_tasks(), [])
+
+    def test_task_transition_publish_seq_ref_error(self):
+        wf_def = """
+        version: 1.0
+
+        description: A basic branching workflow.
+
+        vars:
+          - foobar: fubar
+
+        tasks:
+          task1:
+            action: core.noop
+            next:
+              - when: <% succeeded() %>
+                publish:
+                  - x: 123
+                  - y: <% $.x %>
+                  - z: <% $.y.value %>
+                do: task2
+          task2:
+            action: core.noop
+            next:
+              - when: <% succeeded() %>
+                publish:
+                  - var2: 123
+        """
+
+        expected_errors = [
+            {
+                'message': 'Unknown function "#property#value"',
                 'task_id': 'task1',
                 'task_transition_id': 'task2__0'
             }
@@ -246,7 +355,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         description: A basic branching workflow.
 
         vars:
-          foobar: fubar
+          - foobar: fubar
 
         tasks:
           task1:
@@ -286,7 +395,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         description: A basic branching workflow.
 
         vars:
-          foobar: fubar
+          - foobar: fubar
 
         tasks:
           task1:
@@ -326,7 +435,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         description: A basic branching workflow.
 
         vars:
-          foobar: fubar
+          - foobar: fubar
 
         tasks:
           task1:
@@ -371,7 +480,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         description: A basic branching workflow.
 
         vars:
-          foobar: fubar
+          - foobar: fubar
 
         tasks:
           task1:
@@ -413,7 +522,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         description: A basic branching workflow.
 
         vars:
-          foobar: fubar
+          - foobar: fubar
 
         tasks:
           task1:
@@ -455,7 +564,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         description: A basic branching workflow.
 
         vars:
-          foobar: fubar
+          - foobar: fubar
 
         tasks:
           task1:
@@ -502,8 +611,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         description: A basic branching workflow.
 
         vars:
-          foobar: fubar
-          fubar: foobar
+          - foobar: fubar
+          - fubar: foobar
 
         tasks:
           task1:
@@ -553,8 +662,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         description: A basic branching workflow.
 
         vars:
-          foobar: fubar
-          fubar: foobar
+          - foobar: fubar
+          - fubar: foobar
 
         tasks:
           task1:
@@ -604,8 +713,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         description: A basic branching workflow.
 
         vars:
-          foobar: fubar
-          fubar: foobar
+          - foobar: fubar
+          - fubar: foobar
 
         tasks:
           task1:
@@ -654,7 +763,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         version: 1.0
 
         output:
-          xyz: <% result().foobar %>
+          - xyz: <% result().foobar %>
 
         tasks:
           task1:
@@ -673,4 +782,37 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.update_task_flow(task_name, states.SUCCEEDED)
 
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertIsNone(conductor.get_workflow_output())
+
+    def test_workflow_output_seq_ref_error(self):
+        wf_def = """
+        version: 1.0
+
+        output:
+          - x: 123
+          - y: <% $.x %>
+          - z: <% $.y.value %>
+
+        tasks:
+          task1:
+            action: core.noop
+        """
+
+        expected_errors = [
+            {'message': 'Unknown function "#property#value"'}
+        ]
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.set_workflow_state(states.RUNNING)
+
+        # Manually complete task1.
+        task_name = 'task1'
+        conductor.update_task_flow(task_name, states.RUNNING)
+        conductor.update_task_flow(task_name, states.SUCCEEDED)
+
+        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertListEqual(conductor.errors, expected_errors)
         self.assertIsNone(conductor.get_workflow_output())

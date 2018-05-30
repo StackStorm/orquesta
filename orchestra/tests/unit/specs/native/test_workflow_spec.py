@@ -59,9 +59,9 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
             '<% succeeded() %>'
         )
 
-        self.assertDictEqual(
+        self.assertListEqual(
             getattr(task1_transition_seqs[0], 'publish'),
-            {'greeting': '<% result() %>'}
+            [{'greeting': '<% result() %>'}]
         )
 
         self.assertEqual(
@@ -93,9 +93,9 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
             '<% succeeded() %>'
         )
 
-        self.assertDictEqual(
+        self.assertListEqual(
             getattr(task2_transition_seqs[0], 'publish'),
-            {'greeting': '<% $.greeting %>, <% result() %>'}
+            [{'greeting': '<% $.greeting %>, <% result() %>'}]
         )
 
         self.assertListEqual(
@@ -127,9 +127,9 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
             '<% succeeded() %>'
         )
 
-        self.assertDictEqual(
+        self.assertListEqual(
             getattr(task3_transition_seqs[0], 'publish'),
-            {'greeting': '<% result() %>'}
+            [{'greeting': '<% result() %>'}]
         )
 
         self.assertEqual(

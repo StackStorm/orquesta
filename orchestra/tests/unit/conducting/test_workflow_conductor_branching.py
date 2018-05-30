@@ -31,7 +31,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
             next:
               - when: <% succeeded() %>
                 publish:
-                  var1: 'xyz'
+                  - var1: 'xyz'
                 do: task3
 
           # branch 2
@@ -40,7 +40,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
             next:
               - when: <% succeeded() %>
                 publish:
-                  var2: 123
+                  - var2: 123
                 do: task3
 
           # adjoining branch
@@ -50,7 +50,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
             next:
               - when: <% succeeded() %>
                 publish:
-                  var3: True
+                  - var3: True
                 do: task4
           task4:
             action: core.noop
@@ -271,7 +271,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
             next:
               - when: <% succeeded() %>
                 publish:
-                  var1: 'xyz'
+                  - var1: 'xyz'
                 do: task2
           task2:
             action: core.noop
@@ -282,7 +282,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
             next:
               - when: <% succeeded() %>
                 publish:
-                  var2: 123
+                  - var2: 123
                 do: task4
           task4:
             action: core.noop

@@ -15,6 +15,7 @@ import logging
 import six
 from six.moves import queue
 
+from orchestra import exceptions as exc
 from orchestra.expressions import base as expr
 from orchestra.specs import types
 from orchestra.specs.native.v1 import base
@@ -46,7 +47,7 @@ class TaskTransitionSpec(base.Spec):
             'publish': {
                 'oneOf': [
                     types.NONEMPTY_STRING,
-                    types.NONEMPTY_DICT
+                    types.UNIQUE_ONE_KEY_DICT_LIST
                 ]
             },
             'do': {
@@ -133,7 +134,7 @@ class TaskSpec(base.Spec):
         super(TaskSpec, self).__init__(*args, **kwargs)
 
         action_spec = getattr(self, 'action', str())
-        input_spec = args_utils.parse_inline_params(action_spec)
+        input_spec = args_utils.parse_inline_params(action_spec, preserve_order=False)
 
         if input_spec:
             self.action = action_spec[:action_spec.index(' ')]
@@ -143,7 +144,9 @@ class TaskSpec(base.Spec):
         return hasattr(self, 'join') and self.join
 
     def finalize_context(self, next_task_name, criteria, in_ctx):
+        rolling_ctx = copy.deepcopy(in_ctx)
         new_ctx = {}
+        errors = []
 
         task_transition_specs = getattr(self, 'next') or []
 
@@ -158,12 +161,16 @@ class TaskSpec(base.Spec):
                 if condition and len(criteria) > 0 and condition != criteria[0]:
                     continue
 
-                task_publish_spec = getattr(task_transition_spec, 'publish') or {}
+                for task_publish_spec in (getattr(task_transition_spec, 'publish') or {}):
+                    var_name = list(task_publish_spec.items())[0][0]
+                    default_var_value = list(task_publish_spec.items())[0][1]
 
-                new_ctx = {
-                    var_name: expr.evaluate(var_expr, in_ctx)
-                    for var_name, var_expr in six.iteritems(task_publish_spec)
-                }
+                    try:
+                        rendered_var_value = expr.evaluate(default_var_value, rolling_ctx)
+                        rolling_ctx[var_name] = rendered_var_value
+                        new_ctx[var_name] = rendered_var_value
+                    except exc.ExpressionEvaluationException as e:
+                        errors.append(str(e))
 
                 break
 
@@ -173,7 +180,7 @@ class TaskSpec(base.Spec):
             if key.startswith('__'):
                 out_ctx.pop(key)
 
-        return out_ctx
+        return out_ctx, errors
 
 
 class TaskMappingSpec(base.MappingSpec):
@@ -416,9 +423,9 @@ class WorkflowSpec(base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
-            'vars': types.NONEMPTY_DICT,
+            'vars': types.UNIQUE_ONE_KEY_DICT_LIST,
             'input': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
-            'output': types.NONEMPTY_DICT,
+            'output': types.UNIQUE_ONE_KEY_DICT_LIST,
             'tasks': TaskMappingSpec
         },
         'required': ['tasks'],
@@ -434,5 +441,65 @@ class WorkflowSpec(base.Spec):
 
     _context_inputs = [
         'input',
-        'vars'
+        'vars',
+        'output'
     ]
+
+    def render_input(self, runtime_inputs):
+        rolling_ctx = {}
+        errors = []
+
+        for input_spec in (getattr(self, 'input') or []):
+            if isinstance(input_spec, dict):
+                input_name = list(input_spec.items())[0][0]
+                default_input_value = list(input_spec.items())[0][1]
+            else:
+                input_name = input_spec
+                default_input_value = None
+
+            runtime_input_value = runtime_inputs.get(input_name, default_input_value)
+
+            try:
+                rendered_input_value = expr.evaluate(runtime_input_value, rolling_ctx)
+                rolling_ctx[input_name] = rendered_input_value
+            except exc.ExpressionEvaluationException as e:
+                errors.append(str(e))
+
+        return rolling_ctx, errors
+
+    def render_vars(self, in_ctx):
+        rolling_ctx = copy.deepcopy(in_ctx)
+        rendered_vars = {}
+        errors = []
+
+        for var_spec in (getattr(self, 'vars') or []):
+            var_name = list(var_spec.items())[0][0]
+            default_var_value = list(var_spec.items())[0][1]
+
+            try:
+                rendered_var_value = expr.evaluate(default_var_value, rolling_ctx)
+                rolling_ctx[var_name] = rendered_var_value
+                rendered_vars[var_name] = rendered_var_value
+            except exc.ExpressionEvaluationException as e:
+                errors.append(str(e))
+
+        return rendered_vars, errors
+
+    def render_output(self, in_ctx):
+        output_specs = getattr(self, 'output') or []
+        rolling_ctx = copy.deepcopy(in_ctx)
+        rendered_outputs = {}
+        errors = []
+
+        for output_spec in output_specs:
+            output_name = list(output_spec.items())[0][0]
+            default_output_value = list(output_spec.items())[0][1]
+
+            try:
+                rendered_output_value = expr.evaluate(default_output_value, rolling_ctx)
+                rolling_ctx[output_name] = rendered_output_value
+                rendered_outputs[output_name] = rendered_output_value
+            except exc.ExpressionEvaluationException as e:
+                errors.append(str(e))
+
+        return rendered_outputs, errors

@@ -42,8 +42,9 @@ REGEX_INLINE_PARAM_VARIATIONS.extend([e._regex_pattern for e in expr.get_evaluat
 REGEX_INLINE_PARAMS = '([\w]+)=(%s)' % '|'.join(REGEX_INLINE_PARAM_VARIATIONS)
 
 
-def parse_inline_params(s):
-    params = {}
+def parse_inline_params(s, preserve_order=True):
+    # Use a list to preserve order.
+    params = [] if preserve_order else {}
 
     if s is None or not isinstance(s, six.string_types) or s == str():
         return params
@@ -66,6 +67,9 @@ def parse_inline_params(s):
         except Exception:
             pass
 
-        params[k] = v
+        if preserve_order:
+            params.append({k: v})
+        else:
+            params[k] = v
 
     return params

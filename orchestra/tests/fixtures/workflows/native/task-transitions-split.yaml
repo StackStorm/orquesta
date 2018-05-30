@@ -6,7 +6,7 @@ description: >
 
 tasks:
   task1:
-    action: std.noop
+    action: core.noop
     next:
       - do: task2
       - when: <% failed() %>
@@ -14,4 +14,4 @@ tasks:
       - when: <% succeeded() %>
         do: task2
   task2:
-    action: std.noop
+    action: core.noop

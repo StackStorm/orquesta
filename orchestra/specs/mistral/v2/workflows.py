@@ -11,10 +11,14 @@
 # limitations under the License.
 
 import logging
+import six
 
+from orchestra import exceptions as exc
+from orchestra.expressions import base as expr
 from orchestra.specs import types
 from orchestra.specs.mistral.v2 import base
 from orchestra.specs.mistral.v2 import tasks
+from orchestra.utils import dictionary as dx
 
 
 LOG = logging.getLogger(__name__)
@@ -60,6 +64,47 @@ class WorkflowSpec(base.Spec):
         'input',
         'vars'
     ]
+
+    def render_input(self, runtime_inputs):
+        input_specs = getattr(self, 'input') or []
+        default_inputs = dict([list(i.items())[0] for i in input_specs if isinstance(i, dict)])
+        merged_inputs = dx.merge_dicts(default_inputs, runtime_inputs, True)
+        rendered_inputs = {}
+        errors = []
+
+        try:
+            rendered_inputs = expr.evaluate(merged_inputs, {})
+        except exc.ExpressionEvaluationException as e:
+            errors.append(str(e))
+
+        return rendered_inputs, errors
+
+    def render_vars(self, in_ctx):
+        vars_specs = getattr(self, 'vars') or {}
+        rendered_vars = {}
+        errors = []
+
+        try:
+            rendered_vars = expr.evaluate(vars_specs, in_ctx)
+        except exc.ExpressionEvaluationException as e:
+            errors.append(str(e))
+
+        return rendered_vars, errors
+
+    def render_output(self, in_ctx):
+        output_specs = getattr(self, 'output') or {}
+        rendered_outputs = {}
+        errors = []
+
+        try:
+            rendered_outputs = {
+                var_name: expr.evaluate(var_expr, in_ctx)
+                for var_name, var_expr in six.iteritems(output_specs)
+            }
+        except exc.ExpressionEvaluationException as e:
+            errors.append(str(e))
+
+        return rendered_outputs, errors
 
 
 class WorkbookSpec(base.Spec):

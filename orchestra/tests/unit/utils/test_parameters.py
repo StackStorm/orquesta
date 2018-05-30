@@ -31,7 +31,7 @@ class InlineParametersTest(unittest.TestCase):
         ]
 
         for s, d in tests:
-            self.assertDictEqual(params.parse_inline_params(s), d)
+            self.assertDictEqual(params.parse_inline_params(s)[0], d)
 
     def test_parse_dictionary(self):
         tests = [
@@ -39,7 +39,7 @@ class InlineParametersTest(unittest.TestCase):
         ]
 
         for s, d in tests:
-            self.assertDictEqual(params.parse_inline_params(s), d)
+            self.assertDictEqual(params.parse_inline_params(s)[0], d)
 
     def test_parse_expression(self):
         tests = [
@@ -48,40 +48,43 @@ class InlineParametersTest(unittest.TestCase):
         ]
 
         for s, d in tests:
-            self.assertDictEqual(params.parse_inline_params(s), d)
+            self.assertDictEqual(params.parse_inline_params(s)[0], d)
 
     def test_parse_multiple(self):
         tests = [
-            ('x="abc" y="def"', {'x': 'abc', 'y': 'def'}),
-            ('x="abc", y="def"', {'x': 'abc', 'y': 'def'}),
-            ('x="abc"; y="def"', {'x': 'abc', 'y': 'def'})
+            ('x="abc" y="def"', [{'x': 'abc'}, {'y': 'def'}]),
+            ('y="def" x="abc"', [{'y': 'def'}, {'x': 'abc'}]),
+            ('x="abc", y="def"', [{'x': 'abc'}, {'y': 'def'}]),
+            ('y="def", x="abc"', [{'y': 'def'}, {'x': 'abc'}]),
+            ('x="abc"; y="def"', [{'x': 'abc'}, {'y': 'def'}]),
+            ('y="def"; x="abc"', [{'y': 'def'}, {'x': 'abc'}])
         ]
 
         for s, d in tests:
-            self.assertDictEqual(params.parse_inline_params(s), d)
+            self.assertListEqual(params.parse_inline_params(s), d)
 
     def test_parse_combination(self):
         s = 'i=123 j="abc" k=true x=<% $.abc %> y={{ _.abc }} z=\'{\"a\": 1}\''
 
-        d = {
-            'i': 123,
-            'j': 'abc',
-            'k': True,
-            'x': '<% $.abc %>',
-            'y': '{{ _.abc }}',
-            'z': {'a': 1}
-        }
+        d = [
+            {'i': 123},
+            {'j': 'abc'},
+            {'k': True},
+            {'x': '<% $.abc %>'},
+            {'y': '{{ _.abc }}'},
+            {'z': {'a': 1}}
+        ]
 
-        self.assertDictEqual(params.parse_inline_params(s), d)
+        self.assertListEqual(params.parse_inline_params(s), d)
 
     def test_parse_empty_string(self):
-        self.assertDictEqual(params.parse_inline_params(str()), {})
+        self.assertListEqual(params.parse_inline_params(str()), [])
 
     def test_parse_null_type(self):
-        self.assertDictEqual(params.parse_inline_params(None), {})
+        self.assertListEqual(params.parse_inline_params(None), [])
 
     def test_parse_other_types(self):
-        self.assertDictEqual(params.parse_inline_params(123), {})
-        self.assertDictEqual(params.parse_inline_params(True), {})
-        self.assertDictEqual(params.parse_inline_params([1, 2, 3]), {})
-        self.assertDictEqual(params.parse_inline_params({'a': 123}), {})
+        self.assertListEqual(params.parse_inline_params(123), [])
+        self.assertListEqual(params.parse_inline_params(True), [])
+        self.assertListEqual(params.parse_inline_params([1, 2, 3]), [])
+        self.assertListEqual(params.parse_inline_params({'a': 123}), [])

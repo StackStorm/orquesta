@@ -12,7 +12,6 @@
 
 import copy
 import logging
-import six
 
 from orchestra import exceptions as exc
 from orchestra.expressions import base as expr
@@ -136,23 +135,20 @@ class WorkflowConductor(object):
         if not self._flow:
             self._flow = TaskFlow()
 
-            # Render runtime and default workflow inputs and vars.
-            spec_inputs = self.spec.input or []
-            default_inputs = dict([list(i.items())[0] for i in spec_inputs if isinstance(i, dict)])
-            merged_inputs = dx.merge_dicts(default_inputs, self.get_workflow_input(), True)
+            # Render runtime and default workflow inputs.
+            rendered_inputs, input_errors = self.spec.render_input(self.get_workflow_input())
+            rendered_vars, var_errors = self.spec.render_vars(rendered_inputs)
+            errors = input_errors + var_errors
 
-            try:
-                rendered_inputs = expr.evaluate(merged_inputs, {})
-                rendered_vars = expr.evaluate(getattr(self.spec, 'vars', {}), rendered_inputs)
-            except exc.ExpressionEvaluationException as e:
-                self.log_error(str(e))
+            if errors:
+                self.log_errors(errors)
                 self.set_workflow_state(states.FAILED)
 
             # Proceed if there is no issue with rendering of inputs and vars.
             if self.get_workflow_state() not in states.ABENDED_STATES:
                 # Set the initial workflow context.
-                ctx_value = dx.merge_dicts(rendered_inputs, rendered_vars)
-                self._flow.contexts.append({'srcs': [], 'value': ctx_value})
+                init_ctx = dict(list(rendered_inputs.items()) + list(rendered_vars.items()))
+                self._flow.contexts.append({'srcs': [], 'value': init_ctx})
 
                 # Identify the starting tasks and set the pointer to the initial context entry.
                 for task_node in self.graph.roots:
@@ -174,6 +170,10 @@ class WorkflowConductor(object):
             entry['task_transition_id'] = task_transition_id
 
         self.errors.append(entry)
+
+    def log_errors(self, errors, task_id=None, task_transition_id=None):
+        for error in errors:
+            self.log_error(error, task_id=task_id, task_transition_id=task_transition_id)
 
     def get_workflow_input(self):
         return copy.deepcopy(self._inputs)
@@ -240,18 +240,17 @@ class WorkflowConductor(object):
                 term_ctx_entry['value'] = term_ctx_val
 
     def render_workflow_outputs(self):
+        # Render workflow outputs if workflow succeeded.
         if self.get_workflow_state() == states.SUCCEEDED and not self._outputs:
-            wf_output_spec = getattr(self.spec, 'output') or {}
-            wf_term_ctx = self.get_workflow_terminal_context()
+            outputs, errors = self.spec.render_output(self.get_workflow_terminal_context()['value'])
 
-            try:
-                self._outputs = {
-                    var_name: expr.evaluate(var_expr, wf_term_ctx['value'])
-                    for var_name, var_expr in six.iteritems(wf_output_spec)
-                }
-            except exc.ExpressionEvaluationException as e:
-                self.log_error(str(e))
+            if errors:
+                self.log_errors(errors)
                 self.set_workflow_state(states.FAILED)
+
+            # Persist outputs if there is no issue with rendering.
+            if self.get_workflow_state() not in states.ABENDED_STATES and outputs:
+                self._outputs = outputs
 
     def get_workflow_output(self):
         return copy.deepcopy(self._outputs) if self._outputs else None
@@ -467,14 +466,14 @@ class WorkflowConductor(object):
                     next_task_node = self.graph.get_task(task_transition[1])
                     next_task_name = next_task_node['name']
 
-                    try:
-                        out_ctx_val = task_spec.finalize_context(
-                            next_task_name,
-                            criteria,
-                            copy.deepcopy(current_ctx)
-                        )
-                    except exc.ExpressionEvaluationException as e:
-                        self.log_error(str(e), task_id, task_transition_id)
+                    out_ctx_val, errors = task_spec.finalize_context(
+                        next_task_name,
+                        criteria,
+                        copy.deepcopy(current_ctx)
+                    )
+
+                    if errors:
+                        self.log_errors(errors, task_id, task_transition_id)
                         self.set_workflow_state(states.FAILED)
                         continue
 

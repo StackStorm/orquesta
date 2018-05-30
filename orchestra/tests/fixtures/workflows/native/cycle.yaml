@@ -7,24 +7,24 @@ input:
 
 tasks:
   prep:
-    action: std.noop
+    action: core.noop
     next:
       - when: <% succeeded() %>
         do: task1
   task1:
-    action: std.noop
+    action: core.noop
     next:
       - when: <% succeeded() %>
         do: task2
   task2:
-    action: std.noop
+    action: core.noop
     next:
       - when: <% succeeded() %>
         do: task3
   task3:
-    action: std.noop
+    action: core.noop
     next:
       - when: <% succeeded() and $.count < 2 %>
         publish:
-          count: <% $.count + 1 %>
+          - count: <% $.count + 1 %>
         do: task1

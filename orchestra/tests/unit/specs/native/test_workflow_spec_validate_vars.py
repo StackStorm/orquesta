@@ -15,7 +15,7 @@ from orchestra.tests.unit.specs.native import base
 
 class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
 
-    def test_bad_input(self):
+    def test_bad_vars_in_input(self):
         wf_def = """
             version: 1.0
             description: A basic sequential workflow.
@@ -23,7 +23,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
               - y: <% $.a %>
             tasks:
               task1:
-                action: std.noop
+                action: core.noop
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -35,25 +35,42 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     'expression': '<% $.a %>',
                     'message': 'Variable "a" is referenced before assignment.',
                     'schema_path': 'properties.input',
-                    'spec_path': 'input'
+                    'spec_path': 'input[0]'
                 }
             ]
         }
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
-    def test_bad_vars_yaql(self):
+    def test_seq_vars_in_input(self):
+        wf_def = """
+            version: 1.0
+            description: A basic sequential workflow.
+            input:
+              - x
+              - y: foobar
+              - z: <% $.x %> <% $.y %>
+            tasks:
+              task1:
+                action: core.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_bad_vars_with_yaql(self):
         wf_def = """
             version: 1.0
             description: A basic sequential workflow.
             input:
               - y
             vars:
-              foo: <% $.a %>
-              fooa: <% $.x + $.y + $.z %>
+              - foo: <% $.a %>
+              - fooa: <% $.x + $.y + $.z %>
             tasks:
               task1:
-                action: std.noop
+                action: core.noop
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -65,39 +82,39 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     'expression': '<% $.a %>',
                     'message': 'Variable "a" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'vars'
+                    'spec_path': 'vars[0]'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.x + $.y + $.z %>',
                     'message': 'Variable "x" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'vars'
+                    'spec_path': 'vars[1]'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.x + $.y + $.z %>',
                     'message': 'Variable "z" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'vars'
+                    'spec_path': 'vars[1]'
                 }
             ]
         }
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
-    def test_bad_vars_jinja(self):
+    def test_bad_vars_with_jinja(self):
         wf_def = """
             version: 1.0
             description: A basic sequential workflow.
             input:
               - y
             vars:
-              foo: "{{ _.a }}"
-              fooa: "{{ _.x + _.y + _.z }}"
+              - foo: "{{ _.a }}"
+              - fooa: "{{ _.x + _.y + _.z }}"
             tasks:
               task1:
-                action: std.noop
+                action: core.noop
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -109,39 +126,39 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     'expression': '{{ _.a }}',
                     'message': 'Variable "a" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'vars'
+                    'spec_path': 'vars[0]'
                 },
                 {
                     'type': 'jinja',
                     'expression': '{{ _.x + _.y + _.z }}',
                     'message': 'Variable "x" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'vars'
+                    'spec_path': 'vars[1]'
                 },
                 {
                     'type': 'jinja',
                     'expression': '{{ _.x + _.y + _.z }}',
                     'message': 'Variable "z" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'vars'
+                    'spec_path': 'vars[1]'
                 }
             ]
         }
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
-    def test_bad_vars_mix_yaql_and_jinja(self):
+    def test_bad_vars_with_mix_yaql_and_jinja(self):
         wf_def = """
             version: 1.0
             description: A basic sequential workflow.
             input:
               - y
             vars:
-              foo: "{{ _.a }}"
-              fooa: <% $.x + $.y + $.z %>
+              - foo: "{{ _.a }}"
+              - fooa: <% $.x + $.y + $.z %>
             tasks:
               task1:
-                action: std.noop
+                action: core.noop
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -153,43 +170,63 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     'expression': '{{ _.a }}',
                     'message': 'Variable "a" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'vars'
+                    'spec_path': 'vars[0]'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.x + $.y + $.z %>',
                     'message': 'Variable "x" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'vars'
+                    'spec_path': 'vars[1]'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% $.x + $.y + $.z %>',
                     'message': 'Variable "z" is referenced before assignment.',
                     'schema_path': 'properties.vars',
-                    'spec_path': 'vars'
+                    'spec_path': 'vars[1]'
                 }
             ]
         }
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
-    def test_bad_vars_in_sequential_tasks(self):
+    def test_seq_vars_in_vars(self):
         wf_def = """
             version: 1.0
             description: A basic sequential workflow.
             vars:
-              foobar: foobar
+              - foobar: foobar
+              - fubar: <% $.foobar %>
+              - barfoo: <% $.fubar %>
+              - barfu: <% $.barfoo %>
             tasks:
               task1:
-                action: std.echo
+                action: core.echo
+                input:
+                  message: <% $.fubar %>
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_bad_vars_in_seq_tasks(self):
+        wf_def = """
+            version: 1.0
+            description: A basic sequential workflow.
+            vars:
+              - foobar: foobar
+            tasks:
+              task1:
+                action: core.echo
                 input:
                   message: <% $.foobar %>
                 next:
                   - when: <% task_state(task1) = "SUCCESS" %>
                     do: task2
               task2:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foo %>
         """
@@ -215,10 +252,10 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             version: 1.0
             description: A basic sequential workflow.
             vars:
-              foobar: foobar
+              - foobar: foobar
             tasks:
               task1:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foobar %>
                 next:
@@ -229,11 +266,11 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     publish: bar="foo"
                     do: task3
               task2:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foo + $.bar %>
               task3:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foo + $.bar %>
         """
@@ -266,10 +303,10 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             version: 1.0
             description: A basic sequential workflow.
             vars:
-              foobar: foobar
+              - foobar: foobar
             tasks:
               task1:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foobar %>
                 next:
@@ -277,11 +314,11 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     publish: foo="bar"
                     do: task2
               task2:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foo + $.bar %>
               task3:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foobar %>
                 next:
@@ -289,7 +326,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     publish: bar="foo"
                     do: task4
               task4:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foo + $.bar %>
         """
@@ -322,10 +359,10 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             version: 1.0
             description: A basic sequential workflow.
             vars:
-              foobar: foobar
+              - foobar: foobar
             tasks:
               task1:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foobar %>
                 next:
@@ -333,14 +370,14 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     publish: foo="bar"
                     do: task2
               task2:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foo + $.bar %>
                 next:
                   - when: <% task_state(task2) = "SUCCESS" %>
                     do: task5
               task3:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foobar %>
                 next:
@@ -348,14 +385,14 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     publish: bar="foo"
                     do: task4
               task4:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foo + $.bar %>
                 next:
                   - when: <% task_state(task4) = "SUCCESS" %>
                     do: task5
               task5:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foo %>
         """
@@ -395,10 +432,10 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             version: 1.0
             description: A complex branching workflow.
             vars:
-              foobar: foobar
+              - foobar: foobar
             tasks:
               task1:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foobar %>
                 next:
@@ -406,14 +443,14 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     publish: foo="bar"
                     do: task2
               task2:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foo %>
                 next:
                   - when: <% task_state(task2) = "SUCCESS" %>
                     do: task5
               task3:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foobar %>
                 next:
@@ -421,7 +458,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     publish: bar="foo"
                     do: task4
               task4:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.bar %>
                 next:
@@ -429,7 +466,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     do: task5
               task5:
                 join: all
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foo + $.bar %>
         """
@@ -444,19 +481,19 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             description: A basic workflow.
             tasks:
               task1:
-                action: std.noop
+                action: core.noop
                 next:
                   - publish: foo="bar" bar="foo"
                     do: task2
               task2:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foo + $.bar %>
                 next:
                   - publish: foobar=<% $.fu + $.bar %>
                     do: task3
               task3:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.fu + $.bar %>
                 next:
@@ -475,7 +512,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                         'properties.tasks.patternProperties.^\\w+$.properties.'
                         'next.items.properties.publish'
                     ),
-                    'spec_path': 'tasks.task2.next[0].publish'
+                    'spec_path': 'tasks.task2.next[0].publish[0]'
                 },
                 {
                     'type': 'yaql',
@@ -492,29 +529,29 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                         'properties.tasks.patternProperties.^\\w+$.properties.'
                         'next.items.properties.publish'
                     ),
-                    'spec_path': 'tasks.task3.next[0].publish'
+                    'spec_path': 'tasks.task3.next[0].publish[0]'
                 }
             ]
         }
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
-    def test_publish_inline_params(self):
+    def test_vars_in_publish_inline_params(self):
         wf_def = """
             version: 1.0
             description: A basic workflow.
             tasks:
               task1:
-                action: std.noop
+                action: core.noop
                 next:
                   - publish: foo="bar" bar="foo"
                     do: task2, task3
               task2:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.foo + $.bar %>
               task3:
-                action: std.echo
+                action: core.echo
                 input:
                   message: <% $.fu + $.bar %>
         """
@@ -534,3 +571,78 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
         }
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_seq_vars_in_publish(self):
+        wf_def = """
+            version: 1.0
+            description: A basic workflow.
+            tasks:
+              task1:
+                action: core.noop
+                next:
+                  - publish: foo="bar" bar="foo" foobar="<% $.foo %><% $.bar %>"
+                    do: task2
+              task2:
+                action: core.echo
+                input:
+                  message: <% $.foo + $.bar %>
+                next:
+                  - publish:
+                      - fu: "fu"
+                      - fubar: "<% $.fu %><% $.bar %>"
+                    do: task3
+              task3:
+                action: core.echo
+                input:
+                  message: <% $.fu %><% $.bar %>
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_bad_vars_in_output(self):
+        wf_def = """
+            version: 1.0
+            description: A basic sequential workflow.
+            output:
+              - y: <% $.a %>
+            tasks:
+              task1:
+                action: core.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        expected_errors = {
+            'context': [
+                {
+                    'type': 'yaql',
+                    'expression': '<% $.a %>',
+                    'message': 'Variable "a" is referenced before assignment.',
+                    'schema_path': 'properties.output',
+                    'spec_path': 'output[0]'
+                }
+            ]
+        }
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_seq_vars_in_output(self):
+        wf_def = """
+            version: 1.0
+            description: A basic sequential workflow.
+            input:
+              - a
+            output:
+              - x: <% $.a %>
+              - y: <% $.x %>
+              - z: <% $.x %> <% $.y %>
+            tasks:
+              task1:
+                action: core.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})

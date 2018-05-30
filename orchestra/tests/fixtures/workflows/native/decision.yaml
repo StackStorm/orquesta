@@ -9,7 +9,7 @@ input:
 
 tasks:
   t1:
-    action: std.noop
+    action: core.noop
     next:
       - when: <% succeeded() and $.which = "a" %>
         do: a
@@ -18,8 +18,8 @@ tasks:
       - when: <% succeeded() and not $.which in list(a, b) %>
         do: c
   a:
-    action: std.noop
+    action: core.noop
   b:
-    action: std.noop
+    action: core.noop
   c:
-    action: std.noop
+    action: core.noop
