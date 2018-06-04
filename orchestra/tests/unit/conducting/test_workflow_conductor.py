@@ -113,7 +113,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'state': None,
             'errors': [],
             'flow': {
-                'staged': {'task1': {'ctxs': [0]}},
+                'staged': {'task1': {'ctxs': [0], 'ready': True}},
                 'tasks': {},
                 'sequence': [],
                 'contexts': [{'srcs': [], 'value': {'a': None, 'b': False}}]
@@ -147,7 +147,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'state': None,
             'errors': [],
             'flow': {
-                'staged': {'task1': {'ctxs': [0]}},
+                'staged': {'task1': {'ctxs': [0], 'ready': True}},
                 'tasks': {},
                 'sequence': [],
                 'contexts': [{'srcs': [], 'value': inputs}]
@@ -183,7 +183,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'state': None,
             'errors': [],
             'flow': {
-                'staged': {'task1': {'ctxs': [0]}},
+                'staged': {'task1': {'ctxs': [0], 'ready': True}},
                 'tasks': {},
                 'sequence': [],
                 'contexts': [{'srcs': [], 'value': expected_initial_ctx}]
@@ -262,6 +262,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         expected_ctx_value = {'a': 123, 'b': False}
         expected_tasks = [self.format_task_item(next_task_name, expected_ctx_value, next_task_spec)]
         self.assert_task_list(conductor.get_start_tasks(), expected_tasks)
+        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
 
     def test_get_start_tasks_when_graph_paused(self):
         inputs = {'a': 123}
