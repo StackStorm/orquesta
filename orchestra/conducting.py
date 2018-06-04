@@ -153,7 +153,7 @@ class WorkflowConductor(object):
 
                 # Identify the starting tasks and set the pointer to the initial context entry.
                 for task_node in self.graph.roots:
-                    self._flow.staged[task_node['id']] = {'ctxs': [0]}
+                    self._flow.staged[task_node['id']] = {'ctxs': [0], 'ready': True}
 
         return self._flow
 
