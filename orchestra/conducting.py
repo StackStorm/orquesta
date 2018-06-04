@@ -12,6 +12,7 @@
 
 import copy
 import logging
+import six
 
 from orchestra import exceptions as exc
 from orchestra.expressions import base as expr
@@ -261,6 +262,26 @@ class WorkflowConductor(object):
         task_spec.input = expr.evaluate(getattr(task_spec, 'input', {}), ctx_value)
         return task_spec
 
+    def inbound_criteria_satisfied(self, task_id):
+        inbounds = self.graph.get_prev_transitions(task_id)
+        inbounds_satisfied = []
+        barrier = 1
+
+        if self.graph.has_barrier(task_id):
+            barrier = self.graph.get_barrier(task_id)
+            barrier = len(inbounds) if barrier == '*' else barrier
+
+        for prev_seq in inbounds:
+            prev_task_flow_entry = self.get_task_flow_entry(prev_seq[0])
+
+            if prev_task_flow_entry:
+                prev_task_transition_id = prev_seq[1] + '__' + str(prev_seq[2])
+
+                if prev_task_flow_entry.get(prev_task_transition_id):
+                    inbounds_satisfied.append(prev_task_transition_id)
+
+        return (len(inbounds_satisfied) >= barrier)
+
     def get_task(self, task_id):
         task_node = self.graph.get_task(task_id)
         task_name = task_node['name']
@@ -306,7 +327,12 @@ class WorkflowConductor(object):
         next_tasks = []
 
         if not task_id:
-            for staged_task_id in self.flow.staged.keys():
+            staged_tasks = [
+                k for k, v in six.iteritems(self.flow.staged)
+                if v.get('ready', True) is True
+            ]
+
+            for staged_task_id in staged_tasks:
                 try:
                     next_tasks.append(self.get_task(staged_task_id))
                 except exc.ExpressionEvaluationException as e:
@@ -329,25 +355,9 @@ class WorkflowConductor(object):
                 if not task_flow_entry.get(task_transition_id):
                     continue
 
-                # Evaluate if the next task has a barrier waiting for other tasks to complete.
-                if self.graph.has_barrier(next_task_id):
-                    barrier = self.graph.get_barrier(next_task_id)
-                    inbounds = self.graph.get_prev_transitions(next_task_id)
-
-                    barrier = len(inbounds) if barrier == '*' else barrier
-                    satisfied = []
-
-                    for prev_seq in inbounds:
-                        prev_task_flow_entry = self.get_task_flow_entry(prev_seq[0])
-
-                        if prev_task_flow_entry:
-                            prev_task_transition_id = prev_seq[1] + '__' + str(prev_seq[2])
-
-                            if prev_task_flow_entry.get(prev_task_transition_id):
-                                satisfied.append(prev_task_transition_id)
-
-                    if len(satisfied) < barrier:
-                        continue
+                # Evaluate if inbound criteria for the next task is satisfied.
+                if not self.inbound_criteria_satisfied(next_task_id):
+                    continue
 
                 next_task_node = self.graph.get_task(next_task_id)
 
@@ -411,7 +421,7 @@ class WorkflowConductor(object):
         if not task_flow_entry:
             task_flow_entry = self.add_task_flow(task_id, in_ctx_idx=in_ctx_idx)
 
-        # If task is alstaged completed and in cycle, then create new task flow entry.
+        # If task is already completed and in cycle, then create new task flow entry.
         if self.graph.in_cycle(task_id) and task_flow_entry.get('state') in states.COMPLETED_STATES:
             task_flow_entry = self.add_task_flow(task_id, in_ctx_idx=in_ctx_idx)
 
@@ -465,6 +475,7 @@ class WorkflowConductor(object):
                 if task_flow_entry[task_transition_id]:
                     next_task_node = self.graph.get_task(task_transition[1])
                     next_task_name = next_task_node['name']
+                    next_task_id = next_task_node['id']
 
                     out_ctx_val, errors = task_spec.finalize_context(
                         next_task_name,
@@ -484,38 +495,48 @@ class WorkflowConductor(object):
                     else:
                         out_ctx_idx = in_ctx_idx
 
+                    # Check if inbound criteria are met.
+                    ready = self.inbound_criteria_satisfied(task_transition[1])
+
                     if (task_transition[1] in self.flow.staged and
                             'ctxs' in self.flow.staged[task_transition[1]]):
                         self.flow.staged[task_transition[1]]['ctxs'].append(out_ctx_idx)
+                        self.flow.staged[task_transition[1]]['ready'] = ready
                     else:
-                        self.flow.staged[task_transition[1]] = {'ctxs': [out_ctx_idx]}
+                        staging_data = {'ctxs': [out_ctx_idx], 'ready': ready}
+                        self.flow.staged[task_transition[1]] = staging_data
 
                     # If the next task is noop, then mark the task as completed.
                     if next_task_name == 'noop':
-                        next_task_id = next_task_node['id']
                         self.update_task_flow(next_task_id, states.RUNNING)
                         self.update_task_flow(next_task_id, states.SUCCEEDED)
 
                     # If the next task is fail, then fail the workflow..
                     if next_task_name == 'fail':
-                        next_task_id = next_task_node['id']
                         self.update_task_flow(next_task_id, states.RUNNING)
                         self.update_task_flow(next_task_id, states.FAILED)
 
         # Identify if there are task transitions.
-        any_next_tasks = False
-
-        for t in self.graph.get_next_transitions(task_id):
-            task_transition_id = t[1] + '__' + str(t[2])
-            any_next_tasks = task_flow_entry.get(task_transition_id, False)
-            if any_next_tasks:
-                break
+        any_next_tasks = [
+            t for t in self.graph.get_next_transitions(task_id)
+            if self.inbound_criteria_satisfied(t[1])
+        ]
 
         # Identify if there are any other active tasks.
         any_active_tasks = any([t['state'] in states.ACTIVE_STATES for t in self.flow.sequence])
 
         # Identify if there are any other staged tasks.
-        any_staged_tasks = len(self.flow.staged) > 0
+        any_staged_tasks = [
+            k for k, v in six.iteritems(self.flow.staged)
+            if v.get('ready', True) is True
+        ]
+
+        # Identify if there are any paused tasks.
+        any_paused_tasks = any([t['state'] == states.PAUSED for t in self.flow.sequence])
+        any_pausing_tasks = any([t['state'] == states.PAUSING for t in self.flow.sequence])
+
+        # Decide if workflow is still running.
+        is_wf_running = any_active_tasks or any_next_tasks or any_staged_tasks
 
         # Update workflow state.
         old_state = self.get_workflow_state()
@@ -537,9 +558,14 @@ class WorkflowConductor(object):
             new_state = states.CANCELING if any_active_tasks else states.CANCELED
         elif task_flow_entry['state'] in states.ABENDED_STATES:
             new_state = states.RUNNING if any_next_tasks else states.FAILED
+        elif task_flow_entry['state'] == states.SUCCEEDED and any_pausing_tasks:
+            new_state = states.PAUSING
+        elif task_flow_entry['state'] == states.SUCCEEDED and any_paused_tasks:
+            new_state = states.PAUSED
+        elif task_flow_entry['state'] == states.SUCCEEDED and is_wf_running:
+            new_state = states.RUNNING
         elif task_flow_entry['state'] == states.SUCCEEDED:
-            is_wf_running = any_active_tasks or any_next_tasks or any_staged_tasks
-            new_state = states.RUNNING if is_wf_running else states.SUCCEEDED
+            new_state = states.SUCCEEDED
 
         if old_state != new_state and states.is_transition_valid(old_state, new_state):
             self.set_workflow_state(new_state)
