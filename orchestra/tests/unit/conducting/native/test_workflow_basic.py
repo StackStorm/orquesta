@@ -35,6 +35,8 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'greeting': mock_results[2]
         }
 
+        self.assert_spec_inspection(wf_name)
+
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
@@ -55,6 +57,8 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task6'
         ]
 
+        self.assert_spec_inspection(wf_name)
+
         self.assert_conducting_sequences(wf_name, expected_task_seq)
 
     def test_branching(self):
@@ -67,6 +71,8 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task3',
             'task5'
         ]
+
+        self.assert_spec_inspection(wf_name)
 
         self.assert_conducting_sequences(wf_name, expected_task_seq)
 
@@ -102,6 +108,8 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             't1',
             'c'
         ]
+
+        self.assert_spec_inspection(wf_name)
 
         self.assert_conducting_sequences(
             wf_name,

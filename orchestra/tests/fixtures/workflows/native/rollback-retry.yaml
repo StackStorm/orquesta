@@ -1,0 +1,41 @@
+version: 1.0
+
+description: >
+  A sample workflow that demonstrates how to handle rollback and retry on error. In this example,
+  the workflow will loop until the file /tmp/done exists. A parallel task will wait for some time
+  before creating the file. When completed, /tmp/done will be deleted.
+
+tasks:
+  init:
+    action: core.local cmd="rm -f /tmp/done"
+    next:
+      - when: <% succeeded() %>
+        do: check, create
+
+  check:
+    action: core.local
+    input:
+      cmd: >
+        echo 'Do something useful here.';
+        if [ ! -e '/tmp/done' ]; then exit 1; fi
+    next:
+      - when: <% succeeded() %>
+        do: delete
+      - when: <% failed() %>
+        do: rollback
+
+  rollback:
+    action: core.local
+    input:
+      cmd: >
+        echo 'Rollback something here.';
+        sleep 1;
+    next:
+      - when: <% succeeded() %>
+        do: check
+
+  create:
+    action: core.local cmd="sleep 10; touch /tmp/done"
+
+  delete:
+    action: core.local cmd="rm -f /tmp/done"
