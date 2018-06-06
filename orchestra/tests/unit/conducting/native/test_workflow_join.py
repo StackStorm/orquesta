@@ -29,10 +29,14 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task7'
         ]
 
+        self.assert_spec_inspection(wf_name)
+
         self.assert_conducting_sequences(wf_name, expected_task_seq)
 
     def test_join_count(self):
         wf_name = 'join-count'
+
+        self.assert_spec_inspection(wf_name)
 
         # Mock error at task6
         expected_task_seq = [
@@ -92,6 +96,8 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
     def test_join_count_with_branch_error(self):
         wf_name = 'join-count'
+
+        self.assert_spec_inspection(wf_name)
 
         # Mock error at task6, note that task3 and task5 are
         # already in running state when task6 failed.

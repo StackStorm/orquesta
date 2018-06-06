@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from orchestra import states
 from orchestra.tests.unit.conducting.native import base
 
 
@@ -30,6 +31,8 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task2',
             'task3'
         ]
+
+        self.assert_spec_inspection(wf_name)
 
         self.assert_conducting_sequences(wf_name, expected_task_seq)
 
@@ -58,4 +61,31 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task5'
         ]
 
+        self.assert_spec_inspection(wf_name)
+
         self.assert_conducting_sequences(wf_name, expected_task_seq)
+
+    def test_rollback_retry(self):
+        wf_name = 'rollback-retry'
+
+        expected_task_seq = [
+            'init',
+            'check',
+            'create',
+            'rollback',
+            'check',
+            'delete'
+        ]
+
+        mock_states = [
+            states.SUCCEEDED,   # init
+            states.FAILED,      # check
+            states.SUCCEEDED,   # create
+            states.SUCCEEDED,   # rollback
+            states.SUCCEEDED,   # check
+            states.SUCCEEDED    # delete
+        ]
+
+        self.assert_spec_inspection(wf_name)
+
+        self.assert_conducting_sequences(wf_name, expected_task_seq, mock_states=mock_states)

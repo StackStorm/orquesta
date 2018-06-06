@@ -92,6 +92,11 @@ class WorkflowSpecTest(unittest.TestCase):
     def instantiate(self, wf_def):
         return specs.instantiate(self.spec_module_name, wf_def)
 
+    def assert_spec_inspection(self, wf_name, errors=None):
+        wf_spec = self.get_wf_spec(wf_name)
+
+        self.assertDictEqual(wf_spec.inspect(), errors or {})
+
 
 @six.add_metaclass(abc.ABCMeta)
 class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):

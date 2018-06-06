@@ -289,6 +289,7 @@ class TaskMappingSpec(base.MappingSpec):
 
     def inspect_semantics(self, parent=None):
         result = []
+        traversed = []
 
         # Identify use of reserved words in task names.
         for task_name, task_spec in six.iteritems(self):
@@ -307,6 +308,7 @@ class TaskMappingSpec(base.MappingSpec):
 
         while not q.empty():
             task_name = q.get()
+            traversed.append(task_name)
 
             # Identify the next set of tasks and related transition specs.
             # The get_next_tasks function is not used here because it doesn't
@@ -324,8 +326,12 @@ class TaskMappingSpec(base.MappingSpec):
                     next_task_names = [x.strip() for x in next_task_names.split(',')]
 
                 for next_task_name in next_task_names:
+                    # If the next task has already been traversed, then skip.
+                    if next_task_name in traversed:
+                        continue
+
                     if self.has_task(next_task_name):
-                        if next_task_name not in RESERVED_TASK_NAMES:
+                        if next_task_name not in RESERVED_TASK_NAMES + traversed:
                             q.put(next_task_name)
                     else:
                         entry = {
@@ -341,6 +347,7 @@ class TaskMappingSpec(base.MappingSpec):
     def inspect_context(self, parent=None):
         ctxs = {}
         errors = []
+        traversed = []
         parent_ctx = parent.get('ctx', []) if parent else []
         rolling_ctx = list(set(parent_ctx))
         q = queue.Queue()
@@ -350,6 +357,7 @@ class TaskMappingSpec(base.MappingSpec):
 
         while not q.empty():
             task_name, task_ctx = q.get()
+            traversed.append(task_name)
 
             if not task_ctx:
                 task_ctx = ctxs.get(task_name, [])
@@ -404,7 +412,9 @@ class TaskMappingSpec(base.MappingSpec):
                 errors.extend(result[0])
                 branch_ctx = list(set(task_ctx + result[1]))
 
-                if not next_task_name or not self.has_task(next_task_name):
+                if (not next_task_name or
+                        next_task_name in traversed or
+                        not self.has_task(next_task_name)):
                     continue
 
                 next_task_spec = self.get_task(next_task_name)

@@ -35,6 +35,8 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
             'All your base are belong to us!'   # log
         ]
 
+        self.assert_spec_inspection(wf_name)
+
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
@@ -58,6 +60,8 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
         mock_results = [
             'All your base are belong to us!'   # task1
         ]
+
+        self.assert_spec_inspection(wf_name)
 
         self.assert_conducting_sequences(
             wf_name,

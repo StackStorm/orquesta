@@ -32,6 +32,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task7__2'
         ]
 
+        self.assert_spec_inspection(wf_name)
+
         self.assert_conducting_sequences(wf_name, expected_task_seq)
 
     def test_splits(self):
@@ -53,6 +55,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task8__2',
             'task8__3'
         ]
+
+        self.assert_spec_inspection(wf_name)
 
         self.assert_conducting_sequences(wf_name, expected_task_seq)
 
@@ -87,6 +91,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task10__4'
         ]
 
+        self.assert_spec_inspection(wf_name)
+
         self.assert_conducting_sequences(wf_name, expected_task_seq)
 
     def test_splits_extra_join(self):
@@ -107,5 +113,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task8__1',
             'task8__2'
         ]
+
+        self.assert_spec_inspection(wf_name)
 
         self.assert_conducting_sequences(wf_name, expected_task_seq)

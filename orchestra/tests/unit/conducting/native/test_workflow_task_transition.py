@@ -19,6 +19,8 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
     def test_on_error(self):
         wf_name = 'error-handling'
 
+        self.assert_spec_inspection(wf_name)
+
         # Mock task1 success
         expected_task_seq = [
             'task1',
@@ -55,6 +57,8 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
     def test_on_complete(self):
         wf_name = 'task-on-complete'
+
+        self.assert_spec_inspection(wf_name)
 
         # Mock task1 success
         expected_task_seq = [
@@ -96,6 +100,8 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
     def test_task_transitions_split(self):
         wf_name = 'task-transitions-split'
+
+        self.assert_spec_inspection(wf_name)
 
         # Mock task1 success
         expected_task_seq = [
