@@ -28,5 +28,43 @@ form the edges. The tasks that compose a workflow will be defined in the DSL as 
 | output      | A list of variables defined as output for the workflow.           |
 +-------------+-------------------------------------------------------------------+
 
-.. literalinclude:: /examples/sequential.yaml
-   :language: yaml
+The following is a simple workflow example that illustrates the various sections of the model::
+
+    version: 1.0
+
+    description: A simple workflow.
+
+    # A list of string assuming value be provided at runtime or
+    # key value pairs where value is the default value when value
+    # is not provided at runtime.
+    input:
+      - arg1
+      - arg2: abc
+
+    # A list of key value pairs.
+    vars:
+      - var1: 123
+      - var2: True
+      - var3: null
+
+    # A dictionary of task definition. The order of execution is
+    # determined by inbound task transition and the condition of
+    # the outbound transition.
+    tasks:
+      task1:
+        action: core.noop
+        next:
+          - do: task2
+      task2:
+        action: core.noop
+
+    # A list of key value pairs to output.
+    output:
+      - var3: <% ctx().arg1 %>
+      - var4:
+          var41: 456
+          var42: def
+      - var5:
+          - 1.0
+          - 2.0
+          - 3.0
