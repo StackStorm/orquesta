@@ -12,7 +12,6 @@
 
 from functools import partial
 
-import copy
 import inspect
 import logging
 import re
@@ -100,7 +99,7 @@ class JinjaEvaluator(base.Evaluator):
 
     @classmethod
     def get_var_extraction_regexes(cls):
-        return copy.deepcopy(cls._regex_var_extracts)
+        return cls._regex_var_extracts
 
     @classmethod
     def validate(cls, text):
