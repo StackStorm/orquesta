@@ -211,3 +211,26 @@ tasks and task transitions::
     output:
       - result: <% ctx().abcd %>
 
+The following example illustrates separate task transition with different publishes
+on different condition::
+
+    version: 1.0
+
+    description: Send direct message to member
+
+    input:
+      - member
+      - message
+
+    tasks:
+      task1:
+        action: slack.post member=<% ctx(member) %> message=<% ctx(message) %>
+        next:
+          - when: <% succeeded() %>
+            publish: msg="Successfully posted message."
+            do: task2
+          - when: <% failed() %>
+            publish: msg="Unable to post message due to error: <% result() %>"
+            do: task2
+      task2:
+        action: core.log message=<% ctx(msg) %>
