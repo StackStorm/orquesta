@@ -10,7 +10,7 @@ tasks:
         publish: error=<% result() %>
         do: log
   log:
-    action: core.echo message=<% $.error %>
+    action: core.echo message=<% ctx().error %>
     next:
       - when: <% succeeded() %>
         do: fail

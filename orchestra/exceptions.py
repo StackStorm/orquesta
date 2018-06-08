@@ -28,6 +28,12 @@ class ExpressionEvaluationException(Exception):
     pass
 
 
+class VariableUndefinedError(Exception):
+
+    def __init__(self, var):
+        Exception.__init__(self, 'The variable "%s" is undefined.' % var)
+
+
 class SchemaDefinitionError(Exception):
     pass
 

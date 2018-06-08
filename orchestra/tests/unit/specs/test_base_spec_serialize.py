@@ -33,8 +33,8 @@ class SpecTest(unittest.TestCase):
             ],
             'vars': {
                 'var1': 'foobar',
-                'var2': '<% $.x %>',
-                'var3': '<% $.y %>'
+                'var2': '<% ctx().x %>',
+                'var3': '<% ctx().y %>'
             },
             'attr1': 'foobar',
             'attr1-1': 'fubar',
@@ -43,7 +43,7 @@ class SpecTest(unittest.TestCase):
                 'macro': 'polo'
             },
             'attr3': [
-                '<% $.var1 %>'
+                '<% ctx().var1 %>'
             ],
             'attr4': [
                 {'open': 'sesame'},
@@ -51,7 +51,7 @@ class SpecTest(unittest.TestCase):
             ],
             'attr5': {
                 'attr1': {
-                    'attr1': '<% $.var2 %> <% $.var3 %>'
+                    'attr1': '<% ctx().var2 %> <% ctx().var3 %>'
                 }
             },
             'attr6': {
@@ -105,8 +105,8 @@ class SpecTest(unittest.TestCase):
             ],
             'vars': {
                 'var1': 'foobar',
-                'var2': '<% $.x %>',
-                'var3': '<% $.y %>'
+                'var2': '<% ctx().x %>',
+                'var3': '<% ctx().y %>'
             },
             'attr1': 'foobar',
             'attr1-1': 'fubar',
@@ -115,7 +115,7 @@ class SpecTest(unittest.TestCase):
                 'macro': 'polo'
             },
             'attr3': [
-                '<% $.var1 %>'
+                '<% ctx().var1 %>'
             ],
             'attr4': [
                 {'open': 'sesame'},
@@ -123,7 +123,7 @@ class SpecTest(unittest.TestCase):
             ],
             'attr5': {
                 'attr1': {
-                    'attr1': '<% $.var2 %> <% $.var3 %>'
+                    'attr1': '<% ctx().var2 %> <% ctx().var3 %>'
                 }
             },
             'attr6': {

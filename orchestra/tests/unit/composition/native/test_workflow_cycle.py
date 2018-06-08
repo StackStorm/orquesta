@@ -61,7 +61,7 @@ class CyclicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': ['<% succeeded() and $.count < 2 %>']
+                        'criteria': ['<% succeeded() and ctx().count < 2 %>']
                     }
                 ]
             ],
@@ -117,7 +117,7 @@ class CyclicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': ['<% succeeded() and $.count < 2 %>']
+                        'criteria': ['<% succeeded() and ctx().count < 2 %>']
                     }
                 ]
             ],
@@ -171,12 +171,12 @@ class CyclicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% succeeded() and not $.proceed %>']
+                        'criteria': ['<% succeeded() and not ctx().proceed %>']
                     },
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': ['<% succeeded() and $.proceed %>']
+                        'criteria': ['<% succeeded() and ctx().proceed %>']
                     }
                 ],
                 [
@@ -197,7 +197,7 @@ class CyclicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': ['<% succeeded() and $.count < 2 %>']
+                        'criteria': ['<% succeeded() and ctx().count < 2 %>']
                     }
                 ]
             ],
@@ -254,12 +254,12 @@ class CyclicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task3',
                         'key': 0,
-                        'criteria': ['<% succeeded() and not $.proceed %>']
+                        'criteria': ['<% succeeded() and not ctx().proceed %>']
                     },
                     {
                         'id': 'task5',
                         'key': 0,
-                        'criteria': ['<% succeeded() and $.proceed %>']
+                        'criteria': ['<% succeeded() and ctx().proceed %>']
                     }
                 ],
                 [
@@ -280,7 +280,7 @@ class CyclicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task1',
                         'key': 0,
-                        'criteria': ['<% succeeded() and $.count < 2 %>']
+                        'criteria': ['<% succeeded() and ctx().count < 2 %>']
                     }
                 ]
             ],

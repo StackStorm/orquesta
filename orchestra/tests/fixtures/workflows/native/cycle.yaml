@@ -24,7 +24,7 @@ tasks:
   task3:
     action: core.noop
     next:
-      - when: <% succeeded() and $.count < 2 %>
+      - when: <% succeeded() and ctx().count < 2 %>
         publish:
-          - count: <% $.count + 1 %>
+          - count: <% ctx().count + 1 %>
         do: task1

@@ -11,6 +11,8 @@
 # limitations under the License.
 
 from functools import partial
+
+import copy
 import inspect
 import logging
 import re
@@ -46,12 +48,20 @@ class JinjaEvaluationException(exc.ExpressionEvaluationException):
 
 class JinjaEvaluator(base.Evaluator):
     _type = 'jinja'
-    _var_symbol = '_'
     _delimiter = '{{}}'
     _regex_pattern = '{{.*?}}'
     _regex_parser = re.compile(_regex_pattern)
-    _regex_var_pattern = '.*?(_\.[a-zA-Z0-9_\.\[\]\(\)]*).*?'
+
+    _regex_dot_pattern = '[a-zA-Z0-9_\'"\.\[\]\(\)]*'
+    _regex_ctx_pattern_1 = 'ctx\(\)\.%s' % _regex_dot_pattern
+    _regex_ctx_pattern_2 = 'ctx\([\'|"]?{0}[\'|"]?\)[\.{0}]?'.format(_regex_dot_pattern)
+    _regex_var_pattern = '.*?(%s|%s).*?' % (_regex_ctx_pattern_1, _regex_ctx_pattern_2)
     _regex_var_parser = re.compile(_regex_var_pattern)
+
+    _regex_dot_extract = '([a-zA-Z0-9_\-]*)'
+    _regex_ctx_extract_1 = 'ctx\(\)\.%s' % _regex_dot_extract
+    _regex_ctx_extract_2 = 'ctx\([\'|"]?%s(%s)' % (_regex_dot_extract, _regex_dot_pattern)
+    _regex_var_extracts = ['\%s\.?' % _regex_ctx_extract_1, '\%s\.?' % _regex_ctx_extract_2]
 
     _block_delimiter = '{%}'
     _regex_block_pattern = '{%.*?%}'
@@ -70,14 +80,14 @@ class JinjaEvaluator(base.Evaluator):
 
     @classmethod
     def contextualize(cls, data):
-        ctx = {'_': data}
-
-        for name, func in six.iteritems(cls._custom_functions):
-            ctx[name] = partial(func, ctx['_'])
+        ctx = {'__vars': data}
 
         if isinstance(data, dict):
-            ctx['__flow'] = data.get('__flow')
-            ctx['__current_task'] = data.get('__current_task')
+            ctx['__flow'] = ctx['__vars'].get('__flow')
+            ctx['__current_task'] = ctx['__vars'].get('__current_task')
+
+        for name, func in six.iteritems(cls._custom_functions):
+            ctx[name] = partial(func, ctx)
 
         return ctx
 
@@ -87,6 +97,10 @@ class JinjaEvaluator(base.Evaluator):
         block_exprs = cls._regex_block_parser.findall(text)
 
         return exprs or block_exprs
+
+    @classmethod
+    def get_var_extraction_regexes(cls):
+        return copy.deepcopy(cls._regex_var_extracts)
 
     @classmethod
     def validate(cls, text):

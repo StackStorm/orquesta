@@ -43,7 +43,7 @@ class JinjaCriteriaComposerTest(base.MistralWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             't1',
                             condition='on-success',
-                            expr="{{ _.which == 'a' }}"
+                            expr="{{ ctx().which == 'a' }}"
                         )
                     },
                     {
@@ -52,7 +52,7 @@ class JinjaCriteriaComposerTest(base.MistralWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             't1',
                             condition='on-success',
-                            expr="{{ _.which == 'b' }}"
+                            expr="{{ ctx().which == 'b' }}"
                         )
                     },
                     {
@@ -61,7 +61,7 @@ class JinjaCriteriaComposerTest(base.MistralWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             't1',
                             condition='on-success',
-                            expr="{{ not _.which in ['a', 'b'] }}"
+                            expr="{{ not ctx().which in ['a', 'b'] }}"
                         )
                     }
                 ],
@@ -103,7 +103,7 @@ class JinjaCriteriaComposerTest(base.MistralWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             't1',
                             condition='on-success',
-                            expr="{{ _.which == 'a' }}"
+                            expr="{{ ctx().which == 'a' }}"
                         )
                     },
                     {
@@ -112,7 +112,7 @@ class JinjaCriteriaComposerTest(base.MistralWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             't1',
                             condition='on-success',
-                            expr="{{ _.which == 'b' }}"
+                            expr="{{ ctx().which == 'b' }}"
                         )
                     },
                     {
@@ -121,7 +121,7 @@ class JinjaCriteriaComposerTest(base.MistralWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             't1',
                             condition='on-success',
-                            expr="{{ not _.which in ['a', 'b'] }}"
+                            expr="{{ not ctx().which in ['a', 'b'] }}"
                         )
                     }
                 ],

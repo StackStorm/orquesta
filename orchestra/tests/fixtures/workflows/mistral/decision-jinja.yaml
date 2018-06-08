@@ -10,9 +10,9 @@ decision-jinja:
         t1:
             action: std.noop
             on-success:
-                - a: "{{ _.which == 'a' }}"
-                - b: "{{ _.which == 'b' }}"
-                - c: "{{ not _.which in ['a', 'b'] }}"
+                - a: "{{ ctx().which == 'a' }}"
+                - b: "{{ ctx().which == 'b' }}"
+                - c: "{{ not ctx().which in ['a', 'b'] }}"
         a:
             action: std.noop
         b:

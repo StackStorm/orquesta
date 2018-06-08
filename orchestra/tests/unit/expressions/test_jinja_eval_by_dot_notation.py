@@ -10,17 +10,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra.expressions import yql
+from orchestra.expressions import jinja
 from orchestra.tests.unit import base
 from orchestra.utils import plugin
 
 
-class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
+class JinjaEvaluationTest(base.ExpressionEvaluatorTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.language = 'yaql'
-        super(YAQLEvaluationTest, cls).setUpClass()
+        cls.language = 'jinja'
+        super(JinjaEvaluationTest, cls).setUpClass()
 
     def test_get_evaluator(self):
         e = plugin.get_module(
@@ -28,31 +28,30 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
             self.language
         )
 
-        self.assertEqual(e, yql.YAQLEvaluator)
-        self.assertIn('json', e._custom_functions.keys())
-        self.assertIn('task_state', e._custom_functions.keys())
+        self.assertEqual(e, jinja.JinjaEvaluator)
+        self.assertIn('ctx', e._custom_functions.keys())
 
     def test_basic_eval(self):
-        expr = '<% $.foo %>'
+        expr = '{{ ctx().foo }}'
 
         data = {'foo': 'bar'}
 
         self.assertEqual('bar', self.evaluator.evaluate(expr, data))
 
     def test_basic_eval_undefined(self):
-        expr = '<% $.foo %>'
+        expr = '{{ ctx().foo }}'
 
         data = {}
 
         self.assertRaises(
-            yql.YaqlEvaluationException,
+            jinja.JinjaEvaluationException,
             self.evaluator.evaluate,
             expr,
             data
         )
 
-    def test_nested_eval(self):
-        expr = '<% $.nested.foo %>'
+    def test_dict_eval(self):
+        expr = '{{ ctx().nested.foo }}'
 
         data = {
             'nested': {
@@ -63,7 +62,7 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
         self.assertEqual('bar', self.evaluator.evaluate(expr, data))
 
     def test_multi_eval(self):
-        expr = '<% $.foo %> and <% $.marco %>'
+        expr = '{{ ctx().foo }} and {{ ctx().marco }}'
 
         data = {
             'foo': 'bar',
@@ -73,26 +72,42 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
         self.assertEqual('bar and polo', self.evaluator.evaluate(expr, data))
 
     def test_eval_recursive(self):
-        expr = '<% $.fee %>'
+        expr = '{{ ctx().fee }}'
 
         data = {
-            'fee': '<% $.fi %>',
-            'fi': '<% $.fo %>',
-            'fo': '<% $.fum %>',
+            'fee': '{{ ctx().fi }}',
+            'fi': '{{ ctx().fo }}',
+            'fo': '{{ ctx().fum }}',
             'fum': 'fee-fi-fo-fum'
         }
 
         self.assertEqual('fee-fi-fo-fum', self.evaluator.evaluate(expr, data))
 
-    def test_multi_eval_recursive(self):
-        expr = '<% $.fee %> <% $.im %>'
+    def test_eval_recursive_undefined(self):
+        expr = '{{ ctx().fee }}'
 
         data = {
-            'fee': '<% $.fi %>',
-            'fi': '<% $.fo %>',
-            'fo': '<% $.fum %>',
+            'fee': '{{ ctx().fi }}',
+            'fi': '{{ ctx().fo }}',
+            'fo': '{{ ctx().fum }}'
+        }
+
+        self.assertRaises(
+            jinja.JinjaEvaluationException,
+            self.evaluator.evaluate,
+            expr,
+            data
+        )
+
+    def test_multi_eval_recursive(self):
+        expr = '{{ ctx().fee }} {{ ctx().im }}'
+
+        data = {
+            'fee': '{{ ctx().fi }}',
+            'fi': '{{ ctx().fo }}',
+            'fo': '{{ ctx().fum }}',
             'fum': 'fee-fi-fo-fum!',
-            'im': '<% $.hungry %>',
+            'im': '{{ ctx().hungry }}',
             'hungry': 'i\'m hungry!'
         }
 
@@ -113,30 +128,30 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
 
         self.assertEqual(
             data['k1'],
-            self.evaluator.evaluate('<% $.k1 %>', data)
+            self.evaluator.evaluate('{{ ctx().k1 }}', data)
         )
 
         self.assertEqual(
             data['k2'],
-            self.evaluator.evaluate('<% $.k2 %>', data)
+            self.evaluator.evaluate('{{ ctx().k2 }}', data)
         )
 
-        self.assertTrue(self.evaluator.evaluate('<% $.k3 %>', data))
+        self.assertTrue(self.evaluator.evaluate('{{ ctx().k3 }}', data))
 
         self.assertListEqual(
             data['k4'],
-            self.evaluator.evaluate('<% $.k4 %>', data)
+            self.evaluator.evaluate('{{ ctx().k4 }}', data)
         )
 
         self.assertDictEqual(
             data['k5'],
-            self.evaluator.evaluate('<% $.k5 %>', data)
+            self.evaluator.evaluate('{{ ctx().k5 }}', data)
         )
 
-        self.assertIsNone(self.evaluator.evaluate('<% $.k6 %>', data))
+        self.assertIsNone(self.evaluator.evaluate('{{ ctx().k6 }}', data))
 
     def test_type_string_detection(self):
-        expr = '<% $.foo %> -> <% $.bar %>'
+        expr = '{{ ctx().foo }} -> {{ ctx().bar }}'
 
         data = {
             'foo': 101,
@@ -144,17 +159,3 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
         }
 
         self.assertEqual('101 -> 201', self.evaluator.evaluate(expr, data))
-
-    def test_custom_function(self):
-        expr = '<% json(\'{"a": 123}\') %>'
-
-        self.assertDictEqual({'a': 123}, self.evaluator.evaluate(expr))
-
-    def test_custom_function_failure(self):
-        expr = '<% json(int(123)) %>'
-
-        self.assertRaises(
-            yql.YaqlEvaluationException,
-            self.evaluator.evaluate,
-            expr
-        )

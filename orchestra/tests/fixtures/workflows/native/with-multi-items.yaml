@@ -11,10 +11,10 @@ tasks:
   task1:
     with:
       items:
-        - member in <% $.members %>
-        - message in <% $.messages %>
-      concurrency: <% $.batch_size %>
+        - member in <% ctx().members %>
+        - message in <% ctx().messages %>
+      concurrency: <% ctx().batch_size %>
     action: slack.post
     input:
-      member: <% $.member %>
-      message: <% $.message %>
+      member: <% ctx().member %>
+      message: <% ctx().message %>

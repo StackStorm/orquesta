@@ -10,9 +10,9 @@ decision:
         t1:
             action: std.noop
             on-success:
-                - a: <% $.which = 'a' %>
-                - b: <% $.which = 'b' %>
-                - c: <% not $.which in list(a, b) %>
+                - a: <% ctx().which = 'a' %>
+                - b: <% ctx().which = 'b' %>
+                - c: <% not ctx().which in list(a, b) %>
         a:
             action: std.noop
         b:

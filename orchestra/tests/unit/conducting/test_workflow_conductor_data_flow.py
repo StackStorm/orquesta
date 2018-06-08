@@ -28,15 +28,15 @@ class WorkflowConductorDataFlowTest(base.WorkflowConductorTest):
 
         input:
           - a1
-          - b1: <% $.a1 %>
+          - b1: <% ctx().a1 %>
 
         vars:
-          - a2: <% $.b1 %>
-          - b2: <% $.a2 %>
+          - a2: <% ctx().b1 %>
+          - b2: <% ctx().a2 %>
 
         output:
-          - a5: <% $.b4 %>
-          - b5: <% $.a5 %>
+          - a5: <% ctx().b4 %>
+          - b5: <% ctx().a5 %>
 
         tasks:
           task1:
@@ -44,14 +44,14 @@ class WorkflowConductorDataFlowTest(base.WorkflowConductorTest):
             next:
               - when: <% succeeded() %>
                 publish:
-                  - a3: <% $.b2 %>
-                  - b3: <% $.a3 %>
+                  - a3: <% ctx().b2 %>
+                  - b3: <% ctx().a3 %>
                 do: task2
           task2:
             action: core.noop
             next:
               - when: <% succeeded() %>
-                publish: a4=<% $.b3 %> b4=<% $.a4 %>
+                publish: a4=<% ctx().b3 %> b4=<% ctx().a4 %>
                 do: task3
           task3:
             action: core.noop

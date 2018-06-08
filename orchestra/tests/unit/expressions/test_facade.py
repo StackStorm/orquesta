@@ -18,7 +18,7 @@ from orchestra.expressions import base as expressions
 class ExpressionEvaluatorTest(unittest.TestCase):
 
     def test_mix_types(self):
-        expr = '<% $.foo %> and {{ _.foo }}'
+        expr = '<% ctx().foo %> and {{ ctx().foo }}'
 
         expected_errors = [
             {

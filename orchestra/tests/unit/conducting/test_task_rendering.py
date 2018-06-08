@@ -30,19 +30,19 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
         tasks:
           task1:
-            action: <% $.action_name %>
-            input: <% $.action_input %>
+            action: <% ctx().action_name %>
+            input: <% ctx().action_input %>
             next:
               - publish: message=<% result() %>
                 do: task2
           task2:
-            action: core.echo message=<% $.message %>
+            action: core.echo message=<% ctx().message %>
             next:
               - do: task3
           task3:
             action: core.echo
             input:
-              message: <% $.message %>
+              message: <% ctx().message %>
         """
 
         spec = specs.WorkflowSpec(wf_def)

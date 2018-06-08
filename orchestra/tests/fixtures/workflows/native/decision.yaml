@@ -11,11 +11,11 @@ tasks:
   t1:
     action: core.noop
     next:
-      - when: <% succeeded() and $.which = "a" %>
+      - when: <% succeeded() and ctx().which = "a" %>
         do: a
-      - when: <% succeeded() and $.which = "b" %>
+      - when: <% succeeded() and ctx().which = "b" %>
         do: b
-      - when: <% succeeded() and not $.which in list(a, b) %>
+      - when: <% succeeded() and not ctx().which in list(a, b) %>
         do: c
   a:
     action: core.noop

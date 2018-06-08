@@ -20,11 +20,12 @@ class JinjaFacadeValidationTest(base.ExpressionFacadeEvaluatorTest):
         self.assertListEqual([], self.validate('{{ 1 }}'))
         self.assertListEqual([], self.validate('{{ abc }}'))
         self.assertListEqual([], self.validate('{{ 1 + 2 }}'))
-        self.assertListEqual([], self.validate('{{ _.foo }}'))
-        self.assertListEqual([], self.validate('{{ _.a1 + _.a2 }}'))
+        self.assertListEqual([], self.validate('{{ ctx().foo }}'))
+        self.assertListEqual([], self.validate('{{ ctx("foo") }}'))
+        self.assertListEqual([], self.validate('{{ ctx().a1 + ctx("a2") }}'))
 
     def test_parse_error(self):
-        expr = '{{ {{ _.foo }} }}'
+        expr = '{{ {{ ctx().foo }} }}'
         errors = self.validate(expr)
 
         self.assertEqual(2, len(errors))
@@ -41,14 +42,14 @@ class JinjaFacadeValidationTest(base.ExpressionFacadeEvaluatorTest):
         self.assertIn('unexpected', errors[2]['message'])
 
     def test_block_error(self):
-        expr = '{% for i in _.x %}{{ i }}{% foobar %}'
+        expr = '{% for i in ctx().x %}{{ i }}{% foobar %}'
         errors = self.validate(expr)
 
         self.assertEqual(1, len(errors))
         self.assertIn('unknown tag', errors[0]['message'])
 
     def test_missing_braces_error(self):
-        expr = '{% for i in _.x %}{{ i }}{{ foobar %}'
+        expr = '{% for i in ctx().x %}{{ i }}{{ foobar %}'
         errors = self.validate(expr)
 
         self.assertEqual(1, len(errors))
@@ -67,7 +68,7 @@ class JinjaFacadeValidationTest(base.ExpressionFacadeEvaluatorTest):
         self.assertListEqual([], self.validate(target))
 
     def test_list_multiple_errors(self):
-        target = ['{{ 1 +/ 2 }}', ['{{ {{ _.foo }}'], {'k1': '{{ * }}'}]
+        target = ['{{ 1 +/ 2 }}', ['{{ {{ ctx().foo }}'], {'k1': '{{ * }}'}]
         result = self.validate(target)
         self.assertEqual(3, len(result))
 
@@ -81,8 +82,8 @@ class JinjaFacadeValidationTest(base.ExpressionFacadeEvaluatorTest):
             'k4': ['{{ abc }}', 'xyz', 123, False, {'k': 'v'}],
             'depth-1': {
                 'depth-1-1': {
-                    'depth-1-1-2': '{{ _.a1 + _.a2 }}',
-                    'depth-1-1-3': ['{{ _.foobar }}', 'xyz']
+                    'depth-1-1-2': '{{ ctx().a1 + ctx("a2") }}',
+                    'depth-1-1-3': ['{{ ctx().foobar }}', 'xyz']
                 }
             }
         }
@@ -93,12 +94,12 @@ class JinjaFacadeValidationTest(base.ExpressionFacadeEvaluatorTest):
         target = {
             'k1': '{{ 1 +/ 2 }}',
             'k2': 'foobar',
-            '{{ {{ _.foo }}': 789,
+            '{{ {{ ctx().foo }}': 789,
             'k4': ['{{ abc }}', 'xyz', 123, False, {'k': 'v'}],
             'depth-1': {
                 'depth-1-1': {
                     'depth-1-1-2': '{{ 3 +/ 4 }}',
-                    'depth-1-1-3': ['{{ _.foobar }}', '{{ * }}']
+                    'depth-1-1-3': ['{{ ctx().foobar }}', '{{ * }}']
                 }
             }
         }
