@@ -5,8 +5,7 @@ The Orchestra workflow DSL is the native DSL for the Orchestra workflow engine. 
 derivative of `OpenStack Mistral <https://docs.openstack.org/mistral/latest/user/wf_lang_v2.html>`_.
 
 Workflow Model
-^^^^^^^^^^^^^^
-
+--------------
 The following is the list of attributes that makes up the workflow model. A workflow takes input,
 perform a set of tasks in predefined order, and return output. The workflow model here is a
 directed graph where the tasks are the nodes and the transitions and their condition between tasks
@@ -29,5 +28,5 @@ form the edges. The tasks that compose a workflow will be defined in the DSL as 
 | output      | A list of variables defined as output for the workflow.           |
 +-------------+-------------------------------------------------------------------+
 
-.. literalinclude:: ./examples/sequential.yaml
+.. literalinclude:: /examples/sequential.yaml
    :language: yaml
