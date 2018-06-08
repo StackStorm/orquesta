@@ -234,3 +234,48 @@ on different condition::
             do: task2
       task2:
         action: core.log message=<% ctx(msg) %>
+
+Special Task Transitions
+------------------------
+
+The following is a list of reserved task names with special meaning to the workflow engine.
+When specified under `do` in the task transition, the engine will act accordingly.
+
++-------------+-------------------------------------------------------------------+
+| Task        | Description                                                       |
++=============+===================================================================+
+| noop        | No operation or do not execute anything else.                     |
++-------------+-------------------------------------------------------------------+
+| fail        | Fails the workflow execution.                                     |
++-------------+-------------------------------------------------------------------+
+
+The following example illustrates the use of these special commands::
+
+    version: 1.0
+
+    description: >
+        A workflow example that illustrates error handling. By default
+        when any task fails, the notify_on_error task will be executed
+        and the workflow will transition to the failed state.
+
+    input:
+      - cmd
+
+    tasks:
+      task1:
+        action: core.local cmd=<% ctx(cmd) %>
+        next:
+          - when: <% succeeded() %>
+            publish: stdout=<% result().stdout %>
+          - when: <% failed() %>
+            publish: stderr=<% result().stderr %>
+            do: notify_on_error
+      notify_on_error:
+        action: core.echo message=<% ctx(stderr) %>
+        next:
+          # The fail specified here tells the workflow to go into
+          # failed state on completion of the notify_on_error task.
+          - do: fail
+
+    output:
+      - result: <% $.stdout %>
