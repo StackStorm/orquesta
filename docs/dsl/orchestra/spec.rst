@@ -110,6 +110,28 @@ immediately following the completion of the previous task. There will be multipl
 target task. In the workflow graph, each invocation of the target task will be its own branch with
 the inbound edge from the node of the previous task.
 
+Task Transition Model
+---------------------
+
+The `next` section is a list of task transitions to be evaluated after a task completes. A task is
+completed if it either succeeded, failed, or canceled. The list of transitions will be processed in
+the order they are defined. In the workflow graph, each task transition is one or more outbound
+edges from the current task node. For each task transition, the `when` is the criteria that must be
+met in order for transition. If `when` is not define, then the default criteria is task completion.
+When criteria is met, then `publish` can be defined to add new or update existing variables from the
+result into the runtime workflow context. Finally, the list of tasks defined in `do` will be invoked
+in the order they are specified.
+
++-------------+-------------------------------------------------------------------+
+| Attribute   | Description                                                       |
++=============+===================================================================+
+| when        | The criteria defined as an expression required for transition.    |
++-------------+-------------------------------------------------------------------+
+| publish     | A list of key value pairs to be published into the context.       |
++-------------+-------------------------------------------------------------------+
+| do          | A next set of tasks to invoke when transition criteria is met.    |
++-------------+-------------------------------------------------------------------+
+
 The following is a more complex workflow with branches and join and various ways to define
 tasks and task transitions::
 
