@@ -68,3 +68,124 @@ The following is a simple workflow example that illustrates the various sections
           - 1.0
           - 2.0
           - 3.0
+
+Task Model
+----------
+
++-------------+-------------------------------------------------------------------+
+| Attribute   | Description                                                       |
++=============+===================================================================+
+| join        | If specified, sets up a barrier for a group of parallel branches. |
++-------------+-------------------------------------------------------------------+
+| action      | The fully qualified name of the action to be executed.            |
++-------------+-------------------------------------------------------------------+
+| input       | A dictionary of input arguments for the action execution.         |
++-------------+-------------------------------------------------------------------+
+| next        | Define what happens after this task is completed.                 |
++-------------+-------------------------------------------------------------------+
+
+As described above, the workflow is a directed graph where the tasks are the nodes and the
+transitions with their criteria between tasks form the edges. The starting set of tasks for
+the workflow are tasks with no inbound edges in the graph. On completion of the task, the next
+set of tasks defined in the list of task transitions under `next` will be evaluated. Each task
+transition will be represented as an outbound edge of the current task. When the criteria
+specified in `when` of the transition is met, the next set of tasks under `do` will be invoked.
+If there are no more outbound edges identified, then the workflow execution is complete.
+
+Each task defines what **StackStorm** action to execute, the policies on action execution, and
+what happens after the task completes. All of the variables defined and published up to this point
+(aka context) is accessible to the task. At its simplest, the task executes the action and pass any
+required input from the context to the action execution. On successful completion of the action
+execution, the task is evaluated for completion. If criteria for transition is met, then the next
+set of tasks is invoked, sequentially in the order of the transitions and tasks that are listed.
+
+If more than one tasks transition to the same task and `join` is specified in the latter (i.e. the
+task named "task3" in the example below), then the task being transitioned into becomes a barrier
+for the inbound task transitions. There will be only one instance of the barrier task. In the
+workflow graph, there will be multiple inbound edges to the barrier node.
+
+Conversely, if more than one tasks transition to the same task and `join` is **not** specified in
+the latter (i.e. the task named "log" in the example below), then the target task will be invoked
+immediately following the completion of the previous task. There will be multiple instances of the
+target task. In the workflow graph, each invocation of the target task will be its own branch with
+the inbound edge from the node of the previous task.
+
+The following is a more complex workflow with branches and join and various ways to define
+tasks and task transitions::
+
+    version: 1.0
+
+    description: Calculates (a + b) * (c + d)
+
+    input:
+      - a: 0    # Defaults to value of 0 if input is not provided.
+      - b: 0
+      - c: 0
+      - d: 0
+
+    tasks:
+        task1:
+            # Fully qualified name (pack.name) for the action.
+            action: math.add
+
+            # Assign input arguments to the action from the context.
+            input:
+              operand1: <% ctx(a) %>
+              operand2: <% ctx(b) %>
+
+            # Specify what to run next after the task is completed.
+            next:
+              - # Specify the condition in YAQL or Jinja that is required
+                # for this task to transition to the next set of tasks.
+                when: <% succeeded() %>
+
+                # Publish variables on task transition. This allows for
+                # variables to be published based on the task state and
+                # its result.
+                publish:
+                  msg: task1 done
+                  ab: <% result() %>
+
+                # List the tasks to run next. Each task will be invoked
+                # sequentially. If more than one tasks transition to the
+                # same task and a join is specified at the subsequent
+                # task (i.e task1 and task2 transition to task3 in this
+                # case), then the subsequent task becomes a barrier and
+                # will be invoked when condition of prior tasks are met.
+                do:
+                  - log
+                  - task3
+
+        task2:
+          # Short hand is supported for input arguments. Arguments can be
+          # delimited either by space, comma, or semicolon.
+          action: math.add operand1=<% ctx("c") %> operand2=<% ctx("d") %>
+          next:
+            - when: <% succeeded() %>
+
+              # Short hand is supported for publishing variables. Variables
+              # can be delimited either by space, comma, or semicolon.
+              publish: msg="task2 done", cd=<% result() %>
+
+              # Short hand with comma delimited list is supported.
+              do: log, task3
+
+        task3:
+          # Join is specified for this task. This task will be invoked
+          # when the condition of all inbound task transitions are met.
+          join: all
+          action: math.multiple operand1=<% ctx('ab') %> operand2=<% ctx('cd') %>
+          next:
+            - when: <% succeeded() %>
+              publish: msg="task3 done" abcd=<% result() %>
+              do: log
+
+        # Define a reusable task to log progress. Although this task is
+        # referenced by multiple tasks, since there is no join defined,
+        # this task is not a barrier and will be invoked separately.
+        log:
+          action: core.log message=<% ctx(msg) %>
+
+    output:
+      - result: <% ctx().abcd %>
+
