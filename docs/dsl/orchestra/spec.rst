@@ -2,7 +2,7 @@ Orchestra
 =========
 
 The Orchestra workflow DSL is the native DSL for the Orchestra workflow engine. This DSL is a
-derivative of `OpenStack Mistral <https://docs.openstack.org/mistral/latest/user/dsl_v2.html>`_.
+derivative of `OpenStack Mistral <https://docs.openstack.org/mistral/latest/user/wf_lang_v2.html>`_.
 
 Workflow Model
 ^^^^^^^^^^^^^^
