@@ -10,7 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import inspect
 import logging
 import re
@@ -83,7 +82,7 @@ class YAQLEvaluator(base.Evaluator):
 
     @classmethod
     def get_var_extraction_regexes(cls):
-        return copy.deepcopy(cls._regex_var_extracts)
+        return cls._regex_var_extracts
 
     @classmethod
     def validate(cls, text):
