@@ -21,11 +21,11 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
     def test_basic_eval(self):
         data = {'foo': 'bar'}
 
-        self.assertEqual('bar', expressions.evaluate('{{ _.foo }}', data))
-        self.assertEqual('foobar', expressions.evaluate('foo{{ _.foo }}', data))
+        self.assertEqual('bar', expressions.evaluate('{{ ctx().foo }}', data))
+        self.assertEqual('foobar', expressions.evaluate('foo{{ ctx().foo }}', data))
 
     def test_basic_eval_undefined(self):
-        expr = '{{ _.foo }}'
+        expr = '{{ ctx().foo }}'
 
         data = {}
 
@@ -36,8 +36,8 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
             data
         )
 
-    def test_nested_eval(self):
-        expr = '{{ _.nested.foo }}'
+    def test_dict_eval(self):
+        expr = '{{ ctx().nested.foo }}'
 
         data = {
             'nested': {
@@ -48,7 +48,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
         self.assertEqual('bar', expressions.evaluate(expr, data))
 
     def test_multi_eval(self):
-        expr = '{{ _.foo }} and {{ _.marco }}'
+        expr = '{{ ctx().foo }} and {{ ctx().marco }}'
 
         data = {
             'foo': 'bar',
@@ -58,24 +58,24 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
         self.assertEqual('bar and polo', expressions.evaluate(expr, data))
 
     def test_eval_recursive(self):
-        expr = '{{ _.fee }}'
+        expr = '{{ ctx().fee }}'
 
         data = {
-            'fee': '{{ _.fi }}',
-            'fi': '{{ _.fo }}',
-            'fo': '{{ _.fum }}',
+            'fee': '{{ ctx().fi }}',
+            'fi': '{{ ctx().fo }}',
+            'fo': '{{ ctx().fum }}',
             'fum': 'fee-fi-fo-fum'
         }
 
         self.assertEqual('fee-fi-fo-fum', expressions.evaluate(expr, data))
 
     def test_eval_recursive_undefined(self):
-        expr = '{{ _.fee }}'
+        expr = '{{ ctx().fee }}'
 
         data = {
-            'fee': '{{ _.fi }}',
-            'fi': '{{ _.fo }}',
-            'fo': '{{ _.fum }}'
+            'fee': '{{ ctx().fi }}',
+            'fi': '{{ ctx().fo }}',
+            'fo': '{{ ctx().fum }}'
         }
 
         self.assertRaises(
@@ -86,14 +86,14 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
         )
 
     def test_multi_eval_recursive(self):
-        expr = '{{ _.fee }} {{ _.im }}'
+        expr = '{{ ctx().fee }} {{ ctx().im }}'
 
         data = {
-            'fee': '{{ _.fi }}',
-            'fi': '{{ _.fo }}',
-            'fo': '{{ _.fum }}',
+            'fee': '{{ ctx().fi }}',
+            'fi': '{{ ctx().fo }}',
+            'fo': '{{ ctx().fum }}',
             'fum': 'fee-fi-fo-fum!',
-            'im': '{{ _.hungry }}',
+            'im': '{{ ctx().hungry }}',
             'hungry': 'i\'m hungry!'
         }
 
@@ -104,9 +104,9 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
 
     def test_eval_list(self):
         expr = [
-            '{{ _.foo }}',
-            '{{ _.marco }}',
-            'foo{{ _.foo }}'
+            '{{ ctx().foo }}',
+            '{{ ctx().marco }}',
+            'foo{{ ctx().foo }}'
         ]
 
         data = {
@@ -119,8 +119,8 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
     def test_eval_list_of_list(self):
         expr = [
             [
-                '{{ _.foo }}',
-                '{{ _.marco }}'
+                '{{ ctx().foo }}',
+                '{{ ctx().marco }}'
             ]
         ]
 
@@ -136,8 +136,8 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
     def test_eval_list_of_dict(self):
         expr = [
             {
-                'foo': '{{ _.bar }}',
-                '{{ _.marco }}': 'polo'
+                'foo': '{{ ctx().bar }}',
+                '{{ ctx().marco }}': 'polo'
             }
         ]
 
@@ -157,9 +157,9 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
 
     def test_eval_dict(self):
         expr = {
-            'foo': '{{ _.bar }}',
-            '{{ _.marco }}': 'polo',
-            'foobar': 'foo{{ _.bar }}'
+            'foo': '{{ ctx().bar }}',
+            '{{ ctx().marco }}': 'polo',
+            'foobar': 'foo{{ ctx().bar }}'
         }
 
         data = {
@@ -178,8 +178,8 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
     def test_eval_dict_of_dict(self):
         expr = {
             'nested': {
-                'foo': '{{ _.bar }}',
-                '{{ _.marco }}': 'polo'
+                'foo': '{{ ctx().bar }}',
+                '{{ ctx().marco }}': 'polo'
             }
         }
 
@@ -200,8 +200,8 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
     def test_eval_dict_of_list(self):
         expr = {
             'nested': [
-                '{{ _.foo }}',
-                '{{ _.marco }}'
+                '{{ ctx().foo }}',
+                '{{ ctx().marco }}'
             ]
         }
 
@@ -228,30 +228,30 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
 
         self.assertEqual(
             data['k1'],
-            expressions.evaluate('{{ _.k1 }}', data)
+            expressions.evaluate('{{ ctx().k1 }}', data)
         )
 
         self.assertEqual(
             data['k2'],
-            expressions.evaluate('{{ _.k2 }}', data)
+            expressions.evaluate('{{ ctx().k2 }}', data)
         )
 
-        self.assertTrue(expressions.evaluate('{{ _.k3 }}', data))
+        self.assertTrue(expressions.evaluate('{{ ctx().k3 }}', data))
 
         self.assertListEqual(
             data['k4'],
-            expressions.evaluate('{{ _.k4 }}', data)
+            expressions.evaluate('{{ ctx().k4 }}', data)
         )
 
         self.assertDictEqual(
             data['k5'],
-            expressions.evaluate('{{ _.k5 }}', data)
+            expressions.evaluate('{{ ctx().k5 }}', data)
         )
 
-        self.assertIsNone(expressions.evaluate('{{ _.k6 }}', data))
+        self.assertIsNone(expressions.evaluate('{{ ctx().k6 }}', data))
 
     def test_type_string_detection(self):
-        expr = '{{ _.foo }} -> {{ _.bar }}'
+        expr = '{{ ctx().foo }} -> {{ ctx().bar }}'
 
         data = {
             'foo': 101,
@@ -275,7 +275,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
         )
 
     def test_block_eval(self):
-        expr = '{% for i in _.x %}{{ i }}{% endfor %}'
+        expr = '{% for i in ctx().x %}{{ i }}{% endfor %}'
 
         data = {
             'x': ['a', 'b', 'c']
@@ -284,7 +284,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
         self.assertEqual('abc', expressions.evaluate(expr, data))
 
     def test_block_eval_undefined(self):
-        expr = '{% for i in _.x %}{{ _.y }}{% endfor %}'
+        expr = '{% for i in ctx().x %}{{ ctx().y }}{% endfor %}'
 
         data = {
             'x': ['a', 'b', 'c']
@@ -298,14 +298,14 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
         )
 
     def test_block_eval_recursive(self):
-        expr = '{% for i in _.x %}{{ i }}{% endfor %}'
+        expr = '{% for i in ctx().x %}{{ i }}{% endfor %}'
 
         data = {
             'x': [
-                '{{ _.a }}',
-                '{{ _.b }}',
-                '{{ _.c }}'
-                '{% for j in _.y %}{{ j }}{% endfor %}'
+                '{{ ctx().a }}',
+                '{{ ctx().b }}',
+                '{{ ctx().c }}'
+                '{% for j in ctx().y %}{{ j }}{% endfor %}'
             ],
             'a': 'a',
             'b': 'b',
@@ -317,8 +317,8 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
 
     def test_multi_block_eval(self):
         expr = (
-            '{% for i in _.x %}{{ i }}{% endfor %}'
-            '{% for i in _.y %}{{ i }}{% endfor %}'
+            '{% for i in ctx().x %}{{ i }}{% endfor %}'
+            '{% for i in ctx().y %}{{ i }}{% endfor %}'
         )
 
         data = {
@@ -329,7 +329,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
         self.assertEqual('abcdef', expressions.evaluate(expr, data))
 
     def test_mix_block_and_expr_eval(self):
-        expr = '{{ _.a }}{% for i in _.x %}{{ i }}{% endfor %}{{ _.d }}'
+        expr = '{{ ctx().a }}{% for i in ctx().x %}{{ i }}{% endfor %}{{ ctx().d }}'
 
         data = {
             'x': ['b', 'c'],

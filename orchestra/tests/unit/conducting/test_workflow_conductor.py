@@ -34,9 +34,9 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         output:
           - data:
-              a: <% $.a %>
-              b: <% $.b %>
-              c: <% $.c %>
+              a: <% ctx().a %>
+              b: <% ctx().b %>
+              c: <% ctx().c %>
 
         tasks:
           task1:

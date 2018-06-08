@@ -20,11 +20,12 @@ class YAQLFacadeValidationTest(base.ExpressionFacadeEvaluatorTest):
         self.assertListEqual([], self.validate('<% 1 %>'))
         self.assertListEqual([], self.validate('<% abc %>'))
         self.assertListEqual([], self.validate('<% 1 + 2 %>'))
-        self.assertListEqual([], self.validate('<% $.foo %>'))
-        self.assertListEqual([], self.validate('<% $.a1 + $.a2 %>'))
+        self.assertListEqual([], self.validate('<% ctx().foo %>'))
+        self.assertListEqual([], self.validate('<% ctx(foo) %>'))
+        self.assertListEqual([], self.validate('<% ctx().a1 + ctx(a2) %>'))
 
     def test_parse_error(self):
-        expr = '<% <% $.foo %> %>'
+        expr = '<% <% ctx().foo %> %>'
         errors = self.validate(expr)
 
         self.assertEqual(1, len(errors))
@@ -58,7 +59,7 @@ class YAQLFacadeValidationTest(base.ExpressionFacadeEvaluatorTest):
         self.assertListEqual([], self.validate(target))
 
     def test_list_multiple_errors(self):
-        target = ['<% 1 +/ 2 %>', ['<% <% $.foo %>'], {'k1': '<% {"a": 1} %>'}]
+        target = ['<% 1 +/ 2 %>', ['<% <% ctx().foo %>'], {'k1': '<% {"a": 1} %>'}]
         result = self.validate(target)
         self.assertEqual(3, len(result))
 
@@ -72,8 +73,8 @@ class YAQLFacadeValidationTest(base.ExpressionFacadeEvaluatorTest):
             'k4': ['<% abc %>', 'xyz', 123, False, {'k': 'v'}],
             'depth-1': {
                 'depth-1-1': {
-                    'depth-1-1-2': '<% $.a1 + $.a2 %>',
-                    'depth-1-1-3': ['<% $.foobar %>', 'xyz']
+                    'depth-1-1-2': '<% ctx().a1 + ctx(a2) %>',
+                    'depth-1-1-3': ['<% ctx().foobar %>', 'xyz']
                 }
             }
         }
@@ -84,12 +85,12 @@ class YAQLFacadeValidationTest(base.ExpressionFacadeEvaluatorTest):
         target = {
             'k1': '<% 1 +/ 2 %>',
             'k2': 'foobar',
-            '<% <% $.foo %>': 789,
+            '<% <% ctx().foo %>': 789,
             'k4': ['<% abc %>', 'xyz', 123, False, {'k': 'v'}],
             'depth-1': {
                 'depth-1-1': {
                     'depth-1-1-2': '<% {"a": 1} %>',
-                    'depth-1-1-3': ['<% $.foobar %>', '<% 3 +/ 4 %>']
+                    'depth-1-1-3': ['<% ctx().foobar %>', '<% 3 +/ 4 %>']
                 }
             }
         }

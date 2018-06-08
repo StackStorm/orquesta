@@ -35,11 +35,12 @@ class YAQLValidationTest(base.ExpressionEvaluatorTest):
         self.assertListEqual([], self.evaluator.validate('<% 1 %>'))
         self.assertListEqual([], self.evaluator.validate('<% abc %>'))
         self.assertListEqual([], self.evaluator.validate('<% 1 + 2 %>'))
-        self.assertListEqual([], self.evaluator.validate('<% $.foo %>'))
-        self.assertListEqual([], self.evaluator.validate('<% $.a1 + $.a2 %>'))
+        self.assertListEqual([], self.evaluator.validate('<% ctx().foo %>'))
+        self.assertListEqual([], self.evaluator.validate('<% ctx(foo) %>'))
+        self.assertListEqual([], self.evaluator.validate('<% ctx().a1 + ctx(a2) %>'))
 
     def test_parse_error(self):
-        expr = '<% <% $.foo %> %>'
+        expr = '<% <% ctx().foo %> %>'
         errors = self.evaluator.validate(expr)
 
         self.assertEqual(1, len(errors))

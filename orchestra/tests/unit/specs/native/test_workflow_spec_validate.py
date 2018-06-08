@@ -23,13 +23,13 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
               task1:
                 action: core.noop
                 next:
-                  - when: <% task_state(task1) = "SUCCESS" %>
+                  - when: <% succeeded() %>
                     publish: foo="bar"
                     do: task2
               task2:
                 action: core.noop
                 next:
-                  - when: <% task_state(task2) = "SUCCESS" %>
+                  - when: <% succeeded() %>
                     publish: bar="foo"
                     do: task3
               task3:
@@ -89,7 +89,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
               task2:
                 action: std.echo
                 input:
-                    message: <% $.foo + $.bar %>
+                    message: <% ctx().foo + ctx().bar %>
                 next:
                   - publish:
                       - foobar: fubar
@@ -247,7 +247,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
               - macro: polo
             tasks:
               task1:
-                action: core.local cmd=<% $.foobar %>
+                action: core.local cmd=<% ctx().foobar %>
                 next:
                   - when: <% succeeded() %>
                     do:
@@ -255,7 +255,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
               task2:
                 action: core.local
                 input:
-                    - cmd: echo <% $.macro %>
+                    - cmd: echo <% ctx().macro %>
                 next:
                   - when: <% <% succeeded() %>
                     do: task3
@@ -284,7 +284,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             'context': [
                 {
                     'spec_path': 'tasks.task1.input',
-                    'expression': '<% $.foobar %>',
+                    'expression': '<% ctx().foobar %>',
                     'message': 'Variable "foobar" is referenced before assignment.',
                     'type': 'yaql',
                     'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input'
@@ -293,7 +293,7 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             'syntax': [
                 {
                     'spec_path': 'tasks.task2.input',
-                    'message': '[{\'cmd\': \'echo <% $.macro %>\'}] is not of type \'object\'',
+                    'message': '[{\'cmd\': \'echo <% ctx().macro %>\'}] is not of type \'object\'',
                     'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input.type'
                 }
             ]

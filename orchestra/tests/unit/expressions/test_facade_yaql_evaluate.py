@@ -21,11 +21,11 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
     def test_basic_eval(self):
         data = {'foo': 'bar'}
 
-        self.assertEqual('bar', expressions.evaluate('<% $.foo %>', data))
-        self.assertEqual('foobar', expressions.evaluate('foo<% $.foo %>', data))
+        self.assertEqual('bar', expressions.evaluate('<% ctx().foo %>', data))
+        self.assertEqual('foobar', expressions.evaluate('foo<% ctx().foo %>', data))
 
     def test_basic_eval_undefined(self):
-        expr = '<% $.foo %>'
+        expr = '<% ctx().foo %>'
 
         data = {}
 
@@ -37,7 +37,17 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
         )
 
     def test_nested_eval(self):
-        expr = '<% $.nested.foo %>'
+        expr = '<% ctx(ctx().foo) %>'
+
+        data = {
+            'foo': 'bar',
+            'bar': 'foobar'
+        }
+
+        self.assertEqual('foobar', expressions.evaluate(expr, data))
+
+    def test_dict_eval(self):
+        expr = '<% ctx().nested.foo %>'
 
         data = {
             'nested': {
@@ -48,7 +58,7 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
         self.assertEqual('bar', expressions.evaluate(expr, data))
 
     def test_multi_eval(self):
-        expr = '<% $.foo %> and <% $.marco %>'
+        expr = '<% ctx().foo %> and <% ctx().marco %>'
 
         data = {
             'foo': 'bar',
@@ -58,26 +68,26 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
         self.assertEqual('bar and polo', expressions.evaluate(expr, data))
 
     def test_eval_recursive(self):
-        expr = '<% $.fee %>'
+        expr = '<% ctx().fee %>'
 
         data = {
-            'fee': '<% $.fi %>',
-            'fi': '<% $.fo %>',
-            'fo': '<% $.fum %>',
+            'fee': '<% ctx().fi %>',
+            'fi': '<% ctx().fo %>',
+            'fo': '<% ctx().fum %>',
             'fum': 'fee-fi-fo-fum'
         }
 
         self.assertEqual('fee-fi-fo-fum', expressions.evaluate(expr, data))
 
     def test_multi_eval_recursive(self):
-        expr = '<% $.fee %> <% $.im %>'
+        expr = '<% ctx().fee %> <% ctx().im %>'
 
         data = {
-            'fee': '<% $.fi %>',
-            'fi': '<% $.fo %>',
-            'fo': '<% $.fum %>',
+            'fee': '<% ctx().fi %>',
+            'fi': '<% ctx().fo %>',
+            'fo': '<% ctx().fum %>',
             'fum': 'fee-fi-fo-fum!',
-            'im': '<% $.hungry %>',
+            'im': '<% ctx().hungry %>',
             'hungry': 'i\'m hungry!'
         }
 
@@ -88,9 +98,9 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
 
     def test_eval_list(self):
         expr = [
-            '<% $.foo %>',
-            '<% $.marco %>',
-            'foo<% $.foo %>'
+            '<% ctx().foo %>',
+            '<% ctx().marco %>',
+            'foo<% ctx().foo %>'
         ]
 
         data = {
@@ -103,8 +113,8 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
     def test_eval_list_of_list(self):
         expr = [
             [
-                '<% $.foo %>',
-                '<% $.marco %>'
+                '<% ctx().foo %>',
+                '<% ctx().marco %>'
             ]
         ]
 
@@ -120,8 +130,8 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
     def test_eval_list_of_dict(self):
         expr = [
             {
-                'foo': '<% $.bar %>',
-                '<% $.marco %>': 'polo'
+                'foo': '<% ctx().bar %>',
+                '<% ctx().marco %>': 'polo'
             }
         ]
 
@@ -141,9 +151,9 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
 
     def test_eval_dict(self):
         expr = {
-            'foo': '<% $.bar %>',
-            '<% $.marco %>': 'polo',
-            'foobar': 'foo<% $.bar %>'
+            'foo': '<% ctx().bar %>',
+            '<% ctx().marco %>': 'polo',
+            'foobar': 'foo<% ctx().bar %>'
         }
 
         data = {
@@ -162,8 +172,8 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
     def test_eval_dict_of_dict(self):
         expr = {
             'nested': {
-                'foo': '<% $.bar %>',
-                '<% $.marco %>': 'polo'
+                'foo': '<% ctx().bar %>',
+                '<% ctx().marco %>': 'polo'
             }
         }
 
@@ -184,8 +194,8 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
     def test_eval_dict_of_list(self):
         expr = {
             'nested': [
-                '<% $.foo %>',
-                '<% $.marco %>'
+                '<% ctx().foo %>',
+                '<% ctx().marco %>'
             ]
         }
 
@@ -212,30 +222,30 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
 
         self.assertEqual(
             data['k1'],
-            expressions.evaluate('<% $.k1 %>', data)
+            expressions.evaluate('<% ctx().k1 %>', data)
         )
 
         self.assertEqual(
             data['k2'],
-            expressions.evaluate('<% $.k2 %>', data)
+            expressions.evaluate('<% ctx().k2 %>', data)
         )
 
-        self.assertTrue(expressions.evaluate('<% $.k3 %>', data))
+        self.assertTrue(expressions.evaluate('<% ctx().k3 %>', data))
 
         self.assertListEqual(
             data['k4'],
-            expressions.evaluate('<% $.k4 %>', data)
+            expressions.evaluate('<% ctx().k4 %>', data)
         )
 
         self.assertDictEqual(
             data['k5'],
-            expressions.evaluate('<% $.k5 %>', data)
+            expressions.evaluate('<% ctx().k5 %>', data)
         )
 
-        self.assertIsNone(expressions.evaluate('<% $.k6 %>', data))
+        self.assertIsNone(expressions.evaluate('<% ctx().k6 %>', data))
 
     def test_type_string_detection(self):
-        expr = '<% $.foo %> -> <% $.bar %>'
+        expr = '<% ctx().foo %> -> <% ctx().bar %>'
 
         data = {
             'foo': 101,

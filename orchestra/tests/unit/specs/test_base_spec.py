@@ -154,8 +154,8 @@ class SpecTest(unittest.TestCase):
             ],
             'vars': {
                 'var1': 'foobar',
-                'var2': '<% $.x %>',
-                'var3': '<% $.y %>'
+                'var2': '<% ctx().x %>',
+                'var3': '<% ctx().y %>'
             },
             'attr1': 'foobar',
             'attr1-1': 'fubar',
@@ -164,7 +164,7 @@ class SpecTest(unittest.TestCase):
                 'macro': 'polo'
             },
             'attr3': [
-                '<% $.var1 %>'
+                '<% ctx().var1 %>'
             ],
             'attr4': [
                 {'open': 'sesame'},
@@ -172,7 +172,7 @@ class SpecTest(unittest.TestCase):
             ],
             'attr5': {
                 'attr1': {
-                    'attr1': '<% $.var2 %> <% $.var3 %>'
+                    'attr1': '<% ctx().var2 %> <% ctx().var3 %>'
                 }
             },
             'attr6': {
@@ -268,8 +268,8 @@ class SpecTest(unittest.TestCase):
             ],
             'vars': {
                 'var1': 'foobar',
-                'var2': '<% $.x %>',
-                'var3': '<% $.y %>'
+                'var2': '<% ctx().x %>',
+                'var3': '<% ctx().y %>'
             },
             'attr1': 'foobar',
             'attr1-1': 'fubar',
@@ -278,7 +278,7 @@ class SpecTest(unittest.TestCase):
                 'macro': 'polo'
             },
             'attr3': [
-                '<% $.var1 %>'
+                '<% ctx().var1 %>'
             ],
             'attr4': [
                 {'open': 'sesame'},
@@ -286,7 +286,7 @@ class SpecTest(unittest.TestCase):
             ],
             'attr5': {
                 'attr1': {
-                    'attr1': '<% $.var2 %> <% $.var3 %>'
+                    'attr1': '<% ctx().var2 %> <% ctx().var3 %>'
                 }
             },
             'attr6': {
@@ -340,8 +340,8 @@ class SpecTest(unittest.TestCase):
             ],
             'vars': {
                 'var1': 'foobar',
-                'var2': '<% $.x %>',
-                'var3': '<% $.y %>'
+                'var2': '<% ctx().x %>',
+                'var3': '<% ctx().y %>'
             },
             'attr1': 'foobar',
             'attr1-1': 'fubar',
@@ -350,7 +350,7 @@ class SpecTest(unittest.TestCase):
                 'macro': 'polo'
             },
             'attr3': [
-                '<% $.var1 %>'
+                '<% ctx().var1 %>'
             ],
             'attr4': [
                 {'open': 'sesame'},
@@ -358,7 +358,7 @@ class SpecTest(unittest.TestCase):
             ],
             'attr5': {
                 'attr1': {
-                    'attr1': '<% $.var2 %> <% $.var3 %>'
+                    'attr1': '<% ctx().var2 %> <% ctx().var3 %>'
                 }
             },
             'attr6': {
@@ -476,15 +476,15 @@ class SpecTest(unittest.TestCase):
             ],
             'vars': {
                 'var1': 'foobar',
-                'var2': '<% $.x %>',
-                'var3': '<% $.y %>'
+                'var2': '<% ctx().x %>',
+                'var3': '<% ctx().y %>'
             },
             'attr1': 'foobar',
             'attr2': {
                 'macro': 'polo'
             },
             'attr3': [
-                '<% $.var1 %>'
+                '<% ctx().var1 %>'
             ],
             'attr4': [
                 {'open': 'sesame'},
@@ -492,7 +492,7 @@ class SpecTest(unittest.TestCase):
             ],
             'attr5': {
                 'attr1': {
-                    'attr1': '<% $.var2 %> <% $.var3 %>'
+                    'attr1': '<% ctx().var2 %> <% ctx().var3 %>'
                 }
             }
         }
@@ -513,8 +513,8 @@ class SpecTest(unittest.TestCase):
             ],
             'vars': {
                 'var1': 'foobar',
-                'var2': '<% $.x %>',
-                'var3': '<% $.y %>'
+                'var2': '<% ctx().x %>',
+                'var3': '<% ctx().y %>'
             },
             'attr2': {
                 'macro': 'polo'
@@ -523,12 +523,12 @@ class SpecTest(unittest.TestCase):
                 '<% 1 +/ 2 %> and <% {"a": 123} %>'
             ],
             'attr4': [
-                {'var1': '<% $.fubar %>'}
+                {'var1': '<% ctx().fubar %>'}
             ],
             'attr5': {
                 'attr1': {
-                    'attr1': '<% <% $.var1 %> %>',
-                    'attr2': '<% $.foobar %>'
+                    'attr1': '<% <% ctx().var1 %> %>',
+                    'attr2': '<% ctx().foobar %>'
                 }
             }
         }
@@ -566,7 +566,7 @@ class SpecTest(unittest.TestCase):
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% <% $.var1 %>',
+                    'expression': '<% <% ctx().var1 %>',
                     'spec_path': 'attr5.attr1.attr1',
                     'schema_path': (
                         'properties.attr5.'
@@ -574,13 +574,13 @@ class SpecTest(unittest.TestCase):
                         'properties.attr1'
                     ),
                     'message': 'Parse error: unexpected \'<\' at position 0 '
-                               'of expression \'<% $.var1\''
+                               'of expression \'<% ctx().var1\''
                 }
             ],
             'context': [
                 {
                     'type': 'yaql',
-                    'expression': '<% $.fubar %>',
+                    'expression': '<% ctx().fubar %>',
                     'spec_path': 'attr4[0]',
                     'schema_path': 'properties.attr4',
                     'message': 'Variable "fubar" is referenced '
@@ -588,7 +588,7 @@ class SpecTest(unittest.TestCase):
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foobar %>',
+                    'expression': '<% ctx().foobar %>',
                     'spec_path': 'attr5.attr1.attr2',
                     'schema_path': (
                         'properties.attr5.'
@@ -616,8 +616,8 @@ class SpecTest(unittest.TestCase):
             ],
             'vars': {
                 'var1': 'foobar',
-                'var2': '<% $.x %>',
-                'var3': '<% $.y %>'
+                'var2': '<% ctx().x %>',
+                'var3': '<% ctx().y %>'
             },
             'attr2': {
                 'macro': 'polo'
@@ -626,12 +626,12 @@ class SpecTest(unittest.TestCase):
                 '<% 1 +/ 2 %> and <% {"a": 123} %>'
             ],
             'attr4': [
-                {'var1': '<% $.fubar %>'}
+                {'var1': '<% ctx().fubar %>'}
             ],
             'attr5': {
                 'attr1': {
-                    'attr1': '<% <% $.var1 %> %>',
-                    'attr2': '<% $.foobar %>'
+                    'attr1': '<% <% ctx().var1 %> %>',
+                    'attr2': '<% ctx().foobar %>'
                 }
             }
         }
@@ -669,7 +669,7 @@ class SpecTest(unittest.TestCase):
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% <% $.var1 %>',
+                    'expression': '<% <% ctx().var1 %>',
                     'spec_path': 'attr5.attr1.attr1',
                     'schema_path': (
                         'properties.attr5.'
@@ -677,13 +677,13 @@ class SpecTest(unittest.TestCase):
                         'properties.attr1'
                     ),
                     'message': 'Parse error: unexpected \'<\' at position 0 '
-                               'of expression \'<% $.var1\''
+                               'of expression \'<% ctx().var1\''
                 }
             ],
             'context': [
                 {
                     'type': 'yaql',
-                    'expression': '<% $.fubar %>',
+                    'expression': '<% ctx().fubar %>',
                     'spec_path': 'attr4[0]',
                     'schema_path': 'properties.attr4',
                     'message': 'Variable "fubar" is referenced '
@@ -691,7 +691,7 @@ class SpecTest(unittest.TestCase):
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foobar %>',
+                    'expression': '<% ctx().foobar %>',
                     'spec_path': 'attr5.attr1.attr2',
                     'schema_path': (
                         'properties.attr5.'

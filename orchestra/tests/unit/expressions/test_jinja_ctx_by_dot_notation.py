@@ -13,62 +13,62 @@
 from orchestra.tests.unit import base
 
 
-class YAQLVariableExtractionTest(base.ExpressionEvaluatorTest):
+class JinjaVariableExtractionTest(base.ExpressionEvaluatorTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.language = 'yaql'
-        super(YAQLVariableExtractionTest, cls).setUpClass()
+        cls.language = 'jinja'
+        super(JinjaVariableExtractionTest, cls).setUpClass()
 
     def test_empty_extraction(self):
-        expr = '<% just_text and $not_a_var %>'
+        expr = '{{ just_text and _not_a_var }}'
 
         self.assertListEqual([], self.evaluator.extract_vars(expr))
 
     def test_single_var_extraction(self):
-        expr = '<% $.foobar  %>'
+        expr = '{{ ctx().foobar }}'
 
         expected_vars = [
-            '$.foobar'
+            'ctx().foobar'
         ]
 
         self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
 
     def test_single_dotted_var_extraction(self):
-        expr = '<% $.foo.bar  %>'
+        expr = '{{ ctx().foo.bar }}'
 
         expected_vars = [
-            '$.foo.bar'
+            'ctx().foo.bar'
         ]
 
         self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
 
     def test_single_indexing_var_extraction(self):
-        expr = '<% $.foo[0]  %>'
+        expr = '{{ ctx().foo[0] }}'
 
         expected_vars = [
-            '$.foo[0]'
+            'ctx().foo[0]'
         ]
 
         self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
 
     def test_single_functional_var_extraction(self):
-        expr = '<% $.foo.get(bar)  %>'
+        expr = '{{ ctx().foo.get(bar) }}'
 
         expected_vars = [
-            '$.foo.get(bar)'
+            'ctx().foo.get(bar)'
         ]
 
         self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
 
     def test_multiple_vars_extraction(self):
-        expr = '<% $.foobar $.foo.get(bar) $.fu.bar $.fu.bar[0]  %>'
+        expr = '{{ ctx().foobar ctx().foo.get(bar) ctx().fu.bar ctx().fu.bar[0] }}'
 
         expected_vars = [
-            '$.foobar',
-            '$.foo.get(bar)',
-            '$.fu.bar',
-            '$.fu.bar[0]'
+            'ctx().foobar',
+            'ctx().foo.get(bar)',
+            'ctx().fu.bar',
+            'ctx().fu.bar[0]'
         ]
 
         self.assertListEqual(
@@ -77,11 +77,11 @@ class YAQLVariableExtractionTest(base.ExpressionEvaluatorTest):
         )
 
     def test_multiple_interleaved_vars_extraction(self):
-        expr = '<% Why the $.foobar are you so $.fu.bar serious? %>'
+        expr = '{{ Why the ctx().foobar are you so ctx().fu.bar serious? }}'
 
         expected_vars = [
-            '$.foobar',
-            '$.fu.bar'
+            'ctx().foobar',
+            'ctx().fu.bar'
         ]
 
         self.assertListEqual(

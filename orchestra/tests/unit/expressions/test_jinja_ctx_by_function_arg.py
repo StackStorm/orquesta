@@ -26,49 +26,67 @@ class JinjaVariableExtractionTest(base.ExpressionEvaluatorTest):
         self.assertListEqual([], self.evaluator.extract_vars(expr))
 
     def test_single_var_extraction(self):
-        expr = '{{ _.foobar  }}'
+        expr = '{{ ctx(foobar)  }}'
 
         expected_vars = [
-            '_.foobar'
+            'ctx(foobar)'
+        ]
+
+        self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
+
+    def test_single_var_extraction_with_single_quotes(self):
+        expr = '{{ ctx(\'foobar\')  }}'
+
+        expected_vars = [
+            'ctx(\'foobar\')'
+        ]
+
+        self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
+
+    def test_single_var_extraction_with_double_quotes(self):
+        expr = '{{ ctx("foobar")  }}'
+
+        expected_vars = [
+            'ctx("foobar")'
         ]
 
         self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
 
     def test_single_dotted_var_extraction(self):
-        expr = '{{ _.foo.bar  }}'
+        expr = '{{ ctx(foo).bar  }}'
 
         expected_vars = [
-            '_.foo.bar'
+            'ctx(foo).bar'
         ]
 
         self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
 
     def test_single_indexing_var_extraction(self):
-        expr = '{{ _.foo[0]  }}'
+        expr = '{{ ctx(foo)[0]  }}'
 
         expected_vars = [
-            '_.foo[0]'
+            'ctx(foo)[0]'
         ]
 
         self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
 
     def test_single_functional_var_extraction(self):
-        expr = '{{ _.foo.get(bar)  }}'
+        expr = '{{ ctx(foo).get(bar)  }}'
 
         expected_vars = [
-            '_.foo.get(bar)'
+            'ctx(foo).get(bar)'
         ]
 
         self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
 
     def test_multiple_vars_extraction(self):
-        expr = '{{ _.foobar _.foo.get(bar) _.fu.bar _.fu.bar[0]  }}'
+        expr = '{{ ctx(foobar) ctx(foo).get(bar) ctx(fu).bar ctx(fu).bar[0]  }}'
 
         expected_vars = [
-            '_.foobar',
-            '_.foo.get(bar)',
-            '_.fu.bar',
-            '_.fu.bar[0]'
+            'ctx(foobar)',
+            'ctx(foo).get(bar)',
+            'ctx(fu).bar',
+            'ctx(fu).bar[0]'
         ]
 
         self.assertListEqual(
@@ -77,11 +95,11 @@ class JinjaVariableExtractionTest(base.ExpressionEvaluatorTest):
         )
 
     def test_multiple_interleaved_vars_extraction(self):
-        expr = '{{ Why the _.foobar are you so _.fu.bar serious? }}'
+        expr = '{{ Why the ctx(foobar) are you so ctx(fu).bar serious? }}'
 
         expected_vars = [
-            '_.foobar',
-            '_.fu.bar'
+            'ctx(foobar)',
+            'ctx(fu).bar'
         ]
 
         self.assertListEqual(

@@ -10,11 +10,11 @@ sequential:
       greeting: null
 
     output:
-      greeting: <% $.greeting %>
+      greeting: <% ctx().greeting %>
 
     tasks:
         task1:
-            action: core.echo message=<% $.name %>
+            action: core.echo message=<% ctx().name %>
             publish:
               greeting: <% result() %>
             on-success:
@@ -24,10 +24,10 @@ sequential:
             input:
               message: "All your base are belong to us!"
             publish:
-              greeting: <% $.greeting %>, <% result() %>
+              greeting: <% ctx().greeting %>, <% result() %>
             on-success:
                 - task3
         task3:
-            action: core.echo message=<% $.greeting %>
+            action: core.echo message=<% ctx().greeting %>
             publish:
               greeting: <% result() %>

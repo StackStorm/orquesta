@@ -24,8 +24,8 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                 input:
                     - y
                 vars:
-                    foo: <% $.a %>
-                    fooa: <% $.x + $.y + $.z %>
+                    foo: <% ctx().a %>
+                    fooa: <% ctx().x + ctx().y + ctx().z %>
                 tasks:
                     task1:
                         action: std.noop
@@ -37,21 +37,21 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
             'context': [
                 {
                     'type': 'yaql',
-                    'expression': '<% $.a %>',
+                    'expression': '<% ctx().a %>',
                     'message': 'Variable "a" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'sequential.vars'
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.x + $.y + $.z %>',
+                    'expression': '<% ctx().x + ctx().y + ctx().z %>',
                     'message': 'Variable "x" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'sequential.vars'
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.x + $.y + $.z %>',
+                    'expression': '<% ctx().x + ctx().y + ctx().z %>',
                     'message': 'Variable "z" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'sequential.vars'
@@ -70,8 +70,8 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                 input:
                     - y
                 vars:
-                    foo: "{{ _.a }}"
-                    fooa: "{{ _.x + _.y + _.z }}"
+                    foo: "{{ ctx().a }}"
+                    fooa: "{{ ctx().x + ctx().y + ctx().z }}"
                 tasks:
                     task1:
                         action: std.noop
@@ -83,21 +83,21 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
             'context': [
                 {
                     'type': 'jinja',
-                    'expression': '{{ _.a }}',
+                    'expression': '{{ ctx().a }}',
                     'message': 'Variable "a" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'sequential.vars'
                 },
                 {
                     'type': 'jinja',
-                    'expression': '{{ _.x + _.y + _.z }}',
+                    'expression': '{{ ctx().x + ctx().y + ctx().z }}',
                     'message': 'Variable "x" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'sequential.vars'
                 },
                 {
                     'type': 'jinja',
-                    'expression': '{{ _.x + _.y + _.z }}',
+                    'expression': '{{ ctx().x + ctx().y + ctx().z }}',
                     'message': 'Variable "z" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'sequential.vars'
@@ -116,8 +116,8 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                 input:
                     - y
                 vars:
-                    foo: "{{ _.a }}"
-                    fooa: <% $.x + $.y + $.z %>
+                    foo: "{{ ctx().a }}"
+                    fooa: <% ctx().x + ctx().y + ctx().z %>
                 tasks:
                     task1:
                         action: std.noop
@@ -129,21 +129,21 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
             'context': [
                 {
                     'type': 'jinja',
-                    'expression': '{{ _.a }}',
+                    'expression': '{{ ctx().a }}',
                     'message': 'Variable "a" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'sequential.vars'
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.x + $.y + $.z %>',
+                    'expression': '<% ctx().x + ctx().y + ctx().z %>',
                     'message': 'Variable "x" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'sequential.vars'
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.x + $.y + $.z %>',
+                    'expression': '<% ctx().x + ctx().y + ctx().z %>',
                     'message': 'Variable "z" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'sequential.vars'
@@ -165,13 +165,13 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                     task1:
                         action: std.echo
                         input:
-                            message: <% $.foobar %>
+                            message: <% ctx().foobar %>
                         on-success:
                             - task2
                     task2:
                         action: std.echo
                         input:
-                            message: <% $.foo %>
+                            message: <% ctx().foo %>
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -180,7 +180,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
             'context': [
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foo %>',
+                    'expression': '<% ctx().foo %>',
                     'message': 'Variable "foo" is referenced before assignment.',
                     'schema_path': 'properties.tasks.properties.task2.properties.input',
                     'spec_path': 'sequential.tasks.task2.input'
@@ -202,7 +202,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                     task1:
                         action: std.echo
                         input:
-                            message: <% $.foobar %>
+                            message: <% ctx().foobar %>
                         publish:
                             foo: bar
                         on-success:
@@ -210,12 +210,12 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                     task2:
                         action: std.echo
                         input:
-                            message: <% $.foo + $.bar %>
+                            message: <% ctx().foo + ctx().bar %>
 
                     task3:
                         action: std.echo
                         input:
-                            message: <% $.foobar %>
+                            message: <% ctx().foobar %>
                         publish:
                             bar: foo
                         on-success:
@@ -223,7 +223,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                     task4:
                         action: std.echo
                         input:
-                            message: <% $.foo + $.bar %>
+                            message: <% ctx().foo + ctx().bar %>
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -232,14 +232,14 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
             'context': [
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foo + $.bar %>',
+                    'expression': '<% ctx().foo + ctx().bar %>',
                     'message': 'Variable "bar" is referenced before assignment.',
                     'schema_path': 'properties.tasks.properties.task2.properties.input',
                     'spec_path': 'sequential.tasks.task2.input'
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foo + $.bar %>',
+                    'expression': '<% ctx().foo + ctx().bar %>',
                     'message': 'Variable "foo" is referenced before assignment.',
                     'schema_path': 'properties.tasks.properties.task4.properties.input',
                     'spec_path': 'sequential.tasks.task4.input'
@@ -261,7 +261,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                     task1:
                         action: std.echo
                         input:
-                            message: <% $.foobar %>
+                            message: <% ctx().foobar %>
                         publish:
                             foo: bar
                         on-success:
@@ -269,14 +269,14 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                     task2:
                         action: std.echo
                         input:
-                            message: <% $.foo + $.bar %>
+                            message: <% ctx().foo + ctx().bar %>
                         on-success:
                             - task5
 
                     task3:
                         action: std.echo
                         input:
-                            message: <% $.foobar %>
+                            message: <% ctx().foobar %>
                         publish:
                             bar: foo
                         on-success:
@@ -284,14 +284,14 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                     task4:
                         action: std.echo
                         input:
-                            message: <% $.foo + $.bar %>
+                            message: <% ctx().foo + ctx().bar %>
                         on-success:
                             - task5
 
                     task5:
                         action: std.echo
                         input:
-                            message: <% $.foo %>
+                            message: <% ctx().foo %>
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -300,21 +300,21 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
             'context': [
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foo + $.bar %>',
+                    'expression': '<% ctx().foo + ctx().bar %>',
                     'message': 'Variable "bar" is referenced before assignment.',
                     'schema_path': 'properties.tasks.properties.task2.properties.input',
                     'spec_path': 'sequential.tasks.task2.input'
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foo + $.bar %>',
+                    'expression': '<% ctx().foo + ctx().bar %>',
                     'message': 'Variable "foo" is referenced before assignment.',
                     'schema_path': 'properties.tasks.properties.task4.properties.input',
                     'spec_path': 'sequential.tasks.task4.input'
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foo %>',
+                    'expression': '<% ctx().foo %>',
                     'message': 'Variable "foo" is referenced before assignment.',
                     'schema_path': 'properties.tasks.properties.task5.properties.input',
                     'spec_path': 'sequential.tasks.task5.input'
@@ -336,7 +336,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                     task1:
                         action: std.echo
                         input:
-                            message: <% $.foobar %>
+                            message: <% ctx().foobar %>
                         publish:
                             foo: bar
                         on-success:
@@ -344,14 +344,14 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                     task2:
                         action: std.echo
                         input:
-                            message: <% $.foo %>
+                            message: <% ctx().foo %>
                         on-success:
                             - task5
 
                     task3:
                         action: std.echo
                         input:
-                            message: <% $.foobar %>
+                            message: <% ctx().foobar %>
                         publish:
                             bar: foo
                         on-success:
@@ -359,7 +359,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                     task4:
                         action: std.echo
                         input:
-                            message: <% $.bar %>
+                            message: <% ctx().bar %>
                         on-success:
                             - task5
 
@@ -367,7 +367,7 @@ class WorkflowSpecVarsValidationTest(base.MistralWorkflowSpecTest):
                         join: all
                         action: std.echo
                         input:
-                            message: <% $.foo + $.bar %>
+                            message: <% ctx().foo + ctx().bar %>
         """
 
         wf_spec = self.instantiate(wf_def)

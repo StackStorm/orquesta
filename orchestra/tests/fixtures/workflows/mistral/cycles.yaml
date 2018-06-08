@@ -18,8 +18,8 @@ cycles:
         task2:
             action: std.noop
             on-success:
-                - task3: <% not $.proceed %>
-                - task5: <% $.proceed %>
+                - task3: <% not ctx().proceed %>
+                - task5: <% ctx().proceed %>
         task3:
             action: std.noop
             on-success:
@@ -33,6 +33,6 @@ cycles:
         task5:
             action: std.noop
             publish:
-                count: <% $.count + 1 %>
+                count: <% ctx().count + 1 %>
             on-success:
-                - task1: <% $.count < 2 %>
+                - task1: <% ctx().count < 2 %>

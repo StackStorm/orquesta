@@ -386,17 +386,17 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'a',
                         'key': 0,
-                        'criteria': ['<% succeeded() and $.which = "a" %>']
+                        'criteria': ['<% succeeded() and ctx().which = "a" %>']
                     },
                     {
                         'id': 'b',
                         'key': 0,
-                        'criteria': ['<% succeeded() and $.which = "b" %>']
+                        'criteria': ['<% succeeded() and ctx().which = "b" %>']
                     },
                     {
                         'id': 'c',
                         'key': 0,
-                        'criteria': ['<% succeeded() and not $.which in list(a, b) %>']
+                        'criteria': ['<% succeeded() and not ctx().which in list(a, b) %>']
                     }
                 ],
                 [],
@@ -434,17 +434,17 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'a',
                         'key': 0,
-                        'criteria': ['<% succeeded() and $.which = "a" %>']
+                        'criteria': ['<% succeeded() and ctx().which = "a" %>']
                     },
                     {
                         'id': 'b',
                         'key': 0,
-                        'criteria': ['<% succeeded() and $.which = "b" %>']
+                        'criteria': ['<% succeeded() and ctx().which = "b" %>']
                     },
                     {
                         'id': 'c',
                         'key': 0,
-                        'criteria': ['<% succeeded() and not $.which in list(a, b) %>']
+                        'criteria': ['<% succeeded() and not ctx().which in list(a, b) %>']
                     }
                 ],
                 [],

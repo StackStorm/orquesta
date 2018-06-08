@@ -40,7 +40,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
 
         self.assertIsInstance(task1, specs.TaskSpec)
         self.assertEqual(task1.action, 'core.echo')
-        self.assertDictEqual(task1.input, {'message': '<% $.name %>'})
+        self.assertDictEqual(task1.input, {'message': '<% ctx().name %>'})
 
         task1_transition_seqs = getattr(task1, 'next')
 
@@ -95,7 +95,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
 
         self.assertListEqual(
             getattr(task2_transition_seqs[0], 'publish'),
-            [{'greeting': '<% $.greeting %>, <% result() %>'}]
+            [{'greeting': '<% ctx("greeting") %>, <% result() %>'}]
         )
 
         self.assertListEqual(
@@ -108,7 +108,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
 
         self.assertIsInstance(task3, specs.TaskSpec)
         self.assertEqual(task3.action, 'core.echo')
-        self.assertDictEqual(task3.input, {'message': '<% $.greeting %>'})
+        self.assertDictEqual(task3.input, {'message': '<% ctx(\'greeting\') %>'})
 
         task3_transition_seqs = getattr(task3, 'next')
 
@@ -206,8 +206,8 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
         with_attr = getattr(t1, 'with')
 
         self.assertIsNotNone(with_attr)
-        self.assertEqual(with_attr.items, 'member in <% $.members %>')
-        self.assertEqual(with_attr.concurrency, '<% $.batch_size %>')
+        self.assertEqual(with_attr.items, 'member in <% ctx().members %>')
+        self.assertEqual(with_attr.concurrency, '<% ctx().batch_size %>')
 
     def test_with_multi_items(self):
         wf_name = 'with-multi-items'
@@ -218,6 +218,6 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
         self.assertIsNotNone(with_attr)
         self.assertIsInstance(with_attr.items, list)
         self.assertEqual(len(with_attr.items), 2)
-        self.assertIn('member in <% $.members %>', with_attr.items)
-        self.assertIn('message in <% $.messages %>', with_attr.items)
-        self.assertEqual(with_attr.concurrency, '<% $.batch_size %>')
+        self.assertIn('member in <% ctx().members %>', with_attr.items)
+        self.assertIn('message in <% ctx().messages %>', with_attr.items)
+        self.assertEqual(with_attr.concurrency, '<% ctx().batch_size %>')

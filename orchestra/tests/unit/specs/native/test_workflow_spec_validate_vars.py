@@ -20,7 +20,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             version: 1.0
             description: A basic sequential workflow.
             input:
-              - y: <% $.a %>
+              - y: <% ctx().a %>
             tasks:
               task1:
                 action: core.noop
@@ -32,7 +32,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             'context': [
                 {
                     'type': 'yaql',
-                    'expression': '<% $.a %>',
+                    'expression': '<% ctx().a %>',
                     'message': 'Variable "a" is referenced before assignment.',
                     'schema_path': 'properties.input',
                     'spec_path': 'input[0]'
@@ -49,7 +49,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             input:
               - x
               - y: foobar
-              - z: <% $.x %> <% $.y %>
+              - z: <% ctx().x %> <% ctx().y %>
             tasks:
               task1:
                 action: core.noop
@@ -66,8 +66,8 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             input:
               - y
             vars:
-              - foo: <% $.a %>
-              - fooa: <% $.x + $.y + $.z %>
+              - foo: <% ctx().a %>
+              - fooa: <% ctx().x + ctx().y + ctx().z %>
             tasks:
               task1:
                 action: core.noop
@@ -79,21 +79,21 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             'context': [
                 {
                     'type': 'yaql',
-                    'expression': '<% $.a %>',
+                    'expression': '<% ctx().a %>',
                     'message': 'Variable "a" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'vars[0]'
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.x + $.y + $.z %>',
+                    'expression': '<% ctx().x + ctx().y + ctx().z %>',
                     'message': 'Variable "x" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'vars[1]'
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.x + $.y + $.z %>',
+                    'expression': '<% ctx().x + ctx().y + ctx().z %>',
                     'message': 'Variable "z" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'vars[1]'
@@ -110,8 +110,8 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             input:
               - y
             vars:
-              - foo: "{{ _.a }}"
-              - fooa: "{{ _.x + _.y + _.z }}"
+              - foo: "{{ ctx().a }}"
+              - fooa: "{{ ctx().x + ctx().y + ctx().z }}"
             tasks:
               task1:
                 action: core.noop
@@ -123,21 +123,21 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             'context': [
                 {
                     'type': 'jinja',
-                    'expression': '{{ _.a }}',
+                    'expression': '{{ ctx().a }}',
                     'message': 'Variable "a" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'vars[0]'
                 },
                 {
                     'type': 'jinja',
-                    'expression': '{{ _.x + _.y + _.z }}',
+                    'expression': '{{ ctx().x + ctx().y + ctx().z }}',
                     'message': 'Variable "x" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'vars[1]'
                 },
                 {
                     'type': 'jinja',
-                    'expression': '{{ _.x + _.y + _.z }}',
+                    'expression': '{{ ctx().x + ctx().y + ctx().z }}',
                     'message': 'Variable "z" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'vars[1]'
@@ -154,8 +154,8 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             input:
               - y
             vars:
-              - foo: "{{ _.a }}"
-              - fooa: <% $.x + $.y + $.z %>
+              - foo: "{{ ctx().a }}"
+              - fooa: <% ctx().x + ctx().y + ctx().z %>
             tasks:
               task1:
                 action: core.noop
@@ -167,21 +167,21 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             'context': [
                 {
                     'type': 'jinja',
-                    'expression': '{{ _.a }}',
+                    'expression': '{{ ctx().a }}',
                     'message': 'Variable "a" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'vars[0]'
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.x + $.y + $.z %>',
+                    'expression': '<% ctx().x + ctx().y + ctx().z %>',
                     'message': 'Variable "x" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'vars[1]'
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.x + $.y + $.z %>',
+                    'expression': '<% ctx().x + ctx().y + ctx().z %>',
                     'message': 'Variable "z" is referenced before assignment.',
                     'schema_path': 'properties.vars',
                     'spec_path': 'vars[1]'
@@ -197,14 +197,14 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             description: A basic sequential workflow.
             vars:
               - foobar: foobar
-              - fubar: <% $.foobar %>
-              - barfoo: <% $.fubar %>
-              - barfu: <% $.barfoo %>
+              - fubar: <% ctx().foobar %>
+              - barfoo: <% ctx().fubar %>
+              - barfu: <% ctx().barfoo %>
             tasks:
               task1:
                 action: core.echo
                 input:
-                  message: <% $.fubar %>
+                  message: <% ctx().fubar %>
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -221,14 +221,14 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
               task1:
                 action: core.echo
                 input:
-                  message: <% $.foobar %>
+                  message: <% ctx().foobar %>
                 next:
-                  - when: <% task_state(task1) = "SUCCESS" %>
+                  - when: <% succeeded() %>
                     do: task2
               task2:
                 action: core.echo
                 input:
-                  message: <% $.foo %>
+                  message: <% ctx().foo %>
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -237,7 +237,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             'context': [
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foo %>',
+                    'expression': '<% ctx().foo %>',
                     'message': 'Variable "foo" is referenced before assignment.',
                     'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task2.input'
@@ -257,22 +257,22 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
               task1:
                 action: core.echo
                 input:
-                  message: <% $.foobar %>
+                  message: <% ctx().foobar %>
                 next:
-                  - when: <% task_state(task1) = "SUCCESS" %>
+                  - when: <% succeeded() %>
                     publish: foo="bar"
                     do: task2
-                  - when: <% task_state(task1) = "ERROR" %>
+                  - when: <% failed() %>
                     publish: bar="foo"
                     do: task3
               task2:
                 action: core.echo
                 input:
-                  message: <% $.foo + $.bar %>
+                  message: <% ctx().foo + ctx().bar %>
               task3:
                 action: core.echo
                 input:
-                  message: <% $.foo + $.bar %>
+                  message: <% ctx().foo + ctx().bar %>
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -281,14 +281,14 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             'context': [
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foo + $.bar %>',
+                    'expression': '<% ctx().foo + ctx().bar %>',
                     'message': 'Variable "bar" is referenced before assignment.',
                     'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task2.input'
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foo + $.bar %>',
+                    'expression': '<% ctx().foo + ctx().bar %>',
                     'message': 'Variable "foo" is referenced before assignment.',
                     'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task3.input'
@@ -308,27 +308,27 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
               task1:
                 action: core.echo
                 input:
-                  message: <% $.foobar %>
+                  message: <% ctx().foobar %>
                 next:
-                  - when: <% task_state(task1) = "SUCCESS" %>
+                  - when: <% succeeded() %>
                     publish: foo="bar"
                     do: task2
               task2:
                 action: core.echo
                 input:
-                  message: <% $.foo + $.bar %>
+                  message: <% ctx().foo + ctx().bar %>
               task3:
                 action: core.echo
                 input:
-                  message: <% $.foobar %>
+                  message: <% ctx().foobar %>
                 next:
-                  - when: <% task_state(task3) = "SUCCESS" %>
+                  - when: <% succeeded() %>
                     publish: bar="foo"
                     do: task4
               task4:
                 action: core.echo
                 input:
-                  message: <% $.foo + $.bar %>
+                  message: <% ctx().foo + ctx().bar %>
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -337,14 +337,14 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             'context': [
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foo + $.bar %>',
+                    'expression': '<% ctx().foo + ctx().bar %>',
                     'message': 'Variable "bar" is referenced before assignment.',
                     'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task2.input'
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foo + $.bar %>',
+                    'expression': '<% ctx().foo + ctx().bar %>',
                     'message': 'Variable "foo" is referenced before assignment.',
                     'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task4.input'
@@ -364,37 +364,37 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
               task1:
                 action: core.echo
                 input:
-                  message: <% $.foobar %>
+                  message: <% ctx().foobar %>
                 next:
-                  - when: <% task_state(task1) = "SUCCESS" %>
+                  - when: <% succeeeded() %>
                     publish: foo="bar"
                     do: task2
               task2:
                 action: core.echo
                 input:
-                  message: <% $.foo + $.bar %>
+                  message: <% ctx().foo + ctx().bar %>
                 next:
-                  - when: <% task_state(task2) = "SUCCESS" %>
+                  - when: <% succeeded() %>
                     do: task5
               task3:
                 action: core.echo
                 input:
-                  message: <% $.foobar %>
+                  message: <% ctx().foobar %>
                 next:
-                  - when: <% task_state(task3) = "SUCCESS" %>
+                  - when: <% succeeded() %>
                     publish: bar="foo"
                     do: task4
               task4:
                 action: core.echo
                 input:
-                  message: <% $.foo + $.bar %>
+                  message: <% ctx().foo + ctx().bar %>
                 next:
-                  - when: <% task_state(task4) = "SUCCESS" %>
+                  - when: <% succeeded() %>
                     do: task5
               task5:
                 action: core.echo
                 input:
-                  message: <% $.foo %>
+                  message: <% ctx().foo %>
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -403,21 +403,21 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             'context': [
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foo + $.bar %>',
+                    'expression': '<% ctx().foo + ctx().bar %>',
                     'message': 'Variable "bar" is referenced before assignment.',
                     'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task2.input'
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foo + $.bar %>',
+                    'expression': '<% ctx().foo + ctx().bar %>',
                     'message': 'Variable "foo" is referenced before assignment.',
                     'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task4.input'
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.foo %>',
+                    'expression': '<% ctx().foo %>',
                     'message': 'Variable "foo" is referenced before assignment.',
                     'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task5.input'
@@ -437,38 +437,38 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
               task1:
                 action: core.echo
                 input:
-                  message: <% $.foobar %>
+                  message: <% ctx().foobar %>
                 next:
-                  - when: <% task_state(task1) = "SUCCESS" %>
+                  - when: <% succeeded() %>
                     publish: foo="bar"
                     do: task2
               task2:
                 action: core.echo
                 input:
-                  message: <% $.foo %>
+                  message: <% ctx().foo %>
                 next:
-                  - when: <% task_state(task2) = "SUCCESS" %>
+                  - when: <% succeeded() %>
                     do: task5
               task3:
                 action: core.echo
                 input:
-                  message: <% $.foobar %>
+                  message: <% ctx().foobar %>
                 next:
-                  - when: <% task_state(task3) = "SUCCESS" %>
+                  - when: <% succeeded() %>
                     publish: bar="foo"
                     do: task4
               task4:
                 action: core.echo
                 input:
-                  message: <% $.bar %>
+                  message: <% ctx().bar %>
                 next:
-                  - when: <% task_state(task4) = "SUCCESS" %>
+                  - when: <% succeeded() %>
                     do: task5
               task5:
                 join: all
                 action: core.echo
                 input:
-                  message: <% $.foo + $.bar %>
+                  message: <% ctx().foo + ctx().bar %>
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -488,16 +488,16 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
               task2:
                 action: core.echo
                 input:
-                  message: <% $.foo + $.bar %>
+                  message: <% ctx().foo + ctx().bar %>
                 next:
-                  - publish: foobar=<% $.fu + $.bar %>
+                  - publish: foobar=<% ctx().fu + ctx().bar %>
                     do: task3
               task3:
                 action: core.echo
                 input:
-                  message: <% $.fu + $.bar %>
+                  message: <% ctx().fu + ctx().bar %>
                 next:
-                  - publish: foobar=<% $.fu + $.bar %>
+                  - publish: foobar=<% ctx().fu + ctx().bar %>
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -506,7 +506,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             'context': [
                 {
                     'type': 'yaql',
-                    'expression': '<% $.fu + $.bar %>',
+                    'expression': '<% ctx().fu + ctx().bar %>',
                     'message': 'Variable "fu" is referenced before assignment.',
                     'schema_path': (
                         'properties.tasks.patternProperties.^\\w+$.properties.'
@@ -516,14 +516,14 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.fu + $.bar %>',
+                    'expression': '<% ctx().fu + ctx().bar %>',
                     'message': 'Variable "fu" is referenced before assignment.',
                     'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task3.input'
                 },
                 {
                     'type': 'yaql',
-                    'expression': '<% $.fu + $.bar %>',
+                    'expression': '<% ctx().fu + ctx().bar %>',
                     'message': 'Variable "fu" is referenced before assignment.',
                     'schema_path': (
                         'properties.tasks.patternProperties.^\\w+$.properties.'
@@ -549,11 +549,11 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
               task2:
                 action: core.echo
                 input:
-                  message: <% $.foo + $.bar %>
+                  message: <% ctx().foo + ctx().bar %>
               task3:
                 action: core.echo
                 input:
-                  message: <% $.fu + $.bar %>
+                  message: <% ctx().fu + ctx().bar %>
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -562,7 +562,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             'context': [
                 {
                     'type': 'yaql',
-                    'expression': '<% $.fu + $.bar %>',
+                    'expression': '<% ctx().fu + ctx().bar %>',
                     'message': 'Variable "fu" is referenced before assignment.',
                     'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
                     'spec_path': 'tasks.task3.input'
@@ -580,21 +580,21 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
               task1:
                 action: core.noop
                 next:
-                  - publish: foo="bar" bar="foo" foobar="<% $.foo %><% $.bar %>"
+                  - publish: foo="bar" bar="foo" foobar="<% ctx().foo %><% ctx().bar %>"
                     do: task2
               task2:
                 action: core.echo
                 input:
-                  message: <% $.foo + $.bar %>
+                  message: <% ctx().foo + ctx().bar %>
                 next:
                   - publish:
                       - fu: "fu"
-                      - fubar: "<% $.fu %><% $.bar %>"
+                      - fubar: "<% ctx().fu %><% ctx().bar %>"
                     do: task3
               task3:
                 action: core.echo
                 input:
-                  message: <% $.fu %><% $.bar %>
+                  message: <% ctx().fu %><% ctx().bar %>
         """
 
         wf_spec = self.instantiate(wf_def)
@@ -606,7 +606,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             version: 1.0
             description: A basic sequential workflow.
             output:
-              - y: <% $.a %>
+              - y: <% ctx().a %>
             tasks:
               task1:
                 action: core.noop
@@ -618,7 +618,7 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             'context': [
                 {
                     'type': 'yaql',
-                    'expression': '<% $.a %>',
+                    'expression': '<% ctx().a %>',
                     'message': 'Variable "a" is referenced before assignment.',
                     'schema_path': 'properties.output',
                     'spec_path': 'output[0]'
@@ -635,9 +635,9 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
             input:
               - a
             output:
-              - x: <% $.a %>
-              - y: <% $.x %>
-              - z: <% $.x %> <% $.y %>
+              - x: <% ctx().a %>
+              - y: <% ctx().x %>
+              - z: <% ctx().x %> <% ctx().y %>
             tasks:
               task1:
                 action: core.noop

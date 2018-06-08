@@ -45,8 +45,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         input:
           - x
-          - y: <% $.x %>
-          - z: <% $.y.value %>
+          - y: <% ctx().x %>
+          - z: <% ctx().y.value %>
 
         tasks:
           task1:
@@ -94,8 +94,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         vars:
           - x: 123
-          - y: <% $.x %>
-          - z: <% $.y.value %>
+          - y: <% ctx().x %>
+          - z: <% ctx().y.value %>
 
         tasks:
           task1:
@@ -129,7 +129,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
           task1:
             action: core.noop
             next:
-              - when: <% $.foobar.fubar %>
+              - when: <% ctx().foobar.fubar %>
                 publish:
                   - var1: 'xyz'
                 do: task2
@@ -191,14 +191,14 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
           task1:
             action: core.noop
             next:
-              - when: <% $.foobar.fubar %>
+              - when: <% ctx().foobar.fubar %>
                 publish:
                   - var1: 'xyz'
                 do: task3
           task2:
             action: core.noop
             next:
-              - when: <% $.fubar.foobar %>
+              - when: <% ctx().fubar.foobar %>
                 publish:
                   - var2: 123
                 do: task3
@@ -259,7 +259,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             next:
               - when: <% succeeded() %>
                 publish:
-                  - var1: <% $.foobar.fubar %>
+                  - var1: <% ctx().foobar.fubar %>
                 do: task2
           task2:
             action: core.noop
@@ -311,8 +311,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
               - when: <% succeeded() %>
                 publish:
                   - x: 123
-                  - y: <% $.x %>
-                  - z: <% $.y.value %>
+                  - y: <% ctx().x %>
+                  - z: <% ctx().y.value %>
                 do: task2
           task2:
             action: core.noop
@@ -359,7 +359,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         tasks:
           task1:
-            action: <% $.foobar.fubar %>
+            action: <% ctx().foobar.fubar %>
             next:
               - when: <% succeeded() %>
                 do: task2
@@ -399,7 +399,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         tasks:
           task1:
-            action: <% $.foobar.fubar %>
+            action: <% ctx().foobar.fubar %>
             next:
               - when: <% succeeded() %>
                 do: task2
@@ -444,7 +444,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
               - when: <% succeeded() %>
                 do: task2
           task2:
-            action: <% $.foobar.fubar %>
+            action: <% ctx().foobar.fubar %>
         """
 
         expected_errors = [
@@ -486,7 +486,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
           task1:
             action: core.noop
             input:
-              var_x: <% $.foobar.fubar %>
+              var_x: <% ctx().foobar.fubar %>
             next:
               - when: <% succeeded() %>
                 do: task2
@@ -528,7 +528,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
           task1:
             action: core.noop
             input:
-              var_x: <% $.foobar.fubar %>
+              var_x: <% ctx().foobar.fubar %>
             next:
               - when: <% succeeded() %>
                 do: task2
@@ -575,7 +575,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
           task2:
             action: core.noop
             input:
-              var_x: <% $.foobar.fubar %>
+              var_x: <% ctx().foobar.fubar %>
         """
 
         expected_errors = [
@@ -616,12 +616,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         tasks:
           task1:
-            action: <% $.foobar.fubar %>
+            action: <% ctx().foobar.fubar %>
             next:
               - when: <% succeeded() %>
                 do: task3
           task2:
-            action: core.noop var_x=<% $.fubar.foobar %>
+            action: core.noop var_x=<% ctx().fubar.foobar %>
             next:
               - when: <% succeeded() %>
                 do: task3
@@ -667,12 +667,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         tasks:
           task1:
-            action: <% $.foobar.fubar %>
+            action: <% ctx().foobar.fubar %>
             next:
               - when: <% succeeded() %>
                 do: task3
           task2:
-            action: core.noop var_x=<% $.fubar.foobar %>
+            action: core.noop var_x=<% ctx().fubar.foobar %>
             next:
               - when: <% succeeded() %>
                 do: task3
@@ -723,9 +723,9 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
               - when: <% succeeded() %>
                 do: task2, task3
           task2:
-            action: <% $.foobar.fubar %>
+            action: <% ctx().foobar.fubar %>
           task3:
-            action: core.noop var_x=<% $.fubar.foobar %>
+            action: core.noop var_x=<% ctx().fubar.foobar %>
         """
 
         expected_errors = [
@@ -790,8 +790,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         output:
           - x: 123
-          - y: <% $.x %>
-          - z: <% $.y.value %>
+          - y: <% ctx().x %>
+          - z: <% ctx().y.value %>
 
         tasks:
           task1:

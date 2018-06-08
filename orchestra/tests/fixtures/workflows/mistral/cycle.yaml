@@ -20,6 +20,6 @@ cycle:
         task3:
             action: std.noop
             publish:
-                count: <% $.count + 1 %>
+                count: <% ctx().count + 1 %>
             on-success:
-                - task1: <% $.count < 2 %>
+                - task1: <% ctx().count < 2 %>

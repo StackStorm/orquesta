@@ -35,11 +35,12 @@ class JinjaValidationTest(base.ExpressionEvaluatorTest):
         self.assertListEqual([], self.evaluator.validate('{{ 1 }}'))
         self.assertListEqual([], self.evaluator.validate('{{ abc }}'))
         self.assertListEqual([], self.evaluator.validate('{{ 1 + 2 }}'))
-        self.assertListEqual([], self.evaluator.validate('{{ _.foo }}'))
-        self.assertListEqual([], self.evaluator.validate('{{ _.a1 + _.a2 }}'))
+        self.assertListEqual([], self.evaluator.validate('{{ ctx().foo }}'))
+        self.assertListEqual([], self.evaluator.validate('{{ ctx("foo") }}'))
+        self.assertListEqual([], self.evaluator.validate('{{ ctx().a1 + ctx("a2") }}'))
 
     def test_parse_error(self):
-        expr = '{{ {{ _.foo }} }}'
+        expr = '{{ {{ ctx().foo }} }}'
         errors = self.evaluator.validate(expr)
 
         self.assertEqual(2, len(errors))
@@ -56,14 +57,14 @@ class JinjaValidationTest(base.ExpressionEvaluatorTest):
         self.assertIn('unexpected', errors[2]['message'])
 
     def test_block_error(self):
-        expr = '{% for i in _.x %}{{ i }}{% foobar %}'
+        expr = '{% for i in ctx().x %}{{ i }}{% foobar %}'
         errors = self.evaluator.validate(expr)
 
         self.assertEqual(1, len(errors))
         self.assertIn('unknown tag', errors[0]['message'])
 
     def test_missing_braces_error(self):
-        expr = '{% for i in _.x %}{{ i }}{{ foobar %}'
+        expr = '{% for i in ctx().x %}{{ i }}{{ foobar %}'
         errors = self.evaluator.validate(expr)
 
         self.assertEqual(1, len(errors))

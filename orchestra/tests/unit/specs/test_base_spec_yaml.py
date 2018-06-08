@@ -39,16 +39,16 @@ class SpecTest(unittest.TestCase):
             - y: polo
         vars:
             var1: foobar
-            var2: <% $.x %>
-            var3: <% $.y %>
+            var2: <% ctx().x %>
+            var3: <% ctx().y %>
         attr1: foobar
         attr2:
             macro: polo
         attr3:
-            - <% $.var1 %>
+            - <% ctx().var1 %>
         attr5:
             attr1:
-                attr1: <% $.var2 %> <% $.var3 %>
+                attr1: <% ctx().var2 %> <% ctx().var3 %>
         """
 
         spec_obj = specs.MockSpec(spec)
@@ -83,16 +83,16 @@ class SpecTest(unittest.TestCase):
             - y: polo
         vars:
             var1: foobar
-            var2: <% $.x %>
-            var3: <% $.y %>
+            var2: <% ctx().x %>
+            var3: <% ctx().y %>
         attr1: foobar
         attr2:
             macro: polo
         attr3:
-            - <% $.var1 %>
+            - <% ctx().var1 %>
         attr5:
             attr1:
-                attr1: <% $.var2 %> <% $.var3 %>
+                attr1: <% ctx().var2 %> <% ctx().var3 %>
         """
 
         spec_obj = specs.MockSpec(spec)

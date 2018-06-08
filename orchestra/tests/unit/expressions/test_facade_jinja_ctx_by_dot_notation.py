@@ -14,95 +14,95 @@ from orchestra.expressions import base as expressions
 from orchestra.tests.unit import base
 
 
-class YAQLFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
+class JinjaFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
 
     def test_empty_extraction(self):
-        expr = '<% just_text and $not_a_var %>'
+        expr = '{{ just_text and _not_a_var }}'
 
         self.assertListEqual([], expressions.extract_vars(expr))
 
     def test_single_var_extraction(self):
-        expr = '<% $.foobar  %>'
+        expr = '{{ ctx().foobar }}'
 
-        expected_vars = [('yaql', expr, 'foobar')]
+        expected_vars = [('jinja', expr, 'foobar')]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
     def test_single_dotted_var_extraction(self):
-        expr = '<% $.foo.bar  %>'
+        expr = '{{ ctx().foo.bar }}'
 
-        expected_vars = [('yaql', expr, 'foo')]
+        expected_vars = [('jinja', expr, 'foo')]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
     def test_single_indexing_var_extraction(self):
-        expr = '<% $.foo[0]  %>'
+        expr = '{{ ctx().foo[0] }}'
 
-        expected_vars = [('yaql', expr, 'foo')]
+        expected_vars = [('jinja', expr, 'foo')]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
     def test_single_functional_var_extraction(self):
-        expr = '<% $.foo.get(bar)  %>'
+        expr = '{{ ctx().foo.get(bar) }}'
 
-        expected_vars = [('yaql', expr, 'foo')]
+        expected_vars = [('jinja', expr, 'foo')]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
     def test_multiple_vars_extraction(self):
-        expr = '<% $.foobar $.foo.get(bar) $.fu.bar $.fu.bar[0]  %>'
+        expr = '{{ ctx().foobar ctx().foo.get(bar) ctx().fu.bar ctx().fu.bar[0] }}'
 
         expected_vars = [
-            ('yaql', expr, 'foo'),
-            ('yaql', expr, 'foobar'),
-            ('yaql', expr, 'fu')
+            ('jinja', expr, 'foo'),
+            ('jinja', expr, 'foobar'),
+            ('jinja', expr, 'fu')
         ]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
     def test_multiple_interleaved_vars_extraction(self):
-        expr = '<% Why the $.foobar are you so $.fu.bar serious? %>'
+        expr = '{{ Why the ctx().foobar are you so ctx().fu.bar serious? }}'
 
         expected_vars = [
-            ('yaql', expr, 'foobar'),
-            ('yaql', expr, 'fu')
+            ('jinja', expr, 'foobar'),
+            ('jinja', expr, 'fu')
         ]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
     def test_vars_extraction_from_list(self):
         expr = [
-            '<% abc %>',
-            '<% Why the $.foobar are you so $.fu.bar serious? %>',
+            '{{ abc }}',
+            '{{ Why the ctx().foobar are you so ctx().fu.bar serious? }}',
             'All your base are belong to us.',
-            {'<% $.x %>': 123, 'k2': '<% $.y %>', 'k3': ['<% $.z %>']}
+            {'{{ ctx().x }}': 123, 'k2': '{{ ctx().y }}', 'k3': ['{{ ctx().z }}']}
         ]
 
         expected_vars = [
-            ('yaql', expr[1], 'foobar'),
-            ('yaql', expr[1], 'fu'),
-            ('yaql', '<% $.x %>', 'x'),
-            ('yaql', '<% $.y %>', 'y'),
-            ('yaql', '<% $.z %>', 'z')
+            ('jinja', expr[1], 'foobar'),
+            ('jinja', expr[1], 'fu'),
+            ('jinja', '{{ ctx().x }}', 'x'),
+            ('jinja', '{{ ctx().y }}', 'y'),
+            ('jinja', '{{ ctx().z }}', 'z')
         ]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))
 
     def test_vars_extraction_from_dict(self):
         expr = {
-            'k1': '<% abc %>',
-            'k2': '<% Why the $.foobar are you so $.fu.bar serious? %>',
-            'k3': ['<% $.z %>'],
-            'k4': {'k5': '<% $.y %>'},
-            '<% $.x %>': 123
+            'k1': '{{ abc }}',
+            'k2': '{{ Why the ctx().foobar are you so ctx().fu.bar serious? }}',
+            'k3': ['{{ ctx().z }}'],
+            'k4': {'k5': '{{ ctx().y }}'},
+            '{{ ctx().x }}': 123
         }
 
         expected_vars = [
-            ('yaql', expr['k2'], 'foobar'),
-            ('yaql', expr['k2'], 'fu'),
-            ('yaql', '<% $.x %>', 'x'),
-            ('yaql', '<% $.y %>', 'y'),
-            ('yaql', '<% $.z %>', 'z')
+            ('jinja', expr['k2'], 'foobar'),
+            ('jinja', expr['k2'], 'fu'),
+            ('jinja', '{{ ctx().x }}', 'x'),
+            ('jinja', '{{ ctx().y }}', 'y'),
+            ('jinja', '{{ ctx().z }}', 'z')
         ]
 
         self.assertListEqual(expected_vars, expressions.extract_vars(expr))

@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import inspect
 import logging
 import re
@@ -46,12 +47,21 @@ class YaqlEvaluationException(exc.ExpressionEvaluationException):
 
 class YAQLEvaluator(base.Evaluator):
     _type = 'yaql'
-    _var_symbol = '$'
     _delimiter = '<%>'
     _regex_pattern = '<%.*?%>'
     _regex_parser = re.compile(_regex_pattern)
-    _regex_var_pattern = '.*?(\$\.[a-zA-Z0-9_\.\[\]\(\)]*).*?'
+
+    _regex_dot_pattern = '[a-zA-Z0-9_\'"\.\[\]\(\)]*'
+    _regex_ctx_pattern_1 = 'ctx\(\)\.%s' % _regex_dot_pattern
+    _regex_ctx_pattern_2 = 'ctx\([\'|"]?{0}[\'|"]?\)[\.{0}]?'.format(_regex_dot_pattern)
+    _regex_var_pattern = '.*?(%s|%s).*?' % (_regex_ctx_pattern_1, _regex_ctx_pattern_2)
     _regex_var_parser = re.compile(_regex_var_pattern)
+
+    _regex_dot_extract = '([a-zA-Z0-9_\-]*)'
+    _regex_ctx_extract_1 = 'ctx\(\)\.%s' % _regex_dot_extract
+    _regex_ctx_extract_2 = 'ctx\([\'|"]?%s(%s)' % (_regex_dot_extract, _regex_dot_pattern)
+    _regex_var_extracts = ['\%s\.?' % _regex_ctx_extract_1, '\%s\.?' % _regex_ctx_extract_2]
+
     _engine = yaql.language.factory.YaqlFactory().create()
     _root_ctx = yaql.create_context()
     _custom_functions = register_functions(_root_ctx)
@@ -59,9 +69,9 @@ class YAQLEvaluator(base.Evaluator):
     @classmethod
     def contextualize(cls, data):
         ctx = cls._root_ctx.create_child_context()
-        ctx['$'] = data or {}
-        ctx['__flow'] = ctx['$'].get('__flow')
-        ctx['__current_task'] = ctx['$'].get('__current_task')
+        ctx['__vars'] = data or {}
+        ctx['__flow'] = ctx['__vars'].get('__flow')
+        ctx['__current_task'] = ctx['__vars'].get('__current_task')
 
         return ctx
 
@@ -70,6 +80,10 @@ class YAQLEvaluator(base.Evaluator):
         exprs = cls._regex_parser.findall(text)
 
         return exprs is not None and len(exprs) > 0
+
+    @classmethod
+    def get_var_extraction_regexes(cls):
+        return copy.deepcopy(cls._regex_var_extracts)
 
     @classmethod
     def validate(cls, text):

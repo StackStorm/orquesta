@@ -25,7 +25,6 @@ LOG = logging.getLogger(__name__)
 
 _EXP_EVALUATORS = None
 _EXP_EVALUATOR_NAMESPACE = 'orchestra.expressions.evaluators'
-_REGEX_VAR_EXTRACT = '\%s\.([a-zA-Z0-9_\-]*)\.?'
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -143,10 +142,12 @@ def extract_vars(statement):
 
     elif isinstance(statement, six.string_types):
         for name, evaluator in six.iteritems(get_evaluators()):
-            regex_var_extract = _REGEX_VAR_EXTRACT % evaluator._var_symbol
-
             for var_ref in evaluator.extract_vars(statement):
-                var = re.search(regex_var_extract, var_ref).group(1)
-                variables.append((evaluator.get_type(), statement, var))
+                for regex_var_extract in evaluator.get_var_extraction_regexes():
+                    result = re.search(regex_var_extract, var_ref)
+                    var = result.group(1) if result else ''
+                    variables.append((evaluator.get_type(), statement, var))
+
+    variables = [v for v in variables if v[2] != '']
 
     return sorted(list(set(variables)), key=lambda var: var[2])

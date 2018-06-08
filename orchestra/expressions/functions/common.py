@@ -13,6 +13,8 @@
 import json
 import six
 
+from orchestra import exceptions as exc
+
 
 def json_(context, s):
     if isinstance(s, dict):
@@ -22,3 +24,10 @@ def json_(context, s):
         raise TypeError('Given object is not typeof string.')
 
     return json.loads(s)
+
+
+def ctx_(context, key=None):
+    if key and key not in context['__vars']:
+        raise exc.VariableUndefinedError(key)
+
+    return context['__vars'][key] if key else context['__vars']

@@ -428,7 +428,7 @@ class BasicWorkflowComposerTest(base.MistralWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             't1',
                             condition='on-success',
-                            expr="<% $.which = 'a' %>"
+                            expr="<% ctx().which = 'a' %>"
                         )
                     },
                     {
@@ -437,7 +437,7 @@ class BasicWorkflowComposerTest(base.MistralWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             't1',
                             condition='on-success',
-                            expr="<% $.which = 'b' %>"
+                            expr="<% ctx().which = 'b' %>"
                         )
                     },
                     {
@@ -446,7 +446,7 @@ class BasicWorkflowComposerTest(base.MistralWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             't1',
                             condition='on-success',
-                            expr="<% not $.which in list(a, b) %>"
+                            expr="<% not ctx().which in list(a, b) %>"
                         )
                     }
                 ],
@@ -488,7 +488,7 @@ class BasicWorkflowComposerTest(base.MistralWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             't1',
                             condition='on-success',
-                            expr="<% $.which = 'a' %>"
+                            expr="<% ctx().which = 'a' %>"
                         )
                     },
                     {
@@ -497,7 +497,7 @@ class BasicWorkflowComposerTest(base.MistralWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             't1',
                             condition='on-success',
-                            expr="<% $.which = 'b' %>"
+                            expr="<% ctx().which = 'b' %>"
                         )
                     },
                     {
@@ -506,7 +506,7 @@ class BasicWorkflowComposerTest(base.MistralWorkflowComposerTest):
                         'criteria': self.compose_seq_expr(
                             't1',
                             condition='on-success',
-                            expr="<% not $.which in list(a, b) %>"
+                            expr="<% not ctx().which in list(a, b) %>"
                         )
                     }
                 ],
