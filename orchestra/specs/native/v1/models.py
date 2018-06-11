@@ -116,7 +116,6 @@ class TaskSpec(base.Spec):
                     types.POSITIVE_INTEGER
                 ]
             },
-            'with': ItemizedSpec,
             'action': types.NONEMPTY_STRING,
             'input': types.NONEMPTY_DICT,
             'next': TaskTransitionSequenceSpec,

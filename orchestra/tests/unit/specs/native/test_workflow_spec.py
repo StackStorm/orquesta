@@ -203,21 +203,12 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
         wf_name = 'with-items'
         wf_spec = self.get_wf_spec(wf_name)
         t1 = wf_spec.tasks['task1']
-        with_attr = getattr(t1, 'with')
 
-        self.assertIsNotNone(with_attr)
-        self.assertEqual(with_attr.items, 'member in <% ctx().members %>')
-        self.assertEqual(with_attr.concurrency, '<% ctx().batch_size %>')
+        self.assertRaises(AttributeError, getattr, t1, 'with')
 
     def test_with_multi_items(self):
         wf_name = 'with-multi-items'
         wf_spec = self.get_wf_spec(wf_name)
         t1 = wf_spec.tasks['task1']
-        with_attr = getattr(t1, 'with')
 
-        self.assertIsNotNone(with_attr)
-        self.assertIsInstance(with_attr.items, list)
-        self.assertEqual(len(with_attr.items), 2)
-        self.assertIn('member in <% ctx().members %>', with_attr.items)
-        self.assertIn('message in <% ctx().messages %>', with_attr.items)
-        self.assertEqual(with_attr.concurrency, '<% ctx().batch_size %>')
+        self.assertRaises(AttributeError, getattr, t1, 'with')
