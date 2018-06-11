@@ -12,7 +12,16 @@
 
 import unittest
 
+from mock import patch
+
 from orchestra.expressions.functions import common as funcs
+
+
+ENV_PATCH = {
+    'robot': 'Winson',
+    'lakshmi': 'pointy haired boss',
+    'shell': '/usr/local/bin/fish',
+}
 
 
 class CommonFunctionTest(unittest.TestCase):
@@ -30,3 +39,19 @@ class CommonFunctionTest(unittest.TestCase):
         self.assertDictEqual(funcs.json_(None, '{"k1": "v1"}'), {'k1': 'v1'})
         self.assertListEqual(funcs.json_(None, '[{"a": 1}, {"b": 2}]'), [{'a': 1}, {'b': 2}])
         self.assertListEqual(funcs.json_(None, '[5, 3, 5, 4]'), [5, 3, 5, 4])
+
+    @patch('orchestra.expressions.functions.common.environ', ENV_PATCH)
+    def test_env(self):
+        self.assertDictEqual(funcs.env_(None), ENV_PATCH)
+
+        key = ENV_PATCH.keys()[0]
+        self.assertEquals(
+            funcs.env_(None, key),
+            ENV_PATCH.get(key)
+        )
+
+    def test_env_incorrect_type(self):
+        self.assertRaises(TypeError, funcs.env_, None, 42)
+        self.assertRaises(TypeError, funcs.env_, None, False)
+        self.assertRaises(TypeError, funcs.env_, None, ['a', 'b'])
+        self.assertRaises(TypeError, funcs.env_, None, object())

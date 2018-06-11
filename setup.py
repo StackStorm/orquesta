@@ -73,6 +73,7 @@ setup(
         'orchestra.expressions.functions': [
             'ctx = orchestra.expressions.functions.common:ctx_',
             'json = orchestra.expressions.functions.common:json_',
+            'env = orchestra.expressions.functions.common:env_',
             'task_state = orchestra.expressions.functions.workflow:task_state_',
             'succeeded = orchestra.expressions.functions.workflow:succeeded_',
             'failed = orchestra.expressions.functions.workflow:failed_',
