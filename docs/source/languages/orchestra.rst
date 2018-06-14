@@ -13,21 +13,21 @@ directed graph where the tasks are the nodes and the transitions and their condi
 form the edges. The tasks that compose a workflow will be defined in the DSL as a dictionary named
 `tasks` where the key and value is the task name and task model respectively. 
 
-+-------------+-------------------------------------------------------------------+
-| Attribute   | Description                                                       |
-+=============+===================================================================+
-| version     | The version of the spec being used in this workflow DSL.          |
-+-------------+-------------------------------------------------------------------+
-| description | The description of the workflow.                                  |
-+-------------+-------------------------------------------------------------------+
-| input       | A list of input arguments for this workflow.                      |
-+-------------+-------------------------------------------------------------------+
-| vars        | A list of variables defined for the scope of this workflow.       |
-+-------------+-------------------------------------------------------------------+
-| tasks       | A dictionary of tasks that defines the intent of this workflow.   |
-+-------------+-------------------------------------------------------------------+
-| output      | A list of variables defined as output for the workflow.           |
-+-------------+-------------------------------------------------------------------+
++-------------+------------+-------------------------------------------------------------------+
+| Attribute   | Required   | Description                                                       |
++=============+============+===================================================================+
+| version     | Yes        | The version of the spec being used in this workflow DSL.          |
++-------------+------------+-------------------------------------------------------------------+
+| description | No         | The description of the workflow.                                  |
++-------------+------------+-------------------------------------------------------------------+
+| input       | No         | A list of input arguments for this workflow.                      |
++-------------+------------+-------------------------------------------------------------------+
+| vars        | No         | A list of variables defined for the scope of this workflow.       |
++-------------+------------+-------------------------------------------------------------------+
+| tasks       | Yes        | A dictionary of tasks that defines the intent of this workflow.   |
++-------------+------------+-------------------------------------------------------------------+
+| output      | No         | A list of variables defined as output for the workflow.           |
++-------------+------------+-------------------------------------------------------------------+
 
 The following is a simple workflow example that illustrates the various sections of the model::
 
@@ -73,17 +73,17 @@ The following is a simple workflow example that illustrates the various sections
 Task Model
 ----------
 
-+-------------+-------------------------------------------------------------------+
-| Attribute   | Description                                                       |
-+=============+===================================================================+
-| join        | If specified, sets up a barrier for a group of parallel branches. |
-+-------------+-------------------------------------------------------------------+
-| action      | The fully qualified name of the action to be executed.            |
-+-------------+-------------------------------------------------------------------+
-| input       | A dictionary of input arguments for the action execution.         |
-+-------------+-------------------------------------------------------------------+
-| next        | Define what happens after this task is completed.                 |
-+-------------+-------------------------------------------------------------------+
++-------------+-------------+-------------------------------------------------------------------+
+| Attribute   | Required    | Description                                                       |
++=============+=============+===================================================================+
+| join        | No          | If specified, sets up a barrier for a group of parallel branches. |
++-------------+-------------+-------------------------------------------------------------------+
+| action      | No          | The fully qualified name of the action to be executed.            |
++-------------+-------------+-------------------------------------------------------------------+
+| input       | No          | A dictionary of input arguments for the action execution.         |
++-------------+-------------+-------------------------------------------------------------------+
+| next        | No          | Define what happens after this task is completed.                 |
++-------------+-------------+-------------------------------------------------------------------+
 
 As described above, the workflow is a directed graph where the tasks are the nodes and the
 transitions with their criteria between tasks form the edges. The starting set of tasks for
@@ -123,15 +123,15 @@ When criteria is met, then ``publish`` can be defined to add new or update exist
 result into the runtime workflow context. Finally, the list of tasks defined in ``do`` will be invoked
 in the order they are specified.
 
-+-------------+-------------------------------------------------------------------+
-| Attribute   | Description                                                       |
-+=============+===================================================================+
-| when        | The criteria defined as an expression required for transition.    |
-+-------------+-------------------------------------------------------------------+
-| publish     | A list of key value pairs to be published into the context.       |
-+-------------+-------------------------------------------------------------------+
-| do          | A next set of tasks to invoke when transition criteria is met.    |
-+-------------+-------------------------------------------------------------------+
++-------------+-------------+-------------------------------------------------------------------+
+| Attribute   | Required    | Description                                                       |
++=============+=============+===================================================================+
+| when        | No          | The criteria defined as an expression required for transition.    |
++-------------+-------------+-------------------------------------------------------------------+
+| publish     | No          | A list of key value pairs to be published into the context.       |
++-------------+-------------+-------------------------------------------------------------------+
+| do          | No          | A next set of tasks to invoke when transition criteria is met.    |
++-------------+-------------+-------------------------------------------------------------------+
 
 The following is a more complex workflow with branches and join and various ways to define
 tasks and task transitions::
@@ -287,7 +287,7 @@ When specified under ``do`` in the task transition, the engine will act accordin
 commands are also reserved words that cannot be used for task name.
 
 +-------------+-------------------------------------------------------------------+
-| Task        | Description                                                       |
+| Command     | Description                                                       |
 +=============+===================================================================+
 | noop        | No operation or do not execute anything else.                     |
 +-------------+-------------------------------------------------------------------+
