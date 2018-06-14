@@ -22,6 +22,15 @@ COMPONENTS := orchestra
 # Virtual Environment
 VENV_DIR ?= .venv
 
+# Sphinx Document Options
+SPHINXOPTS    =
+SPHINXBUILD   = sphinx-build
+SPHINXAUTO	  = sphinx-autobuild
+SPHINXPROJ    = Orchestra
+SOURCEDIR     = docs/source
+BUILDDIR      = docs/build
+
+
 .PHONY: clean
 clean:
 	rm -rf $(VENV_DIR)
@@ -36,6 +45,14 @@ reqs: clean venv
 	$(VENV_DIR)/bin/pip install -r requirements.txt
 	$(VENV_DIR)/bin/pip install -r requirements-test.txt
 	$(VENV_DIR)/bin/pip install -r requirements-docs.txt
+
+.PHONY: docs
+docs:
+	. $(VENV_DIR)/bin/activate; $(SPHINXBUILD) -W -b html $(SOURCEDIR) $(BUILDDIR)/html
+
+.PHONY: livedocs
+livedocs:
+	. $(VENV_DIR)/bin/activate; $(SPHINXAUTO) -H 0.0.0.0 -b html $(SOURCEDIR) $(BUILDDIR)/html
 
 .PHONY: rpm
 rpm: 
