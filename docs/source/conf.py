@@ -19,7 +19,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'Orchestra'
+project = u'StackStorm Orchestra'
 copyright = u'2018, StackStorm'
 author = u'StackStorm'
 
