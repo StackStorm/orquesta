@@ -13,4 +13,4 @@ you grant a full, complete, irrevocable copyright license to all users and devel
 project, present and future, pursuant to the license of the project.
 
 If you need help or get stuck at any point during this process, stop by on our
-[Slack Community](https://stackstorm.com/community-signup>) and we will do our best to assist you.
+[Slack Community](https://stackstorm.com/community-signup) and we will do our best to assist you.
