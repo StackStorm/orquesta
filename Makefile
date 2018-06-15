@@ -34,6 +34,7 @@ BUILDDIR      = docs/build
 .PHONY: clean
 clean:
 	rm -rf $(VENV_DIR)
+	rm -rf $(BUILDDIR)
 
 .PHONY: venv
 venv:
@@ -48,10 +49,12 @@ reqs: clean venv
 
 .PHONY: docs
 docs:
+	rm -rf $(BUILDDIR)
 	. $(VENV_DIR)/bin/activate; $(SPHINXBUILD) -W -b html $(SOURCEDIR) $(BUILDDIR)/html
 
 .PHONY: livedocs
 livedocs:
+	rm -rf $(BUILDDIR)
 	. $(VENV_DIR)/bin/activate; $(SPHINXAUTO) -H 0.0.0.0 -b html $(SOURCEDIR) $(BUILDDIR)/html
 
 .PHONY: rpm
