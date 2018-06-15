@@ -14,6 +14,9 @@ By contributing you agree that these contributions are your own (or approved by 
 you grant a full, complete, irrevocable copyright license to all users and developers of the
 project, present and future, pursuant to the license of the project.
 
+Getting Help
+^^^^^^^^^^^^
+
 If you need help or get stuck at any point during this process, stop by on our
 `Slack Community <https://stackstorm.com/community-signup>`_ and we will do our best to
 assist you.
