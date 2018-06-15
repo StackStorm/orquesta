@@ -2,7 +2,7 @@ Orchestra Workflow Definition
 =============================
 
 The Orchestra workflow DSL (Domain Specific Language) is the native DSL for the Orchestra workflow
-engine. This DSL is a derivative of
+engine. This DSL is derived from
 `OpenStack Mistral <https://docs.openstack.org/mistral/latest/user/wf_lang_v2.html>`_.
 
 Workflow Model
@@ -147,67 +147,67 @@ tasks and task transitions::
       - d: 0
 
     tasks:
-        task1:
-            # Fully qualified name (pack.name) for the action.
-            action: math.add
+      task1:
+        # Fully qualified name (pack.name) for the action.
+        action: math.add
 
-            # Assign input arguments to the action from the context.
-            input:
-              operand1: <% ctx(a) %>
-              operand2: <% ctx(b) %>
+        # Assign input arguments to the action from the context.
+        input:
+          operand1: <% ctx(a) %>
+          operand2: <% ctx(b) %>
 
-            # Specify what to run next after the task is completed.
-            next:
-              - # Specify the condition in YAQL or Jinja that is required
-                # for this task to transition to the next set of tasks.
-                when: <% succeeded() %>
+        # Specify what to run next after the task is completed.
+        next:
+          - # Specify the condition in YAQL or Jinja that is required
+            # for this task to transition to the next set of tasks.
+            when: <% succeeded() %>
 
-                # Publish variables on task transition. This allows for
-                # variables to be published based on the task state and
-                # its result.
-                publish:
-                  msg: task1 done
-                  ab: <% result() %>
+            # Publish variables on task transition. This allows for
+            # variables to be published based on the task state and
+            # its result.
+            publish:
+              msg: task1 done
+              ab: <% result() %>
 
-                # List the tasks to run next. Each task will be invoked
-                # sequentially. If more than one tasks transition to the
-                # same task and a join is specified at the subsequent
-                # task (i.e task1 and task2 transition to task3 in this
-                # case), then the subsequent task becomes a barrier and
-                # will be invoked when condition of prior tasks are met.
-                do:
-                  - log
-                  - task3
+            # List the tasks to run next. Each task will be invoked
+            # sequentially. If more than one tasks transition to the
+            # same task and a join is specified at the subsequent
+            # task (i.e task1 and task2 transition to task3 in this
+            # case), then the subsequent task becomes a barrier and
+            # will be invoked when condition of prior tasks are met.
+            do:
+              - log
+              - task3
 
-        task2:
-          # Short hand is supported for input arguments. Arguments can be
-          # delimited either by space, comma, or semicolon.
-          action: math.add operand1=<% ctx("c") %> operand2=<% ctx("d") %>
-          next:
-            - when: <% succeeded() %>
+      task2:
+        # Short hand is supported for input arguments. Arguments can be
+        # delimited either by space, comma, or semicolon.
+        action: math.add operand1=<% ctx("c") %> operand2=<% ctx("d") %>
+        next:
+          - when: <% succeeded() %>
 
-              # Short hand is supported for publishing variables. Variables
-              # can be delimited either by space, comma, or semicolon.
-              publish: msg="task2 done", cd=<% result() %>
+            # Short hand is supported for publishing variables. Variables
+            # can be delimited either by space, comma, or semicolon.
+            publish: msg="task2 done", cd=<% result() %>
 
-              # Short hand with comma delimited list is supported.
-              do: log, task3
+            # Short hand with comma delimited list is supported.
+            do: log, task3
 
-        task3:
-          # Join is specified for this task. This task will be invoked
-          # when the condition of all inbound task transitions are met.
-          join: all
-          action: math.multiple operand1=<% ctx('ab') %> operand2=<% ctx('cd') %>
-          next:
-            - when: <% succeeded() %>
-              publish: msg="task3 done" abcd=<% result() %>
-              do: log
+      task3:
+        # Join is specified for this task. This task will be invoked
+        # when the condition of all inbound task transitions are met.
+        join: all
+        action: math.multiple operand1=<% ctx('ab') %> operand2=<% ctx('cd') %>
+        next:
+          - when: <% succeeded() %>
+            publish: msg="task3 done" abcd=<% result() %>
+            do: log
 
-        # Define a reusable task to log progress. Although this task is
-        # referenced by multiple tasks, since there is no join defined,
-        # this task is not a barrier and will be invoked separately.
-        log:
-          action: core.log message=<% ctx(msg) %>
+      # Define a reusable task to log progress. Although this task is
+      # referenced by multiple tasks, since there is no join defined,
+      # this task is not a barrier and will be invoked separately.
+      log:
+        action: core.log message=<% ctx(msg) %>
 
     output:
       - result: <% ctx().abcd %>
@@ -227,29 +227,29 @@ of ``do``. The following is a revision of the previous example::
       - d: 0
 
     tasks:
-        task1:
-            action: math.add operand1=<% ctx(a) %> operand2=<% ctx(b) %>
-            next:
-              - when: <% succeeded() %>
-                publish: ab=<% result() %>
-                do: task3
+      task1:
+        action: math.add operand1=<% ctx(a) %> operand2=<% ctx(b) %>
+        next:
+          - when: <% succeeded() %>
+            publish: ab=<% result() %>
+            do: task3
 
-        task2:
-          action: math.add operand1=<% ctx("c") %> operand2=<% ctx("d") %>
-          next:
-            - when: <% succeeded() %>
-              publish: cd=<% result() %>
-              do: task3
+      task2:
+        action: math.add operand1=<% ctx("c") %> operand2=<% ctx("d") %>
+        next:
+          - when: <% succeeded() %>
+            publish: cd=<% result() %>
+            do: task3
 
-        task3:
-          join: all
-          action: math.multiple operand1=<% ctx('ab') %> operand2=<% ctx('cd') %>
-          next:
-            # After this task3 completes, it needs to publish the result
-            # for output. Since there is no more tasks to execute afterward,
-            # the do list is empty or not specified.
-            - when: <% succeeded() %>
-              publish: abcd=<% result() %>
+      task3:
+        join: all
+        action: math.multiple operand1=<% ctx('ab') %> operand2=<% ctx('cd') %>
+        next:
+          # After this task3 completes, it needs to publish the result
+          # for output. Since there is no more tasks to execute afterward,
+          # the do list is empty or not specified.
+          - when: <% succeeded() %>
+            publish: abcd=<% result() %>
 
     output:
       - result: <% ctx().abcd %>

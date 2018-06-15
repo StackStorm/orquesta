@@ -12,3 +12,4 @@ StackStorm Orchestra
 
    Overview <overview>
    Workflow Definition <languages/orchestra>
+   Expressions and Context <expressions>
