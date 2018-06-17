@@ -12,12 +12,50 @@
 
 SHELL := /bin/bash
 PY27 := /usr/bin/python2.7
-RPM_ROOT=~/rpmbuild
+RPM_ROOT = ~/rpmbuild
 RPM_SOURCES_DIR := $(RPM_ROOT)/SOURCES/
 RPM_SPECS_DIR := $(RPM_ROOT)/SPECS/
 VER := $(shell cat ./orchestra/__init__.py | grep -Po "__version__ = '\K[^']*")
-RELEASE=1
+RELEASE = 1
 COMPONENTS := orchestra
+
+# Virtual Environment
+VENV_DIR ?= .venv
+
+# Sphinx Document Options
+SPHINXOPTS    =
+SPHINXBUILD   = sphinx-build
+SPHINXAUTO	  = sphinx-autobuild
+SPHINXPROJ    = Orchestra
+SOURCEDIR     = docs/source
+BUILDDIR      = docs/build
+
+
+.PHONY: clean
+clean:
+	rm -rf $(VENV_DIR)
+	rm -rf $(BUILDDIR)
+
+.PHONY: venv
+venv:
+	test -d $(VENV_DIR) || virtualenv --no-site-packages $(VENV_DIR)
+
+.PHONY: reqs
+reqs: clean venv
+	$(VENV_DIR)/bin/pip install --upgrade "pip>=9.0,<9.1"
+	$(VENV_DIR)/bin/pip install -r requirements.txt
+	$(VENV_DIR)/bin/pip install -r requirements-test.txt
+	$(VENV_DIR)/bin/pip install -r requirements-docs.txt
+
+.PHONY: docs
+docs:
+	rm -rf $(BUILDDIR)
+	. $(VENV_DIR)/bin/activate; $(SPHINXBUILD) -W -b html $(SOURCEDIR) $(BUILDDIR)/html
+
+.PHONY: livedocs
+livedocs:
+	rm -rf $(BUILDDIR)
+	. $(VENV_DIR)/bin/activate; $(SPHINXAUTO) -H 0.0.0.0 -b html $(SOURCEDIR) $(BUILDDIR)/html
 
 .PHONY: rpm
 rpm: 
