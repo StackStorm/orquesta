@@ -41,19 +41,19 @@ venv:
 	test -d $(VENV_DIR) || virtualenv --no-site-packages $(VENV_DIR)
 
 .PHONY: reqs
-reqs: clean venv
+reqs: venv
 	$(VENV_DIR)/bin/pip install --upgrade "pip>=9.0,<9.1"
 	$(VENV_DIR)/bin/pip install -r requirements.txt
 	$(VENV_DIR)/bin/pip install -r requirements-test.txt
 	$(VENV_DIR)/bin/pip install -r requirements-docs.txt
 
 .PHONY: docs
-docs:
+docs: reqs
 	rm -rf $(BUILDDIR)
 	. $(VENV_DIR)/bin/activate; $(SPHINXBUILD) -W -b html $(SOURCEDIR) $(BUILDDIR)/html
 
 .PHONY: livedocs
-livedocs:
+livedocs: reqs
 	rm -rf $(BUILDDIR)
 	. $(VENV_DIR)/bin/activate; $(SPHINXAUTO) -H 0.0.0.0 -b html $(SOURCEDIR) $(BUILDDIR)/html
 
