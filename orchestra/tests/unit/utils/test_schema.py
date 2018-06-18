@@ -20,8 +20,8 @@ class SchemaUtilsTest(unittest.TestCase):
 
     def test_get_schema_type(self):
         self.assertEqual('object', utils.get_schema_type({'type': 'object'}))
-        self.assertEqual(None, utils.get_schema_type({}))
-        self.assertEqual(None, utils.get_schema_type(None))
+        self.assertIsNone(utils.get_schema_type({}))
+        self.assertIsNone(utils.get_schema_type(None))
 
     def test_check_schema_mergeable(self):
         utils.check_schema_mergeable(None)
