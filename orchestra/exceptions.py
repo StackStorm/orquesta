@@ -73,6 +73,16 @@ class InvalidStateTransition(Exception):
         Exception.__init__(self, 'State transition from "%s" to "%s" is invalid.' % (old, new))
 
 
+class InvalidTaskFlowEntry(Exception):
+
+    def __init__(self, task_id):
+        Exception.__init__(self, 'Task "%s" is not staged or has not started yet.' % task_id)
+
+
 class WorkflowInspectionError(Exception):
     def __init__(self, errors):
         Exception.__init__(self, 'Workflow definition failed inspection.', errors)
+
+
+class WorkflowContextError(Exception):
+    pass

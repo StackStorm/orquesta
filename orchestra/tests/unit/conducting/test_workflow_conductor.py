@@ -13,6 +13,7 @@
 import copy
 
 from orchestra import conducting
+from orchestra import exceptions as exc
 from orchestra import graphing
 from orchestra.specs import native as specs
 from orchestra import states
@@ -509,7 +510,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         # Use task3 that is not yet staged to get context.
         self.assertRaises(
-            Exception,
+            exc.InvalidTaskFlowEntry,
             conductor.get_task_transition_contexts,
             'task3'
         )
@@ -517,7 +518,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
     def test_get_workflow_terminal_context_when_workflow_incomplete(self):
         inputs = {'a': 123, 'b': True}
         conductor = self._prep_conductor(inputs, states.RUNNING)
-        self.assertRaises(Exception, conductor.get_workflow_terminal_context)
+        self.assertRaises(exc.WorkflowContextError, conductor.get_workflow_terminal_context)
 
     def test_get_workflow_terminal_context_when_workflow_completed(self):
         inputs = {'a': 123, 'b': True}
