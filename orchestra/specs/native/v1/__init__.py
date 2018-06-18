@@ -11,7 +11,8 @@
 # limitations under the License.
 
 from orchestra.specs.native.v1 import base
-from orchestra.specs.native.v1.models import instantiate, deserialize
+from orchestra.specs.native.v1.models import deserialize
+from orchestra.specs.native.v1.models import instantiate
 from orchestra.specs.native.v1.models import TaskMappingSpec
 from orchestra.specs.native.v1.models import TaskSpec
 from orchestra.specs.native.v1.models import TaskTransitionSequenceSpec
