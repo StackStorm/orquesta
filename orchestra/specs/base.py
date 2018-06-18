@@ -21,10 +21,10 @@ import yaml
 
 from orchestra import exceptions as exc
 from orchestra.expressions import base as expr
+from orchestra.specs import types
 from orchestra.utils import expression as expr_utils
 from orchestra.utils import parameters as args_utils
 from orchestra.utils import schema as schema_utils
-from orchestra.specs import types
 
 
 LOG = logging.getLogger(__name__)

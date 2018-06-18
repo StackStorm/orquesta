@@ -20,10 +20,10 @@ from orchestra import conducting
 from orchestra.expressions import base as expressions
 from orchestra.specs import loader as specs_loader
 from orchestra import states
+from orchestra.tests.fixtures import loader as fixture_loader
 from orchestra.utils import context as ctx
 from orchestra.utils import plugin
 from orchestra.utils import specs
-from orchestra.tests.fixtures import loader as fixture_loader
 
 
 @six.add_metaclass(abc.ABCMeta)

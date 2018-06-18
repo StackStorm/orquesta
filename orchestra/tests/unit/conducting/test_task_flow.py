@@ -11,8 +11,8 @@
 # limitations under the License.
 
 from orchestra import conducting
-from orchestra import graphing
 from orchestra import exceptions as exc
+from orchestra import graphing
 from orchestra.specs import native as specs
 from orchestra import states
 from orchestra.tests.unit import base

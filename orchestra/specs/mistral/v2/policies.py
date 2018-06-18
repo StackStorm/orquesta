@@ -12,8 +12,8 @@
 
 import logging
 
-from orchestra.specs import types
 from orchestra.specs.mistral.v2 import base
+from orchestra.specs import types
 
 
 LOG = logging.getLogger(__name__)

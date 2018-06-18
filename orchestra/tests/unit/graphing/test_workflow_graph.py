@@ -10,8 +10,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orchestra import graphing
 from orchestra import exceptions as exc
+from orchestra import graphing
 from orchestra.tests.unit import base
 
 

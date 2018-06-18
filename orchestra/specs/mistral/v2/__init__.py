@@ -11,10 +11,11 @@
 # limitations under the License.
 
 from orchestra.specs.mistral.v2 import base
-from orchestra.specs.mistral.v2.tasks import TaskSpec
 from orchestra.specs.mistral.v2.tasks import TaskDefaultsSpec
+from orchestra.specs.mistral.v2.tasks import TaskSpec
+from orchestra.specs.mistral.v2.workflows import deserialize
+from orchestra.specs.mistral.v2.workflows import instantiate
 from orchestra.specs.mistral.v2.workflows import WorkflowSpec
-from orchestra.specs.mistral.v2.workflows import instantiate, deserialize
 
 VERSION = base.Spec.get_version()
 

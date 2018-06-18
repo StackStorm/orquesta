@@ -11,8 +11,8 @@
 # limitations under the License.
 
 from orchestra.composers import native as composers
-from orchestra.utils import plugin
 from orchestra.tests.unit.composition.native import base
+from orchestra.utils import plugin
 
 
 class WorkflowComposerTest(base.OrchestraWorkflowComposerTest):

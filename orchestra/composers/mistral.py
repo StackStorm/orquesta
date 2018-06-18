@@ -15,8 +15,8 @@ from six.moves import queue
 
 from orchestra.composers import base
 from orchestra import graphing
-from orchestra import states
 from orchestra.specs import mistral as specs
+from orchestra import states
 
 
 LOG = logging.getLogger(__name__)

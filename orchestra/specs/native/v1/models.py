@@ -17,8 +17,8 @@ from six.moves import queue
 
 from orchestra import exceptions as exc
 from orchestra.expressions import base as expr
-from orchestra.specs import types
 from orchestra.specs.native.v1 import base
+from orchestra.specs import types
 from orchestra.utils import dictionary as dx
 from orchestra.utils import parameters as args_utils
 
