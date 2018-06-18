@@ -145,13 +145,11 @@ class WorkflowConductorTest(WorkflowComposerTest):
             'spec': task_spec
         }
 
+    # The conductor.get_start_tasks and conductor.get_next_tasks make copies of the
+    # task specs and render expressions in the task action and task input. So comparing
+    # the task specs will not match. In order to match in unit tests. This method is
+    # used to serialize the task specs and compare the lists.
     def assert_task_list(self, actual, expected):
-        """
-        The conductor.get_start_tasks and conductor.get_next_tasks make copies of the
-        task specs and render expressions in the task action and task input. So comparing
-        the task specs will not match. In order to match in unit tests. This method is
-        used to serialize the task specs and compare the lists.
-        """
         actual_copy = copy.deepcopy(actual)
         expected_copy = copy.deepcopy(expected)
 

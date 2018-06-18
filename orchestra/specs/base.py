@@ -61,13 +61,11 @@ class Spec(object):
     # Put the name of the spec properties that are inputs for the context.
     _context_inputs = []
 
+    # Override __getattr__ so we can dynamically map class attributes to spec properties.
+    # Per documentation, __getattr__ is called by __getattribute__ on AttributeError. In
+    # this case, the attribute does not physically exist on the class and so __getattr__
+    # is called which it is overridden here to access the spec dict.
     def __getattr__(self, name):
-        """
-        Override __getattr__ so we can dynamically map class attributes to spec properties.
-        Per documentation, __getattr__ is called by __getattribute__ on AttributeError. In
-        this case, the attribute does not physically exist on the class and so __getattr__
-        is called which it is overridden here to access the spec dict.
-        """
         # Retrieve from spec if attribute is a meta schema property.
         if name in self._meta_schema.get('properties', {}):
             return self.spec.get(name)
