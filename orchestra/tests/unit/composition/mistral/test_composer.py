@@ -11,8 +11,8 @@
 # limitations under the License.
 
 from orchestra.composers import mistral as composers
-from orchestra.utils import plugin
 from orchestra.tests.unit.composition.mistral import base
+from orchestra.utils import plugin
 
 
 class WorkflowComposerTest(base.MistralWorkflowComposerTest):

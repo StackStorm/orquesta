@@ -202,10 +202,10 @@ class JinjaEvaluator(base.Evaluator):
                     'There are unresolved variables: %s' % ', '.join(exprs)
                 )
 
-        if raw_blocks:
+        if isinstance(output, six.string_types) and raw_blocks:
             # Put raw blocks back into the expression.
             for i in range(0, len(raw_blocks)):
-                output = output.replace('{%s}' % str(i), raw_blocks[i])
+                output = output.replace('{%s}' % str(i), raw_blocks[i])  # pylint: disable=E1101
 
             # Evaluate the raw blocks.
             ctx = cls.contextualize(data)

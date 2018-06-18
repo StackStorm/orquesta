@@ -12,8 +12,8 @@
 
 import unittest
 
-from orchestra.specs import mock
 from orchestra.specs import loader
+from orchestra.specs import mock
 
 
 class SpecLoaderTest(unittest.TestCase):

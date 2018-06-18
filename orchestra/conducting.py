@@ -210,18 +210,18 @@ class WorkflowConductor(object):
             return None
 
         if match and len(match) != 1:
-            raise Exception('More than one final workflow context found.')
+            raise exc.WorkflowContextError('More than one final workflow context found.')
 
         return match[0][0]
 
     def get_workflow_terminal_context(self):
         if self.get_workflow_state() not in states.COMPLETED_STATES:
-            raise Exception('Workflow is not in completed state.')
+            raise exc.WorkflowContextError('Workflow is not in completed state.')
 
         term_ctx_idx = self.get_workflow_terminal_context_idx()
 
         if not term_ctx_idx:
-            raise Exception('Unable to determine the final workflow context.')
+            raise exc.WorkflowContextError('Unable to determine the final workflow context.')
 
         return copy.deepcopy(self.flow.contexts[term_ctx_idx])
 
@@ -612,7 +612,7 @@ class WorkflowConductor(object):
         task_flow_entry = self.get_task_flow_entry(task_id)
 
         if not task_flow_entry:
-            raise Exception('Task "%s" is not staged or has not started yet.' % task_id)
+            raise exc.InvalidTaskFlowEntry(task_id)
 
         for t in self.graph.get_next_transitions(task_id):
             task_transition_id = t[1] + '__' + str(t[2])
