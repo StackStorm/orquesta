@@ -8,10 +8,10 @@ engine. This DSL is derived from
 Workflow Model
 --------------
 The following is the list of attributes that makes up the workflow model. A workflow takes input,
-perform a set of tasks in predefined order, and return output. The workflow model here is a
+perform a set of tasks in predefined order, and returns output. The workflow model here is a
 directed graph where the tasks are the nodes and the transitions and their condition between tasks
 form the edges. The tasks that compose a workflow will be defined in the DSL as a dictionary named
-`tasks` where the key and value is the task name and task model respectively. 
+``tasks`` where the key and value is the task name and task model respectively. 
 
 +-------------+------------+-------------------------------------------------------------------+
 | Attribute   | Required   | Description                                                       |
@@ -29,13 +29,15 @@ form the edges. The tasks that compose a workflow will be defined in the DSL as 
 | output      | No         | A list of variables defined as output for the workflow.           |
 +-------------+------------+-------------------------------------------------------------------+
 
-The following is a simple workflow example that illustrates the various sections of the model::
+The following is a simple workflow example that illustrates the various sections of the model:
+
+.. code-block:: yaml
 
     version: 1.0
 
     description: A simple workflow.
 
-    # A list of string assuming value be provided at runtime or
+    # A list of strings, assuming value will be provided at runtime or
     # key value pairs where value is the default value when value
     # is not provided at runtime.
     input:
@@ -95,7 +97,7 @@ If there are no more outbound edges identified, then the workflow execution is c
 
 Each task defines what **StackStorm** action to execute, the policies on action execution, and
 what happens after the task completes. All of the variables defined and published up to this point
-(aka context) is accessible to the task. At its simplest, the task executes the action and pass any
+(aka context) are accessible to the task. At its simplest, the task executes the action and passes any
 required input from the context to the action execution. On successful completion of the action
 execution, the task is evaluated for completion. If criteria for transition is met, then the next
 set of tasks is invoked, sequentially in the order of the transitions and tasks that are listed.
@@ -118,7 +120,7 @@ The ``next`` section is a list of task transitions to be evaluated after a task 
 completed if it either succeeded, failed, or canceled. The list of transitions will be processed in
 the order they are defined. In the workflow graph, each task transition is one or more outbound
 edges from the current task node. For each task transition, the ``when`` is the criteria that must be
-met in order for transition. If ``when`` is not define, then the default criteria is task completion.
+met in order for transition. If ``when`` is not defined, then the default criteria is task completion.
 When criteria is met, then ``publish`` can be defined to add new or update existing variables from the
 result into the runtime workflow context. Finally, the list of tasks defined in ``do`` will be invoked
 in the order they are specified.
@@ -134,7 +136,9 @@ in the order they are specified.
 +-------------+-------------+-------------------------------------------------------------------+
 
 The following is a more complex workflow with branches and join and various ways to define
-tasks and task transitions::
+tasks and task transitions:
+
+.. code-block:: yaml
 
     version: 1.0
 
@@ -212,9 +216,11 @@ tasks and task transitions::
     output:
       - result: <% ctx().abcd %>
 
-There are times when publish is requires after a task completes but there are no more tasks
+There are times when publish is required after a task completes but there are no more tasks
 to execute next. In this case, a task transition can be defined without specifying the list
-of ``do``. The following is a revision of the previous example::
+of ``do``. The following is a revision of the previous example:
+
+.. code-block:: yaml
 
     version: 1.0
 
@@ -254,8 +260,10 @@ of ``do``. The following is a revision of the previous example::
     output:
       - result: <% ctx().abcd %>
 
-The following example illustrates separate task transition with different publishes
-on different condition::
+The following example illustrates separate task transitions with different publishes
+on different condition:
+
+.. code-block:: yaml
 
     version: 1.0
 
@@ -294,7 +302,9 @@ commands are also reserved words that cannot be used for task name.
 | fail        | Fails the workflow execution.                                     |
 +-------------+-------------------------------------------------------------------+
 
-The following example illustrates the use of the ``fail`` command::
+The following example illustrates the use of the ``fail`` command:
+
+.. code-block:: yaml
 
     version: 1.0
 

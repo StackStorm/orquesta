@@ -136,10 +136,10 @@ For the full list of built-in functions, see the `Standard Library section in YA
 StackStorm Functions
 --------------------
 
-* ``st2kv('st2_key_id')`` queries StackStorm datastore and returns the value for the given key. For
+* ``st2kv('st2_key_id')`` queries the StackStorm datastore and returns the value for the given key. For
   example, the expression ``<% st2kv('system.shared_key_x') %>`` returns the value for a system
   scoped key named ``shared_key_x`` while the expression ``<% st2kv('my_key_y') %>`` returns the
   value for the user scoped key named ``my_key_y``. Please note that the key name should be in quotes
-  otherwise YAQL treats a key name with a dot like ``system.shared_key_x`` as a dict access. Value
-  can be encrypted in StackStorm datastore. To decrypt the retrieved value, the input argument
+  otherwise YAQL treats a key name with a dot like ``system.shared_key_x`` as a dict access. The value
+  can be encrypted in the StackStorm datastore. To decrypt the retrieved value, the input argument
   ``decrypt`` must be set to true such as ``st2kv('st2_key_id', decrypt=true)``.
