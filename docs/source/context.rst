@@ -28,9 +28,9 @@ then the variables from ``vars`` will be assigned. In the example, the workflow 
 in ``task1`` and ``task2`` in parallel. When these tasks complete, ``task3`` multiplies the results
 from ``task1`` and ``task2``. 
 
-In the ``task1`` definition, please note the different way the variable ``a``and ``b`` are assigned to
-``operand1`` and ``operand2``. Note that the variable can be return by ``ctx`` directly when the name
-of the variable is provided as input argument as in the case ``ctx(a)``, or ``ctx`` can return the
+In the ``task1`` definition, please note the different way the variables ``a`` and ``b`` are assigned to
+``operand1`` and ``operand2``. Note that the variable can be returned by ``ctx`` directly when the name
+of the variable is provided as input argument, as in the case ``ctx(a)``, or ``ctx`` can return the
 entire dictionary, and the variable is accessed via dot notation, e.g. ``ctx().b``. 
 
 As shown in ``task2``, the input argument to ``ctx`` can also be single quoted or double quoted. For
@@ -95,7 +95,7 @@ In the workflow defintion where variables are assigned into the context dictiona
 pairs. Orchestra will evaluate the assignment and associated expression in the order that the
 variables are listed. Variables that have already been assigned earlier in the list are immediately
 available for reference. Take the following workflow as an example, the input variable ``x`` is
-immediately available for reference in the assignment of ``y``
+immediately available for reference in the assignment of ``y``:
 
 .. code-block:: yaml
 
