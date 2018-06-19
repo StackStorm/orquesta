@@ -46,7 +46,7 @@ setup(
     version=get_version_string(),
     author='StackStorm',
     author_email='info@stackstorm.com',
-    url='http://www.stackstorm.com',
+    url='https://www.stackstorm.com',
     packages=find_packages(exclude=[]),
     install_requires=get_requirements(),
     license='Apache License (2.0)',
@@ -58,7 +58,9 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7'
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5'
     ],
     entry_points={
         'orchestra.composers': [
