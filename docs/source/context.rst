@@ -1,39 +1,48 @@
 Workflow Runtime Context
 ========================
 
-At runtime, the workflow execution maintain a context dictionary that manages variables assigned.
+At runtime, the workflow execution maintain a context dictionary that manages assigned variables.
 In the workflow definition, there are several location where variables can be assigned into the
 context. These locations are ``input``, ``vars``, and ``output`` in the workflow model and
-``publish`` in the task transition model. The order of the variables begin assigned into the
-context dictionary at runtime goes from workflow ``input`` and workflow ``vars`` at the onset of
+``publish`` in the task transition model. The order of the variables being assigned into the
+context dictionary at runtime goes from workflow ``input`` and workflow ``vars`` at the start of
 workflow execution, to ``publish`` on each task completion, then finally ``output`` on workflow
-completion. Once a variable is assigned into the context dictionary, it can be referenced by a
+completion. 
+
+Once a variable is assigned into the context dictionary, it can be referenced by a
 custom function named ``ctx``. The ``ctx`` function takes the variable name as argument like
-``ctx(foobar)`` or return the entire dictionary and referenced by dot notation like
-``ctx().foobar`` if no argument provided.
+``ctx(foobar)`` or returns the entire dictionary if no argument is provided. This can be
+referenced by dot notation - e.g. ``ctx().foobar``.
 
 Basics
 ------
 
 Let's revisit the workflow example we've used before. This example is using YAQL expressions.
 The ``ctx`` function is also available to Jinja expressions. This workflow calculates a simple math
-equation on input a, b, c, and d. The workflow input is provided on invocation. If input is not
-provided at runtime, a default value is assigned to the variables. In this case, all the variables
-will be assigned a value of 0. These variables are then assigned into the context dictionary. When
-variables from ``input`` are assignned, then the variables from ``vars`` will be assigned. In the
-example, the workflow executes the addition in ``task1`` and ``task2`` in parallel. When these tasks
-complete, ``task3`` multiples the results from ``task1`` and ``task2``. In the ``task1`` definition,
-please note the different way the variable a and b are assigned to operand1 and operand2. Note that
-the variable can be return by ``ctx`` directly when the name of the variable is provided as input
-argument as in the case ``ctx(a)`` or ``ctx`` can return the entire dictionary and the variable is
-accessed as a dot notation like ``ctx().b``. As shown in ``task2``, the input argument to ``ctx``
-can also be single quoted or double quoted. For Jinja expressions, single or double quotes are
-required because Jinja will treat any unquoted literals as variables. When ``task1`` and ``task2``
-completes, each task will ``publish`` the result into the context dictionary. Since these tasks
-run in parallel, the task that completes first will write to the context dictionary first. A race
-between parallel tasks is possible and Orchestra will handle the race condition. However, it is
-best practice to avoid using the same variable name in parallel branches that converges
-downstream::
+equation on inputs ``a``, ``b``, ``c``, and ``d``. The workflow input is provided on invocation.
+If input is not provided at runtime, a default value is assigned. In this case, all the variables
+will be assigned a value of 0.
+
+These variables are then assigned into the context dictionary. After variables from ``input`` are assigned,
+then the variables from ``vars`` will be assigned. In the example, the workflow executes the addition
+in ``task1`` and ``task2`` in parallel. When these tasks complete, ``task3`` multiplies the results
+from ``task1`` and ``task2``. 
+
+In the ``task1`` definition, please note the different way the variables ``a`` and ``b`` are assigned to
+``operand1`` and ``operand2``. Note that the variable can be returned by ``ctx`` directly when the name
+of the variable is provided as input argument, as in the case ``ctx(a)``, or ``ctx`` can return the
+entire dictionary, and the variable is accessed via dot notation, e.g. ``ctx().b``. 
+
+As shown in ``task2``, the input argument to ``ctx`` can also be single quoted or double quoted. For
+Jinja expressions, single or double quotes are required because Jinja will treat any unquoted literals
+as variables.
+
+When ``task1`` and ``task2`` completes, each task will ``publish`` the result into the context dictionary.
+Since these tasks run in parallel, the task that completes first will write to the context dictionary
+first. A race between parallel tasks is possible and Orchestra will handle the race condition. It is
+best practice to avoid using the same variable name in parallel branches that converge downstream.
+
+.. code-block:: yaml
 
     version: 1.0
 
@@ -84,9 +93,11 @@ Assignment Order
 In the workflow defintion where variables are assigned into the context dictionary such as
 ``input``, ``vars``, ``publish``, and ``output``, the variables are defined as a list of key value
 pairs. Orchestra will evaluate the assignment and associated expression in the order that the
-variables are listed. Variables that have already been assigned earlier in the list is immediately
+variables are listed. Variables that have already been assigned earlier in the list are immediately
 available for reference. Take the following workflow as an example, the input variable ``x`` is
-immediately available for reference in the assignment of ``y``::
+immediately available for reference in the assignment of ``y``:
+
+.. code-block:: yaml
 
     version: 1.0
 
@@ -115,7 +126,9 @@ In the following example, there are two branches with one that starts at ``task1
 starts at ``task2``. The branch that starts with ``task2`` will take longer to complete because of
 the explicit sleep. Both branch publishes to an existing variable ``x`` in the context dictionary.
 Since branch 1 will complete first, ``x=123`` will be written to the context dictionary for
-``task4`` first. When branch 2 completes, it will overwrite with ``x=789``::
+``task4`` first. When branch 2 completes, it will overwrite with ``x=789``:
+
+.. code-block:: yaml
 
     version: 1.0
 

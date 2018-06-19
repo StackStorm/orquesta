@@ -1,8 +1,8 @@
 Expressions
 ===========
 
-Expressions can be employed almost anywhere in the workflow definition from assigning value to
-action input to evaluating criteria in the task transition and data transformation when publishing
+Expressions can be employed almost anywhere in the workflow definition, from assigning value to
+action input, to evaluating criteria in the task transition, and data transformation when publishing
 variables.
 
 Here are some of the things that an expression can accomplish:
@@ -14,7 +14,7 @@ Here are some of the things that an expression can accomplish:
 * Evaluation of boolean logic.
 * Any combination of select, filter, transform, and evaluate.
 
-Applying to workflows, here are some use cases:
+Applied to workflows, here are some use cases:
 
 * Define input values to action execution.
 * Define criteria for task transition.
@@ -25,12 +25,12 @@ Applying to workflows, here are some use cases:
 Types
 -----
 Orchestra currently supports `YAQL <http://yaql.readthedocs.io/en/latest/>`_ and
-`Jinja <http://jinja.pocoo.org>`_ expressions. Both types of expressions can be used thru out the
-workflow. But mixing of both YAQL and Jinja expressions in a single statement is not supported.
-To tell orchestra which expression is which, each type of expression should be encapsulated with
-different symbols. For YAQL, the expression is wrapped inbetween ``<% YAQL expression %>``. For
-Jinja, expression is wrapped inbetween ``{{ Jinja expression }}``. Code block using ``{% %}`` is
-also supported for Jinja. The symbols ``{`` and ``}`` conflicts with JSON and the entire Jinja
+`Jinja <http://jinja.pocoo.org>`_ expressions. Both types of expressions can be used throughout the
+workflow. Note that mixing of both YAQL and Jinja expressions in a single statement is not supported.
+To tell Orchestra which expression is which, each type of expression should be encapsulated with
+different symbols. For YAQL, the expression is wrapped in between ``<% YAQL expression %>``. For
+Jinja, expression is wrapped in between ``{{ Jinja expression }}``. Code block using ``{% %}`` is
+also supported for Jinja. The symbols ``{`` and ``}`` conflict with JSON and the entire Jinja
 expression with the encapsulation should be single or double quoted.
 
 Where it's used?
@@ -80,8 +80,8 @@ The following are attributes in the **Task Transition** model that accept expres
 | do           | No                               |
 +--------------+----------------------------------+
 
-Usages
-------
+Usage
+-----
 
 The following sections go into more details on specific topics.
 
