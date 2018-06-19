@@ -60,7 +60,7 @@ class JinjaEvaluator(base.Evaluator):
     _regex_dot_extract = '([a-zA-Z0-9_\-]*)'
     _regex_ctx_extract_1 = 'ctx\(\)\.%s' % _regex_dot_extract
     _regex_ctx_extract_2 = 'ctx\([\'|"]?%s(%s)' % (_regex_dot_extract, _regex_dot_pattern)
-    _regex_var_extracts = ['\%s\.?' % _regex_ctx_extract_1, '\%s\.?' % _regex_ctx_extract_2]
+    _regex_var_extracts = ['%s\.?' % _regex_ctx_extract_1, '%s\.?' % _regex_ctx_extract_2]
 
     _block_delimiter = '{%}'
     _regex_block_pattern = '{%.*?%}'
