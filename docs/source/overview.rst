@@ -9,20 +9,22 @@ The engine consists of the workflow models that are decomposed from the language
 that composes the execution graph from the workflow models, and the conductor that directs the
 execution of the workflow using the graph.
 
-A workflow definition is a structured YAML file that describes the intent of the workflow. A workflow
-is made up of one or more tasks. A task defines what action to execute, with what input. When a task
-completes, it can transition into other tasks based upon criteria. Tasks can also publish output for the
-next tasks. When there are no more tasks to execute, the workflow is complete.
+A workflow definition is a structured YAML file that describes the intent of the workflow. A
+workflow is made up of one or more tasks. A task defines what action to execute, with what input.
+When a task completes, it can transition into other tasks based upon criteria. Tasks can also
+publish output for the next tasks. When there are no more tasks to execute, the workflow is
+complete.
 
 Orchestra includes a native language spec for the workflow definition. The language spec is
 decomposed into various models and described with `JSON schema <http://json-schema.org/>`_. A
-workflow composer that understands the models converts the workflow definition into a directed graph.
-The nodes represent the tasks and edges are the task transition. The criteria for task
+workflow composer that understands the models converts the workflow definition into a directed
+graph. The nodes represent the tasks and edges are the task transition. The criteria for task
 transition is an attribute of the edge. The graph is the underpinning for conducting the workflow
 execution. The workflow definition is just syntactic sugar.
 
-Orchestra allows for one or more language specs to be defined. So as long as the workflow definition,
-however structured, is composed into the expected graph, the workflow conductor can handle it.
+Orchestra allows for one or more language specs to be defined. So as long as the workflow
+definition, however structured, is composed into the expected graph, the workflow conductor can
+handle it.
 
 The workflow execution graph can be a directed graph or a directed cycle graph. It can have one or
 more root nodes which are the starting tasks for the workflow. The graph can have branches that run
