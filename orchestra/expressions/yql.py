@@ -129,11 +129,11 @@ class YAQLEvaluator(base.Evaluator):
 
         except KeyError as e:
             raise YaqlEvaluationException(
-                'Unable to resolve key \'%s\' in expression \'%s\' from context.' %
-                (str(getattr(e, 'message', e)), expr)
+                "Unable to resolve key '%s' in expression '%s' from context." %
+                (str(getattr(e, 'message', e)).strip("'"), expr)
             )
         except (yaql_exc.YaqlException, ValueError, TypeError) as e:
-            raise YaqlEvaluationException(str(getattr(e, 'message', e)))
+            raise YaqlEvaluationException(str(getattr(e, 'message', e)).strip("'"))
 
         return output
 

@@ -43,12 +43,11 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
 
         data = {}
 
-        self.assertRaises(
-            yql.YaqlEvaluationException,
-            self.evaluator.evaluate,
-            expr,
-            data
-        )
+        with self.assertRaises(yql.YaqlEvaluationException) as raised:
+            self.evaluator.evaluate(expr, data)
+
+        expected = "Unable to resolve key 'foo' in expression '<% ctx().foo %>' from context."
+        self.assertEqual(str(raised.exception), expected)
 
     def test_nested_eval(self):
         expr = '<% ctx(ctx().foo) %>'
