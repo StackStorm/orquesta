@@ -57,7 +57,7 @@ class TaskFlow(object):
 
 class WorkflowConductor(object):
 
-    def __init__(self, spec, **kwargs):
+    def __init__(self, spec, context=None, inputs=None):
         if not spec or not isinstance(spec, specs.Spec):
             raise ValueError('The value of "spec" is not type of Spec.')
 
@@ -69,11 +69,13 @@ class WorkflowConductor(object):
         self._workflow_state = None
         self._graph = None
         self._flow = None
-        self._inputs = kwargs
+        self._parent_ctx = context or {}
+        self._inputs = inputs or {}
         self._outputs = None
         self._errors = []
 
-    def restore(self, graph, state=None, errors=None, flow=None, inputs=None, outputs=None):
+    def restore(self, graph, state=None, errors=None, flow=None,
+                inputs=None, outputs=None, context=None):
         if not graph or not isinstance(graph, graphing.WorkflowGraph):
             raise ValueError('The value of "graph" is not type of WorkflowGraph.')
 
@@ -92,6 +94,7 @@ class WorkflowConductor(object):
         self._workflow_state = state
         self._graph = graph
         self._flow = flow
+        self._parent_ctx = context or {}
         self._inputs = inputs or {}
         self._outputs = outputs
         self._errors = errors or []
@@ -101,6 +104,7 @@ class WorkflowConductor(object):
             'spec': self.spec.serialize(),
             'graph': self.graph.serialize(),
             'flow': self.flow.serialize(),
+            'context': self.get_workflow_parent_context(),
             'input': self.get_workflow_input(),
             'output': self.get_workflow_output(),
             'errors': copy.deepcopy(self.errors),
@@ -115,12 +119,13 @@ class WorkflowConductor(object):
         graph = graphing.WorkflowGraph.deserialize(data['graph'])
         state = data['state']
         flow = TaskFlow.deserialize(data['flow'])
+        context = copy.deepcopy(data['context'])
         inputs = copy.deepcopy(data['input'])
         outputs = copy.deepcopy(data['output'])
         errors = copy.deepcopy(data['errors'])
 
         instance = cls(spec)
-        instance.restore(graph, state, errors, flow, inputs, outputs)
+        instance.restore(graph, state, errors, flow, inputs, outputs, context)
 
         return instance
 
@@ -149,6 +154,7 @@ class WorkflowConductor(object):
             if self.get_workflow_state() not in states.ABENDED_STATES:
                 # Set the initial workflow context.
                 init_ctx = dict(list(rendered_inputs.items()) + list(rendered_vars.items()))
+                init_ctx = dx.merge_dicts(init_ctx, self.get_workflow_parent_context(), True)
                 self._flow.contexts.append({'srcs': [], 'value': init_ctx})
 
                 # Identify the starting tasks and set the pointer to the initial context entry.
@@ -175,6 +181,9 @@ class WorkflowConductor(object):
     def log_errors(self, errors, task_id=None, task_transition_id=None):
         for error in errors:
             self.log_error(error, task_id=task_id, task_transition_id=task_transition_id)
+
+    def get_workflow_parent_context(self):
+        return copy.deepcopy(self._parent_ctx)
 
     def get_workflow_input(self):
         return copy.deepcopy(self._inputs)

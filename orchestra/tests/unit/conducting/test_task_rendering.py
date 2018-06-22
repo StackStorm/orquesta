@@ -18,7 +18,7 @@ from orchestra.tests.unit import base
 
 class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
-    def _prep_conductor(self, inputs=None, state=None):
+    def _prep_conductor(self, context=None, inputs=None, state=None):
         wf_def = """
         version: 1.0
 
@@ -47,12 +47,12 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
         spec = specs.WorkflowSpec(wf_def)
 
-        conductor = conducting.WorkflowConductor(spec)
+        kwargs = {
+            'context': context if context is not None else None,
+            'inputs': inputs if inputs is not None else None
+        }
 
-        if inputs:
-            conductor = conducting.WorkflowConductor(spec, **inputs)
-        else:
-            conductor = conducting.WorkflowConductor(spec)
+        conductor = conducting.WorkflowConductor(spec, **kwargs)
 
         if state:
             conductor.set_workflow_state(state)
@@ -63,7 +63,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         action_name = 'core.echo'
         action_input = {'message': 'All your base are belong to us!'}
         inputs = {'action_name': action_name, 'action_input': action_input}
-        conductor = self._prep_conductor(inputs, state=states.RUNNING)
+        conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
 
         # Test that the action and input are rendered entirely from context.
         task_name = 'task1'

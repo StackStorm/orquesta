@@ -40,7 +40,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
 
         return wf_graph
 
-    def _prep_conductor(self, inputs=None, state=None):
+    def _prep_conductor(self, context=None, inputs=None, state=None):
         wf_def = """
         version: 1.0
 
@@ -69,12 +69,12 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
 
         spec = specs.WorkflowSpec(wf_def)
 
-        conductor = conducting.WorkflowConductor(spec)
+        kwargs = {
+            'context': context if context is not None else None,
+            'inputs': inputs if inputs is not None else None
+        }
 
-        if inputs:
-            conductor = conducting.WorkflowConductor(spec, **inputs)
-        else:
-            conductor = conducting.WorkflowConductor(spec)
+        conductor = conducting.WorkflowConductor(spec, **kwargs)
 
         if state:
             conductor.set_workflow_state(state)

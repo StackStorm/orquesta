@@ -169,7 +169,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        conductor = conducting.WorkflowConductor(wf_spec, **inputs)
+        conductor = conducting.WorkflowConductor(wf_spec, inputs=inputs)
         conductor.set_workflow_state(states.RUNNING)
 
         context = {}
