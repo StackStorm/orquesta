@@ -37,14 +37,16 @@ class WorkflowConductorStressTest(base.WorkflowConductorTest):
 
         return wf_def
 
-    def _prep_conductor(self, num_tasks, inputs=None, state=None):
+    def _prep_conductor(self, num_tasks, context=None, inputs=None, state=None):
         wf_def = self._prep_wf_def(num_tasks)
         spec = specs.WorkflowSpec(wf_def)
 
-        if inputs:
-            conductor = conducting.WorkflowConductor(spec, **inputs)
-        else:
-            conductor = conducting.WorkflowConductor(spec)
+        kwargs = {
+            'context': context if context is not None else None,
+            'inputs': inputs if inputs is not None else None
+        }
+
+        conductor = conducting.WorkflowConductor(spec, **kwargs)
 
         if state:
             conductor.set_workflow_state(state)

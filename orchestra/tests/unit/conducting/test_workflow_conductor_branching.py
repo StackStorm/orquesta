@@ -216,7 +216,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
 
         inputs = {'var1': 'xyz'}
         spec = specs.WorkflowSpec(wf_def)
-        conductor = conducting.WorkflowConductor(spec, **inputs)
+        conductor = conducting.WorkflowConductor(spec, inputs=inputs)
         conductor.set_workflow_state(states.RUNNING)
 
         # Conduct task2 and check context and that there is no next tasks yet.

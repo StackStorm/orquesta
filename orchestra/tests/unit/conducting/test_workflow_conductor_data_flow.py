@@ -20,7 +20,7 @@ from orchestra.tests.unit import base
 
 class WorkflowConductorDataFlowTest(base.WorkflowConductorTest):
 
-    def _prep_conductor(self, inputs=None, state=None):
+    def _prep_conductor(self, context=None, inputs=None, state=None):
         wf_def = """
         version: 1.0
 
@@ -60,16 +60,15 @@ class WorkflowConductorDataFlowTest(base.WorkflowConductorTest):
         spec = specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
-        if inputs:
-            conductor = conducting.WorkflowConductor(spec, **inputs)
-            self.assertDictEqual(conductor.get_workflow_input(), inputs)
-        else:
-            conductor = conducting.WorkflowConductor(spec)
+        kwargs = {
+            'context': context if context is not None else None,
+            'inputs': inputs if inputs is not None else None
+        }
+
+        conductor = conducting.WorkflowConductor(spec, **kwargs)
 
         if state:
             conductor.set_workflow_state(state)
-            self.assertEqual(conductor._workflow_state, state)
-            self.assertEqual(conductor.get_workflow_state(), state)
 
         return conductor
 
@@ -77,7 +76,7 @@ class WorkflowConductorDataFlowTest(base.WorkflowConductorTest):
         inputs = {'a1': input_value}
         expected_output = {'a5': inputs['a1'], 'b5': inputs['a1']}
 
-        conductor = self._prep_conductor(inputs, states.RUNNING)
+        conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
 
         for i in range(1, len(conductor.spec.tasks) + 1):
             task_name = 'task' + str(i)
