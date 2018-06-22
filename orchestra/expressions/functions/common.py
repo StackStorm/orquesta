@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from os import environ
 import json
 import six
 
@@ -31,3 +32,13 @@ def ctx_(context, key=None):
         raise exc.VariableUndefinedError(key)
 
     return context['__vars'][key] if key else context['__vars']
+
+
+def env_(context, var=None):
+    if var is not None and not isinstance(var, six.string_types):
+        raise TypeError('Given variale is not typeof string.')
+
+    if var:
+        return environ.get(var)
+
+    return dict(environ)
