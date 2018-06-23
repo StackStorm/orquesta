@@ -236,11 +236,11 @@ class Spec(object):
         return schema
 
     def get_spec_path(self, prop_name, parent=None):
-        return parent.get('spec_path') + '.' + prop_name if parent else prop_name
+        return (parent.get('spec_path') + '.' + prop_name).strip('.') if parent else prop_name
 
     def get_schema_path(self, prop_name, parent=None):
         return (
-            parent.get('schema_path') + '.' + 'properties.' + prop_name
+            (parent.get('schema_path') + '.' + 'properties.' + prop_name).strip('.')
             if parent else 'properties.' + prop_name
         )
 
