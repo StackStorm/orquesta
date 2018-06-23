@@ -47,7 +47,8 @@ class WorkflowSpec(base.Spec):
             'input': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
             'output': types.NONEMPTY_DICT,
             'task-defaults': tasks.TaskDefaultsSpec,
-            'tasks': tasks.TaskMappingSpec
+            'tasks': tasks.TaskMappingSpec,
+            'type': types.WORKFLOW_TYPE
         },
         'required': ['tasks'],
         'additionalProperties': False

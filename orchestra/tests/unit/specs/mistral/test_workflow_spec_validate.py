@@ -115,3 +115,61 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_type_direct(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                type: direct
+                tasks:
+                    task1:
+                        action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_type_reverse(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                type: reverse
+                tasks:
+                    task1:
+                        action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_type_junk_throws_error(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                type: junk
+                tasks:
+                    task1:
+                        action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        expected_errors = {
+            'syntax': [
+                {
+                    'message': "'junk' is not one of ['reverse', 'direct']",
+                    'schema_path': 'properties.type.enum',
+                    'spec_path': 'type'
+                }
+            ]
+        }
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
