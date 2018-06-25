@@ -1,0 +1,4 @@
+version: '2.0'
+
+task-list-missing:
+    description: Tests missing task lists are invalid

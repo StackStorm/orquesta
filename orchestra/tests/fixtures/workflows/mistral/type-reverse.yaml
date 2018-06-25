@@ -1,0 +1,8 @@
+version: '2.0'
+
+type-reverse:
+    description: Tests that specifying a type reverse is valid
+    type: reverse
+    tasks:
+        task1:
+            action: std.noop

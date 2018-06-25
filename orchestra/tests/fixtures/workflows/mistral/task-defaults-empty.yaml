@@ -1,0 +1,8 @@
+version: '2.0'
+
+task-defaults-empty:
+    description: Tests that an empty task-defaults list is valid
+    task-defaults: {}
+    tasks:
+        task1:
+            action: std.noop

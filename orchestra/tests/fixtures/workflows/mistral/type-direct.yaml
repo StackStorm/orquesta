@@ -1,0 +1,8 @@
+version: '2.0'
+
+type-direct:
+    description: Tests that specifying a type direct is valid
+    type: direct
+    tasks:
+        task1:
+            action: std.noop
