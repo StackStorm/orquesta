@@ -16,15 +16,36 @@ from orchestra.tests.unit.specs.mistral import base
 class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
 
     def test_success(self):
-        # load definition from fixture: tests/fixtures/workflows/mistral/xxx.yaml
-        wf_def = self.get_wf_def("sequential-success")
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                tasks:
+                    task1:
+                        action: std.noop
+                        on-success:
+                            - task2
+                    task2:
+                        action: std.noop
+                        on-success:
+                            - task3
+                    task3:
+                        action: std.noop
+        """
+
         wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
     def test_missing_task_list(self):
-        # load definition from fixture: tests/fixtures/workflows/mistral/xxx.yaml
-        wf_def = self.get_wf_def("task-list-missing")
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+        """
+
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
@@ -40,8 +61,14 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
     def test_empty_task_list(self):
-        # load definition from fixture: tests/fixtures/workflows/mistral/xxx.yaml
-        wf_def = self.get_wf_def("task-list-empty")
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                tasks: {}
+        """
+
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
@@ -57,36 +84,82 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
 
     def test_task_default_list(self):
-        # load definition from fixture: tests/fixtures/workflows/mistral/xxx.yaml
-        wf_def = self.get_wf_def("task-defaults-valid")
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                task-defaults:
+                    timeout: 60
+                tasks:
+                    task1:
+                        action: std.noop
+        """
+
         wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
     def test_empty_task_default_list(self):
-        # load definition from fixture: tests/fixtures/workflows/mistral/xxx.yaml
-        wf_def = self.get_wf_def("task-defaults-empty")
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                task-defaults: {}
+                tasks:
+                    task1:
+                        action: std.noop
+        """
+
         wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
     def test_type_direct(self):
-        # load definition from fixture: tests/fixtures/workflows/mistral/xxx.yaml
-        wf_def = self.get_wf_def("type-direct")
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                type: direct
+                tasks:
+                    task1:
+                        action: std.noop
+        """
+
         wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
     def test_type_reverse(self):
-        # load definition from fixture: tests/fixtures/workflows/mistral/xxx.yaml
-        wf_def = self.get_wf_def("type-reverse")
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                type: reverse
+                tasks:
+                    task1:
+                        action: std.noop
+        """
+
         wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
     def test_type_junk_throws_error(self):
-        # load definition from fixture: tests/fixtures/workflows/mistral/xxx.yaml
-        wf_def = self.get_wf_def("type-invalid")
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                type: junk
+                tasks:
+                    task1:
+                        action: std.noop
+        """
+
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {

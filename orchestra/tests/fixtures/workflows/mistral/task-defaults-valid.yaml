@@ -1,9 +1,0 @@
-version: '2.0'
-
-task-defaults-valid:
-    description: Ensures a task-defaults list is valid
-    task-defaults:
-        timeout: 60
-    tasks:
-        task1:
-            action: std.noo

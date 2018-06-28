@@ -1,5 +1,0 @@
-version: '2.0'
-
-task-list-empty:
-    description: Tests empty task lists are invalid
-    tasks: {}

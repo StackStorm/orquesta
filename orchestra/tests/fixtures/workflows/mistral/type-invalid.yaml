@@ -1,8 +1,0 @@
-version: '2.0'
-
-type-invalid:
-    description: Tests that specifying a type that is not 'direct' or 'reverse' is invalid
-    type: junk
-    tasks:
-        task1:
-            action: std.noop
