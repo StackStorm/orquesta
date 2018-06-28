@@ -318,7 +318,7 @@ class WorkflowConductor(object):
         for task_node in self.graph.roots:
             try:
                 tasks.append(self.get_task(task_node['id']))
-            except exc.ExpressionEvaluationException as e:
+            except Exception as e:
                 self.log_error(str(e), task_id=task_node['id'])
                 self.set_workflow_state(states.FAILED)
                 continue
@@ -344,7 +344,7 @@ class WorkflowConductor(object):
             for staged_task_id in staged_tasks:
                 try:
                     next_tasks.append(self.get_task(staged_task_id))
-                except exc.ExpressionEvaluationException as e:
+                except Exception as e:
                     self.log_error(str(e), task_id=staged_task_id)
                     self.set_workflow_state(states.FAILED)
                     continue
@@ -376,7 +376,7 @@ class WorkflowConductor(object):
 
                 try:
                     next_tasks.append(self.get_task(next_task_id))
-                except exc.ExpressionEvaluationException as e:
+                except Exception as e:
                     self.log_error(str(e), task_id=next_task_id)
                     self.set_workflow_state(states.FAILED)
                     continue
@@ -475,7 +475,7 @@ class WorkflowConductor(object):
                     criteria = task_transition[3].get('criteria') or []
                     evaluated_criteria = [expr.evaluate(c, current_ctx) for c in criteria]
                     task_flow_entry[task_transition_id] = all(evaluated_criteria)
-                except exc.ExpressionEvaluationException as e:
+                except Exception as e:
                     self.log_error(str(e), task_id, task_transition_id)
                     self.set_workflow_state(states.FAILED)
                     continue
