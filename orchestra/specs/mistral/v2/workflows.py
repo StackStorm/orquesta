@@ -17,6 +17,7 @@ from orchestra import exceptions as exc
 from orchestra.expressions import base as expr
 from orchestra.specs.mistral.v2 import base
 from orchestra.specs.mistral.v2 import tasks
+from orchestra.specs.mistral.v2 import types as mistral_types
 from orchestra.specs import types
 from orchestra.utils import dictionary as dx
 
@@ -43,12 +44,12 @@ class WorkflowSpec(base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
+            'type': mistral_types.WORKFLOW_TYPE,
             'vars': types.NONEMPTY_DICT,
             'input': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
             'output': types.NONEMPTY_DICT,
             'task-defaults': tasks.TaskDefaultsSpec,
-            'tasks': tasks.TaskMappingSpec,
-            'type': types.WORKFLOW_TYPE
+            'tasks': tasks.TaskMappingSpec
         },
         'required': ['tasks'],
         'additionalProperties': False
