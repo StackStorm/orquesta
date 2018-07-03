@@ -25,7 +25,7 @@ def instantiate(spec_type, definition):
         raise ValueError('Workflow definition is empty.')
 
     if isinstance(definition, six.string_types):
-        definition = yaml.load(definition)
+        definition = yaml.safe_load(definition)
 
     if not isinstance(definition, dict):
         raise ValueError('Unable to convert workflow definition into dict.')
