@@ -61,6 +61,12 @@ class AmbiguousTaskTransition(Exception):
         Exception.__init__(self, message)
 
 
+class InvalidEvent(Exception):
+
+    def __init__(self, value):
+        Exception.__init__(self, 'Event "%s" is not valid.' % value)
+
+
 class InvalidState(Exception):
 
     def __init__(self, value):
@@ -71,6 +77,13 @@ class InvalidStateTransition(Exception):
 
     def __init__(self, old, new):
         Exception.__init__(self, 'State transition from "%s" to "%s" is invalid.' % (old, new))
+
+
+class InvalidTaskStateTransition(Exception):
+
+    def __init__(self, state, event):
+        message = 'Unable to process event "%s" for task in "%s" state.' % (event, state)
+        Exception.__init__(self, message)
 
 
 class InvalidTaskFlowEntry(Exception):

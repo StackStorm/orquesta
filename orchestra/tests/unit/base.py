@@ -17,6 +17,7 @@ from six.moves import queue
 import unittest
 
 from orchestra import conducting
+from orchestra import events
 from orchestra.expressions import base as expressions
 from orchestra.specs import loader as specs_loader
 from orchestra import states
@@ -200,7 +201,8 @@ class WorkflowConductorTest(WorkflowComposerTest):
             conductor = conducting.WorkflowConductor.deserialize(wf_conducting_state)
 
             # Set task state to running.
-            conductor.update_task_flow(current_task_id, states.RUNNING)
+            ac_ex_event = events.ActionExecutionEvent(states.RUNNING)
+            conductor.update_task_flow(current_task_id, ac_ex_event)
 
             # Set current task in context.
             context = ctx.set_current_task(context, current_task)
@@ -208,7 +210,8 @@ class WorkflowConductorTest(WorkflowComposerTest):
             # Mock completion of the task.
             state = state_q.get() if not state_q.empty() else states.SUCCEEDED
             result = result_q.get() if not result_q.empty() else None
-            conductor.update_task_flow(current_task_id, state, result=result)
+            ac_ex_event = events.ActionExecutionEvent(state, result=result)
+            conductor.update_task_flow(current_task_id, ac_ex_event)
 
             # Identify the next set of tasks.
             next_tasks = conductor.get_next_tasks(current_task_id)
@@ -236,7 +239,8 @@ class WorkflowConductorTest(WorkflowComposerTest):
         for task_flow_entry, expected_wf_state in zip(mock_flow_entries, expected_wf_states):
             task_id = task_flow_entry['id']
             task_state = task_flow_entry['state']
-            conductor.update_task_flow(task_id, task_state)
+            ac_ex_event = events.ActionExecutionEvent(task_state)
+            conductor.update_task_flow(task_id, ac_ex_event)
 
             err_ctx = (
                 'Workflow state "%s" is not the expected state "%s". '

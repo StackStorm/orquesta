@@ -11,6 +11,7 @@
 # limitations under the License.
 
 from orchestra import conducting
+from orchestra import events
 from orchestra.specs import native as specs
 from orchestra import states
 from orchestra.tests.unit import base
@@ -46,33 +47,33 @@ class WorkflowConductorPauseResumeTest(base.WorkflowConductorTest):
         conductor.set_workflow_state(states.RUNNING)
 
         # Run task1 and task2.
-        conductor.update_task_flow('task1', states.RUNNING)
-        conductor.update_task_flow('task2', states.RUNNING)
+        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.RUNNING))
+        conductor.update_task_flow('task2', events.ActionExecutionEvent(states.RUNNING))
         self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
 
         # Pause task1 and task2.
-        conductor.update_task_flow('task1', states.PAUSED)
-        conductor.update_task_flow('task2', states.PAUSED)
+        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.PAUSED))
+        conductor.update_task_flow('task2', events.ActionExecutionEvent(states.PAUSED))
         self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
 
         # Resume and complete task1 only. Once task1 completes, the workflow
         # should pause again because there is no active task.
-        conductor.update_task_flow('task1', states.RUNNING)
+        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.RUNNING))
         self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
-        conductor.update_task_flow('task1', states.SUCCEEDED)
+        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.SUCCEEDED))
         self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
 
         # Resume and complete task2. When task2 completes, the workflow
         # should stay running because task3 is now staged and ready.
-        conductor.update_task_flow('task2', states.RUNNING)
+        conductor.update_task_flow('task2', events.ActionExecutionEvent(states.RUNNING))
         self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
-        conductor.update_task_flow('task2', states.SUCCEEDED)
+        conductor.update_task_flow('task2', events.ActionExecutionEvent(states.SUCCEEDED))
         self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
         expected_task = self.format_task_item('task3', {}, conductor.spec.tasks.get_task('task3'))
         self.assert_task_list(conductor.get_next_tasks('task2'), [expected_task])
 
         # Complete task3.
-        conductor.update_task_flow('task3', states.RUNNING)
+        conductor.update_task_flow('task3', events.ActionExecutionEvent(states.RUNNING))
         self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
-        conductor.update_task_flow('task3', states.SUCCEEDED)
+        conductor.update_task_flow('task3', events.ActionExecutionEvent(states.SUCCEEDED))
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)

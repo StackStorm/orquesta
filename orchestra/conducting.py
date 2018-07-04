@@ -14,12 +14,14 @@ import copy
 import logging
 import six
 
+from orchestra import events
 from orchestra import exceptions as exc
 from orchestra.expressions import base as expr
 from orchestra import graphing
 from orchestra.specs import base as specs
 from orchestra.specs import loader as specs_loader
 from orchestra import states
+from orchestra.states import machines
 from orchestra.utils import context as ctx
 from orchestra.utils import dictionary as dx
 from orchestra.utils import plugin
@@ -405,14 +407,15 @@ class WorkflowConductor(object):
 
         return task_flow_entry
 
-    def update_task_flow(self, task_id, state, result=None):
+    def update_task_flow(self, task_id, event):
         in_ctx_idx = 0
 
-        if not states.is_valid(state):
-            raise exc.InvalidState(state)
+        # Throw exception if not expected event type.
+        if not issubclass(type(event), events.ExecutionEvent):
+            raise TypeError('Event is not type of ExecutionEvent.')
 
-        # Remove the task from the staged list if it becomes active.
-        if state in states.ACTIVE_STATES and task_id in self.flow.staged:
+        # Remove the task from the staged list if it is processed.
+        if event.state and task_id in self.flow.staged:
             in_ctx_idxs = self.flow.staged[task_id]['ctxs']
 
             if len(in_ctx_idxs) <= 0 or all(x == in_ctx_idxs[0] for x in in_ctx_idxs):
@@ -434,14 +437,11 @@ class WorkflowConductor(object):
         if self.graph.in_cycle(task_id) and task_flow_entry.get('state') in states.COMPLETED_STATES:
             task_flow_entry = self.add_task_flow(task_id, in_ctx_idx=in_ctx_idx)
 
-        # If the task state change is valid, update state in task flow entry.
-        if not states.is_transition_valid(task_flow_entry.get('state'), state):
-            raise exc.InvalidStateTransition(task_flow_entry.get('state'), state)
-
-        task_flow_entry['state'] = state
+        # Process the action execution event using the task state machine.
+        task_flow_entry = machines.TaskStateMachine.process_event(task_flow_entry, event)
 
         # Evaluate task transitions if task is in completed state.
-        if state in states.COMPLETED_STATES:
+        if task_flow_entry['state'] in states.COMPLETED_STATES:
             # Get task details required for updating outgoing context.
             task_node = self.graph.get_task(task_id)
             task_name = task_node['name']
@@ -451,7 +451,7 @@ class WorkflowConductor(object):
             # Set current task in the context.
             in_ctx_idx = task_flow_entry['ctx']
             in_ctx_val = self.flow.contexts[in_ctx_idx]['value']
-            current_task = {'id': task_id, 'name': task_name, 'result': result}
+            current_task = {'id': task_id, 'name': task_name, 'result': event.result}
             current_ctx = ctx.set_current_task(in_ctx_val, current_task)
 
             # Setup context for evaluating expressions in task transition criteria.
@@ -517,13 +517,11 @@ class WorkflowConductor(object):
 
                     # If the next task is noop, then mark the task as completed.
                     if next_task_name == 'noop':
-                        self.update_task_flow(next_task_id, states.RUNNING)
-                        self.update_task_flow(next_task_id, states.SUCCEEDED)
+                        self.update_task_flow(next_task_id, events.TaskNoopEvent())
 
                     # If the next task is fail, then fail the workflow..
                     if next_task_name == 'fail':
-                        self.update_task_flow(next_task_id, states.RUNNING)
-                        self.update_task_flow(next_task_id, states.FAILED)
+                        self.update_task_flow(next_task_id, events.TaskFailEvent())
 
         # Identify if there are task transitions.
         any_next_tasks = [

@@ -226,7 +226,7 @@ class SequentialWorkflowStateTest(base.OrchestraWorkflowConductorTest):
         ]
 
         self.assertRaises(
-            exc.InvalidStateTransition,
+            exc.InvalidTaskStateTransition,
             self.assert_workflow_state,
             mock_flow_entries,
             expected_wf_states
