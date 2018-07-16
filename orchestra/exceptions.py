@@ -86,6 +86,13 @@ class InvalidTaskStateTransition(Exception):
         Exception.__init__(self, message)
 
 
+class InvalidWorkflowStateTransition(Exception):
+
+    def __init__(self, state, event):
+        message = 'Unable to process event "%s" for workflow in "%s" state.' % (event, state)
+        Exception.__init__(self, message)
+
+
 class InvalidTaskFlowEntry(Exception):
 
     def __init__(self, task_id):

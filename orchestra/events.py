@@ -32,21 +32,111 @@ WORKFLOW_FAILED = 'workflow_failed'
 WORKFLOW_CANCELING = 'workflow_canceling'
 WORKFLOW_CANCELED = 'workflow_canceled'
 
+WORKFLOW_EXECUTION_EVENTS = [
+    WORKFLOW_REQUESTED,
+    WORKFLOW_SCHEDULED,
+    WORKFLOW_DELAYED,
+    WORKFLOW_RUNNING,
+    WORKFLOW_PAUSING,
+    WORKFLOW_PAUSED,
+    WORKFLOW_RESUMING,
+    WORKFLOW_SUCCEEDED,
+    WORKFLOW_FAILED,
+    WORKFLOW_CANCELING,
+    WORKFLOW_CANCELED
+]
+
+
 # Events for task execution.
 TASK_REQUESTED = 'task_requested'
 TASK_SCHEDULED = 'task_scheduled'
 TASK_DELAYED = 'task_delayed'
 TASK_RUNNING = 'task_running'
 TASK_PENDING = 'task_pending'
+TASK_PENDING_WORKFLOW_ACTIVE = 'task_pending_workflow_active'
+TASK_PENDING_WORKFLOW_DORMANT = 'task_pending_workflow_dormant'
 TASK_PAUSING = 'task_pausing'
 TASK_PAUSED = 'task_paused'
+TASK_PAUSED_WORKFLOW_ACTIVE = 'task_paused_workflow_active'
+TASK_PAUSED_WORKFLOW_DORMANT = 'task_paused_workflow_dormant'
 TASK_RESUMING = 'task_resuming'
 TASK_SUCCEEDED = 'task_succeeded'
+TASK_SUCCEEDED_WORKFLOW_ACTIVE_INCOMPLETE = 'task_succeeded_workflow_active_incomplete'
+TASK_SUCCEEDED_WORKFLOW_ACTIVE_COMPLETED = 'task_succeeded_workflow_active_completed'
+TASK_SUCCEEDED_WORKFLOW_ACTIVE_PAUSED = 'task_succeeded_workflow_active_paused'
+TASK_SUCCEEDED_WORKFLOW_ACTIVE_CANCELED = 'task_succeeded_workflow_active_canceled'
+TASK_SUCCEEDED_WORKFLOW_DORMANT_INCOMPLETE = 'task_succeeded_workflow_dormant_incomplete'
+TASK_SUCCEEDED_WORKFLOW_DORMANT_COMPLETED = 'task_succeeded_workflow_dormant_completed'
+TASK_SUCCEEDED_WORKFLOW_DORMANT_PAUSED = 'task_succeeded_workflow_dormant_paused'
+TASK_SUCCEEDED_WORKFLOW_DORMANT_CANCELED = 'task_succeeded_workflow_dormant_canceled'
 TASK_FAILED = 'task_failed'
-TASK_EXPIRED = 'task_timeout'
-TASK_ABANDONED = 'task_abandoned'
+TASK_FAILED_WORKFLOW_ACTIVE = 'task_failed_workflow_active'
+TASK_FAILED_WORKFLOW_DORMANT = 'task_failed_workflow_dormant'
+TASK_REMEDIATED = 'task_remediated'
+TASK_REMEDIATED_WORKFLOW_ACTIVE_INCOMPLETE = 'task_remediated_workflow_active_incomplete'
+TASK_REMEDIATED_WORKFLOW_ACTIVE_COMPLETED = 'task_remediated_workflow_active_completed'
+TASK_REMEDIATED_WORKFLOW_ACTIVE_PAUSED = 'task_remediated_workflow_active_paused'
+TASK_REMEDIATED_WORKFLOW_ACTIVE_CANCELED = 'task_remediated_workflow_active_canceled'
+TASK_REMEDIATED_WORKFLOW_DORMANT_INCOMPLETE = 'task_remediated_workflow_dormant_incomplete'
+TASK_REMEDIATED_WORKFLOW_DORMANT_COMPLETED = 'task_remediated_workflow_dormant_completed'
+TASK_REMEDIATED_WORKFLOW_DORMANT_PAUSED = 'task_remediated_workflow_dormant_paused'
+TASK_REMEDIATED_WORKFLOW_DORMANT_CANCELED = 'task_remediated_workflow_dormant_canceled'
 TASK_CANCELING = 'task_canceling'
 TASK_CANCELED = 'task_canceled'
+TASK_CANCELED_WORKFLOW_ACTIVE = 'task_canceled_workflow_active'
+TASK_CANCELED_WORKFLOW_DORMANT = 'task_canceled_workflow_dormant'
+
+# Task events that require additional workflow context for processing.
+# These are events related to the tasks being complete or inactive.
+TASK_CONDITIONAL_EVENTS = [
+    TASK_PENDING,
+    TASK_PAUSED,
+    TASK_SUCCEEDED,
+    TASK_FAILED,
+    TASK_REMEDIATED,
+    TASK_CANCELED
+]
+
+TASK_EXECUTION_EVENTS = [
+    TASK_REQUESTED,
+    TASK_SCHEDULED,
+    TASK_DELAYED,
+    TASK_RUNNING,
+    TASK_PENDING,
+    TASK_PENDING_WORKFLOW_ACTIVE,
+    TASK_PENDING_WORKFLOW_DORMANT,
+    TASK_PAUSING,
+    TASK_PAUSED,
+    TASK_PAUSED_WORKFLOW_ACTIVE,
+    TASK_PAUSED_WORKFLOW_DORMANT,
+    TASK_RESUMING,
+    TASK_SUCCEEDED,
+    TASK_SUCCEEDED_WORKFLOW_ACTIVE_INCOMPLETE,
+    TASK_SUCCEEDED_WORKFLOW_ACTIVE_COMPLETED,
+    TASK_SUCCEEDED_WORKFLOW_ACTIVE_PAUSED,
+    TASK_SUCCEEDED_WORKFLOW_ACTIVE_CANCELED,
+    TASK_SUCCEEDED_WORKFLOW_DORMANT_INCOMPLETE,
+    TASK_SUCCEEDED_WORKFLOW_DORMANT_COMPLETED,
+    TASK_SUCCEEDED_WORKFLOW_DORMANT_PAUSED,
+    TASK_SUCCEEDED_WORKFLOW_DORMANT_CANCELED,
+    TASK_FAILED,
+    TASK_FAILED_WORKFLOW_ACTIVE,
+    TASK_FAILED_WORKFLOW_DORMANT,
+    TASK_REMEDIATED,
+    TASK_REMEDIATED_WORKFLOW_ACTIVE_INCOMPLETE,
+    TASK_REMEDIATED_WORKFLOW_ACTIVE_COMPLETED,
+    TASK_REMEDIATED_WORKFLOW_ACTIVE_PAUSED,
+    TASK_REMEDIATED_WORKFLOW_ACTIVE_CANCELED,
+    TASK_REMEDIATED_WORKFLOW_DORMANT_INCOMPLETE,
+    TASK_REMEDIATED_WORKFLOW_DORMANT_COMPLETED,
+    TASK_REMEDIATED_WORKFLOW_DORMANT_PAUSED,
+    TASK_REMEDIATED_WORKFLOW_DORMANT_CANCELED,
+    TASK_CANCELING,
+    TASK_CANCELED,
+    TASK_CANCELED_WORKFLOW_ACTIVE,
+    TASK_CANCELED_WORKFLOW_DORMANT
+]
+
 
 # Events for action executions.
 ACTION_REQUESTED = 'action_requested'
@@ -81,6 +171,7 @@ ACTION_EXECUTION_EVENTS = [
     ACTION_CANCELED
 ]
 
+
 # Events for special workflow engine operations.
 TASK_NOOP_REQUESTED = 'task_noop_requested'
 TASK_FAIL_REQUESTED = 'task_fail_requested'
@@ -106,6 +197,13 @@ class ActionExecutionEvent(ExecutionEvent):
 
     def __init__(self, state, result=None):
         super(ActionExecutionEvent, self).__init__('action_%s' % state, state, result=result)
+
+
+class TaskExecutionEvent(ExecutionEvent):
+
+    def __init__(self, task_id, state):
+        super(TaskExecutionEvent, self).__init__('task_%s' % state, state)
+        self.task_id = task_id
 
 
 class TaskNoopEvent(ExecutionEvent):

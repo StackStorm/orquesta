@@ -56,6 +56,36 @@ class TaskFlow(object):
 
         return instance
 
+    def get_tasks_by_state(self, states):
+        return [t for t in self.sequence if t['state'] in states]
+
+    @property
+    def has_active_tasks(self):
+        return len(self.get_tasks_by_state(states.ACTIVE_STATES)) > 0
+
+    @property
+    def has_pausing_tasks(self):
+        return len(self.get_tasks_by_state([states.PAUSING])) > 0
+
+    @property
+    def has_paused_tasks(self):
+        return len(self.get_tasks_by_state([states.PAUSED])) > 0
+
+    @property
+    def has_canceling_tasks(self):
+        return len(self.get_tasks_by_state([states.CANCELING])) > 0
+
+    @property
+    def has_canceled_tasks(self):
+        return len(self.get_tasks_by_state([states.CANCELED])) > 0
+
+    def get_staged_tasks(self):
+        return [k for k, v in six.iteritems(self.staged) if v.get('ready', True) is True]
+
+    @property
+    def has_staged_tasks(self):
+        return len(self.get_staged_tasks()) > 0
+
 
 class WorkflowConductor(object):
 
@@ -202,7 +232,7 @@ class WorkflowConductor(object):
 
         # Determine if workflow is pausing or paused or canceling or canceled.
         if value in states.PAUSE_STATES or value in states.CANCEL_STATES:
-            any_active_tasks = any([t['state'] in states.ACTIVE_STATES for t in self.flow.sequence])
+            any_active_tasks = self.flow.has_active_tasks
             value = states.PAUSING if any_active_tasks and value == states.PAUSED else value
             value = states.PAUSED if not any_active_tasks and value == states.PAUSING else value
             value = states.CANCELING if any_active_tasks and value == states.CANCELED else value
@@ -331,6 +361,19 @@ class WorkflowConductor(object):
 
         return sorted(tasks, key=lambda x: x['name'])
 
+    def has_next_tasks(self, task_id=None):
+        next_tasks = []
+
+        if not task_id:
+            next_tasks = self.flow.get_staged_tasks()
+        else:
+            next_tasks = [
+                t[1] for t in self.graph.get_next_transitions(task_id)
+                if self.inbound_criteria_satisfied(t[1])
+            ]
+
+        return len(next_tasks) > 0
+
     def get_next_tasks(self, task_id=None):
         if self.get_workflow_state() not in states.RUNNING_STATES:
             return []
@@ -437,8 +480,8 @@ class WorkflowConductor(object):
         if self.graph.in_cycle(task_id) and task_flow_entry.get('state') in states.COMPLETED_STATES:
             task_flow_entry = self.add_task_flow(task_id, in_ctx_idx=in_ctx_idx)
 
-        # Process the action execution event using the task state machine.
-        task_flow_entry = machines.TaskStateMachine.process_event(task_flow_entry, event)
+        # Process the action execution event using the task state machine and update the task state.
+        machines.TaskStateMachine.process_event(task_flow_entry, event)
 
         # Evaluate task transitions if task is in completed state.
         if task_flow_entry['state'] in states.COMPLETED_STATES:
@@ -523,60 +566,11 @@ class WorkflowConductor(object):
                     if next_task_name == 'fail':
                         self.update_task_flow(next_task_id, events.TaskFailEvent())
 
-        # Identify if there are task transitions.
-        any_next_tasks = [
-            t for t in self.graph.get_next_transitions(task_id)
-            if self.inbound_criteria_satisfied(t[1])
-        ]
+        # Process the task event using the workflow state machine and update the workflow state.
+        task_ex_event = events.TaskExecutionEvent(task_id, task_flow_entry['state'])
+        machines.WorkflowStateMachine.process_event(self, task_ex_event)
 
-        # Identify if there are any other active tasks.
-        any_active_tasks = any([t['state'] in states.ACTIVE_STATES for t in self.flow.sequence])
-
-        # Identify if there are any other staged tasks.
-        any_staged_tasks = [
-            k for k, v in six.iteritems(self.flow.staged)
-            if v.get('ready', True) is True
-        ]
-
-        # Identify if there are any paused tasks.
-        any_paused_tasks = any([t['state'] == states.PAUSED for t in self.flow.sequence])
-        any_pausing_tasks = any([t['state'] == states.PAUSING for t in self.flow.sequence])
-
-        # Decide if workflow is still running.
-        is_wf_running = any_active_tasks or any_next_tasks or any_staged_tasks
-
-        # Update workflow state.
-        old_state = self.get_workflow_state()
-        new_state = self.get_workflow_state()
-
-        if task_flow_entry['state'] == states.RESUMING:
-            new_state = states.RESUMING
-        elif task_flow_entry['state'] in states.RUNNING_STATES:
-            new_state = states.RUNNING
-        elif task_flow_entry['state'] in states.PAUSE_STATES and old_state == states.CANCELING:
-            new_state = states.CANCELING if any_active_tasks else states.CANCELED
-        elif task_flow_entry['state'] in states.PAUSE_STATES:
-            new_state = states.PAUSING if any_active_tasks else states.PAUSED
-        elif task_flow_entry['state'] in states.CANCEL_STATES:
-            new_state = states.CANCELING if any_active_tasks else states.CANCELED
-        elif task_flow_entry['state'] in states.COMPLETED_STATES and old_state == states.PAUSING:
-            new_state = states.PAUSING if any_active_tasks else states.PAUSED
-        elif task_flow_entry['state'] in states.COMPLETED_STATES and old_state == states.CANCELING:
-            new_state = states.CANCELING if any_active_tasks else states.CANCELED
-        elif task_flow_entry['state'] in states.ABENDED_STATES:
-            new_state = states.RUNNING if any_next_tasks else states.FAILED
-        elif task_flow_entry['state'] == states.SUCCEEDED and any_pausing_tasks:
-            new_state = states.PAUSING
-        elif task_flow_entry['state'] == states.SUCCEEDED and any_paused_tasks:
-            new_state = states.PAUSED
-        elif task_flow_entry['state'] == states.SUCCEEDED and is_wf_running:
-            new_state = states.RUNNING
-        elif task_flow_entry['state'] == states.SUCCEEDED:
-            new_state = states.SUCCEEDED
-
-        if old_state != new_state and states.is_transition_valid(old_state, new_state):
-            self.set_workflow_state(new_state)
-
+        # Render workflow output if workflow is completed.
         if self.get_workflow_state() in states.COMPLETED_STATES:
             in_ctx_idx = task_flow_entry['ctx']
             in_ctx_val = self.flow.contexts[in_ctx_idx]['value']

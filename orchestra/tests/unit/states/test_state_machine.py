@@ -74,17 +74,17 @@ class TaskStateMachineTest(unittest.TestCase):
     def test_current_task_state_unset(self):
         task_flow_entry = {'id': 'task1', 'ctx': 0}
         ac_ex_event = events.ActionExecutionEvent(states.RUNNING)
-        task_flow_entry = machines.TaskStateMachine.process_event(task_flow_entry, ac_ex_event)
+        machines.TaskStateMachine.process_event(task_flow_entry, ac_ex_event)
         self.assertEqual(task_flow_entry['state'], states.RUNNING)
 
     def test_current_task_state_none(self):
         task_flow_entry = {'id': 'task1', 'ctx': 0, 'state': None}
         ac_ex_event = events.ActionExecutionEvent(states.RUNNING)
-        task_flow_entry = machines.TaskStateMachine.process_event(task_flow_entry, ac_ex_event)
+        machines.TaskStateMachine.process_event(task_flow_entry, ac_ex_event)
         self.assertEqual(task_flow_entry['state'], states.RUNNING)
 
     def test_task_state_transition(self):
         task_flow_entry = {'id': 'task1', 'ctx': 0, 'state': states.RUNNING}
         ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED)
-        task_flow_entry = machines.TaskStateMachine.process_event(task_flow_entry, ac_ex_event)
+        machines.TaskStateMachine.process_event(task_flow_entry, ac_ex_event)
         self.assertEqual(task_flow_entry['state'], states.SUCCEEDED)

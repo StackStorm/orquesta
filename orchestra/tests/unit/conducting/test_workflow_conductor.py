@@ -417,7 +417,13 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         self.assertListEqual(conductor.get_next_tasks(task_name), [])
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.PAUSED))
         self.assertListEqual(conductor.get_next_tasks(task_name), [])
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RESUMING))
+
+        # After the previous task is paused, since there is no other tasks running,
+        # the workflow is paused. The workflow needs to be resumed manually.
+        self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
+        conductor.set_workflow_state(states.RESUMING)
+        self.assertEqual(conductor.get_workflow_state(), states.RESUMING)
+
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
         expected_tasks = [self.format_task_item(next_task_name, ctx_value, next_task_spec)]

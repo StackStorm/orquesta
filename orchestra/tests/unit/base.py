@@ -230,13 +230,14 @@ class WorkflowConductorTest(WorkflowComposerTest):
         if expected_output is not None:
             self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
-    def assert_workflow_state(self, wf_name, mock_flow_entries, expected_wf_states):
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        conductor = conducting.WorkflowConductor(wf_spec)
-        conductor.set_workflow_state(states.RUNNING)
+    def assert_workflow_state(self, wf_name, mock_flow, expected_wf_states, conductor=None):
+        if not conductor:
+            wf_def = self.get_wf_def(wf_name)
+            wf_spec = self.spec_module.instantiate(wf_def)
+            conductor = conducting.WorkflowConductor(wf_spec)
+            conductor.set_workflow_state(states.RUNNING)
 
-        for task_flow_entry, expected_wf_state in zip(mock_flow_entries, expected_wf_states):
+        for task_flow_entry, expected_wf_state in zip(mock_flow, expected_wf_states):
             task_id = task_flow_entry['id']
             task_state = task_flow_entry['state']
             ac_ex_event = events.ActionExecutionEvent(task_state)
@@ -249,3 +250,5 @@ class WorkflowConductorTest(WorkflowComposerTest):
             )
 
             self.assertEqual(conductor.get_workflow_state(), expected_wf_state, err_ctx)
+
+        return conductor
