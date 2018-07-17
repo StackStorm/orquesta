@@ -428,6 +428,10 @@ class WorkflowStateMachine(object):
         # Append additional workflow context to the event..
         tk_ex_event.name = cls.add_context_to_event(conductor, tk_ex_event)
 
+        # Check if event is valid.
+        if tk_ex_event.name not in events.TASK_EXECUTION_EVENTS:
+            raise exc.InvalidEvent(tk_ex_event.name)
+
         # Capture current workflow state.
         current_workflow_state = conductor.get_workflow_state()
         new_workflow_state = current_workflow_state

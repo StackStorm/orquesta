@@ -12,13 +12,94 @@
 
 import unittest
 
+from orchestra import conducting
+from orchestra import events
 from orchestra import exceptions as exc
+from orchestra.specs import native as specs
 from orchestra import states
 from orchestra.states import machines
 
 
 class WorkflowStateMachineTest(unittest.TestCase):
-    pass
+
+    def _prep_conductor(self, state=None):
+        wf_def = """
+        version: 1.0
+
+        description: A basic sequential workflow.
+
+        tasks:
+          task1:
+            action: core.noop
+            next:
+              - when: <% succeeded() %>
+                do: task2
+          task2:
+            action: core.noop
+            next:
+              - when: <% succeeded() %>
+                do: task3
+          task3:
+            action: core.noop
+        """
+
+        spec = specs.WorkflowSpec(wf_def)
+        conductor = conducting.WorkflowConductor(spec)
+
+        if state:
+            conductor.set_workflow_state(state)
+
+        return conductor
+
+    def test_bad_event_name(self):
+        conductor = self._prep_conductor(states.RUNNING)
+        tk_ex_event = events.ExecutionEvent('foobar', states.RUNNING)
+        setattr(tk_ex_event, 'task_id', 'task1')
+
+        self.assertRaises(
+            exc.InvalidEvent,
+            machines.WorkflowStateMachine.process_event,
+            conductor,
+            tk_ex_event
+        )
+
+    def test_bad_event_state(self):
+        self.assertRaises(
+            exc.InvalidState,
+            events.TaskExecutionEvent,
+            'task1',
+            'foobar'
+        )
+
+    def test_bad_current_workflow_state(self):
+        conductor = self._prep_conductor()
+        tk_ex_event = events.TaskExecutionEvent('task1', states.RUNNING)
+
+        self.assertRaises(
+            exc.InvalidWorkflowStateTransition,
+            machines.WorkflowStateMachine.process_event,
+            conductor,
+            tk_ex_event
+        )
+
+    def test_bad_current_workflow_state_to_event_mapping(self):
+        conductor = self._prep_conductor(states.REQUESTED)
+        tk_ex_event = events.TaskExecutionEvent('task1', states.RUNNING)
+
+        # If transition is not supported, then workflow state will not change.
+        machines.WorkflowStateMachine.process_event(conductor, tk_ex_event)
+        self.assertEqual(conductor.get_workflow_state(), states.REQUESTED)
+
+    def test_workflow_state_transition(self):
+        conductor = self._prep_conductor(states.RUNNING)
+
+        tk_ex_event = events.TaskExecutionEvent('task1', states.RUNNING)
+        machines.WorkflowStateMachine.process_event(conductor, tk_ex_event)
+        self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
+
+        tk_ex_event = events.TaskExecutionEvent('task1', states.PAUSED)
+        machines.WorkflowStateMachine.process_event(conductor, tk_ex_event)
+        self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
 
 
 class FailedStateTransitionTest(unittest.TestCase):
