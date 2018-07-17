@@ -387,13 +387,12 @@ class WorkflowStateMachine(object):
     @classmethod
     def add_context_to_event(cls, conductor, tk_ex_event):
         # Identify current workflow state.
-        task_id = tk_ex_event.task_id
         task_event = tk_ex_event.name
-        task_has_transitions = conductor.has_next_tasks(task_id)
-        wf_active = conductor.flow.has_active_tasks
+        has_next_tasks = conductor.has_next_tasks(getattr(tk_ex_event, 'task_id', None))
+        has_active_tasks = conductor.flow.has_active_tasks
 
         # Mark task remediated if task is in abended states and there are transitions.
-        if tk_ex_event.state in states.ABENDED_STATES and task_has_transitions:
+        if tk_ex_event.state in states.ABENDED_STATES and has_next_tasks:
             task_event = events.TASK_REMEDIATED
 
         # For certain events like cancel and pause, whether there are tasks in active
@@ -401,7 +400,7 @@ class WorkflowStateMachine(object):
         # For example, if the workflow is being canceled and there are other active
         # tasks, the workflow should be set to canceling.
         if task_event in events.TASK_CONDITIONAL_EVENTS:
-            task_event += '_workflow_active' if wf_active else '_workflow_dormant'
+            task_event += '_workflow_active' if has_active_tasks else '_workflow_dormant'
 
         # When a task succeeded, additional information need to be included in the
         # event to determine whether the workflow is still running, completed, or
@@ -418,7 +417,7 @@ class WorkflowStateMachine(object):
         if conductor.flow.has_pausing_tasks or conductor.flow.has_paused_tasks:
             return task_event + '_paused'
 
-        if conductor.flow.has_staged_tasks or task_has_transitions:
+        if conductor.flow.has_staged_tasks or has_next_tasks:
             return task_event + '_incomplete'
 
         return task_event + '_completed'
