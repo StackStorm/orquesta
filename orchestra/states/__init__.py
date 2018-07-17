@@ -12,8 +12,6 @@
 
 import logging
 
-from orchestra import exceptions as exc
-
 
 LOG = logging.getLogger(__name__)
 
@@ -104,46 +102,5 @@ COMPLETED_STATES = [
 ]
 
 
-VALID_STATE_TRANSITION_MAP = {
-    UNSET: [REQUESTED, DELAYED, SCHEDULED, RUNNING],
-    REQUESTED: [SCHEDULED, DELAYED, RUNNING] + PAUSE_STATES + ABENDED_STATES + CANCEL_STATES,
-    DELAYED: [SCHEDULED, RUNNING] + PAUSE_STATES + ABENDED_STATES + CANCEL_STATES,
-    SCHEDULED: [DELAYED, RUNNING] + PAUSE_STATES + ABENDED_STATES + CANCEL_STATES,
-    RUNNING: COMPLETED_STATES + PAUSE_STATES + CANCEL_STATES,
-    PENDING: [RESUMING, RUNNING] + CANCEL_STATES,
-    PAUSING: [PAUSED, RESUMING, RUNNING] + CANCEL_STATES + ABENDED_STATES,
-    PAUSED: [RESUMING, RUNNING] + CANCEL_STATES,
-    RESUMING: [RUNNING] + CANCEL_STATES,
-    SUCCEEDED: [FAILED],
-    FAILED: [],
-    EXPIRED: [],
-    ABANDONED: [],
-    CANCELING: [CANCELED] + ABENDED_STATES,
-    CANCELED: []
-}
-
-
 def is_valid(state):
     return (state is None or state in ALL_STATES)
-
-
-def is_transition_valid(old_state, new_state):
-    if old_state is None:
-        old_state = 'null'
-
-    if new_state is None:
-        new_state = 'null'
-
-    if old_state not in ALL_STATES:
-        raise exc.InvalidState(old_state)
-
-    if new_state not in ALL_STATES:
-        raise exc.InvalidState(new_state)
-
-    if old_state not in VALID_STATE_TRANSITION_MAP:
-        return False
-
-    if old_state == new_state or new_state in VALID_STATE_TRANSITION_MAP[old_state]:
-        return True
-
-    return False

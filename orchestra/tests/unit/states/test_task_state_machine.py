@@ -88,3 +88,56 @@ class TaskStateMachineTest(unittest.TestCase):
         ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED)
         machines.TaskStateMachine.process_event(task_flow_entry, ac_ex_event)
         self.assertEqual(task_flow_entry['state'], states.SUCCEEDED)
+
+
+class FailedStateTransitionTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(FailedStateTransitionTest, cls).setUpClass()
+        states.ALL_STATES.append('mock')
+
+    @classmethod
+    def tearDownClass(cls):
+        states.ALL_STATES.remove('mock')
+        super(FailedStateTransitionTest, cls).tearDownClass()
+
+    def test_invalid_old_state(self):
+        self.assertRaises(
+            exc.InvalidState,
+            machines.TaskStateMachine.is_transition_valid,
+            'foobar',
+            states.REQUESTED
+        )
+
+    def test_invalid_new_state(self):
+        self.assertRaises(
+            exc.InvalidState,
+            machines.TaskStateMachine.is_transition_valid,
+            states.UNSET,
+            'foobar'
+        )
+
+    def test_original_state_not_in_transition_map(self):
+        self.assertFalse(machines.TaskStateMachine.is_transition_valid('mock', None))
+
+
+class StateTransitionTest(unittest.TestCase):
+
+    def test_null_states(self):
+        is_transition_valid = machines.TaskStateMachine.is_transition_valid
+        self.assertTrue(is_transition_valid(None, None))
+        self.assertTrue(is_transition_valid(states.UNSET, None))
+        self.assertTrue(is_transition_valid(None, states.UNSET))
+        self.assertTrue(is_transition_valid(states.UNSET, states.UNSET))
+
+    def test_transition(self):
+        cases = [
+            (x, y)
+            for x in machines.TASK_STATE_MACHINE_DATA.keys()
+            for y in machines.TASK_STATE_MACHINE_DATA[x].values()
+        ]
+
+        for x, y in cases:
+            expected = (x == y or y in machines.TASK_STATE_MACHINE_DATA[x].values())
+            self.assertEqual(machines.TaskStateMachine.is_transition_valid(x, y), expected)

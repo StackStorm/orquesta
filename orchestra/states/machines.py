@@ -196,6 +196,9 @@ WORKFLOW_STATE_MACHINE_DATA = {
     states.CANCELED: {
     },
     states.SUCCEEDED: {
+        # Workflow state can transition from succeeded to failed in  cases
+        # where there is exception while rendering workflow output.
+        events.WORKFLOW_FAILED: states.FAILED
     },
     states.FAILED: {
     }
@@ -307,6 +310,28 @@ TASK_STATE_MACHINE_DATA = {
 class TaskStateMachine(object):
 
     @classmethod
+    def is_transition_valid(cls, old_state, new_state):
+        if old_state is None:
+            old_state = 'null'
+
+        if new_state is None:
+            new_state = 'null'
+
+        if not states.is_valid(old_state):
+            raise exc.InvalidState(old_state)
+
+        if not states.is_valid(new_state):
+            raise exc.InvalidState(new_state)
+
+        if old_state not in TASK_STATE_MACHINE_DATA.keys():
+            return False
+
+        if old_state == new_state or new_state in TASK_STATE_MACHINE_DATA[old_state].values():
+            return True
+
+        return False
+
+    @classmethod
     def process_event(cls, task_flow_entry, ac_ex_event):
 
         # Check if event is valid.
@@ -336,6 +361,28 @@ class TaskStateMachine(object):
 
 
 class WorkflowStateMachine(object):
+
+    @classmethod
+    def is_transition_valid(cls, old_state, new_state):
+        if old_state is None:
+            old_state = 'null'
+
+        if new_state is None:
+            new_state = 'null'
+
+        if not states.is_valid(old_state):
+            raise exc.InvalidState(old_state)
+
+        if not states.is_valid(new_state):
+            raise exc.InvalidState(new_state)
+
+        if old_state not in WORKFLOW_STATE_MACHINE_DATA.keys():
+            return False
+
+        if old_state == new_state or new_state in WORKFLOW_STATE_MACHINE_DATA[old_state].values():
+            return True
+
+        return False
 
     @classmethod
     def add_context_to_event(cls, conductor, tk_ex_event):

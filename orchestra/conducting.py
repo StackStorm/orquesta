@@ -224,10 +224,7 @@ class WorkflowConductor(object):
         return self._workflow_state
 
     def set_workflow_state(self, value):
-        if not states.is_valid(value):
-            raise exc.InvalidState(value)
-
-        if not states.is_transition_valid(self._workflow_state, value):
+        if not machines.WorkflowStateMachine.is_transition_valid(self._workflow_state, value):
             raise exc.InvalidStateTransition(self._workflow_state, value)
 
         # Determine if workflow is pausing or paused or canceling or canceled.
