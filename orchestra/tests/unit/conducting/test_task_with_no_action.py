@@ -34,7 +34,7 @@ class WorkflowConductorExtendedTaskTest(base.WorkflowConductorTest):
 
         spec = specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
-        conductor.set_workflow_state(states.RUNNING)
+        conductor.request_workflow_state(states.RUNNING)
 
         # Process task1.
         next_task_name = 'task1'
@@ -80,7 +80,7 @@ class WorkflowConductorExtendedTaskTest(base.WorkflowConductorTest):
 
         spec = specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
-        conductor.set_workflow_state(states.RUNNING)
+        conductor.request_workflow_state(states.RUNNING)
 
         # Process task1.
         next_task_name = 'task1'

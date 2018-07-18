@@ -76,21 +76,21 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         conductor = conducting.WorkflowConductor(spec, **kwargs)
 
-        if state:
-            self.assertIsNone(conductor._workflow_state)
-            self.assertIsNone(conductor.get_workflow_state())
-            conductor.set_workflow_state(state)
-            self.assertEqual(conductor._workflow_state, state)
-            self.assertEqual(conductor.get_workflow_state(), state)
-        else:
-            self.assertIsNone(conductor._workflow_state)
-            self.assertIsNone(conductor.get_workflow_state())
-
         self.assertIsNone(conductor._graph)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
 
         self.assertIsNone(conductor._flow)
         self.assertIsInstance(conductor.flow, conducting.TaskFlow)
+
+        if state:
+            self.assertEqual(conductor._workflow_state, states.UNSET)
+            self.assertEqual(conductor.get_workflow_state(), states.UNSET)
+            conductor.request_workflow_state(state)
+            self.assertEqual(conductor._workflow_state, state)
+            self.assertEqual(conductor.get_workflow_state(), state)
+        else:
+            self.assertEqual(conductor._workflow_state, states.UNSET)
+            self.assertEqual(conductor.get_workflow_state(), states.UNSET)
 
         user_inputs = inputs or {}
         parent_context = context or {}
@@ -120,7 +120,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'context': {},
             'input': {},
             'output': None,
-            'state': None,
+            'state': states.UNSET,
             'errors': [],
             'flow': {
                 'staged': {'task1': {'ctxs': [0], 'ready': True}},
@@ -136,8 +136,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor.deserialize(data)
 
         self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
-        self.assertIsNone(conductor._workflow_state)
-        self.assertIsNone(conductor.get_workflow_state())
+        self.assertEqual(conductor._workflow_state, states.UNSET)
+        self.assertEqual(conductor.get_workflow_state(), states.UNSET)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
         self.assertIsInstance(conductor.flow, conducting.TaskFlow)
@@ -155,7 +155,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'context': {},
             'input': inputs,
             'output': None,
-            'state': None,
+            'state': states.UNSET,
             'errors': [],
             'flow': {
                 'staged': {'task1': {'ctxs': [0], 'ready': True}},
@@ -171,8 +171,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor.deserialize(data)
 
         self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
-        self.assertIsNone(conductor._workflow_state)
-        self.assertIsNone(conductor.get_workflow_state())
+        self.assertEqual(conductor._workflow_state, states.UNSET)
+        self.assertEqual(conductor.get_workflow_state(), states.UNSET)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
         self.assertIsInstance(conductor.flow, conducting.TaskFlow)
@@ -192,7 +192,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'context': {},
             'input': inputs,
             'output': None,
-            'state': None,
+            'state': states.UNSET,
             'errors': [],
             'flow': {
                 'staged': {'task1': {'ctxs': [0], 'ready': True}},
@@ -208,8 +208,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor.deserialize(data)
 
         self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
-        self.assertIsNone(conductor._workflow_state)
-        self.assertIsNone(conductor.get_workflow_state())
+        self.assertEqual(conductor._workflow_state, states.UNSET)
+        self.assertEqual(conductor.get_workflow_state(), states.UNSET)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
         self.assertIsInstance(conductor.flow, conducting.TaskFlow)
@@ -230,7 +230,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'context': context,
             'input': inputs,
             'output': None,
-            'state': None,
+            'state': states.UNSET,
             'errors': [],
             'flow': {
                 'staged': {'task1': {'ctxs': [0], 'ready': True}},
@@ -246,8 +246,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor.deserialize(data)
 
         self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
-        self.assertIsNone(conductor._workflow_state)
-        self.assertIsNone(conductor.get_workflow_state())
+        self.assertEqual(conductor._workflow_state, states.UNSET)
+        self.assertEqual(conductor.get_workflow_state(), states.UNSET)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
         self.assertIsInstance(conductor.flow, conducting.TaskFlow)
@@ -319,27 +319,27 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         inputs = {'a': 123}
         conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
 
-        conductor.set_workflow_state(states.PAUSING)
+        conductor.request_workflow_state(states.PAUSING)
         self.assertListEqual(conductor.get_start_tasks(), [])
 
-        conductor.set_workflow_state(states.PAUSED)
+        conductor.request_workflow_state(states.PAUSED)
         self.assertListEqual(conductor.get_start_tasks(), [])
 
     def test_get_start_tasks_when_graph_canceled(self):
         inputs = {'a': 123}
         conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
 
-        conductor.set_workflow_state(states.CANCELING)
+        conductor.request_workflow_state(states.CANCELING)
         self.assertListEqual(conductor.get_start_tasks(), [])
 
-        conductor.set_workflow_state(states.CANCELED)
+        conductor.request_workflow_state(states.CANCELED)
         self.assertListEqual(conductor.get_start_tasks(), [])
 
     def test_get_start_tasks_when_graph_abended(self):
         inputs = {'a': 123}
         conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
 
-        conductor.set_workflow_state(states.FAILED)
+        conductor.request_workflow_state(states.FAILED)
         self.assertListEqual(conductor.get_start_tasks(), [])
 
     def test_get_task(self):
@@ -421,7 +421,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         # After the previous task is paused, since there is no other tasks running,
         # the workflow is paused. The workflow needs to be resumed manually.
         self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
-        conductor.set_workflow_state(states.RESUMING)
+        conductor.request_workflow_state(states.RESUMING)
         self.assertEqual(conductor.get_workflow_state(), states.RESUMING)
 
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
@@ -442,13 +442,13 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         expected_tasks = [self.format_task_item(next_task_name, ctx_value, next_task_spec)]
         self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
 
-        conductor.set_workflow_state(states.PAUSING)
+        conductor.request_workflow_state(states.PAUSING)
         self.assertListEqual(conductor.get_next_tasks(task_name), [])
 
-        conductor.set_workflow_state(states.PAUSED)
+        conductor.request_workflow_state(states.PAUSED)
         self.assertListEqual(conductor.get_next_tasks(task_name), [])
 
-        conductor.set_workflow_state(states.RESUMING)
+        conductor.request_workflow_state(states.RESUMING)
         expected_tasks = [self.format_task_item(next_task_name, ctx_value, next_task_spec)]
         self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
 
@@ -485,10 +485,10 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         expected_tasks = [self.format_task_item(next_task_name, ctx_value, next_task_spec)]
         self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
 
-        conductor.set_workflow_state(states.CANCELING)
+        conductor.request_workflow_state(states.CANCELING)
         self.assertListEqual(conductor.get_next_tasks(task_name), [])
 
-        conductor.set_workflow_state(states.CANCELED)
+        conductor.request_workflow_state(states.CANCELED)
         self.assertListEqual(conductor.get_next_tasks(task_name), [])
 
     def test_get_next_tasks_when_this_task_abended(self):
@@ -526,7 +526,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         expected_tasks = [self.format_task_item(next_task_name, ctx_value, next_task_spec)]
         self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
 
-        conductor.set_workflow_state(states.FAILED)
+        conductor.request_workflow_state(states.FAILED)
         self.assertListEqual(conductor.get_next_tasks(task_name), [])
 
     def test_get_task_initial_context(self):
@@ -638,7 +638,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         task_name = 'task1'
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
-        conductor.set_workflow_state(states.CANCELING)
+        conductor.request_workflow_state(states.CANCELING)
         self.assertEqual(conductor.get_workflow_state(), states.CANCELED)
 
     def test_set_workflow_canceled_when_no_active_tasks(self):
@@ -648,7 +648,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         task_name = 'task1'
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
-        conductor.set_workflow_state(states.CANCELED)
+        conductor.request_workflow_state(states.CANCELED)
         self.assertEqual(conductor.get_workflow_state(), states.CANCELED)
 
     def test_set_workflow_canceling_when_has_active_tasks(self):
@@ -657,7 +657,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         task_name = 'task1'
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.set_workflow_state(states.CANCELING)
+        conductor.request_workflow_state(states.CANCELING)
         self.assertEqual(conductor.get_workflow_state(), states.CANCELING)
 
     def test_set_workflow_canceled_when_has_active_tasks(self):
@@ -666,7 +666,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         task_name = 'task1'
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.set_workflow_state(states.CANCELED)
+        conductor.request_workflow_state(states.CANCELED)
         self.assertEqual(conductor.get_workflow_state(), states.CANCELING)
 
     def test_set_workflow_pausing_when_no_active_tasks(self):
@@ -676,7 +676,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         task_name = 'task1'
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
-        conductor.set_workflow_state(states.PAUSING)
+        conductor.request_workflow_state(states.PAUSING)
         self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
 
     def test_set_workflow_paused_when_no_active_tasks(self):
@@ -686,7 +686,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         task_name = 'task1'
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
-        conductor.set_workflow_state(states.PAUSED)
+        conductor.request_workflow_state(states.PAUSED)
         self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
 
     def test_set_workflow_pausing_when_has_active_tasks(self):
@@ -695,7 +695,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         task_name = 'task1'
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.set_workflow_state(states.PAUSING)
+        conductor.request_workflow_state(states.PAUSING)
         self.assertEqual(conductor.get_workflow_state(), states.PAUSING)
 
     def test_set_workflow_paused_when_has_active_tasks(self):
@@ -704,5 +704,5 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         task_name = 'task1'
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.set_workflow_state(states.PAUSED)
+        conductor.request_workflow_state(states.PAUSED)
         self.assertEqual(conductor.get_workflow_state(), states.PAUSING)

@@ -25,41 +25,46 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.WORKFLOW_REQUESTED: states.REQUESTED,
         events.WORKFLOW_SCHEDULED: states.SCHEDULED,
         events.WORKFLOW_DELAYED: states.DELAYED,
-        events.WORKFLOW_RUNNING: states.RUNNING
+        events.WORKFLOW_RUNNING: states.RUNNING,
+        events.WORKFLOW_FAILED: states.FAILED
     },
     states.REQUESTED: {
         events.WORKFLOW_SCHEDULED: states.SCHEDULED,
         events.WORKFLOW_DELAYED: states.DELAYED,
         events.WORKFLOW_RUNNING: states.RUNNING,
-        events.WORKFLOW_PAUSING: states.PAUSING,
-        events.WORKFLOW_PAUSED: states.PAUSED,
-        events.WORKFLOW_CANCELING: states.CANCELING,
-        events.WORKFLOW_CANCELED: states.CANCELED,
+        events.WORKFLOW_PAUSING_WORKFLOW_DORMANT: states.PAUSED,
+        events.WORKFLOW_PAUSED_WORKFLOW_DORMANT: states.PAUSED,
+        events.WORKFLOW_CANCELING_WORKFLOW_DORMANT: states.CANCELED,
+        events.WORKFLOW_CANCELED_WORKFLOW_DORMANT: states.CANCELED,
         events.WORKFLOW_FAILED: states.FAILED
     },
     states.SCHEDULED: {
         events.WORKFLOW_DELAYED: states.DELAYED,
         events.WORKFLOW_RUNNING: states.RUNNING,
-        events.WORKFLOW_PAUSING: states.PAUSING,
-        events.WORKFLOW_PAUSED: states.PAUSED,
-        events.WORKFLOW_CANCELING: states.CANCELING,
-        events.WORKFLOW_CANCELED: states.CANCELED,
+        events.WORKFLOW_PAUSING_WORKFLOW_DORMANT: states.PAUSED,
+        events.WORKFLOW_PAUSED_WORKFLOW_DORMANT: states.PAUSED,
+        events.WORKFLOW_CANCELING_WORKFLOW_DORMANT: states.CANCELED,
+        events.WORKFLOW_CANCELED_WORKFLOW_DORMANT: states.CANCELED,
         events.WORKFLOW_FAILED: states.FAILED
     },
     states.DELAYED: {
         events.WORKFLOW_SCHEDULED: states.SCHEDULED,
         events.WORKFLOW_RUNNING: states.RUNNING,
-        events.WORKFLOW_PAUSING: states.PAUSING,
-        events.WORKFLOW_PAUSED: states.PAUSED,
-        events.WORKFLOW_CANCELING: states.CANCELING,
-        events.WORKFLOW_CANCELED: states.CANCELED,
+        events.WORKFLOW_PAUSING_WORKFLOW_DORMANT: states.PAUSED,
+        events.WORKFLOW_PAUSED_WORKFLOW_DORMANT: states.PAUSED,
+        events.WORKFLOW_CANCELING_WORKFLOW_DORMANT: states.CANCELED,
+        events.WORKFLOW_CANCELED_WORKFLOW_DORMANT: states.CANCELED,
         events.WORKFLOW_FAILED: states.FAILED
     },
     states.RUNNING: {
-        events.WORKFLOW_PAUSING: states.PAUSING,
-        events.WORKFLOW_PAUSED: states.PAUSED,
-        events.WORKFLOW_CANCELING: states.CANCELING,
-        events.WORKFLOW_CANCELED: states.CANCELED,
+        events.WORKFLOW_PAUSING_WORKFLOW_ACTIVE: states.PAUSING,
+        events.WORKFLOW_PAUSING_WORKFLOW_DORMANT: states.PAUSED,
+        events.WORKFLOW_PAUSED_WORKFLOW_ACTIVE: states.PAUSING,
+        events.WORKFLOW_PAUSED_WORKFLOW_DORMANT: states.PAUSED,
+        events.WORKFLOW_CANCELING_WORKFLOW_ACTIVE: states.CANCELING,
+        events.WORKFLOW_CANCELING_WORKFLOW_DORMANT: states.CANCELED,
+        events.WORKFLOW_CANCELED_WORKFLOW_ACTIVE: states.CANCELING,
+        events.WORKFLOW_CANCELED_WORKFLOW_DORMANT: states.CANCELED,
         events.WORKFLOW_FAILED: states.FAILED,
         events.WORKFLOW_SUCCEEDED: states.SUCCEEDED,
         events.TASK_PENDING_WORKFLOW_ACTIVE: states.PAUSING,
@@ -96,11 +101,16 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.TASK_CANCELED_WORKFLOW_DORMANT: states.CANCELED
     },
     states.PAUSING: {
-        events.WORKFLOW_PAUSED: states.PAUSED,
+        events.WORKFLOW_PAUSING_WORKFLOW_ACTIVE: states.PAUSING,
+        events.WORKFLOW_PAUSING_WORKFLOW_DORMANT: states.PAUSED,
+        events.WORKFLOW_PAUSED_WORKFLOW_ACTIVE: states.PAUSING,
+        events.WORKFLOW_PAUSED_WORKFLOW_DORMANT: states.PAUSED,
+        events.WORKFLOW_CANCELING_WORKFLOW_ACTIVE: states.CANCELING,
+        events.WORKFLOW_CANCELING_WORKFLOW_DORMANT: states.CANCELED,
+        events.WORKFLOW_CANCELED_WORKFLOW_ACTIVE: states.CANCELING,
+        events.WORKFLOW_CANCELED_WORKFLOW_DORMANT: states.CANCELED,
         events.WORKFLOW_RUNNING: states.RUNNING,
         events.WORKFLOW_RESUMING: states.RESUMING,
-        events.WORKFLOW_CANCELING: states.CANCELING,
-        events.WORKFLOW_CANCELED: states.CANCELED,
         events.WORKFLOW_FAILED: states.FAILED,
         events.TASK_PENDING_WORKFLOW_ACTIVE: states.PAUSING,
         events.TASK_PENDING_WORKFLOW_DORMANT: states.PAUSED,
@@ -131,17 +141,22 @@ WORKFLOW_STATE_MACHINE_DATA = {
     states.PAUSED: {
         events.WORKFLOW_RUNNING: states.RUNNING,
         events.WORKFLOW_RESUMING: states.RESUMING,
-        events.WORKFLOW_CANCELING: states.CANCELING,
-        events.WORKFLOW_CANCELED: states.CANCELED,
+        events.WORKFLOW_CANCELING_WORKFLOW_DORMANT: states.CANCELED,
+        events.WORKFLOW_CANCELED_WORKFLOW_DORMANT: states.CANCELED,
         events.TASK_RUNNING: states.RUNNING,
         events.TASK_RESUMING: states.RUNNING
     },
     states.RESUMING: {
+        events.WORKFLOW_PAUSING_WORKFLOW_ACTIVE: states.PAUSING,
+        events.WORKFLOW_PAUSING_WORKFLOW_DORMANT: states.PAUSED,
+        events.WORKFLOW_PAUSED_WORKFLOW_ACTIVE: states.PAUSING,
+        events.WORKFLOW_PAUSED_WORKFLOW_DORMANT: states.PAUSED,
+        events.WORKFLOW_CANCELING_WORKFLOW_ACTIVE: states.CANCELING,
+        events.WORKFLOW_CANCELING_WORKFLOW_DORMANT: states.CANCELED,
+        events.WORKFLOW_CANCELED_WORKFLOW_ACTIVE: states.CANCELING,
+        events.WORKFLOW_CANCELED_WORKFLOW_DORMANT: states.CANCELED,
         events.WORKFLOW_RUNNING: states.RUNNING,
-        events.WORKFLOW_PAUSING: states.PAUSING,
-        events.WORKFLOW_PAUSED: states.PAUSED,
-        events.WORKFLOW_CANCELING: states.CANCELING,
-        events.WORKFLOW_CANCELED: states.CANCELED,
+        events.WORKFLOW_FAILED: states.FAILED,
         events.TASK_RUNNING: states.RUNNING,
         events.TASK_PENDING_WORKFLOW_ACTIVE: states.PAUSING,
         events.TASK_PENDING_WORKFLOW_DORMANT: states.PAUSED,
@@ -170,7 +185,10 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.TASK_CANCELED_WORKFLOW_DORMANT: states.CANCELED
     },
     states.CANCELING: {
-        events.WORKFLOW_CANCELED: states.CANCELED,
+        events.WORKFLOW_CANCELING_WORKFLOW_ACTIVE: states.CANCELING,
+        events.WORKFLOW_CANCELING_WORKFLOW_DORMANT: states.CANCELED,
+        events.WORKFLOW_CANCELED_WORKFLOW_ACTIVE: states.CANCELING,
+        events.WORKFLOW_CANCELED_WORKFLOW_DORMANT: states.CANCELED,
         events.WORKFLOW_FAILED: states.FAILED,
         events.TASK_PENDING_WORKFLOW_ACTIVE: states.CANCELING,
         events.TASK_PENDING_WORKFLOW_DORMANT: states.CANCELED,
@@ -385,7 +403,7 @@ class WorkflowStateMachine(object):
         return False
 
     @classmethod
-    def add_context_to_event(cls, conductor, tk_ex_event):
+    def add_context_to_task_event(cls, conductor, tk_ex_event):
         # Identify current workflow state.
         task_event = tk_ex_event.name
         has_next_tasks = conductor.has_next_tasks(getattr(tk_ex_event, 'task_id', None))
@@ -423,9 +441,9 @@ class WorkflowStateMachine(object):
         return task_event + '_completed'
 
     @classmethod
-    def process_event(cls, conductor, tk_ex_event):
-        # Append additional workflow context to the event..
-        tk_ex_event.name = cls.add_context_to_event(conductor, tk_ex_event)
+    def process_task_event(cls, conductor, tk_ex_event):
+        # Append additional workflow context to the event.
+        tk_ex_event.name = cls.add_context_to_task_event(conductor, tk_ex_event)
 
         # Check if event is valid.
         if tk_ex_event.name not in events.TASK_EXECUTION_EVENTS:
@@ -448,4 +466,59 @@ class WorkflowStateMachine(object):
 
         # Assign new workflow state if there is change.
         if current_workflow_state != new_workflow_state:
-            conductor.set_workflow_state(new_workflow_state)
+            conductor._set_workflow_state(new_workflow_state)
+
+    @classmethod
+    def add_context_to_workflow_event(cls, conductor, wf_ex_event):
+        # Identify current workflow state.
+        workflow_event = wf_ex_event.name
+        has_active_tasks = conductor.flow.has_active_tasks
+
+        # For certain events like cancel and pause, whether there are tasks in active
+        # state determine whether the workflow reached final state or still in progress.
+        # For example, if the workflow is being canceled and there are other active
+        # tasks, the workflow should be set to canceling.
+        if wf_ex_event.state in states.PAUSE_STATES + states.CANCEL_STATES:
+            workflow_event += '_workflow_active' if has_active_tasks else '_workflow_dormant'
+
+        return workflow_event
+
+    @classmethod
+    def process_workflow_event(cls, conductor, wf_ex_event):
+        # Append additional workflow context to the event.
+        wf_ex_event.name = cls.add_context_to_workflow_event(conductor, wf_ex_event)
+
+        # Check if event is valid.
+        if wf_ex_event.name not in events.WORKFLOW_EXECUTION_EVENTS:
+            raise exc.InvalidEvent(wf_ex_event.name)
+
+        # Capture current workflow state.
+        current_workflow_state = conductor.get_workflow_state()
+        new_workflow_state = current_workflow_state
+
+        # Check if the current workflow state can be transitioned.
+        if current_workflow_state not in WORKFLOW_STATE_MACHINE_DATA:
+            raise exc.InvalidWorkflowStateTransition(current_workflow_state, wf_ex_event.name)
+
+        # If the current workflow state can be transitioned and there is no match on the
+        # event, then there is not state transition.
+        if wf_ex_event.name not in WORKFLOW_STATE_MACHINE_DATA[current_workflow_state]:
+            return
+
+        new_workflow_state = WORKFLOW_STATE_MACHINE_DATA[current_workflow_state][wf_ex_event.name]
+
+        # Assign new workflow state if there is change.
+        if current_workflow_state != new_workflow_state:
+            conductor._set_workflow_state(new_workflow_state)
+
+    @classmethod
+    def process_event(cls, conductor, event):
+        if isinstance(event, events.WorkflowExecutionEvent):
+            cls.process_workflow_event(conductor, event)
+            return
+
+        if isinstance(event, events.TaskExecutionEvent):
+            cls.process_task_event(conductor, event)
+            return
+
+        raise exc.InvalidEventType(type(event), event.name)

@@ -60,7 +60,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
 
         spec = specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
-        conductor.set_workflow_state(states.RUNNING)
+        conductor.request_workflow_state(states.RUNNING)
 
         # Conduct task1 and check context and that there is no next tasks yet.
         task_name = 'task1'
@@ -138,7 +138,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
 
         spec = specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
-        conductor.set_workflow_state(states.RUNNING)
+        conductor.request_workflow_state(states.RUNNING)
 
         # Conduct task2 and check context and that there is no next tasks yet.
         task_name = 'task1'
@@ -218,7 +218,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
         inputs = {'var1': 'xyz'}
         spec = specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec, inputs=inputs)
-        conductor.set_workflow_state(states.RUNNING)
+        conductor.request_workflow_state(states.RUNNING)
 
         # Conduct task2 and check context and that there is no next tasks yet.
         task_name = 'task1'
@@ -292,7 +292,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
 
         spec = specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
-        conductor.set_workflow_state(states.RUNNING)
+        conductor.request_workflow_state(states.RUNNING)
 
         # Conduct task1 and check context.
         task_name = 'task1'

@@ -44,7 +44,7 @@ class WorkflowConductorPauseResumeTest(base.WorkflowConductorTest):
 
         spec = specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
-        conductor.set_workflow_state(states.RUNNING)
+        conductor.request_workflow_state(states.RUNNING)
 
         # Run task1 and task2.
         conductor.update_task_flow('task1', events.ActionExecutionEvent(states.RUNNING))
@@ -52,7 +52,7 @@ class WorkflowConductorPauseResumeTest(base.WorkflowConductorTest):
         self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
 
         # Pause the workflow.
-        conductor.set_workflow_state(states.PAUSING)
+        conductor.request_workflow_state(states.PAUSING)
 
         # Complete task1 only. The workflow should still be pausing
         # because task2 is still running.
@@ -65,7 +65,7 @@ class WorkflowConductorPauseResumeTest(base.WorkflowConductorTest):
         self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
 
         # Resume the workflow, task3 should be staged, and complete task3.
-        conductor.set_workflow_state(states.RESUMING)
+        conductor.request_workflow_state(states.RESUMING)
         expected_task = self.format_task_item('task3', {}, conductor.spec.tasks.get_task('task3'))
         self.assert_task_list(conductor.get_next_tasks('task2'), [expected_task])
         conductor.update_task_flow('task3', events.ActionExecutionEvent(states.RUNNING))
@@ -98,7 +98,7 @@ class WorkflowConductorPauseResumeTest(base.WorkflowConductorTest):
 
         spec = specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
-        conductor.set_workflow_state(states.RUNNING)
+        conductor.request_workflow_state(states.RUNNING)
 
         # Run task1 and task2.
         conductor.update_task_flow('task1', events.ActionExecutionEvent(states.RUNNING))

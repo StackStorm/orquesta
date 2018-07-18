@@ -69,7 +69,7 @@ class WorkflowConductorDataFlowTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor(spec, **kwargs)
 
         if state:
-            conductor.set_workflow_state(state)
+            conductor.request_workflow_state(state)
 
         return conductor
 

@@ -76,7 +76,7 @@ class ErrorHandlingWorkflowStateTest(base.OrchestraWorkflowConductorTest):
         conductor = self.assert_workflow_state(mock_flow_entries, expected_wf_states)
 
         # Pause the workflow and assert the remaining states.
-        conductor.set_workflow_state(states.PAUSING)
+        conductor.request_workflow_state(states.PAUSING)
 
         mock_flow_entries = [
             {'id': 'task1', 'name': 'task1', 'state': states.FAILED}
@@ -102,8 +102,8 @@ class ErrorHandlingWorkflowStateTest(base.OrchestraWorkflowConductorTest):
         conductor = self.assert_workflow_state(mock_flow_entries, expected_wf_states)
 
         # Pause and resume the workflow and assert the remaining states.
-        conductor.set_workflow_state(states.PAUSING)
-        conductor.set_workflow_state(states.RESUMING)
+        conductor.request_workflow_state(states.PAUSING)
+        conductor.request_workflow_state(states.RESUMING)
 
         mock_flow_entries = [
             {'id': 'task1', 'name': 'task1', 'state': states.FAILED}
@@ -129,7 +129,7 @@ class ErrorHandlingWorkflowStateTest(base.OrchestraWorkflowConductorTest):
         conductor = self.assert_workflow_state(mock_flow_entries, expected_wf_states)
 
         # Cancel the workflow and assert the remaining states.
-        conductor.set_workflow_state(states.CANCELING)
+        conductor.request_workflow_state(states.CANCELING)
 
         mock_flow_entries = [
             {'id': 'task1', 'name': 'task1', 'state': states.FAILED}

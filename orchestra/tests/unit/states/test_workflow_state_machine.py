@@ -47,14 +47,26 @@ class WorkflowStateMachineTest(unittest.TestCase):
         conductor = conducting.WorkflowConductor(spec)
 
         if state:
-            conductor.set_workflow_state(state)
+            conductor.request_workflow_state(state)
 
         return conductor
 
-    def test_bad_event_name(self):
+    def test_bad_event_type(self):
         conductor = self._prep_conductor(states.RUNNING)
         tk_ex_event = events.ExecutionEvent('foobar', states.RUNNING)
         setattr(tk_ex_event, 'task_id', 'task1')
+
+        self.assertRaises(
+            exc.InvalidEventType,
+            machines.WorkflowStateMachine.process_event,
+            conductor,
+            tk_ex_event
+        )
+
+    def test_bad_event_name(self):
+        conductor = self._prep_conductor(states.RUNNING)
+        tk_ex_event = events.TaskExecutionEvent('task1', states.RUNNING)
+        setattr(tk_ex_event, 'name', 'foobar')
 
         self.assertRaises(
             exc.InvalidEvent,
@@ -73,6 +85,7 @@ class WorkflowStateMachineTest(unittest.TestCase):
 
     def test_bad_current_workflow_state(self):
         conductor = self._prep_conductor()
+        conductor._workflow_state = states.ABANDONED
         tk_ex_event = events.TaskExecutionEvent('task1', states.RUNNING)
 
         self.assertRaises(

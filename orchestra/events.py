@@ -25,12 +25,20 @@ WORKFLOW_SCHEDULED = 'workflow_scheduled'
 WORKFLOW_DELAYED = 'workflow_delayed'
 WORKFLOW_RUNNING = 'workflow_running'
 WORKFLOW_PAUSING = 'workflow_pausing'
+WORKFLOW_PAUSING_WORKFLOW_ACTIVE = 'workflow_pausing_workflow_active'
+WORKFLOW_PAUSING_WORKFLOW_DORMANT = 'workflow_pausing_workflow_dormant'
 WORKFLOW_PAUSED = 'workflow_paused'
+WORKFLOW_PAUSED_WORKFLOW_ACTIVE = 'workflow_paused_workflow_active'
+WORKFLOW_PAUSED_WORKFLOW_DORMANT = 'workflow_paused_workflow_dormant'
 WORKFLOW_RESUMING = 'workflow_resuming'
 WORKFLOW_SUCCEEDED = 'workflow_succeeded'
 WORKFLOW_FAILED = 'workflow_failed'
 WORKFLOW_CANCELING = 'workflow_canceling'
+WORKFLOW_CANCELING_WORKFLOW_ACTIVE = 'workflow_canceling_workflow_active'
+WORKFLOW_CANCELING_WORKFLOW_DORMANT = 'workflow_canceling_workflow_dormant'
 WORKFLOW_CANCELED = 'workflow_canceled'
+WORKFLOW_CANCELED_WORKFLOW_ACTIVE = 'workflow_canceled_workflow_active'
+WORKFLOW_CANCELED_WORKFLOW_DORMANT = 'workflow_canceled_workflow_dormant'
 
 WORKFLOW_EXECUTION_EVENTS = [
     WORKFLOW_REQUESTED,
@@ -38,12 +46,20 @@ WORKFLOW_EXECUTION_EVENTS = [
     WORKFLOW_DELAYED,
     WORKFLOW_RUNNING,
     WORKFLOW_PAUSING,
+    WORKFLOW_PAUSING_WORKFLOW_ACTIVE,
+    WORKFLOW_PAUSING_WORKFLOW_DORMANT,
     WORKFLOW_PAUSED,
+    WORKFLOW_PAUSED_WORKFLOW_ACTIVE,
+    WORKFLOW_PAUSED_WORKFLOW_DORMANT,
     WORKFLOW_RESUMING,
     WORKFLOW_SUCCEEDED,
     WORKFLOW_FAILED,
     WORKFLOW_CANCELING,
-    WORKFLOW_CANCELED
+    WORKFLOW_CANCELING_WORKFLOW_ACTIVE,
+    WORKFLOW_CANCELING_WORKFLOW_DORMANT,
+    WORKFLOW_CANCELED,
+    WORKFLOW_CANCELED_WORKFLOW_ACTIVE,
+    WORKFLOW_CANCELED_WORKFLOW_DORMANT
 ]
 
 
@@ -193,10 +209,10 @@ class ExecutionEvent(object):
         self.result = result
 
 
-class ActionExecutionEvent(ExecutionEvent):
+class WorkflowExecutionEvent(ExecutionEvent):
 
-    def __init__(self, state, result=None):
-        super(ActionExecutionEvent, self).__init__('action_%s' % state, state, result=result)
+    def __init__(self, state):
+        super(WorkflowExecutionEvent, self).__init__('workflow_%s' % state, state)
 
 
 class TaskExecutionEvent(ExecutionEvent):
@@ -204,6 +220,12 @@ class TaskExecutionEvent(ExecutionEvent):
     def __init__(self, task_id, state):
         super(TaskExecutionEvent, self).__init__('task_%s' % state, state)
         self.task_id = task_id
+
+
+class ActionExecutionEvent(ExecutionEvent):
+
+    def __init__(self, state, result=None):
+        super(ActionExecutionEvent, self).__init__('action_%s' % state, state, result=result)
 
 
 class TaskNoopEvent(ExecutionEvent):

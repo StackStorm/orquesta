@@ -61,6 +61,13 @@ class AmbiguousTaskTransition(Exception):
         Exception.__init__(self, message)
 
 
+class InvalidEventType(Exception):
+
+    def __init__(self, type_name, event_name):
+        message = 'Event type "%s" with event "%s" is not valid.' % (type_name, event_name)
+        Exception.__init__(self, message)
+
+
 class InvalidEvent(Exception):
 
     def __init__(self, value):
