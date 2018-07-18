@@ -116,7 +116,7 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
-    def test_type_direct(self):
+    def test_workflow_type_direct(self):
         wf_def = """
             version: '2.0'
 
@@ -132,7 +132,7 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
-    def test_type_reverse(self):
+    def test_workflow_type_reverse(self):
         wf_def = """
             version: '2.0'
 
@@ -148,7 +148,7 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
-    def test_type_junk_throws_error(self):
+    def test_bad_workflow_type(self):
         wf_def = """
             version: '2.0'
 
