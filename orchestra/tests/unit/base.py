@@ -17,6 +17,7 @@ from six.moves import queue
 import unittest
 
 from orchestra import conducting
+from orchestra import events
 from orchestra.expressions import base as expressions
 from orchestra.specs import loader as specs_loader
 from orchestra import states
@@ -170,7 +171,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
         conductor = conducting.WorkflowConductor(wf_spec, inputs=inputs)
-        conductor.set_workflow_state(states.RUNNING)
+        conductor.request_workflow_state(states.RUNNING)
 
         context = {}
         q = queue.Queue()
@@ -200,7 +201,8 @@ class WorkflowConductorTest(WorkflowComposerTest):
             conductor = conducting.WorkflowConductor.deserialize(wf_conducting_state)
 
             # Set task state to running.
-            conductor.update_task_flow(current_task_id, states.RUNNING)
+            ac_ex_event = events.ActionExecutionEvent(states.RUNNING)
+            conductor.update_task_flow(current_task_id, ac_ex_event)
 
             # Set current task in context.
             context = ctx.set_current_task(context, current_task)
@@ -208,7 +210,8 @@ class WorkflowConductorTest(WorkflowComposerTest):
             # Mock completion of the task.
             state = state_q.get() if not state_q.empty() else states.SUCCEEDED
             result = result_q.get() if not result_q.empty() else None
-            conductor.update_task_flow(current_task_id, state, result=result)
+            ac_ex_event = events.ActionExecutionEvent(state, result=result)
+            conductor.update_task_flow(current_task_id, ac_ex_event)
 
             # Identify the next set of tasks.
             next_tasks = conductor.get_next_tasks(current_task_id)
@@ -227,16 +230,18 @@ class WorkflowConductorTest(WorkflowComposerTest):
         if expected_output is not None:
             self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
-    def assert_workflow_state(self, wf_name, mock_flow_entries, expected_wf_states):
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        conductor = conducting.WorkflowConductor(wf_spec)
-        conductor.set_workflow_state(states.RUNNING)
+    def assert_workflow_state(self, wf_name, mock_flow, expected_wf_states, conductor=None):
+        if not conductor:
+            wf_def = self.get_wf_def(wf_name)
+            wf_spec = self.spec_module.instantiate(wf_def)
+            conductor = conducting.WorkflowConductor(wf_spec)
+            conductor.request_workflow_state(states.RUNNING)
 
-        for task_flow_entry, expected_wf_state in zip(mock_flow_entries, expected_wf_states):
+        for task_flow_entry, expected_wf_state in zip(mock_flow, expected_wf_states):
             task_id = task_flow_entry['id']
             task_state = task_flow_entry['state']
-            conductor.update_task_flow(task_id, task_state)
+            ac_ex_event = events.ActionExecutionEvent(task_state)
+            conductor.update_task_flow(task_id, ac_ex_event)
 
             err_ctx = (
                 'Workflow state "%s" is not the expected state "%s". '
@@ -245,3 +250,5 @@ class WorkflowConductorTest(WorkflowComposerTest):
             )
 
             self.assertEqual(conductor.get_workflow_state(), expected_wf_state, err_ctx)
+
+        return conductor

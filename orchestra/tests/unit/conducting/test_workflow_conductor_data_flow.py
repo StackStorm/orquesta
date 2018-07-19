@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from orchestra import conducting
+from orchestra import events
 from orchestra.specs import native as specs
 from orchestra import states
 from orchestra.tests.unit import base
@@ -68,7 +69,7 @@ class WorkflowConductorDataFlowTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor(spec, **kwargs)
 
         if state:
-            conductor.set_workflow_state(state)
+            conductor.request_workflow_state(state)
 
         return conductor
 
@@ -80,8 +81,8 @@ class WorkflowConductorDataFlowTest(base.WorkflowConductorTest):
 
         for i in range(1, len(conductor.spec.tasks) + 1):
             task_name = 'task' + str(i)
-            conductor.update_task_flow(task_name, states.RUNNING)
-            conductor.update_task_flow(task_name, states.SUCCEEDED)
+            conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
+            conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
 
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)

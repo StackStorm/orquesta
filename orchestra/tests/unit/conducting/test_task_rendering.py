@@ -11,6 +11,7 @@
 # limitations under the License.
 
 from orchestra import conducting
+from orchestra import events
 from orchestra.specs import native as specs
 from orchestra import states
 from orchestra.tests.unit import base
@@ -55,7 +56,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor(spec, **kwargs)
 
         if state:
-            conductor.set_workflow_state(state)
+            conductor.request_workflow_state(state)
 
         return conductor
 
@@ -77,8 +78,9 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         task_name = 'task1'
         next_task_name = 'task2'
         mock_result = action_input['message']
-        conductor.update_task_flow(task_name, states.RUNNING)
-        conductor.update_task_flow(task_name, states.SUCCEEDED, result=mock_result)
+        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
+        ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED, result=mock_result)
+        conductor.update_task_flow(task_name, ac_ex_event)
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         next_task_spec.action = 'core.echo'
         next_task_spec.input = {'message': mock_result}
@@ -91,8 +93,9 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         task_name = 'task2'
         next_task_name = 'task3'
         mock_result = action_input['message']
-        conductor.update_task_flow(task_name, states.RUNNING)
-        conductor.update_task_flow(task_name, states.SUCCEEDED, result=mock_result)
+        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
+        ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED, result=mock_result)
+        conductor.update_task_flow(task_name, ac_ex_event)
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         next_task_spec.action = 'core.echo'
         next_task_spec.input = {'message': mock_result}

@@ -11,6 +11,7 @@
 # limitations under the License.
 
 from orchestra import conducting
+from orchestra import events
 from orchestra.specs import native as specs
 from orchestra import states
 from orchestra.tests.unit import base
@@ -33,7 +34,7 @@ class WorkflowConductorExtendedTaskTest(base.WorkflowConductorTest):
 
         spec = specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
-        conductor.set_workflow_state(states.RUNNING)
+        conductor.request_workflow_state(states.RUNNING)
 
         # Process task1.
         next_task_name = 'task1'
@@ -44,8 +45,8 @@ class WorkflowConductorExtendedTaskTest(base.WorkflowConductorTest):
         self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
 
         task_name = 'task1'
-        conductor.update_task_flow(task_name, states.RUNNING)
-        conductor.update_task_flow(task_name, states.SUCCEEDED)
+        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
+        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
 
         # Process task2.
         next_task_name = 'task2'
@@ -55,8 +56,8 @@ class WorkflowConductorExtendedTaskTest(base.WorkflowConductorTest):
         self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
 
         task_name = 'task2'
-        conductor.update_task_flow(task_name, states.RUNNING)
-        conductor.update_task_flow(task_name, states.SUCCEEDED)
+        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
+        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
 
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
 
@@ -79,7 +80,7 @@ class WorkflowConductorExtendedTaskTest(base.WorkflowConductorTest):
 
         spec = specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
-        conductor.set_workflow_state(states.RUNNING)
+        conductor.request_workflow_state(states.RUNNING)
 
         # Process task1.
         next_task_name = 'task1'
@@ -90,8 +91,8 @@ class WorkflowConductorExtendedTaskTest(base.WorkflowConductorTest):
         self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
 
         task_name = 'task1'
-        conductor.update_task_flow(task_name, states.RUNNING)
-        conductor.update_task_flow(task_name, states.SUCCEEDED)
+        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
+        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
 
         # Process task2.
         next_task_name = 'task2'
@@ -101,8 +102,8 @@ class WorkflowConductorExtendedTaskTest(base.WorkflowConductorTest):
         self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
 
         task_name = 'task2'
-        conductor.update_task_flow(task_name, states.RUNNING)
-        conductor.update_task_flow(task_name, states.SUCCEEDED)
+        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
+        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
 
         # Process task3.
         next_task_name = 'task3'
@@ -112,7 +113,7 @@ class WorkflowConductorExtendedTaskTest(base.WorkflowConductorTest):
         self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
 
         task_name = 'task3'
-        conductor.update_task_flow(task_name, states.RUNNING)
-        conductor.update_task_flow(task_name, states.SUCCEEDED)
+        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
+        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
 
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)

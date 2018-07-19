@@ -14,12 +14,14 @@ import copy
 import logging
 import six
 
+from orchestra import events
 from orchestra import exceptions as exc
 from orchestra.expressions import base as expr
 from orchestra import graphing
 from orchestra.specs import base as specs
 from orchestra.specs import loader as specs_loader
 from orchestra import states
+from orchestra.states import machines
 from orchestra.utils import context as ctx
 from orchestra.utils import dictionary as dx
 from orchestra.utils import plugin
@@ -54,6 +56,36 @@ class TaskFlow(object):
 
         return instance
 
+    def get_tasks_by_state(self, states):
+        return [t for t in self.sequence if t['state'] in states]
+
+    @property
+    def has_active_tasks(self):
+        return len(self.get_tasks_by_state(states.ACTIVE_STATES)) > 0
+
+    @property
+    def has_pausing_tasks(self):
+        return len(self.get_tasks_by_state([states.PAUSING])) > 0
+
+    @property
+    def has_paused_tasks(self):
+        return len(self.get_tasks_by_state([states.PAUSED])) > 0
+
+    @property
+    def has_canceling_tasks(self):
+        return len(self.get_tasks_by_state([states.CANCELING])) > 0
+
+    @property
+    def has_canceled_tasks(self):
+        return len(self.get_tasks_by_state([states.CANCELED])) > 0
+
+    def get_staged_tasks(self):
+        return [k for k, v in six.iteritems(self.staged) if v.get('ready', True) is True]
+
+    @property
+    def has_staged_tasks(self):
+        return len(self.get_staged_tasks()) > 0
+
 
 class WorkflowConductor(object):
 
@@ -66,7 +98,7 @@ class WorkflowConductor(object):
         self.spec_module = specs_loader.get_spec_module(self.catalog)
         self.composer = plugin.get_module('orchestra.composers', self.catalog)
 
-        self._workflow_state = None
+        self._workflow_state = states.UNSET
         self._graph = None
         self._flow = None
         self._parent_ctx = context or {}
@@ -148,7 +180,7 @@ class WorkflowConductor(object):
 
             if errors:
                 self.log_errors(errors)
-                self.set_workflow_state(states.FAILED)
+                self.request_workflow_state(states.FAILED)
 
             # Proceed if there is no issue with rendering of inputs and vars.
             if self.get_workflow_state() not in states.ABENDED_STATES:
@@ -191,22 +223,26 @@ class WorkflowConductor(object):
     def get_workflow_state(self):
         return self._workflow_state
 
-    def set_workflow_state(self, value):
-        if not states.is_valid(value):
-            raise exc.InvalidState(value)
-
-        if not states.is_transition_valid(self._workflow_state, value):
+    def _set_workflow_state(self, value):
+        if not machines.WorkflowStateMachine.is_transition_valid(self._workflow_state, value):
             raise exc.InvalidStateTransition(self._workflow_state, value)
 
-        # Determine if workflow is pausing or paused or canceling or canceled.
-        if value in states.PAUSE_STATES or value in states.CANCEL_STATES:
-            any_active_tasks = any([t['state'] in states.ACTIVE_STATES for t in self.flow.sequence])
-            value = states.PAUSING if any_active_tasks and value == states.PAUSED else value
-            value = states.PAUSED if not any_active_tasks and value == states.PAUSING else value
-            value = states.CANCELING if any_active_tasks and value == states.CANCELED else value
-            value = states.CANCELED if not any_active_tasks and value == states.CANCELING else value
-
         self._workflow_state = value
+
+    def request_workflow_state(self, state):
+        # Record current workflow state.
+        current_state = self.get_workflow_state()
+
+        # Process state change event.
+        wf_ex_event = events.WorkflowExecutionEvent(state)
+        machines.WorkflowStateMachine.process_event(self, wf_ex_event)
+
+        # Get workflow state after event is processed.
+        updated_state = self.get_workflow_state()
+
+        # If state has not changed as expected, then raise exception.
+        if state != current_state and current_state == updated_state:
+            raise exc.InvalidWorkflowStateTransition(current_state, wf_ex_event.name)
 
     def get_workflow_initial_context(self):
         return copy.deepcopy(self.flow.contexts[0])
@@ -256,7 +292,7 @@ class WorkflowConductor(object):
 
             if errors:
                 self.log_errors(errors)
-                self.set_workflow_state(states.FAILED)
+                self.request_workflow_state(states.FAILED)
 
             # Persist outputs if there is no issue with rendering.
             if self.get_workflow_state() not in states.ABENDED_STATES and outputs:
@@ -320,7 +356,7 @@ class WorkflowConductor(object):
                 tasks.append(self.get_task(task_node['id']))
             except Exception as e:
                 self.log_error(str(e), task_id=task_node['id'])
-                self.set_workflow_state(states.FAILED)
+                self.request_workflow_state(states.FAILED)
                 continue
 
         # Return nothing if there is error(s) on determining start tasks.
@@ -328,6 +364,19 @@ class WorkflowConductor(object):
             return []
 
         return sorted(tasks, key=lambda x: x['name'])
+
+    def has_next_tasks(self, task_id=None):
+        next_tasks = []
+
+        if not task_id:
+            next_tasks = self.flow.get_staged_tasks()
+        else:
+            next_tasks = [
+                t[1] for t in self.graph.get_next_transitions(task_id)
+                if self.inbound_criteria_satisfied(t[1])
+            ]
+
+        return len(next_tasks) > 0
 
     def get_next_tasks(self, task_id=None):
         if self.get_workflow_state() not in states.RUNNING_STATES:
@@ -346,7 +395,7 @@ class WorkflowConductor(object):
                     next_tasks.append(self.get_task(staged_task_id))
                 except Exception as e:
                     self.log_error(str(e), task_id=staged_task_id)
-                    self.set_workflow_state(states.FAILED)
+                    self.request_workflow_state(states.FAILED)
                     continue
         else:
             task_flow_entry = self.get_task_flow_entry(task_id)
@@ -378,7 +427,7 @@ class WorkflowConductor(object):
                     next_tasks.append(self.get_task(next_task_id))
                 except Exception as e:
                     self.log_error(str(e), task_id=next_task_id)
-                    self.set_workflow_state(states.FAILED)
+                    self.request_workflow_state(states.FAILED)
                     continue
 
         # Return nothing if there is error(s) on determining next tasks.
@@ -405,14 +454,15 @@ class WorkflowConductor(object):
 
         return task_flow_entry
 
-    def update_task_flow(self, task_id, state, result=None):
+    def update_task_flow(self, task_id, event):
         in_ctx_idx = 0
 
-        if not states.is_valid(state):
-            raise exc.InvalidState(state)
+        # Throw exception if not expected event type.
+        if not issubclass(type(event), events.ExecutionEvent):
+            raise TypeError('Event is not type of ExecutionEvent.')
 
-        # Remove the task from the staged list if it becomes active.
-        if state in states.ACTIVE_STATES and task_id in self.flow.staged:
+        # Remove the task from the staged list if it is processed.
+        if event.state and task_id in self.flow.staged:
             in_ctx_idxs = self.flow.staged[task_id]['ctxs']
 
             if len(in_ctx_idxs) <= 0 or all(x == in_ctx_idxs[0] for x in in_ctx_idxs):
@@ -434,14 +484,11 @@ class WorkflowConductor(object):
         if self.graph.in_cycle(task_id) and task_flow_entry.get('state') in states.COMPLETED_STATES:
             task_flow_entry = self.add_task_flow(task_id, in_ctx_idx=in_ctx_idx)
 
-        # If the task state change is valid, update state in task flow entry.
-        if not states.is_transition_valid(task_flow_entry.get('state'), state):
-            raise exc.InvalidStateTransition(task_flow_entry.get('state'), state)
-
-        task_flow_entry['state'] = state
+        # Process the action execution event using the task state machine and update the task state.
+        machines.TaskStateMachine.process_event(task_flow_entry, event)
 
         # Evaluate task transitions if task is in completed state.
-        if state in states.COMPLETED_STATES:
+        if task_flow_entry['state'] in states.COMPLETED_STATES:
             # Get task details required for updating outgoing context.
             task_node = self.graph.get_task(task_id)
             task_name = task_node['name']
@@ -451,7 +498,7 @@ class WorkflowConductor(object):
             # Set current task in the context.
             in_ctx_idx = task_flow_entry['ctx']
             in_ctx_val = self.flow.contexts[in_ctx_idx]['value']
-            current_task = {'id': task_id, 'name': task_name, 'result': result}
+            current_task = {'id': task_id, 'name': task_name, 'result': event.result}
             current_ctx = ctx.set_current_task(in_ctx_val, current_task)
 
             # Setup context for evaluating expressions in task transition criteria.
@@ -477,7 +524,7 @@ class WorkflowConductor(object):
                     task_flow_entry[task_transition_id] = all(evaluated_criteria)
                 except Exception as e:
                     self.log_error(str(e), task_id, task_transition_id)
-                    self.set_workflow_state(states.FAILED)
+                    self.request_workflow_state(states.FAILED)
                     continue
 
                 # If criteria met, then mark the next task staged and calculate outgoing context.
@@ -494,7 +541,7 @@ class WorkflowConductor(object):
 
                     if errors:
                         self.log_errors(errors, task_id, task_transition_id)
-                        self.set_workflow_state(states.FAILED)
+                        self.request_workflow_state(states.FAILED)
                         continue
 
                     if out_ctx_val != in_ctx_val:
@@ -517,68 +564,17 @@ class WorkflowConductor(object):
 
                     # If the next task is noop, then mark the task as completed.
                     if next_task_name == 'noop':
-                        self.update_task_flow(next_task_id, states.RUNNING)
-                        self.update_task_flow(next_task_id, states.SUCCEEDED)
+                        self.update_task_flow(next_task_id, events.TaskNoopEvent())
 
                     # If the next task is fail, then fail the workflow..
                     if next_task_name == 'fail':
-                        self.update_task_flow(next_task_id, states.RUNNING)
-                        self.update_task_flow(next_task_id, states.FAILED)
+                        self.update_task_flow(next_task_id, events.TaskFailEvent())
 
-        # Identify if there are task transitions.
-        any_next_tasks = [
-            t for t in self.graph.get_next_transitions(task_id)
-            if self.inbound_criteria_satisfied(t[1])
-        ]
+        # Process the task event using the workflow state machine and update the workflow state.
+        task_ex_event = events.TaskExecutionEvent(task_id, task_flow_entry['state'])
+        machines.WorkflowStateMachine.process_event(self, task_ex_event)
 
-        # Identify if there are any other active tasks.
-        any_active_tasks = any([t['state'] in states.ACTIVE_STATES for t in self.flow.sequence])
-
-        # Identify if there are any other staged tasks.
-        any_staged_tasks = [
-            k for k, v in six.iteritems(self.flow.staged)
-            if v.get('ready', True) is True
-        ]
-
-        # Identify if there are any paused tasks.
-        any_paused_tasks = any([t['state'] == states.PAUSED for t in self.flow.sequence])
-        any_pausing_tasks = any([t['state'] == states.PAUSING for t in self.flow.sequence])
-
-        # Decide if workflow is still running.
-        is_wf_running = any_active_tasks or any_next_tasks or any_staged_tasks
-
-        # Update workflow state.
-        old_state = self.get_workflow_state()
-        new_state = self.get_workflow_state()
-
-        if task_flow_entry['state'] == states.RESUMING:
-            new_state = states.RESUMING
-        elif task_flow_entry['state'] in states.RUNNING_STATES:
-            new_state = states.RUNNING
-        elif task_flow_entry['state'] in states.PAUSE_STATES and old_state == states.CANCELING:
-            new_state = states.CANCELING if any_active_tasks else states.CANCELED
-        elif task_flow_entry['state'] in states.PAUSE_STATES:
-            new_state = states.PAUSING if any_active_tasks else states.PAUSED
-        elif task_flow_entry['state'] in states.CANCEL_STATES:
-            new_state = states.CANCELING if any_active_tasks else states.CANCELED
-        elif task_flow_entry['state'] in states.COMPLETED_STATES and old_state == states.PAUSING:
-            new_state = states.PAUSING if any_active_tasks else states.PAUSED
-        elif task_flow_entry['state'] in states.COMPLETED_STATES and old_state == states.CANCELING:
-            new_state = states.CANCELING if any_active_tasks else states.CANCELED
-        elif task_flow_entry['state'] in states.ABENDED_STATES:
-            new_state = states.RUNNING if any_next_tasks else states.FAILED
-        elif task_flow_entry['state'] == states.SUCCEEDED and any_pausing_tasks:
-            new_state = states.PAUSING
-        elif task_flow_entry['state'] == states.SUCCEEDED and any_paused_tasks:
-            new_state = states.PAUSED
-        elif task_flow_entry['state'] == states.SUCCEEDED and is_wf_running:
-            new_state = states.RUNNING
-        elif task_flow_entry['state'] == states.SUCCEEDED:
-            new_state = states.SUCCEEDED
-
-        if old_state != new_state and states.is_transition_valid(old_state, new_state):
-            self.set_workflow_state(new_state)
-
+        # Render workflow output if workflow is completed.
         if self.get_workflow_state() in states.COMPLETED_STATES:
             in_ctx_idx = task_flow_entry['ctx']
             in_ctx_val = self.flow.contexts[in_ctx_idx]['value']

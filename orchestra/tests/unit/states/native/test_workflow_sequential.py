@@ -22,11 +22,12 @@ class SequentialWorkflowStateTest(base.OrchestraWorkflowConductorTest):
         super(SequentialWorkflowStateTest, self).__init__(*args, **kwargs)
         self.wf_name = 'sequential'
 
-    def assert_workflow_state(self, mock_flow_entries, expected_wf_states):
+    def assert_workflow_state(self, mock_flow_entries, expected_wf_states, conductor=None):
         return super(SequentialWorkflowStateTest, self).assert_workflow_state(
             self.wf_name,
             mock_flow_entries,
-            expected_wf_states
+            expected_wf_states,
+            conductor=conductor
         )
 
     def test_success(self):
@@ -67,7 +68,338 @@ class SequentialWorkflowStateTest(base.OrchestraWorkflowConductorTest):
 
         self.assert_workflow_state(mock_flow_entries, expected_wf_states)
 
-    def test_pause(self):
+    def test_pending(self):
+        mock_flow_entries = [
+            {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
+            {'id': 'task1', 'name': 'task1', 'state': states.SUCCEEDED},
+            {'id': 'task2', 'name': 'task2', 'state': states.RUNNING},
+            {'id': 'task2', 'name': 'task2', 'state': states.PENDING}
+        ]
+
+        expected_wf_states = [
+            states.RUNNING,
+            states.RUNNING,
+            states.RUNNING,
+            states.PAUSED
+        ]
+
+        # Assert states and then save the conductor for later.
+        conductor = self.assert_workflow_state(mock_flow_entries, expected_wf_states)
+
+        # Resume the workflow and assert the remaining states.
+        conductor.request_workflow_state(states.RESUMING)
+
+        mock_flow_entries = [
+            {'id': 'task3', 'name': 'task3', 'state': states.RUNNING},
+            {'id': 'task3', 'name': 'task3', 'state': states.SUCCEEDED}
+        ]
+
+        expected_wf_states = [
+            states.RUNNING,
+            states.SUCCEEDED
+        ]
+
+        # Assert the remaining states using the previous conductor.
+        self.assert_workflow_state(mock_flow_entries, expected_wf_states, conductor=conductor)
+
+    def test_workflow_pausing_while_task_running(self):
+        # Run workflow until task2 is running.
+        mock_flow_entries = [
+            {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
+            {'id': 'task1', 'name': 'task1', 'state': states.SUCCEEDED},
+            {'id': 'task2', 'name': 'task2', 'state': states.RUNNING}
+        ]
+
+        expected_wf_states = [
+            states.RUNNING,
+            states.RUNNING,
+            states.RUNNING
+        ]
+
+        # Assert states and then save the conductor for later.
+        conductor = self.assert_workflow_state(mock_flow_entries, expected_wf_states)
+
+        # Pause the workflow and assert the remaining states.
+        conductor.request_workflow_state(states.PAUSING)
+
+        mock_flow_entries = [
+            {'id': 'task2', 'name': 'task2', 'state': states.SUCCEEDED}
+        ]
+
+        expected_wf_states = [
+            states.PAUSED
+        ]
+
+        # Assert the remaining states using the previous conductor.
+        self.assert_workflow_state(mock_flow_entries, expected_wf_states, conductor=conductor)
+
+    def test_workflow_pausing_and_resuming_while_task_running(self):
+        # Run workflow until task2 is running.
+        mock_flow_entries = [
+            {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
+            {'id': 'task1', 'name': 'task1', 'state': states.SUCCEEDED},
+            {'id': 'task2', 'name': 'task2', 'state': states.RUNNING}
+        ]
+
+        expected_wf_states = [
+            states.RUNNING,
+            states.RUNNING,
+            states.RUNNING
+        ]
+
+        # Assert states and then save the conductor for later.
+        conductor = self.assert_workflow_state(mock_flow_entries, expected_wf_states)
+
+        # Pause and resume the workflow and assert the remaining states.
+        conductor.request_workflow_state(states.PAUSING)
+        conductor.request_workflow_state(states.RESUMING)
+
+        mock_flow_entries = [
+            {'id': 'task2', 'name': 'task2', 'state': states.SUCCEEDED}
+        ]
+
+        expected_wf_states = [
+            states.RUNNING
+        ]
+
+        # Assert the remaining states using the previous conductor.
+        self.assert_workflow_state(mock_flow_entries, expected_wf_states, conductor=conductor)
+
+    def test_workflow_pausing_then_task_abended(self):
+        # Run workflow until task2 is running.
+        mock_flow_entries = [
+            {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
+            {'id': 'task1', 'name': 'task1', 'state': states.SUCCEEDED},
+            {'id': 'task2', 'name': 'task2', 'state': states.RUNNING}
+        ]
+
+        expected_wf_states = [
+            states.RUNNING,
+            states.RUNNING,
+            states.RUNNING
+        ]
+
+        # Assert states and then save the conductor for later.
+        conductor = self.assert_workflow_state(mock_flow_entries, expected_wf_states)
+
+        # Pause the workflow and assert the remaining states.
+        conductor.request_workflow_state(states.PAUSING)
+
+        mock_flow_entries = [
+            {'id': 'task2', 'name': 'task2', 'state': states.FAILED}
+        ]
+
+        expected_wf_states = [
+            states.FAILED
+        ]
+
+        # Assert the remaining states using the previous conductor.
+        self.assert_workflow_state(mock_flow_entries, expected_wf_states, conductor=conductor)
+
+    def test_workflow_pausing_then_task_canceled(self):
+        # Run workflow until task2 is running.
+        mock_flow_entries = [
+            {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
+            {'id': 'task1', 'name': 'task1', 'state': states.SUCCEEDED},
+            {'id': 'task2', 'name': 'task2', 'state': states.RUNNING}
+        ]
+
+        expected_wf_states = [
+            states.RUNNING,
+            states.RUNNING,
+            states.RUNNING
+        ]
+
+        # Assert states and then save the conductor for later.
+        conductor = self.assert_workflow_state(mock_flow_entries, expected_wf_states)
+
+        # Pause the workflow and assert the remaining states.
+        conductor.request_workflow_state(states.PAUSING)
+
+        mock_flow_entries = [
+            {'id': 'task2', 'name': 'task2', 'state': states.CANCELED}
+        ]
+
+        expected_wf_states = [
+            states.CANCELED
+        ]
+
+        # Assert the remaining states using the previous conductor.
+        self.assert_workflow_state(mock_flow_entries, expected_wf_states, conductor=conductor)
+
+    def test_workflow_pausing_then_task_pending(self):
+        # Run workflow until task2 is running.
+        mock_flow_entries = [
+            {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
+            {'id': 'task1', 'name': 'task1', 'state': states.SUCCEEDED},
+            {'id': 'task2', 'name': 'task2', 'state': states.RUNNING}
+        ]
+
+        expected_wf_states = [
+            states.RUNNING,
+            states.RUNNING,
+            states.RUNNING
+        ]
+
+        # Assert states and then save the conductor for later.
+        conductor = self.assert_workflow_state(mock_flow_entries, expected_wf_states)
+
+        # Pause the workflow and assert the remaining states.
+        conductor.request_workflow_state(states.PAUSING)
+
+        mock_flow_entries = [
+            {'id': 'task2', 'name': 'task2', 'state': states.PENDING}
+        ]
+
+        expected_wf_states = [
+            states.PAUSED
+        ]
+
+        # Assert the remaining states using the previous conductor.
+        self.assert_workflow_state(mock_flow_entries, expected_wf_states, conductor=conductor)
+
+    def test_workflow_resuming(self):
+        # Run workflow until task2 is running.
+        mock_flow_entries = [
+            {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
+            {'id': 'task1', 'name': 'task1', 'state': states.SUCCEEDED},
+            {'id': 'task2', 'name': 'task2', 'state': states.RUNNING}
+        ]
+
+        expected_wf_states = [
+            states.RUNNING,
+            states.RUNNING,
+            states.RUNNING
+        ]
+
+        # Assert states and then save the conductor for later.
+        conductor = self.assert_workflow_state(mock_flow_entries, expected_wf_states)
+
+        # Pause the workflow and assert the remaining states.
+        conductor.request_workflow_state(states.PAUSING)
+
+        mock_flow_entries = [
+            {'id': 'task2', 'name': 'task2', 'state': states.SUCCEEDED}
+        ]
+
+        expected_wf_states = [
+            states.PAUSED
+        ]
+
+        # Assert the remaining states using the previous conductor.
+        conductor = self.assert_workflow_state(mock_flow_entries, expected_wf_states, conductor)
+
+        # Resume the workflow and assert the remaining states.
+        conductor.request_workflow_state(states.RESUMING)
+
+        mock_flow_entries = [
+            {'id': 'task3', 'name': 'task3', 'state': states.RUNNING},
+            {'id': 'task3', 'name': 'task3', 'state': states.SUCCEEDED}
+        ]
+
+        expected_wf_states = [
+            states.RUNNING,
+            states.SUCCEEDED
+        ]
+
+        # Assert the remaining states using the previous conductor.
+        self.assert_workflow_state(mock_flow_entries, expected_wf_states, conductor=conductor)
+
+    def test_workflow_resuming_then_task_abended(self):
+        # Run workflow until task2 is running.
+        mock_flow_entries = [
+            {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
+            {'id': 'task1', 'name': 'task1', 'state': states.SUCCEEDED},
+            {'id': 'task2', 'name': 'task2', 'state': states.RUNNING}
+        ]
+
+        expected_wf_states = [
+            states.RUNNING,
+            states.RUNNING,
+            states.RUNNING
+        ]
+
+        # Assert states and then save the conductor for later.
+        conductor = self.assert_workflow_state(mock_flow_entries, expected_wf_states)
+
+        # Pause the workflow and assert the remaining states.
+        conductor.request_workflow_state(states.PAUSING)
+
+        mock_flow_entries = [
+            {'id': 'task2', 'name': 'task2', 'state': states.SUCCEEDED}
+        ]
+
+        expected_wf_states = [
+            states.PAUSED
+        ]
+
+        # Assert the remaining states using the previous conductor.
+        conductor = self.assert_workflow_state(mock_flow_entries, expected_wf_states, conductor)
+
+        # Resume the workflow and assert the remaining states.
+        conductor.request_workflow_state(states.RESUMING)
+
+        mock_flow_entries = [
+            {'id': 'task3', 'name': 'task3', 'state': states.RUNNING},
+            {'id': 'task3', 'name': 'task3', 'state': states.FAILED}
+        ]
+
+        expected_wf_states = [
+            states.RUNNING,
+            states.FAILED
+        ]
+
+        # Assert the remaining states using the previous conductor.
+        self.assert_workflow_state(mock_flow_entries, expected_wf_states, conductor=conductor)
+
+    def test_workflow_resuming_then_task_canceled(self):
+        # Run workflow until task2 is running.
+        mock_flow_entries = [
+            {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
+            {'id': 'task1', 'name': 'task1', 'state': states.SUCCEEDED},
+            {'id': 'task2', 'name': 'task2', 'state': states.RUNNING}
+        ]
+
+        expected_wf_states = [
+            states.RUNNING,
+            states.RUNNING,
+            states.RUNNING
+        ]
+
+        # Assert states and then save the conductor for later.
+        conductor = self.assert_workflow_state(mock_flow_entries, expected_wf_states)
+
+        # Pause the workflow and assert the remaining states.
+        conductor.request_workflow_state(states.PAUSING)
+
+        mock_flow_entries = [
+            {'id': 'task2', 'name': 'task2', 'state': states.SUCCEEDED}
+        ]
+
+        expected_wf_states = [
+            states.PAUSED
+        ]
+
+        # Assert the remaining states using the previous conductor.
+        conductor = self.assert_workflow_state(mock_flow_entries, expected_wf_states, conductor)
+
+        # Resume the workflow and assert the remaining states.
+        conductor.request_workflow_state(states.RESUMING)
+
+        mock_flow_entries = [
+            {'id': 'task3', 'name': 'task3', 'state': states.RUNNING},
+            {'id': 'task3', 'name': 'task3', 'state': states.CANCELED}
+        ]
+
+        expected_wf_states = [
+            states.RUNNING,
+            states.CANCELED
+        ]
+
+        # Assert the remaining states using the previous conductor.
+        self.assert_workflow_state(mock_flow_entries, expected_wf_states, conductor=conductor)
+
+    def test_task_pause(self):
         # Test use case where a task is paused.
         mock_flow_entries = [
             {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
@@ -81,13 +413,13 @@ class SequentialWorkflowStateTest(base.OrchestraWorkflowConductorTest):
             states.RUNNING,
             states.RUNNING,
             states.RUNNING,
-            states.PAUSING,
+            states.RUNNING,
             states.PAUSED
         ]
 
         self.assert_workflow_state(mock_flow_entries, expected_wf_states)
 
-    def test_pausing_then_canceled(self):
+    def test_task_pausing_then_canceled(self):
         # Test use case where a task is pausing and then canceled.
         mock_flow_entries = [
             {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
@@ -102,14 +434,14 @@ class SequentialWorkflowStateTest(base.OrchestraWorkflowConductorTest):
             states.RUNNING,
             states.RUNNING,
             states.RUNNING,
-            states.PAUSING,
+            states.RUNNING,
             states.CANCELING,
             states.CANCELED
         ]
 
         self.assert_workflow_state(mock_flow_entries, expected_wf_states)
 
-    def test_pausing_then_abended(self):
+    def test_task_pausing_then_abended(self):
         # Test use case where a task is pausing and then failed.
         mock_flow_entries = [
             {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
@@ -123,13 +455,13 @@ class SequentialWorkflowStateTest(base.OrchestraWorkflowConductorTest):
             states.RUNNING,
             states.RUNNING,
             states.RUNNING,
-            states.PAUSING,
-            states.PAUSED
+            states.RUNNING,
+            states.FAILED
         ]
 
         self.assert_workflow_state(mock_flow_entries, expected_wf_states)
 
-    def test_resume(self):
+    def test_task_resume(self):
         # Test use case where a task is paused and resumed.
         mock_flow_entries = [
             {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
@@ -148,9 +480,9 @@ class SequentialWorkflowStateTest(base.OrchestraWorkflowConductorTest):
             states.RUNNING,
             states.RUNNING,
             states.RUNNING,
-            states.PAUSING,
+            states.RUNNING,
             states.PAUSED,
-            states.RESUMING,
+            states.RUNNING,
             states.RUNNING,
             states.RUNNING,
             states.RUNNING,
@@ -159,7 +491,7 @@ class SequentialWorkflowStateTest(base.OrchestraWorkflowConductorTest):
 
         self.assert_workflow_state(mock_flow_entries, expected_wf_states)
 
-    def test_resuming_then_canceled(self):
+    def test_task_resuming_then_canceled(self):
         # Test use case where a task is paused and resumed.
         mock_flow_entries = [
             {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
@@ -176,16 +508,16 @@ class SequentialWorkflowStateTest(base.OrchestraWorkflowConductorTest):
             states.RUNNING,
             states.RUNNING,
             states.RUNNING,
-            states.PAUSING,
+            states.RUNNING,
             states.PAUSED,
-            states.RESUMING,
+            states.RUNNING,
             states.CANCELING,
             states.CANCELED
         ]
 
         self.assert_workflow_state(mock_flow_entries, expected_wf_states)
 
-    def test_cancel(self):
+    def test_task_cancel(self):
         # Test use case where a task is canceled.
         mock_flow_entries = [
             {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
@@ -205,7 +537,7 @@ class SequentialWorkflowStateTest(base.OrchestraWorkflowConductorTest):
 
         self.assert_workflow_state(mock_flow_entries, expected_wf_states)
 
-    def test_canceling_then_paused(self):
+    def test_task_canceling_then_paused(self):
         # Test use case where a task is canceling and then paused.
         mock_flow_entries = [
             {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
@@ -226,13 +558,13 @@ class SequentialWorkflowStateTest(base.OrchestraWorkflowConductorTest):
         ]
 
         self.assertRaises(
-            exc.InvalidStateTransition,
+            exc.InvalidTaskStateTransition,
             self.assert_workflow_state,
             mock_flow_entries,
             expected_wf_states
         )
 
-    def test_canceling_then_abended(self):
+    def test_task_canceling_then_abended(self):
         # Test use case where a task is pausing and then failed.
         mock_flow_entries = [
             {'id': 'task1', 'name': 'task1', 'state': states.RUNNING},
