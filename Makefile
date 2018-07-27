@@ -15,9 +15,9 @@ PY27 := /usr/bin/python2.7
 RPM_ROOT = ~/rpmbuild
 RPM_SOURCES_DIR := $(RPM_ROOT)/SOURCES/
 RPM_SPECS_DIR := $(RPM_ROOT)/SPECS/
-VER := $(shell cat ./orchestra/__init__.py | grep -Po "__version__ = '\K[^']*")
+VER := $(shell cat ./orquesta/__init__.py | grep -Po "__version__ = '\K[^']*")
 RELEASE = 1
-COMPONENTS := orchestra
+COMPONENTS := orquesta
 
 # Virtual Environment
 VENV_DIR ?= .venv
@@ -26,7 +26,7 @@ VENV_DIR ?= .venv
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SPHINXAUTO	  = sphinx-autobuild
-SPHINXPROJ    = Orchestra
+SPHINXPROJ    = Orquesta
 SOURCEDIR     = docs/source
 BUILDDIR      = docs/build
 
