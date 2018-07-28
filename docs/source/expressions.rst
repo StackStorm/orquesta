@@ -24,10 +24,10 @@ Applied to workflows, here are some use cases:
 
 Types
 -----
-Orchestra currently supports `YAQL <http://yaql.readthedocs.io/en/latest/>`_ and
+Orquesta currently supports `YAQL <http://yaql.readthedocs.io/en/latest/>`_ and
 `Jinja <http://jinja.pocoo.org>`_ expressions. Both types of expressions can be used throughout the
 workflow. Note that mixing of both YAQL and Jinja expressions in a single statement is not supported.
-To tell Orchestra which expression is which, each type of expression should be encapsulated with
+To tell Orquesta which expression is which, each type of expression should be encapsulated with
 different symbols. For YAQL, the expression is wrapped in between ``<% YAQL expression %>``. For
 Jinja, expression is wrapped in between ``{{ Jinja expression }}``. Code block using ``{% %}`` is
 also supported for Jinja. The symbols ``{`` and ``}`` conflict with JSON and the entire Jinja
