@@ -26,7 +26,7 @@ os.chdir(PKG_ROOT_DIR)
 def get_version_string():
     version = None
     sys.path.insert(0, PKG_ROOT_DIR)
-    from orchestra import __version__
+    from orquesta import __version__
     version = __version__
     sys.path.pop(0)
     return version
@@ -42,7 +42,7 @@ def get_requirements():
 
 
 setup(
-    name='orchestra',
+    name='orquesta',
     version=get_version_string(),
     author='StackStorm',
     author_email='info@stackstorm.com',
@@ -63,26 +63,26 @@ setup(
         'Programming Language :: Python :: 3.5'
     ],
     entry_points={
-        'orchestra.composers': [
-            'native = orchestra.composers.native:WorkflowComposer',
-            'mistral = orchestra.composers.mistral:WorkflowComposer',
-            'mock = orchestra.composers.mock:WorkflowComposer'
+        'orquesta.composers': [
+            'native = orquesta.composers.native:WorkflowComposer',
+            'mistral = orquesta.composers.mistral:WorkflowComposer',
+            'mock = orquesta.composers.mock:WorkflowComposer'
         ],
-        'orchestra.expressions.evaluators': [
-            'yaql = orchestra.expressions.yql:YAQLEvaluator',
-            'jinja = orchestra.expressions.jinja:JinjaEvaluator'
+        'orquesta.expressions.evaluators': [
+            'yaql = orquesta.expressions.yql:YAQLEvaluator',
+            'jinja = orquesta.expressions.jinja:JinjaEvaluator'
         ],
-        'orchestra.expressions.functions': [
-            'ctx = orchestra.expressions.functions.common:ctx_',
-            'json = orchestra.expressions.functions.common:json_',
-            'task_state = orchestra.expressions.functions.workflow:task_state_',
-            'succeeded = orchestra.expressions.functions.workflow:succeeded_',
-            'failed = orchestra.expressions.functions.workflow:failed_',
-            'completed = orchestra.expressions.functions.workflow:completed_',
-            'result = orchestra.expressions.functions.workflow:result_' 
+        'orquesta.expressions.functions': [
+            'ctx = orquesta.expressions.functions.common:ctx_',
+            'json = orquesta.expressions.functions.common:json_',
+            'task_state = orquesta.expressions.functions.workflow:task_state_',
+            'succeeded = orquesta.expressions.functions.workflow:succeeded_',
+            'failed = orquesta.expressions.functions.workflow:failed_',
+            'completed = orquesta.expressions.functions.workflow:completed_',
+            'result = orquesta.expressions.functions.workflow:result_' 
         ],
-        'orchestra.tests': [
-            'fake = orchestra.tests.unit.utils.test_plugin:FakePlugin'
+        'orquesta.tests': [
+            'fake = orquesta.tests.unit.utils.test_plugin:FakePlugin'
         ]
     }
 )

@@ -39,7 +39,7 @@ as variables.
 
 When ``task1`` and ``task2`` completes, each task will ``publish`` the result into the context dictionary.
 Since these tasks run in parallel, the task that completes first will write to the context dictionary
-first. A race between parallel tasks is possible and Orchestra will handle the race condition. It is
+first. A race between parallel tasks is possible and Orquesta will handle the race condition. It is
 best practice to avoid using the same variable name in parallel branches that converge downstream.
 
 .. code-block:: yaml
@@ -92,7 +92,7 @@ Assignment Order
 
 In the workflow defintion where variables are assigned into the context dictionary such as
 ``input``, ``vars``, ``publish``, and ``output``, the variables are defined as a list of key value
-pairs. Orchestra will evaluate the assignment and associated expression in the order that the
+pairs. Orquesta will evaluate the assignment and associated expression in the order that the
 variables are listed. Variables that have already been assigned earlier in the list are immediately
 available for reference. Take the following workflow as an example, the input variable ``x`` is
 immediately available for reference in the assignment of ``y``:

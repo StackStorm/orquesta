@@ -1,8 +1,8 @@
-Orchestra Overview
+Orquesta Overview
 ==================
 
-Orchestra is a graph based workflow engine designed specifically for
-`StackStorm <https://github.com/StackStorm/st2>`_. As a building block, Orchestra does not include
+Orquesta is a graph based workflow engine designed specifically for
+`StackStorm <https://github.com/StackStorm/st2>`_. As a building block, Orquesta does not include
 all the parts such as messaging, persistence, and locking required to run as a service.
 
 The engine consists of the workflow models that are decomposed from the language spec, the composer
@@ -15,14 +15,14 @@ When a task completes, it can transition into other tasks based upon criteria. T
 publish output for the next tasks. When there are no more tasks to execute, the workflow is
 complete.
 
-Orchestra includes a native language spec for the workflow definition. The language spec is
+Orquesta includes a native language spec for the workflow definition. The language spec is
 decomposed into various models and described with `JSON schema <http://json-schema.org/>`_. A
 workflow composer that understands the models converts the workflow definition into a directed
 graph. The nodes represent the tasks and edges are the task transition. The criteria for task
 transition is an attribute of the edge. The graph is the underpinning for conducting the workflow
 execution. The workflow definition is just syntactic sugar.
 
-Orchestra allows for one or more language specs to be defined. So as long as the workflow
+Orquesta allows for one or more language specs to be defined. So as long as the workflow
 definition, however structured, is composed into the expected graph, the workflow conductor can
 handle it.
 

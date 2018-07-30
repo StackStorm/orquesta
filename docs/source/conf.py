@@ -19,7 +19,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'StackStorm Orchestra'
+project = u'StackStorm Orquesta'
 copyright = u'2018, StackStorm'
 author = u'StackStorm'
 
@@ -103,7 +103,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'Orchestradoc'
+htmlhelp_basename = 'Orquestadoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -130,7 +130,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'Orchestra.tex', u'Orchestra Documentation',
+    (master_doc, 'Orquesta.tex', u'Orquesta Documentation',
      u'StackStorm', 'manual'),
 ]
 
@@ -140,7 +140,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'orchestra', u'Orchestra Documentation',
+    (master_doc, 'orquesta', u'Orquesta Documentation',
      [author], 1)
 ]
 
@@ -151,7 +151,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'Orchestra', u'Orchestra Documentation',
-     author, 'Orchestra', 'One line description of project.',
+    (master_doc, 'Orquesta', u'Orquesta Documentation',
+     author, 'Orquesta', 'One line description of project.',
      'Miscellaneous'),
 ]
