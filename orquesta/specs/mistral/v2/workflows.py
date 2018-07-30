@@ -17,7 +17,7 @@ from orquesta import exceptions as exc
 from orquesta.expressions import base as expr
 from orquesta.specs.mistral.v2 import base
 from orquesta.specs.mistral.v2 import tasks
-from orqessta.specs.mistral.v2 import types as mistral_types
+from orquesta.specs.mistral.v2 import types as mistral_types
 from orquesta.specs import types
 from orquesta.utils import dictionary as dx
 
