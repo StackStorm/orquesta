@@ -123,10 +123,6 @@ VERSION = {
     ]
 }
 
-WORKFLOW_TYPE = {
-    "enum": ["reverse", "direct"]
-}
-
 STRING_OR_ONE_KEY_DICT = {
     "oneOf": [
         NONEMPTY_STRING,
