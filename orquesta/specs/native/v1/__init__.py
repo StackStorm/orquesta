@@ -10,23 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.specs.native.v1 import base
-from orquesta.specs.native.v1.models import deserialize                 # noqa
-from orquesta.specs.native.v1.models import instantiate                 # noqa
-from orquesta.specs.native.v1.models import TaskMappingSpec             # noqa
-from orquesta.specs.native.v1.models import TaskSpec                    # noqa
-from orquesta.specs.native.v1.models import TaskTransitionSequenceSpec  # noqa
-from orquesta.specs.native.v1.models import TaskTransitionSpec          # noqa
-from orquesta.specs.native.v1.models import WorkflowSpec                # noqa
+from orquesta.specs.native.v1 import base as native_v1_base
 
-VERSION = base.Spec.get_version()
 
-__all__ = [
-    instantiate.__name__,
-    deserialize.__name__,
-    WorkflowSpec.__name__,
-    TaskMappingSpec.__name__,
-    TaskSpec.__name__,
-    TaskTransitionSequenceSpec.__name__,
-    TaskTransitionSpec.__name__
-]
+VERSION = native_v1_base.Spec.get_version()
