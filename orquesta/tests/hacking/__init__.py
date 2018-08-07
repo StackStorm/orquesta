@@ -10,19 +10,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.specs.mistral import v2
-from orquesta.specs.mistral.v2 import deserialize       # noqa
-from orquesta.specs.mistral.v2 import instantiate       # noqa
-from orquesta.specs.mistral.v2 import TaskDefaultsSpec  # noqa
-from orquesta.specs.mistral.v2 import TaskSpec          # noqa
-from orquesta.specs.mistral.v2 import WorkflowSpec      # noqa
 
-VERSION = v2.VERSION
+from orquesta.tests.hacking import imports as import_rules
 
-__all__ = [
-    instantiate.__name__,
-    deserialize.__name__,
-    WorkflowSpec.__name__,
-    TaskDefaultsSpec.__name__,
-    TaskSpec.__name__
-]
+
+def factory(register):
+    register(import_rules.check_import_modules_only)

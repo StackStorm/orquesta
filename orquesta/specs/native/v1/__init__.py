@@ -11,13 +11,13 @@
 # limitations under the License.
 
 from orquesta.specs.native.v1 import base
-from orquesta.specs.native.v1.models import deserialize
-from orquesta.specs.native.v1.models import instantiate
-from orquesta.specs.native.v1.models import TaskMappingSpec
-from orquesta.specs.native.v1.models import TaskSpec
-from orquesta.specs.native.v1.models import TaskTransitionSequenceSpec
-from orquesta.specs.native.v1.models import TaskTransitionSpec
-from orquesta.specs.native.v1.models import WorkflowSpec
+from orquesta.specs.native.v1.models import deserialize                 # noqa
+from orquesta.specs.native.v1.models import instantiate                 # noqa
+from orquesta.specs.native.v1.models import TaskMappingSpec             # noqa
+from orquesta.specs.native.v1.models import TaskSpec                    # noqa
+from orquesta.specs.native.v1.models import TaskTransitionSequenceSpec  # noqa
+from orquesta.specs.native.v1.models import TaskTransitionSpec          # noqa
+from orquesta.specs.native.v1.models import WorkflowSpec                # noqa
 
 VERSION = base.Spec.get_version()
 

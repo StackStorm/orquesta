@@ -11,11 +11,11 @@
 # limitations under the License.
 
 from orquesta.specs.mistral.v2 import base
-from orquesta.specs.mistral.v2.tasks import TaskDefaultsSpec
-from orquesta.specs.mistral.v2.tasks import TaskSpec
-from orquesta.specs.mistral.v2.workflows import deserialize
-from orquesta.specs.mistral.v2.workflows import instantiate
-from orquesta.specs.mistral.v2.workflows import WorkflowSpec
+from orquesta.specs.mistral.v2.tasks import TaskDefaultsSpec    # noqa
+from orquesta.specs.mistral.v2.tasks import TaskSpec            # noqa
+from orquesta.specs.mistral.v2.workflows import deserialize     # noqa
+from orquesta.specs.mistral.v2.workflows import instantiate     # noqa
+from orquesta.specs.mistral.v2.workflows import WorkflowSpec    # noqa
 
 VERSION = base.Spec.get_version()
 

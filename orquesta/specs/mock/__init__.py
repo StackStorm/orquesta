@@ -11,9 +11,9 @@
 # limitations under the License.
 
 from orquesta.specs import base
-from orquesta.specs.mock.models import deserialize
-from orquesta.specs.mock.models import instantiate
-from orquesta.specs.mock.models import WorkflowSpec
+from orquesta.specs.mock.models import deserialize      # noqa
+from orquesta.specs.mock.models import instantiate      # noqa
+from orquesta.specs.mock.models import WorkflowSpec     # noqa
 
 VERSION = base.Spec.get_version()
 
