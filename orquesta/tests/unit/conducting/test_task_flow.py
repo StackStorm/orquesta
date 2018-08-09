@@ -123,6 +123,16 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         self.assertEqual(conductor.get_task_flow_idx('task1'), 0)
         self.assertDictEqual(conductor.get_task_flow_entry('task1'), expected_task_flow_item)
 
+    def test_update_task_flow_for_not_ready_task(self):
+        conductor = self._prep_conductor(state=states.RUNNING)
+
+        self.assertRaises(
+            exc.InvalidTaskFlowEntry,
+            conductor.update_task_flow,
+            'task2',
+            events.ActionExecutionEvent(states.RUNNING)
+        )
+
     def test_update_task_flow_for_nonexistent_task(self):
         conductor = self._prep_conductor(state=states.RUNNING)
 

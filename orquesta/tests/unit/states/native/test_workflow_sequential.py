@@ -90,11 +90,13 @@ class SequentialWorkflowStateTest(base.OrchestraWorkflowConductorTest):
         conductor.request_workflow_state(states.RESUMING)
 
         mock_flow_entries = [
+            {'id': 'task2', 'name': 'task2', 'state': states.SUCCEEDED},
             {'id': 'task3', 'name': 'task3', 'state': states.RUNNING},
             {'id': 'task3', 'name': 'task3', 'state': states.SUCCEEDED}
         ]
 
         expected_wf_states = [
+            states.RUNNING,
             states.RUNNING,
             states.SUCCEEDED
         ]
