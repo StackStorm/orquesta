@@ -69,7 +69,7 @@ class TaskFlow(object):
 
     @property
     def has_paused_tasks(self):
-        return len(self.get_tasks_by_state([states.PAUSED])) > 0
+        return len(self.get_tasks_by_state([states.PAUSED, states.PENDING])) > 0
 
     @property
     def has_canceling_tasks(self):
@@ -461,6 +461,17 @@ class WorkflowConductor(object):
         if not issubclass(type(event), events.ExecutionEvent):
             raise TypeError('Event is not type of ExecutionEvent.')
 
+        # Throw exception if task does not exist in the workflow graph.
+        if not self.graph.has_task(task_id):
+            raise exc.InvalidTask(task_id)
+
+        # Try to get the task flow entry.
+        task_flow_entry = self.get_task_flow_entry(task_id)
+
+        # Throw exception if task is not staged and there is no task flow entry.
+        if task_id not in self.flow.staged and not task_flow_entry:
+            raise exc.InvalidTaskFlowEntry(task_id)
+
         # Remove the task from the staged list if it is processed.
         if event.state and task_id in self.flow.staged:
             in_ctx_idxs = self.flow.staged[task_id]['ctxs']
@@ -474,9 +485,7 @@ class WorkflowConductor(object):
 
             del self.flow.staged[task_id]
 
-        # Get task flow entry and create new if it does not exist.
-        task_flow_entry = self.get_task_flow_entry(task_id)
-
+        # Create new task flow entry if it does not exist.
         if not task_flow_entry:
             task_flow_entry = self.add_task_flow(task_id, in_ctx_idx=in_ctx_idx)
 

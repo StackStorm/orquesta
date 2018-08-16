@@ -160,12 +160,6 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.TASK_RUNNING: states.RUNNING,
         events.TASK_PENDING_WORKFLOW_ACTIVE: states.PAUSING,
         events.TASK_PENDING_WORKFLOW_DORMANT: states.PAUSED,
-        # Workflow in resuming state is almost similar to workflow in running state.
-        # Workflow state is not affected by task going into pause states. This allows for more
-        # granular control if operators want to pause a task but keep the rest of running.
-        events.TASK_PAUSING: states.RUNNING,
-        events.TASK_PAUSED_WORKFLOW_ACTIVE: states.RUNNING,
-        events.TASK_PAUSED_WORKFLOW_DORMANT: states.PAUSED,
         events.TASK_SUCCEEDED_WORKFLOW_ACTIVE_INCOMPLETE: states.RUNNING,
         events.TASK_SUCCEEDED_WORKFLOW_ACTIVE_COMPLETED: states.RUNNING,
         events.TASK_SUCCEEDED_WORKFLOW_DORMANT_INCOMPLETE: states.RUNNING,
