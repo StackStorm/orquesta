@@ -10,8 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from functools import partial
-
+import functools
 import inspect
 import logging
 import re
@@ -86,7 +85,7 @@ class JinjaEvaluator(base.Evaluator):
             ctx['__current_task'] = ctx['__vars'].get('__current_task')
 
         for name, func in six.iteritems(cls._custom_functions):
-            ctx[name] = partial(func, ctx)
+            ctx[name] = functools.partial(func, ctx)
 
         return ctx
 

@@ -10,19 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.specs.mistral.v2 import base
-from orquesta.specs.mistral.v2.tasks import TaskDefaultsSpec
-from orquesta.specs.mistral.v2.tasks import TaskSpec
-from orquesta.specs.mistral.v2.workflows import deserialize
-from orquesta.specs.mistral.v2.workflows import instantiate
-from orquesta.specs.mistral.v2.workflows import WorkflowSpec
+from orquesta.specs.mistral.v2 import base as mistral_v2_base
 
-VERSION = base.Spec.get_version()
 
-__all__ = [
-    instantiate.__name__,
-    deserialize.__name__,
-    WorkflowSpec.__name__,
-    TaskDefaultsSpec.__name__,
-    TaskSpec.__name__
-]
+VERSION = mistral_v2_base.Spec.get_version()

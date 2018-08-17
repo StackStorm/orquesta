@@ -10,17 +10,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.specs import base as mock_base
-from orquesta.specs.mock import models as mock_models
+
+from orquesta.tests.hacking import imports as import_rules
 
 
-VERSION = mock_base.Spec.get_version()
-deserialize = mock_models.deserialize
-instantiate = mock_models.instantiate
-WorkflowSpec = mock_models.WorkflowSpec
-
-__all__ = [
-    instantiate.__name__,
-    deserialize.__name__,
-    WorkflowSpec.__name__
-]
+def factory(register):
+    register(import_rules.check_import_modules_only)
