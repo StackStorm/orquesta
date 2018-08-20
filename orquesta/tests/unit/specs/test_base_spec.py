@@ -712,3 +712,76 @@ class SpecTest(unittest.TestCase):
         self.assertEqual(len(ctx.exception.args), 2)
         self.assertEqual(ctx.exception.args[0], 'Workflow definition failed inspection.')
         self.assertDictEqual(ctx.exception.args[1], errors)
+
+    def test_spec_valid_with_app_ctx(self):
+        spec = {
+            'name': 'mock',
+            'version': '1.0',
+            'description': 'This is a mock spec.',
+            'vars': {
+                'var1': 'foobar',
+                'var2': '<% ctx().x %>',
+                'var3': '<% ctx().y %>'
+            },
+            'attr1': 'foobar',
+            'attr2': {
+                'macro': 'polo'
+            },
+            'attr3': [
+                '<% ctx().var1 %>'
+            ],
+            'attr4': [
+                {'open': 'sesame'},
+                {'sesame': 'open'}
+            ],
+            'attr5': {
+                'attr1': {
+                    'attr1': '<% ctx().var2 %> <% ctx().var3 %>'
+                }
+            }
+        }
+
+        spec_obj = specs.MockSpec(spec)
+        app_ctx = {'x': 'marco', 'y': 'polo'}
+
+        self.assertDictEqual(spec_obj.spec, spec)
+        self.assertDictEqual(spec_obj.inspect(app_ctx=app_ctx), {})
+
+    def test_spec_invalid_with_bad_app_ctx(self):
+        spec = {
+            'name': 'mock',
+            'version': '1.0',
+            'description': 'This is a mock spec.',
+            'vars': {
+                'var1': 'foobar',
+                'var2': '<% ctx().x %>',
+                'var3': '<% ctx().y %>'
+            },
+            'attr1': 'foobar',
+            'attr2': {
+                'macro': 'polo'
+            },
+            'attr3': [
+                '<% ctx().var1 %>'
+            ],
+            'attr4': [
+                {'open': 'sesame'},
+                {'sesame': 'open'}
+            ],
+            'attr5': {
+                'attr1': {
+                    'attr1': '<% ctx().var2 %> <% ctx().var3 %>'
+                }
+            }
+        }
+
+        spec_obj = specs.MockSpec(spec)
+        app_ctx = [{'x': 'marco'}, {'y': 'polo'}]
+
+        self.assertDictEqual(spec_obj.spec, spec)
+
+        self.assertRaises(
+            TypeError,
+            spec_obj.inspect,
+            app_ctx=app_ctx
+        )
