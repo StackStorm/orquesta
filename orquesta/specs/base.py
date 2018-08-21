@@ -244,8 +244,12 @@ class Spec(object):
             if parent else 'properties.' + prop_name
         )
 
-    def inspect(self, raise_exception=False):
+    def inspect(self, app_ctx=None, raise_exception=False):
+        if app_ctx and not isinstance(app_ctx, dict):
+            raise TypeError('Application context is not type of dict.')
+
         errors = {}
+        app_ctx_metadata = None
 
         syntax_errors = sorted(self.inspect_syntax(), key=lambda e: e['schema_path'])
 
@@ -262,7 +266,14 @@ class Spec(object):
         if expr_errors:
             errors['expressions'] = expr_errors
 
-        ctx_errors, _ = self.inspect_context()
+        if app_ctx:
+            app_ctx_metadata = {
+                'ctx': app_ctx.keys(),
+                'spec_path': '.',
+                'schema_path': '.'
+            }
+
+        ctx_errors, _ = self.inspect_context(parent=app_ctx_metadata)
 
         if ctx_errors:
             errors['context'] = ctx_errors
