@@ -30,7 +30,7 @@ LOG = logging.getLogger(__name__)
 ON_CLAUSE_SCHEMA = {
     'oneOf': [
         types.NONEMPTY_STRING,
-        types.UNIQUE_STRING_OR_YAQL_CONDITION_LIST
+        types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST
     ]
 }
 
@@ -74,10 +74,14 @@ class TaskSpec(base.Spec):
             'workflow': types.NONEMPTY_STRING,
             'input': types.NONEMPTY_DICT,
             'publish': types.NONEMPTY_DICT,
+            'publish-on-error': types.NONEMPTY_DICT,
+            'keep-result': policies.KEEP_RESULT_SCHEMA,
             'retry': policies.RetrySpec,
+            'safe-rerun': policies.SAFE_RERUN_SCHEMA,
             'wait-before': policies.WAIT_BEFORE_SCHEMA,
             'wait-after': policies.WAIT_AFTER_SCHEMA,
             'pause-before': policies.PAUSE_BEFORE_SCHEMA,
+            'target': policies.TARGET_SCHEMA,
             'timeout': policies.TIMEOUT_SCHEMA,
             'on-complete': ON_CLAUSE_SCHEMA,
             'on-success': ON_CLAUSE_SCHEMA,
@@ -114,6 +118,7 @@ class TaskSpec(base.Spec):
         'workflow',
         'input',
         'publish',
+        'publish-on-error',
         'on-complete',
         'on-success',
         'on-error'

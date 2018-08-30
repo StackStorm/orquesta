@@ -10,6 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+BOOLEAN = {
+    "type": "boolean"
+}
+
 NONEMPTY_STRING = {
     "type": "string",
     "minLength": 1
@@ -48,7 +52,7 @@ YAQL_CONDITION = {
 ANY = {
     "anyOf": [
         {"type": "array"},
-        {"type": "boolean"},
+        BOOLEAN,
         {"type": "integer"},
         {"type": "number"},
         {"type": "object"},
@@ -61,7 +65,7 @@ ANY_NULLABLE = {
     "anyOf": [
         {"type": "null"},
         {"type": "array"},
-        {"type": "boolean"},
+        BOOLEAN,
         {"type": "integer"},
         {"type": "number"},
         {"type": "object"},
@@ -87,6 +91,20 @@ ONE_KEY_DICT = {
     }
 }
 
+STRING_OR_POSITIVE_INTEGER = {
+    "oneOf": [
+        NONEMPTY_STRING,
+        POSITIVE_INTEGER
+    ]
+}
+
+STRING_OR_BOOLEAN = {
+    "oneOf": [
+        NONEMPTY_STRING,
+        BOOLEAN
+    ]
+}
+
 STRING_OR_YAQL_CONDITION = {
     "oneOf": [
         NONEMPTY_STRING,
@@ -104,7 +122,7 @@ YAQL_OR_POSITIVE_INTEGER = {
 YAQL_OR_BOOLEAN = {
     "oneOf": [
         YAQL,
-        {"type": "boolean"}
+        BOOLEAN
     ]
 }
 
