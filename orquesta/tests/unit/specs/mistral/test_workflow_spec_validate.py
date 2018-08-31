@@ -90,9 +90,29 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
             sequential:
                 description: A basic sequential workflow.
                 task-defaults:
-                    timeout: 60
+                   concurrency: 1
+                   keep-result: true
+                   retry:
+                       delay: 5
+                       count: 10
+                   safe-rerun: true
+                   wait-before: 3
+                   wait-after: 9
+                   pause-before: false
+                   target: some_node
+                   timeout: 90
+                   on-success:
+                       - task2
+                   on-error:
+                       - task2
+                   on-complete:
+                       - task3
                 tasks:
                     task1:
+                        action: std.noop
+                    task2:
+                        action: std.noop
+                    task3:
                         action: std.noop
         """
 
@@ -173,3 +193,99 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
         }
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_workflow_with_output_on_error(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                vars:
+                    jinja_expr: "abc"
+                    test_jinja: "xyz"
+                output-on-error:
+                    stdout: "abc"
+                    jinja_expr: "{{ _.test_jinja }}"
+                    yaql_expr: <% $.test_yaql %>
+
+                tasks:
+                    task1:
+                        action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_task_policies(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+
+                tasks:
+                    task1:
+                        action: std.noop
+                        concurrency: 1
+                        keep-result: true
+                        retry:
+                            delay: 5
+                            count: 10
+                        safe-rerun: true
+                        wait-before: 3
+                        wait-after: 9
+                        pause-before: false
+                        target: some_node
+                        timeout: 90
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_task_policies_with_expressions(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+
+                tasks:
+                    task1:
+                        action: std.noop
+                        concurrency: "{{ 3 | int }}"
+                        keep-result: "{{ True }}"
+                        retry:
+                            delay: "{{ 5 | int }}"
+                            count: "{{ 10 | int }}"
+                        safe-rerun: "{{ True }}"
+                        wait-before: "{{ 3 | int }}"
+                        wait-after: "{{ 9 | int }}"
+                        pause-before: "{{ False }}"
+                        target: "{{ 'some_node' }}"
+                        timeout: "{{ 39 | int }}"
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_task_publish_on_error(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+
+                tasks:
+                    task1:
+                        action: std.noop
+                        publish-on-error:
+                            stdout: "{{ 'abc' }}"
+                            stderr:  <$ 'xyz' %>
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})

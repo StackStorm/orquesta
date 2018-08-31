@@ -40,10 +40,13 @@ class TaskDefaultsSpec(base.Spec):
         'type': 'object',
         'properties': {
             'concurrency': policies.CONCURRENCY_SCHEMA,
+            'keep-result': policies.KEEP_RESULT_SCHEMA,
             'retry': policies.RetrySpec,
+            'safe-rerun': policies.SAFE_RERUN_SCHEMA,
             'wait-before': policies.WAIT_BEFORE_SCHEMA,
             'wait-after': policies.WAIT_AFTER_SCHEMA,
             'pause-before': policies.PAUSE_BEFORE_SCHEMA,
+            'target': policies.TARGET_SCHEMA,
             'timeout': policies.TIMEOUT_SCHEMA,
             'on-complete': ON_CLAUSE_SCHEMA,
             'on-success': ON_CLAUSE_SCHEMA,
