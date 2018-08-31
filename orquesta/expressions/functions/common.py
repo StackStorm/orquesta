@@ -16,7 +16,7 @@ import six
 from orquesta import exceptions as exc
 
 
-def json_(context, s):
+def json_(s):
     if isinstance(s, dict):
         return s
 

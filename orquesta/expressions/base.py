@@ -11,6 +11,7 @@
 # limitations under the License.
 
 import abc
+import inspect
 import logging
 import re
 import six
@@ -151,3 +152,7 @@ def extract_vars(statement):
     variables = [v for v in variables if v[2] != '']
 
     return sorted(list(set(variables)), key=lambda var: var[2])
+
+
+def func_has_ctx_arg(func):
+    return 'context' in inspect.getargspec(func).args

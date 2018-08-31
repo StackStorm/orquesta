@@ -85,7 +85,7 @@ class JinjaEvaluator(base.Evaluator):
             ctx['__current_task'] = ctx['__vars'].get('__current_task')
 
         for name, func in six.iteritems(cls._custom_functions):
-            ctx[name] = functools.partial(func, ctx)
+            ctx[name] = functools.partial(func, ctx) if base.func_has_ctx_arg(func) else func
 
         return ctx
 

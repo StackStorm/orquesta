@@ -18,15 +18,15 @@ from orquesta.expressions.functions import common as funcs
 class CommonFunctionTest(unittest.TestCase):
 
     def test_convert_json_from_dict(self):
-        self.assertDictEqual(funcs.json_(None, {'k1': 'v1'}), {'k1': 'v1'})
+        self.assertDictEqual(funcs.json_({'k1': 'v1'}), {'k1': 'v1'})
 
     def test_convert_json_from_other_types(self):
-        self.assertRaises(TypeError, funcs.json_, None, 123)
-        self.assertRaises(TypeError, funcs.json_, None, False)
-        self.assertRaises(TypeError, funcs.json_, None, ['a', 'b'])
-        self.assertRaises(TypeError, funcs.json_, None, object())
+        self.assertRaises(TypeError, funcs.json_, 123)
+        self.assertRaises(TypeError, funcs.json_, False)
+        self.assertRaises(TypeError, funcs.json_, ['a', 'b'])
+        self.assertRaises(TypeError, funcs.json_, object())
 
     def test_convert_json(self):
-        self.assertDictEqual(funcs.json_(None, '{"k1": "v1"}'), {'k1': 'v1'})
-        self.assertListEqual(funcs.json_(None, '[{"a": 1}, {"b": 2}]'), [{'a': 1}, {'b': 2}])
-        self.assertListEqual(funcs.json_(None, '[5, 3, 5, 4]'), [5, 3, 5, 4])
+        self.assertDictEqual(funcs.json_('{"k1": "v1"}'), {'k1': 'v1'})
+        self.assertListEqual(funcs.json_('[{"a": 1}, {"b": 2}]'), [{'a': 1}, {'b': 2}])
+        self.assertListEqual(funcs.json_('[5, 3, 5, 4]'), [5, 3, 5, 4])
