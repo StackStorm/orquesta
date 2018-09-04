@@ -13,6 +13,7 @@
 import unittest
 
 from orquesta.expressions import base as expressions
+from orquesta.expressions.functions import common as functions
 
 
 class ExpressionEvaluatorTest(unittest.TestCase):
@@ -34,3 +35,7 @@ class ExpressionEvaluatorTest(unittest.TestCase):
             expected_errors,
             result.get('errors', [])
         )
+
+    def test_inspect_function_has_context_argument(self):
+        self.assertTrue(expressions.func_has_ctx_arg(functions.ctx_))
+        self.assertFalse(expressions.func_has_ctx_arg(functions.json_))
