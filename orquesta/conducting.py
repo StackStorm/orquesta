@@ -612,13 +612,13 @@ class WorkflowConductor(object):
     def get_task_initial_context(self, task_id):
         task_flow_entry = self.get_task_flow_entry(task_id)
 
-        if task_flow_entry:
-            in_ctx_idx = task_flow_entry.get('ctx')
-            return copy.deepcopy(self.flow.contexts[in_ctx_idx])
-
         if task_id in self.flow.staged:
             in_ctx_idxs = self.flow.staged[task_id]['ctxs']
             return self.converge_task_contexts(in_ctx_idxs)
+
+        if task_flow_entry:
+            in_ctx_idx = task_flow_entry.get('ctx')
+            return copy.deepcopy(self.flow.contexts[in_ctx_idx])
 
         raise ValueError('Unable to determine context for task "%s".' % task_id)
 
