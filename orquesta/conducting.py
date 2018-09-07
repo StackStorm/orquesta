@@ -336,6 +336,8 @@ class WorkflowConductor(object):
         except ValueError:
             task_ctx = self.get_workflow_initial_context()
 
+        current_task = {'id': task_id, 'name': task_name}
+        task_ctx = ctx.set_current_task(task_ctx, current_task)
         task_spec = self.render_task_spec(task_name, task_ctx)
 
         return {
