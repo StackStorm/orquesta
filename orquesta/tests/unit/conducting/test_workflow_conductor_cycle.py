@@ -77,3 +77,9 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
         self.assert_task_list(conductor.get_next_tasks(task_name), [])
+
+        # Check workflow state and context.
+        expected_ctx_value = {'loop': False}
+        expected_ctx_entry = {'src': [2], 'term': True, 'value': expected_ctx_value}
+        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
+        self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_ctx_entry)
