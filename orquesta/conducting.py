@@ -336,6 +336,8 @@ class WorkflowConductor(object):
         except ValueError:
             task_ctx = self.get_workflow_initial_context()
 
+        current_task = {'id': task_id, 'name': task_name}
+        task_ctx = ctx.set_current_task(task_ctx, current_task)
         task_spec = self.render_task_spec(task_name, task_ctx)
 
         return {
@@ -371,26 +373,37 @@ class WorkflowConductor(object):
         if not task_id:
             next_tasks = self.flow.get_staged_tasks()
         else:
-            next_tasks = [
-                t[1] for t in self.graph.get_next_transitions(task_id)
-                if self.inbound_criteria_satisfied(t[1])
-            ]
+            task_flow_entry = self.get_task_flow_entry(task_id)
+
+            if not task_flow_entry or task_flow_entry.get('state') not in states.COMPLETED_STATES:
+                return []
+
+            outbounds = self.graph.get_next_transitions(task_id)
+
+            for next_seq in outbounds:
+                next_task_id, seq_key = next_seq[1], next_seq[2]
+                task_transition_id = next_task_id + '__' + str(seq_key)
+
+                # Evaluate if outbound criteria is satisfied.
+                if not task_flow_entry.get(task_transition_id):
+                    continue
+
+                # Evaluate if inbound criteria for the next task is satisfied.
+                if not self.inbound_criteria_satisfied(next_task_id):
+                    continue
+
+                next_tasks.append(next_task_id)
 
         return len(next_tasks) > 0
 
     def get_next_tasks(self, task_id=None):
-        if self.get_workflow_state() not in states.RUNNING_STATES:
-            return []
-
         next_tasks = []
 
-        if not task_id:
-            staged_tasks = [
-                k for k, v in six.iteritems(self.flow.staged)
-                if v.get('ready', True) is True
-            ]
+        if self.get_workflow_state() not in states.RUNNING_STATES:
+            return next_tasks
 
-            for staged_task_id in staged_tasks:
+        if not task_id:
+            for staged_task_id in self.flow.get_staged_tasks():
                 try:
                     next_tasks.append(self.get_task(staged_task_id))
                 except Exception as e:
@@ -610,13 +623,13 @@ class WorkflowConductor(object):
     def get_task_initial_context(self, task_id):
         task_flow_entry = self.get_task_flow_entry(task_id)
 
-        if task_flow_entry:
-            in_ctx_idx = task_flow_entry.get('ctx')
-            return copy.deepcopy(self.flow.contexts[in_ctx_idx])
-
         if task_id in self.flow.staged:
             in_ctx_idxs = self.flow.staged[task_id]['ctxs']
             return self.converge_task_contexts(in_ctx_idxs)
+
+        if task_flow_entry:
+            in_ctx_idx = task_flow_entry.get('ctx')
+            return copy.deepcopy(self.flow.contexts[in_ctx_idx])
 
         raise ValueError('Unable to determine context for task "%s".' % task_id)
 

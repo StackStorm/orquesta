@@ -158,6 +158,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
             task['spec'] = task['spec'].serialize()
 
         for task in expected_copy:
+            task['ctx']['__current_task'] = {'id': task['id'], 'name': task['name']}
             task['spec'] = task['spec'].serialize()
 
         self.assertListEqual(actual_copy, expected_copy)

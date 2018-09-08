@@ -347,18 +347,22 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
 
         task_name = 'task1'
+        current_task = {'id': task_name, 'name': task_name}
+        expected_ctx = {'a': 123, 'b': False, '__current_task': current_task}
         task = conductor.get_task(task_name)
         self.assertEqual(task['id'], task_name)
         self.assertEqual(task['name'], task_name)
-        self.assertDictEqual(task['ctx'], {'a': 123, 'b': False})
+        self.assertDictEqual(task['ctx'], expected_ctx)
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
 
         task_name = 'task2'
+        current_task = {'id': task_name, 'name': task_name}
+        expected_ctx = {'a': 123, 'b': False, 'c': 'xyz', '__current_task': current_task}
         task = conductor.get_task(task_name)
         self.assertEqual(task['id'], task_name)
         self.assertEqual(task['name'], task_name)
-        self.assertDictEqual(task['ctx'], {'a': 123, 'b': False, 'c': 'xyz'})
+        self.assertDictEqual(task['ctx'], expected_ctx)
 
     def test_get_next_tasks(self):
         inputs = {'a': 123}
