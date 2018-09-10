@@ -247,7 +247,7 @@ class WorkflowConductor(object):
     def get_workflow_initial_context(self):
         return copy.deepcopy(self.flow.contexts[0])
 
-    def get_workflow_terminal_context_idx(self):
+    def _get_workflow_terminal_context_idx(self):
         query = filter(lambda x: 'term' in x[1] and x[1]['term'], enumerate(self.flow.contexts))
         match = list(query)
 
@@ -263,15 +263,15 @@ class WorkflowConductor(object):
         if self.get_workflow_state() not in states.COMPLETED_STATES:
             raise exc.WorkflowContextError('Workflow is not in completed state.')
 
-        term_ctx_idx = self.get_workflow_terminal_context_idx()
+        term_ctx_idx = self._get_workflow_terminal_context_idx()
 
         if not term_ctx_idx:
             raise exc.WorkflowContextError('Unable to determine the final workflow context.')
 
         return copy.deepcopy(self.flow.contexts[term_ctx_idx])
 
-    def update_workflow_terminal_context(self, ctx_diff, task_flow_idx):
-        term_ctx_idx = self.get_workflow_terminal_context_idx()
+    def _update_workflow_terminal_context(self, ctx_diff, task_flow_idx):
+        term_ctx_idx = self._get_workflow_terminal_context_idx()
 
         if not term_ctx_idx:
             term_ctx_val = copy.deepcopy(ctx_diff)
@@ -285,7 +285,7 @@ class WorkflowConductor(object):
                 term_ctx_entry['src'].append(task_flow_idx)
                 term_ctx_entry['value'] = term_ctx_val
 
-    def render_workflow_outputs(self):
+    def _render_workflow_outputs(self):
         # Render workflow outputs if workflow succeeded.
         if self.get_workflow_state() == states.SUCCEEDED and not self._outputs:
             outputs, errors = self.spec.render_output(self.get_workflow_terminal_context()['value'])
@@ -301,13 +301,13 @@ class WorkflowConductor(object):
     def get_workflow_output(self):
         return copy.deepcopy(self._outputs) if self._outputs else None
 
-    def render_task_spec(self, task_name, ctx_value):
+    def _render_task_spec(self, task_name, ctx_value):
         task_spec = self.spec.tasks.get_task(task_name).copy()
         task_spec.action = expr.evaluate(task_spec.action, ctx_value)
         task_spec.input = expr.evaluate(getattr(task_spec, 'input', {}), ctx_value)
         return task_spec
 
-    def inbound_criteria_satisfied(self, task_id):
+    def _inbound_criteria_satisfied(self, task_id):
         inbounds = self.graph.get_prev_transitions(task_id)
         inbounds_satisfied = []
         barrier = 1
@@ -338,7 +338,7 @@ class WorkflowConductor(object):
 
         current_task = {'id': task_id, 'name': task_name}
         task_ctx = ctx.set_current_task(task_ctx, current_task)
-        task_spec = self.render_task_spec(task_name, task_ctx)
+        task_spec = self._render_task_spec(task_name, task_ctx)
 
         return {
             'id': task_id,
@@ -389,7 +389,7 @@ class WorkflowConductor(object):
                     continue
 
                 # Evaluate if inbound criteria for the next task is satisfied.
-                if not self.inbound_criteria_satisfied(next_task_id):
+                if not self._inbound_criteria_satisfied(next_task_id):
                     continue
 
                 next_tasks.append(next_task_id)
@@ -427,7 +427,7 @@ class WorkflowConductor(object):
                     continue
 
                 # Evaluate if inbound criteria for the next task is satisfied.
-                if not self.inbound_criteria_satisfied(next_task_id):
+                if not self._inbound_criteria_satisfied(next_task_id):
                     continue
 
                 next_task_node = self.graph.get_task(next_task_id)
@@ -449,11 +449,11 @@ class WorkflowConductor(object):
 
         return sorted(next_tasks, key=lambda x: x['name'])
 
-    def get_task_flow_idx(self, task_id):
+    def _get_task_flow_idx(self, task_id):
         return self.flow.tasks.get(task_id)
 
     def get_task_flow_entry(self, task_id):
-        flow_idx = self.get_task_flow_idx(task_id)
+        flow_idx = self._get_task_flow_idx(task_id)
 
         return self.flow.sequence[flow_idx] if flow_idx is not None else None
 
@@ -492,7 +492,7 @@ class WorkflowConductor(object):
             if len(in_ctx_idxs) <= 0 or all(x == in_ctx_idxs[0] for x in in_ctx_idxs):
                 in_ctx_idx = in_ctx_idxs[0]
             else:
-                new_ctx_entry = self.converge_task_contexts(in_ctx_idxs)
+                new_ctx_entry = self._converge_task_contexts(in_ctx_idxs)
                 self.flow.contexts.append(new_ctx_entry)
                 in_ctx_idx = len(self.flow.contexts) - 1
 
@@ -515,7 +515,7 @@ class WorkflowConductor(object):
             task_node = self.graph.get_task(task_id)
             task_name = task_node['name']
             task_spec = self.spec.tasks.get_task(task_name)
-            task_flow_idx = self.get_task_flow_idx(task_id)
+            task_flow_idx = self._get_task_flow_idx(task_id)
 
             # Set current task in the context.
             in_ctx_idx = task_flow_entry['ctx']
@@ -532,7 +532,7 @@ class WorkflowConductor(object):
 
             # Update workflow context when there is no transitions.
             if not task_transitions:
-                self.update_workflow_terminal_context(in_ctx_val, task_flow_idx)
+                self._update_workflow_terminal_context(in_ctx_val, task_flow_idx)
 
             # Iterate thru each outbound task transitions.
             for task_transition in task_transitions:
@@ -567,14 +567,14 @@ class WorkflowConductor(object):
                         continue
 
                     if out_ctx_val != in_ctx_val:
-                        task_flow_idx = self.get_task_flow_idx(task_id)
+                        task_flow_idx = self._get_task_flow_idx(task_id)
                         self.flow.contexts.append({'srcs': [task_flow_idx], 'value': out_ctx_val})
                         out_ctx_idx = len(self.flow.contexts) - 1
                     else:
                         out_ctx_idx = in_ctx_idx
 
                     # Check if inbound criteria are met.
-                    ready = self.inbound_criteria_satisfied(task_transition[1])
+                    ready = self._inbound_criteria_satisfied(task_transition[1])
 
                     if (task_transition[1] in self.flow.staged and
                             'ctxs' in self.flow.staged[task_transition[1]]):
@@ -600,13 +600,13 @@ class WorkflowConductor(object):
         if self.get_workflow_state() in states.COMPLETED_STATES:
             in_ctx_idx = task_flow_entry['ctx']
             in_ctx_val = self.flow.contexts[in_ctx_idx]['value']
-            task_flow_idx = self.get_task_flow_idx(task_id)
-            self.update_workflow_terminal_context(in_ctx_val, task_flow_idx)
-            self.render_workflow_outputs()
+            task_flow_idx = self._get_task_flow_idx(task_id)
+            self._update_workflow_terminal_context(in_ctx_val, task_flow_idx)
+            self._render_workflow_outputs()
 
         return task_flow_entry
 
-    def converge_task_contexts(self, ctx_idxs):
+    def _converge_task_contexts(self, ctx_idxs):
         if len(ctx_idxs) <= 0 or all(x == ctx_idxs[0] for x in ctx_idxs):
             return self.flow.contexts[ctx_idxs[0]]
 
@@ -625,7 +625,7 @@ class WorkflowConductor(object):
 
         if task_id in self.flow.staged:
             in_ctx_idxs = self.flow.staged[task_id]['ctxs']
-            return self.converge_task_contexts(in_ctx_idxs)
+            return self._converge_task_contexts(in_ctx_idxs)
 
         if task_flow_entry:
             in_ctx_idx = task_flow_entry.get('ctx')
