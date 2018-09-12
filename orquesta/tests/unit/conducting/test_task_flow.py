@@ -51,7 +51,8 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
           task1:
             action: core.noop
             next:
-              - do: task2, task5
+              - when: <% succeeded() %>
+                do: task2, task5
           task2:
             action: core.noop
             next:
@@ -122,6 +123,39 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
 
         self.assertEqual(conductor._get_task_flow_idx('task1'), 0)
         self.assertDictEqual(conductor.get_task_flow_entry('task1'), expected_task_flow_item)
+
+    def test_update_task_flow_with_failed_event(self):
+        conductor = self._prep_conductor(state=states.RUNNING)
+
+        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.RUNNING))
+        expected_task_flow_item = {'id': 'task1', 'state': 'running', 'ctx': 0}
+
+        self.assertEqual(conductor._get_task_flow_idx('task1'), 0)
+        self.assertDictEqual(conductor.get_task_flow_entry('task1'), expected_task_flow_item)
+
+        ac_ex_event = events.ActionExecutionEvent(states.FAILED, result={'stdout': 'boom!'})
+        conductor.update_task_flow('task1', ac_ex_event)
+
+        expected_task_flow_item = {
+            'id': 'task1',
+            'state': 'failed',
+            'task2__0': False,
+            'task5__0': False,
+            'ctx': 0
+        }
+
+        self.assertEqual(conductor._get_task_flow_idx('task1'), 0)
+        self.assertDictEqual(conductor.get_task_flow_entry('task1'), expected_task_flow_item)
+
+        expected_errors = [
+            {
+                'message': 'Execution failed. See result for details.',
+                'task_id': 'task1',
+                'result': {'stdout': 'boom!'}
+            }
+        ]
+
+        self.assertListEqual(conductor.errors, expected_errors)
 
     def test_update_task_flow_for_not_ready_task(self):
         conductor = self._prep_conductor(state=states.RUNNING)

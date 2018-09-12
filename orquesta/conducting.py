@@ -199,7 +199,7 @@ class WorkflowConductor(object):
     def errors(self):
         return self._errors
 
-    def log_error(self, error, task_id=None, task_transition_id=None):
+    def log_error(self, error, task_id=None, task_transition_id=None, result=None):
         entry = {'message': error}
 
         if task_id:
@@ -207,6 +207,9 @@ class WorkflowConductor(object):
 
         if task_transition_id:
             entry['task_transition_id'] = task_transition_id
+
+        if result:
+            entry['result'] = result
 
         self.errors.append(entry)
 
@@ -505,6 +508,11 @@ class WorkflowConductor(object):
         # If task is already completed and in cycle, then create new task flow entry.
         if self.graph.in_cycle(task_id) and task_flow_entry.get('state') in states.COMPLETED_STATES:
             task_flow_entry = self.add_task_flow(task_id, in_ctx_idx=in_ctx_idx)
+
+        # Log the error if it is a failed execution event.
+        if event.state == states.FAILED:
+            message = 'Execution failed. See result for details.'
+            self.log_error(message, task_id=task_id, result=event.result)
 
         # Process the action execution event using the task state machine and update the task state.
         machines.TaskStateMachine.process_event(task_flow_entry, event)
