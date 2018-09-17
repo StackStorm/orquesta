@@ -19,31 +19,21 @@ from orquesta.specs import types
 LOG = logging.getLogger(__name__)
 
 
-WAIT_BEFORE_SCHEMA = types.YAQL_OR_POSITIVE_INTEGER
-WAIT_AFTER_SCHEMA = types.YAQL_OR_POSITIVE_INTEGER
-TIMEOUT_SCHEMA = types.YAQL_OR_POSITIVE_INTEGER
-PAUSE_BEFORE_SCHEMA = types.YAQL_OR_BOOLEAN
-CONCURRENCY_SCHEMA = types.YAQL_OR_POSITIVE_INTEGER
+WAIT_BEFORE_SCHEMA = types.STRING_OR_POSITIVE_INTEGER
+WAIT_AFTER_SCHEMA = types.STRING_OR_POSITIVE_INTEGER
+TIMEOUT_SCHEMA = types.STRING_OR_POSITIVE_INTEGER
+PAUSE_BEFORE_SCHEMA = types.STRING_OR_BOOLEAN
+CONCURRENCY_SCHEMA = types.STRING_OR_POSITIVE_INTEGER
 
 
 class RetrySpec(base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
-            'count': {
-                'oneOf': [
-                    types.YAQL,
-                    types.POSITIVE_INTEGER
-                ]
-            },
-            'break-on': types.YAQL,
-            'continue-on': types.YAQL,
-            'delay': {
-                'oneOf': [
-                    types.YAQL,
-                    types.POSITIVE_INTEGER
-                ]
-            },
+            'count': types.STRING_OR_POSITIVE_INTEGER,
+            'break-on': types.NONEMPTY_STRING,
+            'continue-on': types.NONEMPTY_STRING,
+            'delay': types.STRING_OR_POSITIVE_INTEGER
         },
         'required': ['delay', 'count'],
         'additionalProperties': False
