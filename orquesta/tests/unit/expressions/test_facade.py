@@ -49,3 +49,9 @@ class ExpressionEvaluatorTest(unittest.TestCase):
         }
 
         self.assertDictEqual(expressions.get_statement_regexes(), expected_data)
+
+    def test_has_expressions(self):
+        self.assertTrue(expressions.has_expressions('<% ctx().foo %> and {{ ctx().foo }}'))
+        self.assertTrue(expressions.has_expressions('foo <% ctx().foo %> bar'))
+        self.assertTrue(expressions.has_expressions('foo {{ ctx().foo }} bar'))
+        self.assertFalse(expressions.has_expressions('foobar'))

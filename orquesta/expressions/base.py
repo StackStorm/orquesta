@@ -90,6 +90,12 @@ def get_statement_regexes():
     return {t: e.get_statement_regex() for t, e in six.iteritems(get_evaluators())}
 
 
+def has_expressions(text):
+    result = {t: e.has_expressions(text) for t, e in six.iteritems(get_evaluators())}
+
+    return any(result.values())
+
+
 def validate(statement):
     errors = []
 
