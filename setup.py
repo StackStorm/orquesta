@@ -75,6 +75,7 @@ setup(
         'orquesta.expressions.functions': [
             'ctx = orquesta.expressions.functions.common:ctx_',
             'json = orquesta.expressions.functions.common:json_',
+            'zip = orquesta.expressions.functions.common:zip_',
             'task_state = orquesta.expressions.functions.workflow:task_state_',
             'succeeded = orquesta.expressions.functions.workflow:succeeded_',
             'failed = orquesta.expressions.functions.workflow:failed_',
