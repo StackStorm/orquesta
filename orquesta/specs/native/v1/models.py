@@ -101,7 +101,7 @@ class ItemizedSpec(base.Spec):
                     types.UNIQUE_STRING_LIST
                 ]
             },
-            'concurrency': types.YAQL_OR_POSITIVE_INTEGER
+            'concurrency': types.STRING_OR_POSITIVE_INTEGER
         }
     }
 

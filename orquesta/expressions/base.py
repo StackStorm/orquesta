@@ -42,6 +42,10 @@ class Evaluator(object):
         return expr.strip(cls._delimiter).strip()
 
     @classmethod
+    def get_statement_regex(cls):
+        raise NotImplementedError()
+
+    @classmethod
     def has_expressions(cls, text):
         raise NotImplementedError()
 
@@ -82,8 +86,17 @@ def get_evaluators():
     return _EXP_EVALUATORS
 
 
-def validate(statement):
+def get_statement_regexes():
+    return {t: e.get_statement_regex() for t, e in six.iteritems(get_evaluators())}
 
+
+def has_expressions(text):
+    result = {t: e.has_expressions(text) for t, e in six.iteritems(get_evaluators())}
+
+    return any(result.values())
+
+
+def validate(statement):
     errors = []
 
     if isinstance(statement, dict):

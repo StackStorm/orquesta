@@ -32,17 +32,12 @@ POSITIVE_NUMBER = {
     "minimum": 0.0
 }
 
-YAQL = {
-    "type": "string",
-    "pattern": "^<%.*?%>\\s*$"
-}
-
-YAQL_CONDITION = {
-    "type": "object",
-    "minProperties": 1,
-    "patternProperties": {
-        "^\w+$": YAQL
-    }
+VERSION = {
+    "anyOf": [
+        NONEMPTY_STRING,
+        POSITIVE_INTEGER,
+        POSITIVE_NUMBER
+    ]
 }
 
 ANY = {
@@ -52,8 +47,7 @@ ANY = {
         {"type": "integer"},
         {"type": "number"},
         {"type": "object"},
-        {"type": "string"},
-        YAQL
+        {"type": "string"}
     ]
 }
 
@@ -65,8 +59,7 @@ ANY_NULLABLE = {
         {"type": "integer"},
         {"type": "number"},
         {"type": "object"},
-        {"type": "string"},
-        YAQL
+        {"type": "string"}
     ]
 }
 
@@ -87,39 +80,17 @@ ONE_KEY_DICT = {
     }
 }
 
-STRING_OR_YAQL_CONDITION = {
+STRING_OR_POSITIVE_INTEGER = {
     "oneOf": [
         NONEMPTY_STRING,
-        YAQL_CONDITION
-    ]
-}
-
-YAQL_OR_POSITIVE_INTEGER = {
-    "oneOf": [
-        YAQL,
         POSITIVE_INTEGER
     ]
 }
 
-YAQL_OR_BOOLEAN = {
+STRING_OR_BOOLEAN = {
     "oneOf": [
-        YAQL,
-        {"type": "boolean"}
-    ]
-}
-
-UNIQUE_STRING_OR_YAQL_CONDITION_LIST = {
-    "type": "array",
-    "items": STRING_OR_YAQL_CONDITION,
-    "uniqueItems": True,
-    "minItems": 1
-}
-
-VERSION = {
-    "anyOf": [
         NONEMPTY_STRING,
-        POSITIVE_INTEGER,
-        POSITIVE_NUMBER
+        {"type": "boolean"}
     ]
 }
 

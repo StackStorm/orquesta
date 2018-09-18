@@ -90,6 +90,10 @@ class JinjaEvaluator(base.Evaluator):
         return ctx
 
     @classmethod
+    def get_statement_regex(cls):
+        return cls._regex_pattern
+
+    @classmethod
     def has_expressions(cls, text):
         exprs = cls._regex_parser.findall(text)
         block_exprs = cls._regex_block_parser.findall(text)
