@@ -198,17 +198,3 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
         self.assertTrue(wf_spec.tasks.in_cycle('task3'))
         self.assertTrue(wf_spec.tasks.in_cycle('task4'))
         self.assertTrue(wf_spec.tasks.in_cycle('task5'))
-
-    def test_with_items(self):
-        wf_name = 'with-items'
-        wf_spec = self.get_wf_spec(wf_name)
-        t1 = wf_spec.tasks['task1']
-
-        self.assertRaises(AttributeError, getattr, t1, 'with')
-
-    def test_with_multi_items(self):
-        wf_name = 'with-multi-items'
-        wf_spec = self.get_wf_spec(wf_name)
-        t1 = wf_spec.tasks['task1']
-
-        self.assertRaises(AttributeError, getattr, t1, 'with')

@@ -91,21 +91,6 @@ class TaskTransitionSequenceSpec(base.SequenceSpec):
     }
 
 
-class ItemizedSpec(base.Spec):
-    _schema = {
-        'type': 'object',
-        'properties': {
-            'items': {
-                'oneOf': [
-                    types.NONEMPTY_STRING,
-                    types.UNIQUE_STRING_LIST
-                ]
-            },
-            'concurrency': types.STRING_OR_POSITIVE_INTEGER
-        }
-    }
-
-
 class TaskSpec(base.Spec):
     _schema = {
         'type': 'object',
@@ -116,6 +101,15 @@ class TaskSpec(base.Spec):
                     types.POSITIVE_INTEGER
                 ]
             },
+            'with': {
+                'type': 'string',
+                'pattern': (
+                    # Regular expression in the form "x, y, z, ... in <expression>"
+                    # or "x in <expression>" with optional space(s) on both end.
+                    '^(\s+)?((\w+,\s?|\s+)+)?(\w+)\s+in\s+(%s)(\s+)?$' %
+                    '|'.join(expr.get_statement_regexes().values())
+                )
+            },
             'action': types.NONEMPTY_STRING,
             'input': types.NONEMPTY_DICT,
             'next': TaskTransitionSequenceSpec,
@@ -124,6 +118,7 @@ class TaskSpec(base.Spec):
     }
 
     _context_evaluation_sequence = [
+        'with',
         'action',
         'input',
         'next'

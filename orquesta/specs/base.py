@@ -25,6 +25,7 @@ from orquesta.specs import types
 from orquesta.utils import expression as expr_utils
 from orquesta.utils import parameters as args_utils
 from orquesta.utils import schema as schema_utils
+from orquesta.utils import strings as strings_utils
 
 
 LOG = logging.getLogger(__name__)
@@ -288,7 +289,6 @@ class Spec(object):
         validator = self.get_schema_validator()
 
         for e in validator.iter_errors(self.spec):
-            message = e.message
             spec_path = ''
             schema_path = ''
 
@@ -305,7 +305,7 @@ class Spec(object):
                 )
 
             entry = {
-                'message': message,
+                'message': strings_utils.unescape(e.message),
                 'spec_path': spec_path or None,
                 'schema_path': schema_path or None
             }
