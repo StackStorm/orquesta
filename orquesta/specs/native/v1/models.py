@@ -14,6 +14,7 @@ import copy
 import logging
 import six
 from six.moves import queue
+import yaml
 
 from orquesta import exceptions as exc
 from orquesta.expressions import base as expr
@@ -91,6 +92,32 @@ class TaskTransitionSequenceSpec(base.SequenceSpec):
     }
 
 
+class ItemizedSpec(base.Spec):
+    _items_regex = (
+        # Regular expression in the form "x, y, z, ... in <expression>"
+        # or "x in <expression>" with optional space(s) on both end.
+        '^(\s+)?((\w+,\s?|\s+)+)?(\w+)\s+in\s+(%s)(\s+)?$' %
+        '|'.join(expr.get_statement_regexes().values())
+    )
+
+    _schema = {
+        'type': 'object',
+        'properties': {
+            'items': {
+                'type': 'string',
+                'minLength': 1,
+                'pattern': _items_regex
+            },
+            'concurrency': types.STRING_OR_POSITIVE_INTEGER
+        }
+    }
+
+    _context_evaluation_sequence = [
+        'items',
+        'concurrency'
+    ]
+
+
 class TaskSpec(base.Spec):
     _schema = {
         'type': 'object',
@@ -101,15 +128,7 @@ class TaskSpec(base.Spec):
                     types.POSITIVE_INTEGER
                 ]
             },
-            'with': {
-                'type': 'string',
-                'pattern': (
-                    # Regular expression in the form "x, y, z, ... in <expression>"
-                    # or "x in <expression>" with optional space(s) on both end.
-                    '^(\s+)?((\w+,\s?|\s+)+)?(\w+)\s+in\s+(%s)(\s+)?$' %
-                    '|'.join(expr.get_statement_regexes().values())
-                )
-            },
+            'with': ItemizedSpec,
             'action': types.NONEMPTY_STRING,
             'input': types.NONEMPTY_DICT,
             'next': TaskTransitionSequenceSpec,
@@ -448,6 +467,24 @@ class WorkflowSpec(base.Spec):
         'vars',
         'output'
     ]
+
+    def __init__(self, spec, name=None, member=False):
+        if not spec:
+            raise ValueError('The spec cannot be type of None.')
+
+        spec = (
+            yaml.safe_load(spec)
+            if not isinstance(spec, dict) and not isinstance(spec, list)
+            else spec
+        )
+
+        # Resolve shorthand inline with items.
+        if 'tasks' in spec and isinstance(spec['tasks'], dict) and spec['tasks']:
+            for task_name, task_spec in six.iteritems(spec['tasks']):
+                if 'with' in task_spec and isinstance(task_spec['with'], six.string_types):
+                    task_spec['with'] = {'items': task_spec['with']}
+
+        super(WorkflowSpec, self).__init__(spec, name=name, member=member)
 
     def render_input(self, runtime_inputs):
         rolling_ctx = {}
