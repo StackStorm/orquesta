@@ -26,6 +26,7 @@ class TaskSpecTest(base.OrchestraWorkflowSpecTest):
                   items: foobar
                 action: core.noop
         """
+
         expected_errors = {
             'syntax': [
                 {
@@ -396,3 +397,73 @@ class TaskSpecTest(base.OrchestraWorkflowSpecTest):
         expected_items = 'x,  y in <% zip(ctx(xs), ctx(ys)) %>'
         t10_with_attr = getattr(wf_spec.tasks['task10'], 'with')
         self.assertEqual(t10_with_attr.items, expected_items)
+
+    def test_with_items_bad_vars(self):
+        wf_def = """
+            version: 1.0
+            description: A basic with items workflow.
+            tasks:
+              task1:
+                with:
+                  items: x in <% ctx(xs) %>
+                  concurrency: <% ctx(size) %>
+                action: core.noop
+        """
+
+        expected_errors = {
+            'context': [
+                {
+                    'type': 'yaql',
+                    'expression': '<% ctx(size) %>',
+                    'message': 'Variable "size" is referenced before assignment.',
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.with.properties.concurrency'
+                    ),
+                    'spec_path': 'tasks.task1.with.concurrency'
+                },
+                {
+                    'type': 'yaql',
+                    'expression': 'x in <% ctx(xs) %>',
+                    'message': 'Variable "xs" is referenced before assignment.',
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.with.properties.items'
+                    ),
+                    'spec_path': 'tasks.task1.with.items'
+                }
+            ]
+        }
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_inline_with_items_bad_vars(self):
+        wf_def = """
+            version: 1.0
+            description: A basic with items workflow.
+            tasks:
+              task1:
+                with: x in <% ctx(xs) %>
+                action: core.noop
+        """
+
+        expected_errors = {
+            'context': [
+                {
+                    'type': 'yaql',
+                    'expression': 'x in <% ctx(xs) %>',
+                    'message': 'Variable "xs" is referenced before assignment.',
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.with.properties.items'
+                    ),
+                    'spec_path': 'tasks.task1.with.items'
+                }
+            ]
+        }
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)

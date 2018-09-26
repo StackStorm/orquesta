@@ -252,17 +252,20 @@ class Spec(object):
         errors = {}
         app_ctx_metadata = None
 
-        syntax_errors = sorted(self.inspect_syntax(), key=lambda e: e['schema_path'])
+        def sort_errors(e):
+            return (e['schema_path'], e['spec_path'])
+
+        syntax_errors = sorted(self.inspect_syntax(), key=sort_errors)
 
         if syntax_errors:
             errors['syntax'] = syntax_errors
 
-        semantic_errors = sorted(self.inspect_semantics(), key=lambda e: e['schema_path'])
+        semantic_errors = sorted(self.inspect_semantics(), key=sort_errors)
 
         if semantic_errors:
             errors['semantics'] = semantic_errors
 
-        expr_errors = sorted(self.inspect_expressions(), key=lambda e: e['schema_path'])
+        expr_errors = sorted(self.inspect_expressions(), key=sort_errors)
 
         if expr_errors:
             errors['expressions'] = expr_errors
@@ -275,6 +278,7 @@ class Spec(object):
             }
 
         ctx_errors, _ = self.inspect_context(parent=app_ctx_metadata)
+        ctx_errors = sorted(ctx_errors, key=sort_errors)
 
         if ctx_errors:
             errors['context'] = ctx_errors
