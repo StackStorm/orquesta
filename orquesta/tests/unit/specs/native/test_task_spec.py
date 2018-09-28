@@ -10,6 +10,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import six
+
 from orquesta.specs import native as models
 from orquesta.tests.unit.specs.native import base
 
@@ -173,6 +175,56 @@ class TaskSpecTest(base.OrchestraWorkflowSpecTest):
 
             tasks:
               task1:
+                with: <% ctx(xs) %>
+                action: core.noop
+              task2:
+                with: "{{ ctx('xs') }}"
+                action: core.noop
+              task3:
+                with:
+                  items: <% ctx(xs) %>
+                  concurrency: <% ctx(batch_size) %>
+                action: core.noop
+              task4:
+                with:
+                  items: "{{ ctx('xs') }}"
+                action: core.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+        expected_items = '<% ctx(xs) %>'
+        t1_with_attr = getattr(wf_spec.tasks['task1'], 'with')
+        self.assertEqual(t1_with_attr.items, expected_items)
+
+        expected_items = "{{ ctx('xs') }}"
+        t2_with_attr = getattr(wf_spec.tasks['task2'], 'with')
+        self.assertEqual(t2_with_attr.items, expected_items)
+
+        expected_items = '<% ctx(xs) %>'
+        expected_concurrency = '<% ctx(batch_size) %>'
+        t3_with_attr = getattr(wf_spec.tasks['task3'], 'with')
+        self.assertEqual(t3_with_attr.items, expected_items)
+        self.assertEqual(t3_with_attr.concurrency, expected_concurrency)
+
+        expected_items = "{{ ctx('xs') }}"
+        t4_with_attr = getattr(wf_spec.tasks['task4'], 'with')
+        self.assertEqual(t4_with_attr.items, expected_items)
+
+    def test_with_one_list_and_var_expansion(self):
+        wf_def = """
+            version: 1.0
+
+            description: Send direct y to xs
+
+            input:
+              - xs
+              - batch_size: 1
+
+            tasks:
+              task1:
                 with: x in <% ctx(xs) %>
                 action: core.noop
               task2:
@@ -318,37 +370,43 @@ class TaskSpecTest(base.OrchestraWorkflowSpecTest):
 
             tasks:
               task1:
-                with: " x in <% ctx(xs) %> "
+                with: " <% ctx(xs) %> "
                 action: core.noop
               task2:
-                with: "  x in <% ctx(xs) %>  "
+                with: "  <% ctx(xs) %>  "
                 action: core.noop
               task3:
-                with: "x  in  <% ctx(xs) %>"
+                with: " x in <% ctx(xs) %> "
                 action: core.noop
               task4:
-                with: "x,y in <% zip(ctx(xs), ctx(ys)) %>"
+                with: "  x in <% ctx(xs) %>  "
                 action: core.noop
               task5:
-                with: "x,  y in <% zip(ctx(xs), ctx(ys)) %>"
+                with: "x  in  <% ctx(xs) %>"
                 action: core.noop
               task6:
-                with:
-                  items: " x in <% ctx(xs) %> "
+                with: "x,y in <% zip(ctx(xs), ctx(ys)) %>"
                 action: core.noop
               task7:
-                with:
-                  items: "  x in <% ctx(xs) %>  "
+                with: "x,  y in <% zip(ctx(xs), ctx(ys)) %>"
                 action: core.noop
               task8:
                 with:
-                  items: "x  in  <% ctx(xs) %>"
+                  items: " x in <% ctx(xs) %> "
                 action: core.noop
               task9:
                 with:
-                  items: "x,y in <% zip(ctx(xs), ctx(ys)) %>"
+                  items: "  x in <% ctx(xs) %>  "
                 action: core.noop
               task10:
+                with:
+                  items: "x  in  <% ctx(xs) %>"
+                action: core.noop
+              task11:
+                with:
+                  items: "x,y in <% zip(ctx(xs), ctx(ys)) %>"
+                action: core.noop
+              task12:
                 with:
                   items: "x,  y in <% zip(ctx(xs), ctx(ys)) %>"
                 action: core.noop
@@ -358,45 +416,24 @@ class TaskSpecTest(base.OrchestraWorkflowSpecTest):
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
-        expected_items = ' x in <% ctx(xs) %> '
-        t1_with_attr = getattr(wf_spec.tasks['task1'], 'with')
-        self.assertEqual(t1_with_attr.items, expected_items)
+        expected_items = {
+            'task1': ' <% ctx(xs) %> ',
+            'task2': '  <% ctx(xs) %>  ',
+            'task3': ' x in <% ctx(xs) %> ',
+            'task4': '  x in <% ctx(xs) %>  ',
+            'task5': 'x  in  <% ctx(xs) %>',
+            'task6': 'x,y in <% zip(ctx(xs), ctx(ys)) %>',
+            'task7': 'x,  y in <% zip(ctx(xs), ctx(ys)) %>',
+            'task8': ' x in <% ctx(xs) %> ',
+            'task9': '  x in <% ctx(xs) %>  ',
+            'task10': 'x  in  <% ctx(xs) %>',
+            'task11': 'x,y in <% zip(ctx(xs), ctx(ys)) %>',
+            'task12': 'x,  y in <% zip(ctx(xs), ctx(ys)) %>'
+        }
 
-        expected_items = '  x in <% ctx(xs) %>  '
-        t2_with_attr = getattr(wf_spec.tasks['task2'], 'with')
-        self.assertEqual(t2_with_attr.items, expected_items)
-
-        expected_items = 'x  in  <% ctx(xs) %>'
-        t3_with_attr = getattr(wf_spec.tasks['task3'], 'with')
-        self.assertEqual(t3_with_attr.items, expected_items)
-
-        expected_items = 'x,y in <% zip(ctx(xs), ctx(ys)) %>'
-        t4_with_attr = getattr(wf_spec.tasks['task4'], 'with')
-        self.assertEqual(t4_with_attr.items, expected_items)
-
-        expected_items = 'x,  y in <% zip(ctx(xs), ctx(ys)) %>'
-        t5_with_attr = getattr(wf_spec.tasks['task5'], 'with')
-        self.assertEqual(t5_with_attr.items, expected_items)
-
-        expected_items = ' x in <% ctx(xs) %> '
-        t6_with_attr = getattr(wf_spec.tasks['task6'], 'with')
-        self.assertEqual(t6_with_attr.items, expected_items)
-
-        expected_items = '  x in <% ctx(xs) %>  '
-        t7_with_attr = getattr(wf_spec.tasks['task7'], 'with')
-        self.assertEqual(t7_with_attr.items, expected_items)
-
-        expected_items = 'x  in  <% ctx(xs) %>'
-        t8_with_attr = getattr(wf_spec.tasks['task8'], 'with')
-        self.assertEqual(t8_with_attr.items, expected_items)
-
-        expected_items = 'x,y in <% zip(ctx(xs), ctx(ys)) %>'
-        t9_with_attr = getattr(wf_spec.tasks['task9'], 'with')
-        self.assertEqual(t9_with_attr.items, expected_items)
-
-        expected_items = 'x,  y in <% zip(ctx(xs), ctx(ys)) %>'
-        t10_with_attr = getattr(wf_spec.tasks['task10'], 'with')
-        self.assertEqual(t10_with_attr.items, expected_items)
+        for task_name, items_expr in six.iteritems(expected_items):
+            tk_with_attr = getattr(wf_spec.tasks[task_name], 'with')
+            self.assertEqual(tk_with_attr.items, items_expr)
 
     def test_with_items_bad_vars(self):
         wf_def = """

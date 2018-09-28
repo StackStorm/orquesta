@@ -305,10 +305,52 @@ class WorkflowConductor(object):
         return copy.deepcopy(self._outputs) if self._outputs else None
 
     def _render_task_spec(self, task_name, ctx_value):
+        action_specs = []
         task_spec = self.spec.tasks.get_task(task_name).copy()
-        task_spec.action = expr.evaluate(task_spec.action, ctx_value)
-        task_spec.input = expr.evaluate(getattr(task_spec, 'input', {}), ctx_value)
-        return task_spec
+
+        if not task_spec.has_items():
+            action_spec = {
+                'action': expr.evaluate(task_spec.action, ctx_value),
+                'input': expr.evaluate(getattr(task_spec, 'input', {}), ctx_value)
+            }
+
+            action_specs.append(action_spec)
+        else:
+            items_spec = task_spec.get_items_spec()
+
+            items_expr = (
+                items_spec.items.strip() if 'in' not in items_spec.items
+                else items_spec.items[items_spec.items.index('in') + 2:].strip()
+            )
+
+            items = expr.evaluate(items_expr, ctx_value)
+
+            if not isinstance(items, list):
+                raise TypeError('The value of "%s" is not type of list.' % items_expr)
+
+            item_keys = (
+                None if 'in' not in items_spec.items
+                else items_spec.items[:items_spec.items.index('in')].replace(' ', '').split(',')
+            )
+
+            for item in items:
+                current_item = item
+
+                if item_keys and (isinstance(item, tuple) or isinstance(item, list)):
+                    current_item = dict(zip(item_keys, list(item)))
+                elif item_keys and len(item_keys) == 1:
+                    current_item = {item_keys[0]: item}
+
+                item_ctx_value = ctx.set_current_item(ctx_value, current_item)
+
+                action_spec = {
+                    'action': expr.evaluate(task_spec.action, item_ctx_value),
+                    'input': expr.evaluate(getattr(task_spec, 'input', {}), item_ctx_value)
+                }
+
+                action_specs.append(action_spec)
+
+        return task_spec, action_specs
 
     def _inbound_criteria_satisfied(self, task_id):
         inbounds = self.graph.get_prev_transitions(task_id)
@@ -341,13 +383,14 @@ class WorkflowConductor(object):
 
         current_task = {'id': task_id, 'name': task_name}
         task_ctx = ctx.set_current_task(task_ctx, current_task)
-        task_spec = self._render_task_spec(task_name, task_ctx)
+        task_spec, action_specs = self._render_task_spec(task_name, task_ctx)
 
         return {
             'id': task_id,
             'name': task_name,
             'ctx': task_ctx,
-            'spec': task_spec
+            'spec': task_spec,
+            'actions': action_specs
         }
 
     def get_start_tasks(self):

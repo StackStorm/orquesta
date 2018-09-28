@@ -96,8 +96,9 @@ class ItemizedSpec(base.Spec):
     _items_regex = (
         # Regular expression in the form "x, y, z, ... in <expression>"
         # or "x in <expression>" with optional space(s) on both end.
-        '^(\s+)?((\w+,\s?|\s+)+)?(\w+)\s+in\s+(%s)(\s+)?$' %
-        '|'.join(expr.get_statement_regexes().values())
+        '^(\s+)?({expr})(\s+)?$|^(\s+)?((\w+,\s?|\s+)+)?(\w+)\s+in\s+({expr})(\s+)?$'.format(
+            expr='|'.join(expr.get_statement_regexes().values())
+        )
     )
 
     _schema = {
@@ -152,6 +153,12 @@ class TaskSpec(base.Spec):
         if input_spec:
             self.action = action_spec[:action_spec.index(' ')]
             self.input = input_spec
+
+    def has_items(self):
+        return hasattr(self, 'with') and getattr(self, 'with', None) is not None
+
+    def get_items_spec(self):
+        return getattr(self, 'with', None)
 
     def has_join(self):
         return hasattr(self, 'join') and self.join

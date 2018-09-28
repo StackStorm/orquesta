@@ -123,6 +123,12 @@ class TaskSpec(base.Spec):
         'publish'
     ]
 
+    def has_items(self):
+        return hasattr(self, 'with-items') and getattr(self, 'with-items', None) is not None
+
+    def get_items_spec(self):
+        return getattr(self, 'with-items', None)
+
     def has_join(self):
         return hasattr(self, 'join') and self.join
 

@@ -138,12 +138,22 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
 @six.add_metaclass(abc.ABCMeta)
 class WorkflowConductorTest(WorkflowComposerTest):
 
-    def format_task_item(self, task_name, task_init_ctx, task_spec, task_id=None):
+    def format_task_item(self, task_name, task_init_ctx, task_spec,
+                         action_specs=None, task_id=None):
+        if not action_specs:
+            action_specs = [
+                {
+                    'action': task_spec.action,
+                    'input': task_spec.input
+                }
+            ]
+
         return {
             'id': task_id or task_name,
             'name': task_name,
             'ctx': task_init_ctx,
-            'spec': task_spec
+            'spec': task_spec,
+            'actions': action_specs
         }
 
     # The conductor.get_start_tasks and conductor.get_next_tasks make copies of the
