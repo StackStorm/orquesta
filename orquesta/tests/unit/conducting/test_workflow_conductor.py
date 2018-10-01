@@ -379,7 +379,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             expected_task = self.format_task_item(next_task_name, expected_ctx_val, next_task_spec)
             self.assert_task_list(conductor.get_next_tasks(task_name), [expected_task])
 
-    def test_get_next_tasks_repeat(self):
+    def test_get_next_tasks_repeat_with_no_input(self):
         inputs = {'a': 123}
         conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
         self.assertEqual(len(conductor.get_next_tasks()), 1)
@@ -401,6 +401,22 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         )
 
         self.assertEqual(len(conductor.get_next_tasks()), 0)
+
+    def test_get_next_tasks_repeat_by_task_name(self):
+        inputs = {'a': 123}
+        conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
+        self.assertEqual(len(conductor.get_next_tasks()), 1)
+
+        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.RUNNING))
+        self.assertEqual(len(conductor.get_next_tasks('task1')), 0)
+
+        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.SUCCEEDED))
+        next_tasks = conductor.get_next_tasks('task1')
+        self.assertEqual(len(next_tasks), 1)
+        self.assertEqual(next_tasks[0]['name'], 'task2')
+
+        conductor.update_task_flow('task2', events.ActionExecutionEvent(states.RUNNING))
+        self.assertEqual(len(conductor.get_next_tasks('task2')), 0)
 
     def test_get_next_tasks_from_staged(self):
         inputs = {'a': 123}
