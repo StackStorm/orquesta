@@ -81,7 +81,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_tasks = [expected_task]
 
-        self.assert_task_list(conductor.get_start_tasks(), expected_tasks)
+        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
 
         # Test that the inline parameter in action is rendered.
         task_name = 'task1'

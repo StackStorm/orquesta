@@ -312,7 +312,6 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         expected_ctx_value = {'a': 123, 'b': False}
         expected_tasks = [self.format_task_item(next_task_name, expected_ctx_value, next_task_spec)]
-        self.assert_task_list(conductor.get_start_tasks(), expected_tasks)
         self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
 
     def test_get_start_tasks_when_graph_paused(self):
@@ -320,27 +319,27 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
 
         conductor.request_workflow_state(states.PAUSING)
-        self.assertListEqual(conductor.get_start_tasks(), [])
+        self.assertListEqual(conductor.get_next_tasks(), [])
 
         conductor.request_workflow_state(states.PAUSED)
-        self.assertListEqual(conductor.get_start_tasks(), [])
+        self.assertListEqual(conductor.get_next_tasks(), [])
 
     def test_get_start_tasks_when_graph_canceled(self):
         inputs = {'a': 123}
         conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
 
         conductor.request_workflow_state(states.CANCELING)
-        self.assertListEqual(conductor.get_start_tasks(), [])
+        self.assertListEqual(conductor.get_next_tasks(), [])
 
         conductor.request_workflow_state(states.CANCELED)
-        self.assertListEqual(conductor.get_start_tasks(), [])
+        self.assertListEqual(conductor.get_next_tasks(), [])
 
     def test_get_start_tasks_when_graph_abended(self):
         inputs = {'a': 123}
         conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
 
         conductor.request_workflow_state(states.FAILED)
-        self.assertListEqual(conductor.get_start_tasks(), [])
+        self.assertListEqual(conductor.get_next_tasks(), [])
 
     def test_get_task(self):
         inputs = {'a': 123}

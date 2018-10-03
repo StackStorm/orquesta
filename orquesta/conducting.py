@@ -393,26 +393,6 @@ class WorkflowConductor(object):
             'actions': action_specs
         }
 
-    def get_start_tasks(self):
-        if self.get_workflow_state() not in states.RUNNING_STATES:
-            return []
-
-        tasks = []
-
-        for task_node in self.graph.roots:
-            try:
-                tasks.append(self.get_task(task_node['id']))
-            except Exception as e:
-                self.log_error(str(e), task_id=task_node['id'])
-                self.request_workflow_state(states.FAILED)
-                continue
-
-        # Return nothing if there is error(s) on determining start tasks.
-        if self.get_workflow_state() in states.COMPLETED_STATES:
-            return []
-
-        return sorted(tasks, key=lambda x: x['name'])
-
     def has_next_tasks(self, task_id=None):
         next_tasks = []
 
