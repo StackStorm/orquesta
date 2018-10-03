@@ -359,14 +359,19 @@ class TaskStateMachine(object):
         if current_task_state not in states.ALL_STATES:
             raise exc.InvalidState(current_task_state)
 
-        # Identify new task state for the event.
         if current_task_state not in TASK_STATE_MACHINE_DATA:
             raise exc.InvalidTaskStateTransition(current_task_state, ac_ex_event.name)
 
-        if ac_ex_event.name not in TASK_STATE_MACHINE_DATA[current_task_state]:
-            raise exc.InvalidTaskStateTransition(current_task_state, ac_ex_event.name)
+        # Determine if action execution is part of an itemized task.
+        if (not hasattr(ac_ex_event, 'context') or
+                not ac_ex_event.context or 'item_id' not in ac_ex_event.context):
+            # Use simple mapping to identify new task state for the event.
+            if ac_ex_event.name not in TASK_STATE_MACHINE_DATA[current_task_state]:
+                raise exc.InvalidTaskStateTransition(current_task_state, ac_ex_event.name)
 
-        new_task_state = TASK_STATE_MACHINE_DATA[current_task_state][ac_ex_event.name]
+            new_task_state = TASK_STATE_MACHINE_DATA[current_task_state][ac_ex_event.name]
+        else:
+            pass
 
         # Assign new state to the task flow entry.
         task_flow_entry['state'] = new_task_state

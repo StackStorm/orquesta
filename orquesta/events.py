@@ -200,13 +200,14 @@ ENGINE_OPERATION_EVENTS = [
 
 class ExecutionEvent(object):
 
-    def __init__(self, name, state, result=None):
+    def __init__(self, name, state, result=None, context=None):
         if not states.is_valid(state):
             raise exc.InvalidState(state)
 
         self.name = name
         self.state = state
         self.result = result
+        self.context = context
 
 
 class WorkflowExecutionEvent(ExecutionEvent):
@@ -224,8 +225,13 @@ class TaskExecutionEvent(ExecutionEvent):
 
 class ActionExecutionEvent(ExecutionEvent):
 
-    def __init__(self, state, result=None):
-        super(ActionExecutionEvent, self).__init__('action_%s' % state, state, result=result)
+    def __init__(self, state, result=None, context=None):
+        super(ActionExecutionEvent, self).__init__(
+            'action_%s' % state,
+            state,
+            result=result,
+            context=context
+        )
 
 
 class TaskNoopEvent(ExecutionEvent):
@@ -234,6 +240,7 @@ class TaskNoopEvent(ExecutionEvent):
         self.name = TASK_NOOP_REQUESTED
         self.state = states.SUCCEEDED
         self.result = None
+        self.context = None
 
 
 class TaskFailEvent(ExecutionEvent):
@@ -242,3 +249,4 @@ class TaskFailEvent(ExecutionEvent):
         self.name = TASK_FAIL_REQUESTED
         self.state = states.FAILED
         self.result = None
+        self.context = None
