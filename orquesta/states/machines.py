@@ -274,7 +274,10 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_FAILED: states.FAILED,
         events.ACTION_EXPIRED: states.FAILED,
         events.ACTION_ABANDONED: states.FAILED,
-        events.ACTION_SUCCEEDED: states.SUCCEEDED
+        events.ACTION_SUCCEEDED: states.SUCCEEDED,
+        events.ACTION_SUCCEEDED_TASK_ACTIVE_ITEMS_INCOMPLETE: states.RUNNING,
+        events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_INCOMPLETE: states.RUNNING,
+        events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_COMPLETED: states.SUCCEEDED
     },
     states.PENDING: {
         events.ACTION_CANCELED: states.CANCELED,
@@ -344,11 +347,28 @@ class TaskStateMachine(object):
         return False
 
     @classmethod
-    def process_event(cls, task_flow_entry, ac_ex_event):
+    def add_context_to_action_event(cls, conductor, task_id, ac_ex_event):
+        action_event = ac_ex_event.name
 
+        if (ac_ex_event.state in [states.SUCCEEDED] and
+                ac_ex_event.context and 'item_id' in ac_ex_event.context):
+            items_status = [item['state'] for item in conductor.flow.staged[task_id]['items']]
+            active = list(filter(lambda x: x in states.ACTIVE_STATES, items_status))
+            incomplete = list(filter(lambda x: x not in states.COMPLETED_STATES, items_status))
+            action_event += '_task_active' if active else '_task_dormant'
+            action_event += '_items_incomplete' if incomplete else '_items_completed'
+
+        return action_event
+
+    @classmethod
+    def process_event(cls, conductor, task_flow_entry, ac_ex_event):
         # Check if event is valid.
         if ac_ex_event.name not in events.ACTION_EXECUTION_EVENTS + events.ENGINE_OPERATION_EVENTS:
             raise exc.InvalidEvent(ac_ex_event.name)
+
+        # Append additional task context to the event.
+        task_id = task_flow_entry['id']
+        ac_ex_event.name = cls.add_context_to_action_event(conductor, task_id, ac_ex_event)
 
         # Identify current task state.
         current_task_state = task_flow_entry.get('state', states.UNSET)
@@ -362,16 +382,11 @@ class TaskStateMachine(object):
         if current_task_state not in TASK_STATE_MACHINE_DATA:
             raise exc.InvalidTaskStateTransition(current_task_state, ac_ex_event.name)
 
-        # Determine if action execution is part of an itemized task.
-        if (not hasattr(ac_ex_event, 'context') or
-                not ac_ex_event.context or 'item_id' not in ac_ex_event.context):
-            # Use simple mapping to identify new task state for the event.
-            if ac_ex_event.name not in TASK_STATE_MACHINE_DATA[current_task_state]:
-                raise exc.InvalidTaskStateTransition(current_task_state, ac_ex_event.name)
+        # If no transition is identified, then there is no state change.
+        if ac_ex_event.name not in TASK_STATE_MACHINE_DATA[current_task_state]:
+            return
 
-            new_task_state = TASK_STATE_MACHINE_DATA[current_task_state][ac_ex_event.name]
-        else:
-            pass
+        new_task_state = TASK_STATE_MACHINE_DATA[current_task_state][ac_ex_event.name]
 
         # Assign new state to the task flow entry.
         task_flow_entry['state'] = new_task_state
@@ -427,8 +442,6 @@ class WorkflowStateMachine(object):
         if (not task_event.startswith(events.TASK_SUCCEEDED) and
                 not task_event.startswith(events.TASK_REMEDIATED)):
             return task_event
-
-        if conductor.flow.has_canceling_tasks or conductor.flow.has_canceled_tasks:
             return task_event + '_canceled'
 
         if conductor.flow.has_pausing_tasks or conductor.flow.has_paused_tasks:

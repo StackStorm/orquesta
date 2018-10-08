@@ -148,17 +148,19 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
 
         next_task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}},
-            {'action': 'core.echo', 'input': {'message': 'fi'}},
-            {'action': 'core.echo', 'input': {'message': 'fo'}},
-            {'action': 'core.echo', 'input': {'message': 'fum'}},
+            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
+            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
+            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
+            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
         ]
 
         expected_task = self.format_task_item(
             next_task_name,
             next_task_ctx,
             next_task_spec,
-            action_specs=next_task_action_specs
+            action_specs=next_task_action_specs,
+            items_count=len(next_task_ctx['xs']),
+            items_concurrency=None
         )
 
         expected_tasks = [expected_task]
@@ -222,17 +224,19 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
 
         next_task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}},
-            {'action': 'core.echo', 'input': {'message': 'fi'}},
-            {'action': 'core.echo', 'input': {'message': 'fo'}},
-            {'action': 'core.echo', 'input': {'message': 'fum'}},
+            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
+            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
+            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
+            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
         ]
 
         expected_task = self.format_task_item(
             next_task_name,
             next_task_ctx,
             next_task_spec,
-            action_specs=next_task_action_specs
+            action_specs=next_task_action_specs,
+            items_count=len(next_task_ctx['xs']),
+            items_concurrency=None
         )
 
         expected_tasks = [expected_task]
@@ -267,17 +271,19 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
 
         next_task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}},
-            {'action': 'core.echo', 'input': {'message': 'fi'}},
-            {'action': 'core.echo', 'input': {'message': 'fo'}},
-            {'action': 'core.echo', 'input': {'message': 'fum'}},
+            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
+            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
+            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
+            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
         ]
 
         expected_task = self.format_task_item(
             next_task_name,
             next_task_ctx,
             next_task_spec,
-            action_specs=next_task_action_specs
+            action_specs=next_task_action_specs,
+            items_count=len(next_task_ctx['xs']),
+            items_concurrency=None
         )
 
         expected_tasks = [expected_task]
@@ -315,16 +321,18 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
 
         next_task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'foobar'}},
-            {'action': 'core.echo', 'input': {'message': 'fubar'}},
-            {'action': 'core.echo', 'input': {'message': 'marcopolo'}},
+            {'action': 'core.echo', 'input': {'message': 'foobar'}, 'item_id': 0},
+            {'action': 'core.echo', 'input': {'message': 'fubar'}, 'item_id': 1},
+            {'action': 'core.echo', 'input': {'message': 'marcopolo'}, 'item_id': 2},
         ]
 
         expected_task = self.format_task_item(
             next_task_name,
             next_task_ctx,
             next_task_spec,
-            action_specs=next_task_action_specs
+            action_specs=next_task_action_specs,
+            items_count=len(next_task_ctx['xs']),
+            items_concurrency=None
         )
 
         expected_tasks = [expected_task]

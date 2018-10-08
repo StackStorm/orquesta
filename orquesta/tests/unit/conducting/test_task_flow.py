@@ -193,12 +193,17 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             'foobar'
         )
 
-        self.assertRaises(
-            exc.InvalidTaskStateTransition,
-            conductor.update_task_flow,
-            'task1',
-            events.ActionExecutionEvent(states.SUCCEEDED)
-        )
+        # When transition is not valid, the task state is not changed. For the test case below,
+        # the state change from requested to succeeded is not a valid transition.
+        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.REQUESTED))
+        expected_task_flow_item = {'id': 'task1', 'state': 'requested', 'ctx': 0}
+        self.assertEqual(conductor._get_task_flow_idx('task1'), 0)
+        self.assertDictEqual(conductor.get_task_flow_entry('task1'), expected_task_flow_item)
+
+        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.SUCCEEDED))
+        expected_task_flow_item = {'id': 'task1', 'state': 'requested', 'ctx': 0}
+        self.assertEqual(conductor._get_task_flow_idx('task1'), 0)
+        self.assertDictEqual(conductor.get_task_flow_entry('task1'), expected_task_flow_item)
 
     def test_add_sequence_to_task_flow(self):
         conductor = self._prep_conductor(state=states.RUNNING)

@@ -139,7 +139,9 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
 class WorkflowConductorTest(WorkflowComposerTest):
 
     def format_task_item(self, task_name, task_init_ctx, task_spec,
-                         action_specs=None, task_id=None):
+                         action_specs=None, task_id=None,
+                         items_count=None, items_concurrency=None):
+
         if not action_specs:
             action_specs = [
                 {
@@ -148,13 +150,19 @@ class WorkflowConductorTest(WorkflowComposerTest):
                 }
             ]
 
-        return {
+        task = {
             'id': task_id or task_name,
             'name': task_name,
             'ctx': task_init_ctx,
             'spec': task_spec,
             'actions': action_specs
         }
+
+        if items_count:
+            task['items_count'] = items_count
+            task['concurrency'] = items_concurrency
+
+        return task
 
     # The conductor.get_next_tasks make copies of the task specs and render expressions
     # in the task action and task input. So comparing the task specs will not match. In

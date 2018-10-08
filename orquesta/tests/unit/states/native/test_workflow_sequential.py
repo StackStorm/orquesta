@@ -10,7 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta import exceptions as exc
 from orquesta import states
 
 from orquesta.tests.unit.conducting.native import base
@@ -547,7 +546,8 @@ class SequentialWorkflowStateTest(base.OrchestraWorkflowConductorTest):
             {'id': 'task2', 'name': 'task2', 'state': states.RUNNING},
             {'id': 'task2', 'name': 'task2', 'state': states.CANCELING},
             {'id': 'task2', 'name': 'task2', 'state': states.PAUSING},
-            {'id': 'task2', 'name': 'task2', 'state': states.PAUSED}
+            {'id': 'task2', 'name': 'task2', 'state': states.PAUSED},
+            {'id': 'task2', 'name': 'task2', 'state': states.CANCELED}
         ]
 
         expected_wf_states = [
@@ -556,15 +556,11 @@ class SequentialWorkflowStateTest(base.OrchestraWorkflowConductorTest):
             states.RUNNING,
             states.CANCELING,
             states.CANCELING,
+            states.CANCELING,
             states.CANCELED
         ]
 
-        self.assertRaises(
-            exc.InvalidTaskStateTransition,
-            self.assert_workflow_state,
-            mock_flow_entries,
-            expected_wf_states
-        )
+        self.assert_workflow_state(mock_flow_entries, expected_wf_states)
 
     def test_task_canceling_then_abended(self):
         # Test use case where a task is pausing and then failed.

@@ -333,19 +333,20 @@ class WorkflowConductor(object):
                 else items_spec.items[:items_spec.items.index('in')].replace(' ', '').split(',')
             )
 
-            for item in items:
-                current_item = item
+            for i in range(0, len(items)):
+                cur_item = items[i]
 
-                if item_keys and (isinstance(item, tuple) or isinstance(item, list)):
-                    current_item = dict(zip(item_keys, list(item)))
+                if item_keys and (isinstance(cur_item, tuple) or isinstance(cur_item, list)):
+                    cur_item = dict(zip(item_keys, list(cur_item)))
                 elif item_keys and len(item_keys) == 1:
-                    current_item = {item_keys[0]: item}
+                    cur_item = {item_keys[0]: cur_item}
 
-                item_ctx_value = ctx.set_current_item(ctx_value, current_item)
+                item_ctx_value = ctx.set_current_item(ctx_value, cur_item)
 
                 action_spec = {
                     'action': expr.evaluate(task_spec.action, item_ctx_value),
-                    'input': expr.evaluate(getattr(task_spec, 'input', {}), item_ctx_value)
+                    'input': expr.evaluate(getattr(task_spec, 'input', {}), item_ctx_value),
+                    'item_id': i
                 }
 
                 action_specs.append(action_spec)
@@ -385,13 +386,20 @@ class WorkflowConductor(object):
         task_ctx = ctx.set_current_task(task_ctx, current_task)
         task_spec, action_specs = self._render_task_spec(task_name, task_ctx)
 
-        return {
+        task = {
             'id': task_id,
             'name': task_name,
             'ctx': task_ctx,
             'spec': task_spec,
             'actions': action_specs
         }
+
+        if task_spec.has_items():
+            items_spec = getattr(task_spec, 'with')
+            task['items_count'] = len(action_specs)
+            task['concurrency'] = getattr(items_spec, 'concurrency', None)
+
+        return task
 
     def has_next_tasks(self, task_id=None):
         next_tasks = []
@@ -422,6 +430,30 @@ class WorkflowConductor(object):
 
         return len(next_tasks) > 0
 
+    def _prep_next_task(self, task_id):
+        task = self.get_task(task_id)
+
+        # Check if task is with items.
+        if task['spec'].has_items():
+            # Prepare the staging task to track items execution status.
+            if 'items' not in self.flow.staged[task_id] or not self.flow.staged[task_id]['items']:
+                self.flow.staged[task_id]['items'] = [{'state': states.UNSET}] * task['items_count']
+
+            # Trim the list of actions in the task per concurrency policy.
+            all_items = list(zip(task['actions'], self.flow.staged[task_id]['items']))
+            active_items = list(filter(lambda x: x[1]['state'] in states.ACTIVE_STATES, all_items))
+            notrun_items = list(filter(lambda x: x[1]['state'] == states.UNSET, all_items))
+
+            if task['concurrency'] is not None:
+                availability = task['concurrency'] - len(active_items)
+                candidates = list(zip(*notrun_items[:availability]))
+                task['actions'] = list(candidates[0]) if candidates and availability > 0 else []
+            else:
+                candidates = list(zip(*notrun_items))
+                task['actions'] = list(candidates[0]) if candidates else []
+
+        return task if task['actions'] else None
+
     def get_next_tasks(self, task_id=None):
         next_tasks = []
 
@@ -431,7 +463,10 @@ class WorkflowConductor(object):
         if not task_id:
             for staged_task_id in self.flow.get_staged_tasks():
                 try:
-                    next_tasks.append(self.get_task(staged_task_id))
+                    next_task = self._prep_next_task(staged_task_id)
+
+                    if next_task:
+                        next_tasks.append(next_task)
                 except Exception as e:
                     self.log_error(str(e), task_id=staged_task_id)
                     self.request_workflow_state(states.FAILED)
@@ -463,7 +498,10 @@ class WorkflowConductor(object):
                     continue
 
                 try:
-                    next_tasks.append(self.get_task(next_task_id))
+                    next_task = self._prep_next_task(next_task_id)
+
+                    if next_task:
+                        next_tasks.append(next_task)
                 except Exception as e:
                     self.log_error(str(e), task_id=next_task_id)
                     self.request_workflow_state(states.FAILED)
@@ -511,8 +549,8 @@ class WorkflowConductor(object):
         if task_id not in self.flow.staged and not task_flow_entry:
             raise exc.InvalidTaskFlowEntry(task_id)
 
-        # Remove the task from the staged list if it is processed.
-        if event.state and task_id in self.flow.staged:
+        # Get the incoming context from the staged task.
+        if task_id in self.flow.staged:
             in_ctx_idxs = self.flow.staged[task_id]['ctxs']
 
             if len(in_ctx_idxs) <= 0 or all(x == in_ctx_idxs[0] for x in in_ctx_idxs):
@@ -522,8 +560,6 @@ class WorkflowConductor(object):
                 self.flow.contexts.append(new_ctx_entry)
                 in_ctx_idx = len(self.flow.contexts) - 1
 
-            del self.flow.staged[task_id]
-
         # Create new task flow entry if it does not exist.
         if not task_flow_entry:
             task_flow_entry = self.add_task_flow(task_id, in_ctx_idx=in_ctx_idx)
@@ -532,16 +568,51 @@ class WorkflowConductor(object):
         if self.graph.in_cycle(task_id) and task_flow_entry.get('state') in states.COMPLETED_STATES:
             task_flow_entry = self.add_task_flow(task_id, in_ctx_idx=in_ctx_idx)
 
+        # Remove task from staging if task is not with items.
+        if event.state and task_id in self.flow.staged and 'items' not in self.flow.staged[task_id]:
+            del self.flow.staged[task_id]
+
+        # If action execution is for a task item, then store the execution state for the item.
+        if (event.state and event.context and
+                'item_id' in event.context and event.context['item_id'] is not None):
+            item_result = {'state': event.state, 'result': event.result}
+            self.flow.staged[task_id]['items'][event.context['item_id']] = item_result
+
         # Log the error if it is a failed execution event.
         if event.state == states.FAILED:
             message = 'Execution failed. See result for details.'
             self.log_error(message, task_id=task_id, result=event.result)
 
         # Process the action execution event using the task state machine and update the task state.
-        machines.TaskStateMachine.process_event(task_flow_entry, event)
+        old_task_state = task_flow_entry.get('state', states.UNSET)
+        machines.TaskStateMachine.process_event(self, task_flow_entry, event)
+        new_task_state = task_flow_entry.get('state', states.UNSET)
+
+        if new_task_state in states.COMPLETED_STATES:
+            # Get task details required for updating outgoing context.
+            task_node = self.graph.get_task(task_id)
+            task_name = task_node['name']
+            task_spec = self.spec.tasks.get_task(task_name)
+            task_flow_idx = self._get_task_flow_idx(task_id)
+
+            # Get task result.
+            task_result = (
+                [item.get('result') for item in self.flow.staged[task_id]['items']]
+                if task_spec.has_items() else event.result
+            )
+
+            # Remove remaining task entry from staging.
+            if task_id in self.flow.staged:
+                any_items_running = [
+                    item for item in self.flow.staged[task_id].get('items', [])
+                    if item['state'] in states.ACTIVE_STATES
+                ]
+
+                if not any_items_running:
+                    del self.flow.staged[task_id]
 
         # Evaluate task transitions if task is in completed state.
-        if task_flow_entry['state'] in states.COMPLETED_STATES:
+        if new_task_state != old_task_state and new_task_state in states.COMPLETED_STATES:
             # Get task details required for updating outgoing context.
             task_node = self.graph.get_task(task_id)
             task_name = task_node['name']
@@ -551,7 +622,7 @@ class WorkflowConductor(object):
             # Set current task in the context.
             in_ctx_idx = task_flow_entry['ctx']
             in_ctx_val = self.flow.contexts[in_ctx_idx]['value']
-            current_task = {'id': task_id, 'name': task_name, 'result': event.result}
+            current_task = {'id': task_id, 'name': task_name, 'result': task_result}
             current_ctx = ctx.set_current_task(in_ctx_val, current_task)
 
             # Setup context for evaluating expressions in task transition criteria.

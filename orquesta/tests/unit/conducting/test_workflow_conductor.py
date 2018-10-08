@@ -392,13 +392,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor.update_task_flow('task2', events.ActionExecutionEvent(states.RUNNING))
         self.assertEqual(len(conductor.get_next_tasks()), 0)
 
-        self.assertRaises(
-            exc.InvalidTaskStateTransition,
-            conductor.update_task_flow,
-            'task1',
-            events.ActionExecutionEvent(states.SUCCEEDED)
-        )
-
+        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.SUCCEEDED))
         self.assertEqual(len(conductor.get_next_tasks()), 0)
 
     def test_get_next_tasks_repeat_by_task_name(self):
