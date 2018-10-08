@@ -1,18 +1,11 @@
 version: 1.0
 
-description: Send direct message to members
+description: A workflow demonstrating with items.
 
 input:
   - members
-  - message
-  - batch_size: 3
 
 tasks:
   task1:
-    with:
-      items: member in <% ctx().members %>
-      concurrency: <% ctx().batch_size %>
-    action: slack.post
-    input:
-      member: <% ctx().member %>
-      message: <% ctx().message %>
+    with: <% ctx(members) %>
+    action: core.echo message="<% item() %>, resistance is futile!"
