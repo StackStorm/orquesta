@@ -14,6 +14,8 @@ import copy
 import logging
 import six
 
+from six.moves import queue
+
 from orquesta import events
 from orquesta import exceptions as exc
 from orquesta.expressions import base as expr
@@ -533,6 +535,7 @@ class WorkflowConductor(object):
 
     def update_task_flow(self, task_id, event):
         in_ctx_idx = 0
+        engine_event_queue = queue.Queue()
 
         # Throw exception if not expected event type.
         if not issubclass(type(event), events.ExecutionEvent):
@@ -687,16 +690,18 @@ class WorkflowConductor(object):
                         self.flow.staged[task_transition[1]] = staging_data
 
                     # If the next task is noop, then mark the task as completed.
-                    if next_task_name == 'noop':
-                        self.update_task_flow(next_task_id, events.TaskNoopEvent())
-
-                    # If the next task is fail, then fail the workflow..
-                    if next_task_name == 'fail':
-                        self.update_task_flow(next_task_id, events.TaskFailEvent())
+                    if next_task_name in events.ENGINE_EVENT_MAP.keys():
+                        engine_event_queue.put((next_task_id, next_task_name))
 
         # Process the task event using the workflow state machine and update the workflow state.
         task_ex_event = events.TaskExecutionEvent(task_id, task_flow_entry['state'])
         machines.WorkflowStateMachine.process_event(self, task_ex_event)
+
+        # Process any engine commands in the queue.
+        while not engine_event_queue.empty():
+            next_task_id, next_task_name = engine_event_queue.get()
+            engine_event = events.ENGINE_EVENT_MAP[next_task_name]
+            self.update_task_flow(next_task_id, engine_event())
 
         # Render workflow output if workflow is completed.
         if self.get_workflow_state() in states.COMPLETED_STATES:

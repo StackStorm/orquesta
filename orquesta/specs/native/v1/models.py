@@ -16,6 +16,7 @@ import six
 from six.moves import queue
 import yaml
 
+from orquesta import events
 from orquesta import exceptions as exc
 from orquesta.expressions import base as expr
 from orquesta.specs.native.v1 import base
@@ -26,10 +27,7 @@ from orquesta.utils import parameters as args_utils
 
 LOG = logging.getLogger(__name__)
 
-RESERVED_TASK_NAMES = [
-    'fail',
-    'noop'
-]
+RESERVED_TASK_NAMES = list(events.ENGINE_EVENT_MAP.keys())
 
 
 def instantiate(definition):

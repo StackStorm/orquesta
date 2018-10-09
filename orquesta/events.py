@@ -256,3 +256,9 @@ class TaskFailEvent(ExecutionEvent):
         self.state = states.FAILED
         self.result = None
         self.context = None
+
+
+ENGINE_EVENT_MAP = {
+    'noop': TaskNoopEvent,
+    'fail': TaskFailEvent
+}
