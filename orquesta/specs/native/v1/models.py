@@ -21,6 +21,7 @@ from orquesta import exceptions as exc
 from orquesta.expressions import base as expr
 from orquesta.specs.native.v1 import base
 from orquesta.specs import types
+from orquesta.utils import context as ctx
 from orquesta.utils import dictionary as dx
 from orquesta.utils import parameters as args_utils
 
@@ -160,6 +161,54 @@ class TaskSpec(base.Spec):
 
     def has_join(self):
         return hasattr(self, 'join') and self.join
+
+    def render(self, in_ctx):
+        action_specs = []
+
+        if not self.has_items():
+            action_spec = {
+                'action': expr.evaluate(self.action, in_ctx),
+                'input': expr.evaluate(getattr(self, 'input', {}), in_ctx)
+            }
+
+            action_specs.append(action_spec)
+        else:
+            items_spec = self.get_items_spec()
+
+            items_expr = (
+                items_spec.items.strip() if 'in' not in items_spec.items
+                else items_spec.items[items_spec.items.index('in') + 2:].strip()
+            )
+
+            items = expr.evaluate(items_expr, in_ctx)
+
+            if not isinstance(items, list):
+                raise TypeError('The value of "%s" is not type of list.' % items_expr)
+
+            item_keys = (
+                None if 'in' not in items_spec.items
+                else items_spec.items[:items_spec.items.index('in')].replace(' ', '').split(',')
+            )
+
+            for i in range(0, len(items)):
+                cur_item = items[i]
+
+                if item_keys and (isinstance(cur_item, tuple) or isinstance(cur_item, list)):
+                    cur_item = dict(zip(item_keys, list(cur_item)))
+                elif item_keys and len(item_keys) == 1:
+                    cur_item = {item_keys[0]: cur_item}
+
+                item_ctx_value = ctx.set_current_item(in_ctx, cur_item)
+
+                action_spec = {
+                    'action': expr.evaluate(self.action, item_ctx_value),
+                    'input': expr.evaluate(getattr(self, 'input', {}), item_ctx_value),
+                    'item_id': i
+                }
+
+                action_specs.append(action_spec)
+
+        return self, action_specs
 
     def finalize_context(self, next_task_name, criteria, in_ctx):
         rolling_ctx = copy.deepcopy(in_ctx)

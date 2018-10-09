@@ -316,55 +316,6 @@ class WorkflowConductor(object):
     def get_workflow_output(self):
         return copy.deepcopy(self._outputs) if self._outputs else None
 
-    def _render_task_spec(self, task_name, ctx_value):
-        action_specs = []
-        task_spec = self.spec.tasks.get_task(task_name).copy()
-
-        if not task_spec.has_items():
-            action_spec = {
-                'action': expr.evaluate(task_spec.action, ctx_value),
-                'input': expr.evaluate(getattr(task_spec, 'input', {}), ctx_value)
-            }
-
-            action_specs.append(action_spec)
-        else:
-            items_spec = task_spec.get_items_spec()
-
-            items_expr = (
-                items_spec.items.strip() if 'in' not in items_spec.items
-                else items_spec.items[items_spec.items.index('in') + 2:].strip()
-            )
-
-            items = expr.evaluate(items_expr, ctx_value)
-
-            if not isinstance(items, list):
-                raise TypeError('The value of "%s" is not type of list.' % items_expr)
-
-            item_keys = (
-                None if 'in' not in items_spec.items
-                else items_spec.items[:items_spec.items.index('in')].replace(' ', '').split(',')
-            )
-
-            for i in range(0, len(items)):
-                cur_item = items[i]
-
-                if item_keys and (isinstance(cur_item, tuple) or isinstance(cur_item, list)):
-                    cur_item = dict(zip(item_keys, list(cur_item)))
-                elif item_keys and len(item_keys) == 1:
-                    cur_item = {item_keys[0]: cur_item}
-
-                item_ctx_value = ctx.set_current_item(ctx_value, cur_item)
-
-                action_spec = {
-                    'action': expr.evaluate(task_spec.action, item_ctx_value),
-                    'input': expr.evaluate(getattr(task_spec, 'input', {}), item_ctx_value),
-                    'item_id': i
-                }
-
-                action_specs.append(action_spec)
-
-        return task_spec, action_specs
-
     def _inbound_criteria_satisfied(self, task_id):
         inbounds = self.graph.get_prev_transitions(task_id)
         inbounds_satisfied = []
@@ -396,7 +347,8 @@ class WorkflowConductor(object):
 
         current_task = {'id': task_id, 'name': task_name}
         task_ctx = ctx.set_current_task(task_ctx, current_task)
-        task_spec, action_specs = self._render_task_spec(task_name, task_ctx)
+        task_spec = self.spec.tasks.get_task(task_name).copy()
+        task_spec, action_specs = task_spec.render(task_ctx)
 
         task = {
             'id': task_id,
@@ -410,6 +362,30 @@ class WorkflowConductor(object):
             items_spec = getattr(task_spec, 'with')
             task['items_count'] = len(action_specs)
             task['concurrency'] = getattr(items_spec, 'concurrency', None)
+
+        return task
+
+    def _evaluate_task_actions(self, task):
+        task_id = task['id']
+
+        # Check if task is with items.
+        if task['spec'].has_items():
+            # Prepare the staging task to track items execution status.
+            if 'items' not in self.flow.staged[task_id] or not self.flow.staged[task_id]['items']:
+                self.flow.staged[task_id]['items'] = [{'state': states.UNSET}] * task['items_count']
+
+            # Trim the list of actions in the task per concurrency policy.
+            all_items = list(zip(task['actions'], self.flow.staged[task_id]['items']))
+            active_items = list(filter(lambda x: x[1]['state'] in states.ACTIVE_STATES, all_items))
+            notrun_items = list(filter(lambda x: x[1]['state'] == states.UNSET, all_items))
+
+            if task['concurrency'] is not None:
+                availability = task['concurrency'] - len(active_items)
+                candidates = list(zip(*notrun_items[:availability]))
+                task['actions'] = list(candidates[0]) if candidates and availability > 0 else []
+            else:
+                candidates = list(zip(*notrun_items))
+                task['actions'] = list(candidates[0]) if candidates else []
 
         return task
 
@@ -442,30 +418,6 @@ class WorkflowConductor(object):
 
         return len(next_tasks) > 0
 
-    def _prep_next_task(self, task_id):
-        task = self.get_task(task_id)
-
-        # Check if task is with items.
-        if task['spec'].has_items():
-            # Prepare the staging task to track items execution status.
-            if 'items' not in self.flow.staged[task_id] or not self.flow.staged[task_id]['items']:
-                self.flow.staged[task_id]['items'] = [{'state': states.UNSET}] * task['items_count']
-
-            # Trim the list of actions in the task per concurrency policy.
-            all_items = list(zip(task['actions'], self.flow.staged[task_id]['items']))
-            active_items = list(filter(lambda x: x[1]['state'] in states.ACTIVE_STATES, all_items))
-            notrun_items = list(filter(lambda x: x[1]['state'] == states.UNSET, all_items))
-
-            if task['concurrency'] is not None:
-                availability = task['concurrency'] - len(active_items)
-                candidates = list(zip(*notrun_items[:availability]))
-                task['actions'] = list(candidates[0]) if candidates and availability > 0 else []
-            else:
-                candidates = list(zip(*notrun_items))
-                task['actions'] = list(candidates[0]) if candidates else []
-
-        return task if task['actions'] else None
-
     def get_next_tasks(self, task_id=None):
         next_tasks = []
 
@@ -475,9 +427,10 @@ class WorkflowConductor(object):
         if not task_id:
             for staged_task_id in self.flow.get_staged_tasks():
                 try:
-                    next_task = self._prep_next_task(staged_task_id)
+                    next_task = self.get_task(staged_task_id)
+                    next_task = self._evaluate_task_actions(next_task)
 
-                    if next_task:
+                    if 'actions' in next_task and len(next_task['actions']) > 0:
                         next_tasks.append(next_task)
                 except Exception as e:
                     self.log_error(str(e), task_id=staged_task_id)
@@ -510,9 +463,10 @@ class WorkflowConductor(object):
                     continue
 
                 try:
-                    next_task = self._prep_next_task(next_task_id)
+                    next_task = self.get_task(next_task_id)
+                    next_task = self._evaluate_task_actions(next_task)
 
-                    if next_task:
+                    if 'actions' in next_task and len(next_task['actions']) > 0:
                         next_tasks.append(next_task)
                 except Exception as e:
                     self.log_error(str(e), task_id=next_task_id)
