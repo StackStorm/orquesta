@@ -88,6 +88,16 @@ class TaskFlow(object):
     def has_staged_tasks(self):
         return len(self.get_staged_tasks()) > 0
 
+    def remove_staged_task(self, task_id):
+        if task_id in self.staged:
+            any_items_running = [
+                item for item in self.staged[task_id].get('items', [])
+                if item['state'] in states.ACTIVE_STATES
+            ]
+
+            if not any_items_running:
+                del self.staged[task_id]
+
 
 class WorkflowConductor(object):
 
@@ -591,6 +601,7 @@ class WorkflowConductor(object):
         machines.TaskStateMachine.process_event(self, task_flow_entry, event)
         new_task_state = task_flow_entry.get('state', states.UNSET)
 
+        # Get task result and set current context if task is completed.
         if new_task_state in states.COMPLETED_STATES:
             # Get task details required for updating outgoing context.
             task_node = self.graph.get_task(task_id)
@@ -604,23 +615,8 @@ class WorkflowConductor(object):
                 if task_spec.has_items() else event.result
             )
 
-            # Remove remaining task entry from staging.
-            if task_id in self.flow.staged:
-                any_items_running = [
-                    item for item in self.flow.staged[task_id].get('items', [])
-                    if item['state'] in states.ACTIVE_STATES
-                ]
-
-                if not any_items_running:
-                    del self.flow.staged[task_id]
-
-        # Evaluate task transitions if task is in completed state.
-        if new_task_state != old_task_state and new_task_state in states.COMPLETED_STATES:
-            # Get task details required for updating outgoing context.
-            task_node = self.graph.get_task(task_id)
-            task_name = task_node['name']
-            task_spec = self.spec.tasks.get_task(task_name)
-            task_flow_idx = self._get_task_flow_idx(task_id)
+            # Remove remaining task from staging.
+            self.flow.remove_staged_task(task_id)
 
             # Set current task in the context.
             in_ctx_idx = task_flow_entry['ctx']
@@ -632,6 +628,8 @@ class WorkflowConductor(object):
             flow_ctx = {'__flow': self.flow.serialize()}
             current_ctx = dx.merge_dicts(current_ctx, flow_ctx, True)
 
+        # Evaluate task transitions if task is completed and state change is not processed.
+        if new_task_state in states.COMPLETED_STATES and new_task_state != old_task_state:
             # Identify task transitions for the current completed task.
             task_transitions = self.graph.get_next_transitions(task_id)
 
