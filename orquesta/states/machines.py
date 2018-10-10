@@ -275,6 +275,8 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_PAUSED_TASK_DORMANT_ITEMS_INCOMPLETE: states.PAUSED,
         events.ACTION_CANCELING: states.CANCELING,
         events.ACTION_CANCELED: states.CANCELED,
+        events.ACTION_CANCELED_TASK_ACTIVE_ITEMS_INCOMPLETE: states.CANCELING,
+        events.ACTION_CANCELED_TASK_DORMANT_ITEMS_INCOMPLETE: states.CANCELED,
         events.ACTION_FAILED: states.FAILED,
         events.ACTION_EXPIRED: states.FAILED,
         events.ACTION_ABANDONED: states.FAILED,
@@ -318,7 +320,9 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_CANCELED: states.CANCELED,
         events.ACTION_FAILED: states.FAILED,
         events.ACTION_EXPIRED: states.FAILED,
-        events.ACTION_ABANDONED: states.FAILED
+        events.ACTION_ABANDONED: states.FAILED,
+        events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_CANCELED: states.CANCELED,
+        events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_INCOMPLETE: states.CANCELED
     },
     states.CANCELED: {
     },
@@ -356,7 +360,7 @@ class TaskStateMachine(object):
     @classmethod
     def add_context_to_action_event(cls, conductor, task_id, ac_ex_event):
         action_event = ac_ex_event.name
-        requirements = [states.PENDING, states.PAUSED, states.SUCCEEDED]
+        requirements = [states.PENDING, states.PAUSED, states.SUCCEEDED, states.CANCELED]
 
         if (ac_ex_event.state in requirements and
                 ac_ex_event.context and 'item_id' in ac_ex_event.context):
@@ -364,11 +368,12 @@ class TaskStateMachine(object):
             active = list(filter(lambda x: x in states.ACTIVE_STATES, items_status))
             incomplete = list(filter(lambda x: x not in states.COMPLETED_STATES, items_status))
             paused = list(filter(lambda x: x in [states.PENDING, states.PAUSED], items_status))
+            canceled = list(filter(lambda x: x == states.CANCELED, items_status))
 
             action_event += '_task_active' if active else '_task_dormant'
 
-            if not active and paused:
-                action_event += '_items_paused'
+            if not active and (paused or canceled):
+                action_event += '_items_paused' if paused else '_items_canceled'
                 return action_event
 
             action_event += '_items_incomplete' if incomplete else '_items_completed'

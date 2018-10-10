@@ -46,10 +46,33 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorTest):
             ac_ex_event = events.ActionExecutionEvent(states.RUNNING, context=context)
             conductor.update_task_flow(task_id, ac_ex_event)
 
-        # Ensure there are no actions when getting next tasks again.
+        # Ensure the actions listed is accurate when getting next tasks again.
         expected_tasks = []
+        capacity = len(items)
+        next_item_id = len(tests)
+        next_action_specs = []
+
+        if concurrency is not None and concurrency > 0:
+            items_running = min(len(tests), concurrency or len(items))
+            capacity = concurrency - items_running
+
+        if capacity > 0 and next_item_id < len(items):
+            next_action_specs = action_specs[next_item_id:next_item_id + capacity]
+
+        if next_action_specs:
+            expected_task = self.format_task_item(
+                task_id,
+                task_ctx,
+                conductor.spec.tasks.get_task(task_id),
+                action_specs=next_action_specs,
+                items_count=len(items),
+                items_concurrency=concurrency
+            )
+
+            expected_tasks = [expected_task]
+
         actual_tasks = conductor.get_next_tasks()
-        self.assertListEqual(actual_tasks, expected_tasks)
+        self.assert_task_list(actual_tasks, expected_tasks)
 
         # Mock the action execution for each item.
         for i in range(0, len(tests)):
@@ -473,6 +496,128 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorTest):
 
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+
+    def test_cancel_item(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - xs:
+              - fee
+              - fi
+              - fo
+              - fum
+
+        tasks:
+          task1:
+            with: <% ctx(xs) %>
+            action: core.echo message=<% item() %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
+        """
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_state(states.RUNNING)
+
+        # Mock the action execution for each item and assert expected task states.
+        task_name = 'task1'
+        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+
+        task_action_specs = [
+            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
+            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
+            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
+            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+        ]
+
+        mock_ac_ex_states = [states.SUCCEEDED, states.CANCELED, states.SUCCEEDED, states.SUCCEEDED]
+        expected_task_states = [states.RUNNING] + [states.CANCELING] * 2 + [states.CANCELED]
+        expected_workflow_states = [states.RUNNING] + [states.CANCELING] * 2 + [states.CANCELED]
+
+        self.assert_task_items(
+            conductor,
+            task_name,
+            task_ctx,
+            task_ctx['xs'],
+            task_action_specs,
+            mock_ac_ex_states,
+            expected_task_states,
+            expected_workflow_states
+        )
+
+        # Assert the task is removed from staging.
+        self.assertNotIn(task_name, conductor.flow.staged)
+
+        # Assert the workflow succeeded.
+        self.assertEqual(conductor.get_workflow_state(), states.CANCELED)
+
+    def test_cancel_with_items_incomplete(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - xs:
+              - fee
+              - fi
+              - fo
+              - fum
+
+        tasks:
+          task1:
+            with: <% ctx(xs) %>
+            action: core.echo message=<% item() %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
+        """
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_state(states.RUNNING)
+
+        # Mock the action execution for each item and assert expected task states.
+        task_name = 'task1'
+        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+
+        task_action_specs = [
+            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
+            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
+            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
+            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+        ]
+
+        mock_ac_ex_states = [states.SUCCEEDED, states.CANCELED, states.SUCCEEDED]
+        expected_task_states = [states.RUNNING, states.CANCELING, states.CANCELED]
+        expected_workflow_states = [states.RUNNING, states.CANCELING, states.CANCELED]
+
+        self.assert_task_items(
+            conductor,
+            task_name,
+            task_ctx,
+            task_ctx['xs'],
+            task_action_specs,
+            mock_ac_ex_states,
+            expected_task_states,
+            expected_workflow_states
+        )
+
+        # Assert the task is removed from staging.
+        self.assertNotIn(task_name, conductor.flow.staged)
+
+        # Assert the workflow succeeded.
+        self.assertEqual(conductor.get_workflow_state(), states.CANCELED)
 
     def test_pause_item(self):
         wf_def = """
