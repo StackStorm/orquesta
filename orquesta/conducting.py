@@ -58,6 +58,9 @@ class TaskFlow(object):
 
         return instance
 
+    def get_task(self, task_id):
+        return self.sequence[self.tasks[task_id]]
+
     def get_tasks_by_state(self, states):
         return [t for t in self.sequence if t['state'] in states]
 

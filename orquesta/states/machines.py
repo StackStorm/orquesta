@@ -267,8 +267,12 @@ TASK_STATE_MACHINE_DATA = {
     states.RUNNING: {
         events.ACTION_RUNNING: states.RUNNING,
         events.ACTION_PENDING: states.PENDING,
+        events.ACTION_PENDING_TASK_ACTIVE_ITEMS_INCOMPLETE: states.PAUSING,
+        events.ACTION_PENDING_TASK_DORMANT_ITEMS_INCOMPLETE: states.PAUSED,
         events.ACTION_PAUSING: states.PAUSING,
         events.ACTION_PAUSED: states.PAUSED,
+        events.ACTION_PAUSED_TASK_ACTIVE_ITEMS_INCOMPLETE: states.PAUSING,
+        events.ACTION_PAUSED_TASK_DORMANT_ITEMS_INCOMPLETE: states.PAUSED,
         events.ACTION_CANCELING: states.CANCELING,
         events.ACTION_CANCELED: states.CANCELED,
         events.ACTION_FAILED: states.FAILED,
@@ -277,6 +281,7 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_SUCCEEDED: states.SUCCEEDED,
         events.ACTION_SUCCEEDED_TASK_ACTIVE_ITEMS_INCOMPLETE: states.RUNNING,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_INCOMPLETE: states.RUNNING,
+        events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_PAUSED: states.PAUSED,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_COMPLETED: states.SUCCEEDED
     },
     states.PENDING: {
@@ -294,7 +299,9 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_CANCELED: states.CANCELED,
         events.ACTION_FAILED: states.FAILED,
         events.ACTION_EXPIRED: states.FAILED,
-        events.ACTION_ABANDONED: states.FAILED
+        events.ACTION_ABANDONED: states.FAILED,
+        events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_PAUSED: states.PAUSED,
+        events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_INCOMPLETE: states.PAUSED
     },
     states.PAUSED: {
         events.ACTION_RUNNING: states.RUNNING,
@@ -349,14 +356,23 @@ class TaskStateMachine(object):
     @classmethod
     def add_context_to_action_event(cls, conductor, task_id, ac_ex_event):
         action_event = ac_ex_event.name
+        requirements = [states.PENDING, states.PAUSED, states.SUCCEEDED]
 
-        if (ac_ex_event.state in [states.SUCCEEDED] and
+        if (ac_ex_event.state in requirements and
                 ac_ex_event.context and 'item_id' in ac_ex_event.context):
             items_status = [item['state'] for item in conductor.flow.staged[task_id]['items']]
             active = list(filter(lambda x: x in states.ACTIVE_STATES, items_status))
             incomplete = list(filter(lambda x: x not in states.COMPLETED_STATES, items_status))
+            paused = list(filter(lambda x: x in [states.PENDING, states.PAUSED], items_status))
+
             action_event += '_task_active' if active else '_task_dormant'
+
+            if not active and paused:
+                action_event += '_items_paused'
+                return action_event
+
             action_event += '_items_incomplete' if incomplete else '_items_completed'
+            return action_event
 
         return action_event
 
