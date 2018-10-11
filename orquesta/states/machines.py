@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import logging
 
 from orquesta import events
@@ -278,12 +279,15 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_CANCELED_TASK_ACTIVE_ITEMS_INCOMPLETE: states.CANCELING,
         events.ACTION_CANCELED_TASK_DORMANT_ITEMS_INCOMPLETE: states.CANCELED,
         events.ACTION_FAILED: states.FAILED,
+        events.ACTION_FAILED_TASK_ACTIVE_ITEMS_INCOMPLETE: states.RUNNING,
+        events.ACTION_FAILED_TASK_DORMANT_ITEMS_INCOMPLETE: states.FAILED,
         events.ACTION_EXPIRED: states.FAILED,
         events.ACTION_ABANDONED: states.FAILED,
         events.ACTION_SUCCEEDED: states.SUCCEEDED,
         events.ACTION_SUCCEEDED_TASK_ACTIVE_ITEMS_INCOMPLETE: states.RUNNING,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_INCOMPLETE: states.RUNNING,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_PAUSED: states.PAUSED,
+        events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_FAILED: states.FAILED,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_COMPLETED: states.SUCCEEDED
     },
     states.PENDING: {
@@ -360,20 +364,42 @@ class TaskStateMachine(object):
     @classmethod
     def add_context_to_action_event(cls, conductor, task_id, ac_ex_event):
         action_event = ac_ex_event.name
-        requirements = [states.PENDING, states.PAUSED, states.SUCCEEDED, states.CANCELED]
+
+        requirements = [
+            states.PENDING,
+            states.PAUSED,
+            states.SUCCEEDED,
+            states.FAILED,
+            states.CANCELED
+        ]
 
         if (ac_ex_event.state in requirements and
                 ac_ex_event.context and 'item_id' in ac_ex_event.context):
-            items_status = [item['state'] for item in conductor.flow.staged[task_id]['items']]
+            # Make a copy of the items and remove current item under evaluation.
+            items = copy.deepcopy(conductor.flow.staged[task_id]['items'])
+            del items[ac_ex_event.context['item_id']]
+            items_status = [item['state'] for item in items]
+
+            # Assess various situations.
             active = list(filter(lambda x: x in states.ACTIVE_STATES, items_status))
             incomplete = list(filter(lambda x: x not in states.COMPLETED_STATES, items_status))
             paused = list(filter(lambda x: x in [states.PENDING, states.PAUSED], items_status))
             canceled = list(filter(lambda x: x == states.CANCELED, items_status))
+            failed = list(filter(lambda x: x in states.ABENDED_STATES, items_status))
 
+            # Attach contextual information with the event.
             action_event += '_task_active' if active else '_task_dormant'
 
-            if not active and (paused or canceled):
-                action_event += '_items_paused' if paused else '_items_canceled'
+            if not active and (paused or canceled or failed):
+                if paused:
+                    action_event += '_items_paused'
+
+                if canceled:
+                    action_event += '_items_canceled'
+
+                if failed:
+                    action_event += '_items_failed'
+
                 return action_event
 
             action_event += '_items_incomplete' if incomplete else '_items_completed'
