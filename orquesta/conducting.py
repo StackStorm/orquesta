@@ -251,8 +251,14 @@ class WorkflowConductor(object):
         # Record current workflow state.
         current_state = self.get_workflow_state()
 
-        # Process state change event.
+        # Create an event for the request.
         wf_ex_event = events.WorkflowExecutionEvent(state)
+
+        # Push the event to all the active tasks. The event may trigger state changes to the task.
+        for task in self.flow.get_tasks_by_state(states.ACTIVE_STATES):
+            machines.TaskStateMachine.process_event(self, task, wf_ex_event)
+
+        # Process the workflow state change event.
         machines.WorkflowStateMachine.process_event(self, wf_ex_event)
 
         # Get workflow state after event is processed.

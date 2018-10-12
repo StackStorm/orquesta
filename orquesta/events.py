@@ -24,16 +24,23 @@ WORKFLOW_REQUESTED = 'workflow_requested'
 WORKFLOW_SCHEDULED = 'workflow_scheduled'
 WORKFLOW_DELAYED = 'workflow_delayed'
 WORKFLOW_RUNNING = 'workflow_running'
+WORKFLOW_RUNNING_WORKFLOW_COMPLETED = 'workflow_running_workflow_completed'
 WORKFLOW_PAUSING = 'workflow_pausing'
+WORKFLOW_PAUSING_TASK_ACTIVE_ITEMS_INCOMPLETE = 'workflow_pausing_task_active_items_incomplete'
+WORKFLOW_PAUSING_TASK_DORMANT_ITEMS_INCOMPLETE = 'workflow_pausing_task_dormant_items_incomplete'
 WORKFLOW_PAUSING_WORKFLOW_ACTIVE = 'workflow_pausing_workflow_active'
 WORKFLOW_PAUSING_WORKFLOW_DORMANT = 'workflow_pausing_workflow_dormant'
 WORKFLOW_PAUSED = 'workflow_paused'
 WORKFLOW_PAUSED_WORKFLOW_ACTIVE = 'workflow_paused_workflow_active'
 WORKFLOW_PAUSED_WORKFLOW_DORMANT = 'workflow_paused_workflow_dormant'
 WORKFLOW_RESUMING = 'workflow_resuming'
+WORKFLOW_RESUMING_WORKFLOW_COMPLETED = 'workflow_resuming_workflow_completed'
 WORKFLOW_SUCCEEDED = 'workflow_succeeded'
 WORKFLOW_FAILED = 'workflow_failed'
 WORKFLOW_CANCELING = 'workflow_canceling'
+WORKFLOW_CANCELING_TASK_ACTIVE_ITEMS_INCOMPLETE = 'workflow_canceling_task_active_items_incomplete'
+WORKFLOW_CANCELING_TASK_DORMANT_ITEMS_INCOMPLETE = \
+    'workflow_canceling_task_dormant_items_incomplete'
 WORKFLOW_CANCELING_WORKFLOW_ACTIVE = 'workflow_canceling_workflow_active'
 WORKFLOW_CANCELING_WORKFLOW_DORMANT = 'workflow_canceling_workflow_dormant'
 WORKFLOW_CANCELED = 'workflow_canceled'
@@ -45,16 +52,22 @@ WORKFLOW_EXECUTION_EVENTS = [
     WORKFLOW_SCHEDULED,
     WORKFLOW_DELAYED,
     WORKFLOW_RUNNING,
+    WORKFLOW_RUNNING_WORKFLOW_COMPLETED,
     WORKFLOW_PAUSING,
+    WORKFLOW_PAUSING_TASK_ACTIVE_ITEMS_INCOMPLETE,
+    WORKFLOW_PAUSING_TASK_DORMANT_ITEMS_INCOMPLETE,
     WORKFLOW_PAUSING_WORKFLOW_ACTIVE,
     WORKFLOW_PAUSING_WORKFLOW_DORMANT,
     WORKFLOW_PAUSED,
     WORKFLOW_PAUSED_WORKFLOW_ACTIVE,
     WORKFLOW_PAUSED_WORKFLOW_DORMANT,
     WORKFLOW_RESUMING,
+    WORKFLOW_RESUMING_WORKFLOW_COMPLETED,
     WORKFLOW_SUCCEEDED,
     WORKFLOW_FAILED,
     WORKFLOW_CANCELING,
+    WORKFLOW_CANCELING_TASK_ACTIVE_ITEMS_INCOMPLETE,
+    WORKFLOW_CANCELING_TASK_DORMANT_ITEMS_INCOMPLETE,
     WORKFLOW_CANCELING_WORKFLOW_ACTIVE,
     WORKFLOW_CANCELING_WORKFLOW_DORMANT,
     WORKFLOW_CANCELED,
@@ -262,7 +275,11 @@ class ActionExecutionEvent(ExecutionEvent):
         )
 
 
-class TaskNoopEvent(ExecutionEvent):
+class EngineOperationEvent(ExecutionEvent):
+    pass
+
+
+class TaskNoopEvent(EngineOperationEvent):
 
     def __init__(self):
         self.name = TASK_NOOP_REQUESTED
@@ -271,7 +288,7 @@ class TaskNoopEvent(ExecutionEvent):
         self.context = None
 
 
-class TaskFailEvent(ExecutionEvent):
+class TaskFailEvent(EngineOperationEvent):
 
     def __init__(self):
         self.name = TASK_FAIL_REQUESTED

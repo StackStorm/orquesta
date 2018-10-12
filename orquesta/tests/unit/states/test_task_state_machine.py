@@ -18,6 +18,13 @@ from orquesta import states
 from orquesta.states import machines
 
 
+class MockExecutionEvent(events.ActionExecutionEvent):
+
+    def __init__(self, name, state):
+        self.name = name
+        self.state = state
+
+
 class TaskStateMachineTest(unittest.TestCase):
 
     @classmethod
@@ -32,14 +39,14 @@ class TaskStateMachineTest(unittest.TestCase):
 
     def test_bad_event_name(self):
         task_flow_entry = {'id': 'task1', 'ctx': 0}
-        ac_ex_event = events.ExecutionEvent('foobar', states.RUNNING)
+        mock_event = MockExecutionEvent('foobar', states.RUNNING)
 
         self.assertRaises(
             exc.InvalidEvent,
             machines.TaskStateMachine.process_event,
             None,
             task_flow_entry,
-            ac_ex_event
+            mock_event
         )
 
     def test_bad_event_state(self):
