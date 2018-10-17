@@ -370,7 +370,7 @@ class WorkflowConductor(object):
         if task_spec.has_items():
             items_spec = getattr(task_spec, 'with')
             task['items_count'] = len(action_specs)
-            task['concurrency'] = getattr(items_spec, 'concurrency', None)
+            task['concurrency'] = expr.evaluate(getattr(items_spec, 'concurrency', None), task_ctx)
 
         return task
 

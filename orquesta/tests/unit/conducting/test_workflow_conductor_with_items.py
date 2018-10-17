@@ -89,6 +89,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         version: 1.0
 
         vars:
+          - concurrency: 2
           - xs:
               - fee
               - fi
@@ -99,7 +100,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
           task1:
             with:
               items: <% ctx(xs) %>
-              concurrency: 2
+              concurrency: <% ctx(concurrency) %>
             action: core.echo message=<% item() %>
             next:
               - publish:
@@ -119,7 +120,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         # Mock the action execution for each item and assert expected task states.
         task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum'], 'concurrency': 2}
 
         task_action_specs = [
             {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},

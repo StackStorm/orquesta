@@ -293,8 +293,14 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             'syntax': [
                 {
                     'spec_path': 'tasks.task2.input',
-                    'message': '[{\'cmd\': \'echo <% ctx().macro %>\'}] is not of type \'object\'',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input.type'
+                    'message': (
+                        '[{\'cmd\': \'echo <% ctx().macro %>\'}] is '
+                        'not valid under any of the given schemas'
+                    ),
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.input.oneOf'
+                    )
                 }
             ]
         }

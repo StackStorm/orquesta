@@ -130,7 +130,12 @@ class TaskSpec(base.Spec):
             },
             'with': ItemizedSpec,
             'action': types.NONEMPTY_STRING,
-            'input': types.NONEMPTY_DICT,
+            'input': {
+                'oneOf': [
+                    types.NONEMPTY_STRING,
+                    types.NONEMPTY_DICT,
+                ]
+            },
             'next': TaskTransitionSequenceSpec,
         },
         'additionalProperties': False
