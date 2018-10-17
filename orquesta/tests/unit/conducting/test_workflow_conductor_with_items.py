@@ -622,7 +622,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         # Assert the workflow is canceled.
         self.assertEqual(conductor.get_workflow_state(), states.CANCELED)
 
-    def test_cancel_workflow_with_items_active(self):
+    def test_cancel_workflow_using_canceling_state_with_items_active(self):
         wf_def = """
         version: 1.0
 
@@ -700,7 +700,85 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         self.assertEqual(conductor.flow.get_task(task_name)['state'], states.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_state(), states.CANCELED)
 
-    def test_cancel_workflow_with_items_concurrency(self):
+    def test_cancel_workflow_using_canceled_state_with_items_active(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - xs:
+              - fee
+              - fi
+              - fo
+              - fum
+
+        tasks:
+          task1:
+            with: <% ctx(xs) %>
+            action: core.echo message=<% item() %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
+        """
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_state(states.RUNNING)
+
+        # Mock the action execution for each item and assert expected task states.
+        task_name = 'task1'
+        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+
+        task_action_specs = [
+            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
+            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
+            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
+            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+        ]
+
+        # Verify the set of action executions.
+        expected_task = self.format_task_item(
+            task_name,
+            task_ctx,
+            conductor.spec.tasks.get_task(task_name),
+            action_specs=task_action_specs,
+            items_count=len(task_ctx['xs'])
+        )
+
+        expected_tasks = [expected_task]
+        actual_tasks = conductor.get_next_tasks()
+        self.assert_task_list(actual_tasks, expected_tasks)
+
+        # Set the items to running state.
+        for i in range(0, len(task_ctx['xs'])):
+            context = {'item_id': i}
+            ac_ex_event = events.ActionExecutionEvent(states.RUNNING, context=context)
+            conductor.update_task_flow(task_name, ac_ex_event)
+
+        # Assert that the task is running.
+        self.assertEqual(conductor.flow.get_task(task_name)['state'], states.RUNNING)
+
+        # Cancel the workflow.
+        conductor.request_workflow_state(states.CANCELED)
+        self.assertEqual(conductor.get_workflow_state(), states.CANCELING)
+        self.assertEqual(conductor.flow.get_task(task_name)['state'], states.CANCELING)
+
+        # Complete the items.
+        for i in range(0, len(task_ctx['xs'])):
+            context = {'item_id': i}
+            result = task_ctx['xs'][i]
+            ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED, result, context=context)
+            conductor.update_task_flow(task_name, ac_ex_event)
+
+        # Assert the task is completed and workflow is canceled.
+        self.assertEqual(conductor.flow.get_task(task_name)['state'], states.SUCCEEDED)
+        self.assertEqual(conductor.get_workflow_state(), states.CANCELED)
+
+    def test_cancel_workflow_using_canceling_state_with_items_concurrency(self):
         wf_def = """
         version: 1.0
 
@@ -768,6 +846,77 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         # Cancel the workflow.
         conductor.request_workflow_state(states.CANCELING)
+        self.assertEqual(conductor.get_workflow_state(), states.CANCELED)
+        self.assertEqual(conductor.flow.get_task(task_name)['state'], states.CANCELED)
+
+    def test_cancel_workflow_using_canceled_state_with_items_concurrency(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - xs:
+              - fee
+              - fi
+              - fo
+              - fum
+
+        tasks:
+          task1:
+            with:
+              items: <% ctx(xs) %>
+              concurrency: 2
+            action: core.echo message=<% item() %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
+        """
+
+        concurrency = 2
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_state(states.RUNNING)
+
+        # Mock the action execution for each item and assert expected task states.
+        task_name = 'task1'
+        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+
+        task_action_specs = [
+            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
+            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
+            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
+            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+        ]
+
+        mock_ac_ex_states = [states.SUCCEEDED] * 2
+        expected_task_states = [states.RUNNING] * 2
+        expected_workflow_states = [states.RUNNING] * 2
+
+        self.assert_task_items(
+            conductor,
+            task_name,
+            task_ctx,
+            task_ctx['xs'],
+            task_action_specs,
+            mock_ac_ex_states,
+            expected_task_states,
+            expected_workflow_states,
+            concurrency=concurrency
+        )
+
+        # Assert the task is not removed from staging.
+        self.assertIn(task_name, conductor.flow.staged)
+
+        # Assert the workflow is still running.
+        self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
+
+        # Cancel the workflow.
+        conductor.request_workflow_state(states.CANCELED)
         self.assertEqual(conductor.get_workflow_state(), states.CANCELED)
         self.assertEqual(conductor.flow.get_task(task_name)['state'], states.CANCELED)
 
@@ -999,7 +1148,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         self.assertEqual(conductor.flow.get_task(task_name)['state'], states.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
 
-    def test_pause_workflow_with_items_active(self):
+    def test_pause_workflow_using_pausing_state_with_items_active(self):
         wf_def = """
         version: 1.0
 
@@ -1081,7 +1230,89 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         conductor.request_workflow_state(states.RESUMING)
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
 
-    def test_pause_workflow_with_items_concurrency(self):
+    def test_pause_workflow_using_paused_state_with_items_active(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - xs:
+              - fee
+              - fi
+              - fo
+              - fum
+
+        tasks:
+          task1:
+            with: <% ctx(xs) %>
+            action: core.echo message=<% item() %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
+        """
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_state(states.RUNNING)
+
+        # Mock the action execution for each item and assert expected task states.
+        task_name = 'task1'
+        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+
+        task_action_specs = [
+            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
+            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
+            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
+            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+        ]
+
+        # Verify the set of action executions.
+        expected_task = self.format_task_item(
+            task_name,
+            task_ctx,
+            conductor.spec.tasks.get_task(task_name),
+            action_specs=task_action_specs,
+            items_count=len(task_ctx['xs'])
+        )
+
+        expected_tasks = [expected_task]
+        actual_tasks = conductor.get_next_tasks()
+        self.assert_task_list(actual_tasks, expected_tasks)
+
+        # Set the items to running state.
+        for i in range(0, len(task_ctx['xs'])):
+            context = {'item_id': i}
+            ac_ex_event = events.ActionExecutionEvent(states.RUNNING, context=context)
+            conductor.update_task_flow(task_name, ac_ex_event)
+
+        # Assert that the task is running.
+        self.assertEqual(conductor.flow.get_task(task_name)['state'], states.RUNNING)
+
+        # Pause the workflow.
+        conductor.request_workflow_state(states.PAUSED)
+        self.assertEqual(conductor.get_workflow_state(), states.PAUSING)
+        self.assertEqual(conductor.flow.get_task(task_name)['state'], states.PAUSING)
+
+        # Complete the items.
+        for i in range(0, len(task_ctx['xs'])):
+            context = {'item_id': i}
+            result = task_ctx['xs'][i]
+            ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED, result, context=context)
+            conductor.update_task_flow(task_name, ac_ex_event)
+
+        # Assert the task is completed and workflow is paused.
+        self.assertEqual(conductor.flow.get_task(task_name)['state'], states.SUCCEEDED)
+        self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
+
+        # Resume the workflow.
+        conductor.request_workflow_state(states.RESUMING)
+        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
+
+    def test_pause_workflow_using_pausing_state_with_items_concurrency(self):
         wf_def = """
         version: 1.0
 
@@ -1149,6 +1380,116 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         # Pause the workflow.
         conductor.request_workflow_state(states.PAUSING)
+        self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
+        self.assertEqual(conductor.flow.get_task(task_name)['state'], states.PAUSED)
+
+        # Resume the workflow.
+        conductor.request_workflow_state(states.RESUMING)
+        self.assertEqual(conductor.get_workflow_state(), states.RESUMING)
+
+        # Verify the second set of action executions.
+        expected_task = self.format_task_item(
+            task_name,
+            task_ctx,
+            conductor.spec.tasks.get_task(task_name),
+            action_specs=task_action_specs[concurrency:],
+            items_count=len(task_ctx['xs']),
+            items_concurrency=concurrency
+        )
+
+        expected_tasks = [expected_task]
+        actual_tasks = conductor.get_next_tasks()
+        self.assert_task_list(actual_tasks, expected_tasks)
+
+        # Set the items to running state.
+        for i in range(0 + concurrency, len(task_ctx['xs'])):
+            context = {'item_id': i}
+            ac_ex_event = events.ActionExecutionEvent(states.RUNNING, context=context)
+            conductor.update_task_flow(task_name, ac_ex_event)
+
+        # Assert that the task is running.
+        self.assertEqual(conductor.flow.get_task(task_name)['state'], states.RUNNING)
+        self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
+
+        # Complete the items.
+        for i in range(0 + concurrency, len(task_ctx['xs'])):
+            context = {'item_id': i}
+            result = task_ctx['xs'][i]
+            ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED, result, context=context)
+            conductor.update_task_flow(task_name, ac_ex_event)
+
+        # Assert the task and workflow are completed.
+        self.assertEqual(conductor.flow.get_task(task_name)['state'], states.SUCCEEDED)
+        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
+
+    def test_pause_workflow_using_paused_state_with_items_concurrency(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - xs:
+              - fee
+              - fi
+              - fo
+              - fum
+
+        tasks:
+          task1:
+            with:
+              items: <% ctx(xs) %>
+              concurrency: 2
+            action: core.echo message=<% item() %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
+        """
+
+        concurrency = 2
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_state(states.RUNNING)
+
+        # Mock the action execution for each item and assert expected task states.
+        task_name = 'task1'
+        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+
+        task_action_specs = [
+            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
+            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
+            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
+            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+        ]
+
+        mock_ac_ex_states = [states.SUCCEEDED] * 2
+        expected_task_states = [states.RUNNING] * 2
+        expected_workflow_states = [states.RUNNING] * 2
+
+        self.assert_task_items(
+            conductor,
+            task_name,
+            task_ctx,
+            task_ctx['xs'],
+            task_action_specs,
+            mock_ac_ex_states,
+            expected_task_states,
+            expected_workflow_states,
+            concurrency=concurrency
+        )
+
+        # Assert the task is not removed from staging.
+        self.assertIn(task_name, conductor.flow.staged)
+
+        # Assert the workflow is still running.
+        self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
+
+        # Pause the workflow.
+        conductor.request_workflow_state(states.PAUSED)
         self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
         self.assertEqual(conductor.flow.get_task(task_name)['state'], states.PAUSED)
 

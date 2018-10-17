@@ -293,8 +293,12 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_COMPLETED: states.SUCCEEDED,
         events.WORKFLOW_PAUSING_TASK_ACTIVE_ITEMS_INCOMPLETE: states.PAUSING,
         events.WORKFLOW_PAUSING_TASK_DORMANT_ITEMS_INCOMPLETE: states.PAUSED,
+        events.WORKFLOW_PAUSED_TASK_ACTIVE_ITEMS_INCOMPLETE: states.PAUSING,
+        events.WORKFLOW_PAUSED_TASK_DORMANT_ITEMS_INCOMPLETE: states.PAUSED,
         events.WORKFLOW_CANCELING_TASK_ACTIVE_ITEMS_INCOMPLETE: states.CANCELING,
-        events.WORKFLOW_CANCELING_TASK_DORMANT_ITEMS_INCOMPLETE: states.CANCELED
+        events.WORKFLOW_CANCELING_TASK_DORMANT_ITEMS_INCOMPLETE: states.CANCELED,
+        events.WORKFLOW_CANCELED_TASK_ACTIVE_ITEMS_INCOMPLETE: states.CANCELING,
+        events.WORKFLOW_CANCELED_TASK_DORMANT_ITEMS_INCOMPLETE: states.CANCELED
     },
     states.PENDING: {
         events.ACTION_CANCELED: states.CANCELED,
@@ -449,11 +453,7 @@ class TaskStateMachine(object):
     @classmethod
     def add_context_to_workflow_event(cls, conductor, task_id, wf_ex_event):
         workflow_event = wf_ex_event.name
-
-        requirements = [
-            states.PAUSING,
-            states.CANCELING
-        ]
+        requirements = states.PAUSE_STATES + states.CANCEL_STATES
 
         task_with_items = (
             task_id in conductor.flow.staged and
