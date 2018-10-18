@@ -195,20 +195,18 @@ class TaskSpec(base.Spec):
                 else items_spec.items[:items_spec.items.index('in')].replace(' ', '').split(',')
             )
 
-            for i in range(0, len(items)):
-                cur_item = items[i]
-
-                if item_keys and (isinstance(cur_item, tuple) or isinstance(cur_item, list)):
-                    cur_item = dict(zip(item_keys, list(cur_item)))
+            for idx, item in enumerate(items):
+                if item_keys and (isinstance(item, tuple) or isinstance(item, list)):
+                    item = dict(zip(item_keys, list(item)))
                 elif item_keys and len(item_keys) == 1:
-                    cur_item = {item_keys[0]: cur_item}
+                    item = {item_keys[0]: item}
 
-                item_ctx_value = ctx.set_current_item(in_ctx, cur_item)
+                item_ctx_value = ctx.set_current_item(in_ctx, item)
 
                 action_spec = {
                     'action': expr.evaluate(self.action, item_ctx_value),
                     'input': expr.evaluate(getattr(self, 'input', {}), item_ctx_value),
-                    'item_id': i
+                    'item_id': idx
                 }
 
                 action_specs.append(action_spec)
