@@ -61,11 +61,23 @@ The following are attributes in the **Task** model that accept expressions:
 +==============+==================================+
 | join         | No                               |
 +--------------+----------------------------------+
+| with         | Yes, see With Items              |
++--------------+----------------------------------+
 | action       | Yes                              |
 +--------------+----------------------------------+
 | input        | Yes, entire dict or at each item |
 +--------------+----------------------------------+
 | next         | See Task Transition              |
++--------------+----------------------------------+
+
+The following are attributes in the task **With Items** model that accept expressions:
+
++--------------+----------------------------------+
+| Attributes   | Accept Expressions               |
++==============+==================================+
+| items        | Yes                              |
++--------------+----------------------------------+
+| concurrency  | Yes                              |
 +--------------+----------------------------------+
 
 The following are attributes in the **Task Transition** model that accept expressions:

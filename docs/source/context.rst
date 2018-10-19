@@ -156,4 +156,5 @@ Since branch 1 will complete first, ``x=123`` will be written to the context dic
 
       # Converge branch 1 and 2
       task4:
+        join: all
         action: core.noop
