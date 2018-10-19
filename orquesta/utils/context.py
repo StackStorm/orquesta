@@ -34,3 +34,13 @@ def set_current_task(context, task):
         ctx['__current_task']['result'] = task.get('result')
 
     return ctx
+
+
+def set_current_item(context, item):
+    if context and not isinstance(context, dict):
+        raise TypeError('The context is not type of dict.')
+
+    ctx = copy.deepcopy(context) if context else dict()
+    ctx['__current_item'] = item
+
+    return ctx

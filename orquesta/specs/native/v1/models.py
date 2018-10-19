@@ -14,21 +14,21 @@ import copy
 import logging
 import six
 from six.moves import queue
+import yaml
 
+from orquesta import events
 from orquesta import exceptions as exc
 from orquesta.expressions import base as expr
 from orquesta.specs.native.v1 import base
 from orquesta.specs import types
+from orquesta.utils import context as ctx
 from orquesta.utils import dictionary as dx
 from orquesta.utils import parameters as args_utils
 
 
 LOG = logging.getLogger(__name__)
 
-RESERVED_TASK_NAMES = [
-    'fail',
-    'noop'
-]
+RESERVED_TASK_NAMES = list(events.ENGINE_EVENT_MAP.keys())
 
 
 def instantiate(definition):
@@ -92,18 +92,30 @@ class TaskTransitionSequenceSpec(base.SequenceSpec):
 
 
 class ItemizedSpec(base.Spec):
+    _items_regex = (
+        # Regular expression in the form "x, y, z, ... in <expression>"
+        # or "x in <expression>" with optional space(s) on both end.
+        '^(\s+)?({expr})(\s+)?$|^(\s+)?((\w+,\s?|\s+)+)?(\w+)\s+in\s+({expr})(\s+)?$'.format(
+            expr='|'.join(expr.get_statement_regexes().values())
+        )
+    )
+
     _schema = {
         'type': 'object',
         'properties': {
             'items': {
-                'oneOf': [
-                    types.NONEMPTY_STRING,
-                    types.UNIQUE_STRING_LIST
-                ]
+                'type': 'string',
+                'minLength': 1,
+                'pattern': _items_regex
             },
             'concurrency': types.STRING_OR_POSITIVE_INTEGER
         }
     }
+
+    _context_evaluation_sequence = [
+        'items',
+        'concurrency'
+    ]
 
 
 class TaskSpec(base.Spec):
@@ -116,14 +128,21 @@ class TaskSpec(base.Spec):
                     types.POSITIVE_INTEGER
                 ]
             },
+            'with': ItemizedSpec,
             'action': types.NONEMPTY_STRING,
-            'input': types.NONEMPTY_DICT,
+            'input': {
+                'oneOf': [
+                    types.NONEMPTY_STRING,
+                    types.NONEMPTY_DICT,
+                ]
+            },
             'next': TaskTransitionSequenceSpec,
         },
         'additionalProperties': False
     }
 
     _context_evaluation_sequence = [
+        'with',
         'action',
         'input',
         'next'
@@ -139,8 +158,60 @@ class TaskSpec(base.Spec):
             self.action = action_spec[:action_spec.index(' ')]
             self.input = input_spec
 
+    def has_items(self):
+        return hasattr(self, 'with') and getattr(self, 'with', None) is not None
+
+    def get_items_spec(self):
+        return getattr(self, 'with', None)
+
     def has_join(self):
         return hasattr(self, 'join') and self.join
+
+    def render(self, in_ctx):
+        action_specs = []
+
+        if not self.has_items():
+            action_spec = {
+                'action': expr.evaluate(self.action, in_ctx),
+                'input': expr.evaluate(getattr(self, 'input', {}), in_ctx)
+            }
+
+            action_specs.append(action_spec)
+        else:
+            items_spec = self.get_items_spec()
+
+            items_expr = (
+                items_spec.items.strip() if 'in' not in items_spec.items
+                else items_spec.items[items_spec.items.index('in') + 2:].strip()
+            )
+
+            items = expr.evaluate(items_expr, in_ctx)
+
+            if not isinstance(items, list):
+                raise TypeError('The value of "%s" is not type of list.' % items_expr)
+
+            item_keys = (
+                None if 'in' not in items_spec.items
+                else items_spec.items[:items_spec.items.index('in')].replace(' ', '').split(',')
+            )
+
+            for idx, item in enumerate(items):
+                if item_keys and (isinstance(item, tuple) or isinstance(item, list)):
+                    item = dict(zip(item_keys, list(item)))
+                elif item_keys and len(item_keys) == 1:
+                    item = {item_keys[0]: item}
+
+                item_ctx_value = ctx.set_current_item(in_ctx, item)
+
+                action_spec = {
+                    'action': expr.evaluate(self.action, item_ctx_value),
+                    'input': expr.evaluate(getattr(self, 'input', {}), item_ctx_value),
+                    'item_id': idx
+                }
+
+                action_specs.append(action_spec)
+
+        return self, action_specs
 
     def finalize_context(self, next_task_name, criteria, in_ctx):
         rolling_ctx = copy.deepcopy(in_ctx)
@@ -453,6 +524,24 @@ class WorkflowSpec(base.Spec):
         'vars',
         'output'
     ]
+
+    def __init__(self, spec, name=None, member=False):
+        if not spec:
+            raise ValueError('The spec cannot be type of None.')
+
+        spec = (
+            yaml.safe_load(spec)
+            if not isinstance(spec, dict) and not isinstance(spec, list)
+            else spec
+        )
+
+        # Resolve shorthand inline with items.
+        if 'tasks' in spec and isinstance(spec['tasks'], dict) and spec['tasks']:
+            for task_name, task_spec in six.iteritems(spec['tasks']):
+                if 'with' in task_spec and isinstance(task_spec['with'], six.string_types):
+                    task_spec['with'] = {'items': task_spec['with']}
+
+        super(WorkflowSpec, self).__init__(spec, name=name, member=member)
 
     def render_input(self, runtime_inputs):
         rolling_ctx = {}

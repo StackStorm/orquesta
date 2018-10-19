@@ -123,8 +123,29 @@ class TaskSpec(base.Spec):
         'publish'
     ]
 
+    def has_items(self):
+        return hasattr(self, 'with-items') and getattr(self, 'with-items', None) is not None
+
+    def get_items_spec(self):
+        return getattr(self, 'with-items', None)
+
     def has_join(self):
         return hasattr(self, 'join') and self.join
+
+    def render(self, in_ctx):
+        action_specs = []
+
+        if self.has_items():
+            raise NotImplementedError('Task with items is not implemented.')
+
+        action_spec = {
+            'action': expr.evaluate(self.action, in_ctx),
+            'input': expr.evaluate(getattr(self, 'input', {}), in_ctx)
+        }
+
+        action_specs.append(action_spec)
+
+        return self, action_specs
 
     def finalize_context(self, next_task_name, criteria, in_ctx):
         expected_criteria_pattern = "<\% task_state\(\w+\) in \['succeeded'\] \%>"

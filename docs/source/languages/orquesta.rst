@@ -80,6 +80,8 @@ Task Model
 +=============+=============+===================================================================+
 | join        | No          | If specified, sets up a barrier for a group of parallel branches. |
 +-------------+-------------+-------------------------------------------------------------------+
+| with        | No          | When given a list, execute the action for each item.              |
++-------------+-------------+-------------------------------------------------------------------+
 | action      | No          | The fully qualified name of the action to be executed.            |
 +-------------+-------------+-------------------------------------------------------------------+
 | input       | No          | A dictionary of input arguments for the action execution.         |
@@ -97,8 +99,8 @@ If there are no more outbound edges identified, then the workflow execution is c
 
 Each task defines what **StackStorm** action to execute, the policies on action execution, and
 what happens after the task completes. All of the variables defined and published up to this point
-(aka context) are accessible to the task. At its simplest, the task executes the action and passes any
-required input from the context to the action execution. On successful completion of the action
+(aka context) are accessible to the task. At its simplest, the task executes the action and passes
+any required input from the context to the action execution. On successful completion of the action
 execution, the task is evaluated for completion. If criteria for transition is met, then the next
 set of tasks is invoked, sequentially in the order of the transitions and tasks that are listed.
 
@@ -113,17 +115,119 @@ immediately following the completion of the previous task. There will be multipl
 target task. In the workflow graph, each invocation of the target task will be its own branch with
 the inbound edge from the node of the previous task.
 
+With Items Model
+----------------
+
+Use the ``with`` items section to process a list of items in a task. The task will iterate thru each
+item and request an action execution for each item. By default, all the items will be processed at
+the same time. When ``concurrency`` is specified, the number of items up to the concurrency value
+will be processed and the remaining items will be queued. When the action execution for an item is
+completed, the next item in the list will be processed.
+
+The task result is a list of the action execution result in the same order as the items. All action
+executions must be completely successfully for the task to reach a succeeded state. If one ore more
+action executions abended, then the task will result in a failed state.
+
+When there's a request to cancel or pause the workflow, the task will be in a canceling or pausing
+state respectively until all action executions in the process of being executed are completed. Once
+these action executions are completed, the task will go to canceled or paused state respectively.
+If concurrency for the task is specified and there are remaining items, no new action executions
+will be requested. When a paused workflow resumes, the task will continue to process any remaining
+items.
+
++-------------+-------------+-------------------------------------------------------------------+
+| Attribute   | Required    | Description                                                       |
++=============+=============+===================================================================+
+| items       | Yes         | The list of items to execute the action with.                     |
++-------------+-------------+-------------------------------------------------------------------+
+| concurrency | No          | The number of items being processed concurrently.                 |
++-------------+-------------+-------------------------------------------------------------------+
+
+The following is a simple example with a single list of items defined in a task. The task is given
+a list of messages to echo. For an items list where no concurrency is required, there is a short
+hand notation to pass just the list directly to the ``with`` statement. The individual items can be
+passed into the action as input for execution using the ``item`` function.
+
+.. code-block:: yaml
+
+    version: 1.0
+
+    input:
+      - messages
+
+    tasks:
+      task1:
+        with: <% ctx(messages) %>
+        action: core.echo message=<% item() %>
+
+When concurrency is required, use the formal schema with ``items`` and ``concurrency`` instead
+of the short hand notation for task definition.
+
+.. code-block:: yaml
+
+    version: 1.0
+
+    input:
+      - messages
+
+    tasks:
+      task1:
+        with:
+          items: <% ctx(messages) %>
+          concurrency: 2
+        action: core.echo message=<% item() %>
+
+The item value can be named. The following example is the same workflow as the one above. Note
+that the items are specified as ``message in <% ctx(messages) %>`` where the value of the item
+is named "message" and can be referenced with the ``item`` function as ``item(message)``. The
+value returned from ``item()`` in this case would be a dictionary like ``{"message": "value"}``.
+The benefit is evident below when working with multiple lists of items.
+
+.. code-block:: yaml
+
+    version: 1.0
+
+    input:
+      - messages
+
+    tasks:
+      task1:
+        with: message in <% ctx(messages) %>
+        action: core.echo message=<% item(message) %>
+
+For multiple lists of items, the lists need to be zipped first with the ``zip`` function and then
+define the keys required to access the individual values in each item. In the example below, the
+task will execute a specific command on a specific host. The hosts and commands are zipped via
+``<% zip(ctx(hosts), ctx(commands)) %>`` and then the keys to access the values in each item is
+defined as ``host, command in <% zip(ctx(hosts), ctx(commands)) %>``. Finally, when specifying the
+input parameters for the action execution, host value is accessed via ``<% item(host) %>`` and the
+command value is accessed via ``<% item(command) %>``.
+
+.. code-block:: yaml
+
+    version: 1.0
+
+    input:
+      - hosts
+      - commands
+
+    tasks:
+      task1:
+        with: host, command in <% zip(ctx(hosts), ctx(commands)) %>
+        action: core.remote hosts=<% item(host) %> cmd=<% item(command) %>
+
+
 Task Transition Model
 ---------------------
 
 The ``next`` section is a list of task transitions to be evaluated after a task completes. A task is
 completed if it either succeeded, failed, or canceled. The list of transitions will be processed in
 the order they are defined. In the workflow graph, each task transition is one or more outbound
-edges from the current task node. For each task transition, the ``when`` is the criteria that must be
-met in order for transition. If ``when`` is not defined, then the default criteria is task completion.
-When criteria is met, then ``publish`` can be defined to add new or update existing variables from the
-result into the runtime workflow context. Finally, the list of tasks defined in ``do`` will be invoked
-in the order they are specified.
+edges from the current task node. For each task transition, the ``when`` is the criteria that must
+be met in order for transition. If ``when`` is not defined, then the default criteria is task
+completion. When criteria is met, then ``publish`` can be defined to add new or update existing
+variables from the result into the runtime workflow context. Finally, the list of tasks defined in
+``do`` will be invoked in the order they are specified.
 
 +-------------+-------------+-------------------------------------------------------------------+
 | Attribute   | Required    | Description                                                       |

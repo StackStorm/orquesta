@@ -138,18 +138,36 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
 @six.add_metaclass(abc.ABCMeta)
 class WorkflowConductorTest(WorkflowComposerTest):
 
-    def format_task_item(self, task_name, task_init_ctx, task_spec, task_id=None):
-        return {
+    def format_task_item(self, task_name, task_init_ctx, task_spec,
+                         action_specs=None, task_id=None,
+                         items_count=None, items_concurrency=None):
+
+        if not action_specs:
+            action_specs = [
+                {
+                    'action': task_spec.action,
+                    'input': task_spec.input
+                }
+            ]
+
+        task = {
             'id': task_id or task_name,
             'name': task_name,
             'ctx': task_init_ctx,
-            'spec': task_spec
+            'spec': task_spec,
+            'actions': action_specs
         }
 
-    # The conductor.get_start_tasks and conductor.get_next_tasks make copies of the
-    # task specs and render expressions in the task action and task input. So comparing
-    # the task specs will not match. In order to match in unit tests. This method is
-    # used to serialize the task specs and compare the lists.
+        if items_count:
+            task['items_count'] = items_count
+            task['concurrency'] = items_concurrency
+
+        return task
+
+    # The conductor.get_next_tasks make copies of the task specs and render expressions
+    # in the task action and task input. So comparing the task specs will not match. In
+    # order to match in unit tests. This method is used to serialize the task specs and
+    # compare the lists.
     def assert_task_list(self, actual, expected):
         actual_copy = copy.deepcopy(actual)
         expected_copy = copy.deepcopy(expected)
@@ -188,7 +206,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
                 result_q.put(item)
 
         # Get start tasks and being conducting workflow.
-        for task in conductor.get_start_tasks():
+        for task in conductor.get_next_tasks():
             q.put(task)
 
         # Serialize workflow conductor to mock async execution.
@@ -253,3 +271,119 @@ class WorkflowConductorTest(WorkflowComposerTest):
             self.assertEqual(conductor.get_workflow_state(), expected_wf_state, err_ctx)
 
         return conductor
+
+
+class WorkflowConductorWithItemsTest(WorkflowConductorTest):
+
+    def assert_task_items(self, conductor, task_id, task_ctx, items, action_specs,
+                          mock_ac_ex_states, expected_task_states, expected_workflow_states,
+                          concurrency=None):
+
+        # Set up test cases.
+        tests = list(zip(mock_ac_ex_states, expected_task_states, expected_workflow_states))
+
+        # Verify the first set of action executions.
+        expected_task = self.format_task_item(
+            task_id,
+            task_ctx,
+            conductor.spec.tasks.get_task(task_id),
+            action_specs=action_specs[0:concurrency],
+            items_count=len(items),
+            items_concurrency=concurrency
+        )
+
+        expected_tasks = [expected_task]
+        actual_tasks = conductor.get_next_tasks()
+        self.assert_task_list(actual_tasks, expected_tasks)
+
+        # Mark the first set of action executions as running.
+        for i in range(0, min(len(tests), concurrency or len(items))):
+            context = {'item_id': i}
+            ac_ex_event = events.ActionExecutionEvent(states.RUNNING, context=context)
+            conductor.update_task_flow(task_id, ac_ex_event)
+
+        # Ensure the actions listed is accurate when getting next tasks again.
+        expected_tasks = []
+        capacity = len(items)
+        next_item_id = len(tests)
+        next_action_specs = []
+
+        if concurrency is not None and concurrency > 0:
+            items_running = min(len(tests), concurrency or len(items))
+            capacity = concurrency - items_running
+
+        if capacity > 0 and next_item_id < len(items):
+            next_action_specs = action_specs[next_item_id:next_item_id + capacity]
+
+        if next_action_specs:
+            expected_task = self.format_task_item(
+                task_id,
+                task_ctx,
+                conductor.spec.tasks.get_task(task_id),
+                action_specs=next_action_specs,
+                items_count=len(items),
+                items_concurrency=concurrency
+            )
+
+            expected_tasks = [expected_task]
+
+        actual_tasks = conductor.get_next_tasks()
+        self.assert_task_list(actual_tasks, expected_tasks)
+
+        # Mock the action execution for each item.
+        for i in range(0, len(tests)):
+            context = {'item_id': i}
+            result = items[i]
+            ac_ex_state = tests[i][0]
+            ac_ex_event = events.ActionExecutionEvent(ac_ex_state, result, context)
+            conductor.update_task_flow(task_id, ac_ex_event)
+
+            expected_task_state = tests[i][1]
+            actual_task_state = conductor.get_task_flow_entry(task_id)['state']
+
+            error_message = (
+                'Task execution state "%s" does not match "%s" for item %s.' %
+                (actual_task_state, expected_task_state, i)
+            )
+
+            self.assertEqual(actual_task_state, expected_task_state, error_message)
+
+            expected_workflow_state = tests[i][2]
+            actual_workflow_state = conductor.get_workflow_state()
+
+            error_message = (
+                'Workflow execution state "%s" does not match "%s" after item %s update.' %
+                (actual_workflow_state, expected_workflow_state, i)
+            )
+
+            self.assertEqual(actual_workflow_state, expected_workflow_state, error_message)
+
+            # Process next set of action executions only if there are more test cases.
+            if i >= len(tests) - 2 or concurrency is None:
+                continue
+
+            item_id = i + concurrency
+            expected_tasks = []
+
+            if item_id < len(items):
+                expected_task = self.format_task_item(
+                    task_id,
+                    task_ctx,
+                    conductor.spec.tasks.get_task(task_id),
+                    action_specs=action_specs[item_id:item_id + 1],
+                    items_count=len(items),
+                    items_concurrency=concurrency
+                )
+
+                expected_tasks = [expected_task]
+
+            actual_tasks = conductor.get_next_tasks()
+            self.assert_task_list(actual_tasks, expected_tasks)
+
+            for task in actual_tasks:
+                task_id = task['id']
+
+                for action in task['actions']:
+                    ctx = {'item_id': action['item_id']}
+                    ac_ex_event = events.ActionExecutionEvent(states.RUNNING, context=ctx)
+                    conductor.update_task_flow(task_id, ac_ex_event)

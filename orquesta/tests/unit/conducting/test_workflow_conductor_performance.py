@@ -77,3 +77,67 @@ class WorkflowConductorStressTest(base.WorkflowConductorTest):
         self.assertEqual(len(data), data_length)
         conductor = self._prep_conductor(1, inputs={'data': data}, state=states.RUNNING)
         conductor.deserialize(conductor.serialize())
+
+
+class WorkflowConductorWithItemsStressTest(base.WorkflowConductorWithItemsTest):
+
+    def test_runtime_function_of_items_list_size(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - xs: <% range(500).select(str($)) %>
+
+        tasks:
+          task1:
+            with: <% ctx(xs) %>
+            action: core.echo message=<% item() %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
+        """
+
+        num_items = 500
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_state(states.RUNNING)
+
+        # Mock the action execution for each item and assert expected task states.
+        task_name = 'task1'
+        task_ctx = {'xs': [str(i) for i in range(0, num_items)]}
+
+        task_action_specs = [
+            {'action': 'core.echo', 'input': {'message': i}, 'item_id': int(i)}
+            for i in task_ctx['xs']
+        ]
+
+        mock_ac_ex_states = [states.SUCCEEDED] * num_items
+        expected_task_states = [states.RUNNING] * (num_items - 1) + [states.SUCCEEDED]
+        expected_workflow_states = [states.RUNNING] * (num_items - 1) + [states.SUCCEEDED]
+
+        self.assert_task_items(
+            conductor,
+            task_name,
+            task_ctx,
+            task_ctx['xs'],
+            task_action_specs,
+            mock_ac_ex_states,
+            expected_task_states,
+            expected_workflow_states
+        )
+
+        # Assert the task is removed from staging.
+        self.assertNotIn(task_name, conductor.flow.staged)
+
+        # Assert the workflow succeeded.
+        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
+
+        # Assert the workflow output is correct.
+        expected_output = {'items': task_ctx['xs']}
+        self.assertDictEqual(conductor.get_workflow_output(), expected_output)

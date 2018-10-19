@@ -26,6 +26,17 @@ def json_(s):
     return json.loads(s)
 
 
+def zip_(*args, **kwargs):
+    args = [list() if arg is None else arg for arg in args]
+
+    if len(args) == 1:
+        return args[0]
+
+    pad_with = kwargs.pop('pad', None)
+
+    return list(six.moves.zip_longest(*args, fillvalue=pad_with))
+
+
 def ctx_(context, key=None):
     if key and key not in context['__vars']:
         raise exc.VariableUndefinedError(key)

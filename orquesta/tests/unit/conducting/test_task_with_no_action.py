@@ -41,7 +41,6 @@ class WorkflowConductorExtendedTaskTest(base.WorkflowConductorTest):
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         expected_ctx_value = {}
         expected_tasks = [self.format_task_item(next_task_name, expected_ctx_value, next_task_spec)]
-        self.assert_task_list(conductor.get_start_tasks(), expected_tasks)
         self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
 
         task_name = 'task1'
@@ -87,7 +86,6 @@ class WorkflowConductorExtendedTaskTest(base.WorkflowConductorTest):
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         expected_ctx_value = {}
         expected_tasks = [self.format_task_item(next_task_name, expected_ctx_value, next_task_spec)]
-        self.assert_task_list(conductor.get_start_tasks(), expected_tasks)
         self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
 
         task_name = 'task1'

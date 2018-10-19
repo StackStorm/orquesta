@@ -293,8 +293,14 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
             'syntax': [
                 {
                     'spec_path': 'tasks.task2.input',
-                    'message': '[{\'cmd\': \'echo <% ctx().macro %>\'}] is not of type \'object\'',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input.type'
+                    'message': (
+                        '[{\'cmd\': \'echo <% ctx().macro %>\'}] is '
+                        'not valid under any of the given schemas'
+                    ),
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.input.oneOf'
+                    )
                 }
             ]
         }
@@ -350,53 +356,6 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
                     'message': 'The task name "noop" is reserved with special function.',
                     'spec_path': 'tasks.noop',
                     'schema_path': 'properties.tasks.patternProperties.^\\w+$'
-                }
-            ]
-        }
-
-        self.assertDictEqual(wf_spec.inspect(), expected_errors)
-
-    def test_with_items(self):
-        wf_def = """
-            version: 1.0
-
-            description: Send direct message to members
-
-            input:
-              - members
-              - message
-              - batch_size: 3
-
-            tasks:
-              task1:
-                with:
-                  items: member in <% ctx().members %>
-                  concurrency: <% ctx().batch_size %>
-                action: slack.post
-                input:
-                  member: <% ctx().member %>
-                  message: <% ctx().message %>
-        """
-
-        wf_spec = self.instantiate(wf_def)
-
-        # With items is not currently supported so we are expecting
-        # errors on the with property and the item variable.
-        expected_errors = {
-            'context': [
-                {
-                    'type': 'yaql',
-                    'expression': '<% ctx().member %>',
-                    'spec_path': 'tasks.task1.input',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
-                    'message': 'Variable "member" is referenced before assignment.'
-                }
-            ],
-            'syntax': [
-                {
-                    'message': "Additional properties are not allowed ('with' was unexpected)",
-                    'spec_path': 'tasks.task1',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.additionalProperties'
                 }
             ]
         }

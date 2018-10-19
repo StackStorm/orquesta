@@ -1,20 +1,12 @@
 version: 1.0
-
-description: Send direct customized message to members
+  
+description: A workflow demonstrating multiple with items.
 
 input:
   - members
   - messages
-  - batch_size: 3
 
 tasks:
   task1:
-    with:
-      items:
-        - member in <% ctx().members %>
-        - message in <% ctx().messages %>
-      concurrency: <% ctx().batch_size %>
-    action: slack.post
-    input:
-      member: <% ctx().member %>
-      message: <% ctx().message %>
+    with: member, message in <% zip(ctx(members), ctx(messages)) %>
+    action: core.echo message=<% item(member), item(message) %>

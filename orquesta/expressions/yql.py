@@ -71,6 +71,7 @@ class YAQLEvaluator(base.Evaluator):
         ctx['__vars'] = data or {}
         ctx['__flow'] = ctx['__vars'].get('__flow')
         ctx['__current_task'] = ctx['__vars'].get('__current_task')
+        ctx['__current_item'] = ctx['__vars'].get('__current_item')
 
         return ctx
 
