@@ -122,6 +122,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'output': None,
             'state': states.UNSET,
             'errors': [],
+            'log': [],
             'flow': {
                 'staged': {'task1': {'ctxs': [0], 'ready': True}},
                 'tasks': {},
@@ -157,6 +158,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'output': None,
             'state': states.UNSET,
             'errors': [],
+            'log': [],
             'flow': {
                 'staged': {'task1': {'ctxs': [0], 'ready': True}},
                 'tasks': {},
@@ -194,6 +196,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'output': None,
             'state': states.UNSET,
             'errors': [],
+            'log': [],
             'flow': {
                 'staged': {'task1': {'ctxs': [0], 'ready': True}},
                 'tasks': {},
@@ -232,6 +235,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'output': None,
             'state': states.UNSET,
             'errors': [],
+            'log': [],
             'flow': {
                 'staged': {'task1': {'ctxs': [0], 'ready': True}},
                 'tasks': {},
@@ -273,7 +277,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'context': conductor.get_workflow_parent_context(),
             'input': conductor.get_workflow_input(),
             'output': conductor.get_workflow_output(),
-            'errors': conductor.errors
+            'errors': conductor.errors,
+            'log': conductor.log
         }
 
         self.assertDictEqual(data, expected_data)
@@ -742,3 +747,76 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
         conductor.request_workflow_state(states.PAUSED)
         self.assertEqual(conductor.get_workflow_state(), states.PAUSING)
+
+    def test_append_log_entry(self):
+        inputs = {'a': 123, 'b': True}
+        conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
+
+        extra = {'x': 1234}
+        conductor.log_entry('info', 'The workflow is running as expected.', data=extra)
+        conductor.log_entry('warn', 'The task may be running a little bit slow.', task_id='task1')
+        conductor.log_entry('error', 'This is baloney.', task_id='task1')
+
+        self.assertRaises(
+            exc.WorkflowLogEntryError,
+            conductor.log_entry,
+            'foobar',
+            'This is foobar.'
+        )
+
+        expected_log_entries = [
+            {
+                'type': 'info',
+                'message': 'The workflow is running as expected.',
+                'data': extra
+            },
+            {
+                'type': 'warn',
+                'message': 'The task may be running a little bit slow.',
+                'task_id': 'task1'
+            }
+        ]
+
+        expected_errors = [
+            {
+                'type': 'error',
+                'message': 'This is baloney.',
+                'task_id': 'task1'
+            }
+        ]
+
+        self.assertListEqual(conductor.log, expected_log_entries)
+        self.assertListEqual(conductor.errors, expected_errors)
+
+        # Serialize and check.
+        data = conductor.serialize()
+
+        expected_data = {
+            'spec': conductor.spec.serialize(),
+            'graph': conductor.graph.serialize(),
+            'context': {},
+            'input': inputs,
+            'output': None,
+            'state': states.RUNNING,
+            'errors': expected_errors,
+            'log': expected_log_entries,
+            'flow': {
+                'staged': {'task1': {'ctxs': [0], 'ready': True}},
+                'tasks': {},
+                'sequence': [],
+                'contexts': [{'srcs': [], 'value': inputs}]
+            }
+        }
+
+        self.assertDictEqual(data, expected_data)
+
+        # Deserialize and check.
+        conductor = conducting.WorkflowConductor.deserialize(data)
+
+        self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
+        self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
+        self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
+        self.assertEqual(len(conductor.graph._graph.node), 5)
+        self.assertIsInstance(conductor.flow, conducting.TaskFlow)
+        self.assertListEqual(conductor.log, expected_log_entries)
+        self.assertListEqual(conductor.errors, expected_errors)
