@@ -16,7 +16,7 @@ from orquesta.specs import native as models
 from orquesta.tests.unit.specs.native import base
 
 
-class TaskSpecTest(base.OrchestraWorkflowSpecTest):
+class WithItemsTaskSpecTest(base.OrchestraWorkflowSpecTest):
 
     def test_with_items_bad_syntax(self):
         wf_def = """

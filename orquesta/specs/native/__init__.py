@@ -19,6 +19,7 @@ instantiate = native_v1_models.instantiate
 deserialize = native_v1_models.deserialize
 WorkflowSpec = native_v1_models.WorkflowSpec
 ItemizedSpec = native_v1_models.ItemizedSpec
+LogSpec = native_v1_models.LogSpec
 TaskMappingSpec = native_v1_models.TaskMappingSpec
 TaskSpec = native_v1_models.TaskSpec
 TaskTransitionSequenceSpec = native_v1_models.TaskTransitionSequenceSpec
@@ -29,6 +30,7 @@ __all__ = [
     deserialize.__name__,
     WorkflowSpec.__name__,
     ItemizedSpec.__name__,
+    LogSpec.__name__,
     TaskMappingSpec.__name__,
     TaskSpec.__name__,
     TaskTransitionSequenceSpec.__name__,

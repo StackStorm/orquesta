@@ -39,6 +39,26 @@ def deserialize(data):
     return WorkflowSpec.deserialize(data)
 
 
+class LogSpec(base.Spec):
+    _schema = {
+        'type': 'object',
+        'properties': {
+            'type': {
+                'enum': ['info', 'warn', 'error'],
+                'default': 'info'
+            },
+            'message': types.NONEMPTY_STRING,
+            'data': types.ANY_NULLABLE
+        },
+        'required': ['message']
+    }
+
+    _context_evaluation_sequence = [
+        'message',
+        'data'
+    ]
+
+
 class TaskTransitionSpec(base.Spec):
     _schema = {
         'type': 'object',
@@ -50,6 +70,7 @@ class TaskTransitionSpec(base.Spec):
                     types.UNIQUE_ONE_KEY_DICT_LIST
                 ]
             },
+            'log': LogSpec,
             'do': {
                 'oneOf': [
                     types.NONEMPTY_STRING,
@@ -63,6 +84,7 @@ class TaskTransitionSpec(base.Spec):
     _context_evaluation_sequence = [
         'when',
         'publish',
+        'log',
         'do'
     ]
 
@@ -73,11 +95,13 @@ class TaskTransitionSpec(base.Spec):
     def __init__(self, *args, **kwargs):
         super(TaskTransitionSpec, self).__init__(*args, **kwargs)
 
+        # Customized process for the "publish" spec.
         publish_spec = getattr(self, 'publish', None)
 
         if publish_spec and isinstance(publish_spec, six.string_types):
             self.publish = args_utils.parse_inline_params(publish_spec or str())
 
+        # Customized process for the "do" spec.
         do_spec = getattr(self, 'do', None)
 
         if not do_spec:
@@ -535,11 +559,20 @@ class WorkflowSpec(base.Spec):
             else spec
         )
 
-        # Resolve shorthand inline with items.
-        if 'tasks' in spec and isinstance(spec['tasks'], dict) and spec['tasks']:
-            for task_name, task_spec in six.iteritems(spec['tasks']):
-                if 'with' in task_spec and isinstance(task_spec['with'], six.string_types):
-                    task_spec['with'] = {'items': task_spec['with']}
+        # Resolve shorthand inline formats in attributes of task specs.
+        for task_name, task_spec in six.iteritems(spec.get('tasks', {})):
+            # Resolve shorthand inline format of the task with items spec.
+            if 'with' in task_spec and isinstance(task_spec['with'], six.string_types):
+                task_spec['with'] = {'items': task_spec['with']}
+
+            # Resolve shorthand inline format of the task transition log spec.
+            for transition_spec in task_spec.get('next', []):
+                if isinstance(transition_spec.get('log'), six.string_types):
+                    transition_spec['log'] = {
+                        k: v
+                        for p in args_utils.parse_inline_params(transition_spec.get('log', ''))
+                        for k, v in six.iteritems(p)
+                    }
 
         super(WorkflowSpec, self).__init__(spec, name=name, member=member)
 
