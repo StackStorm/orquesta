@@ -120,8 +120,9 @@ class WorkflowConductor(object):
         self._inputs = inputs or {}
         self._outputs = None
         self._errors = []
+        self._log = []
 
-    def restore(self, graph, state=None, errors=None, flow=None,
+    def restore(self, graph, state=None, log=None, errors=None, flow=None,
                 inputs=None, outputs=None, context=None):
         if not graph or not isinstance(graph, graphing.WorkflowGraph):
             raise ValueError('The value of "graph" is not type of WorkflowGraph.')
@@ -145,6 +146,7 @@ class WorkflowConductor(object):
         self._inputs = inputs or {}
         self._outputs = outputs
         self._errors = errors or []
+        self._log = log or []
 
     def serialize(self):
         return {
@@ -155,6 +157,7 @@ class WorkflowConductor(object):
             'input': self.get_workflow_input(),
             'output': self.get_workflow_output(),
             'errors': copy.deepcopy(self.errors),
+            'log': copy.deepcopy(self.log),
             'state': self.get_workflow_state()
         }
 
@@ -170,9 +173,10 @@ class WorkflowConductor(object):
         inputs = copy.deepcopy(data['input'])
         outputs = copy.deepcopy(data['output'])
         errors = copy.deepcopy(data['errors'])
+        log = copy.deepcopy(data['log'])
 
         instance = cls(spec)
-        instance.restore(graph, state, errors, flow, inputs, outputs, context)
+        instance.restore(graph, state, log, errors, flow, inputs, outputs, context)
 
         return instance
 
@@ -214,23 +218,31 @@ class WorkflowConductor(object):
     def errors(self):
         return self._errors
 
-    def log_error(self, error, task_id=None, task_transition_id=None, result=None):
-        entry = {'message': error}
+    @property
+    def log(self):
+        return self._log
 
-        if task_id:
-            entry['task_id'] = task_id
+    def log_entry(self, entry_type, message,
+                  task_id=None, task_transition_id=None,
+                  result=None, data=None):
+        # Check entry type.
+        if entry_type not in ['info', 'warn', 'error']:
+            raise exc.WorkflowLogEntryError('The log entry type "%s" is not valid.' % entry_type)
 
-        if task_transition_id:
-            entry['task_transition_id'] = task_transition_id
+        # Create a log entry.
+        entry = {'type': entry_type, 'message': message}
+        dx.set_dict_value(entry, 'task_id', task_id, insert_null=False)
+        dx.set_dict_value(entry, 'task_transition_id', task_transition_id, insert_null=False)
+        dx.set_dict_value(entry, 'result', result, insert_null=False)
+        dx.set_dict_value(entry, 'data', data, insert_null=False)
 
-        if result:
-            entry['result'] = result
-
-        self.errors.append(entry)
+        # Identify the appropriate log and then log the entry.
+        log = self.errors if entry_type == 'error' else self.log
+        log.append(entry)
 
     def log_errors(self, errors, task_id=None, task_transition_id=None):
         for error in errors:
-            self.log_error(error, task_id=task_id, task_transition_id=task_transition_id)
+            self.log_entry('error', error, task_id=task_id, task_transition_id=task_transition_id)
 
     def get_workflow_parent_context(self):
         return copy.deepcopy(self._parent_ctx)
@@ -442,7 +454,7 @@ class WorkflowConductor(object):
                     if 'actions' in next_task and len(next_task['actions']) > 0:
                         next_tasks.append(next_task)
                 except Exception as e:
-                    self.log_error(str(e), task_id=staged_task_id)
+                    self.log_entry('error', str(e), task_id=staged_task_id)
                     self.request_workflow_state(states.FAILED)
                     continue
         else:
@@ -478,7 +490,7 @@ class WorkflowConductor(object):
                     if 'actions' in next_task and len(next_task['actions']) > 0:
                         next_tasks.append(next_task)
                 except Exception as e:
-                    self.log_error(str(e), task_id=next_task_id)
+                    self.log_entry('error', str(e), task_id=next_task_id)
                     self.request_workflow_state(states.FAILED)
                     continue
 
@@ -557,7 +569,7 @@ class WorkflowConductor(object):
         # Log the error if it is a failed execution event.
         if event.state == states.FAILED:
             message = 'Execution failed. See result for details.'
-            self.log_error(message, task_id=task_id, result=event.result)
+            self.log_entry('error', message, task_id=task_id, result=event.result)
 
         # Process the action execution event using the task state machine and update the task state.
         old_task_state = task_flow_entry.get('state', states.UNSET)
@@ -611,7 +623,7 @@ class WorkflowConductor(object):
                     evaluated_criteria = [expr.evaluate(c, current_ctx) for c in criteria]
                     task_flow_entry[task_transition_id] = all(evaluated_criteria)
                 except Exception as e:
-                    self.log_error(str(e), task_id, task_transition_id)
+                    self.log_entry('error', str(e), task_id, task_transition_id)
                     self.request_workflow_state(states.FAILED)
                     continue
 

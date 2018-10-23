@@ -149,6 +149,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
+                'type': 'error',
                 'message': 'Execution failed. See result for details.',
                 'task_id': 'task1',
                 'result': {'stdout': 'boom!'}
