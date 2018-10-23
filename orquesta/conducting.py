@@ -240,9 +240,13 @@ class WorkflowConductor(object):
         log = self.errors if entry_type == 'error' else self.log
         log.append(entry)
 
+    def log_error(self, e, task_id=None, task_transition_id=None):
+        message = '%s: %s' % (type(e).__name__, str(e))
+        self.log_entry('error', message, task_id=task_id, task_transition_id=task_transition_id)
+
     def log_errors(self, errors, task_id=None, task_transition_id=None):
         for error in errors:
-            self.log_entry('error', error, task_id=task_id, task_transition_id=task_transition_id)
+            self.log_error(error, task_id=task_id, task_transition_id=task_transition_id)
 
     def get_workflow_parent_context(self):
         return copy.deepcopy(self._parent_ctx)
@@ -454,7 +458,7 @@ class WorkflowConductor(object):
                     if 'actions' in next_task and len(next_task['actions']) > 0:
                         next_tasks.append(next_task)
                 except Exception as e:
-                    self.log_entry('error', str(e), task_id=staged_task_id)
+                    self.log_error(e, task_id=staged_task_id)
                     self.request_workflow_state(states.FAILED)
                     continue
         else:
@@ -490,7 +494,7 @@ class WorkflowConductor(object):
                     if 'actions' in next_task and len(next_task['actions']) > 0:
                         next_tasks.append(next_task)
                 except Exception as e:
-                    self.log_entry('error', str(e), task_id=next_task_id)
+                    self.log_error(e, task_id=next_task_id)
                     self.request_workflow_state(states.FAILED)
                     continue
 
@@ -623,7 +627,7 @@ class WorkflowConductor(object):
                     evaluated_criteria = [expr.evaluate(c, current_ctx) for c in criteria]
                     task_flow_entry[task_transition_id] = all(evaluated_criteria)
                 except Exception as e:
-                    self.log_entry('error', str(e), task_id, task_transition_id)
+                    self.log_error(e, task_id, task_transition_id)
                     self.request_workflow_state(states.FAILED)
                     continue
 
