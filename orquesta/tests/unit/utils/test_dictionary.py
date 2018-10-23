@@ -128,3 +128,83 @@ class DictUtilsTest(unittest.TestCase):
             'a.b',
             raise_key_error=True
         )
+
+    def test_dict_dot_notation_set_value(self):
+        data = {
+            'a': 'foo',
+            'b': {
+                'c': 'bar',
+                'd': {
+                    'e': 123,
+                    'f': False,
+                    'g': {},
+                    'h': None
+                }
+            },
+            'x': {},
+            'y': None
+        }
+
+        # Test basic insert.
+        utils.set_dict_value(data, 'z', {'foo': 'bar'})
+
+        # Test insert via dot notation on existing node.
+        utils.set_dict_value(data, 'b.d.h', 2.0)
+
+        # Test insert via dot notation on nonexistent nodes.
+        utils.set_dict_value(data, 'm.n.o', True)
+
+        # Test insert non-null only.
+        utils.set_dict_value(data, 'b.d.i', None, insert_null=False)
+
+        # Test insert null.
+        utils.set_dict_value(data, 'b.d.j', None, insert_null=True)
+
+        expected_data = {
+            'a': 'foo',
+            'b': {
+                'c': 'bar',
+                'd': {
+                    'e': 123,
+                    'f': False,
+                    'g': {},
+                    'h': 2.0,
+                    'j': None
+                }
+            },
+            'm': {
+                'n': {
+                    'o': True
+                }
+            },
+            'x': {},
+            'y': None,
+            'z': {
+                'foo': 'bar'
+            }
+        }
+
+        self.assertDictEqual(data, expected_data)
+
+    def test_dict_dot_notation_set_value_type_error(self):
+        data = {'a': 'foo'}
+
+        self.assertRaises(
+            TypeError,
+            utils.set_dict_value,
+            data,
+            'a.b',
+            'foobar'
+        )
+
+    def test_dict_dot_notation_set_value_key_error(self):
+        data = {'a': {}}
+
+        self.assertRaises(
+            KeyError,
+            utils.set_dict_value,
+            data,
+            'a.b',
+            'foobar',
+            raise_key_error=True
+        )
