@@ -240,7 +240,7 @@ class TaskSpec(base.Spec):
                         rolling_ctx[var_name] = rendered_var_value
                         new_ctx[var_name] = rendered_var_value
                     except exc.ExpressionEvaluationException as e:
-                        errors.append(str(e))
+                        errors.append(e)
 
                 break
 
@@ -561,7 +561,7 @@ class WorkflowSpec(base.Spec):
                 rendered_input_value = expr.evaluate(runtime_input_value, rolling_ctx)
                 rolling_ctx[input_name] = rendered_input_value
             except exc.ExpressionEvaluationException as e:
-                errors.append(str(e))
+                errors.append(e)
 
         return rolling_ctx, errors
 
@@ -579,7 +579,7 @@ class WorkflowSpec(base.Spec):
                 rolling_ctx[var_name] = rendered_var_value
                 rendered_vars[var_name] = rendered_var_value
             except exc.ExpressionEvaluationException as e:
-                errors.append(str(e))
+                errors.append(e)
 
         return rendered_vars, errors
 
@@ -598,6 +598,6 @@ class WorkflowSpec(base.Spec):
                 rolling_ctx[output_name] = rendered_output_value
                 rendered_outputs[output_name] = rendered_output_value
             except exc.ExpressionEvaluationException as e:
-                errors.append(str(e))
+                errors.append(e)
 
         return rendered_outputs, errors

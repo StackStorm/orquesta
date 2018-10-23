@@ -756,6 +756,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor.log_entry('info', 'The workflow is running as expected.', data=extra)
         conductor.log_entry('warn', 'The task may be running a little bit slow.', task_id='task1')
         conductor.log_entry('error', 'This is baloney.', task_id='task1')
+        conductor.log_error(TypeError('Something is not right.'), task_id='task1')
+        conductor.log_errors([KeyError('task1'), ValueError('foobar')], task_id='task1')
 
         self.assertRaises(
             exc.WorkflowLogEntryError,
@@ -781,6 +783,21 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             {
                 'type': 'error',
                 'message': 'This is baloney.',
+                'task_id': 'task1'
+            },
+            {
+                'type': 'error',
+                'message': 'TypeError: Something is not right.',
+                'task_id': 'task1'
+            },
+            {
+                'type': 'error',
+                'message': "KeyError: 'task1'",
+                'task_id': 'task1'
+            },
+            {
+                'type': 'error',
+                'message': 'ValueError: foobar',
                 'task_id': 'task1'
             }
         ]
