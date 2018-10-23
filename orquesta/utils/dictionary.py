@@ -36,10 +36,9 @@ def merge_dicts(left, right, overwrite=True):
 
 def get_dict_value(obj, path, raise_key_error=False):
     item = obj
-    keys = path.split('.')
     traversed = ''
 
-    for key in keys:
+    for key in path.split('.'):
         if not isinstance(item, dict) and traversed != path:
             raise TypeError('Value of \'%s\' is not typeof dict.' % traversed)
 
@@ -54,3 +53,28 @@ def get_dict_value(obj, path, raise_key_error=False):
             break
 
     return item
+
+
+def set_dict_value(obj, path, value, raise_key_error=False, insert_null=True):
+    if not insert_null and value is None:
+        return
+
+    item = obj
+    traversed = ''
+
+    for key in path.split('.'):
+        if not isinstance(item, dict) and traversed != path:
+            raise TypeError('Value of \'%s\' is not typeof dict.' % traversed)
+
+        traversed += '.' + key if len(traversed) > 0 else key
+
+        if key not in item and raise_key_error:
+            raise KeyError('Key \'%s\' does not exist.' % traversed)
+
+        if traversed == path:
+            item[key] = value
+        else:
+            if key not in item:
+                item[key] = {}
+
+            item = item[key]
