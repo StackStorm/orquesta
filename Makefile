@@ -46,6 +46,12 @@ reqs: venv
 	$(VENV_DIR)/bin/pip install -r requirements.txt
 	$(VENV_DIR)/bin/pip install -r requirements-test.txt
 	$(VENV_DIR)/bin/pip install -r requirements-docs.txt
+	$(VENV_DIR)/bin/python setup.py develop
+	echo
+
+.PHONY: schemas
+schemas: reqs
+	$(VENV_DIR)/bin/python bin/orquesta-generate-schemas
 
 .PHONY: docs
 docs: reqs
