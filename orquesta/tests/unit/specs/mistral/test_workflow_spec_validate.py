@@ -324,54 +324,62 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
             'syntax': [
                 {
                     'message': '[] is not valid under any of the given schemas',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.concurrency.oneOf',
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.concurrency.oneOf'),
                     'spec_path': 'tasks.task1.concurrency'
                 },
                 {
                     'message': '{} is not valid under any of the given schemas',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.keep-result.oneOf',
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.keep-result.oneOf'),
                     'spec_path': 'tasks.task1.keep-result'
                 },
                 {
                     'message': '[] is not valid under any of the given schemas',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.pause-before.oneOf',
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.pause-before.oneOf'),
                     'spec_path': 'tasks.task1.pause-before'
                 },
                 {
                     'message': "'' is not of type 'object'",
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.retry.type',
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.retry.type'),
                     'spec_path': 'tasks.task1.retry'
                 },
                 {
                     'message': '[] is not valid under any of the given schemas',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.safe-rerun.oneOf',
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.safe-rerun.oneOf'),
                     'spec_path': 'tasks.task1.safe-rerun'
                 },
                 {
                     'message': "{} is not of type 'string'",
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.target.type',
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.target.type'),
                     'spec_path': 'tasks.task1.target'
                 },
                 {
                     'message': '[] is not valid under any of the given schemas',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.timeout.oneOf',
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.timeout.oneOf'),
                     'spec_path': 'tasks.task1.timeout'
                 },
                 {
                     'message': '[] is not valid under any of the given schemas',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.wait-after.oneOf',
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.wait-after.oneOf'),
                     'spec_path': 'tasks.task1.wait-after'
                 },
                 {
                     'message': '[] is not valid under any of the given schemas',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.wait-before.oneOf',
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.wait-before.oneOf'),
                     'spec_path': 'tasks.task1.wait-before'
                 },
             ]
         }
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
-
 
     def test_task_publish_on_error(self):
         wf_def = """
