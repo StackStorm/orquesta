@@ -217,6 +217,32 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
+    def test_empty_output_on_error(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                output-on-error: {}
+                tasks:
+                    task1:
+                        action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        expected_errors = {
+            'syntax': [
+                {
+                    'message': '{} does not have enough properties',
+                    'schema_path': 'properties.output-on-error.minProperties',
+                    'spec_path': 'output-on-error'
+                }
+            ]
+        }
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
     def test_task_policies(self):
         wf_def = """
             version: '2.0'
@@ -270,6 +296,82 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_task_policies_validation_errors(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+
+                tasks:
+                    task1:
+                        action: std.noop
+                        concurrency: []
+                        keep-result: {}
+                        retry: ''
+                        safe-rerun: []
+                        wait-before: []
+                        wait-after: []
+                        pause-before: []
+                        target: {}
+                        timeout: []
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        expected_errors = {
+            'syntax': [
+                {
+                    'message': '[] is not valid under any of the given schemas',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.concurrency.oneOf',
+                    'spec_path': 'tasks.task1.concurrency'
+                },
+                {
+                    'message': '{} is not valid under any of the given schemas',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.keep-result.oneOf',
+                    'spec_path': 'tasks.task1.keep-result'
+                },
+                {
+                    'message': '[] is not valid under any of the given schemas',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.pause-before.oneOf',
+                    'spec_path': 'tasks.task1.pause-before'
+                },
+                {
+                    'message': "'' is not of type 'object'",
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.retry.type',
+                    'spec_path': 'tasks.task1.retry'
+                },
+                {
+                    'message': '[] is not valid under any of the given schemas',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.safe-rerun.oneOf',
+                    'spec_path': 'tasks.task1.safe-rerun'
+                },
+                {
+                    'message': "{} is not of type 'string'",
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.target.type',
+                    'spec_path': 'tasks.task1.target'
+                },
+                {
+                    'message': '[] is not valid under any of the given schemas',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.timeout.oneOf',
+                    'spec_path': 'tasks.task1.timeout'
+                },
+                {
+                    'message': '[] is not valid under any of the given schemas',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.wait-after.oneOf',
+                    'spec_path': 'tasks.task1.wait-after'
+                },
+                {
+                    'message': '[] is not valid under any of the given schemas',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.wait-before.oneOf',
+                    'spec_path': 'tasks.task1.wait-before'
+                },
+            ]
+        }
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
 
     def test_task_publish_on_error(self):
         wf_def = """
