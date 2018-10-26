@@ -55,7 +55,7 @@ ANY_NULLABLE = {
     "anyOf": [
         {"type": "null"},
         {"type": "array"},
-        ,
+        {"type": "boolean"},
         {"type": "integer"},
         {"type": "number"},
         {"type": "object"},
@@ -91,20 +91,6 @@ STRING_OR_BOOLEAN = {
     "oneOf": [
         NONEMPTY_STRING,
         {"type": "boolean"}
-    ]
-}
-
-STRING_OR_YAQL_CONDITION = {
-    "oneOf": [
-        NONEMPTY_STRING,
-        YAQL_CONDITION
-    ]
-}
-
-YAQL_OR_POSITIVE_INTEGER = {
-    "oneOf": [
-        YAQL,
-        POSITIVE_INTEGER
     ]
 }
 
