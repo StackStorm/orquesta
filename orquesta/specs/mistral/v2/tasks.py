@@ -30,7 +30,7 @@ LOG = logging.getLogger(__name__)
 ON_CLAUSE_SCHEMA = {
     'oneOf': [
         types.NONEMPTY_STRING,
-        types.UNIQUE_STRING_LIST
+        types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST
     ]
 }
 

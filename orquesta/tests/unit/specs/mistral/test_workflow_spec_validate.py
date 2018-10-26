@@ -38,6 +38,69 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
+    def test_on_success_conditional(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                vars:
+                  xxx: true
+                tasks:
+                    task1:
+                        action: std.noop
+                        on-success:
+                            - task2: "{{ _.xxx }}"
+                    task2:
+                        action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_on_error_conditional(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                vars:
+                  xxx: true
+                tasks:
+                    task1:
+                        action: std.noop
+                        on-error:
+                            - task2: "{{ _.xxx }}"
+                    task2:
+                        action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_on_complete_conditional(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                vars:
+                  xxx: true
+                tasks:
+                    task1:
+                        action: std.noop
+                        on-complete:
+                            - task2: "{{ _.xxx }}"
+                    task2:
+                        action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
     def test_missing_task_list(self):
         wf_def = """
             version: '2.0'
