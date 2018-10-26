@@ -10,10 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-BOOLEAN = {
-    "type": "boolean"
-}
-
 NONEMPTY_STRING = {
     "type": "string",
     "minLength": 1
@@ -36,28 +32,22 @@ POSITIVE_NUMBER = {
     "minimum": 0.0
 }
 
-YAQL = {
-    "type": "string",
-    "pattern": "^<%.*?%>\\s*$"
-}
-
-YAQL_CONDITION = {
-    "type": "object",
-    "minProperties": 1,
-    "patternProperties": {
-        "^\w+$": YAQL
-    }
+VERSION = {
+    "anyOf": [
+        NONEMPTY_STRING,
+        POSITIVE_INTEGER,
+        POSITIVE_NUMBER
+    ]
 }
 
 ANY = {
     "anyOf": [
         {"type": "array"},
-        BOOLEAN,
+        {"type": "boolean"},
         {"type": "integer"},
         {"type": "number"},
         {"type": "object"},
-        {"type": "string"},
-        YAQL
+        {"type": "string"}
     ]
 }
 
@@ -65,12 +55,11 @@ ANY_NULLABLE = {
     "anyOf": [
         {"type": "null"},
         {"type": "array"},
-        BOOLEAN,
+        ,
         {"type": "integer"},
         {"type": "number"},
         {"type": "object"},
-        {"type": "string"},
-        YAQL
+        {"type": "string"}
     ]
 }
 
@@ -101,7 +90,7 @@ STRING_OR_POSITIVE_INTEGER = {
 STRING_OR_BOOLEAN = {
     "oneOf": [
         NONEMPTY_STRING,
-        BOOLEAN
+        {"type": "boolean"}
     ]
 }
 
@@ -116,28 +105,6 @@ YAQL_OR_POSITIVE_INTEGER = {
     "oneOf": [
         YAQL,
         POSITIVE_INTEGER
-    ]
-}
-
-YAQL_OR_BOOLEAN = {
-    "oneOf": [
-        YAQL,
-        BOOLEAN
-    ]
-}
-
-UNIQUE_STRING_OR_YAQL_CONDITION_LIST = {
-    "type": "array",
-    "items": STRING_OR_YAQL_CONDITION,
-    "uniqueItems": True,
-    "minItems": 1
-}
-
-VERSION = {
-    "anyOf": [
-        NONEMPTY_STRING,
-        POSITIVE_INTEGER,
-        POSITIVE_NUMBER
     ]
 }
 

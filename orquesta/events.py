@@ -24,19 +24,31 @@ WORKFLOW_REQUESTED = 'workflow_requested'
 WORKFLOW_SCHEDULED = 'workflow_scheduled'
 WORKFLOW_DELAYED = 'workflow_delayed'
 WORKFLOW_RUNNING = 'workflow_running'
+WORKFLOW_RUNNING_WORKFLOW_COMPLETED = 'workflow_running_workflow_completed'
 WORKFLOW_PAUSING = 'workflow_pausing'
+WORKFLOW_PAUSING_TASK_ACTIVE_ITEMS_INCOMPLETE = 'workflow_pausing_task_active_items_incomplete'
+WORKFLOW_PAUSING_TASK_DORMANT_ITEMS_INCOMPLETE = 'workflow_pausing_task_dormant_items_incomplete'
 WORKFLOW_PAUSING_WORKFLOW_ACTIVE = 'workflow_pausing_workflow_active'
 WORKFLOW_PAUSING_WORKFLOW_DORMANT = 'workflow_pausing_workflow_dormant'
 WORKFLOW_PAUSED = 'workflow_paused'
+WORKFLOW_PAUSED_TASK_ACTIVE_ITEMS_INCOMPLETE = 'workflow_paused_task_active_items_incomplete'
+WORKFLOW_PAUSED_TASK_DORMANT_ITEMS_INCOMPLETE = 'workflow_paused_task_dormant_items_incomplete'
 WORKFLOW_PAUSED_WORKFLOW_ACTIVE = 'workflow_paused_workflow_active'
 WORKFLOW_PAUSED_WORKFLOW_DORMANT = 'workflow_paused_workflow_dormant'
 WORKFLOW_RESUMING = 'workflow_resuming'
+WORKFLOW_RESUMING_WORKFLOW_COMPLETED = 'workflow_resuming_workflow_completed'
 WORKFLOW_SUCCEEDED = 'workflow_succeeded'
 WORKFLOW_FAILED = 'workflow_failed'
 WORKFLOW_CANCELING = 'workflow_canceling'
+WORKFLOW_CANCELING_TASK_ACTIVE_ITEMS_INCOMPLETE = 'workflow_canceling_task_active_items_incomplete'
+WORKFLOW_CANCELING_TASK_DORMANT_ITEMS_INCOMPLETE = \
+    'workflow_canceling_task_dormant_items_incomplete'
 WORKFLOW_CANCELING_WORKFLOW_ACTIVE = 'workflow_canceling_workflow_active'
 WORKFLOW_CANCELING_WORKFLOW_DORMANT = 'workflow_canceling_workflow_dormant'
 WORKFLOW_CANCELED = 'workflow_canceled'
+WORKFLOW_CANCELED_TASK_ACTIVE_ITEMS_INCOMPLETE = 'workflow_canceled_task_active_items_incomplete'
+WORKFLOW_CANCELED_TASK_DORMANT_ITEMS_INCOMPLETE = \
+    'workflow_canceled_task_dormant_items_incomplete'
 WORKFLOW_CANCELED_WORKFLOW_ACTIVE = 'workflow_canceled_workflow_active'
 WORKFLOW_CANCELED_WORKFLOW_DORMANT = 'workflow_canceled_workflow_dormant'
 
@@ -45,19 +57,29 @@ WORKFLOW_EXECUTION_EVENTS = [
     WORKFLOW_SCHEDULED,
     WORKFLOW_DELAYED,
     WORKFLOW_RUNNING,
+    WORKFLOW_RUNNING_WORKFLOW_COMPLETED,
     WORKFLOW_PAUSING,
+    WORKFLOW_PAUSING_TASK_ACTIVE_ITEMS_INCOMPLETE,
+    WORKFLOW_PAUSING_TASK_DORMANT_ITEMS_INCOMPLETE,
     WORKFLOW_PAUSING_WORKFLOW_ACTIVE,
     WORKFLOW_PAUSING_WORKFLOW_DORMANT,
     WORKFLOW_PAUSED,
+    WORKFLOW_PAUSED_TASK_ACTIVE_ITEMS_INCOMPLETE,
+    WORKFLOW_PAUSED_TASK_DORMANT_ITEMS_INCOMPLETE,
     WORKFLOW_PAUSED_WORKFLOW_ACTIVE,
     WORKFLOW_PAUSED_WORKFLOW_DORMANT,
     WORKFLOW_RESUMING,
+    WORKFLOW_RESUMING_WORKFLOW_COMPLETED,
     WORKFLOW_SUCCEEDED,
     WORKFLOW_FAILED,
     WORKFLOW_CANCELING,
+    WORKFLOW_CANCELING_TASK_ACTIVE_ITEMS_INCOMPLETE,
+    WORKFLOW_CANCELING_TASK_DORMANT_ITEMS_INCOMPLETE,
     WORKFLOW_CANCELING_WORKFLOW_ACTIVE,
     WORKFLOW_CANCELING_WORKFLOW_DORMANT,
     WORKFLOW_CANCELED,
+    WORKFLOW_CANCELED_TASK_ACTIVE_ITEMS_INCOMPLETE,
+    WORKFLOW_CANCELED_TASK_DORMANT_ITEMS_INCOMPLETE,
     WORKFLOW_CANCELED_WORKFLOW_ACTIVE,
     WORKFLOW_CANCELED_WORKFLOW_DORMANT
 ]
@@ -160,15 +182,29 @@ ACTION_SCHEDULED = 'action_scheduled'
 ACTION_DELAYED = 'action_delayed'
 ACTION_RUNNING = 'action_running'
 ACTION_PENDING = 'action_pending'
+ACTION_PENDING_TASK_ACTIVE_ITEMS_INCOMPLETE = 'action_pending_task_active_items_incomplete'
+ACTION_PENDING_TASK_DORMANT_ITEMS_INCOMPLETE = 'action_pending_task_dormant_items_incomplete'
 ACTION_PAUSING = 'action_pausing'
 ACTION_PAUSED = 'action_paused'
+ACTION_PAUSED_TASK_ACTIVE_ITEMS_INCOMPLETE = 'action_paused_task_active_items_incomplete'
+ACTION_PAUSED_TASK_DORMANT_ITEMS_INCOMPLETE = 'action_paused_task_dormant_items_incomplete'
 ACTION_RESUMING = 'action_resuming'
 ACTION_SUCCEEDED = 'action_succeeded'
+ACTION_SUCCEEDED_TASK_ACTIVE_ITEMS_INCOMPLETE = 'action_succeeded_task_active_items_incomplete'
+ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_INCOMPLETE = 'action_succeeded_task_dormant_items_incomplete'
+ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_COMPLETED = 'action_succeeded_task_dormant_items_completed'
+ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_PAUSED = 'action_succeeded_task_dormant_items_paused'
+ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_CANCELED = 'action_succeeded_task_dormant_items_canceled'
+ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_FAILED = 'action_succeeded_task_dormant_items_failed'
 ACTION_FAILED = 'action_failed'
+ACTION_FAILED_TASK_ACTIVE_ITEMS_INCOMPLETE = 'action_failed_task_active_items_incomplete'
+ACTION_FAILED_TASK_DORMANT_ITEMS_INCOMPLETE = 'action_failed_task_dormant_items_incomplete'
 ACTION_EXPIRED = 'action_timeout'
 ACTION_ABANDONED = 'action_abandoned'
 ACTION_CANCELING = 'action_canceling'
 ACTION_CANCELED = 'action_canceled'
+ACTION_CANCELED_TASK_ACTIVE_ITEMS_INCOMPLETE = 'action_canceled_task_active_items_incomplete'
+ACTION_CANCELED_TASK_DORMANT_ITEMS_INCOMPLETE = 'action_canceled_task_dormant_items_incomplete'
 
 ACTION_EXECUTION_EVENTS = [
     ACTION_REQUESTED,
@@ -176,15 +212,29 @@ ACTION_EXECUTION_EVENTS = [
     ACTION_DELAYED,
     ACTION_RUNNING,
     ACTION_PENDING,
+    ACTION_PENDING_TASK_ACTIVE_ITEMS_INCOMPLETE,
+    ACTION_PENDING_TASK_DORMANT_ITEMS_INCOMPLETE,
     ACTION_PAUSING,
     ACTION_PAUSED,
+    ACTION_PAUSED_TASK_ACTIVE_ITEMS_INCOMPLETE,
+    ACTION_PAUSED_TASK_DORMANT_ITEMS_INCOMPLETE,
     ACTION_RESUMING,
     ACTION_SUCCEEDED,
+    ACTION_SUCCEEDED_TASK_ACTIVE_ITEMS_INCOMPLETE,
+    ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_INCOMPLETE,
+    ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_COMPLETED,
+    ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_PAUSED,
+    ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_CANCELED,
+    ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_FAILED,
     ACTION_FAILED,
+    ACTION_FAILED_TASK_ACTIVE_ITEMS_INCOMPLETE,
+    ACTION_FAILED_TASK_DORMANT_ITEMS_INCOMPLETE,
     ACTION_EXPIRED,
     ACTION_ABANDONED,
     ACTION_CANCELING,
-    ACTION_CANCELED
+    ACTION_CANCELED,
+    ACTION_CANCELED_TASK_ACTIVE_ITEMS_INCOMPLETE,
+    ACTION_CANCELED_TASK_DORMANT_ITEMS_INCOMPLETE
 ]
 
 
@@ -200,13 +250,14 @@ ENGINE_OPERATION_EVENTS = [
 
 class ExecutionEvent(object):
 
-    def __init__(self, name, state, result=None):
+    def __init__(self, name, state, result=None, context=None):
         if not states.is_valid(state):
             raise exc.InvalidState(state)
 
         self.name = name
         self.state = state
         self.result = result
+        self.context = context
 
 
 class WorkflowExecutionEvent(ExecutionEvent):
@@ -224,21 +275,38 @@ class TaskExecutionEvent(ExecutionEvent):
 
 class ActionExecutionEvent(ExecutionEvent):
 
-    def __init__(self, state, result=None):
-        super(ActionExecutionEvent, self).__init__('action_%s' % state, state, result=result)
+    def __init__(self, state, result=None, context=None):
+        super(ActionExecutionEvent, self).__init__(
+            'action_%s' % state,
+            state,
+            result=result,
+            context=context
+        )
 
 
-class TaskNoopEvent(ExecutionEvent):
+class EngineOperationEvent(ExecutionEvent):
+    pass
+
+
+class TaskNoopEvent(EngineOperationEvent):
 
     def __init__(self):
         self.name = TASK_NOOP_REQUESTED
         self.state = states.SUCCEEDED
         self.result = None
+        self.context = None
 
 
-class TaskFailEvent(ExecutionEvent):
+class TaskFailEvent(EngineOperationEvent):
 
     def __init__(self):
         self.name = TASK_FAIL_REQUESTED
         self.state = states.FAILED
         self.result = None
+        self.context = None
+
+
+ENGINE_EVENT_MAP = {
+    'noop': TaskNoopEvent,
+    'fail': TaskFailEvent
+}

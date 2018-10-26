@@ -13,6 +13,9 @@
 import unittest
 
 from orquesta.expressions import base as expressions
+from orquesta.expressions.functions import common as functions
+from orquesta.expressions import jinja as jinja_exp
+from orquesta.expressions import yql as yaql_exp
 
 
 class ExpressionEvaluatorTest(unittest.TestCase):
@@ -34,3 +37,21 @@ class ExpressionEvaluatorTest(unittest.TestCase):
             expected_errors,
             result.get('errors', [])
         )
+
+    def test_inspect_function_has_context_argument(self):
+        self.assertTrue(expressions.func_has_ctx_arg(functions.ctx_))
+        self.assertFalse(expressions.func_has_ctx_arg(functions.json_))
+
+    def test_get_statement_regexes(self):
+        expected_data = {
+            'jinja': jinja_exp.JinjaEvaluator.get_statement_regex(),
+            'yaql': yaql_exp.YAQLEvaluator.get_statement_regex()
+        }
+
+        self.assertDictEqual(expressions.get_statement_regexes(), expected_data)
+
+    def test_has_expressions(self):
+        self.assertTrue(expressions.has_expressions('<% ctx().foo %> and {{ ctx().foo }}'))
+        self.assertTrue(expressions.has_expressions('foo <% ctx().foo %> bar'))
+        self.assertTrue(expressions.has_expressions('foo {{ ctx().foo }} bar'))
+        self.assertFalse(expressions.has_expressions('foobar'))

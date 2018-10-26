@@ -33,20 +33,10 @@ class RetrySpec(base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
-            'count': {
-                'oneOf': [
-                    types.NONEMPTY_STRING,
-                    types.POSITIVE_INTEGER
-                ]
-            },
+            'count': types.STRING_OR_POSITIVE_INTEGER,
             'break-on': types.NONEMPTY_STRING,
             'continue-on': types.NONEMPTY_STRING,
-            'delay': {
-                'oneOf': [
-                    types.NONEMPTY_STRING,
-                    types.POSITIVE_INTEGER
-                ]
-            },
+            'delay': types.STRING_OR_POSITIVE_INTEGER
         },
         'required': ['delay', 'count'],
         'additionalProperties': False

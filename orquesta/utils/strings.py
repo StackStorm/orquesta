@@ -10,4 +10,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__version__ = '0.2'
+import logging
+
+import six
+
+
+LOG = logging.getLogger(__name__)
+
+
+def unescape(s):
+    return s.decode('string_escape') if six.PY2 else bytes(s, 'utf-8').decode('unicode_escape')

@@ -68,3 +68,24 @@ def result_(context):
     current_task = _get_current_task(context)
 
     return current_task.get('result')
+
+
+def item_(context, key=None):
+    if not context:
+        raise exc.ExpressionEvaluationException('The context is not set.')
+
+    current_item = context['__current_item']
+
+    if not current_item:
+        return None
+
+    if not key:
+        return current_item
+
+    if not isinstance(current_item, dict):
+        raise exc.ExpressionEvaluationException('Item is not type of dict.')
+
+    if key not in current_item:
+        raise exc.ExpressionEvaluationException('Item does not have key "%s".' % key)
+
+    return current_item[key]

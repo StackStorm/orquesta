@@ -382,7 +382,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # The get_start_tasks method should not return any tasks.
-        self.assertListEqual(conductor.get_start_tasks(), [])
+        self.assertListEqual(conductor.get_next_tasks(), [])
 
         # The workflow should fail with the expected errors.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
@@ -509,7 +509,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # The get_start_tasks method should not return any tasks.
-        self.assertListEqual(conductor.get_start_tasks(), [])
+        self.assertListEqual(conductor.get_next_tasks(), [])
 
         # The workflow should fail with the expected errors.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
@@ -649,7 +649,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # The get_start_tasks method should not return any tasks.
-        self.assertListEqual(conductor.get_start_tasks(), [])
+        self.assertListEqual(conductor.get_next_tasks(), [])
 
         # The workflow should fail with the expected errors.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)

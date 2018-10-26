@@ -10,4 +10,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__version__ = '0.2'
+import unittest
+
+from orquesta.utils import strings
+
+
+class StringsTest(unittest.TestCase):
+
+    def test_unescape(self):
+        self.assertEqual(strings.unescape('foobar'), 'foobar')
+        self.assertEqual(strings.unescape('\\\\foobar'), '\\foobar')

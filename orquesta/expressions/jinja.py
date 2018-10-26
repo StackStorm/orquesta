@@ -83,11 +83,16 @@ class JinjaEvaluator(base.Evaluator):
         if isinstance(data, dict):
             ctx['__flow'] = ctx['__vars'].get('__flow')
             ctx['__current_task'] = ctx['__vars'].get('__current_task')
+            ctx['__current_item'] = ctx['__vars'].get('__current_item')
 
         for name, func in six.iteritems(cls._custom_functions):
-            ctx[name] = functools.partial(func, ctx)
+            ctx[name] = functools.partial(func, ctx) if base.func_has_ctx_arg(func) else func
 
         return ctx
+
+    @classmethod
+    def get_statement_regex(cls):
+        return cls._regex_pattern
 
     @classmethod
     def has_expressions(cls, text):

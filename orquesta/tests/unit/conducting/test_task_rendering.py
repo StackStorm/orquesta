@@ -19,7 +19,7 @@ from orquesta.tests.unit import base
 
 class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
-    def _prep_conductor(self, context=None, inputs=None, state=None):
+    def test_basic_rendering(self):
         wf_def = """
         version: 1.0
 
@@ -46,60 +46,138 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
               message: <% ctx().message %>
         """
 
+        # Instantiate workflow spec.
         spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
 
-        kwargs = {
-            'context': context if context is not None else None,
-            'inputs': inputs if inputs is not None else None
-        }
-
-        conductor = conducting.WorkflowConductor(spec, **kwargs)
-
-        if state:
-            conductor.request_workflow_state(state)
-
-        return conductor
-
-    def test_runtime_rendering(self):
+        # Instantiate conductor
         action_name = 'core.echo'
         action_input = {'message': 'All your base are belong to us!'}
         inputs = {'action_name': action_name, 'action_input': action_input}
-        conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
+        conductor = conducting.WorkflowConductor(spec, inputs=inputs)
+        conductor.request_workflow_state(states.RUNNING)
 
         # Test that the action and input are rendered entirely from context.
-        task_name = 'task1'
-        task1_spec = conductor.spec.tasks.get_task(task_name).copy()
-        task1_spec.action = action_name
-        task1_spec.input = action_input
-        expected = [self.format_task_item(task_name, inputs, task1_spec)]
-        self.assert_task_list(conductor.get_start_tasks(), expected)
+        next_task_name = 'task1'
+        next_task_ctx = inputs
+        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
+        next_task_action_specs = [{'action': action_name, 'input': action_input}]
+
+        expected_task = self.format_task_item(
+            next_task_name,
+            next_task_ctx,
+            next_task_spec,
+            action_specs=next_task_action_specs
+        )
+
+        expected_tasks = [expected_task]
+
+        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
 
         # Test that the inline parameter in action is rendered.
         task_name = 'task1'
         next_task_name = 'task2'
         mock_result = action_input['message']
+
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
         ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED, result=mock_result)
         conductor.update_task_flow(task_name, ac_ex_event)
+
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
-        next_task_spec.action = 'core.echo'
-        next_task_spec.input = {'message': mock_result}
-        expected_ctx_value = {'message': mock_result}
-        expected_ctx_value.update(inputs)
-        expected_tasks = [self.format_task_item(next_task_name, expected_ctx_value, next_task_spec)]
+        next_task_action_specs = [{'action': 'core.echo', 'input': {'message': mock_result}}]
+
+        next_task_ctx = {'message': mock_result}
+        next_task_ctx.update(inputs)
+
+        expected_task = self.format_task_item(
+            next_task_name,
+            next_task_ctx,
+            next_task_spec,
+            action_specs=next_task_action_specs
+        )
+
+        expected_tasks = [expected_task]
+
         self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
 
         # Test that the individual expression in input is rendered.
         task_name = 'task2'
         next_task_name = 'task3'
         mock_result = action_input['message']
+
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
         ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED, result=mock_result)
         conductor.update_task_flow(task_name, ac_ex_event)
+
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
-        next_task_spec.action = 'core.echo'
-        next_task_spec.input = {'message': mock_result}
-        expected_ctx_value = {'message': mock_result}
-        expected_ctx_value.update(inputs)
-        expected_tasks = [self.format_task_item(next_task_name, expected_ctx_value, next_task_spec)]
+        next_task_action_specs = [{'action': 'core.echo', 'input': {'message': mock_result}}]
+
+        next_task_ctx = {'message': mock_result}
+        next_task_ctx.update(inputs)
+
+        expected_task = self.format_task_item(
+            next_task_name,
+            next_task_ctx,
+            next_task_spec,
+            action_specs=next_task_action_specs
+        )
+
+        expected_tasks = [expected_task]
+
         self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
+
+    def test_with_items_rendering(self):
+        wf_def = """
+        version: 1.0
+
+        input:
+          - xs
+          - concurrency
+
+        tasks:
+          task1:
+            with:
+              items: <% ctx(xs) %>
+              concurrency: <% ctx(concurrency) %>
+            action: core.echo message=<% item() %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
+        """
+
+        # Instantiate workflow spec.
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        # Instantiate conductor
+        inputs = {'xs': ['fee', 'fi', 'fo', 'fum'], 'concurrency': 2}
+        conductor = conducting.WorkflowConductor(spec, inputs=inputs)
+        conductor.request_workflow_state(states.RUNNING)
+
+        # Test that the items and context of a task is rendered from context.
+        next_task_name = 'task1'
+        next_task_ctx = inputs
+        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
+
+        next_task_action_specs = [
+            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
+            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
+            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
+            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+        ]
+
+        expected_task = self.format_task_item(
+            next_task_name,
+            next_task_ctx,
+            next_task_spec,
+            action_specs=next_task_action_specs[0:inputs['concurrency']],
+            items_count=len(inputs['xs']),
+            items_concurrency=inputs['concurrency']
+        )
+
+        expected_tasks = [expected_task]
+
+        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)

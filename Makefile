@@ -10,14 +10,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SHELL := /bin/bash
-PY27 := /usr/bin/python2.7
-RPM_ROOT = ~/rpmbuild
-RPM_SOURCES_DIR := $(RPM_ROOT)/SOURCES/
-RPM_SPECS_DIR := $(RPM_ROOT)/SPECS/
+PY3 := /usr/bin/python3
 VER := $(shell cat ./orquesta/__init__.py | grep -Po "__version__ = '\K[^']*")
-RELEASE = 1
-COMPONENTS := orquesta
 
 # Virtual Environment
 VENV_DIR ?= .venv
@@ -30,11 +24,16 @@ SPHINXPROJ    = Orquesta
 SOURCEDIR     = docs/source
 BUILDDIR      = docs/build
 
+# Packaging Options
+PKGDISTDIR    = dist
+PKGBUILDDIR   = build
 
 .PHONY: clean
 clean:
 	rm -rf $(VENV_DIR)
 	rm -rf $(BUILDDIR)
+	rm -rf $(PKGDISTDIR)
+	rm -rf $(PKGBUILDDIR)
 
 .PHONY: venv
 venv:
@@ -46,6 +45,12 @@ reqs: venv
 	$(VENV_DIR)/bin/pip install -r requirements.txt
 	$(VENV_DIR)/bin/pip install -r requirements-test.txt
 	$(VENV_DIR)/bin/pip install -r requirements-docs.txt
+	$(VENV_DIR)/bin/python setup.py develop
+	echo
+
+.PHONY: schemas
+schemas: reqs
+	$(VENV_DIR)/bin/python bin/orquesta-generate-schemas
 
 .PHONY: docs
 docs: reqs
@@ -57,27 +62,8 @@ livedocs: reqs
 	rm -rf $(BUILDDIR)
 	. $(VENV_DIR)/bin/activate; $(SPHINXAUTO) -H 0.0.0.0 -b html $(SOURCEDIR) $(BUILDDIR)/html
 
-.PHONY: rpm
-rpm: 
-	$(PY27) setup.py bdist_rpm --python=$(PY27)
-	mkdir -p $(RPM_ROOT)/RPMS/noarch
-	cp dist/$(COMPONENTS)*noarch.rpm $(RPM_ROOT)/RPMS/noarch/$(COMPONENTS)-$(VER)-$(RELEASE).noarch.rpm
-	mkdir -p $(RPM_ROOT)/SRPMS
-	cp dist/*src.rpm $(RPM_ROOT)/SRPMS/$(COMPONENTS)-$(VER)-$(RELEASE).src.rpm
-	rm -Rf dist $(COMPONENTS).egg-info ChangeLog AUTHORS build
-
-.PHONY: rhel-rpm
-rhel-rpm:
-	$(PY27) setup.py bdist_rpm --python=$(PY27)
-	mkdir -p $(RPM_ROOT)/RPMS/noarch
-	cp dist/$(COMPONENTS)*noarch.rpm $(RPM_ROOT)/RPMS/noarch/$(COMPONENTS)-$(VER)-$(RELEASE).noarch.rpm
-	mkdir -p $(RPM_ROOT)/SRPMS
-	cp dist/*src.rpm $(RPM_ROOT)/SRPMS/$(COMPONENTS)-$(VER)-$(RELEASE).src.rpm
-	rm -Rf dist $(COMPONENTS).egg-info ChangeLog AUTHORS build
-
-.PHONY: deb
-deb:
-	$(PY27) setup.py --command-packages=stdeb.command bdist_deb
-	mkdir -p ~/debbuild
-	cp deb_dist/python-$(COMPONENTS)*-1_all.deb ~/debbuild/$(COMPONENTS)_$(VER)-$(RELEASE)_amd64.deb
-	rm -Rf dist deb_dist $(COMPONENTS)-$(VER).tar.gz $(COMPONENTS).egg-info ChangeLog AUTHORS build
+.PHONY: package
+package:
+	rm -rf $(PKGDISTDIR)
+	rm -rf $(PKGBUILDDIR)
+	$(PY3) setup.py sdist bdist_wheel

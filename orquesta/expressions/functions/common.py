@@ -16,7 +16,7 @@ import six
 from orquesta import exceptions as exc
 
 
-def json_(context, s):
+def json_(s):
     if isinstance(s, dict):
         return s
 
@@ -24,6 +24,17 @@ def json_(context, s):
         raise TypeError('Given object is not typeof string.')
 
     return json.loads(s)
+
+
+def zip_(*args, **kwargs):
+    args = [list() if arg is None else arg for arg in args]
+
+    if len(args) == 1:
+        return args[0]
+
+    pad_with = kwargs.pop('pad', None)
+
+    return list(six.moves.zip_longest(*args, fillvalue=pad_with))
 
 
 def ctx_(context, key=None):

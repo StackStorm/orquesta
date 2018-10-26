@@ -11,6 +11,7 @@
 # limitations under the License.
 
 import abc
+import inspect
 import logging
 import re
 import six
@@ -39,6 +40,10 @@ class Evaluator(object):
     @classmethod
     def strip_delimiter(cls, expr):
         return expr.strip(cls._delimiter).strip()
+
+    @classmethod
+    def get_statement_regex(cls):
+        raise NotImplementedError()
 
     @classmethod
     def has_expressions(cls, text):
@@ -81,8 +86,17 @@ def get_evaluators():
     return _EXP_EVALUATORS
 
 
-def validate(statement):
+def get_statement_regexes():
+    return {t: e.get_statement_regex() for t, e in six.iteritems(get_evaluators())}
 
+
+def has_expressions(text):
+    result = {t: e.has_expressions(text) for t, e in six.iteritems(get_evaluators())}
+
+    return any(result.values())
+
+
+def validate(statement):
     errors = []
 
     if isinstance(statement, dict):
@@ -151,3 +165,7 @@ def extract_vars(statement):
     variables = [v for v in variables if v[2] != '']
 
     return sorted(list(set(variables)), key=lambda var: var[2])
+
+
+def func_has_ctx_arg(func):
+    return 'context' in inspect.getargspec(func).args

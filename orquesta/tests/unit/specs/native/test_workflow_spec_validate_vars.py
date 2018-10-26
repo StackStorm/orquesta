@@ -508,18 +508,18 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
                     'type': 'yaql',
                     'expression': '<% ctx().fu + ctx().bar %>',
                     'message': 'Variable "fu" is referenced before assignment.',
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.properties.'
-                        'next.items.properties.publish'
-                    ),
-                    'spec_path': 'tasks.task2.next[0].publish[0]'
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
+                    'spec_path': 'tasks.task3.input'
                 },
                 {
                     'type': 'yaql',
                     'expression': '<% ctx().fu + ctx().bar %>',
                     'message': 'Variable "fu" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
-                    'spec_path': 'tasks.task3.input'
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.properties.'
+                        'next.items.properties.publish'
+                    ),
+                    'spec_path': 'tasks.task2.next[0].publish[0]'
                 },
                 {
                     'type': 'yaql',
