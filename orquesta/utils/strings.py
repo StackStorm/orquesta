@@ -12,7 +12,11 @@
 
 import logging
 
+import chardet
 import six
+
+if six.PY2:
+    import __builtin__
 
 
 LOG = logging.getLogger(__name__)
@@ -20,3 +24,20 @@ LOG = logging.getLogger(__name__)
 
 def unescape(s):
     return s.decode('string_escape') if six.PY2 else bytes(s, 'utf-8').decode('unicode_escape')
+
+
+def encoding(s):
+    return chardet.detect(s)['encoding']
+
+
+def unicode(s, force=False):
+    if not isinstance(s, six.string_types) and not force:
+        return s
+
+    if six.PY2:
+        if not force and (isinstance(s, __builtin__.unicode) or encoding(s) == 'utf-8'):
+            return s
+
+        return __builtin__.unicode(s)
+
+    return str(s)

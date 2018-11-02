@@ -38,7 +38,10 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Item does not have key "y".',
+                'message': (
+                    'Unable to evaluate expression \'<% item(y) %>\'. '
+                    'ExpressionEvaluationException: Item does not have key "y".'
+                ),
                 'task_id': 'task1'
             }
         ]
@@ -73,7 +76,10 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Item is not type of dict.',
+                'message': (
+                    'Unable to evaluate expression \'<% item(x) %>\'. '
+                    'ExpressionEvaluationException: Item is not type of dict.'
+                ),
                 'task_id': 'task1'
             }
         ]
