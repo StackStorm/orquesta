@@ -1,3 +1,4 @@
+chardet
 Jinja2>=2.8 # BSD License (3 clause)
 jsonschema!=2.5.0,<3.0.0,>=2.0.0 # MIT
 networkx>=1.10,<2.0
