@@ -22,6 +22,7 @@ from orquesta import exceptions as exc
 from orquesta.expressions import base
 from orquesta.expressions.functions import base as functions
 from orquesta.utils import expression as utils
+from orquesta.utils import strings as strings_utils
 
 
 LOG = logging.getLogger(__name__)
@@ -139,7 +140,7 @@ class JinjaEvaluator(base.Evaluator):
 
     @classmethod
     def _evaluate_and_expand(cls, text, data=None):
-        output = text
+        output = strings_utils.unicode(text)
         exprs = cls._regex_parser.findall(text)
         block_exprs = cls._regex_block_parser.findall(text)
         ctx = cls.contextualize(data)
@@ -164,9 +165,9 @@ class JinjaEvaluator(base.Evaluator):
                 # raise an exception with error description.
                 if not isinstance(result, jinja2.runtime.StrictUndefined):
                     if len(exprs) > 1 or block_exprs or len(output) > len(expr):
-                        output = output.replace(expr, str(result))
+                        output = output.replace(expr, strings_utils.unicode(result, force=True))
                     else:
-                        output = result
+                        output = strings_utils.unicode(result)
 
             # Evaluate jinja block(s) after inline expressions are evaluated.
             if block_exprs and isinstance(output, six.string_types):
@@ -177,7 +178,11 @@ class JinjaEvaluator(base.Evaluator):
                 output = cls._evaluate_and_expand(output, data)
 
         except jinja2.exceptions.UndefinedError as e:
-            raise JinjaEvaluationException(str(getattr(e, 'message', e)))
+            msg = "Unable to evaluate expression '%s'. %s: %s"
+            raise JinjaEvaluationException(msg % (expr, e.__class__.__name__, str(e)))
+        except Exception as e:
+            msg = "Unable to evaluate expression '%s'. %s: %s"
+            raise JinjaEvaluationException(msg % (expr, e.__class__.__name__, str(e)))
 
         return output
 

@@ -22,6 +22,7 @@ from orquesta import exceptions as exc
 from orquesta.expressions import base
 from orquesta.expressions.functions import base as functions
 from orquesta.utils import expression as utils
+from orquesta.utils import strings as strings_utils
 
 
 LOG = logging.getLogger(__name__)
@@ -112,7 +113,7 @@ class YAQLEvaluator(base.Evaluator):
         if data and not isinstance(data, dict):
             raise ValueError('Provided data is not typeof dict.')
 
-        output = text
+        output = strings_utils.unicode(text)
         exprs = cls._regex_parser.findall(text)
         ctx = cls.contextualize(data)
 
@@ -128,17 +129,20 @@ class YAQLEvaluator(base.Evaluator):
                     result = cls.evaluate(result, data)
 
                 if len(exprs) > 1 or len(output) > len(expr):
-                    output = output.replace(expr, str(result))
+                    output = output.replace(expr, strings_utils.unicode(result, force=True))
                 else:
-                    output = result
+                    output = strings_utils.unicode(result)
 
         except KeyError as e:
-            raise YaqlEvaluationException(
-                "Unable to resolve key '%s' in expression '%s' from context." %
-                (str(getattr(e, 'message', e)).strip("'"), expr)
-            )
+            error = str(getattr(e, 'message', e)).strip("'")
+            msg = "Unable to resolve key '%s' in expression '%s' from context."
+            raise YaqlEvaluationException(msg % (error, expr))
         except (yaql_exc.YaqlException, ValueError, TypeError) as e:
-            raise YaqlEvaluationException(str(getattr(e, 'message', e)).strip("'"))
+            msg = "Unable to evaluate expression '%s'. %s: %s"
+            raise YaqlEvaluationException(msg % (expr, e.__class__.__name__, str(e).strip("'")))
+        except Exception as e:
+            msg = "Unable to evaluate expression '%s'. %s: %s"
+            raise YaqlEvaluationException(msg % (expr, e.__class__.__name__, str(e)))
 
         return output
 

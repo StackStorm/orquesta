@@ -55,7 +55,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         """
 
         expected_errors = [
-            {'message': 'Unknown function "#property#value"'}
+            {
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().y.value %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#value"'
+                )
+            }
         ]
 
         spec = specs.WorkflowSpec(wf_def)
@@ -104,7 +109,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         """
 
         expected_errors = [
-            {'message': 'Unknown function "#property#value"'}
+            {
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().y.value %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#value"'
+                )
+            }
         ]
 
         spec = specs.WorkflowSpec(wf_def)
@@ -150,7 +160,10 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().foobar.fubar %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1',
                 'task_transition_id': 'task2__0'
             }
@@ -210,12 +223,18 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().foobar.fubar %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1',
                 'task_transition_id': 'task3__0'
             },
             {
-                'message': 'Unknown function "#property#foobar"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().fubar.foobar %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#foobar"'
+                ),
                 'task_id': 'task2',
                 'task_transition_id': 'task3__0'
             }
@@ -272,7 +291,10 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().foobar.fubar %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1',
                 'task_transition_id': 'task2__0'
             }
@@ -325,7 +347,10 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#value"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().y.value %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#value"'
+                ),
                 'task_id': 'task1',
                 'task_transition_id': 'task2__0'
             }
@@ -370,7 +395,10 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().foobar.fubar %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1'
             }
         ]
@@ -410,7 +438,10 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().foobar.fubar %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1'
             }
         ]
@@ -450,7 +481,10 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().foobar.fubar %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task2'
             }
         ]
@@ -497,7 +531,10 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().foobar.fubar %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1'
             }
         ]
@@ -539,7 +576,10 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().foobar.fubar %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1'
             }
         ]
@@ -581,7 +621,10 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().foobar.fubar %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task2'
             }
         ]
@@ -633,11 +676,17 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().foobar.fubar %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1'
             },
             {
-                'message': 'Unknown function "#property#foobar"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().fubar.foobar %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#foobar"'
+                ),
                 'task_id': 'task2'
             }
         ]
@@ -684,11 +733,17 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().foobar.fubar %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1'
             },
             {
-                'message': 'Unknown function "#property#foobar"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().fubar.foobar %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#foobar"'
+                ),
                 'task_id': 'task2'
             }
         ]
@@ -731,11 +786,17 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().foobar.fubar %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task2'
             },
             {
-                'message': 'Unknown function "#property#foobar"',
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().fubar.foobar %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#foobar"'
+                ),
                 'task_id': 'task3'
             }
         ]
@@ -800,7 +861,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         """
 
         expected_errors = [
-            {'message': 'Unknown function "#property#value"'}
+            {
+                'message': (
+                    'Unable to evaluate expression \'<% ctx().y.value %>\'. '
+                    'NoFunctionRegisteredException: Unknown function "#property#value"'
+                )
+            }
         ]
 
         spec = specs.WorkflowSpec(wf_def)

@@ -10,7 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta import exceptions as exc
 from orquesta.expressions import jinja
 from orquesta.tests.unit import base
 from orquesta.utils import plugin
@@ -45,7 +44,7 @@ class JinjaEvaluationTest(base.ExpressionEvaluatorTest):
         data = {}
 
         self.assertRaises(
-            exc.VariableUndefinedError,
+            jinja.JinjaEvaluationException,
             self.evaluator.evaluate,
             expr,
             data
@@ -104,7 +103,7 @@ class JinjaEvaluationTest(base.ExpressionEvaluatorTest):
         }
 
         self.assertRaises(
-            exc.VariableUndefinedError,
+            jinja.JinjaEvaluationException,
             self.evaluator.evaluate,
             expr,
             data
