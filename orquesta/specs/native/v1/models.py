@@ -305,7 +305,7 @@ class TaskMappingSpec(base.MappingSpec):
 
         task_transitions = getattr(task_spec, 'next') or []
 
-        for task_transition in task_transitions:
+        for task_transition_item_idx, task_transition in enumerate(task_transitions):
             condition = getattr(task_transition, 'when') or None
             next_task_names = getattr(task_transition, 'do') or []
 
@@ -313,7 +313,7 @@ class TaskMappingSpec(base.MappingSpec):
                 next_task_names = [x.strip() for x in next_task_names.split(',')]
 
             for next_task_name in next_task_names:
-                next_tasks.append((next_task_name, condition))
+                next_tasks.append((next_task_name, condition, task_transition_item_idx))
 
         return sorted(next_tasks, key=lambda x: x[0])
 
@@ -323,13 +323,13 @@ class TaskMappingSpec(base.MappingSpec):
         for name, task_spec in six.iteritems(self):
             for next_task in self.get_next_tasks(name):
                 if task_name == next_task[0]:
-                    prev_tasks.append((name, next_task[1]))
+                    prev_tasks.append((name, next_task[1], next_task[2]))
 
         return sorted(prev_tasks, key=lambda x: x[0])
 
     def get_start_tasks(self):
         start_tasks = [
-            (task_name, None)
+            (task_name, None, None)
             for task_name in self.keys()
             if not self.get_prev_tasks(task_name)
         ]

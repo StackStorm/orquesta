@@ -40,6 +40,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -47,6 +48,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -54,6 +56,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'noop',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -90,6 +93,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -97,6 +101,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -104,6 +109,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'noop',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -145,6 +151,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -152,6 +159,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -160,6 +168,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -167,6 +176,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task6',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -211,6 +221,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -218,6 +229,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -226,6 +238,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -233,6 +246,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task6',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -271,11 +285,13 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -283,6 +299,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -291,6 +308,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -331,11 +349,13 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -343,6 +363,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -351,6 +372,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -386,16 +408,19 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'a',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() and ctx().which = "a" %>']
                     },
                     {
                         'id': 'b',
                         'key': 0,
+                        'ref': 1,
                         'criteria': ['<% succeeded() and ctx().which = "b" %>']
                     },
                     {
                         'id': 'c',
                         'key': 0,
+                        'ref': 2,
                         'criteria': ['<% succeeded() and not ctx().which in list(a, b) %>']
                     }
                 ],
@@ -434,16 +459,19 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'a',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() and ctx().which = "a" %>']
                     },
                     {
                         'id': 'b',
                         'key': 0,
+                        'ref': 1,
                         'criteria': ['<% succeeded() and ctx().which = "b" %>']
                     },
                     {
                         'id': 'c',
                         'key': 0,
+                        'ref': 2,
                         'criteria': ['<% succeeded() and not ctx().which in list(a, b) %>']
                     }
                 ],

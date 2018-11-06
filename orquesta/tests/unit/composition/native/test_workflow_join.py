@@ -50,11 +50,13 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -62,6 +64,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -69,6 +72,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task6',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -76,6 +80,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -83,6 +88,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task6',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -90,6 +96,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -139,11 +146,13 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -151,6 +160,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -158,6 +168,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task6',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -165,6 +176,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -172,6 +184,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task6',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -179,6 +192,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -227,16 +241,19 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -244,6 +261,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -251,6 +269,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -258,6 +277,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -265,6 +285,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -272,6 +293,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -279,6 +301,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -332,16 +355,19 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -349,6 +375,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -356,6 +383,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -363,6 +391,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -370,6 +399,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -377,6 +407,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -384,6 +415,7 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],

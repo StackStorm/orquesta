@@ -83,48 +83,60 @@ class WorkflowGraph(object):
         for key, value in six.iteritems(kwargs):
             self._graph.node[task_id][key] = value
 
-    def has_transition(self, source, destination, criteria=None):
-        return [
-            edge for edge in self._graph.edges(data=True, keys=True)
-            if (edge[0] == source and edge[1] == destination and
-                edge[3].get('criteria', None) == criteria)
-        ]
+    def has_transition(self, source, destination, **kwargs):
+        edges = filter(
+            lambda e: e[0] == source and e[1] == destination,
+            self._graph.edges(data=True, keys=True)
+        )
 
-    def get_transition(self, source, destination, key=None, criteria=None):
-        seqs = [
-            edge for edge in self._graph.edges(data=True, keys=True)
-            if (edge[0] == source and edge[1] == destination and (
-                edge[3].get('criteria', None) == criteria or
-                edge[2] == key))
-        ]
+        for attr, value in six.iteritems(kwargs):
+            edges = filter(lambda e: e[3].get(attr, None) == value, list(edges))
 
-        if not seqs:
+        return list(edges)
+
+    def get_transition(self, source, destination, key=None, **kwargs):
+        if key is not None:
+            edges = filter(
+                lambda e: e[0] == source and e[1] == destination and e[2] == key,
+                self._graph.edges(data=True, keys=True)
+            )
+        else:
+            edges = filter(
+                lambda e: e[0] == source and e[1] == destination,
+                self._graph.edges(data=True, keys=True)
+            )
+
+            for attr, value in six.iteritems(kwargs):
+                edges = filter(lambda e: e[3].get(attr, None) == value, list(edges))
+
+        edges = list(edges)
+
+        if len(edges) <= 0:
             raise exc.InvalidTaskTransition(source, destination)
 
-        if len(seqs) > 1:
+        if len(edges) > 1:
             raise exc.AmbiguousTaskTransition(source, destination)
 
-        return seqs[0]
+        return edges[0]
 
     def get_transition_attributes(self, attribute):
         return nx.get_edge_attributes(self._graph, attribute)
 
-    def add_transition(self, source, destination, criteria=None):
+    def add_transition(self, source, destination, **kwargs):
         if not self.has_task(source):
             self.add_task(source)
 
         if not self.has_task(destination):
             self.add_task(destination)
 
-        seqs = self.has_transition(source, destination, criteria)
+        # Add attributes only if value is not None.
+        attrs = {}
 
-        if len(seqs) > 1:
-            raise exc.AmbiguousTaskTransition(source, destination)
+        for attr, value in six.iteritems(kwargs):
+            if attr is not None:
+                attrs[attr] = value
 
-        if not seqs:
-            self._graph.add_edge(source, destination, criteria=criteria)
-        else:
-            self.update_transition(source, destination, key=seqs[0][2], criteria=criteria)
+        self._graph.add_edge(source, destination, **attrs)
 
     def update_transition(self, source, destination, key, **kwargs):
         seq = self.get_transition(source, destination, key=key)
