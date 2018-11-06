@@ -44,7 +44,7 @@ class WorkflowComposer(base.WorkflowComposer):
         q = queue.Queue()
         wf_graph = graphing.WorkflowGraph()
 
-        for task_name, condition in wf_spec.tasks.get_start_tasks():
+        for task_name, condition, task_transition_item_idx in wf_spec.tasks.get_start_tasks():
             q.put((task_name, []))
 
         while not q.empty():
@@ -67,16 +67,36 @@ class WorkflowComposer(base.WorkflowComposer):
 
             next_tasks = wf_spec.tasks.get_next_tasks(task_name)
 
-            for next_task_name, condition in next_tasks:
+            for next_task_name, condition, task_transition_item_idx in next_tasks:
                 if (not wf_graph.has_task(next_task_name) or
                         not wf_spec.tasks.in_cycle(next_task_name)):
                     q.put((next_task_name, list(splits)))
 
                 crta = [condition] if condition else []
-                seqs = wf_graph.has_transition(task_name, next_task_name, criteria=crta)
 
-                if not seqs:
-                    wf_graph.add_transition(task_name, next_task_name, criteria=crta)
+                seqs = wf_graph.has_transition(
+                    task_name,
+                    next_task_name,
+                    criteria=crta,
+                    ref=task_transition_item_idx
+                )
+
+                # Use existing transition if present otherwise create new transition.
+                if seqs:
+                    wf_graph.update_transition(
+                        task_name,
+                        next_task_name,
+                        key=seqs[0][2],
+                        criteria=crta,
+                        ref=task_transition_item_idx
+                    )
+                else:
+                    wf_graph.add_transition(
+                        task_name,
+                        next_task_name,
+                        criteria=crta,
+                        ref=task_transition_item_idx
+                    )
 
         return wf_graph
 
@@ -90,10 +110,10 @@ class WorkflowComposer(base.WorkflowComposer):
             return task_name + '__' + str(split_id) if split_id > 0 else task_name
 
         for task in wf_graph.roots:
-            q.put((task['id'], None, None, []))
+            q.put((task['id'], None, None, None, []))
 
         while not q.empty():
-            task_name, prev_task_ex_name, criteria, splits = q.get()
+            task_name, prev_task_ex_name, criteria, transition_ref, splits = q.get()
             task_ex_attrs = wf_graph.get_task(task_name)
             task_ex_attrs['name'] = task_name
 
@@ -140,13 +160,27 @@ class WorkflowComposer(base.WorkflowComposer):
                         for c in next_seq[3]['criteria']
                     ]
 
-                    q.put((next_seq[1], task_ex_name, next_seq_criteria, list(splits)))
+                    item = (
+                        next_seq[1],
+                        task_ex_name,
+                        next_seq_criteria,
+                        next_seq[3]['ref'],
+                        list(splits)
+                    )
+
+                    q.put(item)
 
             # A split task should only have one previous transition even if there are multiple
             # different tasks transitioning to it. Since it has no join requirement, the split
             # task will create a new instance and execute.
             if is_split_task and prev_task_ex_name:
-                wf_ex_graph.add_transition(prev_task_ex_name, task_ex_name, criteria=criteria)
+                wf_ex_graph.add_transition(
+                    prev_task_ex_name,
+                    task_ex_name,
+                    criteria=criteria,
+                    ref=transition_ref
+                )
+
                 continue
 
             # Finally, process all inbound task transitions.
@@ -166,6 +200,28 @@ class WorkflowComposer(base.WorkflowComposer):
                     for c in prev_seq[3]['criteria']
                 ]
 
-                wf_ex_graph.add_transition(p_task_ex_name, task_ex_name, criteria=p_seq_criteria)
+                seqs = wf_ex_graph.has_transition(
+                    p_task_ex_name,
+                    task_ex_name,
+                    criteria=p_seq_criteria,
+                    ref=prev_seq[3]['ref']
+                )
+
+                # Use existing transition if present otherwise create new transition.
+                if seqs:
+                    wf_ex_graph.update_transition(
+                        p_task_ex_name,
+                        task_ex_name,
+                        key=seqs[0][2],
+                        criteria=p_seq_criteria,
+                        ref=prev_seq[3]['ref']
+                    )
+                else:
+                    wf_ex_graph.add_transition(
+                        p_task_ex_name,
+                        task_ex_name,
+                        criteria=p_seq_criteria,
+                        ref=prev_seq[3]['ref']
+                    )
 
         return wf_ex_graph

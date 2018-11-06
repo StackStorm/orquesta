@@ -10,6 +10,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
+
 from orquesta import exceptions as exc
 from orquesta import graphing
 from orquesta.tests.unit import base
@@ -53,65 +55,56 @@ EXPECTED_WF_GRAPH = {
             {
                 'id': 'task2',
                 'key': 0,
-                'criteria': None
+                'attr1': 'foobar'
             },
             {
                 'id': 'task4',
-                'key': 0,
-                'criteria': None
+                'key': 0
             },
             {
                 'id': 'task7',
-                'key': 0,
-                'criteria': None
+                'key': 0
             },
             {
                 'id': 'task9',
-                'key': 0,
-                'criteria': None
+                'key': 0
             }
         ],
         [
             {
                 'id': 'task3',
-                'key': 0,
-                'criteria': None
+                'key': 0
             }
         ],
         [
             {
                 'id': 'task5',
-                'key': 0,
-                'criteria': None
+                'key': 0
             }
         ],
         [
             {
                 'id': 'task5',
-                'key': 0,
-                'criteria': None
+                'key': 0
             }
         ],
         [
             {
                 'id': 'task6',
-                'key': 0,
-                'criteria': None
+                'key': 0
             }
         ],
         [],
         [
             {
                 'id': 'task8',
-                'key': 0,
-                'criteria': None
+                'key': 0
             }
         ],
         [
             {
                 'id': 'task9',
-                'key': 0,
-                'criteria': None
+                'key': 0
             }
         ],
         []
@@ -127,7 +120,7 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
             wf_graph.add_task('task' + str(i))
 
     def _add_transitions(self, wf_graph):
-        wf_graph.add_transition('task1', 'task2')
+        wf_graph.add_transition('task1', 'task2', attr1='foobar')
         wf_graph.add_transition('task2', 'task3')
         wf_graph.add_transition('task1', 'task4')
         wf_graph.add_transition('task3', 'task5')
@@ -177,12 +170,23 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
 
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
 
-    def test_duplicate_add_transitions(self):
+    def test_add_same_transition_between_tasks(self):
         wf_graph = self._prep_graph()
 
-        self._add_transitions(wf_graph)
+        wf_graph.add_transition('task1', 'task2', key=0, attr1='foobar')
 
         self.assert_graph_equal(wf_graph, EXPECTED_WF_GRAPH)
+
+    def test_add_duplicate_transition_between_tasks(self):
+        wf_graph = self._prep_graph()
+
+        wf_graph.add_transition('task1', 'task2', attr1='fubar')
+
+        expected_wf_graph = copy.deepcopy(EXPECTED_WF_GRAPH)
+        expected_transition = {'id': 'task2', 'key': 1, 'attr1': 'fubar'}
+        expected_wf_graph['adjacency'][0].append(expected_transition)
+
+        self.assert_graph_equal(wf_graph, expected_wf_graph)
 
     def test_get_task(self):
         wf_graph = self._prep_graph()
@@ -246,14 +250,34 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
 
         self.assertDictEqual(wf_graph.get_task_attributes('attr1'), expected)
 
+    def test_has_transition(self):
+        wf_graph = self._prep_graph()
+
+        expected = [('task1', 'task2', 0, {'attr1': 'foobar'})]
+        self.assertListEqual(wf_graph.has_transition('task1', 'task2', attr1='foobar'), expected)
+
+        expected = [('task2', 'task3', 0, {})]
+        self.assertListEqual(wf_graph.has_transition('task2', 'task3'), expected)
+
     def test_get_transition(self):
         wf_graph = self._prep_graph()
 
-        expected = ('task1', 'task2', 0, {'criteria': None})
-        self.assertEqual(wf_graph.get_transition('task1', 'task2'), expected)
+        expected = ('task1', 'task2', 0, {'attr1': 'foobar'})
+        self.assertEqual(wf_graph.get_transition('task1', 'task2', attr1='foobar'), expected)
+
+        expected = ('task2', 'task3', 0, {})
+        self.assertEqual(wf_graph.get_transition('task2', 'task3'), expected)
 
     def test_get_nonexistent_transition(self):
         wf_graph = self._prep_graph()
+
+        self.assertRaises(
+            exc.InvalidTaskTransition,
+            wf_graph.get_transition,
+            'task1',
+            'task2',
+            attr1='fubar'
+        )
 
         self.assertRaises(
             exc.InvalidTaskTransition,
@@ -277,29 +301,14 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
             'task2'
         )
 
-    def test_add_ambiguous_transition(self):
-        wf_graph = graphing.WorkflowGraph()
-
-        self._add_tasks(wf_graph)
-
-        wf_graph._graph.add_edge('task1', 'task2')
-        wf_graph._graph.add_edge('task1', 'task2')
-
-        self.assertRaises(
-            exc.AmbiguousTaskTransition,
-            wf_graph.add_transition,
-            'task1',
-            'task2'
-        )
-
     def test_get_next_transitions(self):
         wf_graph = self._prep_graph()
 
         expected_transitions = [
-            ('task1', 'task2', 0, {'criteria': None}),
-            ('task1', 'task4', 0, {'criteria': None}),
-            ('task1', 'task7', 0, {'criteria': None}),
-            ('task1', 'task9', 0, {'criteria': None})
+            ('task1', 'task2', 0, {'attr1': 'foobar'}),
+            ('task1', 'task4', 0, {}),
+            ('task1', 'task7', 0, {}),
+            ('task1', 'task9', 0, {})
         ]
 
         self.assertListEqual(
@@ -311,8 +320,8 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
         wf_graph = self._prep_graph()
 
         expected_transitions = [
-            ('task3', 'task5', 0, {'criteria': None}),
-            ('task4', 'task5', 0, {'criteria': None})
+            ('task3', 'task5', 0, {}),
+            ('task4', 'task5', 0, {})
         ]
 
         self.assertListEqual(
