@@ -639,7 +639,7 @@ class WorkflowConductor(object):
 
                     out_ctx_val, errors = task_spec.finalize_context(
                         next_task_name,
-                        criteria,
+                        task_transition,
                         copy.deepcopy(current_ctx)
                     )
 

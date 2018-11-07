@@ -237,36 +237,26 @@ class TaskSpec(base.Spec):
 
         return self, action_specs
 
-    def finalize_context(self, next_task_name, criteria, in_ctx):
+    def finalize_context(self, next_task_name, task_transition_meta, in_ctx):
         rolling_ctx = copy.deepcopy(in_ctx)
         new_ctx = {}
         errors = []
 
         task_transition_specs = getattr(self, 'next') or []
+        task_transition_spec = task_transition_specs[task_transition_meta[3]['ref']]
+        next_task_names = getattr(task_transition_spec, 'do') or []
 
-        for task_transition_spec in task_transition_specs:
-            condition = getattr(task_transition_spec, 'when') or None
-            next_task_names = getattr(task_transition_spec, 'do') or []
+        if next_task_name in next_task_names:
+            for task_publish_spec in (getattr(task_transition_spec, 'publish') or {}):
+                var_name = list(task_publish_spec.items())[0][0]
+                default_var_value = list(task_publish_spec.items())[0][1]
 
-            if next_task_name in next_task_names:
-                if (condition and len(criteria) <= 0) or (not condition and len(criteria) > 0):
-                    continue
-
-                if condition and len(criteria) > 0 and condition != criteria[0]:
-                    continue
-
-                for task_publish_spec in (getattr(task_transition_spec, 'publish') or {}):
-                    var_name = list(task_publish_spec.items())[0][0]
-                    default_var_value = list(task_publish_spec.items())[0][1]
-
-                    try:
-                        rendered_var_value = expr.evaluate(default_var_value, rolling_ctx)
-                        rolling_ctx[var_name] = rendered_var_value
-                        new_ctx[var_name] = rendered_var_value
-                    except exc.ExpressionEvaluationException as e:
-                        errors.append(e)
-
-                break
+                try:
+                    rendered_var_value = expr.evaluate(default_var_value, rolling_ctx)
+                    rolling_ctx[var_name] = rendered_var_value
+                    new_ctx[var_name] = rendered_var_value
+                except exc.ExpressionEvaluationException as e:
+                    errors.append(e)
 
         out_ctx = dx.merge_dicts(in_ctx, new_ctx, overwrite=True)
 
