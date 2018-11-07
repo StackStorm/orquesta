@@ -173,7 +173,7 @@ class WorkflowConductor(object):
         inputs = copy.deepcopy(data['input'])
         outputs = copy.deepcopy(data['output'])
         errors = copy.deepcopy(data['errors'])
-        log = copy.deepcopy(data['log'])
+        log = copy.deepcopy(data.get('log', []))
 
         instance = cls(spec)
         instance.restore(graph, state, log, errors, flow, inputs, outputs, context)
