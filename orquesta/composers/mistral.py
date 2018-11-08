@@ -100,8 +100,20 @@ class WorkflowComposer(base.WorkflowComposer):
                 crta = cls._compose_transition_criteria(task_name, condition=condition, expr=expr)
                 seqs = wf_graph.has_transition(task_name, next_task_name, criteria=crta)
 
-                if not seqs:
-                    wf_graph.add_transition(task_name, next_task_name, criteria=crta)
+                # Use existing transition if present otherwise create new transition.
+                if seqs:
+                    wf_graph.update_transition(
+                        task_name,
+                        next_task_name,
+                        key=seqs[0][2],
+                        criteria=crta
+                    )
+                else:
+                    wf_graph.add_transition(
+                        task_name,
+                        next_task_name,
+                        criteria=crta
+                    )
 
         return wf_graph
 
@@ -191,6 +203,25 @@ class WorkflowComposer(base.WorkflowComposer):
                     for c in prev_seq[3]['criteria']
                 ]
 
-                wf_ex_graph.add_transition(p_task_ex_name, task_ex_name, criteria=p_seq_criteria)
+                seqs = wf_ex_graph.has_transition(
+                    p_task_ex_name,
+                    task_ex_name,
+                    criteria=p_seq_criteria
+                )
+
+                # Use existing transition if present otherwise create new transition.
+                if seqs:
+                    wf_ex_graph.update_transition(
+                        p_task_ex_name,
+                        task_ex_name,
+                        key=seqs[0][2],
+                        criteria=p_seq_criteria
+                    )
+                else:
+                    wf_ex_graph.add_transition(
+                        p_task_ex_name,
+                        task_ex_name,
+                        criteria=p_seq_criteria
+                    )
 
         return wf_ex_graph

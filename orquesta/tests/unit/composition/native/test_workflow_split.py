@@ -54,11 +54,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -66,6 +68,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -73,6 +76,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -80,11 +84,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -92,6 +98,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -99,6 +106,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -173,11 +181,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -185,6 +195,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task4__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -192,11 +203,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                 ],
@@ -204,6 +217,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -212,6 +226,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -219,6 +234,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task4__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -226,11 +242,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                 ],
@@ -238,6 +256,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -246,6 +265,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ]
@@ -298,16 +318,19 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task8',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -315,6 +338,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -322,6 +346,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -329,11 +354,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -341,6 +368,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -348,6 +376,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -355,6 +384,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -444,16 +474,19 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task8__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -461,6 +494,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task4__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -468,11 +502,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                 ],
@@ -480,6 +516,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -487,6 +524,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -495,6 +533,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -502,6 +541,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task4__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -509,11 +549,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                 ],
@@ -521,6 +563,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -528,6 +571,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8__3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -536,6 +580,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -597,11 +642,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -609,6 +656,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -616,6 +664,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -623,11 +672,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -635,6 +686,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -642,6 +694,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -649,11 +702,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task9',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -661,6 +716,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task10',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -668,6 +724,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task10',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -814,11 +871,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -826,6 +885,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task4__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -833,11 +893,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                 ],
@@ -845,6 +907,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -852,11 +915,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task9__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -864,6 +929,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task10__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -872,6 +938,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task10__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -879,6 +946,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -886,11 +954,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task9__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -898,6 +968,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task10__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -906,6 +977,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task10__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -913,6 +985,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task4__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -920,11 +993,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                 ],
@@ -932,6 +1007,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -939,11 +1015,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8__3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task9__3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -951,6 +1029,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task10__3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -959,6 +1038,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task10__3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -966,6 +1046,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -973,11 +1054,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8__4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task9__4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -985,6 +1068,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task10__4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -993,6 +1077,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task10__4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ]
@@ -1046,16 +1131,19 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task8',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -1063,6 +1151,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -1070,6 +1159,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task4',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -1077,11 +1167,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -1089,6 +1181,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -1096,6 +1189,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -1103,6 +1197,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -1189,21 +1284,25 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task8__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task8__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -1211,6 +1310,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task4__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -1218,11 +1318,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                 ],
@@ -1230,6 +1332,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -1237,6 +1340,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -1245,6 +1349,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -1252,6 +1357,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task4__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -1259,11 +1365,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task5__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task6__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                 ],
@@ -1271,6 +1379,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -1278,6 +1387,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task8__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -1286,6 +1396,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task7__2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ]

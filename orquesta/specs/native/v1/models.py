@@ -213,36 +213,26 @@ class TaskSpec(base.Spec):
 
         return self, action_specs
 
-    def finalize_context(self, next_task_name, criteria, in_ctx):
+    def finalize_context(self, next_task_name, task_transition_meta, in_ctx):
         rolling_ctx = copy.deepcopy(in_ctx)
         new_ctx = {}
         errors = []
 
         task_transition_specs = getattr(self, 'next') or []
+        task_transition_spec = task_transition_specs[task_transition_meta[3]['ref']]
+        next_task_names = getattr(task_transition_spec, 'do') or []
 
-        for task_transition_spec in task_transition_specs:
-            condition = getattr(task_transition_spec, 'when') or None
-            next_task_names = getattr(task_transition_spec, 'do') or []
+        if next_task_name in next_task_names:
+            for task_publish_spec in (getattr(task_transition_spec, 'publish') or {}):
+                var_name = list(task_publish_spec.items())[0][0]
+                default_var_value = list(task_publish_spec.items())[0][1]
 
-            if next_task_name in next_task_names:
-                if (condition and len(criteria) <= 0) or (not condition and len(criteria) > 0):
-                    continue
-
-                if condition and len(criteria) > 0 and condition != criteria[0]:
-                    continue
-
-                for task_publish_spec in (getattr(task_transition_spec, 'publish') or {}):
-                    var_name = list(task_publish_spec.items())[0][0]
-                    default_var_value = list(task_publish_spec.items())[0][1]
-
-                    try:
-                        rendered_var_value = expr.evaluate(default_var_value, rolling_ctx)
-                        rolling_ctx[var_name] = rendered_var_value
-                        new_ctx[var_name] = rendered_var_value
-                    except exc.ExpressionEvaluationException as e:
-                        errors.append(str(e))
-
-                break
+                try:
+                    rendered_var_value = expr.evaluate(default_var_value, rolling_ctx)
+                    rolling_ctx[var_name] = rendered_var_value
+                    new_ctx[var_name] = rendered_var_value
+                except exc.ExpressionEvaluationException as e:
+                    errors.append(e)
 
         out_ctx = dx.merge_dicts(in_ctx, new_ctx, overwrite=True)
 
@@ -281,7 +271,7 @@ class TaskMappingSpec(base.MappingSpec):
 
         task_transitions = getattr(task_spec, 'next') or []
 
-        for task_transition in task_transitions:
+        for task_transition_item_idx, task_transition in enumerate(task_transitions):
             condition = getattr(task_transition, 'when') or None
             next_task_names = getattr(task_transition, 'do') or []
 
@@ -289,7 +279,7 @@ class TaskMappingSpec(base.MappingSpec):
                 next_task_names = [x.strip() for x in next_task_names.split(',')]
 
             for next_task_name in next_task_names:
-                next_tasks.append((next_task_name, condition))
+                next_tasks.append((next_task_name, condition, task_transition_item_idx))
 
         return sorted(next_tasks, key=lambda x: x[0])
 
@@ -299,13 +289,13 @@ class TaskMappingSpec(base.MappingSpec):
         for name, task_spec in six.iteritems(self):
             for next_task in self.get_next_tasks(name):
                 if task_name == next_task[0]:
-                    prev_tasks.append((name, next_task[1]))
+                    prev_tasks.append((name, next_task[1], next_task[2]))
 
         return sorted(prev_tasks, key=lambda x: x[0])
 
     def get_start_tasks(self):
         start_tasks = [
-            (task_name, None)
+            (task_name, None, None)
             for task_name in self.keys()
             if not self.get_prev_tasks(task_name)
         ]
@@ -561,7 +551,7 @@ class WorkflowSpec(base.Spec):
                 rendered_input_value = expr.evaluate(runtime_input_value, rolling_ctx)
                 rolling_ctx[input_name] = rendered_input_value
             except exc.ExpressionEvaluationException as e:
-                errors.append(str(e))
+                errors.append(e)
 
         return rolling_ctx, errors
 
@@ -579,7 +569,7 @@ class WorkflowSpec(base.Spec):
                 rolling_ctx[var_name] = rendered_var_value
                 rendered_vars[var_name] = rendered_var_value
             except exc.ExpressionEvaluationException as e:
-                errors.append(str(e))
+                errors.append(e)
 
         return rendered_vars, errors
 
@@ -598,6 +588,6 @@ class WorkflowSpec(base.Spec):
                 rolling_ctx[output_name] = rendered_output_value
                 rendered_outputs[output_name] = rendered_output_value
             except exc.ExpressionEvaluationException as e:
-                errors.append(str(e))
+                errors.append(e)
 
         return rendered_outputs, errors

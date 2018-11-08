@@ -113,3 +113,7 @@ class WorkflowInspectionError(Exception):
 
 class WorkflowContextError(Exception):
     pass
+
+
+class WorkflowLogEntryError(Exception):
+    pass
