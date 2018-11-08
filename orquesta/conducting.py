@@ -326,17 +326,19 @@ class WorkflowConductor(object):
                 term_ctx_entry['value'] = term_ctx_val
 
     def _render_workflow_outputs(self):
-        # Render workflow outputs if workflow succeeded.
-        if self.get_workflow_state() == states.SUCCEEDED and not self._outputs:
-            outputs, errors = self.spec.render_output(self.get_workflow_terminal_context()['value'])
+        # Render workflow outputs if workflow is completed.
+        if self.get_workflow_state() in states.COMPLETED_STATES and not self._outputs:
+            workflow_context = self.get_workflow_terminal_context()['value']
+            outputs, errors = self.spec.render_output(workflow_context)
 
+            # Persist outputs if it is not empty.
+            if outputs:
+                self._outputs = outputs
+
+            # Log errors if any returned and mark workflow as failed.
             if errors:
                 self.log_errors(errors)
                 self.request_workflow_state(states.FAILED)
-
-            # Persist outputs if there is no issue with rendering.
-            if self.get_workflow_state() not in states.ABENDED_STATES and outputs:
-                self._outputs = outputs
 
     def get_workflow_output(self):
         return copy.deepcopy(self._outputs) if self._outputs else None

@@ -646,3 +646,27 @@ class WorkflowSpecVarsValidationTest(base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_vars_in_output_on_error_handling(self):
+        wf_def = """
+            version: 1.0
+            description: A basic sequential workflow.
+            input:
+              - a
+            output:
+              - b: <% ctx().b %>
+              - x: <% ctx().a %>
+              - y: <% ctx().x %>
+              - z: <% ctx().x %> <% ctx().y %>
+            tasks:
+              task1:
+                action: core.noop
+                next:
+                  - when: <% failed() %>
+                    publish: b="foobar"
+                    do: fail
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})

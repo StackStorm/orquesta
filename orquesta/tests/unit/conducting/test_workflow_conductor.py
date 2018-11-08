@@ -656,8 +656,9 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.FAILED))
 
+        expected_output = {'data': {'a': 123, 'b': True, 'c': 'xyz'}}
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
-        self.assertIsNone(conductor.get_workflow_output())
+        self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
     def test_get_workflow_output_when_workflow_succeeded(self):
         inputs = {'a': 123, 'b': True}
