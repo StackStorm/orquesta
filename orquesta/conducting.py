@@ -229,15 +229,21 @@ class WorkflowConductor(object):
         if entry_type not in ['info', 'warn', 'error']:
             raise exc.WorkflowLogEntryError('The log entry type "%s" is not valid.' % entry_type)
 
-        # Create a log entry.
+        # Identify the appropriate log and then log the entry.
+        log = self.errors if entry_type == 'error' else self.log
+
+        # Create the log entry.
         entry = {'type': entry_type, 'message': message}
         dx.set_dict_value(entry, 'task_id', task_id, insert_null=False)
         dx.set_dict_value(entry, 'task_transition_id', task_transition_id, insert_null=False)
         dx.set_dict_value(entry, 'result', result, insert_null=False)
         dx.set_dict_value(entry, 'data', data, insert_null=False)
 
-        # Identify the appropriate log and then log the entry.
-        log = self.errors if entry_type == 'error' else self.log
+        # Ignore if this is a duplicate.
+        if len(list(filter(lambda x: x == entry, log))) > 0:
+            return
+
+        # Append the log entry.
         log.append(entry)
 
     def log_error(self, e, task_id=None, task_transition_id=None):

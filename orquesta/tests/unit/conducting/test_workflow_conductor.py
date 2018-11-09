@@ -749,7 +749,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.PAUSED)
         self.assertEqual(conductor.get_workflow_state(), states.PAUSING)
 
-    def test_append_log_entry(self):
+    def test_append_log_entries(self):
         inputs = {'a': 123, 'b': True}
         conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
 
@@ -836,5 +836,60 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
         self.assertIsInstance(conductor.flow, conducting.TaskFlow)
+        self.assertListEqual(conductor.log, expected_log_entries)
+        self.assertListEqual(conductor.errors, expected_errors)
+
+    def test_append_duplicate_log_entries(self):
+        inputs = {'a': 123, 'b': True}
+        conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
+
+        extra = {'x': 1234}
+        conductor.log_entry('info', 'The workflow is running as expected.', data=extra)
+        conductor.log_entry('info', 'The workflow is running as expected.', data=extra)
+        conductor.log_entry('warn', 'The task may be running a little bit slow.', task_id='task1')
+        conductor.log_entry('warn', 'The task may be running a little bit slow.', task_id='task1')
+        conductor.log_entry('error', 'This is baloney.', task_id='task1')
+        conductor.log_entry('error', 'This is baloney.', task_id='task1')
+        conductor.log_error(TypeError('Something is not right.'), task_id='task1')
+        conductor.log_error(TypeError('Something is not right.'), task_id='task1')
+        conductor.log_errors([KeyError('task1'), ValueError('foobar')], task_id='task1')
+        conductor.log_errors([KeyError('task1'), ValueError('foobar')], task_id='task1')
+
+        expected_log_entries = [
+            {
+                'type': 'info',
+                'message': 'The workflow is running as expected.',
+                'data': extra
+            },
+            {
+                'type': 'warn',
+                'message': 'The task may be running a little bit slow.',
+                'task_id': 'task1'
+            }
+        ]
+
+        expected_errors = [
+            {
+                'type': 'error',
+                'message': 'This is baloney.',
+                'task_id': 'task1'
+            },
+            {
+                'type': 'error',
+                'message': 'TypeError: Something is not right.',
+                'task_id': 'task1'
+            },
+            {
+                'type': 'error',
+                'message': "KeyError: 'task1'",
+                'task_id': 'task1'
+            },
+            {
+                'type': 'error',
+                'message': 'ValueError: foobar',
+                'task_id': 'task1'
+            }
+        ]
+
         self.assertListEqual(conductor.log, expected_log_entries)
         self.assertListEqual(conductor.errors, expected_errors)
