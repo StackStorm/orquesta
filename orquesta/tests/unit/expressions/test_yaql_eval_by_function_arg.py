@@ -10,7 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta import exceptions as exc
 from orquesta.expressions import yql
 from orquesta.tests.unit import base
 from orquesta.utils import plugin
@@ -45,7 +44,7 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
         data = {}
 
         self.assertRaises(
-            exc.VariableUndefinedError,
+            yql.YaqlEvaluationException,
             self.evaluator.evaluate,
             expr,
             data

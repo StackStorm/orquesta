@@ -1,0 +1,16 @@
+version: 1.0
+  
+description: A basic workflow with task transitions having duplicate condition.
+
+tasks:
+  task1:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        do: task2
+      - when: <% succeeded() %>
+        do: task3
+  task2:
+    action: core.noop
+  task3:
+    action: core.noop

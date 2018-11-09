@@ -37,11 +37,13 @@ class TaskTransitionWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 1,
                         'criteria': ['<% failed() %>']
                     }
                 ],
@@ -75,12 +77,173 @@ class TaskTransitionWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 1,
                         'criteria': ['<% failed() %>']
+                    }
+                ],
+                [],
+                []
+            ],
+            'multigraph': True
+        }
+
+        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
+
+    def test_task_with_duplicate_when(self):
+        wf_name = 'task-duplicate-when'
+
+        expected_wf_graph = {
+            'directed': True,
+            'graph': {},
+            'nodes': [
+                {
+                    'id': 'task1'
+                },
+                {
+                    'id': 'task2'
+                },
+                {
+                    'id': 'task3'
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'id': 'task2',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    },
+                    {
+                        'id': 'task3',
+                        'key': 0,
+                        'ref': 1,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                [],
+                []
+            ],
+            'multigraph': True
+        }
+
+        self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
+
+        expected_wf_ex_graph = {
+            'directed': True,
+            'graph': {},
+            'nodes': [
+                {
+                    'id': 'task1',
+                    'name': 'task1'
+                },
+                {
+                    'id': 'task2',
+                    'name': 'task2'
+                },
+                {
+                    'id': 'task3',
+                    'name': 'task3'
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'id': 'task2',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    },
+                    {
+                        'id': 'task3',
+                        'key': 0,
+                        'ref': 1,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                [],
+                []
+            ],
+            'multigraph': True
+        }
+
+        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
+
+    def test_task_with_duplicate_transition(self):
+        wf_name = 'task-duplicate-transition'
+
+        expected_wf_graph = {
+            'directed': True,
+            'graph': {},
+            'nodes': [
+                {
+                    'id': 'task1'
+                },
+                {
+                    'id': 'task2',
+                    'splits': ['task2']
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'id': 'task2',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    },
+                    {
+                        'id': 'task2',
+                        'key': 1,
+                        'ref': 1,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                []
+            ],
+            'multigraph': True
+        }
+
+        self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
+
+        expected_wf_ex_graph = {
+            'directed': True,
+            'graph': {},
+            'nodes': [
+                {
+                    'id': 'task1',
+                    'name': 'task1'
+                },
+                {
+                    'id': 'task2__1',
+                    'name': 'task2',
+                    'splits': [('task2', 1)]
+                },
+                {
+                    'id': 'task2__2',
+                    'name': 'task2',
+                    'splits': [('task2', 2)]
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'id': 'task2__1',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    },
+                    {
+                        'id': 'task2__2',
+                        'key': 0,
+                        'ref': 1,
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
@@ -116,16 +279,19 @@ class TaskTransitionWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 1,
                         'criteria': ['<% failed() %>']
                     },
                     {
                         'id': 'task4',
                         'key': 0,
+                        'ref': 2,
                         'criteria': []
                     }
                 ],
@@ -164,16 +330,19 @@ class TaskTransitionWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 1,
                         'criteria': ['<% failed() %>']
                     },
                     {
                         'id': 'task4',
                         'key': 0,
+                        'ref': 2,
                         'criteria': []
                     }
                 ],
@@ -206,16 +375,19 @@ class TaskTransitionWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2',
                         'key': 0,
+                        'ref': 0,
                         'criteria': []
                     },
                     {
                         'id': 'task2',
                         'key': 1,
+                        'ref': 1,
                         'criteria': ['<% failed() %>']
                     },
                     {
                         'id': 'task2',
                         'key': 2,
+                        'ref': 2,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
@@ -255,16 +427,19 @@ class TaskTransitionWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     {
                         'id': 'task2__1',
                         'key': 0,
+                        'ref': 0,
                         'criteria': []
                     },
                     {
                         'id': 'task2__2',
                         'key': 0,
+                        'ref': 1,
                         'criteria': ['<% failed() %>']
                     },
                     {
                         'id': 'task2__3',
                         'key': 0,
+                        'ref': 2,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],

@@ -55,7 +55,14 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         """
 
         expected_errors = [
-            {'message': 'Unknown function "#property#value"'}
+            {
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().y.value %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#value"'
+                )
+            }
         ]
 
         spec = specs.WorkflowSpec(wf_def)
@@ -104,7 +111,14 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         """
 
         expected_errors = [
-            {'message': 'Unknown function "#property#value"'}
+            {
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().y.value %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#value"'
+                )
+            }
         ]
 
         spec = specs.WorkflowSpec(wf_def)
@@ -150,7 +164,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1',
                 'task_transition_id': 'task2__0'
             }
@@ -210,12 +229,22 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1',
                 'task_transition_id': 'task3__0'
             },
             {
-                'message': 'Unknown function "#property#foobar"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().fubar.foobar %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#foobar"'
+                ),
                 'task_id': 'task2',
                 'task_transition_id': 'task3__0'
             }
@@ -272,7 +301,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1',
                 'task_transition_id': 'task2__0'
             }
@@ -325,7 +359,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#value"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().y.value %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#value"'
+                ),
                 'task_id': 'task1',
                 'task_transition_id': 'task2__0'
             }
@@ -370,7 +409,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1'
             }
         ]
@@ -410,7 +454,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1'
             }
         ]
@@ -450,7 +499,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task2'
             }
         ]
@@ -497,7 +551,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1'
             }
         ]
@@ -539,7 +598,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1'
             }
         ]
@@ -581,7 +645,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task2'
             }
         ]
@@ -633,11 +702,21 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1'
             },
             {
-                'message': 'Unknown function "#property#foobar"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().fubar.foobar %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#foobar"'
+                ),
                 'task_id': 'task2'
             }
         ]
@@ -684,11 +763,21 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task1'
             },
             {
-                'message': 'Unknown function "#property#foobar"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().fubar.foobar %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#foobar"'
+                ),
                 'task_id': 'task2'
             }
         ]
@@ -731,11 +820,21 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         expected_errors = [
             {
-                'message': 'Unknown function "#property#fubar"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#fubar"'
+                ),
                 'task_id': 'task2'
             },
             {
-                'message': 'Unknown function "#property#foobar"',
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().fubar.foobar %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#foobar"'
+                ),
                 'task_id': 'task3'
             }
         ]
@@ -771,36 +870,15 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             action: core.noop
         """
 
-        spec = specs.WorkflowSpec(wf_def)
-        self.assertDictEqual(spec.inspect(), {})
-
-        conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
-
-        # Manually complete task1.
-        task_name = 'task1'
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
-
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
-        self.assertIsNone(conductor.get_workflow_output())
-
-    def test_workflow_output_seq_ref_error(self):
-        wf_def = """
-        version: 1.0
-
-        output:
-          - x: 123
-          - y: <% ctx().x %>
-          - z: <% ctx().y.value %>
-
-        tasks:
-          task1:
-            action: core.noop
-        """
-
         expected_errors = [
-            {'message': 'Unknown function "#property#value"'}
+            {
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% result().foobar %>\'. ExpressionEvaluationException: '
+                    'The current task is not set in the context.'
+                )
+            }
         ]
 
         spec = specs.WorkflowSpec(wf_def)
@@ -817,3 +895,48 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertIsNone(conductor.get_workflow_output())
+
+    def test_workflow_output_seq_ref_error(self):
+        wf_def = """
+        version: 1.0
+
+        output:
+          - x: 123
+          - y: <% ctx().x %>
+          - z: <% ctx().y.value %>
+
+        tasks:
+          task1:
+            action: core.noop
+        """
+
+        expected_output = {
+            'x': 123,
+            'y': 123
+        }
+
+        expected_errors = [
+            {
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx().y.value %>\'. NoFunctionRegisteredException: '
+                    'Unknown function "#property#value"'
+                )
+            }
+        ]
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_state(states.RUNNING)
+
+        # Manually complete task1.
+        task_name = 'task1'
+        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
+        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+
+        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertListEqual(conductor.errors, expected_errors)
+        self.assertDictEqual(conductor.get_workflow_output(), expected_output)
