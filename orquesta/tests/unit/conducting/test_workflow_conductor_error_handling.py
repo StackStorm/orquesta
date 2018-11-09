@@ -870,6 +870,17 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             action: core.noop
         """
 
+        expected_errors = [
+            {
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% result().foobar %>\'. ExpressionEvaluationException: '
+                    'The current task is not set in the context.'
+                )
+            }
+        ]
+
         spec = specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
@@ -882,6 +893,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
 
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertListEqual(conductor.errors, expected_errors)
         self.assertIsNone(conductor.get_workflow_output())
 
     def test_workflow_output_seq_ref_error(self):
@@ -897,6 +909,11 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
           task1:
             action: core.noop
         """
+
+        expected_output = {
+            'x': 123,
+            'y': 123
+        }
 
         expected_errors = [
             {
@@ -922,4 +939,4 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)
-        self.assertIsNone(conductor.get_workflow_output())
+        self.assertDictEqual(conductor.get_workflow_output(), expected_output)
