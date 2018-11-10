@@ -229,15 +229,21 @@ class WorkflowConductor(object):
         if entry_type not in ['info', 'warn', 'error']:
             raise exc.WorkflowLogEntryError('The log entry type "%s" is not valid.' % entry_type)
 
-        # Create a log entry.
+        # Identify the appropriate log and then log the entry.
+        log = self.errors if entry_type == 'error' else self.log
+
+        # Create the log entry.
         entry = {'type': entry_type, 'message': message}
         dx.set_dict_value(entry, 'task_id', task_id, insert_null=False)
         dx.set_dict_value(entry, 'task_transition_id', task_transition_id, insert_null=False)
         dx.set_dict_value(entry, 'result', result, insert_null=False)
         dx.set_dict_value(entry, 'data', data, insert_null=False)
 
-        # Identify the appropriate log and then log the entry.
-        log = self.errors if entry_type == 'error' else self.log
+        # Ignore if this is a duplicate.
+        if len(list(filter(lambda x: x == entry, log))) > 0:
+            return
+
+        # Append the log entry.
         log.append(entry)
 
     def log_error(self, e, task_id=None, task_transition_id=None):
@@ -326,8 +332,10 @@ class WorkflowConductor(object):
                 term_ctx_entry['value'] = term_ctx_val
 
     def _render_workflow_outputs(self):
+        wf_state = self.get_workflow_state()
+
         # Render workflow outputs if workflow is completed.
-        if self.get_workflow_state() in states.COMPLETED_STATES and not self._outputs:
+        if wf_state in states.COMPLETED_STATES and not self._outputs:
             workflow_context = self.get_workflow_terminal_context()['value']
             outputs, errors = self.spec.render_output(workflow_context)
 
@@ -338,7 +346,9 @@ class WorkflowConductor(object):
             # Log errors if any returned and mark workflow as failed.
             if errors:
                 self.log_errors(errors)
-                self.request_workflow_state(states.FAILED)
+
+                if wf_state not in [states.EXPIRED, states.ABANDONED, states.CANCELED]:
+                    self.request_workflow_state(states.FAILED)
 
     def get_workflow_output(self):
         return copy.deepcopy(self._outputs) if self._outputs else None
