@@ -533,8 +533,8 @@ class WorkflowSpec(base.Spec):
 
         super(WorkflowSpec, self).__init__(spec, name=name, member=member)
 
-    def render_input(self, runtime_inputs):
-        rolling_ctx = {}
+    def render_input(self, runtime_inputs, in_ctx=None):
+        rolling_ctx = copy.deepcopy(in_ctx) if in_ctx else {}
         errors = []
 
         for input_spec in (getattr(self, 'input') or []):

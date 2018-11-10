@@ -68,7 +68,7 @@ class WorkflowSpec(base.Spec):
         'vars'
     ]
 
-    def render_input(self, runtime_inputs):
+    def render_input(self, runtime_inputs, in_ctx=None):
         input_specs = getattr(self, 'input') or []
         default_inputs = dict([list(i.items())[0] for i in input_specs if isinstance(i, dict)])
         merged_inputs = dx.merge_dicts(default_inputs, runtime_inputs, True)
