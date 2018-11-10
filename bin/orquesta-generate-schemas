@@ -20,11 +20,13 @@ import json
 import os
 import six
 
+from orquesta.specs import mistral
 from orquesta.specs import native
 
 
 workflow_models = {
-	'orquesta': native.WorkflowSpec
+	'orquesta': native.WorkflowSpec,
+	'mistral': mistral.WorkflowSpec
 }
 
 
