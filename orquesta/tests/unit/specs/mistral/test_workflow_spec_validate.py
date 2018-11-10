@@ -38,6 +38,69 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
+    def test_on_success_conditional(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                vars:
+                  xxx: true
+                tasks:
+                    task1:
+                        action: std.noop
+                        on-success:
+                            - task2: "{{ _.xxx }}"
+                    task2:
+                        action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_on_error_conditional(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                vars:
+                  xxx: true
+                tasks:
+                    task1:
+                        action: std.noop
+                        on-error:
+                            - task2: "{{ _.xxx }}"
+                    task2:
+                        action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_on_complete_conditional(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                vars:
+                  xxx: true
+                tasks:
+                    task1:
+                        action: std.noop
+                        on-complete:
+                            - task2: "{{ _.xxx }}"
+                    task2:
+                        action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
     def test_missing_task_list(self):
         wf_def = """
             version: '2.0'
@@ -90,9 +153,29 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
             sequential:
                 description: A basic sequential workflow.
                 task-defaults:
-                    timeout: 60
+                   concurrency: 1
+                   keep-result: true
+                   retry:
+                       delay: 5
+                       count: 10
+                   safe-rerun: true
+                   wait-before: 3
+                   wait-after: 9
+                   pause-before: false
+                   target: some_node
+                   timeout: 90
+                   on-success:
+                       - task2
+                   on-error:
+                       - task2
+                   on-complete:
+                       - task3
                 tasks:
                     task1:
+                        action: std.noop
+                    task2:
+                        action: std.noop
+                    task3:
                         action: std.noop
         """
 
@@ -173,3 +256,209 @@ class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
         }
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_workflow_with_output_on_error(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                vars:
+                    jinja_expr: "abc"
+                    test_jinja: "xyz"
+                output-on-error:
+                    stdout: "abc"
+                    jinja_expr: "{{ _.test_jinja }}"
+                    yaql_expr: <% $.test_yaql %>
+
+                tasks:
+                    task1:
+                        action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_empty_output_on_error(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+                output-on-error: {}
+                tasks:
+                    task1:
+                        action: std.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        expected_errors = {
+            'syntax': [
+                {
+                    'message': '{} does not have enough properties',
+                    'schema_path': 'properties.output-on-error.minProperties',
+                    'spec_path': 'output-on-error'
+                }
+            ]
+        }
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_task_policies(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+
+                tasks:
+                    task1:
+                        action: std.noop
+                        concurrency: 1
+                        keep-result: true
+                        retry:
+                            delay: 5
+                            count: 10
+                        safe-rerun: true
+                        wait-before: 3
+                        wait-after: 9
+                        pause-before: false
+                        target: some_node
+                        timeout: 90
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_task_policies_with_expressions(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+
+                tasks:
+                    task1:
+                        action: std.noop
+                        concurrency: "{{ 3 | int }}"
+                        keep-result: "{{ True }}"
+                        retry:
+                            delay: "{{ 5 | int }}"
+                            count: "{{ 10 | int }}"
+                        safe-rerun: "{{ True }}"
+                        wait-before: "{{ 3 | int }}"
+                        wait-after: "{{ 9 | int }}"
+                        pause-before: "{{ False }}"
+                        target: "{{ 'some_node' }}"
+                        timeout: "{{ 39 | int }}"
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_task_policies_validation_errors(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+
+                tasks:
+                    task1:
+                        action: std.noop
+                        concurrency: []
+                        keep-result: {}
+                        retry: ''
+                        safe-rerun: []
+                        wait-before: []
+                        wait-after: []
+                        pause-before: []
+                        target: {}
+                        timeout: []
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        expected_errors = {
+            'syntax': [
+                {
+                    'message': '[] is not valid under any of the given schemas',
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.concurrency.oneOf'),
+                    'spec_path': 'tasks.task1.concurrency'
+                },
+                {
+                    'message': '{} is not valid under any of the given schemas',
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.keep-result.oneOf'),
+                    'spec_path': 'tasks.task1.keep-result'
+                },
+                {
+                    'message': '[] is not valid under any of the given schemas',
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.pause-before.oneOf'),
+                    'spec_path': 'tasks.task1.pause-before'
+                },
+                {
+                    'message': "'' is not of type 'object'",
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.retry.type'),
+                    'spec_path': 'tasks.task1.retry'
+                },
+                {
+                    'message': '[] is not valid under any of the given schemas',
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.safe-rerun.oneOf'),
+                    'spec_path': 'tasks.task1.safe-rerun'
+                },
+                {
+                    'message': "{} is not of type 'string'",
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.target.type'),
+                    'spec_path': 'tasks.task1.target'
+                },
+                {
+                    'message': '[] is not valid under any of the given schemas',
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.timeout.oneOf'),
+                    'spec_path': 'tasks.task1.timeout'
+                },
+                {
+                    'message': '[] is not valid under any of the given schemas',
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.wait-after.oneOf'),
+                    'spec_path': 'tasks.task1.wait-after'
+                },
+                {
+                    'message': '[] is not valid under any of the given schemas',
+                    'schema_path': ('properties.tasks.patternProperties'
+                                    '.^\\w+$.properties.wait-before.oneOf'),
+                    'spec_path': 'tasks.task1.wait-before'
+                },
+            ]
+        }
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_task_publish_on_error(self):
+        wf_def = """
+            version: '2.0'
+
+            sequential:
+                description: A basic sequential workflow.
+
+                tasks:
+                    task1:
+                        action: std.noop
+                        publish-on-error:
+                            stdout: "{{ 'abc' }}"
+                            stderr:  <$ 'xyz' %>
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
