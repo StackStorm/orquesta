@@ -42,3 +42,9 @@ provider relays the status and result back to the conductor. The conductor then 
 change, keeps track of the sequence of task execution, manages change history of the runtime
 context, evaluate outbound task transitions, identifies any new tasks for execution, and determines
 the overall workflow state and result.
+
+When there is no more tasks identified to run next, the workflow is complete. On workflow
+completion, regardless of state, the workflow result contains the list of error(s) if any and the
+output as defined in the workflow defintion. If the workflow failed, the workflow conductor will do
+its best to render the output from the latest version of the runtime context at completion of the
+workflow execution.
