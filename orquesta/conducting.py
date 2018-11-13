@@ -192,9 +192,19 @@ class WorkflowConductor(object):
         if not self._flow:
             self._flow = TaskFlow()
 
-            # Render runtime and default workflow inputs.
-            rendered_inputs, input_errors = self.spec.render_input(self.get_workflow_input())
-            rendered_vars, var_errors = self.spec.render_vars(rendered_inputs)
+            # Set any given context as the initial context.
+            init_ctx = self.get_workflow_parent_context()
+
+            # Render workflow inputs and merge into the initial context.
+            workflow_input = self.get_workflow_input()
+            rendered_inputs, input_errors = self.spec.render_input(workflow_input, init_ctx)
+            init_ctx = dx.merge_dicts(init_ctx, rendered_inputs, True)
+
+            # Render workflow variables and merge into the initial context.
+            rendered_vars, var_errors = self.spec.render_vars(init_ctx)
+            init_ctx = dx.merge_dicts(init_ctx, rendered_vars, True)
+
+            # Fail workflow if there are errors.
             errors = input_errors + var_errors
 
             if errors:
@@ -204,8 +214,6 @@ class WorkflowConductor(object):
             # Proceed if there is no issue with rendering of inputs and vars.
             if self.get_workflow_state() not in states.ABENDED_STATES:
                 # Set the initial workflow context.
-                init_ctx = dict(list(rendered_inputs.items()) + list(rendered_vars.items()))
-                init_ctx = dx.merge_dicts(init_ctx, self.get_workflow_parent_context(), True)
                 self._flow.contexts.append({'srcs': [], 'value': init_ctx})
 
                 # Identify the starting tasks and set the pointer to the initial context entry.
