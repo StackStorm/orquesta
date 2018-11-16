@@ -12,10 +12,6 @@
                     "additionalProperties": false, 
                     "type": "object", 
                     "properties": {
-                        "action": {
-                            "minLength": 1, 
-                            "type": "string"
-                        }, 
                         "join": {
                             "oneOf": [
                                 {
@@ -26,67 +22,6 @@
                                 {
                                     "minimum": 0, 
                                     "type": "integer"
-                                }
-                            ]
-                        }, 
-                        "with": {
-                            "type": "object", 
-                            "properties": {
-                                "items": {
-                                    "minLength": 1, 
-                                    "type": "string", 
-                                    "pattern": "^(\\s+)?({{.*?}}|<%.*?%>)(\\s+)?$|^(\\s+)?((\\w+,\\s?|\\s+)+)?(\\w+)\\s+in\\s+({{.*?}}|<%.*?%>)(\\s+)?$"
-                                }, 
-                                "concurrency": {
-                                    "oneOf": [
-                                        {
-                                            "minLength": 1, 
-                                            "type": "string"
-                                        }, 
-                                        {
-                                            "minimum": 0, 
-                                            "type": "integer"
-                                        }
-                                    ]
-                                }
-                            }
-                        }, 
-                        "input": {
-                            "oneOf": [
-                                {
-                                    "minLength": 1, 
-                                    "type": "string"
-                                }, 
-                                {
-                                    "type": "object", 
-                                    "patternProperties": {
-                                        "^\\w+$": {
-                                            "anyOf": [
-                                                {
-                                                    "type": "null"
-                                                }, 
-                                                {
-                                                    "type": "array"
-                                                }, 
-                                                {
-                                                    "type": "boolean"
-                                                }, 
-                                                {
-                                                    "type": "integer"
-                                                }, 
-                                                {
-                                                    "type": "number"
-                                                }, 
-                                                {
-                                                    "type": "object"
-                                                }, 
-                                                {
-                                                    "type": "string"
-                                                }
-                                            ]
-                                        }
-                                    }, 
-                                    "minProperties": 1
                                 }
                             ]
                         }, 
@@ -164,6 +99,83 @@
                                 }
                             }, 
                             "type": "array"
+                        }, 
+                        "delay": {
+                            "oneOf": [
+                                {
+                                    "minLength": 1, 
+                                    "type": "string"
+                                }, 
+                                {
+                                    "minimum": 0, 
+                                    "type": "integer"
+                                }
+                            ]
+                        }, 
+                        "action": {
+                            "minLength": 1, 
+                            "type": "string"
+                        }, 
+                        "input": {
+                            "oneOf": [
+                                {
+                                    "minLength": 1, 
+                                    "type": "string"
+                                }, 
+                                {
+                                    "type": "object", 
+                                    "patternProperties": {
+                                        "^\\w+$": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "null"
+                                                }, 
+                                                {
+                                                    "type": "array"
+                                                }, 
+                                                {
+                                                    "type": "boolean"
+                                                }, 
+                                                {
+                                                    "type": "integer"
+                                                }, 
+                                                {
+                                                    "type": "number"
+                                                }, 
+                                                {
+                                                    "type": "object"
+                                                }, 
+                                                {
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        }
+                                    }, 
+                                    "minProperties": 1
+                                }
+                            ]
+                        }, 
+                        "with": {
+                            "type": "object", 
+                            "properties": {
+                                "items": {
+                                    "minLength": 1, 
+                                    "type": "string", 
+                                    "pattern": "^(\\s+)?({{.*?}}|<%.*?%>)(\\s+)?$|^(\\s+)?((\\w+,\\s?|\\s+)+)?(\\w+)\\s+in\\s+({{.*?}}|<%.*?%>)(\\s+)?$"
+                                }, 
+                                "concurrency": {
+                                    "oneOf": [
+                                        {
+                                            "minLength": 1, 
+                                            "type": "string"
+                                        }, 
+                                        {
+                                            "minimum": 0, 
+                                            "type": "integer"
+                                        }
+                                    ]
+                                }
+                            }
                         }
                     }
                 }

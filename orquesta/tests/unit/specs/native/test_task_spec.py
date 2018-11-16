@@ -18,6 +18,97 @@ from orquesta.tests.unit.specs.native import base
 
 class TaskSpecTest(base.OrchestraWorkflowSpecTest):
 
+    def test_delay_bad_syntax(self):
+        wf_def = """
+            version: 1.0
+            description: A basic workflow with a delay in task.
+            tasks:
+              task1:
+                delay: true
+                action: core.noop
+        """
+
+        expected_errors = {
+            'syntax': [
+                {
+                    'message': 'True is not valid under any of the given schemas',
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.delay.oneOf'
+                    ),
+                    'spec_path': 'tasks.task1.delay'
+                }
+            ]
+        }
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_delay(self):
+        wf_def = """
+            version: 1.0
+            description: A basic workflow with a delay in task.
+            tasks:
+              task1:
+                delay: 100
+                action: core.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+        task1 = wf_spec.tasks['task1']
+
+        self.assertEqual(task1.delay, 100)
+
+    def test_delay_with_expression(self):
+        wf_def = """
+            version: 1.0
+            description: A basic workflow with a delay in task.
+            vars:
+              - delay: 100
+            tasks:
+              task1:
+                delay: <% ctx().delay %>
+                action: core.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+        task1 = wf_spec.tasks['task1']
+
+        self.assertEqual(task1.delay, '<% ctx().delay %>')
+
+    def test_delay_with_bad_vars(self):
+        wf_def = """
+            version: 1.0
+            description: A basic workflow with a delay in task.
+            tasks:
+              task1:
+                delay: <% ctx().delay %>
+                action: core.noop
+        """
+
+        expected_errors = {
+            'context': [
+                {
+                    'type': 'yaql',
+                    'expression': '<% ctx().delay %>',
+                    'message': 'Variable "delay" is referenced before assignment.',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.delay',
+                    'spec_path': 'tasks.task1.delay'
+                }
+            ]
+        }
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
     def test_with_items_bad_syntax(self):
         wf_def = """
             version: 1.0

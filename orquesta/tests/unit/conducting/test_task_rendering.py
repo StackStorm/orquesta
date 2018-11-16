@@ -181,3 +181,80 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         expected_tasks = [expected_task]
 
         self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
+
+    def test_task_delay_rendering(self):
+        wf_def = """
+        version: 1.0
+
+        description: A basic sequential workflow.
+
+        vars:
+          - delay: 180
+
+        tasks:
+          task1:
+            delay: <% ctx().delay %>
+            action: core.noop
+        """
+
+        # Instantiate workflow spec.
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        # Instantiate conductor
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_state(states.RUNNING)
+
+        # Ensure the task delay is rendered correctly.
+        next_task_name = 'task1'
+        next_task_ctx = {'delay': 180}
+        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
+        next_task_action_specs = [{'action': 'core.noop', 'input': None}]
+
+        expected_task = self.format_task_item(
+            next_task_name,
+            next_task_ctx,
+            next_task_spec,
+            action_specs=next_task_action_specs,
+            task_delay=180
+        )
+
+        expected_tasks = [expected_task]
+
+        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
+
+    def test_task_delay_rendering_bad_type(self):
+        wf_def = """
+        version: 1.0
+
+        description: A basic sequential workflow.
+
+        vars:
+          - delay: foobar
+
+        tasks:
+          task1:
+            delay: <% ctx().delay %>
+            action: core.noop
+        """
+
+        expected_errors = [
+            {
+                'type': 'error',
+                'message': 'TypeError: The value of task delay is not type of integer.',
+                'task_id': 'task1'
+            }
+        ]
+
+        # Instantiate workflow spec.
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        # Instantiate conductor
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_state(states.RUNNING)
+
+        # Assert failed status and errors.
+        self.assert_task_list(conductor.get_next_tasks(), [])
+        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertListEqual(conductor.errors, expected_errors)

@@ -78,6 +78,8 @@ Task Model
 +-------------+-------------+-------------------------------------------------------------------+
 | Attribute   | Required    | Description                                                       |
 +=============+=============+===================================================================+
+| delay       | No          | If specified, the number of seconds to delay the task execution.  |
++-------------+-------------+-------------------------------------------------------------------+
 | join        | No          | If specified, sets up a barrier for a group of parallel branches. |
 +-------------+-------------+-------------------------------------------------------------------+
 | with        | No          | When given a list, execute the action for each item.              |
@@ -274,8 +276,8 @@ tasks and task transitions:
             # variables to be published based on the task state and
             # its result.
             publish:
-              msg: task1 done
-              ab: <% result() %>
+              - msg: task1 done
+              - ab: <% result() %>
 
             # List the tasks to run next. Each task will be invoked
             # sequentially. If more than one tasks transition to the
@@ -437,4 +439,4 @@ The following example illustrates the use of the ``fail`` command:
           - do: fail
 
     output:
-      - result: <% $.stdout %>
+      - result: <% ctx(stdout) %>

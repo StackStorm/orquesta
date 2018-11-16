@@ -59,6 +59,8 @@ The following are attributes in the **Task** model that accept expressions:
 +--------------+----------------------------------+
 | Attributes   | Accept Expressions               |
 +==============+==================================+
+| delay        | Yes                              |
++--------------+----------------------------------+
 | join         | No                               |
 +--------------+----------------------------------+
 | with         | Yes, see With Items              |
