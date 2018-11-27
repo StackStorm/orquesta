@@ -122,6 +122,7 @@ class TaskSpec(base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
+            'delay': types.STRING_OR_POSITIVE_INTEGER,
             'join': {
                 'oneOf': [
                     {'enum': ['all']},
@@ -142,6 +143,7 @@ class TaskSpec(base.Spec):
     }
 
     _context_evaluation_sequence = [
+        'delay',
         'with',
         'action',
         'input',

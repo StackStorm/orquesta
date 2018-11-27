@@ -403,6 +403,19 @@ class WorkflowConductor(object):
             'actions': action_specs
         }
 
+        # If there is a task delay specified, evaluate the delay value.
+        if getattr(task_spec, 'delay', None):
+            task_delay = task_spec.delay
+
+            if isinstance(task_delay, six.string_types):
+                task_delay = expr.evaluate(task_delay, task_ctx)
+
+            if not isinstance(task_delay, int):
+                raise TypeError('The value of task delay is not type of integer.')
+
+            task['delay'] = task_delay
+
+        # Add items and related meta data to the task details.
         if task_spec.has_items():
             items_spec = getattr(task_spec, 'with')
             task['items_count'] = len(action_specs)

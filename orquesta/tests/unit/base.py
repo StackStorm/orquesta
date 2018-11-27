@@ -139,7 +139,7 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
 class WorkflowConductorTest(WorkflowComposerTest):
 
     def format_task_item(self, task_name, task_init_ctx, task_spec,
-                         action_specs=None, task_id=None,
+                         action_specs=None, task_id=None, task_delay=None,
                          items_count=None, items_concurrency=None):
 
         if not action_specs:
@@ -157,6 +157,9 @@ class WorkflowConductorTest(WorkflowComposerTest):
             'spec': task_spec,
             'actions': action_specs
         }
+
+        if task_delay:
+            task['delay'] = task_delay
 
         if items_count:
             task['items_count'] = items_count
