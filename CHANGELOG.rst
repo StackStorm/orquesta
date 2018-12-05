@@ -1,6 +1,35 @@
 Changelog
 =========
 
+0.3
+---
+
+Added
+~~~~~
+
+* Add with items model to the orquesta task spec. (improvement)
+* Add delay attribute to the orquesta task spec. (improvement)
+* Add script to generate JSON schema from the workflow models. (improvement)
+* Add command to make package for upload to pypi. (improvement)
+
+Changed
+~~~~~~~
+
+* Allow workflow to output on other completed states such as error. (improvement)
+* Allow multiple transition between two tasks. (improvement)
+* Refactor finalize_context in task spec to get the transition precisely. (improvement)
+* Refactor conductor log entries and methods. (improvement)
+* Refactor rendering of task spec in conductor to support with items model. (improvement)
+
+Fixed
+~~~~~
+
+* Fix state change when workflow output fails rendering. (bug fix)
+* Fix vars and input that references app context. (bug fix)
+* Convert strings in context to unicode to fix problems with mixing
+  ascii and unicode strings in expressions. (bug fix)
+
+
 0.2
 ---
 
