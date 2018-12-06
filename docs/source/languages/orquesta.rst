@@ -107,15 +107,102 @@ execution, the task is evaluated for completion. If criteria for transition is m
 set of tasks is invoked, sequentially in the order of the transitions and tasks that are listed.
 
 If more than one tasks transition to the same task and ``join`` is specified in the latter (i.e. the
-task named "task3" in the example below), then the task being transitioned into becomes a barrier
-for the inbound task transitions. There will be only one instance of the barrier task. In the
-workflow graph, there will be multiple inbound edges to the barrier node.
+task named ``barrier_task`` in the example below), then the task being transitioned into becomes a
+barrier for the inbound task transitions. There will be only one instance of the barrier task. In
+the workflow graph, there will be multiple inbound edges to the barrier node.
+
+.. code-block:: yaml
+
+    version: 1.0
+
+    tasks:
+      setup_task:
+        # ...
+        # Run tasks in parallel
+        next:
+          - do:
+              - parallel_task_1
+              - parallel_task_2
+              - parallel_task_3
+
+      parallel_task_1:
+        # ...
+        # Wait to run barrier_task after this
+        next:
+          - do:
+              - barrier_task
+
+      parallel_task_2:
+        # ...
+        # Eventually run barrier_task
+        next:
+          - do:
+              - intermediate_task
+
+      intermediate_task:
+        # ...
+        # Wait to run barrier_task after this
+        next:
+          - do:
+              - barrier_task
+
+      barrier_task:
+        # ...
+        # Run after parallel_task_1, parallel_task_2, and intermediate_task have all finished
+        join: all
+
+      parallel_task_3:
+        # ...
+        # Run immediately after setup_task, do NOT wait for barrier_task
+
+Will result in this execution graph:
+
+.. code-block:: none
+
+    =---- time (not to scale) ---->
+
+    setup_task --+
+                 |
+                 +------ parallel_task_1 --------------------------+
+                 |                                                 |
+                 +-- parallel_task_2 --+                           |
+                 |                     |                           |
+                 |                     +---- intermediate_task ----+
+                 |                                                 |
+                 |                                                 +-- barrier_task --+
+                 |                                                                    |
+                 +-- parallel_task_3 -------------------------------------------------+
+                                                                                      |
+                                                                                      +-- [finish]
 
 Conversely, if more than one tasks transition to the same task and ``join`` is **not** specified in
 the latter (i.e. the task named "log" in the example below), then the target task will be invoked
 immediately following the completion of the previous task. There will be multiple instances of the
 target task. In the workflow graph, each invocation of the target task will be its own branch with
 the inbound edge from the node of the previous task.
+
+In other words, if ``join: all`` was removed from the previous workflow, the ``barrier_task`` would
+be run two different times, resulting in this execution graph:
+
+.. code-block:: none
+
+    =---- time (not to scale) ---->
+
+    setup_task --+
+                 |
+                 +------ parallel_task_1 ------+
+                 |                             |
+                 |                             +-- barrier_task (1) ----------------------+
+                 |                                                                        |
+                 +-- parallel_task_2 --+                                                  |
+                 |                     |                                                  |
+                 |                     +---- intermediate_task ----+                      |
+                 |                                                 |                      |
+                 |                                                 +-- barrier_task (2) --+
+                 |                                                                        |
+                 +-- parallel_task_3 -----------------------------------------------------+
+                                                                                          |
+                                                                                          +-- [finish]
 
 With Items Model
 ----------------
