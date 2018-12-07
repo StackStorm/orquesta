@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from orquesta import states
 from orquesta.tests.unit.conducting.native import base
 
 
@@ -117,3 +118,57 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         self.assert_spec_inspection(wf_name)
 
         self.assert_conducting_sequences(wf_name, expected_task_seq)
+
+    def test_splits_mixed(self):
+        wf_name = 'splits-mixed'
+
+        expected_task_seq = [
+            'task1',
+            'task2',
+            'task3__1',
+            'task3__2',
+            'task4__1',
+            'task4__3',
+            'task5__1',
+            'task5__3'
+        ]
+
+        self.assert_spec_inspection(wf_name)
+
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq
+        )
+
+    def test_splits_mixed_alt_branch(self):
+        wf_name = 'splits-mixed'
+
+        expected_task_seq = [
+            'task1',
+            'task2',
+            'task3__1',
+            'task3__2',
+            'task4__1',
+            'task4__4',
+            'task5__1',
+            'task5__4'
+        ]
+
+        mock_states = [
+            states.SUCCEEDED,   # task1
+            states.SUCCEEDED,   # task2
+            states.SUCCEEDED,   # task3__1
+            states.FAILED,      # task3__2
+            states.SUCCEEDED,   # task4__1
+            states.SUCCEEDED,   # task4__4
+            states.SUCCEEDED,   # task5__1
+            states.SUCCEEDED    # task5__4
+        ]
+
+        self.assert_spec_inspection(wf_name)
+
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            mock_states=mock_states
+        )
