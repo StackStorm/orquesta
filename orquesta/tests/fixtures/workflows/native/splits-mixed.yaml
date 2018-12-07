@@ -1,0 +1,37 @@
+version: 1.0
+  
+description: >
+  A basic workflow that demonstrate a split use case where a non-join task
+  is referenced in more than one task transitions. The workflow is hence
+  split into multiple branches from the non-join task. Additional splits
+  occur at task transitions.
+
+tasks:
+  task1:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        do: task3
+  task2:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        do: task3
+
+  # split from single task transition in a task
+  task3:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        do: task4
+      - when: <% failed() %>
+        do: task4
+
+  # split from multiple task transition in a task
+  task4:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        do: task5
+  task5:
+    action: core.noop

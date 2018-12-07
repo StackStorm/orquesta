@@ -142,7 +142,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
                          action_specs=None, task_id=None, task_delay=None,
                          items_count=None, items_concurrency=None):
 
-        if not action_specs:
+        if not action_specs and items_count is None:
             action_specs = [
                 {
                     'action': task_spec.action,
@@ -155,13 +155,13 @@ class WorkflowConductorTest(WorkflowComposerTest):
             'name': task_name,
             'ctx': task_init_ctx,
             'spec': task_spec,
-            'actions': action_specs
+            'actions': action_specs or []
         }
 
         if task_delay:
             task['delay'] = task_delay
 
-        if items_count:
+        if items_count is not None:
             task['items_count'] = items_count
             task['concurrency'] = items_concurrency
 
@@ -299,11 +299,16 @@ class WorkflowConductorWithItemsTest(WorkflowConductorTest):
         actual_tasks = conductor.get_next_tasks()
         self.assert_task_list(actual_tasks, expected_tasks)
 
-        # Mark the first set of action executions as running.
-        for i in range(0, min(len(tests), concurrency or len(items))):
-            context = {'item_id': i}
-            ac_ex_event = events.ActionExecutionEvent(states.RUNNING, context=context)
+        # If items is an empty list, then mark the task as running.
+        if len(items) == 0:
+            ac_ex_event = events.ActionExecutionEvent(states.RUNNING)
             conductor.update_task_flow(task_id, ac_ex_event)
+        else:
+            # Mark the first set of action executions as running.
+            for i in range(0, min(len(tests), concurrency or len(items))):
+                context = {'item_id': i}
+                ac_ex_event = events.ActionExecutionEvent(states.RUNNING, context=context)
+                conductor.update_task_flow(task_id, ac_ex_event)
 
         # Ensure the actions listed is accurate when getting next tasks again.
         expected_tasks = []
@@ -318,7 +323,7 @@ class WorkflowConductorWithItemsTest(WorkflowConductorTest):
         if capacity > 0 and next_item_id < len(items):
             next_action_specs = action_specs[next_item_id:next_item_id + capacity]
 
-        if next_action_specs:
+        if next_action_specs or len(items) == 0:
             expected_task = self.format_task_item(
                 task_id,
                 task_ctx,
@@ -332,6 +337,11 @@ class WorkflowConductorWithItemsTest(WorkflowConductorTest):
 
         actual_tasks = conductor.get_next_tasks()
         self.assert_task_list(actual_tasks, expected_tasks)
+
+        # If items is an empty list, complete the task.
+        if len(items) == 0:
+            ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED)
+            conductor.update_task_flow(task_id, ac_ex_event)
 
         # Mock the action execution for each item.
         for i in range(0, len(tests)):
