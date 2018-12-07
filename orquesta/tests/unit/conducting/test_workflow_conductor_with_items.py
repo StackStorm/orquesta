@@ -19,6 +19,61 @@ from orquesta.tests.unit import base
 
 class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
+    def test_empty_items_list(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - xs: []
+
+        tasks:
+          task1:
+            with: <% ctx(xs) %>
+            action: core.echo message=<% item() %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
+        """
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_state(states.RUNNING)
+
+        # Mock the action execution for each item and assert expected task states.
+        task_name = 'task1'
+        task_ctx = {'xs': []}
+        task_action_specs = []
+
+        mock_ac_ex_states = []
+        expected_task_states = [states.SUCCEEDED]
+        expected_workflow_states = [states.SUCCEEDED]
+
+        self.assert_task_items(
+            conductor,
+            task_name,
+            task_ctx,
+            task_ctx['xs'],
+            task_action_specs,
+            mock_ac_ex_states,
+            expected_task_states,
+            expected_workflow_states
+        )
+
+        # Assert the task is removed from staging.
+        self.assertNotIn(task_name, conductor.flow.staged)
+
+        # Assert the workflow succeeded.
+        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
+
+        # Assert the workflow output is correct.
+        expected_output = {'items': []}
+        self.assertDictEqual(conductor.get_workflow_output(), expected_output)
+
     def test_basic_items_list(self):
         wf_def = """
         version: 1.0
