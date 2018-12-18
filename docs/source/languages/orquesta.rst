@@ -111,6 +111,9 @@ task named ``barrier_task`` in the example below), then the task being transitio
 barrier for the inbound task transitions. There will be only one instance of the barrier task. In
 the workflow graph, there will be multiple inbound edges to the barrier node.
 
+The following workflow definition illustrates the execution of parallel branches. The barrier task
+will be blocked until all the parallel branches complete and reach it.
+
 .. code-block:: yaml
 
     version: 1.0
@@ -155,7 +158,7 @@ the workflow graph, there will be multiple inbound edges to the barrier node.
         # ...
         # Run immediately after setup_task, do NOT wait for barrier_task
 
-Will result in this execution graph:
+The following is the corresponding workflow execution graph.
 
 .. code-block:: none
 
@@ -176,10 +179,10 @@ Will result in this execution graph:
                                                                                       +-- [finish]
 
 Conversely, if more than one tasks transition to the same task and ``join`` is **not** specified in
-the latter (i.e. the task named "log" in the example below), then the target task will be invoked
-immediately following the completion of the previous task. There will be multiple instances of the
-target task. In the workflow graph, each invocation of the target task will be its own branch with
-the inbound edge from the node of the previous task.
+the latter, then the target task will be invoked immediately following the completion of the
+previous task. There will be multiple instances of the target task. In the workflow graph, each
+invocation of the target task will be its own branch with the inbound edge from the node of the
+previous task.
 
 In other words, if ``join: all`` was removed from the previous workflow, the ``barrier_task`` would
 be run two different times, resulting in this execution graph:
