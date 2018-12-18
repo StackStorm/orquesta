@@ -490,6 +490,8 @@ class WorkflowConductor(object):
 
                     if 'actions' in next_task and len(next_task['actions']) > 0:
                         next_tasks.append(next_task)
+                    elif 'items_count' in next_task and next_task['items_count'] == 0:
+                        next_tasks.append(next_task)
                 except Exception as e:
                     self.log_error(e, task_id=staged_task_id)
                     self.request_workflow_state(states.FAILED)
@@ -525,6 +527,8 @@ class WorkflowConductor(object):
                     next_task = self._evaluate_task_actions(next_task)
 
                     if 'actions' in next_task and len(next_task['actions']) > 0:
+                        next_tasks.append(next_task)
+                    elif 'items_count' in next_task and next_task['items_count'] == 0:
                         next_tasks.append(next_task)
                 except Exception as e:
                     self.log_error(e, task_id=next_task_id)
