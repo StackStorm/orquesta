@@ -10,6 +10,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+
 from orquesta.tests.unit import base
 
 
@@ -19,3 +21,11 @@ class OrchestraWorkflowComposerTest(base.WorkflowComposerTest):
     def setUpClass(cls):
         cls.spec_module_name = 'native'
         super(OrchestraWorkflowComposerTest, cls).setUpClass()
+
+    def assert_wf_ex_routes(self, wf_name, expected_routes, debug=False):
+        wf_ex_graph = self.compose_wf_ex_graph(wf_name)
+
+        if debug:
+            print(json.dumps(wf_ex_graph.get_routes(), indent=4))
+
+        self.assertListEqual(wf_ex_graph.get_routes(), expected_routes)

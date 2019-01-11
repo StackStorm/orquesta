@@ -155,6 +155,18 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
 
         self.assertListEqual(wf_graph.roots, expected)
 
+    def test_graph_leaves(self):
+        wf_graph = self._prep_graph()
+
+        expected_leaves = [{'id': 'task6', 'name': 'task6'}, {'id': 'task9', 'name': 'task9'}]
+
+        self.assertListEqual(wf_graph.leaves, expected_leaves)
+
+        # Ensure the underlying graph is not permanently altered.
+        expected_roots = [{'id': 'task1', 'name': 'task1'}]
+
+        self.assertListEqual(wf_graph.roots, expected_roots)
+
     def test_skip_add_tasks(self):
         wf_graph = graphing.WorkflowGraph()
 
@@ -347,3 +359,73 @@ class WorkflowGraphTest(base.WorkflowGraphTest):
             len(wf_graph.get_prev_transitions('task9')) > 1 and
             not wf_graph.has_barrier('task9')
         )
+
+    def test_get_route_bad_leaves(self):
+        wf_graph = self._prep_graph()
+
+        self.assertIsNone(wf_graph.get_route('task1'))
+        self.assertIsNone(wf_graph.get_route('task101'))
+
+    def test_get_route(self):
+        wf_graph = self._prep_graph()
+
+        expected_route = {
+            'tasks': [
+                'task1',
+                'task2',
+                'task3',
+                'task4',
+                'task5',
+                'task6'
+            ],
+            'path': [
+                ('task1', 'task2', 0),
+                ('task1', 'task4', 0),
+                ('task2', 'task3', 0),
+                ('task3', 'task5', 0),
+                ('task4', 'task5', 0),
+                ('task5', 'task6', 0)
+            ]
+        }
+
+        self.assertDictEqual(wf_graph.get_route('task6'), expected_route)
+
+    def test_get_routes(self):
+        wf_graph = self._prep_graph()
+
+        expected_routes = [
+            {
+                'tasks': [
+                    'task1',
+                    'task2',
+                    'task3',
+                    'task4',
+                    'task5',
+                    'task6'
+                ],
+                'path': [
+                    ('task1', 'task2', 0),
+                    ('task1', 'task4', 0),
+                    ('task2', 'task3', 0),
+                    ('task3', 'task5', 0),
+                    ('task4', 'task5', 0),
+                    ('task5', 'task6', 0)
+                ]
+            },
+            {
+                'tasks': [
+                    'task1',
+                    'task7',
+                    'task8',
+                    'task9'
+                ],
+                'path': [
+                    ('task1', 'task7', 0),
+                    ('task1', 'task9', 0),
+                    ('task7', 'task8', 0),
+                    ('task8', 'task9', 0)
+                ]
+            }
+        ]
+
+        self.assertListEqual(wf_graph.get_routes(), expected_routes)
