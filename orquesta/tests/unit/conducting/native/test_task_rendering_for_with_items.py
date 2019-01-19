@@ -338,7 +338,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
             next_task_ctx,
             next_task_spec,
             action_specs=next_task_action_specs,
-            items_count=len(next_task_ctx['xs']),
+            items_count=len(next_task_ctx['domains']),
             items_concurrency=None
         )
 
