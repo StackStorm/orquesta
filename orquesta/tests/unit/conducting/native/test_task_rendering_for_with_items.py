@@ -299,6 +299,53 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         actual_tasks = conductor.get_next_tasks()
         self.assert_task_list(actual_tasks, expected_tasks)
 
+    def test_basic_list_rendering_var_w_in(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - domains:
+              - fee
+              - fi
+              - fo
+              - fum
+
+        tasks:
+          task1:
+            with: <% ctx(domains) %>
+            action: core.echo message=<% item() %>
+        """
+
+        spec = specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_state(states.RUNNING)
+
+        next_task_name = 'task1'
+        next_task_ctx = {'domains': ['fee', 'fi', 'fo', 'fum']}
+        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
+
+        next_task_action_specs = [
+            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
+            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
+            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
+            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+        ]
+
+        expected_task = self.format_task_item(
+            next_task_name,
+            next_task_ctx,
+            next_task_spec,
+            action_specs=next_task_action_specs,
+            items_count=len(next_task_ctx['xs']),
+            items_concurrency=None
+        )
+
+        expected_tasks = [expected_task]
+        actual_tasks = conductor.get_next_tasks()
+        self.assert_task_list(actual_tasks, expected_tasks)
+
     def test_multiple_lists_rendering(self):
         wf_def = """
         version: 1.0
