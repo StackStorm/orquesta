@@ -133,6 +133,11 @@ For the full list of built-in functions, see the `Standard Library section in YA
 * ``"one, two, three, four".split(',').select(str($).trim())`` converts a comma separated
   string to an array, trimming each element.
 
+Named Parameters in Function
+----------------------------
+
+* Named parameters in funciton call must use ``=>`` as assignment. For example: ``dict(a => 1, b => 2)``. ``=`` is not going to work.
+
 StackStorm Functions
 --------------------
 
@@ -142,4 +147,4 @@ StackStorm Functions
   value for the user scoped key named ``my_key_y``. Please note that the key name should be in quotes
   otherwise YAQL treats a key name with a dot like ``system.shared_key_x`` as a dict access. The value
   can be encrypted in the StackStorm datastore. To decrypt the retrieved value, the input argument
-  ``decrypt`` must be set to true such as ``st2kv('st2_key_id', decrypt=true)``.
+  ``decrypt`` must be set to true such as ``st2kv('st2_key_id', decrypt=>true)``.
