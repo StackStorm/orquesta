@@ -137,7 +137,7 @@ For the full list of built-in functions, see the `Standard Library section in YA
 Named Parameters in Function 
 ----------------------------
 
-* Named parameters in funciton call must use ``=>`` as assignment. For example: ``dict(a => 1, b => 2)``. ``=`` is not going to work.
+* Named parameters in function call must use the sign => for assignment. Equal sign = in YAQL is used for evaluation and will result in   the wrong value being passed for the parameter. For example, the built-in datetime function has parameters year, month, day, hour=0,   minute=0, second=0, microsecond=0, offset=ZERO_TIMESPAN) where year, month, and day are required parameters and the named parameters   are optional. To assign value to hour, the function call will look like datetime(2020, 1, 1, hour=>12).
 
 StackStorm Functions
 --------------------
