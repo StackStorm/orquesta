@@ -133,6 +133,12 @@ For the full list of built-in functions, see the `Standard Library section in YA
 * ``"one, two, three, four".split(',').select(str($).trim())`` converts a comma separated
   string to an array, trimming each element.
 
+
+Named Parameters in Function 
+----------------------------
+
+* Named parameters in function call must use the sign ``=>`` for assignment. Equal sign ``=`` in YAQL is used for evaluation and will result in the wrong value being passed for the parameter. For example, the built-in ``datetime`` function has parameters ``year, month, day, hour=0, minute=0, second=0, microsecond=0, offset=ZERO_TIMESPAN`` where year, month, and day are required parameters and the named parameters are optional. To assign value to hour, the function call will look like ``datetime(2020, 1, 1, hour=>12)``.
+
 StackStorm Functions
 --------------------
 
@@ -142,4 +148,4 @@ StackStorm Functions
   value for the user scoped key named ``my_key_y``. Please note that the key name should be in quotes
   otherwise YAQL treats a key name with a dot like ``system.shared_key_x`` as a dict access. The value
   can be encrypted in the StackStorm datastore. To decrypt the retrieved value, the input argument
-  ``decrypt`` must be set to true such as ``st2kv('st2_key_id', decrypt=true)``.
+  ``decrypt`` must be set to true such as ``st2kv('st2_key_id', decrypt=>true)``.
