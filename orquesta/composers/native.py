@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import eventlet
 import logging
 from six.moves import queue
 
@@ -223,5 +224,8 @@ class WorkflowComposer(base.WorkflowComposer):
                         criteria=p_seq_criteria,
                         ref=prev_seq[3]['ref']
                     )
+
+            # Add sleep here to yield to other threads/processes.
+            eventlet.sleep(0.001)
 
         return wf_ex_graph

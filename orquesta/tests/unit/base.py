@@ -67,6 +67,11 @@ class WorkflowGraphTest(unittest.TestCase):
 
         self.assertListEqual(wf_graph_meta, expected_wf_graph_meta)
 
+        wf_graph_attrs = sorted(wf_graph_json['graph'], key=lambda x: x[0])
+        expected_wf_graph_attrs = sorted(expected_wf_graph['graph'], key=lambda x: x[0])
+
+        self.assertListEqual(wf_graph_attrs, expected_wf_graph_attrs)
+
 
 class WorkflowSpecTest(unittest.TestCase):
     spec_module_name = 'mock'

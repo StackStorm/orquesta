@@ -16,7 +16,9 @@ import logging
 
 import networkx as nx
 from networkx.readwrite import json_graph
+
 import six
+from six.moves import queue
 
 from orquesta import exceptions as exc
 from orquesta.utils import dictionary as dict_utils
@@ -35,21 +37,40 @@ class WorkflowGraph(object):
         self._graph = graph if graph else nx.MultiDiGraph()
 
     def serialize(self):
-        return json_graph.adjacency_data(self._graph)
+        data = json_graph.adjacency_data(self._graph)
+
+        data['adjacency'] = [
+            sorted(outbounds, key=lambda x: x['id'])
+            for outbounds in data['adjacency']
+        ]
+
+        return data
 
     @classmethod
     def deserialize(cls, data):
         g = json_graph.adjacency_graph(copy.deepcopy(data), directed=True, multigraph=True)
         return cls(graph=g)
 
-    @property
-    def roots(self):
-        tasks = [
-            {'id': n, 'name': self._graph.node[n].get('name', n)}
-            for n, d in self._graph.in_degree().items() if d == 0
+    @staticmethod
+    def get_root_nodes(graph):
+        nodes = [
+            {'id': n, 'name': graph.node[n].get('name', n)}
+            for n, d in graph.in_degree().items() if d == 0
         ]
 
-        return sorted(tasks, key=lambda x: x['name'])
+        return sorted(nodes, key=lambda x: x['id'])
+
+    @property
+    def roots(self):
+        return self.get_root_nodes(self._graph)
+
+    @property
+    def leaves(self):
+        # Reverse the graph using a copy to identify the root nodes.
+        return self.get_root_nodes(self._graph.reverse(copy=True))
+
+    def has_tasks(self):
+        return len(self._graph) > 0
 
     def has_task(self, task_id):
         return self._graph.has_node(task_id)
@@ -167,5 +188,81 @@ class WorkflowGraph(object):
 
         return (b is not None and b != '')
 
+    def get_cycles(self):
+        return [
+            {'tasks': sorted(c), 'route': nx.find_cycle(self._graph, c)}
+            for c in nx.simple_cycles(self._graph)
+        ]
+
     def in_cycle(self, task_id):
         return [c for c in nx.simple_cycles(self._graph) if task_id in c]
+
+    def is_cycle_closed(self, cycle):
+        # A cycle is closed, for a lack of better term, if there is no task
+        # transition to any task that is not a member of the cycle.
+        for task_id in cycle['tasks']:
+            for transition in self.get_next_transitions(task_id):
+                if transition[1] not in cycle['tasks']:
+                    return False
+
+        return True
+
+    def get_route(self, leaf_cluster):
+        tasks = []
+        path = []
+        q = queue.Queue()
+
+        if isinstance(leaf_cluster, six.string_types):
+            leaf_cluster = [leaf_cluster]
+
+        for leaf_task_id in leaf_cluster:
+            for transition in self.get_prev_transitions(leaf_task_id):
+                q.put(transition)
+
+        while not q.empty():
+            transition = q.get()
+
+            source = transition[0]
+            destination = transition[1]
+            edge_key = transition[2]
+            path_section = (source, destination, edge_key)
+
+            if path_section in path:
+                continue
+
+            tasks.append(source)
+            tasks.append(destination)
+            path.append(path_section)
+
+            for transition in self.get_prev_transitions(source):
+                q.put(transition)
+
+        if not tasks or not path:
+            return None
+
+        return {
+            'tasks': sorted(list(set(tasks))),
+            'path': sorted(path, key=lambda x: (x[0], x[1], x[2]))
+        }
+
+    def get_routes(self):
+        routes = []
+
+        # Identify routes for each leaves in the graph first. This list is needed
+        # to filter out cycles that are not covered.
+        for node in self.leaves:
+            routes.append(self.get_route([node['id']]))
+
+        # Identify routes for each leaf clusters (closed cycles) in the graph.
+        for cycle in self.get_cycles():
+            if not routes or self.is_cycle_closed(cycle):
+                routes.append(self.get_route(cycle['tasks']))
+            else:
+                for route in routes:
+                    # If the cycle is not in any of the routes,
+                    # then consider this cycle as a separate route.
+                    if set(cycle['tasks']) - set(route['tasks']):
+                        routes.append(self.get_route(cycle['tasks']))
+                        break
+
+        return routes
