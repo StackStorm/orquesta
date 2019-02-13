@@ -64,7 +64,7 @@ def parse_inline_params(s, preserve_order=True):
         v = re.sub("^'", '', v)
         v = re.sub("'$", '', v)
 
-        curly_brace_in_param = bool(v[0] == '{' and v[len(v) -1] == '}')
+        curly_brace_in_param = bool(v[0] == '{' and v[len(v) - 1] == '}')
         quotes_in_string = bool(quotes_in_param and not curly_brace_in_param)
         is_bool_value = bool(v.lower() == 'true' or v.lower() == 'false')
 
