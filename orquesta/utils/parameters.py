@@ -53,6 +53,9 @@ def parse_inline_params(s, preserve_order=True):
         # Remove leading and trailing whitespaces.
         v = v.strip()
 
+        quotes_in_param = bool(re.findall(REGEX_VALUE_IN_QUOTES, v) or
+                               re.findall(REGEX_VALUE_IN_APOSTROPHES, v))
+
         # Remove leading and trailing double quotes.
         v = re.sub('^"', '', v)
         v = re.sub('"$', '', v)
@@ -61,12 +64,16 @@ def parse_inline_params(s, preserve_order=True):
         v = re.sub("^'", '', v)
         v = re.sub("'$", '', v)
 
-        if v.lower() == 'true' or v.lower() == 'false':
-            v = v.lower()
+        curly_brace_in_param = bool(v[0] == '{' and v[len(v) -1] == '}')
+        quotes_in_string = bool(quotes_in_param and not curly_brace_in_param)
+        is_bool_value = bool(v.lower() == 'true' or v.lower() == 'false')
 
         # Load string into dictionary.
         try:
-            v = json.loads(v)
+            if not quotes_in_string:
+                if is_bool_value:
+                    v = v.lower()
+                v = json.loads(v)
         except Exception:
             pass
 
