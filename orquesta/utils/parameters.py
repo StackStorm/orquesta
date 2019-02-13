@@ -22,8 +22,8 @@ REGEX_VALUE_IN_QUOTES = '\"[^\"]*\"\s*'
 REGEX_VALUE_IN_APOSTROPHES = "'[^']*'\s*"
 REGEX_FLOATING_NUMBER = '[-]?\d*\.\d+'
 REGEX_INTEGER = '[-]?\d+'
-REGEX_TRUE = 'true'
-REGEX_FALSE = 'false'
+REGEX_TRUE = '(?i)true'
+REGEX_FALSE = '(?i)false'
 REGEX_NULL = 'null'
 
 # REGEX_FLOATING_NUMBER must go before REGEX_INTEGER
@@ -60,6 +60,9 @@ def parse_inline_params(s, preserve_order=True):
         # Remove leading and trailing single quotes.
         v = re.sub("^'", '', v)
         v = re.sub("'$", '', v)
+
+        if v.lower() == 'true' or v.lower() == 'false':
+            v = v.lower()
 
         # Load string into dictionary.
         try:

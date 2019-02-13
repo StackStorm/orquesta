@@ -83,6 +83,19 @@ class InlineParametersTest(unittest.TestCase):
     def test_parse_null_type(self):
         self.assertListEqual(params.parse_inline_params(None), [])
 
+    def test_parse_bool_input(self):
+        tests = [
+            ('x=true', [{'x': True}]),
+            ('y=True', [{'y': True}]),
+            ('c=TRUE', [{'c': True}]),
+            ('x=false', [{'x': False}]),
+            ('y=False', [{'y': False}]),
+            ('c=FALSE', [{'c': False}])
+        ]
+
+        for s, d in tests:
+            self.assertListEqual(params.parse_inline_params(s), d)
+
     def test_parse_other_types(self):
         self.assertListEqual(params.parse_inline_params(123), [])
         self.assertListEqual(params.parse_inline_params(True), [])
