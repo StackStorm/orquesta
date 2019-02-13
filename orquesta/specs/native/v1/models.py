@@ -183,8 +183,8 @@ class TaskSpec(base.Spec):
             items_spec = self.get_items_spec()
 
             items_expr = (
-                items_spec.items.strip() if 'in' not in items_spec.items
-                else items_spec.items[items_spec.items.index('in') + 2:].strip()
+                items_spec.items.strip() if ' in ' not in items_spec.items
+                else items_spec.items[items_spec.items.index(' in ') + 4:].strip()
             )
 
             items = expr.evaluate(items_expr, in_ctx)
@@ -193,8 +193,8 @@ class TaskSpec(base.Spec):
                 raise TypeError('The value of "%s" is not type of list.' % items_expr)
 
             item_keys = (
-                None if 'in' not in items_spec.items
-                else items_spec.items[:items_spec.items.index('in')].replace(' ', '').split(',')
+                None if ' in ' not in items_spec.items
+                else items_spec.items[:items_spec.items.index(' in ')].replace(' ', '').split(',')
             )
 
             for idx, item in enumerate(items):
