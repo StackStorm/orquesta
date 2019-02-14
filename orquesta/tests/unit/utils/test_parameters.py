@@ -108,6 +108,7 @@ class InlineParametersTest(unittest.TestCase):
             ("c='FALSE'", [{'c': 'FALSE'}]),
             ("d='123'", [{'d': '123'}]),
             ("e='abcde'", [{'e': 'abcde'}]),
+            ("f=''", [{'f': ''}])
         ]
 
         for s, d in tests:
