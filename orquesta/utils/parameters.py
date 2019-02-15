@@ -67,9 +67,9 @@ def parse_inline_params(s, preserve_order=True):
         quotes_in_string = False
         if v != "":
             # Check if param is a JSON string becuse it can be handled by json.loads()
-            curly_brace_in_param = bool(v[0] == '{' and v[-1] == '}')
-            quotes_in_string = bool(quotes_in_param and not curly_brace_in_param)
-        is_bool_value = bool(v.lower() == 'true' or v.lower() == 'false')
+            curly_brace_in_param = v[0] == '{' and v[-1] == '}'
+            quotes_in_string = quotes_in_param and not curly_brace_in_param
+        is_bool_value = v.lower() == 'true' or v.lower() == 'false'
 
         # Load string into dictionary.
         try:
