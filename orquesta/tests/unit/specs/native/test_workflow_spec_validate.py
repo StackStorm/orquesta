@@ -361,3 +361,60 @@ class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
         }
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_unreachable_task(self):
+        wf_def = """
+            version: 1.0
+
+            description: >
+              A basic workflow that demonstrate multiple splits where a post split
+              task5 is also being joined with task1 before the split. The task5 is
+              not going to be unreachable because the reference at task1 is out of
+              scope for the reference below task4.
+
+            tasks:
+              task1:
+                action: core.noop
+                next:
+                  - when: <% succeeded() %>
+                    do: task2, task3, task5
+
+              # branch 1
+              task2:
+                action: core.noop
+                next:
+                  - when: <% succeeded() %>
+                    do: task4
+
+              # branch 2
+              task3:
+                action: core.noop
+                next:
+                  - when: <% succeeded() %>
+                    do: task4
+
+              # split branch
+              task4:
+                action: core.noop
+                next:
+                  - when: <% succeeded() %>
+                    do: task5
+
+              task5:
+                join: all
+                action: core.noop
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        expected_errors = {
+            'semantics': [
+                {
+                    'message': 'The join task "task5" is unreachable.',
+                    'spec_path': 'tasks.task5',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$'
+                }
+            ]
+        }
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
