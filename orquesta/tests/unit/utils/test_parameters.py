@@ -96,6 +96,25 @@ class InlineParametersTest(unittest.TestCase):
         for s, d in tests:
             self.assertListEqual(params.parse_inline_params(s), d)
 
+    def test_parse_string_in_quotes_input(self):
+        tests = [
+            ('x="true"', [{'x': "true"}]),
+            ('y="True"', [{'y': "True"}]),
+            ('c="TRUE"', [{'c': "TRUE"}]),
+            ('d="123"', [{'d': '123'}]),
+            ('e="abcde"', [{'e': 'abcde'}]),
+            ('f=""', [{'f': ''}]),
+            ("x='false'", [{'x': 'false'}]),
+            ("y='False'", [{'y': 'False'}]),
+            ("c='FALSE'", [{'c': 'FALSE'}]),
+            ("d='123'", [{'d': '123'}]),
+            ("e='abcde'", [{'e': 'abcde'}]),
+            ("f=''", [{'f': ''}])
+        ]
+
+        for s, d in tests:
+            self.assertListEqual(params.parse_inline_params(s), d)
+
     def test_parse_other_types(self):
         self.assertListEqual(params.parse_inline_params(123), [])
         self.assertListEqual(params.parse_inline_params(True), [])
