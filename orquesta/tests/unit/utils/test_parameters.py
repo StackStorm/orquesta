@@ -103,6 +103,7 @@ class InlineParametersTest(unittest.TestCase):
             ('c="TRUE"', [{'c': "TRUE"}]),
             ('d="123"', [{'d': '123'}]),
             ('e="abcde"', [{'e': 'abcde'}]),
+            ('f=""', [{'f': ''}]),
             ("x='false'", [{'x': 'false'}]),
             ("y='False'", [{'y': 'False'}]),
             ("c='FALSE'", [{'c': 'FALSE'}]),
