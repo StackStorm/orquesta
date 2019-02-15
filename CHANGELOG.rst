@@ -1,6 +1,25 @@
 Changelog
 =========
 
+0.4
+---
+
+Added
+~~~~~
+
+* Add get_routes function to workflow graph to identify possible execution routes. (new feature)
+* Add ascii art diagrams to docs to illustrate workflows with join task. (improvement)
+
+Fixed
+~~~~~
+
+* Add sleep in while loop for composing execution graph to spread out cpu spike. (improvement) 
+* Value in quotes in shorthand publish should be evaluated as string type. Fixes #130 (bug fix)
+* Fix interpretation of boolean value in shorthand format of publish. Fixes #119 (bug fix)
+* Update YAQL section in docs on use of "=>" for named parameters in function calls. Closes #124
+* Fix with items intepretor to handle variables that contain the word 'in'. (bug fix)
+  Contributed by Anton Kayukov (@batk0)
+
 0.3
 ---
 
