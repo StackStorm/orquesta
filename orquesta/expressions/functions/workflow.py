@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from orquesta import constants
 from orquesta import exceptions as exc
 from orquesta import states
 
@@ -26,13 +27,16 @@ def _get_current_task(context):
     return current_task
 
 
-def task_state_(context, task_id):
+def task_state_(context, task):
     if not context:
         return states.UNSET
 
+    task_id = task['id']
+    task_route = task['route']
     task_flow = context['__flow'] or {}
     task_flow_pointers = task_flow.get('tasks') or {}
-    task_flow_item_idx = task_flow_pointers.get(task_id)
+    task_flow_task_uid = constants.TASK_FLOW_ROUTE_FORMAT % (task_id, str(task_route))
+    task_flow_item_idx = task_flow_pointers.get(task_flow_task_uid)
 
     if task_flow_item_idx is None:
         return states.UNSET
@@ -49,19 +53,19 @@ def task_state_(context, task_id):
 def succeeded_(context):
     current_task = _get_current_task(context)
 
-    return (task_state_(context, current_task.get('id')) == states.SUCCEEDED)
+    return (task_state_(context, current_task) == states.SUCCEEDED)
 
 
 def failed_(context):
     current_task = _get_current_task(context)
 
-    return (task_state_(context, current_task.get('id')) == states.FAILED)
+    return (task_state_(context, current_task) == states.FAILED)
 
 
 def completed_(context):
     current_task = _get_current_task(context)
 
-    return (task_state_(context, current_task.get('id')) in states.COMPLETED_STATES)
+    return (task_state_(context, current_task) in states.COMPLETED_STATES)
 
 
 def result_(context):

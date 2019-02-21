@@ -28,7 +28,11 @@ def set_current_task(context, task):
         raise TypeError('The task is not type of dict.')
 
     ctx = copy.deepcopy(context) if context else dict()
-    ctx['__current_task'] = {'id': task.get('id'), 'name': task.get('name')}
+
+    ctx['__current_task'] = {
+        'id': task.get('id'),
+        'route': task.get('route')
+    }
 
     if 'result' in task:
         ctx['__current_task']['result'] = task.get('result')
