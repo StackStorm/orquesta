@@ -112,33 +112,26 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': 'task2',
-                    'name': 'task2'
+                    'id': 'task2'
                 },
                 {
-                    'id': 'task3',
-                    'name': 'task3'
+                    'id': 'task3'
                 },
                 {
-                    'id': 'task4',
-                    'name': 'task4'
+                    'id': 'task4'
                 },
                 {
-                    'id': 'task5',
-                    'name': 'task5'
+                    'id': 'task5'
                 },
                 {
                     'id': 'task6',
-                    'name': 'task6',
                     'barrier': '*'
                 },
                 {
-                    'id': 'task7',
-                    'name': 'task7'
+                    'id': 'task7'
                 }
             ],
             'adjacency': [
@@ -317,36 +310,28 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': 'task2',
-                    'name': 'task2'
+                    'id': 'task2'
                 },
                 {
-                    'id': 'task3',
-                    'name': 'task3'
+                    'id': 'task3'
                 },
                 {
-                    'id': 'task4',
-                    'name': 'task4'
+                    'id': 'task4'
                 },
                 {
-                    'id': 'task5',
-                    'name': 'task5'
+                    'id': 'task5'
                 },
                 {
-                    'id': 'task6',
-                    'name': 'task6'
+                    'id': 'task6'
                 },
                 {
-                    'id': 'task7',
-                    'name': 'task7'
+                    'id': 'task7'
                 },
                 {
                     'id': 'task8',
-                    'name': 'task8',
                     'barrier': 2
                 }
             ],

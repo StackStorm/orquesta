@@ -122,58 +122,30 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': 'task2',
-                    'name': 'task2'
+                    'id': 'task2'
                 },
                 {
-                    'id': 'task4__1',
-                    'name': 'task4',
-                    'splits': [('task4', 1)]
+                    'id': 'task3'
                 },
                 {
-                    'id': 'task5__1',
-                    'name': 'task5',
-                    'splits': [('task4', 1)]
+                    'id': 'task4',
+                    'splits': ['task4']
                 },
                 {
-                    'id': 'task7__1',
-                    'name': 'task7',
+                    'id': 'task5',
+                    'splits': ['task4']
+                },
+                {
+                    'id': 'task6',
+                    'splits': ['task4']
+                },
+                {
+                    'id': 'task7',
                     'barrier': '*',
-                    'splits': [('task4', 1)]
-                },
-                {
-                    'id': 'task6__1',
-                    'name': 'task6',
-                    'splits': [('task4', 1)]
-                },
-                {
-                    'id': 'task3',
-                    'name': 'task3'
-                },
-                {
-                    'id': 'task4__2',
-                    'name': 'task4',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task5__2',
-                    'name': 'task5',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task7__2',
-                    'name': 'task7',
-                    'barrier': '*',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task6__2',
-                    'name': 'task6',
-                    'splits': [('task4', 2)]
+                    'splits': ['task4']
                 }
             ],
             'adjacency': [
@@ -193,7 +165,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task4__1',
+                        'id': 'task4',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -201,30 +173,21 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task5__1',
+                        'id': 'task4',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                [
+                    {
+                        'id': 'task5',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
-                        'id': 'task6__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                ],
-                [
-                    {
-                        'id': 'task7__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': 'task7__1',
+                        'id': 'task6',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -232,7 +195,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task4__2',
+                        'id': 'task7',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -240,35 +203,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task5__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task6__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                ],
-                [
-                    {
-                        'id': 'task7__2',
+                        'id': 'task7',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
-                [],
-                [
-                    {
-                        'id': 'task7__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ]
+                []
             ],
             'multigraph': True
         }
@@ -400,73 +341,34 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': 'task2',
-                    'name': 'task2'
+                    'id': 'task2'
                 },
                 {
-                    'id': 'task4__1',
-                    'name': 'task4',
-                    'splits': [('task4', 1)]
+                    'id': 'task3'
                 },
                 {
-                    'id': 'task5__1',
-                    'name': 'task5',
-                    'splits': [('task4', 1)]
+                    'id': 'task4',
+                    'splits': ['task4']
                 },
                 {
-                    'id': 'task7__1',
-                    'name': 'task7',
+                    'id': 'task5',
+                    'splits': ['task4']
+                },
+                {
+                    'id': 'task6',
+                    'splits': ['task4']
+                },
+                {
+                    'id': 'task7',
                     'barrier': '*',
-                    'splits': [('task4', 1)]
+                    'splits': ['task4']
                 },
                 {
-                    'id': 'task8__2',
-                    'name': 'task8',
-                    'splits': [('task4', 1), ('task8', 2)]
-                },
-                {
-                    'id': 'task6__1',
-                    'name': 'task6',
-                    'splits': [('task4', 1)]
-                },
-                {
-                    'id': 'task3',
-                    'name': 'task3'
-                },
-                {
-                    'id': 'task4__2',
-                    'name': 'task4',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task5__2',
-                    'name': 'task5',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task7__2',
-                    'name': 'task7',
-                    'barrier': '*',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task8__3',
-                    'name': 'task8',
-                    'splits': [('task4', 2), ('task8', 3)]
-                },
-                {
-                    'id': 'task6__2',
-                    'name': 'task6',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task8__1',
-                    'name': 'task8',
-                    'splits': [('task8', 1)]
+                    'id': 'task8',
+                    'splits': ['task4', 'task8']
                 }
             ],
             'adjacency': [
@@ -484,7 +386,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                         'criteria': ['<% succeeded() %>']
                     },
                     {
-                        'id': 'task8__1',
+                        'id': 'task8',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -492,7 +394,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task4__1',
+                        'id': 'task4',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -500,21 +402,21 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task5__1',
+                        'id': 'task4',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                [
+                    {
+                        'id': 'task5',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
-                        'id': 'task6__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                ],
-                [
-                    {
-                        'id': 'task7__1',
+                        'id': 'task6',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -522,16 +424,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task8__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': 'task7__1',
+                        'id': 'task7',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -539,7 +432,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task4__2',
+                        'id': 'task7',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -547,38 +440,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task5__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task6__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                ],
-                [
-                    {
-                        'id': 'task7__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8__3',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': 'task7__2',
+                        'id': 'task8',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -740,130 +602,42 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': 'task2',
-                    'name': 'task2'
+                    'id': 'task2'
                 },
                 {
-                    'id': 'task4__1',
-                    'name': 'task4',
-                    'splits': [('task4', 1)]
+                    'id': 'task3'
                 },
                 {
-                    'id': 'task5__1',
-                    'name': 'task5',
-                    'splits': [('task4', 1)]
+                    'id': 'task4',
+                    'splits': ['task4']
                 },
                 {
-                    'id': 'task7__1',
-                    'name': 'task7',
-                    'splits': [('task4', 1), ('task7', 1)]
+                    'id': 'task5',
+                    'splits': ['task4']
                 },
                 {
-                    'id': 'task8__1',
-                    'name': 'task8',
-                    'splits': [('task4', 1), ('task7', 1)]
+                    'id': 'task6',
+                    'splits': ['task4']
                 },
                 {
-                    'id': 'task10__1',
-                    'name': 'task10',
+                    'id': 'task7',
+                    'splits': ['task4', 'task7']
+                },
+                {
+                    'id': 'task8',
+                    'splits': ['task4', 'task7']
+                },
+                {
+                    'id': 'task9',
+                    'splits': ['task4', 'task7']
+                },
+                {
+                    'id': 'task10',
                     'barrier': '*',
-                    'splits': [('task4', 1), ('task7', 1)]
-                },
-                {
-                    'id': 'task9__1',
-                    'name': 'task9',
-                    'splits': [('task4', 1), ('task7', 1)]
-                },
-                {
-                    'id': 'task6__1',
-                    'name': 'task6',
-                    'splits': [('task4', 1)]
-                },
-                {
-                    'id': 'task7__2',
-                    'name': 'task7',
-                    'splits': [('task4', 1), ('task7', 2)]
-                },
-                {
-                    'id': 'task8__2',
-                    'name': 'task8',
-                    'splits': [('task4', 1), ('task7', 2)]
-                },
-                {
-                    'id': 'task10__2',
-                    'name': 'task10',
-                    'barrier': '*',
-                    'splits': [('task4', 1), ('task7', 2)]
-                },
-                {
-                    'id': 'task9__2',
-                    'name': 'task9',
-                    'splits': [('task4', 1), ('task7', 2)]
-                },
-                {
-                    'id': 'task3',
-                    'name': 'task3'
-                },
-                {
-                    'id': 'task4__2',
-                    'name': 'task4',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task5__2',
-                    'name': 'task5',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task7__3',
-                    'name': 'task7',
-                    'splits': [('task4', 2), ('task7', 3)]
-                },
-                {
-                    'id': 'task8__3',
-                    'name': 'task8',
-                    'splits': [('task4', 2), ('task7', 3)]
-                },
-                {
-                    'id': 'task10__3',
-                    'name': 'task10',
-                    'barrier': '*',
-                    'splits': [('task4', 2), ('task7', 3)]
-                },
-                {
-                    'id': 'task9__3',
-                    'name': 'task9',
-                    'splits': [('task4', 2), ('task7', 3)]
-                },
-                {
-                    'id': 'task6__2',
-                    'name': 'task6',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task7__4',
-                    'name': 'task7',
-                    'splits': [('task4', 2), ('task7', 4)]
-                },
-                {
-                    'id': 'task8__4',
-                    'name': 'task8',
-                    'splits': [('task4', 2), ('task7', 4)]
-                },
-                {
-                    'id': 'task10__4',
-                    'name': 'task10',
-                    'barrier': '*',
-                    'splits': [('task4', 2), ('task7', 4)]
-                },
-                {
-                    'id': 'task9__4',
-                    'name': 'task9',
-                    'splits': [('task4', 2), ('task7', 4)]
+                    'splits': ['task4', 'task7']
                 }
             ],
             'adjacency': [
@@ -883,7 +657,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task4__1',
+                        'id': 'task4',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -891,21 +665,21 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task5__1',
+                        'id': 'task4',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                [
+                    {
+                        'id': 'task5',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
-                        'id': 'task6__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                ],
-                [
-                    {
-                        'id': 'task7__1',
+                        'id': 'task6',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -913,13 +687,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task8__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task9__1',
+                        'id': 'task7',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -927,16 +695,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task10__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': 'task10__1',
+                        'id': 'task7',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -944,21 +703,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task7__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8__2',
+                        'id': 'task8',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
-                        'id': 'task9__2',
+                        'id': 'task9',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -966,16 +717,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task10__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': 'task10__2',
+                        'id': 'task10',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -983,104 +725,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task4__2',
+                        'id': 'task10',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
-                [
-                    {
-                        'id': 'task5__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task6__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                ],
-                [
-                    {
-                        'id': 'task7__3',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8__3',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task9__3',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task10__3',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': 'task10__3',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task7__4',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8__4',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task9__4',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task10__4',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': 'task10__4',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ]
+                []
             ],
             'multigraph': True
         }
@@ -1213,70 +864,35 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': 'task2',
-                    'name': 'task2'
+                    'id': 'task2'
                 },
                 {
-                    'id': 'task4__1',
-                    'name': 'task4',
-                    'splits': [('task4', 1)]
+                    'id': 'task3'
                 },
                 {
-                    'id': 'task5__1',
-                    'name': 'task5',
-                    'splits': [('task4', 1)]
+                    'id': 'task4',
+                    'splits': ['task4']
                 },
                 {
-                    'id': 'task7__1',
-                    'name': 'task7',
+                    'id': 'task5',
+                    'splits': ['task4']
+                },
+                {
+                    'id': 'task6',
+                    'splits': ['task4']
+                },
+                {
+                    'id': 'task7',
                     'barrier': '*',
-                    'splits': [('task4', 1)]
+                    'splits': ['task4']
                 },
                 {
-                    'id': 'task8__1',
-                    'name': 'task8',
+                    'id': 'task8',
                     'barrier': '*',
-                    'splits': [('task4', 1)]
-                },
-                {
-                    'id': 'task6__1',
-                    'name': 'task6',
-                    'splits': [('task4', 1)]
-                },
-                {
-                    'id': 'task3',
-                    'name': 'task3'
-                },
-                {
-                    'id': 'task4__2',
-                    'name': 'task4',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task5__2',
-                    'name': 'task5',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task7__2',
-                    'name': 'task7',
-                    'barrier': '*',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task8__2',
-                    'name': 'task8',
-                    'barrier': '*',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task6__2',
-                    'name': 'task6',
-                    'splits': [('task4', 2)]
+                    'splits': ['task4']
                 }
             ],
             'adjacency': [
@@ -1294,13 +910,37 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                         'criteria': ['<% succeeded() %>']
                     },
                     {
-                        'id': 'task8__1',
+                        'id': 'task8',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                [
+                    {
+                        'id': 'task4',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                [
+                    {
+                        'id': 'task4',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                [
+                    {
+                        'id': 'task5',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
-                        'id': 'task8__2',
+                        'id': 'task6',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -1308,7 +948,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task4__1',
+                        'id': 'task7',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -1316,21 +956,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task5__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task6__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                ],
-                [
-                    {
-                        'id': 'task7__1',
+                        'id': 'task7',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -1338,68 +964,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task8__1',
+                        'id': 'task8',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
-                [],
-                [
-                    {
-                        'id': 'task7__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task4__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task5__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task6__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                ],
-                [
-                    {
-                        'id': 'task7__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': 'task7__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ]
+                []
             ],
             'multigraph': True
         }
