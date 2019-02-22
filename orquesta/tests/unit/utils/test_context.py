@@ -20,7 +20,7 @@ class ContextUtilTest(unittest.TestCase):
 
     def test_set_current_task(self):
         context = {'var1': 'foobar'}
-        task = {'id': 't1_1', 'name': 't1'}
+        task = {'id': 't1', 'route': 0}
 
         context = ctx.set_current_task(context, task)
         expected_context = dict([('__current_task', copy.deepcopy(task))] + list(context.items()))
@@ -29,7 +29,7 @@ class ContextUtilTest(unittest.TestCase):
 
     def test_set_current_task_with_result(self):
         context = {'var1': 'foobar'}
-        task = {'id': 't1_1', 'name': 't1', 'result': 'foobar'}
+        task = {'id': 't1', 'route': 0, 'result': 'foobar'}
 
         context = ctx.set_current_task(context, task)
         expected_context = dict([('__current_task', copy.deepcopy(task))] + list(context.items()))
@@ -37,7 +37,7 @@ class ContextUtilTest(unittest.TestCase):
         self.assertDictEqual(context, expected_context)
 
     def test_set_current_task_nonetype_context(self):
-        task = {'id': 't1_1', 'name': 't1'}
+        task = {'id': 't1', 'route': 0}
 
         context = ctx.set_current_task(None, task)
         expected_context = {'__current_task': copy.deepcopy(task)}
@@ -45,7 +45,7 @@ class ContextUtilTest(unittest.TestCase):
         self.assertDictEqual(context, expected_context)
 
     def test_set_current_task_empty_context(self):
-        task = {'id': 't1_1', 'name': 't1'}
+        task = {'id': 't1', 'route': 0}
 
         context = ctx.set_current_task(dict(), task)
         expected_context = {'__current_task': copy.deepcopy(task)}
@@ -58,7 +58,7 @@ class ContextUtilTest(unittest.TestCase):
         self.assertRaises(ValueError, ctx.set_current_task, context, dict())
 
     def test_set_current_task_bad_types(self):
-        task = {'id': 't1_1', 'name': 't1'}
+        task = {'id': 't1', 'route': 0}
 
         self.assertRaises(TypeError, ctx.set_current_task, 'foobar', task)
 
