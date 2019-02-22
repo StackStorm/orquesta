@@ -718,7 +718,7 @@ class WorkflowConductor(object):
                         out_ctx_idx = in_ctx_idx
 
                     # Stage the next task if it is not in staging.
-                    next_task_route = self._evaluate_route(next_task_id, task_id, route)
+                    next_task_route = self._evaluate_route(task_transition, route)
                     staged_next_task = self.flow.get_staged_task(next_task_id, next_task_route)
 
                     backref = (
@@ -769,16 +769,25 @@ class WorkflowConductor(object):
 
         return task_flow_entry
 
-    def _evaluate_route(self, task_id, prev_task_id, prev_route):
+    def _evaluate_route(self, task_transition, prev_route):
+        task_id = task_transition[1]
+
+        prev_task_transition_id = (
+            constants.TASK_FLOW_TRANSITION_FORMAT %
+            (task_transition[0], str(task_transition[2]))
+        )
+
         is_split_task = self.spec.tasks.is_split_task(task_id)
         is_in_cycle = self.graph.in_cycle(task_id)
 
         if not is_split_task or is_in_cycle:
             return prev_route
 
-        prev_task_flow_idx = self._get_task_flow_idx(prev_task_id, prev_route)
-        old_route_details = copy.deepcopy(self.flow.routes[prev_route])
-        new_route_details = sorted(list(set(old_route_details) | set([prev_task_flow_idx])))
+        old_route_details = self.flow.routes[prev_route]
+        new_route_details = copy.deepcopy(old_route_details)
+
+        if prev_task_transition_id not in old_route_details:
+            new_route_details.append(prev_task_transition_id)
 
         if old_route_details == new_route_details:
             return prev_route
