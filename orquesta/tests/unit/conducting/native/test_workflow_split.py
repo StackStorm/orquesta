@@ -228,3 +228,127 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         self.assert_spec_inspection(wf_name)
 
         self.assert_conducting_sequences(wf_name, expected_task_seq, expected_routes)
+
+    def test_very_many_splits(self):
+        wf_name = 'splits-very-many'
+
+        expected_routes = [
+            [],
+            ['init__t1'],
+            ['init__t0'],
+            ['init__t0', 'task2__t0'],
+            ['init__t0', 'task2__t0', 'task7__t0'],
+            ['init__t0', 'task2__t0', 'task7__t0', 'task10__t0'],
+            ['init__t0', 'task2__t0', 'task7__t0', 'task10__t0', 'task13__t0'],
+            ['init__t0', 'task2__t0', 'task7__t0', 'task10__t0', 'task13__t0', 'task15__t0'],
+            ['init__t0', 'task2__t0', 'task7__t0', 'task10__t0',
+             'task13__t0', 'task15__t0', 'task17__t0']
+        ]
+
+        expected_task_seq = [
+            ('init', 0),
+            ('notify', 1),
+            ('task2', 2),
+            ('task5', 3),
+            ('task7', 3),
+            ('task9', 4),
+            ('task10', 4),
+            ('task11', 5),
+            ('task12', 5),
+            ('task13', 5),
+            ('task14', 6),
+            ('task15', 6),
+            ('task17', 7),
+            ('notify', 8)
+        ]
+
+        self.assert_spec_inspection(wf_name)
+
+        self.assert_conducting_sequences(wf_name, expected_task_seq, expected_routes)
+
+    def test_very_many_splits_alt(self):
+        wf_name = 'splits-very-many'
+
+        inputs = {
+            'fork1': True,
+            'fork2': True,
+            'fork3': True,
+            'fork4': True,
+            'fork5': True,
+            'fork6': True,
+            'fork7': True,
+            'fork8': True
+        }
+
+        mock_results = [
+            None,   # init
+            None,   # notify
+            None,   # task1
+            None,   # task2
+            None,   # task3
+            None,   # task4
+            None,   # task5
+            None,   # task6
+            None,   # task8
+            None,   # task9
+            None,   # task11
+            None,   # task12
+            None,   # task13
+            None,   # task14
+            False,  # task16 (try #1)
+            True,   # task16 (try #2)
+            None,   # task17
+            False,  # task18 (try #1)
+            True,   # task18 (try #2)
+            None,   # task19
+            None    # notify
+        ]
+
+        expected_routes = [
+            [],
+            ['init__t0'],
+            ['task1__t0'],
+            ['task1__t0', 'task4__t0'],
+            ['task1__t0', 'task4__t0', 'task6__t0'],
+            ['task1__t0', 'task4__t0', 'task6__t0', 'task8__t0'],
+            ['task1__t0', 'task4__t0', 'task6__t0', 'task8__t0', 'task9__t0'],
+            ['task1__t0', 'task4__t0', 'task6__t0', 'task8__t0', 'task9__t0', 'task13__t0'],
+            ['task1__t0', 'task4__t0', 'task6__t0', 'task8__t0',
+             'task9__t0', 'task13__t0', 'task16__t0'],
+            ['task1__t0', 'task4__t0', 'task6__t0', 'task8__t0',
+             'task9__t0', 'task13__t0', 'task16__t0', 'task19__t0']
+        ]
+
+        expected_task_seq = [
+            ('init', 0),
+            ('notify', 1),
+            ('task1', 0),
+            ('task2', 2),
+            ('task3', 2),
+            ('task4', 2),
+            ('task5', 3),
+            ('task6', 3),
+            ('task8', 4),
+            ('task9', 5),
+            ('task11', 6),
+            ('task12', 6),
+            ('task13', 6),
+            ('task14', 7),
+            ('task16', 7),
+            ('task16', 7),
+            ('task17', 8),
+            ('task18', 8),
+            ('task18', 8),
+            ('task19', 8),
+            ('notify', 9)
+        ]
+
+        self.assert_spec_inspection(wf_name)
+
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            inputs=inputs,
+            mock_results=mock_results,
+            expected_routes=expected_routes
+        )

@@ -1,0 +1,166 @@
+---
+version: '1.0'
+
+input:
+  - fork1: false
+  - fork2: false
+  - fork3: false
+  - fork4: false
+  - fork5: false
+  - fork6: false
+  - fork7: false
+  - fork8: false
+
+tasks:
+  init:
+    action: core.noop
+    next:
+      - when: <% ctx().fork1 %>
+        do: notify, task1
+      - when: <% not ctx().fork1 %>
+        do: notify, task2
+
+  notify:
+    action: core.noop
+
+  task1:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        do: task2
+
+  task2:
+    action: core.noop
+    next:
+      - when: <% succeeded() and ctx().fork2 %>
+        do: task3
+      - when: <% succeeded() and not ctx().fork2 %>
+        do: task5
+      - when: <% failed() %>
+        do: task14
+
+  task3:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        do: task4
+  task4:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        do: task5
+
+  task5:
+    action: core.noop
+    next:
+      - when: <% succeeded() and ctx().fork3 %>
+        do: task6
+      - when: <% succeeded() and not ctx().fork3 %>
+        do: task7
+
+  task6:
+    action: core.noop
+    next:
+      - when: <% succeeded() and ctx().fork4 %>
+        do: task8
+      - when: <% succeeded() and not ctx().fork4 %>
+        do: task9
+      - when: <% failed() %>
+        do: task14
+
+  task7:
+    action: core.noop
+    next:
+      - when: <% succeeded() and ctx().fork4 %>
+        do: task8
+      - when: <% succeeded() and not ctx().fork4 %>
+        do: task9
+      - when: <% failed() %>
+        do: task14
+
+  task8:
+    action: core.noop
+    next:
+      - do: task9
+
+  task9:
+    action: core.noop
+    next:
+      - when: <% not ctx().fork5 %>
+        do: task10
+      - when: <% ctx().fork5 %>
+        do: task11
+
+  task10:
+    action: core.noop
+    next:
+      - do: task11
+
+  task11:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        do: task12
+      - when: <% failed() %>
+        do: task14
+
+  task12:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        do: task13
+      - when: <% failed() %>
+        do: task14
+
+  task13:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        do: task14
+      - when: <% failed()  %>
+        do: task14
+
+  task14:
+    action: core.noop
+    next:
+      - when: <% not ctx().fork6 %>
+        do: task15
+      - when: <% ctx().fork6 %>
+        do: task16
+
+  task15:
+    action: core.noop
+    next:
+      - when: <% ctx().fork7 %>
+        do: task16
+      - when: <% not ctx().fork7 %>
+        do: task17
+
+  task16:
+    action: core.noop
+    next:
+      - when: <% succeeded() and result() %>
+        do: task17
+      - when: <% succeeded() and not result() %>
+        do: task16
+
+  task17:
+    action: core.noop
+    next:
+      - when: <% ctx().fork8 %>
+        do: task18
+      - when: <% not ctx().fork8 %>
+        do: notify
+
+  task18:
+    action: core.noop
+    next:
+      - when: <% succeeded() and result() %>
+        do: task19
+      - when: <% succeeded() and not result() %>
+        do: task18
+
+  task19:
+    action: core.noop
+    next:
+      - do: notify
