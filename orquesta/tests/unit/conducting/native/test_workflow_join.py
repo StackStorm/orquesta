@@ -101,8 +101,8 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         self.assert_spec_inspection(wf_name)
 
-        # Mock error at task6, note that task3 and task5 are
-        # already in running state when task6 failed.
+        # Mock error at task6. The conductor runs breadth first
+        # and so task3 and task5 has not started.
         expected_task_seq = [
             'task1',
             'task2',

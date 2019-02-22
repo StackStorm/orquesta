@@ -103,13 +103,13 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         self.assert_spec_inspection(wf_name)
 
+        # Mock task1 success
         expected_routes = [
             [],                 # default from start
             ['task1__t0'],      # task1 -> task2 (when #1)
             ['task1__t2']       # task1 -> task2 (when #3)
         ]
 
-        # Mock task1 success
         expected_task_seq = [
             ('task1', 0),
             ('task2', 1),
@@ -129,13 +129,13 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             mock_states=mock_states
         )
 
+        # Mock task1 error
         expected_routes = [
             [],                 # default from start
             ['task1__t0'],      # task1 -> task2 (when #1)
             ['task1__t1']       # task1 -> task2 (when #2)
         ]
 
-        # Mock task1 error
         expected_task_seq = [
             ('task1', 0),
             ('task2', 1),
