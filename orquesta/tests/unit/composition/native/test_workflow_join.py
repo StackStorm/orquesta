@@ -227,6 +227,9 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 {
                     'id': 'task8',
                     'barrier': 2
+                },
+                {
+                    'id': 'noop'
                 }
             ],
             'adjacency': [
@@ -292,12 +295,19 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
+                        'ref': 1,
+                        'id': 'noop',
+                        'key': 0,
+                        'criteria': ['<% failed() %>']
+                    },
+                    {
                         'id': 'task8',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
+                [],
                 []
             ],
             'multigraph': True
@@ -333,6 +343,9 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 {
                     'id': 'task8',
                     'barrier': 2
+                },
+                {
+                    'id': 'noop'
                 }
             ],
             'adjacency': [
@@ -398,12 +411,19 @@ class JoinWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
+                        'ref': 1,
+                        'id': 'noop',
+                        'key': 0,
+                        'criteria': ['<% failed() %>']
+                    },
+                    {
                         'id': 'task8',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
+                [],
                 []
             ],
             'multigraph': True
