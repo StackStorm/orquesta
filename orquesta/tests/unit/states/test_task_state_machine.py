@@ -38,7 +38,7 @@ class TaskStateMachineTest(unittest.TestCase):
         super(TaskStateMachineTest, cls).tearDownClass()
 
     def test_bad_event_name(self):
-        task_flow_entry = {'id': 'task1', 'ctx': 0}
+        task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0}
         mock_event = MockExecutionEvent('foobar', states.RUNNING)
 
         self.assertRaises(
@@ -58,7 +58,7 @@ class TaskStateMachineTest(unittest.TestCase):
         )
 
     def test_bad_current_task_state(self):
-        task_flow_entry = {'id': 'task1', 'ctx': 0, 'state': 'mock'}
+        task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0, 'state': 'mock'}
         ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED)
 
         self.assertRaises(
@@ -70,25 +70,25 @@ class TaskStateMachineTest(unittest.TestCase):
         )
 
     def test_bad_current_task_state_to_event_mapping(self):
-        task_flow_entry = {'id': 'task1', 'ctx': 0, 'state': states.REQUESTED}
+        task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0, 'state': states.REQUESTED}
         ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED)
         machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
         self.assertEqual(task_flow_entry['state'], states.REQUESTED)
 
     def test_current_task_state_unset(self):
-        task_flow_entry = {'id': 'task1', 'ctx': 0}
+        task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0}
         ac_ex_event = events.ActionExecutionEvent(states.RUNNING)
         machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
         self.assertEqual(task_flow_entry['state'], states.RUNNING)
 
     def test_current_task_state_none(self):
-        task_flow_entry = {'id': 'task1', 'ctx': 0, 'state': None}
+        task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0, 'state': None}
         ac_ex_event = events.ActionExecutionEvent(states.RUNNING)
         machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
         self.assertEqual(task_flow_entry['state'], states.RUNNING)
 
     def test_task_state_transition(self):
-        task_flow_entry = {'id': 'task1', 'ctx': 0, 'state': states.RUNNING}
+        task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0, 'state': states.RUNNING}
         ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED)
         machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
         self.assertEqual(task_flow_entry['state'], states.SUCCEEDED)
