@@ -11,7 +11,6 @@
 # limitations under the License.
 
 from orquesta import conducting
-from orquesta import events
 from orquesta.specs import native as specs
 from orquesta import states
 from orquesta.tests.unit import base
@@ -37,26 +36,16 @@ class WorkflowConductorExtendedTaskTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # Process task1.
-        next_task_name = 'task1'
-        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
-        expected_ctx_value = {}
-        expected_tasks = [self.format_task_item(next_task_name, expected_ctx_value, next_task_spec)]
-        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
-
         task_name = 'task1'
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+        expected_task_ctx = {}
+        self.assert_next_task(conductor, task_name, expected_task_ctx)
+        self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
 
         # Process task2.
-        next_task_name = 'task2'
-        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
-        expected_ctx_value = {'xyz': 123}
-        expected_tasks = [self.format_task_item(next_task_name, expected_ctx_value, next_task_spec)]
-        self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
-
         task_name = 'task2'
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+        expected_task_ctx = {'xyz': 123}
+        self.assert_next_task(conductor, task_name, expected_task_ctx)
+        self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
 
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
 
@@ -82,36 +71,20 @@ class WorkflowConductorExtendedTaskTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # Process task1.
-        next_task_name = 'task1'
-        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
-        expected_ctx_value = {}
-        expected_tasks = [self.format_task_item(next_task_name, expected_ctx_value, next_task_spec)]
-        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
-
         task_name = 'task1'
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+        expected_task_ctx = {}
+        self.assert_next_task(conductor, task_name, expected_task_ctx)
+        self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
 
         # Process task2.
-        next_task_name = 'task2'
-        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
-        expected_ctx_value = {}
-        expected_tasks = [self.format_task_item(next_task_name, expected_ctx_value, next_task_spec)]
-        self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
-
         task_name = 'task2'
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+        self.assert_next_task(conductor, task_name, expected_task_ctx)
+        self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
 
         # Process task3.
-        next_task_name = 'task3'
-        next_task_spec = conductor.spec.tasks.get_task(next_task_name)
-        expected_ctx_value = {'xyz': 123}
-        expected_tasks = [self.format_task_item(next_task_name, expected_ctx_value, next_task_spec)]
-        self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
-
         task_name = 'task3'
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+        expected_task_ctx = {'xyz': 123}
+        self.assert_next_task(conductor, task_name, expected_task_ctx)
+        self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
 
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)

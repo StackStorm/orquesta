@@ -14,7 +14,6 @@ import random
 import string
 
 from orquesta import conducting
-from orquesta import events
 from orquesta.specs import native as specs
 from orquesta import states
 from orquesta.tests.unit import base
@@ -61,8 +60,7 @@ class WorkflowConductorStressTest(base.WorkflowConductorTest):
 
         for i in range(1, num_tasks + 1):
             task_name = 't' + str(i)
-            conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-            conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+            self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
 
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
 
@@ -109,6 +107,7 @@ class WorkflowConductorWithItemsStressTest(base.WorkflowConductorWithItemsTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # Mock the action execution for each item and assert expected task states.
+        task_route = 0
         task_name = 'task1'
         task_ctx = {'xs': [str(i) for i in range(0, num_items)]}
 
@@ -124,6 +123,7 @@ class WorkflowConductorWithItemsStressTest(base.WorkflowConductorWithItemsTest):
         self.assert_task_items(
             conductor,
             task_name,
+            task_route,
             task_ctx,
             task_ctx['xs'],
             task_action_specs,
@@ -133,7 +133,7 @@ class WorkflowConductorWithItemsStressTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is removed from staging.
-        self.assertNotIn(task_name, conductor.flow.staged)
+        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
 
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
