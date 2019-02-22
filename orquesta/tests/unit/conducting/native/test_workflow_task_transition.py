@@ -103,40 +103,54 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         self.assert_spec_inspection(wf_name)
 
+        expected_routes = [
+            [],                 # default from start
+            ['task1__t0'],      # task1 -> task2 (when #1)
+            ['task1__t2']       # task1 -> task2 (when #3)
+        ]
+
         # Mock task1 success
         expected_task_seq = [
-            'task1',
-            'task2__1',
-            'task2__3'
+            ('task1', 0),
+            ('task2', 1),
+            ('task2', 2)
         ]
 
         mock_states = [
-            states.SUCCEEDED,   # task1
-            states.SUCCEEDED,   # task2__1 on-complete
-            states.SUCCEEDED    # task2__3 on-success
+            states.SUCCEEDED,   # task1, 0
+            states.SUCCEEDED,   # task2, 1 on complete
+            states.SUCCEEDED    # task2, 2 on success
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
+            expected_routes=expected_routes,
             mock_states=mock_states
         )
 
+        expected_routes = [
+            [],                 # default from start
+            ['task1__t0'],      # task1 -> task2 (when #1)
+            ['task1__t1']       # task1 -> task2 (when #2)
+        ]
+
         # Mock task1 error
         expected_task_seq = [
-            'task1',
-            'task2__1',
-            'task2__2'
+            ('task1', 0),
+            ('task2', 1),
+            ('task2', 2)
         ]
 
         mock_states = [
-            states.FAILED,      # task1
-            states.SUCCEEDED,   # task2__1 on-complete
-            states.SUCCEEDED    # task2__2 on-error
+            states.FAILED,      # task1, 0
+            states.SUCCEEDED,   # task2, 1 on complete
+            states.SUCCEEDED    # task2, 2 on failure
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
+            expected_routes=expected_routes,
             mock_states=mock_states
         )

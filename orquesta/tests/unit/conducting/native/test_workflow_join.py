@@ -62,7 +62,8 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states
+            mock_states=mock_states,
+            expected_workflow_state=states.RUNNING
         )
 
         # Mock error at task7
@@ -91,7 +92,8 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states
+            mock_states=mock_states,
+            expected_workflow_state=states.RUNNING
         )
 
     def test_join_count_with_branch_error(self):
@@ -105,24 +107,21 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task1',
             'task2',
             'task4',
-            'task6',
-            'task3',
-            'task5'
+            'task6'
         ]
 
         mock_states = [
             states.SUCCEEDED,   # task1
             states.SUCCEEDED,   # task2
             states.SUCCEEDED,   # task4
-            states.FAILED,      # task6
-            states.SUCCEEDED,   # task3
-            states.SUCCEEDED    # task5
+            states.FAILED       # task6
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states
+            mock_states=mock_states,
+            expected_workflow_state=states.FAILED
         )
 
         # Mock error at task7, note that task3 and task5 have
@@ -135,6 +134,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task3',
             'task5',
             'task7',
+            'noop',
             'task8'
         ]
 
@@ -146,6 +146,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             states.SUCCEEDED,   # task3
             states.SUCCEEDED,   # task5
             states.FAILED,      # task7
+            states.SUCCEEDED,   # noop
             states.SUCCEEDED    # task8
         ]
 
