@@ -79,20 +79,16 @@ class JinjaCriteriaComposerTest(base.MistralWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 't1',
-                    'name': 't1'
+                    'id': 't1'
                 },
                 {
-                    'id': 'a',
-                    'name': 'a'
+                    'id': 'a'
                 },
                 {
-                    'id': 'b',
-                    'name': 'b'
+                    'id': 'b'
                 },
                 {
-                    'id': 'c',
-                    'name': 'c'
+                    'id': 'c'
                 }
             ],
             'adjacency': [

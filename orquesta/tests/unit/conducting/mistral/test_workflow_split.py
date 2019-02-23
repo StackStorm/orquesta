@@ -18,94 +18,104 @@ class SplitWorkflowConductorTest(base.MistralWorkflowConductorTest):
     def test_split(self):
         wf_name = 'split'
 
-        expected_task_seq = [
-            'task1',
-            'task2',
-            'task3',
-            'task4__1',
-            'task4__2',
-            'task5__1',
-            'task6__1',
-            'task5__2',
-            'task6__2',
-            'task7__1',
-            'task7__2'
+        expected_routes = [
+            [],                             # default from start
+            ['task2__t0'],                  # task1 -> task2 -> task4
+            ['task3__t0']                   # task1 -> task3 -> task4
         ]
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq)
+        expected_task_seq = [
+            ('task1', 0),
+            ('task2', 0),
+            ('task3', 0),
+            ('task4', 1),
+            ('task4', 2),
+            ('task5', 1),
+            ('task5', 2),
+            ('task6', 1),
+            ('task6', 2),
+            ('task7', 1),
+            ('task7', 2)
+        ]
+
+        self.assert_spec_inspection(wf_name)
+
+        self.assert_conducting_sequences(wf_name, expected_task_seq, expected_routes)
 
     def test_splits(self):
         wf_name = 'splits'
 
-        expected_task_seq = [
-            'task1',
-            'task2',
-            'task3',
-            'task8__1',
-            'task4__1',
-            'task4__2',
-            'task5__1',
-            'task6__1',
-            'task5__2',
-            'task6__2',
-            'task7__1',
-            'task7__2',
-            'task8__2',
-            'task8__3'
+        expected_routes = [
+            [],                             # default from start
+            ['task1__t0'],                  # task1 -> task8
+            ['task2__t0'],                  # task1 -> task2 -> task4
+            ['task3__t0'],                  # task1 -> task3 -> task4
+            ['task2__t0', 'task7__t0'],     # task1 -> task2 -> task4 -> task5/6 -> task7 -> task8
+            ['task3__t0', 'task7__t0']      # task1 -> task3 -> task4 -> task5/6 -> task7 -> task8
         ]
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq)
+        expected_task_seq = [
+            ('task1', 0),
+            ('task2', 0),
+            ('task3', 0),
+            ('task8', 1),
+            ('task4', 2),
+            ('task4', 3),
+            ('task5', 2),
+            ('task5', 3),
+            ('task6', 2),
+            ('task6', 3),
+            ('task7', 2),
+            ('task7', 3),
+            ('task8', 4),
+            ('task8', 5)
+        ]
+
+        self.assert_spec_inspection(wf_name)
+
+        self.assert_conducting_sequences(wf_name, expected_task_seq, expected_routes)
 
     def test_nested_splits(self):
         wf_name = 'splits-nested'
 
-        expected_task_seq = [
-            'task1',
-            'task2',
-            'task3',
-            'task4__1',
-            'task4__2',
-            'task5__1',
-            'task6__1',
-            'task5__2',
-            'task6__2',
-            'task7__1',
-            'task7__2',
-            'task7__3',
-            'task7__4',
-            'task8__1',
-            'task9__1',
-            'task8__2',
-            'task9__2',
-            'task8__3',
-            'task9__3',
-            'task8__4',
-            'task9__4',
-            'task10__1',
-            'task10__2',
-            'task10__3',
-            'task10__4'
+        expected_routes = [
+            [],                             # default from start
+            ['task2__t0'],                  # task1 -> task2 -> task4
+            ['task3__t0'],                  # task1 -> task3 -> task4
+            ['task2__t0', 'task5__t0'],     # task1 -> task2 -> task4 -> task5 -> task7
+            ['task3__t0', 'task5__t0'],     # task1 -> task3 -> task4 -> task5 -> task7
+            ['task2__t0', 'task6__t0'],     # task1 -> task2 -> task4 -> task6 -> task7
+            ['task3__t0', 'task6__t0']      # task1 -> task3 -> task4 -> task6 -> task7
         ]
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq)
-
-    def test_splits_extra_join(self):
-        wf_name = 'splits-join'
-
         expected_task_seq = [
-            'task1',
-            'task2',
-            'task3',
-            'task4__1',
-            'task4__2',
-            'task5__1',
-            'task6__1',
-            'task5__2',
-            'task6__2',
-            'task7__1',
-            'task7__2',
-            'task8__1',
-            'task8__2'
+            ('task1', 0),
+            ('task2', 0),
+            ('task3', 0),
+            ('task4', 1),
+            ('task4', 2),
+            ('task5', 1),
+            ('task5', 2),
+            ('task6', 1),
+            ('task6', 2),
+            ('task7', 3),
+            ('task7', 4),
+            ('task7', 5),
+            ('task7', 6),
+            ('task8', 3),
+            ('task8', 4),
+            ('task8', 5),
+            ('task8', 6),
+            ('task9', 3),
+            ('task9', 4),
+            ('task9', 5),
+            ('task9', 6),
+            ('task10', 3),
+            ('task10', 4),
+            ('task10', 5),
+            ('task10', 6)
         ]
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq)
+        self.assert_spec_inspection(wf_name)
+
+        self.assert_conducting_sequences(wf_name, expected_task_seq, expected_routes)

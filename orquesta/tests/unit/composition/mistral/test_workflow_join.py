@@ -126,33 +126,26 @@ class JoinWorkflowComposerTest(base.MistralWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': 'task2',
-                    'name': 'task2'
+                    'id': 'task2'
                 },
                 {
-                    'id': 'task3',
-                    'name': 'task3'
+                    'id': 'task3'
                 },
                 {
-                    'id': 'task4',
-                    'name': 'task4'
+                    'id': 'task4'
                 },
                 {
-                    'id': 'task5',
-                    'name': 'task5'
+                    'id': 'task5'
                 },
                 {
                     'id': 'task6',
-                    'name': 'task6',
                     'barrier': '*'
                 },
                 {
-                    'id': 'task7',
-                    'name': 'task7'
+                    'id': 'task7'
                 }
             ],
             'adjacency': [
@@ -262,6 +255,9 @@ class JoinWorkflowComposerTest(base.MistralWorkflowComposerTest):
                 {
                     'id': 'task8',
                     'barrier': 2
+                },
+                {
+                    'id': 'task9'
                 }
             ],
             'adjacency': [
@@ -349,8 +345,17 @@ class JoinWorkflowComposerTest(base.MistralWorkflowComposerTest):
                             'task7',
                             condition='on-success'
                         )
+                    },
+                    {
+                        'id': 'task9',
+                        'key': 0,
+                        'criteria': self.compose_seq_expr(
+                            'task7',
+                            condition='on-error'
+                        )
                     }
                 ],
+                [],
                 []
             ],
             'multigraph': True
@@ -363,37 +368,32 @@ class JoinWorkflowComposerTest(base.MistralWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': 'task2',
-                    'name': 'task2'
+                    'id': 'task2'
                 },
                 {
-                    'id': 'task3',
-                    'name': 'task3'
+                    'id': 'task3'
                 },
                 {
-                    'id': 'task4',
-                    'name': 'task4'
+                    'id': 'task4'
                 },
                 {
-                    'id': 'task5',
-                    'name': 'task5'
+                    'id': 'task5'
                 },
                 {
-                    'id': 'task6',
-                    'name': 'task6'
+                    'id': 'task6'
                 },
                 {
-                    'id': 'task7',
-                    'name': 'task7'
+                    'id': 'task7'
                 },
                 {
                     'id': 'task8',
-                    'name': 'task8',
                     'barrier': 2
+                },
+                {
+                    'id': 'task9'
                 }
             ],
             'adjacency': [
@@ -481,8 +481,17 @@ class JoinWorkflowComposerTest(base.MistralWorkflowComposerTest):
                             'task7',
                             condition='on-success'
                         )
+                    },
+                    {
+                        'id': 'task9',
+                        'key': 0,
+                        'criteria': self.compose_seq_expr(
+                            'task7',
+                            condition='on-error'
+                        )
                     }
                 ],
+                [],
                 []
             ],
             'multigraph': True

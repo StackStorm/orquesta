@@ -64,16 +64,13 @@ class TaskTransitionWorkflowComposerTest(base.MistralWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': 'task2',
-                    'name': 'task2'
+                    'id': 'task2'
                 },
                 {
-                    'id': 'task3',
-                    'name': 'task3'
+                    'id': 'task3'
                 }
             ],
             'adjacency': [
@@ -164,20 +161,16 @@ class TaskTransitionWorkflowComposerTest(base.MistralWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': 'task2',
-                    'name': 'task2'
+                    'id': 'task2'
                 },
                 {
-                    'id': 'task3',
-                    'name': 'task3'
+                    'id': 'task3'
                 },
                 {
-                    'id': 'task4',
-                    'name': 'task4'
+                    'id': 'task4'
                 }
             ],
             'adjacency': [
@@ -270,29 +263,17 @@ class TaskTransitionWorkflowComposerTest(base.MistralWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': 'task2__1',
-                    'name': 'task2',
-                    'splits': [('task2', 1)]
-                },
-                {
-                    'id': 'task2__2',
-                    'name': 'task2',
-                    'splits': [('task2', 2)]
-                },
-                {
-                    'id': 'task2__3',
-                    'name': 'task2',
-                    'splits': [('task2', 3)]
+                    'id': 'task2',
+                    'splits': ['task2']
                 }
             ],
             'adjacency': [
                 [
                     {
-                        'id': 'task2__1',
+                        'id': 'task2',
                         'key': 0,
                         'criteria': self.compose_seq_expr(
                             'task1',
@@ -300,24 +281,22 @@ class TaskTransitionWorkflowComposerTest(base.MistralWorkflowComposerTest):
                         )
                     },
                     {
-                        'id': 'task2__2',
-                        'key': 0,
+                        'id': 'task2',
+                        'key': 1,
                         'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-error'
                         )
                     },
                     {
-                        'id': 'task2__3',
-                        'key': 0,
+                        'id': 'task2',
+                        'key': 2,
                         'criteria': self.compose_seq_expr(
                             'task1',
                             condition='on-success'
                         )
                     }
                 ],
-                [],
-                [],
                 []
             ],
             'multigraph': True
