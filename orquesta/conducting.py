@@ -263,9 +263,9 @@ class WorkflowConductor(object):
     def log(self):
         return self._log
 
-    def log_entry(self, entry_type, message,
-                  task_id=None, task_transition_id=None,
-                  result=None, data=None):
+    def log_entry(self, entry_type, message, task_id=None, route=None,
+                  task_transition_id=None, result=None, data=None):
+
         # Check entry type.
         if entry_type not in ['info', 'warn', 'error']:
             raise exc.WorkflowLogEntryError('The log entry type "%s" is not valid.' % entry_type)
@@ -276,6 +276,7 @@ class WorkflowConductor(object):
         # Create the log entry.
         entry = {'type': entry_type, 'message': message}
         dx.set_dict_value(entry, 'task_id', task_id, insert_null=False)
+        dx.set_dict_value(entry, 'route', route, insert_null=False)
         dx.set_dict_value(entry, 'task_transition_id', task_transition_id, insert_null=False)
         dx.set_dict_value(entry, 'result', result, insert_null=False)
         dx.set_dict_value(entry, 'data', data, insert_null=False)
@@ -287,13 +288,23 @@ class WorkflowConductor(object):
         # Append the log entry.
         log.append(entry)
 
-    def log_error(self, e, task_id=None, task_transition_id=None):
-        message = '%s: %s' % (type(e).__name__, str(e))
-        self.log_entry('error', message, task_id=task_id, task_transition_id=task_transition_id)
+    def log_error(self, e, task_id=None, route=None, task_transition_id=None):
+        self.log_entry(
+            'error',
+            '%s: %s' % (type(e).__name__, str(e)),
+            task_id=task_id,
+            route=route,
+            task_transition_id=task_transition_id
+        )
 
-    def log_errors(self, errors, task_id=None, task_transition_id=None):
+    def log_errors(self, errors, task_id=None, route=None, task_transition_id=None):
         for error in errors:
-            self.log_error(error, task_id=task_id, task_transition_id=task_transition_id)
+            self.log_error(
+                error,
+                task_id=task_id,
+                route=route,
+                task_transition_id=task_transition_id
+            )
 
     def get_workflow_parent_context(self):
         return copy.deepcopy(self._parent_ctx)
@@ -533,7 +544,7 @@ class WorkflowConductor(object):
                 elif 'items_count' in next_task and next_task['items_count'] == 0:
                     next_tasks.append(next_task)
             except Exception as e:
-                self.log_error(e, task_id=staged_task['id'])
+                self.log_error(e, task_id=staged_task['id'], route=staged_task['route'])
                 self.request_workflow_state(states.FAILED)
                 continue
 
@@ -691,7 +702,7 @@ class WorkflowConductor(object):
                     evaluated_criteria = [expr.evaluate(c, current_ctx) for c in criteria]
                     task_flow_entry['next'][task_transition_id] = all(evaluated_criteria)
                 except Exception as e:
-                    self.log_error(e, task_id, task_transition_id)
+                    self.log_error(e, task_id, route, task_transition_id)
                     self.request_workflow_state(states.FAILED)
                     continue
 
@@ -707,7 +718,7 @@ class WorkflowConductor(object):
                     )
 
                     if errors:
-                        self.log_errors(errors, task_id, task_transition_id)
+                        self.log_errors(errors, task_id, route, task_transition_id)
                         self.request_workflow_state(states.FAILED)
                         continue
 

@@ -247,7 +247,8 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
             {
                 'type': 'error',
                 'message': 'TypeError: The value of task delay is not type of integer.',
-                'task_id': 'task1'
+                'task_id': 'task1',
+                'route': 0
             }
         ]
 

@@ -42,7 +42,8 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
                     'YaqlEvaluationException: Unable to evaluate expression \'<% item(y) %>\'. '
                     'ExpressionEvaluationException: Item does not have key "y".'
                 ),
-                'task_id': 'task1'
+                'task_id': 'task1',
+                'route': 0
             }
         ]
 
@@ -81,7 +82,8 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
                     'YaqlEvaluationException: Unable to evaluate expression \'<% item(x) %>\'. '
                     'ExpressionEvaluationException: Item is not type of dict.'
                 ),
-                'task_id': 'task1'
+                'task_id': 'task1',
+                'route': 0
             }
         ]
 
@@ -113,7 +115,8 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
             {
                 'type': 'error',
                 'message': 'TypeError: The value of "<% ctx(xs) %>" is not type of list.',
-                'task_id': 'task1'
+                'task_id': 'task1',
+                'route': 0
             }
         ]
 

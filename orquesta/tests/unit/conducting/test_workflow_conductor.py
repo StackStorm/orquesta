@@ -844,16 +844,17 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
 
         extra = {'x': 1234}
+        task = {'task_id': 'task1', 'route': 0}
         conductor.log_entry('info', 'The workflow is running as expected.', data=extra)
         conductor.log_entry('info', 'The workflow is running as expected.', data=extra)
-        conductor.log_entry('warn', 'The task may be running a little bit slow.', task_id='task1')
-        conductor.log_entry('warn', 'The task may be running a little bit slow.', task_id='task1')
-        conductor.log_entry('error', 'This is baloney.', task_id='task1')
-        conductor.log_entry('error', 'This is baloney.', task_id='task1')
-        conductor.log_error(TypeError('Something is not right.'), task_id='task1')
-        conductor.log_error(TypeError('Something is not right.'), task_id='task1')
-        conductor.log_errors([KeyError('task1'), ValueError('foobar')], task_id='task1')
-        conductor.log_errors([KeyError('task1'), ValueError('foobar')], task_id='task1')
+        conductor.log_entry('warn', 'The task may be running a little bit slow.', **task)
+        conductor.log_entry('warn', 'The task may be running a little bit slow.', **task)
+        conductor.log_entry('error', 'This is baloney.', **task)
+        conductor.log_entry('error', 'This is baloney.', **task)
+        conductor.log_error(TypeError('Something is not right.'), **task)
+        conductor.log_error(TypeError('Something is not right.'), **task)
+        conductor.log_errors([KeyError('task1'), ValueError('foobar')], **task)
+        conductor.log_errors([KeyError('task1'), ValueError('foobar')], **task)
 
         expected_log_entries = [
             {
@@ -864,7 +865,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             {
                 'type': 'warn',
                 'message': 'The task may be running a little bit slow.',
-                'task_id': 'task1'
+                'task_id': 'task1',
+                'route': 0
             }
         ]
 
@@ -872,22 +874,26 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             {
                 'type': 'error',
                 'message': 'This is baloney.',
-                'task_id': 'task1'
+                'task_id': 'task1',
+                'route': 0
             },
             {
                 'type': 'error',
                 'message': 'TypeError: Something is not right.',
-                'task_id': 'task1'
+                'task_id': 'task1',
+                'route': 0
             },
             {
                 'type': 'error',
                 'message': "KeyError: 'task1'",
-                'task_id': 'task1'
+                'task_id': 'task1',
+                'route': 0
             },
             {
                 'type': 'error',
                 'message': 'ValueError: foobar',
-                'task_id': 'task1'
+                'task_id': 'task1',
+                'route': 0
             }
         ]
 

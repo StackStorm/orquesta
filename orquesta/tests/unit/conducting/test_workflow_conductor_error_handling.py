@@ -169,6 +169,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1',
                 'task_transition_id': 'task2__t0'
             }
@@ -233,6 +234,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1',
                 'task_transition_id': 'task3__t0'
             },
@@ -243,6 +245,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().fubar.foobar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#foobar"'
                 ),
+                'route': 0,
                 'task_id': 'task2',
                 'task_transition_id': 'task3__t0'
             }
@@ -303,6 +306,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1',
                 'task_transition_id': 'task2__t0'
             }
@@ -361,6 +365,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().y.value %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#value"'
                 ),
+                'route': 0,
                 'task_id': 'task1',
                 'task_transition_id': 'task2__t0'
             }
@@ -411,6 +416,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1'
             }
         ]
@@ -456,6 +462,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1'
             }
         ]
@@ -501,6 +508,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task2'
             }
         ]
@@ -551,6 +559,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1'
             }
         ]
@@ -598,6 +607,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1'
             }
         ]
@@ -645,6 +655,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task2'
             }
         ]
@@ -700,6 +711,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1'
             },
             {
@@ -709,6 +721,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().fubar.foobar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#foobar"'
                 ),
+                'route': 0,
                 'task_id': 'task2'
             }
         ]
@@ -761,6 +774,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1'
             },
             {
@@ -770,6 +784,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().fubar.foobar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#foobar"'
                 ),
+                'route': 0,
                 'task_id': 'task2'
             }
         ]
@@ -818,6 +833,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task2'
             },
             {
@@ -827,6 +843,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().fubar.foobar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#foobar"'
                 ),
+                'route': 0,
                 'task_id': 'task3'
             }
         ]
