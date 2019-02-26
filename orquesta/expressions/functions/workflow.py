@@ -30,13 +30,13 @@ def _get_current_task(context):
     return current_task
 
 
-def task_state_(context, task_id, task_route=None):
+def task_state_(context, task_id, route=None):
     if not context:
         return states.UNSET
 
-    if task_route is None:
+    if route is None:
         current_task = _get_current_task(context)
-        task_route = current_task['route']
+        route = current_task['route']
 
     try:
         task_flow = context['__flow'] or {}
@@ -44,21 +44,21 @@ def task_state_(context, task_id, task_route=None):
         task_flow = {}
 
     task_flow_pointers = task_flow.get('tasks') or {}
-    task_flow_task_uid = constants.TASK_FLOW_ROUTE_FORMAT % (task_id, str(task_route))
+    task_flow_task_uid = constants.TASK_FLOW_ROUTE_FORMAT % (task_id, str(route))
     task_flow_item_idx = task_flow_pointers.get(task_flow_task_uid)
 
     # If unable to identify the task flow entry and if there are other routes, then
     # use an earlier route before the split to find the specific task.
     if task_flow_item_idx is None:
-        if task_route > 0:
-            current_route_details = task_flow['routes'][task_route]
+        if route > 0:
+            current_route_details = task_flow['routes'][route]
             # Reverse the list because we want to start with the next longest route.
-            for idx, prev_route_details in enumerate(reversed(task_flow['routes'][:task_route])):
+            for idx, prev_route_details in enumerate(reversed(task_flow['routes'][:route])):
                 if len(set(prev_route_details) - set(current_route_details)) == 0:
                     # The index is from a reversed list so need to calculate
                     # the index of the item in the list before the reverse.
-                    prev_task_route = task_route - idx - 1
-                    return task_state_(context, task_id, task_route=prev_task_route)
+                    prev_route = route - idx - 1
+                    return task_state_(context, task_id, route=prev_route)
 
         return states.UNSET
 
@@ -74,25 +74,25 @@ def task_state_(context, task_id, task_route=None):
 def succeeded_(context):
     current_task = _get_current_task(context)
     task_id = current_task['id']
-    task_route = current_task['route']
+    route = current_task['route']
 
-    return (task_state_(context, task_id, task_route=task_route) == states.SUCCEEDED)
+    return (task_state_(context, task_id, route=route) == states.SUCCEEDED)
 
 
 def failed_(context):
     current_task = _get_current_task(context)
     task_id = current_task['id']
-    task_route = current_task['route']
+    route = current_task['route']
 
-    return (task_state_(context, task_id, task_route=task_route) == states.FAILED)
+    return (task_state_(context, task_id, route=route) == states.FAILED)
 
 
 def completed_(context):
     current_task = _get_current_task(context)
     task_id = current_task['id']
-    task_route = current_task['route']
+    route = current_task['route']
 
-    return (task_state_(context, task_id, task_route=task_route) in states.COMPLETED_STATES)
+    return (task_state_(context, task_id, route=route) in states.COMPLETED_STATES)
 
 
 def result_(context):

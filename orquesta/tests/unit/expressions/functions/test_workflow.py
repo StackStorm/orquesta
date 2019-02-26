@@ -119,7 +119,7 @@ class WorkflowFunctionTest(unittest.TestCase):
 
         task_pointers = {task_flow_pointer_id: 0}
         context = {'__flow': {'tasks': task_pointers, 'sequence': [{'state': states.RUNNING}]}}
-        actual_task_state = funcs.task_state_(context, task_name, task_route=task_route)
+        actual_task_state = funcs.task_state_(context, task_name, route=task_route)
         self.assertEqual(actual_task_state, states.RUNNING)
 
     def test_task_state_route_from_current_task(self):
