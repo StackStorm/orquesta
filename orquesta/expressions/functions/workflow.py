@@ -36,9 +36,9 @@ def task_state_(context, task_id, route=None):
 
     if route is None:
         try:
-            current_task = _get_current_task(context)
+            current_task = context['__current_task'] or {}
             route = current_task['route']
-        except Exception:
+        except KeyError:
             route = 0
 
     try:
