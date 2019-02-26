@@ -178,7 +178,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
     def test_next_task_rendering(self):
         wf_def = """
@@ -227,7 +227,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
         self.forward_task_states(conductor, next_task_name, [states.RUNNING, states.SUCCEEDED])
 
         # Process next task.
@@ -254,7 +254,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
     def test_basic_list_rendering(self):
         wf_def = """
@@ -303,7 +303,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
     def test_basic_list_rendering_var_w_in(self):
         wf_def = """
@@ -352,7 +352,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
     def test_multiple_lists_rendering(self):
         wf_def = """
@@ -403,4 +403,4 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)

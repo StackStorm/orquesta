@@ -388,8 +388,10 @@ class WorkflowConductor(object):
 
         # Render workflow outputs if workflow is completed.
         if wf_state in states.COMPLETED_STATES and not self._outputs:
-            workflow_context = self.get_workflow_terminal_context()['value']
-            outputs, errors = self.spec.render_output(workflow_context)
+            workflow_ctx = self.get_workflow_terminal_context()['value']
+            flow_ctx = {'__flow': self.flow.serialize()}
+            workflow_ctx = dx.merge_dicts(workflow_ctx, flow_ctx, True)
+            outputs, errors = self.spec.render_output(workflow_ctx)
 
             # Persist outputs if it is not empty.
             if outputs:
@@ -435,8 +437,10 @@ class WorkflowConductor(object):
         except ValueError:
             task_ctx = self.get_workflow_initial_context()
 
+        flow_ctx = {'__flow': self.flow.serialize()}
         current_task = {'id': task_id, 'route': route}
         task_ctx = ctx.set_current_task(task_ctx, current_task)
+        task_ctx = dx.merge_dicts(task_ctx, flow_ctx, True)
         task_spec = self.spec.tasks.get_task(task_id).copy()
         task_spec, action_specs = task_spec.render(task_ctx)
 

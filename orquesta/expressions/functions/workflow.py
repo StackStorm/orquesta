@@ -35,8 +35,11 @@ def task_state_(context, task_id, route=None):
         return states.UNSET
 
     if route is None:
-        current_task = _get_current_task(context)
-        route = current_task['route']
+        try:
+            current_task = _get_current_task(context)
+            route = current_task['route']
+        except Exception:
+            route = 0
 
     try:
         task_flow = context['__flow'] or {}

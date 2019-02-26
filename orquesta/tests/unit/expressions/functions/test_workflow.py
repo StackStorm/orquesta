@@ -58,13 +58,9 @@ class WorkflowFunctionTest(unittest.TestCase):
         task_flow_pointer_id = constants.TASK_FLOW_ROUTE_FORMAT % (task_name, str(task_route))
         task_pointers = {task_flow_pointer_id: None}
 
-        context = None
-        self.assertEqual(funcs.task_state_(context, task_name), states.UNSET)
-
-        context = {}
-        self.assertEqual(funcs.task_state_(context, task_name), states.UNSET)
-
         context_test_cases = [
+            None,
+            {},
             {'__flow': None},
             {'__flow': {}},
             {'__flow': {'tasks': None}},
@@ -73,12 +69,7 @@ class WorkflowFunctionTest(unittest.TestCase):
         ]
 
         for context in context_test_cases:
-            self.assertRaises(
-                exc.ExpressionEvaluationException,
-                funcs.task_state_,
-                context,
-                task_name
-            )
+            self.assertEqual(funcs.task_state_(context, task_name), states.UNSET)
 
     def test_task_state_empty_context_with_no_given_route_but_current_task_set(self):
         task_route = 0

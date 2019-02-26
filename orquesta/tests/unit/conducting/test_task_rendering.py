@@ -73,7 +73,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_tasks = [expected_task]
 
-        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
+        self.assert_task_list(conductor, conductor.get_next_tasks(), expected_tasks)
 
         # Test that the inline parameter in action is rendered.
         task_name = 'task1'
@@ -99,7 +99,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_tasks = [expected_task]
 
-        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
+        self.assert_task_list(conductor, conductor.get_next_tasks(), expected_tasks)
 
         # Test that the individual expression in input is rendered.
         task_name = 'task2'
@@ -125,7 +125,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_tasks = [expected_task]
 
-        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
+        self.assert_task_list(conductor, conductor.get_next_tasks(), expected_tasks)
 
     def test_with_items_rendering(self):
         wf_def = """
@@ -183,7 +183,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_tasks = [expected_task]
 
-        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
+        self.assert_task_list(conductor, conductor.get_next_tasks(), expected_tasks)
 
     def test_task_delay_rendering(self):
         wf_def = """
@@ -226,7 +226,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_tasks = [expected_task]
 
-        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
+        self.assert_task_list(conductor, conductor.get_next_tasks(), expected_tasks)
 
     def test_task_delay_rendering_bad_type(self):
         wf_def = """

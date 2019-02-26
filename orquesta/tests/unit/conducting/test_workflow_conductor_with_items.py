@@ -751,7 +751,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # Set the items to running state.
         for i in range(0, len(task_ctx['xs'])):
@@ -829,7 +829,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # Set the items to running state.
         for i in range(0, len(task_ctx['xs'])):
@@ -1058,7 +1058,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # Set the items to running state.
         for i in range(0, concurrency):
@@ -1288,7 +1288,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # Set the items to running state.
         for i in range(0, len(task_ctx['xs'])):
@@ -1370,7 +1370,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # Set the items to running state.
         for i in range(0, len(task_ctx['xs'])):
@@ -1489,7 +1489,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # Set the items to running state.
         for i in range(0 + concurrency, len(task_ctx['xs'])):
@@ -1600,7 +1600,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # Set the items to running state.
         for i in range(0 + concurrency, len(task_ctx['xs'])):
@@ -1679,7 +1679,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # Set the items to running state.
         for i in range(0, concurrency):
@@ -1721,7 +1721,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # Set the items to running state.
         for i in range(0 + concurrency, len(task_ctx['xs'])):

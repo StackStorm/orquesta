@@ -371,6 +371,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         task_name = 'task1'
         expected_ctx = dx.merge_dicts(copy.deepcopy(inputs), {'b': False})
         expected_ctx['__current_task'] = {'id': task_name, 'route': task_route}
+        expected_ctx['__flow'] = conductor.flow.serialize()
         task = conductor.get_task(task_name, task_route)
         self.assertEqual(task['id'], task_name)
         self.assertEqual(task['route'], task_route)
@@ -381,6 +382,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         task_name = 'task2'
         expected_ctx = dx.merge_dicts(copy.deepcopy(expected_ctx), {'c': 'xyz'})
         expected_ctx['__current_task'] = {'id': task_name, 'route': task_route}
+        expected_ctx['__flow'] = conductor.flow.serialize()
         task = conductor.get_task(task_name, task_route)
         self.assertEqual(task['id'], task_name)
         self.assertEqual(task['route'], task_route)

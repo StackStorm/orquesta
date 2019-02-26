@@ -181,16 +181,25 @@ class WorkflowConductorTest(WorkflowComposerTest):
     # in the task action and task input. So comparing the task specs will not match. In
     # order to match in unit tests. This method is used to serialize the task specs and
     # compare the lists.
-    def assert_task_list(self, actual, expected):
+    def assert_task_list(self, conductor, actual, expected):
         actual_copy = copy.deepcopy(actual)
         expected_copy = copy.deepcopy(expected)
 
         for task in actual_copy:
             task['spec'] = task['spec'].serialize()
 
+            for staged_task in task['ctx']['__flow']['staged']:
+                if 'items' in staged_task:
+                    del staged_task['items']
+
         for task in expected_copy:
             task['ctx']['__current_task'] = {'id': task['id'], 'route': task['route']}
+            task['ctx']['__flow'] = conductor.flow.serialize()
             task['spec'] = task['spec'].serialize()
+
+            for staged_task in task['ctx']['__flow']['staged']:
+                if 'items' in staged_task:
+                    del staged_task['items']
 
         self.assertListEqual(actual_copy, expected_copy)
 
@@ -201,7 +210,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
             task_spec = conductor.spec.tasks.get_task(task_id)
             expected_tasks = [self.format_task_item(task_id, route, ctx, task_spec)]
 
-        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
+        self.assert_task_list(conductor, conductor.get_next_tasks(), expected_tasks)
 
     def assert_next_tasks(self, conductor, task_ids=None, ctxs=None, routes=None):
         expected_tasks = []
@@ -210,7 +219,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
             task_spec = conductor.spec.tasks.get_task(task_id)
             expected_tasks.append(self.format_task_item(task_id, route, ctx, task_spec))
 
-        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
+        self.assert_task_list(conductor, conductor.get_next_tasks(), expected_tasks)
 
     def assert_conducting_sequences(self, wf_name, expected_task_seq, expected_routes=None,
                                     inputs=None, mock_states=None, mock_results=None,
@@ -345,7 +354,7 @@ class WorkflowConductorWithItemsTest(WorkflowConductorTest):
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # If items is an empty list, then mark the task as running.
         if len(items) == 0:
@@ -385,7 +394,7 @@ class WorkflowConductorWithItemsTest(WorkflowConductorTest):
             expected_tasks = [expected_task]
 
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # If items is an empty list, complete the task.
         if len(items) == 0:
@@ -441,7 +450,7 @@ class WorkflowConductorWithItemsTest(WorkflowConductorTest):
                 expected_tasks = [expected_task]
 
             actual_tasks = conductor.get_next_tasks()
-            self.assert_task_list(actual_tasks, expected_tasks)
+            self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
             for task in actual_tasks:
                 task_id = task['id']
