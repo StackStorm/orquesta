@@ -11,7 +11,6 @@
 # limitations under the License.
 
 from orquesta import conducting
-from orquesta import events
 from orquesta.specs import native as specs
 from orquesta import states
 from orquesta.tests.unit import base
@@ -43,7 +42,8 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
                     'YaqlEvaluationException: Unable to evaluate expression \'<% item(y) %>\'. '
                     'ExpressionEvaluationException: Item does not have key "y".'
                 ),
-                'task_id': 'task1'
+                'task_id': 'task1',
+                'route': 0
             }
         ]
 
@@ -82,7 +82,8 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
                     'YaqlEvaluationException: Unable to evaluate expression \'<% item(x) %>\'. '
                     'ExpressionEvaluationException: Item is not type of dict.'
                 ),
-                'task_id': 'task1'
+                'task_id': 'task1',
+                'route': 0
             }
         ]
 
@@ -114,7 +115,8 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
             {
                 'type': 'error',
                 'message': 'TypeError: The value of "<% ctx(xs) %>" is not type of list.',
-                'task_id': 'task1'
+                'task_id': 'task1',
+                'route': 0
             }
         ]
 
@@ -152,6 +154,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_state(states.RUNNING)
 
+        task_route = 0
         next_task_name = 'task1'
         next_task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
@@ -165,16 +168,17 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_task = self.format_task_item(
             next_task_name,
+            task_route,
             next_task_ctx,
             next_task_spec,
-            action_specs=next_task_action_specs,
+            actions=next_task_action_specs,
             items_count=len(next_task_ctx['xs']),
             items_concurrency=None
         )
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
     def test_next_task_rendering(self):
         wf_def = """
@@ -204,6 +208,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # Process start task.
+        task_route = 0
         next_task_name = 'task1'
         next_task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
@@ -214,18 +219,16 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_task = self.format_task_item(
             next_task_name,
+            task_route,
             next_task_ctx,
             next_task_spec,
-            action_specs=next_task_action_specs
+            actions=next_task_action_specs
         )
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
-
-        conductor.update_task_flow(next_task_name, events.ActionExecutionEvent(states.RUNNING))
-        ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED)
-        conductor.update_task_flow(next_task_name, ac_ex_event)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
+        self.forward_task_states(conductor, next_task_name, [states.RUNNING, states.SUCCEEDED])
 
         # Process next task.
         next_task_name = 'task2'
@@ -241,16 +244,17 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_task = self.format_task_item(
             next_task_name,
+            task_route,
             next_task_ctx,
             next_task_spec,
-            action_specs=next_task_action_specs,
+            actions=next_task_action_specs,
             items_count=len(next_task_ctx['xs']),
             items_concurrency=None
         )
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
     def test_basic_list_rendering(self):
         wf_def = """
@@ -275,6 +279,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_state(states.RUNNING)
 
+        task_route = 0
         next_task_name = 'task1'
         next_task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
@@ -288,16 +293,17 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_task = self.format_task_item(
             next_task_name,
+            task_route,
             next_task_ctx,
             next_task_spec,
-            action_specs=next_task_action_specs,
+            actions=next_task_action_specs,
             items_count=len(next_task_ctx['xs']),
             items_concurrency=None
         )
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
     def test_basic_list_rendering_var_w_in(self):
         wf_def = """
@@ -322,6 +328,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_state(states.RUNNING)
 
+        task_route = 0
         next_task_name = 'task1'
         next_task_ctx = {'domains': ['fee', 'fi', 'fo', 'fum']}
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
@@ -335,16 +342,17 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_task = self.format_task_item(
             next_task_name,
+            task_route,
             next_task_ctx,
             next_task_spec,
-            action_specs=next_task_action_specs,
+            actions=next_task_action_specs,
             items_count=len(next_task_ctx['domains']),
             items_concurrency=None
         )
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
     def test_multiple_lists_rendering(self):
         wf_def = """
@@ -372,6 +380,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_state(states.RUNNING)
 
+        task_route = 0
         next_task_name = 'task1'
         next_task_ctx = {'xs': ['foo', 'fu', 'marco'], 'ys': ['bar', 'bar', 'polo']}
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
@@ -384,13 +393,14 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_task = self.format_task_item(
             next_task_name,
+            task_route,
             next_task_ctx,
             next_task_spec,
-            action_specs=next_task_action_specs,
+            actions=next_task_action_specs,
             items_count=len(next_task_ctx['xs']),
             items_concurrency=None
         )
 
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
-        self.assert_task_list(actual_tasks, expected_tasks)
+        self.assert_task_list(conductor, actual_tasks, expected_tasks)

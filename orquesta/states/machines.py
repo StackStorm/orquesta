@@ -374,7 +374,7 @@ class TaskStateMachine(object):
         return False
 
     @classmethod
-    def add_context_to_action_event(cls, conductor, task_id, ac_ex_event):
+    def add_context_to_action_event(cls, conductor, task_id, task_route, ac_ex_event):
         action_event = ac_ex_event.name
 
         requirements = [
@@ -388,7 +388,8 @@ class TaskStateMachine(object):
         if (ac_ex_event.state in requirements and
                 ac_ex_event.context and 'item_id' in ac_ex_event.context):
             # Make a copy of the items and remove current item under evaluation.
-            items = copy.deepcopy(conductor.flow.staged[task_id]['items'])
+            staged_task = conductor.flow.get_staged_task(task_id, task_route)
+            items = copy.deepcopy(staged_task['items'])
             del items[ac_ex_event.context['item_id']]
             items_status = [item['state'] for item in items]
 
@@ -427,7 +428,8 @@ class TaskStateMachine(object):
 
         # Append additional task context to the event.
         task_id = task_flow_entry['id']
-        event_name = cls.add_context_to_action_event(conductor, task_id, ac_ex_event)
+        task_route = task_flow_entry['route']
+        event_name = cls.add_context_to_action_event(conductor, task_id, task_route, ac_ex_event)
 
         # Identify current task state.
         current_task_state = task_flow_entry.get('state', states.UNSET)
@@ -451,17 +453,13 @@ class TaskStateMachine(object):
         task_flow_entry['state'] = new_task_state
 
     @classmethod
-    def add_context_to_workflow_event(cls, conductor, task_id, wf_ex_event):
+    def add_context_to_workflow_event(cls, conductor, task_id, task_route, wf_ex_event):
         workflow_event = wf_ex_event.name
         requirements = states.PAUSE_STATES + states.CANCEL_STATES
+        staged_task = conductor.flow.get_staged_task(task_id, task_route)
 
-        task_with_items = (
-            task_id in conductor.flow.staged and
-            'items' in conductor.flow.staged[task_id]
-        )
-
-        if wf_ex_event.state in requirements and task_with_items:
-            items_status = [item['state'] for item in conductor.flow.staged[task_id]['items']]
+        if wf_ex_event.state in requirements and staged_task and 'items' in staged_task:
+            items_status = [item['state'] for item in staged_task['items']]
             active = list(filter(lambda x: x in states.ACTIVE_STATES, items_status))
             incomplete = list(filter(lambda x: x not in states.COMPLETED_STATES, items_status))
             workflow_event += '_task_active' if active else '_task_dormant'
@@ -477,7 +475,8 @@ class TaskStateMachine(object):
 
         # Append additional task context to the event.
         task_id = task_flow_entry['id']
-        event_name = cls.add_context_to_workflow_event(conductor, task_id, wf_ex_event)
+        task_route = task_flow_entry['route']
+        event_name = cls.add_context_to_workflow_event(conductor, task_id, task_route, wf_ex_event)
 
         # Identify current task state.
         current_task_state = task_flow_entry.get('state', states.UNSET)
@@ -545,7 +544,9 @@ class WorkflowStateMachine(object):
     def add_context_to_task_event(cls, conductor, tk_ex_event):
         # Identify current workflow state.
         task_event = tk_ex_event.name
-        has_next_tasks = conductor.has_next_tasks(getattr(tk_ex_event, 'task_id', None))
+        task_id = getattr(tk_ex_event, 'task_id', None)
+        task_route = getattr(tk_ex_event, 'route', None)
+        has_next_tasks = conductor.has_next_tasks(task_id, task_route)
         has_active_tasks = conductor.flow.has_active_tasks
 
         # Mark task remediated if task is in abended states and there are transitions.

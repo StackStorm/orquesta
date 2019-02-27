@@ -1,31 +1,37 @@
 version: 1.0
-
+  
 description: >
-  A basic workflow that demonstrate multiple splits where a post split
-  task8 is also being joined with task1 before the split.
+  A basic workflow that demonstrate a split use case where a non-join task
+  is referenced in more than one task transitions. The workflow is hence
+  split into multiple branches from the non-join task. Additional splits
+  occur at task transitions.
+
+vars:
+  - a: True
+  - b: True
 
 tasks:
   task1:
     action: core.noop
     next:
       - when: <% succeeded() %>
-        do: task2, task3, task8
-
-  # branch 1
+        do: task3
   task2:
     action: core.noop
     next:
       - when: <% succeeded() %>
-        do: task4
+        do: task3
 
-  # branch 2
+  # split from single task transition in a task
   task3:
     action: core.noop
     next:
-      - when: <% succeeded() %>
+      - when: <% succeeded() and ctx(a) %>
+        do: task4
+      - when: <% succeeded() and ctx(b) %>
         do: task4
 
-  # split branch
+  # split from multiple task transition in a task
   task4:
     action: core.noop
     next:
@@ -42,11 +48,5 @@ tasks:
       - when: <% succeeded() %>
         do: task7
   task7:
-    join: all
-    action: core.noop
-    next:
-      - when: <% succeeded() %>
-        do: task8
-  task8:
     join: all
     action: core.noop

@@ -44,6 +44,8 @@ tasks:
     next:
       - when: <% succeeded() %>
         do: task8
+      - when: <% failed() %>
+        do: noop
 
   # converge branches
   task8:

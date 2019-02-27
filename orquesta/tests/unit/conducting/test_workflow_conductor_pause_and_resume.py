@@ -11,7 +11,6 @@
 # limitations under the License.
 
 from orquesta import conducting
-from orquesta import events
 from orquesta.specs import native as specs
 from orquesta import states
 from orquesta.tests.unit import base
@@ -47,8 +46,8 @@ class WorkflowConductorPauseResumeTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # Run task1 and task2.
-        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow('task2', events.ActionExecutionEvent(states.RUNNING))
+        self.forward_task_states(conductor, 'task1', [states.RUNNING])
+        self.forward_task_states(conductor, 'task2', [states.RUNNING])
         self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
 
         # Pause the workflow.
@@ -56,21 +55,18 @@ class WorkflowConductorPauseResumeTest(base.WorkflowConductorTest):
 
         # Complete task1 only. The workflow should still be pausing
         # because task2 is still running.
-        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.SUCCEEDED))
+        self.forward_task_states(conductor, 'task1', [states.SUCCEEDED])
         self.assertEqual(conductor.get_workflow_state(), states.PAUSING)
 
         # Complete task2. When task2 completes, the workflow should be paused
         # because there is no task in active state.
-        conductor.update_task_flow('task2', events.ActionExecutionEvent(states.SUCCEEDED))
+        self.forward_task_states(conductor, 'task2', [states.SUCCEEDED])
         self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
 
         # Resume the workflow, task3 should be staged, and complete task3.
         conductor.request_workflow_state(states.RESUMING)
-        expected_task = self.format_task_item('task3', {}, conductor.spec.tasks.get_task('task3'))
-        self.assert_task_list(conductor.get_next_tasks('task2'), [expected_task])
-        conductor.update_task_flow('task3', events.ActionExecutionEvent(states.RUNNING))
-        self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
-        conductor.update_task_flow('task3', events.ActionExecutionEvent(states.SUCCEEDED))
+        self.assert_next_task(conductor, 'task3', {})
+        self.forward_task_states(conductor, 'task3', [states.RUNNING, states.SUCCEEDED])
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
 
     def test_pause_and_resume_from_branches(self):
@@ -101,33 +97,30 @@ class WorkflowConductorPauseResumeTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # Run task1 and task2.
-        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow('task2', events.ActionExecutionEvent(states.RUNNING))
+        self.forward_task_states(conductor, 'task1', [states.RUNNING])
+        self.forward_task_states(conductor, 'task2', [states.RUNNING])
         self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
 
         # Pause task1 and task2.
-        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.PAUSED))
-        conductor.update_task_flow('task2', events.ActionExecutionEvent(states.PAUSED))
+        self.forward_task_states(conductor, 'task1', [states.PAUSED])
+        self.forward_task_states(conductor, 'task2', [states.PAUSED])
         self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
 
         # Resume and complete task1 only. Once task1 completes, the workflow
         # should pause again because there is no active task.
-        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.RUNNING))
+        self.forward_task_states(conductor, 'task1', [states.RUNNING])
         self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
-        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.SUCCEEDED))
+        self.forward_task_states(conductor, 'task1', [states.SUCCEEDED])
         self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
 
         # Resume and complete task2. When task2 completes, the workflow
         # should stay running because task3 is now staged and ready.
-        conductor.update_task_flow('task2', events.ActionExecutionEvent(states.RUNNING))
+        self.forward_task_states(conductor, 'task2', [states.RUNNING])
         self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
-        conductor.update_task_flow('task2', events.ActionExecutionEvent(states.SUCCEEDED))
+        self.forward_task_states(conductor, 'task2', [states.SUCCEEDED])
         self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
-        expected_task = self.format_task_item('task3', {}, conductor.spec.tasks.get_task('task3'))
-        self.assert_task_list(conductor.get_next_tasks('task2'), [expected_task])
+        self.assert_next_task(conductor, 'task3', {})
 
         # Complete task3.
-        conductor.update_task_flow('task3', events.ActionExecutionEvent(states.RUNNING))
-        self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
-        conductor.update_task_flow('task3', events.ActionExecutionEvent(states.SUCCEEDED))
+        self.forward_task_states(conductor, 'task3', [states.RUNNING, states.SUCCEEDED])
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)

@@ -39,7 +39,10 @@ join-count:
             action: std.noop
             on-success:
                 - task8
-
+            on-error:
+                - task9
+        task9:
+            action: std.noop
 
         # converge branches
         task8:

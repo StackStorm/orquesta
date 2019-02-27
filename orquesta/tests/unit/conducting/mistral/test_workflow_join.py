@@ -58,7 +58,8 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states
+            mock_states=mock_states,
+            expected_workflow_state=states.RUNNING
         )
 
         # Mock error at task7
@@ -87,36 +88,34 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states
+            mock_states=mock_states,
+            expected_workflow_state=states.RUNNING
         )
 
     def test_join_count_with_branch_error(self):
         wf_name = 'join-count'
 
-        # Mock error at task6, note that task3 and task5 are
-        # already in running state when task6 failed.
+        # Mock error at task6. The conductor runs breadth first
+        # and so task3 and task5 has not started.
         expected_task_seq = [
             'task1',
             'task2',
             'task4',
-            'task6',
-            'task3',
-            'task5'
+            'task6'
         ]
 
         mock_states = [
             states.SUCCEEDED,   # task1
             states.SUCCEEDED,   # task2
             states.SUCCEEDED,   # task4
-            states.FAILED,      # task6
-            states.SUCCEEDED,   # task3
-            states.SUCCEEDED    # task5
+            states.FAILED       # task6
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states
+            mock_states=mock_states,
+            expected_workflow_state=states.FAILED
         )
 
         # Mock error at task7, note that task3 and task5 have
@@ -129,7 +128,8 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
             'task3',
             'task5',
             'task7',
-            'task8'
+            'task8',
+            'task9'
         ]
 
         mock_states = [
@@ -140,7 +140,8 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
             states.SUCCEEDED,   # task3
             states.SUCCEEDED,   # task5
             states.FAILED,      # task7
-            states.SUCCEEDED    # task8
+            states.SUCCEEDED,   # task8
+            states.SUCCEEDED    # task9
         ]
 
         self.assert_conducting_sequences(

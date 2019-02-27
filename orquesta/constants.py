@@ -10,12 +10,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.tests.unit import base
-
-
-class OrchestraWorkflowComposerTest(base.WorkflowComposerTest):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.spec_module_name = 'native'
-        super(OrchestraWorkflowComposerTest, cls).setUpClass()
+TASK_FLOW_ROUTE_FORMAT = '%s__r%s'
+TASK_FLOW_TRANSITION_FORMAT = '%s__t%s'

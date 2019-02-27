@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from orquesta import conducting
-from orquesta import events
 from orquesta.specs import native as specs
 from orquesta import states
 from orquesta.tests.unit import base
@@ -76,13 +75,11 @@ class WorkflowConductorDataFlowTest(base.WorkflowConductorTest):
     def assert_data_flow(self, input_value):
         inputs = {'a1': input_value}
         expected_output = {'a5': inputs['a1'], 'b5': inputs['a1']}
-
         conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
 
         for i in range(1, len(conductor.spec.tasks) + 1):
             task_name = 'task' + str(i)
-            conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-            conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+            self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
 
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)

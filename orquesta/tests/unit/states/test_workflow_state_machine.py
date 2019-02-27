@@ -65,7 +65,7 @@ class WorkflowStateMachineTest(unittest.TestCase):
 
     def test_bad_event_name(self):
         conductor = self._prep_conductor(states.RUNNING)
-        tk_ex_event = events.TaskExecutionEvent('task1', states.RUNNING)
+        tk_ex_event = events.TaskExecutionEvent('task1', 0, states.RUNNING)
         setattr(tk_ex_event, 'name', 'foobar')
 
         self.assertRaises(
@@ -80,13 +80,14 @@ class WorkflowStateMachineTest(unittest.TestCase):
             exc.InvalidState,
             events.TaskExecutionEvent,
             'task1',
+            0,
             'foobar'
         )
 
     def test_bad_current_workflow_state(self):
         conductor = self._prep_conductor()
         conductor._workflow_state = states.ABANDONED
-        tk_ex_event = events.TaskExecutionEvent('task1', states.RUNNING)
+        tk_ex_event = events.TaskExecutionEvent('task1', 0, states.RUNNING)
 
         self.assertRaises(
             exc.InvalidWorkflowStateTransition,
@@ -97,7 +98,7 @@ class WorkflowStateMachineTest(unittest.TestCase):
 
     def test_bad_current_workflow_state_to_event_mapping(self):
         conductor = self._prep_conductor(states.REQUESTED)
-        tk_ex_event = events.TaskExecutionEvent('task1', states.RUNNING)
+        tk_ex_event = events.TaskExecutionEvent('task1', 0, states.RUNNING)
 
         # If transition is not supported, then workflow state will not change.
         machines.WorkflowStateMachine.process_event(conductor, tk_ex_event)
@@ -106,11 +107,11 @@ class WorkflowStateMachineTest(unittest.TestCase):
     def test_workflow_state_transition(self):
         conductor = self._prep_conductor(states.RUNNING)
 
-        tk_ex_event = events.TaskExecutionEvent('task1', states.RUNNING)
+        tk_ex_event = events.TaskExecutionEvent('task1', 0, states.RUNNING)
         machines.WorkflowStateMachine.process_event(conductor, tk_ex_event)
         self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
 
-        tk_ex_event = events.TaskExecutionEvent('task1', states.PAUSED)
+        tk_ex_event = events.TaskExecutionEvent('task1', 0, states.PAUSED)
         machines.WorkflowStateMachine.process_event(conductor, tk_ex_event)
         self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
 

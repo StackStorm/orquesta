@@ -11,7 +11,6 @@
 # limitations under the License.
 
 from orquesta import conducting
-from orquesta import events
 from orquesta.specs import native as specs
 from orquesta import states
 from orquesta.tests.unit import base
@@ -45,12 +44,11 @@ class WorkflowConductorCancelTest(base.WorkflowConductorTest):
         # Run the workflow and keep it running.
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_state(states.RUNNING)
-        task_name = 'task1'
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
+        self.forward_task_states(conductor, 'task1', [states.RUNNING])
 
         # Cancels the workflow and complete task1.
         conductor.request_workflow_state(states.CANCELING)
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+        self.forward_task_states(conductor, 'task1', [states.SUCCEEDED])
 
         # Check workflow status and output.
         self.assertEqual(conductor.get_workflow_state(), states.CANCELED)
@@ -93,12 +91,11 @@ class WorkflowConductorCancelTest(base.WorkflowConductorTest):
         # Run the workflow and keep it running.
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_state(states.RUNNING)
-        task_name = 'task1'
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
+        self.forward_task_states(conductor, 'task1', [states.RUNNING])
 
         # Cancels the workflow and complete task1.
         conductor.request_workflow_state(states.CANCELING)
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+        self.forward_task_states(conductor, 'task1', [states.SUCCEEDED])
 
         # Check workflow status is not changed to failed given the output error.
         self.assertEqual(conductor.get_workflow_state(), states.CANCELED)

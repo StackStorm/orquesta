@@ -122,58 +122,30 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': 'task2',
-                    'name': 'task2'
+                    'id': 'task2'
                 },
                 {
-                    'id': 'task4__1',
-                    'name': 'task4',
-                    'splits': [('task4', 1)]
+                    'id': 'task3'
                 },
                 {
-                    'id': 'task5__1',
-                    'name': 'task5',
-                    'splits': [('task4', 1)]
+                    'id': 'task4',
+                    'splits': ['task4']
                 },
                 {
-                    'id': 'task7__1',
-                    'name': 'task7',
+                    'id': 'task5',
+                    'splits': ['task4']
+                },
+                {
+                    'id': 'task6',
+                    'splits': ['task4']
+                },
+                {
+                    'id': 'task7',
                     'barrier': '*',
-                    'splits': [('task4', 1)]
-                },
-                {
-                    'id': 'task6__1',
-                    'name': 'task6',
-                    'splits': [('task4', 1)]
-                },
-                {
-                    'id': 'task3',
-                    'name': 'task3'
-                },
-                {
-                    'id': 'task4__2',
-                    'name': 'task4',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task5__2',
-                    'name': 'task5',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task7__2',
-                    'name': 'task7',
-                    'barrier': '*',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task6__2',
-                    'name': 'task6',
-                    'splits': [('task4', 2)]
+                    'splits': ['task4']
                 }
             ],
             'adjacency': [
@@ -193,7 +165,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task4__1',
+                        'id': 'task4',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -201,30 +173,21 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task5__1',
+                        'id': 'task4',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                [
+                    {
+                        'id': 'task5',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
-                        'id': 'task6__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                ],
-                [
-                    {
-                        'id': 'task7__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': 'task7__1',
+                        'id': 'task6',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -232,7 +195,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task4__2',
+                        'id': 'task7',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -240,35 +203,13 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task5__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task6__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                ],
-                [
-                    {
-                        'id': 'task7__2',
+                        'id': 'task7',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
-                [],
-                [
-                    {
-                        'id': 'task7__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ]
+                []
             ],
             'multigraph': True
         }
@@ -400,73 +341,34 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': 'task2',
-                    'name': 'task2'
+                    'id': 'task2'
                 },
                 {
-                    'id': 'task4__1',
-                    'name': 'task4',
-                    'splits': [('task4', 1)]
+                    'id': 'task3'
                 },
                 {
-                    'id': 'task5__1',
-                    'name': 'task5',
-                    'splits': [('task4', 1)]
+                    'id': 'task4',
+                    'splits': ['task4']
                 },
                 {
-                    'id': 'task7__1',
-                    'name': 'task7',
+                    'id': 'task5',
+                    'splits': ['task4']
+                },
+                {
+                    'id': 'task6',
+                    'splits': ['task4']
+                },
+                {
+                    'id': 'task7',
                     'barrier': '*',
-                    'splits': [('task4', 1)]
+                    'splits': ['task4']
                 },
                 {
-                    'id': 'task8__2',
-                    'name': 'task8',
-                    'splits': [('task4', 1), ('task8', 2)]
-                },
-                {
-                    'id': 'task6__1',
-                    'name': 'task6',
-                    'splits': [('task4', 1)]
-                },
-                {
-                    'id': 'task3',
-                    'name': 'task3'
-                },
-                {
-                    'id': 'task4__2',
-                    'name': 'task4',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task5__2',
-                    'name': 'task5',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task7__2',
-                    'name': 'task7',
-                    'barrier': '*',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task8__3',
-                    'name': 'task8',
-                    'splits': [('task4', 2), ('task8', 3)]
-                },
-                {
-                    'id': 'task6__2',
-                    'name': 'task6',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task8__1',
-                    'name': 'task8',
-                    'splits': [('task8', 1)]
+                    'id': 'task8',
+                    'splits': ['task4', 'task8']
                 }
             ],
             'adjacency': [
@@ -484,7 +386,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                         'criteria': ['<% succeeded() %>']
                     },
                     {
-                        'id': 'task8__1',
+                        'id': 'task8',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -492,7 +394,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task4__1',
+                        'id': 'task4',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -500,21 +402,21 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task5__1',
+                        'id': 'task4',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                [
+                    {
+                        'id': 'task5',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
-                        'id': 'task6__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                ],
-                [
-                    {
-                        'id': 'task7__1',
+                        'id': 'task6',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -522,16 +424,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task8__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': 'task7__1',
+                        'id': 'task7',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -539,7 +432,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task4__2',
+                        'id': 'task7',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -547,38 +440,7 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task5__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task6__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                ],
-                [
-                    {
-                        'id': 'task7__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8__3',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': 'task7__2',
+                        'id': 'task8',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -740,361 +602,6 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'task1',
-                    'name': 'task1'
-                },
-                {
-                    'id': 'task2',
-                    'name': 'task2'
-                },
-                {
-                    'id': 'task4__1',
-                    'name': 'task4',
-                    'splits': [('task4', 1)]
-                },
-                {
-                    'id': 'task5__1',
-                    'name': 'task5',
-                    'splits': [('task4', 1)]
-                },
-                {
-                    'id': 'task7__1',
-                    'name': 'task7',
-                    'splits': [('task4', 1), ('task7', 1)]
-                },
-                {
-                    'id': 'task8__1',
-                    'name': 'task8',
-                    'splits': [('task4', 1), ('task7', 1)]
-                },
-                {
-                    'id': 'task10__1',
-                    'name': 'task10',
-                    'barrier': '*',
-                    'splits': [('task4', 1), ('task7', 1)]
-                },
-                {
-                    'id': 'task9__1',
-                    'name': 'task9',
-                    'splits': [('task4', 1), ('task7', 1)]
-                },
-                {
-                    'id': 'task6__1',
-                    'name': 'task6',
-                    'splits': [('task4', 1)]
-                },
-                {
-                    'id': 'task7__2',
-                    'name': 'task7',
-                    'splits': [('task4', 1), ('task7', 2)]
-                },
-                {
-                    'id': 'task8__2',
-                    'name': 'task8',
-                    'splits': [('task4', 1), ('task7', 2)]
-                },
-                {
-                    'id': 'task10__2',
-                    'name': 'task10',
-                    'barrier': '*',
-                    'splits': [('task4', 1), ('task7', 2)]
-                },
-                {
-                    'id': 'task9__2',
-                    'name': 'task9',
-                    'splits': [('task4', 1), ('task7', 2)]
-                },
-                {
-                    'id': 'task3',
-                    'name': 'task3'
-                },
-                {
-                    'id': 'task4__2',
-                    'name': 'task4',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task5__2',
-                    'name': 'task5',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task7__3',
-                    'name': 'task7',
-                    'splits': [('task4', 2), ('task7', 3)]
-                },
-                {
-                    'id': 'task8__3',
-                    'name': 'task8',
-                    'splits': [('task4', 2), ('task7', 3)]
-                },
-                {
-                    'id': 'task10__3',
-                    'name': 'task10',
-                    'barrier': '*',
-                    'splits': [('task4', 2), ('task7', 3)]
-                },
-                {
-                    'id': 'task9__3',
-                    'name': 'task9',
-                    'splits': [('task4', 2), ('task7', 3)]
-                },
-                {
-                    'id': 'task6__2',
-                    'name': 'task6',
-                    'splits': [('task4', 2)]
-                },
-                {
-                    'id': 'task7__4',
-                    'name': 'task7',
-                    'splits': [('task4', 2), ('task7', 4)]
-                },
-                {
-                    'id': 'task8__4',
-                    'name': 'task8',
-                    'splits': [('task4', 2), ('task7', 4)]
-                },
-                {
-                    'id': 'task10__4',
-                    'name': 'task10',
-                    'barrier': '*',
-                    'splits': [('task4', 2), ('task7', 4)]
-                },
-                {
-                    'id': 'task9__4',
-                    'name': 'task9',
-                    'splits': [('task4', 2), ('task7', 4)]
-                }
-            ],
-            'adjacency': [
-                [
-                    {
-                        'id': 'task2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task3',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task4__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task5__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task6__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                ],
-                [
-                    {
-                        'id': 'task7__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task9__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task10__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': 'task10__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task7__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task9__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task10__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': 'task10__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task4__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task5__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task6__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                ],
-                [
-                    {
-                        'id': 'task7__3',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8__3',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task9__3',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task10__3',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': 'task10__3',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task7__4',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8__4',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task9__4',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task10__4',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [],
-                [
-                    {
-                        'id': 'task10__4',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ]
-            ],
-            'multigraph': True
-        }
-
-        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
-
-    def test_splits_extra_join(self):
-        wf_name = 'splits-join'
-
-        expected_wf_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
                     'id': 'task1'
                 },
                 {
@@ -1117,13 +624,20 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 },
                 {
                     'id': 'task7',
-                    'barrier': '*',
-                    'splits': ['task4']
+                    'splits': ['task4', 'task7']
                 },
                 {
                     'id': 'task8',
+                    'splits': ['task4', 'task7']
+                },
+                {
+                    'id': 'task9',
+                    'splits': ['task4', 'task7']
+                },
+                {
+                    'id': 'task10',
                     'barrier': '*',
-                    'splits': ['task4']
+                    'splits': ['task4', 'task7']
                 }
             ],
             'adjacency': [
@@ -1136,12 +650,6 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     },
                     {
                         'id': 'task3',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task8',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -1199,9 +707,492 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
+                    },
+                    {
+                        'id': 'task9',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                [
+                    {
+                        'id': 'task10',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                [
+                    {
+                        'id': 'task10',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
                     }
                 ],
                 []
+            ],
+            'multigraph': True
+        }
+
+        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
+
+    def test_very_many_splits(self):
+        wf_name = 'splits-very-many'
+
+        expected_wf_graph = {
+            'directed': True,
+            'graph': [],
+            'nodes': [
+                {
+                    'id': 'task1'
+                },
+                {
+                    'splits': [
+                        'task2'
+                    ],
+                    'id': 'task2'
+                },
+                {
+                    'splits': [
+                        'task2'
+                    ],
+                    'id': 'task3'
+                },
+                {
+                    'splits': [
+                        'task2'
+                    ],
+                    'id': 'task4'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5'
+                    ],
+                    'id': 'task5'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5'
+                    ],
+                    'id': 'task6'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5'
+                    ],
+                    'id': 'task7'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8'
+                    ],
+                    'id': 'task8'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9'
+                    ],
+                    'id': 'task9'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task14',
+                        'task17'
+                    ],
+                    'id': 'task18'
+                },
+                {
+                    'id': 'init'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task14',
+                        'task17'
+                    ],
+                    'id': 'task19'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9',
+                        'task11',
+                        'task14',
+                        'task17',
+                        'notify'
+                    ],
+                    'id': 'notify'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9',
+                        'task11'
+                    ],
+                    'id': 'task12'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9',
+                        'task11'
+                    ],
+                    'id': 'task13'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9'
+                    ],
+                    'id': 'task10'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9',
+                        'task11'
+                    ],
+                    'id': 'task11'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task14'
+                    ],
+                    'id': 'task16'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9',
+                        'task11',
+                        'task14',
+                        'task17'
+                    ],
+                    'id': 'task17'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9',
+                        'task11',
+                        'task14'
+                    ],
+                    'id': 'task14'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9',
+                        'task11',
+                        'task14'
+                    ],
+                    'id': 'task15'
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'ref': 0,
+                        'id': 'task2',
+                        'key': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 2,
+                        'id': 'task14',
+                        'key': 0,
+                        'criteria': ['<% failed() %>']
+                    },
+                    {
+                        'ref': 0,
+                        'id': 'task3',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and ctx().fork2 %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task5',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and not ctx().fork2 %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'task4',
+                        'key': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'task5',
+                        'key': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'task6',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and ctx().fork3 %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task7',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and not ctx().fork3 %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 2,
+                        'id': 'task14',
+                        'key': 0,
+                        'criteria': ['<% failed() %>']
+                    },
+                    {
+                        'ref': 0,
+                        'id': 'task8',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and ctx().fork4 %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task9',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and not ctx().fork4 %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 2,
+                        'id': 'task14',
+                        'key': 0,
+                        'criteria': ['<% failed() %>']
+                    },
+                    {
+                        'ref': 0,
+                        'id': 'task8',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and ctx().fork4 %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task9',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and not ctx().fork4 %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'task9',
+                        'key': 0,
+                        'criteria': []
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'task10',
+                        'key': 0,
+                        'criteria': ['<% not ctx().fork5 %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task11',
+                        'key': 0,
+                        'criteria': ['<% ctx().fork5 %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 1,
+                        'id': 'task18',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and not result() %>']
+                    },
+                    {
+                        'ref': 0,
+                        'id': 'task19',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and result() %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'notify',
+                        'key': 0,
+                        'criteria': ['<% ctx().fork1 %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'notify',
+                        'key': 1,
+                        'criteria': ['<% not ctx().fork1 %>']
+                    },
+                    {
+                        'ref': 0,
+                        'id': 'task1',
+                        'key': 0,
+                        'criteria': ['<% ctx().fork1 %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task2',
+                        'key': 0,
+                        'criteria': ['<% not ctx().fork1 %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'notify',
+                        'key': 0,
+                        'criteria': []
+                    }
+                ],
+                [],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'task13',
+                        'key': 0,
+                        'criteria': ['<% succeeded() %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task14',
+                        'key': 0,
+                        'criteria': ['<% failed() %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'task14',
+                        'key': 0,
+                        'criteria': ['<% succeeded() %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task14',
+                        'key': 1,
+                        'criteria': ['<% failed()  %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'task11',
+                        'key': 0,
+                        'criteria': []
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'task12',
+                        'key': 0,
+                        'criteria': ['<% succeeded() %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task14',
+                        'key': 0,
+                        'criteria': ['<% failed() %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 1,
+                        'id': 'task16',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and not result() %>']
+                    },
+                    {
+                        'ref': 0,
+                        'id': 'task17',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and result() %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 1,
+                        'id': 'notify',
+                        'key': 0,
+                        'criteria': ['<% not ctx().fork8 %>']
+                    },
+                    {
+                        'ref': 0,
+                        'id': 'task18',
+                        'key': 0,
+                        'criteria': ['<% ctx().fork8 %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'task15',
+                        'key': 0,
+                        'criteria': ['<% not ctx().fork6 %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task16',
+                        'key': 0,
+                        'criteria': ['<% ctx().fork6 %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'task16',
+                        'key': 0,
+                        'criteria': ['<% ctx().fork7 %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task17',
+                        'key': 0,
+                        'criteria': ['<% not ctx().fork7 %>']
+                    }
+                ]
             ],
             'multigraph': True
         }
@@ -1210,194 +1201,454 @@ class SplitWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
 
         expected_wf_ex_graph = {
             'directed': True,
-            'graph': {},
+            'graph': [],
             'nodes': [
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': 'task2',
-                    'name': 'task2'
+                    'splits': [
+                        'task2'
+                    ],
+                    'id': 'task2'
                 },
                 {
-                    'id': 'task4__1',
-                    'name': 'task4',
-                    'splits': [('task4', 1)]
+                    'splits': [
+                        'task2'
+                    ],
+                    'id': 'task3'
                 },
                 {
-                    'id': 'task5__1',
-                    'name': 'task5',
-                    'splits': [('task4', 1)]
+                    'splits': [
+                        'task2'
+                    ],
+                    'id': 'task4'
                 },
                 {
-                    'id': 'task7__1',
-                    'name': 'task7',
-                    'barrier': '*',
-                    'splits': [('task4', 1)]
+                    'splits': [
+                        'task2',
+                        'task5'
+                    ],
+                    'id': 'task5'
                 },
                 {
-                    'id': 'task8__1',
-                    'name': 'task8',
-                    'barrier': '*',
-                    'splits': [('task4', 1)]
+                    'splits': [
+                        'task2',
+                        'task5'
+                    ],
+                    'id': 'task6'
                 },
                 {
-                    'id': 'task6__1',
-                    'name': 'task6',
-                    'splits': [('task4', 1)]
+                    'splits': [
+                        'task2',
+                        'task5'
+                    ],
+                    'id': 'task7'
                 },
                 {
-                    'id': 'task3',
-                    'name': 'task3'
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8'
+                    ],
+                    'id': 'task8'
                 },
                 {
-                    'id': 'task4__2',
-                    'name': 'task4',
-                    'splits': [('task4', 2)]
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9'
+                    ],
+                    'id': 'task9'
                 },
                 {
-                    'id': 'task5__2',
-                    'name': 'task5',
-                    'splits': [('task4', 2)]
+                    'splits': [
+                        'task2',
+                        'task14',
+                        'task17'
+                    ],
+                    'id': 'task18'
                 },
                 {
-                    'id': 'task7__2',
-                    'name': 'task7',
-                    'barrier': '*',
-                    'splits': [('task4', 2)]
+                    'id': 'init'
                 },
                 {
-                    'id': 'task8__2',
-                    'name': 'task8',
-                    'barrier': '*',
-                    'splits': [('task4', 2)]
+                    'splits': [
+                        'task2',
+                        'task14',
+                        'task17'
+                    ],
+                    'id': 'task19'
                 },
                 {
-                    'id': 'task6__2',
-                    'name': 'task6',
-                    'splits': [('task4', 2)]
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9',
+                        'task11',
+                        'task14',
+                        'task17',
+                        'notify'
+                    ],
+                    'id': 'notify'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9',
+                        'task11'
+                    ],
+                    'id': 'task12'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9',
+                        'task11'
+                    ],
+                    'id': 'task13'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9'
+                    ],
+                    'id': 'task10'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9',
+                        'task11'
+                    ],
+                    'id': 'task11'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task14'
+                    ],
+                    'id': 'task16'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9',
+                        'task11',
+                        'task14',
+                        'task17'
+                    ],
+                    'id': 'task17'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9',
+                        'task11',
+                        'task14'
+                    ],
+                    'id': 'task14'
+                },
+                {
+                    'splits': [
+                        'task2',
+                        'task5',
+                        'task8',
+                        'task9',
+                        'task11',
+                        'task14'
+                    ],
+                    'id': 'task15'
                 }
             ],
             'adjacency': [
                 [
                     {
+                        'ref': 0,
                         'id': 'task2',
                         'key': 0,
-                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 2,
+                        'id': 'task14',
+                        'key': 0,
+                        'criteria': ['<% failed() %>']
                     },
                     {
+                        'ref': 0,
                         'id': 'task3',
                         'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
+                        'criteria': ['<% succeeded() and ctx().fork2 %>']
                     },
                     {
-                        'id': 'task8__1',
+                        'ref': 1,
+                        'id': 'task5',
                         'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
+                        'criteria': ['<% succeeded() and not ctx().fork2 %>']
+                    }
+                ],
+                [
                     {
-                        'id': 'task8__2',
-                        'key': 0,
                         'ref': 0,
+                        'id': 'task4',
+                        'key': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
-                        'id': 'task4__1',
-                        'key': 0,
                         'ref': 0,
+                        'id': 'task5',
+                        'key': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [
                     {
-                        'id': 'task5__1',
-                        'key': 0,
                         'ref': 0,
-                        'criteria': ['<% succeeded() %>']
+                        'id': 'task6',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and ctx().fork3 %>']
                     },
                     {
-                        'id': 'task6__1',
+                        'ref': 1,
+                        'id': 'task7',
                         'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                ],
-                [
-                    {
-                        'id': 'task7__1',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
+                        'criteria': ['<% succeeded() and not ctx().fork3 %>']
                     }
                 ],
                 [
                     {
-                        'id': 'task8__1',
+                        'ref': 2,
+                        'id': 'task14',
                         'key': 0,
+                        'criteria': ['<% failed() %>']
+                    },
+                    {
                         'ref': 0,
-                        'criteria': ['<% succeeded() %>']
+                        'id': 'task8',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and ctx().fork4 %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task9',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and not ctx().fork4 %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 2,
+                        'id': 'task14',
+                        'key': 0,
+                        'criteria': ['<% failed() %>']
+                    },
+                    {
+                        'ref': 0,
+                        'id': 'task8',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and ctx().fork4 %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task9',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and not ctx().fork4 %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'task9',
+                        'key': 0,
+                        'criteria': []
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'task10',
+                        'key': 0,
+                        'criteria': ['<% not ctx().fork5 %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task11',
+                        'key': 0,
+                        'criteria': ['<% ctx().fork5 %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 1,
+                        'id': 'task18',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and not result() %>']
+                    },
+                    {
+                        'ref': 0,
+                        'id': 'task19',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and result() %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'notify',
+                        'key': 0,
+                        'criteria': ['<% ctx().fork1 %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'notify',
+                        'key': 1,
+                        'criteria': ['<% not ctx().fork1 %>']
+                    },
+                    {
+                        'ref': 0,
+                        'id': 'task1',
+                        'key': 0,
+                        'criteria': ['<% ctx().fork1 %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task2',
+                        'key': 0,
+                        'criteria': ['<% not ctx().fork1 %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'notify',
+                        'key': 0,
+                        'criteria': []
                     }
                 ],
                 [],
                 [
                     {
-                        'id': 'task7__1',
-                        'key': 0,
                         'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task4__2',
+                        'id': 'task13',
                         'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task5__2',
-                        'key': 0,
-                        'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     },
                     {
-                        'id': 'task6__2',
+                        'ref': 1,
+                        'id': 'task14',
                         'key': 0,
+                        'criteria': ['<% failed() %>']
+                    }
+                ],
+                [
+                    {
                         'ref': 0,
+                        'id': 'task14',
+                        'key': 0,
                         'criteria': ['<% succeeded() %>']
                     },
-                ],
-                [
                     {
-                        'id': 'task7__2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
+                        'ref': 1,
+                        'id': 'task14',
+                        'key': 1,
+                        'criteria': ['<% failed()  %>']
                     }
                 ],
                 [
                     {
-                        'id': 'task8__2',
-                        'key': 0,
                         'ref': 0,
-                        'criteria': ['<% succeeded() %>']
+                        'id': 'task11',
+                        'key': 0,
+                        'criteria': []
                     }
                 ],
-                [],
                 [
                     {
-                        'id': 'task7__2',
-                        'key': 0,
                         'ref': 0,
+                        'id': 'task12',
+                        'key': 0,
                         'criteria': ['<% succeeded() %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task14',
+                        'key': 0,
+                        'criteria': ['<% failed() %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 1,
+                        'id': 'task16',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and not result() %>']
+                    },
+                    {
+                        'ref': 0,
+                        'id': 'task17',
+                        'key': 0,
+                        'criteria': ['<% succeeded() and result() %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 1,
+                        'id': 'notify',
+                        'key': 0,
+                        'criteria': ['<% not ctx().fork8 %>']
+                    },
+                    {
+                        'ref': 0,
+                        'id': 'task18',
+                        'key': 0,
+                        'criteria': ['<% ctx().fork8 %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'task15',
+                        'key': 0,
+                        'criteria': ['<% not ctx().fork6 %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task16',
+                        'key': 0,
+                        'criteria': ['<% ctx().fork6 %>']
+                    }
+                ],
+                [
+                    {
+                        'ref': 0,
+                        'id': 'task16',
+                        'key': 0,
+                        'criteria': ['<% ctx().fork7 %>']
+                    },
+                    {
+                        'ref': 1,
+                        'id': 'task17',
+                        'key': 0,
+                        'criteria': ['<% not ctx().fork7 %>']
                     }
                 ]
             ],

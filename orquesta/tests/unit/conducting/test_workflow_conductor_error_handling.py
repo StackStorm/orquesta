@@ -11,7 +11,6 @@
 # limitations under the License.
 
 from orquesta import conducting
-from orquesta import events
 from orquesta.specs import native as specs
 from orquesta import states
 from orquesta.tests.unit import base
@@ -71,7 +70,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_state(states.RUNNING)
 
-        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assert_next_task(conductor, has_next_task=False)
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)
 
@@ -93,7 +92,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_state(states.RUNNING)
 
-        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assert_next_task(conductor, has_next_task=False)
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
 
     def test_workflow_vars_seq_ref_error(self):
@@ -127,7 +126,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_state(states.RUNNING)
 
-        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assert_next_task(conductor, has_next_task=False)
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)
 
@@ -170,8 +169,9 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1',
-                'task_transition_id': 'task2__0'
+                'task_transition_id': 'task2__t0'
             }
         ]
 
@@ -182,9 +182,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # The workflow should fail on completion of task1 while evaluating task transition.
-        task_name = 'task1'
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
 
         # The workflow should fail with the expected errors.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
@@ -192,10 +190,11 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertListEqual(actual_errors, expected_errors)
 
         # There are two transitions in task1. The transition to task3 should be processed.
-        self.assertIn('task3', conductor.flow.staged)
+        staged_tasks = list(filter(lambda x: x['id'] == 'task3', conductor.flow.staged))
+        self.assertGreater(len(staged_tasks), 0)
 
         # Since the workflow failed, there should be no next tasks returned.
-        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assert_next_task(conductor, has_next_task=False)
 
     def test_multiple_task_transition_criteria_errors(self):
         wf_def = """
@@ -235,8 +234,9 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1',
-                'task_transition_id': 'task3__0'
+                'task_transition_id': 'task3__t0'
             },
             {
                 'type': 'error',
@@ -245,8 +245,9 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().fubar.foobar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#foobar"'
                 ),
+                'route': 0,
                 'task_id': 'task2',
-                'task_transition_id': 'task3__0'
+                'task_transition_id': 'task3__t0'
             }
         ]
 
@@ -258,10 +259,8 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
 
         # Manually complete task1 and task2. Although the workflow failed when
         # processing task1, task flow can still be updated for task2.
-        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow('task1', events.ActionExecutionEvent(states.SUCCEEDED))
-        conductor.update_task_flow('task2', events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow('task2', events.ActionExecutionEvent(states.SUCCEEDED))
+        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
+        self.forward_task_states(conductor, 'task2', [states.RUNNING, states.SUCCEEDED])
 
         # The workflow should fail with the expected errors.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
@@ -272,7 +271,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertNotIn('task3', conductor.flow.staged)
 
         # Since the workflow failed, there should be no next tasks returned.
-        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assert_next_task(conductor, has_next_task=False)
 
     def test_task_transition_publish_error(self):
         wf_def = """
@@ -307,8 +306,9 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1',
-                'task_transition_id': 'task2__0'
+                'task_transition_id': 'task2__t0'
             }
         ]
 
@@ -319,16 +319,16 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # The workflow should fail on completion of task1 while evaluating task transition.
-        task_name = 'task1'
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
 
         # The workflow should fail with the expected errors.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
         self.assertNotIn('task2', conductor.flow.staged)
-        self.assertListEqual(conductor.get_next_tasks(), [])
+
+        # Since the workflow failed, there should be no next tasks returned.
+        self.assert_next_task(conductor, has_next_task=False)
 
     def test_task_transition_publish_seq_ref_error(self):
         wf_def = """
@@ -365,8 +365,9 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().y.value %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#value"'
                 ),
+                'route': 0,
                 'task_id': 'task1',
-                'task_transition_id': 'task2__0'
+                'task_transition_id': 'task2__t0'
             }
         ]
 
@@ -377,16 +378,16 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # The workflow should fail on completion of task1 while evaluating task transition.
-        task_name = 'task1'
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
 
         # The workflow should fail with the expected errors.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
         self.assertNotIn('task2', conductor.flow.staged)
-        self.assertListEqual(conductor.get_next_tasks(), [])
+
+        # Since the workflow failed, there should be no next tasks returned.
+        self.assert_next_task(conductor, has_next_task=False)
 
     def test_get_start_tasks_with_task_action_error(self):
         wf_def = """
@@ -415,6 +416,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1'
             }
         ]
@@ -426,7 +428,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # The get_start_tasks method should not return any tasks.
-        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
@@ -460,6 +462,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1'
             }
         ]
@@ -471,7 +474,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # The get_next_tasks method should not return any tasks.
-        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
@@ -505,6 +508,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task2'
             }
         ]
@@ -516,12 +520,10 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # Manually complete task1.
-        task_name = 'task1'
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
 
         # The get_next_tasks method should not return any tasks.
-        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
@@ -557,6 +559,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1'
             }
         ]
@@ -568,7 +571,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # The get_start_tasks method should not return any tasks.
-        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
@@ -604,6 +607,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1'
             }
         ]
@@ -615,7 +619,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # The get_next_tasks method should not return any tasks.
-        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
@@ -651,6 +655,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task2'
             }
         ]
@@ -662,12 +667,10 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # Manually complete task1.
-        task_name = 'task1'
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
 
         # The get_next_tasks method should not return any tasks.
-        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
@@ -708,6 +711,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1'
             },
             {
@@ -717,6 +721,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().fubar.foobar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#foobar"'
                 ),
+                'route': 0,
                 'task_id': 'task2'
             }
         ]
@@ -728,7 +733,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # The get_start_tasks method should not return any tasks.
-        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
@@ -769,6 +774,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task1'
             },
             {
@@ -778,6 +784,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().fubar.foobar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#foobar"'
                 ),
+                'route': 0,
                 'task_id': 'task2'
             }
         ]
@@ -789,7 +796,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # The get_next_tasks method should not return any tasks.
-        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
@@ -826,6 +833,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().foobar.fubar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#fubar"'
                 ),
+                'route': 0,
                 'task_id': 'task2'
             },
             {
@@ -835,6 +843,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
                     '\'<% ctx().fubar.foobar %>\'. NoFunctionRegisteredException: '
                     'Unknown function "#property#foobar"'
                 ),
+                'route': 0,
                 'task_id': 'task3'
             }
         ]
@@ -846,12 +855,10 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # Manually complete task1.
-        task_name = 'task1'
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
 
         # The get_next_tasks method should not return any tasks.
-        self.assertListEqual(conductor.get_next_tasks(), [])
+        self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
@@ -888,9 +895,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # Manually complete task1.
-        task_name = 'task1'
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
 
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)
@@ -933,9 +938,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # Manually complete task1.
-        task_name = 'task1'
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.SUCCEEDED))
+        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
 
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)

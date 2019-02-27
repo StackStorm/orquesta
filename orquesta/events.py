@@ -268,9 +268,10 @@ class WorkflowExecutionEvent(ExecutionEvent):
 
 class TaskExecutionEvent(ExecutionEvent):
 
-    def __init__(self, task_id, state):
+    def __init__(self, task_id, route, state):
         super(TaskExecutionEvent, self).__init__('task_%s' % state, state)
         self.task_id = task_id
+        self.route = route
 
 
 class ActionExecutionEvent(ExecutionEvent):

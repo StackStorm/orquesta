@@ -11,7 +11,6 @@
 # limitations under the License.
 
 from orquesta import conducting
-from orquesta import events
 from orquesta.specs import native as specs
 from orquesta import states
 from orquesta.tests.unit import base
@@ -58,6 +57,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # Test that the action and input are rendered entirely from context.
+        task_route = 0
         next_task_name = 'task1'
         next_task_ctx = inputs
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
@@ -65,23 +65,23 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_task = self.format_task_item(
             next_task_name,
+            task_route,
             next_task_ctx,
             next_task_spec,
-            action_specs=next_task_action_specs
+            actions=next_task_action_specs
         )
 
         expected_tasks = [expected_task]
 
-        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
+        self.assert_task_list(conductor, conductor.get_next_tasks(), expected_tasks)
 
         # Test that the inline parameter in action is rendered.
         task_name = 'task1'
         next_task_name = 'task2'
         mock_result = action_input['message']
 
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED, result=mock_result)
-        conductor.update_task_flow(task_name, ac_ex_event)
+        self.forward_task_states(conductor, task_name, [states.RUNNING])
+        self.forward_task_states(conductor, task_name, [states.SUCCEEDED], results=[mock_result])
 
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         next_task_action_specs = [{'action': 'core.echo', 'input': {'message': mock_result}}]
@@ -91,23 +91,23 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_task = self.format_task_item(
             next_task_name,
+            task_route,
             next_task_ctx,
             next_task_spec,
-            action_specs=next_task_action_specs
+            actions=next_task_action_specs
         )
 
         expected_tasks = [expected_task]
 
-        self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
+        self.assert_task_list(conductor, conductor.get_next_tasks(), expected_tasks)
 
         # Test that the individual expression in input is rendered.
         task_name = 'task2'
         next_task_name = 'task3'
         mock_result = action_input['message']
 
-        conductor.update_task_flow(task_name, events.ActionExecutionEvent(states.RUNNING))
-        ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED, result=mock_result)
-        conductor.update_task_flow(task_name, ac_ex_event)
+        self.forward_task_states(conductor, task_name, [states.RUNNING])
+        self.forward_task_states(conductor, task_name, [states.SUCCEEDED], results=[mock_result])
 
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         next_task_action_specs = [{'action': 'core.echo', 'input': {'message': mock_result}}]
@@ -117,14 +117,15 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_task = self.format_task_item(
             next_task_name,
+            task_route,
             next_task_ctx,
             next_task_spec,
-            action_specs=next_task_action_specs
+            actions=next_task_action_specs
         )
 
         expected_tasks = [expected_task]
 
-        self.assert_task_list(conductor.get_next_tasks(task_name), expected_tasks)
+        self.assert_task_list(conductor, conductor.get_next_tasks(), expected_tasks)
 
     def test_with_items_rendering(self):
         wf_def = """
@@ -158,6 +159,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # Test that the items and context of a task is rendered from context.
+        task_route = 0
         next_task_name = 'task1'
         next_task_ctx = inputs
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
@@ -171,16 +173,17 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_task = self.format_task_item(
             next_task_name,
+            task_route,
             next_task_ctx,
             next_task_spec,
-            action_specs=next_task_action_specs[0:inputs['concurrency']],
+            actions=next_task_action_specs[0:inputs['concurrency']],
             items_count=len(inputs['xs']),
             items_concurrency=inputs['concurrency']
         )
 
         expected_tasks = [expected_task]
 
-        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
+        self.assert_task_list(conductor, conductor.get_next_tasks(), expected_tasks)
 
     def test_task_delay_rendering(self):
         wf_def = """
@@ -206,6 +209,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # Ensure the task delay is rendered correctly.
+        task_route = 0
         next_task_name = 'task1'
         next_task_ctx = {'delay': 180}
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
@@ -213,15 +217,16 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
         expected_task = self.format_task_item(
             next_task_name,
+            task_route,
             next_task_ctx,
             next_task_spec,
-            action_specs=next_task_action_specs,
-            task_delay=180
+            actions=next_task_action_specs,
+            delay=next_task_ctx['delay']
         )
 
         expected_tasks = [expected_task]
 
-        self.assert_task_list(conductor.get_next_tasks(), expected_tasks)
+        self.assert_task_list(conductor, conductor.get_next_tasks(), expected_tasks)
 
     def test_task_delay_rendering_bad_type(self):
         wf_def = """
@@ -242,7 +247,8 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
             {
                 'type': 'error',
                 'message': 'TypeError: The value of task delay is not type of integer.',
-                'task_id': 'task1'
+                'task_id': 'task1',
+                'route': 0
             }
         ]
 
@@ -255,6 +261,6 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         conductor.request_workflow_state(states.RUNNING)
 
         # Assert failed status and errors.
-        self.assert_task_list(conductor.get_next_tasks(), [])
+        self.assert_next_task(conductor, has_next_task=False)
         self.assertEqual(conductor.get_workflow_state(), states.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)

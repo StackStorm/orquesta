@@ -349,9 +349,8 @@ class TaskMappingSpec(base.MappingSpec):
 
         return False
 
-    def inspect_semantics(self, parent=None):
+    def detect_reserved_names(self, parent=None):
         result = []
-        traversed = []
 
         # Identify use of reserved words in task names.
         for task_name, task_spec in six.iteritems(self):
@@ -362,7 +361,12 @@ class TaskMappingSpec(base.MappingSpec):
                 entry = {'message': message, 'spec_path': spec_path, 'schema_path': schema_path}
                 result.append(entry)
 
+        return result
+
+    def detect_undefined_tasks(self, parent=None):
         # Identify the undefined task in task transitions.
+        result = []
+        traversed = []
         q = queue.Queue()
 
         for task in self.get_start_tasks():
@@ -403,6 +407,78 @@ class TaskMappingSpec(base.MappingSpec):
                         }
 
                         result.append(entry)
+
+        return result
+
+    def detect_unreachable_tasks(self, parent=None):
+        # Identify tasks that are not reachable.
+        result = []
+        staging = {}
+        q = queue.Queue()
+
+        # Traverse the tasks spec and prep data for evaluation.
+        for task_name, condition, task_transition_item_idx in self.get_start_tasks():
+            q.put((None, task_name, []))
+
+        while not q.empty():
+            prev_task_name, task_name, splits = q.get()
+
+            # If the task is undefined, then move on.
+            if task_name not in self:
+                continue
+
+            # Determine if the task is a split task and if it is in a cycle. If the task is a
+            # split task, keep track of where the split(s) occurs.
+            if self.is_split_task(task_name) and not self.in_cycle(task_name):
+                splits.append(task_name)
+
+            if task_name not in staging:
+                staging[task_name] = {
+                    'spec_path': parent.get('spec_path') + '.' + task_name,
+                    'schema_path': parent.get('schema_path') + '.patternProperties.^\\w+$',
+                    'join': self.is_join_task(task_name),
+                    'splits': [],
+                    'prev': []
+                }
+
+            staging[task_name]['splits'] = list(set(staging[task_name]['splits']) | set(splits))
+
+            if prev_task_name:
+                inbounds = list(set(staging[task_name]['prev']) | set([prev_task_name]))
+                staging[task_name]['prev'] = inbounds
+
+            next_tasks = self.get_next_tasks(task_name)
+
+            for next_task_name, condition, task_transition_item_idx in next_tasks:
+                if next_task_name not in staging or not self.in_cycle(next_task_name):
+                    q.put((task_name, next_task_name, list(splits)))
+
+        # Use the prepped data to identify tasks that are not reachable.
+        for task_name, meta in six.iteritems(staging):
+            if not meta['join']:
+                meta['reachable'] = True
+                continue
+
+            for prev_task_name in meta['prev']:
+                meta['reachable'] = (meta['splits'] == staging[prev_task_name]['splits'])
+
+                if not meta['reachable']:
+                    entry = {
+                        'message': 'The join task "%s" is unreachable.' % task_name,
+                        'spec_path': meta['spec_path'],
+                        'schema_path': meta['schema_path']
+                    }
+
+                    result.append(entry)
+
+                    break
+
+        return result
+
+    def inspect_semantics(self, parent=None):
+        result = self.detect_reserved_names(parent=parent)
+        result.extend(self.detect_undefined_tasks(parent=parent))
+        result.extend(self.detect_unreachable_tasks(parent=parent))
 
         return result
 

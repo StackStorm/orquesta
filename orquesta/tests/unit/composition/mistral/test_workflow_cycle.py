@@ -88,20 +88,16 @@ class CyclicWorkflowComposerTest(base.MistralWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'prep',
-                    'name': 'prep'
+                    'id': 'prep'
                 },
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': 'task2',
-                    'name': 'task2'
+                    'id': 'task2'
                 },
                 {
-                    'id': 'task3',
-                    'name': 'task3'
+                    'id': 'task3'
                 }
             ],
             'adjacency': [
@@ -261,28 +257,22 @@ class CyclicWorkflowComposerTest(base.MistralWorkflowComposerTest):
             'graph': {},
             'nodes': [
                 {
-                    'id': 'prep',
-                    'name': 'prep'
+                    'id': 'prep'
                 },
                 {
-                    'id': 'task1',
-                    'name': 'task1'
+                    'id': 'task1'
                 },
                 {
-                    'id': 'task2',
-                    'name': 'task2'
+                    'id': 'task2'
                 },
                 {
-                    'id': 'task3',
-                    'name': 'task3'
+                    'id': 'task3'
                 },
                 {
-                    'id': 'task4',
-                    'name': 'task4'
+                    'id': 'task4'
                 },
                 {
-                    'id': 'task5',
-                    'name': 'task5'
+                    'id': 'task5'
                 }
             ],
             'adjacency': [
