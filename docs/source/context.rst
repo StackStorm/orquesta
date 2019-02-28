@@ -158,3 +158,56 @@ Since branch 1 will complete first, ``x=123`` will be written to the context dic
       task4:
         join: all
         action: core.noop
+
+Dynamic Action Execution
+------------------------
+
+Sometimes the name of the action to execute is not known when writing a workflow. Instead,
+the name of the action needs to be determined dynamically at runtime. This is possible with
+Orquesta by placing an expression in the ``action`` property of a ``task``. The expression
+for the ``action`` property will be rendered first, then the action will be executed given
+the other properties of the task. Example:
+
+.. code-block:: yaml
+    version: 1.0
+
+    input:
+      - dynamic_action
+      - data
+
+    tasks:
+      task1:
+        action: "{{ ctx().dynamic_action }}"
+        input:
+          x: "{{ ctx().data }}"
+
+In the example above, the workflow takes a parameter ``dynamic_action``, this is a string of
+the full action ref (``<pack>.<action>``, ex: ``core.local``) to execute.
+
+Additionally, action inputs can be dynamically assigned using expresssions:
+
+.. code-block:: yaml
+    version: 1.0
+
+    input:
+      - dynamic_action
+      - dynamic_input
+
+    tasks:
+      task1:
+        action: "{{ ctx().dynamic_action }}"
+        input: "{{ ctx().dynamic_input }}"
+
+In the example above, the workflow adds a parameter ``dynamic_input`` of type ``object``.
+The ``dynamic_input`` is then assigned directly to the tasks's ``input``, allowing any
+combination of parameters to be passed to the dynamic action. One might invoke this workflow
+using the following:
+
+.. code-block:: sh
+    st2 run default.dynamic_workflow dynamic_action='core.local' dynamic_input='{"cmd": "date"}'
+
+This is effectively the same as executing:
+
+.. code-block:: sh
+    st2 run core.local cmd=date
+
