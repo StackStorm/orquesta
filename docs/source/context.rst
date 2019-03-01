@@ -169,6 +169,7 @@ for the ``action`` property will be rendered first, then the action will be exec
 the other properties of the task. Example:
 
 .. code-block:: yaml
+
     version: 1.0
 
     input:
@@ -187,6 +188,7 @@ the full action ref (``<pack>.<action>``, ex: ``core.local``) to execute.
 Additionally, action inputs can be dynamically assigned using expresssions:
 
 .. code-block:: yaml
+
     version: 1.0
 
     input:
@@ -204,10 +206,12 @@ combination of parameters to be passed to the dynamic action. One might invoke t
 using the following:
 
 .. code-block:: sh
+
     st2 run default.dynamic_workflow dynamic_action='core.local' dynamic_input='{"cmd": "date"}'
 
 This is effectively the same as executing:
 
 .. code-block:: sh
+
     st2 run core.local cmd=date
 
