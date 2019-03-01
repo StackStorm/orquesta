@@ -39,9 +39,19 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             ('task7', 2)
         ]
 
+        expected_term_tasks = [
+            ('task7', 1),
+            ('task7', 2)
+        ]
+
         self.assert_spec_inspection(wf_name)
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq, expected_routes)
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            expected_routes=expected_routes,
+            expected_term_tasks=expected_term_tasks
+        )
 
     def test_splits(self):
         wf_name = 'splits'
@@ -72,9 +82,20 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             ('task8', 5)
         ]
 
+        expected_term_tasks = [
+            ('task8', 1),
+            ('task8', 4),
+            ('task8', 5)
+        ]
+
         self.assert_spec_inspection(wf_name)
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq, expected_routes)
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            expected_routes=expected_routes,
+            expected_term_tasks=expected_term_tasks
+        )
 
     def test_nested_splits(self):
         wf_name = 'splits-nested'
@@ -117,9 +138,21 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             ('task10', 6)
         ]
 
+        expected_term_tasks = [
+            ('task10', 3),
+            ('task10', 4),
+            ('task10', 5),
+            ('task10', 6)
+        ]
+
         self.assert_spec_inspection(wf_name)
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq, expected_routes)
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            expected_routes=expected_routes,
+            expected_term_tasks=expected_term_tasks
+        )
 
     def test_splits_mixed(self):
         wf_name = 'splits-mixed'
@@ -143,9 +176,19 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             ('task5', 4)
         ]
 
+        expected_term_tasks = [
+            ('task5', 3),
+            ('task5', 4)
+        ]
+
         self.assert_spec_inspection(wf_name)
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq, expected_routes)
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            expected_routes=expected_routes,
+            expected_term_tasks=expected_term_tasks
+        )
 
     def test_splits_mixed_alt_branch(self):
         wf_name = 'splits-mixed'
@@ -180,13 +223,19 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             states.SUCCEEDED    # task5, 4
         ]
 
+        expected_term_tasks = [
+            ('task5', 3),
+            ('task5', 4)
+        ]
+
         self.assert_spec_inspection(wf_name)
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            expected_routes,
-            mock_states=mock_states
+            mock_states=mock_states,
+            expected_routes=expected_routes,
+            expected_term_tasks=expected_term_tasks
         )
 
     def test_splits_multiple_transition(self):
@@ -225,9 +274,21 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             ('task7', 6)
         ]
 
+        expected_term_tasks = [
+            ('task7', 3),
+            ('task7', 4),
+            ('task7', 5),
+            ('task7', 6)
+        ]
+
         self.assert_spec_inspection(wf_name)
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq, expected_routes)
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            expected_routes=expected_routes,
+            expected_term_tasks=expected_term_tasks
+        )
 
     def test_very_many_splits(self):
         wf_name = 'splits-very-many'
@@ -262,9 +323,19 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             ('notify', 8)
         ]
 
+        expected_term_tasks = [
+            ('notify', 1),
+            ('notify', 8)
+        ]
+
         self.assert_spec_inspection(wf_name)
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq, expected_routes)
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            expected_routes=expected_routes,
+            expected_term_tasks=expected_term_tasks
+        )
 
     def test_very_many_splits_alt(self):
         wf_name = 'splits-very-many'
@@ -343,6 +414,11 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             ('notify', 9)
         ]
 
+        expected_term_tasks = [
+            ('notify', 1),
+            ('notify', 9)
+        ]
+
         self.assert_spec_inspection(wf_name)
 
         self.assert_conducting_sequences(
@@ -350,5 +426,6 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             expected_task_seq,
             inputs=inputs,
             mock_results=mock_results,
-            expected_routes=expected_routes
+            expected_routes=expected_routes,
+            expected_term_tasks=expected_term_tasks
         )

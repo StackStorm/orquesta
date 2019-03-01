@@ -37,28 +37,28 @@ class TaskFlow(object):
 
     def __init__(self):
         self.routes = list()
+        self.staged = list()
         self.tasks = dict()
         self.sequence = list()
         self.contexts = list()
-        self.staged = list()
 
     def serialize(self):
         return {
             'routes': copy.deepcopy(self.routes),
+            'staged': copy.deepcopy(self.staged),
             'tasks': copy.deepcopy(self.tasks),
             'sequence': copy.deepcopy(self.sequence),
-            'contexts': copy.deepcopy(self.contexts),
-            'staged': copy.deepcopy(self.staged)
+            'contexts': copy.deepcopy(self.contexts)
         }
 
     @classmethod
     def deserialize(cls, data):
         instance = cls()
         instance.routes = copy.deepcopy(data.get('routes', list()))
+        instance.staged = copy.deepcopy(data.get('staged', dict()))
         instance.tasks = copy.deepcopy(data.get('tasks', dict()))
         instance.sequence = copy.deepcopy(data.get('sequence', list()))
         instance.contexts = copy.deepcopy(data.get('contexts', list()))
-        instance.staged = copy.deepcopy(data.get('staged', dict()))
 
         return instance
 
@@ -69,6 +69,9 @@ class TaskFlow(object):
 
     def get_tasks_by_state(self, states):
         return [t for t in self.sequence if t['state'] in states]
+
+    def get_terminal_tasks(self):
+        return [t for t in self.sequence if t.get('term', False)]
 
     @property
     def has_active_tasks(self):
@@ -97,10 +100,15 @@ class TaskFlow(object):
     def has_staged_tasks(self):
         return len(self.get_staged_tasks()) > 0
 
-    def add_staged_task(self, task_id, ctxs, route, prev=None, ready=True):
+    def add_staged_task(self, task_id, route, ctxs=None, prev=None, ready=True):
+        if not ctxs:
+            ctxs = [0]
+
         entry = {
             'id': task_id,
-            'ctxs': ctxs,
+            'ctxs': {
+                'in': ctxs
+            },
             'route': route,
             'prev': prev if isinstance(prev, dict) else {},
             'ready': ready
@@ -243,7 +251,7 @@ class WorkflowConductor(object):
             # Proceed if there is no issue with rendering of inputs and vars.
             if self.get_workflow_state() not in states.ABENDED_STATES:
                 # Set the initial workflow context.
-                self._flow.contexts.append({'srcs': [], 'value': init_ctx})
+                self._flow.contexts.append(init_ctx)
 
                 # Set the initial execution route.
                 self._flow.routes.append([])
@@ -251,7 +259,7 @@ class WorkflowConductor(object):
                 # Identify the starting tasks and set the pointer to the initial context entry.
                 for task_node in self.graph.roots:
                     ctxs, route = [0], 0
-                    self._flow.add_staged_task(task_node['id'], ctxs, route, ready=True)
+                    self._flow.add_staged_task(task_node['id'], route, ctxs=ctxs, ready=True)
 
         return self._flow
 
@@ -345,50 +353,42 @@ class WorkflowConductor(object):
     def get_workflow_initial_context(self):
         return copy.deepcopy(self.flow.contexts[0])
 
-    def _get_workflow_terminal_context_idx(self):
-        query = filter(lambda x: 'term' in x[1] and x[1]['term'], enumerate(self.flow.contexts))
-        match = list(query)
-
-        if not match or len(match) <= 0:
-            return None
-
-        if match and len(match) != 1:
-            raise exc.WorkflowContextError('More than one final workflow context found.')
-
-        return match[0][0]
-
     def get_workflow_terminal_context(self):
         if self.get_workflow_state() not in states.COMPLETED_STATES:
             raise exc.WorkflowContextError('Workflow is not in completed state.')
 
-        term_ctx_idx = self._get_workflow_terminal_context_idx()
+        wf_term_ctx = {}
 
-        if not term_ctx_idx:
-            raise exc.WorkflowContextError('Unable to determine the final workflow context.')
+        term_tasks = self.flow.get_terminal_tasks()
 
-        return copy.deepcopy(self.flow.contexts[term_ctx_idx])
+        if not term_tasks:
+            return wf_term_ctx
 
-    def _update_workflow_terminal_context(self, ctx_diff, task_flow_idx):
-        term_ctx_idx = self._get_workflow_terminal_context_idx()
+        first_term_task = term_tasks[0:1][0]
+        other_term_tasks = term_tasks[1:]
 
-        if not term_ctx_idx:
-            term_ctx_val = copy.deepcopy(ctx_diff)
-            term_ctx_entry = {'src': [task_flow_idx], 'term': True, 'value': term_ctx_val}
-            self.flow.contexts.append(term_ctx_entry)
-            term_ctx_idx = len(self.flow.contexts) - 1
-        else:
-            term_ctx_entry = self.flow.contexts[term_ctx_idx]
-            if task_flow_idx not in term_ctx_entry['src']:
-                term_ctx_val = dx.merge_dicts(term_ctx_entry['value'], ctx_diff, True)
-                term_ctx_entry['src'].append(task_flow_idx)
-                term_ctx_entry['value'] = term_ctx_val
+        wf_term_ctx = self.get_task_context(first_term_task['ctxs']['in'])
+
+        for task in other_term_tasks:
+            # Remove the initial context since the first task processed above already
+            # inclulded that and we only want to apply the differences.
+            in_ctx_idxs = copy.deepcopy(task['ctxs']['in'])
+            in_ctx_idxs.remove(0)
+
+            wf_term_ctx = dx.merge_dicts(
+                wf_term_ctx,
+                self.get_task_context(in_ctx_idxs),
+                overwrite=True
+            )
+
+        return wf_term_ctx
 
     def _render_workflow_outputs(self):
         wf_state = self.get_workflow_state()
 
         # Render workflow outputs if workflow is completed.
         if wf_state in states.COMPLETED_STATES and not self._outputs:
-            workflow_ctx = self.get_workflow_terminal_context()['value']
+            workflow_ctx = self.get_workflow_terminal_context()
             flow_ctx = {'__flow': self.flow.serialize()}
             workflow_ctx = dx.merge_dicts(workflow_ctx, flow_ctx, True)
             outputs, errors = self.spec.render_output(workflow_ctx)
@@ -433,7 +433,7 @@ class WorkflowConductor(object):
 
     def get_task(self, task_id, route):
         try:
-            task_ctx = self.get_task_initial_context(task_id, route)['value']
+            task_ctx = self.get_task_initial_context(task_id, route)
         except ValueError:
             task_ctx = self.get_workflow_initial_context()
 
@@ -566,14 +566,19 @@ class WorkflowConductor(object):
 
         return self.flow.sequence[task_flow_seq_idx] if task_flow_seq_idx is not None else None
 
-    def add_task_flow(self, task_id, route, in_ctx_idx=None, prev=None):
+    def add_task_flow(self, task_id, route, in_ctx_idxs=None, prev=None):
         if not self.graph.has_task(task_id):
             raise exc.InvalidTask(task_id)
+
+        if not in_ctx_idxs:
+            in_ctx_idxs = [0]
 
         task_flow_entry = {
             'id': task_id,
             'route': route,
-            'ctx': in_ctx_idx,
+            'ctxs': {
+                'in': in_ctx_idxs
+            },
             'prev': prev or {},
             'next': {}
         }
@@ -585,7 +590,6 @@ class WorkflowConductor(object):
         return task_flow_entry
 
     def update_task_flow(self, task_id, route, event):
-        in_ctx_idx = 0
         engine_event_queue = queue.Queue()
 
         # Throw exception if not expected event type.
@@ -604,23 +608,12 @@ class WorkflowConductor(object):
         if not staged_task and not task_flow_entry:
             raise exc.InvalidTaskFlowEntry(task_id)
 
-        # Get the incoming context from the staged task.
-        if staged_task:
-            in_ctx_idxs = staged_task['ctxs']
-
-            if len(in_ctx_idxs) <= 0 or all(x == in_ctx_idxs[0] for x in in_ctx_idxs):
-                in_ctx_idx = in_ctx_idxs[0]
-            else:
-                new_ctx_entry = self._converge_task_contexts(in_ctx_idxs)
-                self.flow.contexts.append(new_ctx_entry)
-                in_ctx_idx = len(self.flow.contexts) - 1
-
         # Create new task flow entry if it does not exist.
         if not task_flow_entry:
             task_flow_entry = self.add_task_flow(
                 task_id,
                 staged_task['route'],
-                in_ctx_idx=in_ctx_idx,
+                in_ctx_idxs=staged_task['ctxs']['in'],
                 prev=staged_task['prev']
             )
 
@@ -632,7 +625,7 @@ class WorkflowConductor(object):
             task_flow_entry = self.add_task_flow(
                 task_id,
                 staged_task['route'],
-                in_ctx_idx=in_ctx_idx,
+                in_ctx_idxs=staged_task['ctxs']['in'],
                 prev=staged_task['prev']
             )
 
@@ -674,8 +667,8 @@ class WorkflowConductor(object):
             self.flow.remove_staged_task(task_id, route)
 
             # Set current task in the context.
-            in_ctx_idx = task_flow_entry['ctx']
-            in_ctx_val = self.flow.contexts[in_ctx_idx]['value']
+            in_ctx_idxs = task_flow_entry['ctxs']['in']
+            in_ctx_val = self.get_task_context(in_ctx_idxs)
             current_task = {'id': task_id, 'route': route, 'result': task_result}
             current_ctx = ctx.set_current_task(in_ctx_val, current_task)
 
@@ -688,9 +681,9 @@ class WorkflowConductor(object):
             # Identify task transitions for the current completed task.
             task_transitions = self.graph.get_next_transitions(task_id)
 
-            # Update workflow context when there is no transitions.
+            # Mark task as terminal when there is no transitions.
             if not task_transitions:
-                self._update_workflow_terminal_context(in_ctx_val, task_flow_idx)
+                task_flow_entry['term'] = True
 
             # Iterate thru each outbound task transitions.
             for task_transition in task_transitions:
@@ -714,8 +707,10 @@ class WorkflowConductor(object):
                 if task_flow_entry['next'][task_transition_id]:
                     next_task_node = self.graph.get_task(task_transition[1])
                     next_task_id = next_task_node['id']
+                    new_ctx_idx = None
 
-                    out_ctx_val, errors = task_spec.finalize_context(
+                    # Get and process new context for the task transition.
+                    out_ctx, new_ctx, errors = task_spec.finalize_context(
                         next_task_id,
                         task_transition,
                         copy.deepcopy(current_ctx)
@@ -726,11 +721,20 @@ class WorkflowConductor(object):
                         self.request_workflow_state(states.FAILED)
                         continue
 
-                    if out_ctx_val != in_ctx_val:
-                        self.flow.contexts.append({'srcs': [task_flow_idx], 'value': out_ctx_val})
-                        out_ctx_idx = len(self.flow.contexts) - 1
-                    else:
-                        out_ctx_idx = in_ctx_idx
+                    out_ctx_idxs = copy.deepcopy(task_flow_entry['ctxs']['in'])
+
+                    if new_ctx:
+                        self.flow.contexts.append(new_ctx)
+                        new_ctx_idx = len(self.flow.contexts) - 1
+
+                        # Add to the list of contexts for the next task in this transition.
+                        out_ctx_idxs.append(new_ctx_idx)
+
+                        # Record the outgoing context for this task transition.
+                        if 'out' not in task_flow_entry['ctxs']:
+                            task_flow_entry['ctxs']['out'] = {}
+
+                        task_flow_entry['ctxs']['out'] = {task_transition_id: new_ctx_idx}
 
                     # Stage the next task if it is not in staging.
                     next_task_route = self._evaluate_route(task_transition, route)
@@ -741,14 +745,22 @@ class WorkflowConductor(object):
                         (task_id, str(task_transition[2]))
                     )
 
+                    # If the next task is already staged.
                     if staged_next_task:
-                        staged_next_task['ctxs'].append(out_ctx_idx)
+                        # Remove the root context to avoid overwriting vars.
+                        out_ctx_idxs.remove(0)
+
+                        # Extend the outgoing context from this task.
+                        staged_next_task['ctxs']['in'].extend(out_ctx_idxs)
+
+                        # Add a backref for the current task in the next task.
                         staged_next_task['prev'][backref] = task_flow_idx
                     else:
+                        # Otherwise create a new entry in staging for the next task.
                         staged_next_task = self.flow.add_staged_task(
                             next_task_id,
-                            [out_ctx_idx],
                             next_task_route,
+                            ctxs=out_ctx_idxs,
                             prev={backref: task_flow_idx},
                             ready=False
                         )
@@ -776,10 +788,7 @@ class WorkflowConductor(object):
 
         # Render workflow output if workflow is completed.
         if self.get_workflow_state() in states.COMPLETED_STATES:
-            in_ctx_idx = task_flow_entry['ctx']
-            in_ctx_val = self.flow.contexts[in_ctx_idx]['value']
-            task_flow_idx = self._get_task_flow_idx(task_id, route)
-            self._update_workflow_terminal_context(in_ctx_val, task_flow_idx)
+            task_flow_entry['term'] = True
             self._render_workflow_outputs()
 
         return task_flow_entry
@@ -811,31 +820,24 @@ class WorkflowConductor(object):
 
         return len(self.flow.routes) - 1
 
-    def _converge_task_contexts(self, ctx_idxs):
-        if len(ctx_idxs) <= 0 or all(x == ctx_idxs[0] for x in ctx_idxs):
-            return self.flow.contexts[ctx_idxs[0]]
+    def get_task_context(self, ctx_idxs):
+        ctx = {}
 
-        ctx_srcs = []
-        merged_ctx = {}
+        for ctx_idx in ctx_idxs:
+            ctx = dx.merge_dicts(ctx, self.flow.contexts[ctx_idx], overwrite=True)
 
-        for i in ctx_idxs:
-            ctx_entry = self.flow.contexts[i]
-            merged_ctx = dx.merge_dicts(merged_ctx, copy.deepcopy(ctx_entry['value']), True)
-            ctx_srcs.extend(ctx_entry['srcs'])
-
-        return {'srcs': list(set(ctx_srcs)), 'value': merged_ctx}
+        return ctx
 
     def get_task_initial_context(self, task_id, route):
-        task_flow_entry = self.get_task_flow_entry(task_id, route)
         staged_task = self.flow.get_staged_task(task_id, route)
 
         if staged_task:
-            in_ctx_idxs = staged_task['ctxs']
-            return self._converge_task_contexts(in_ctx_idxs)
+            return self.get_task_context(staged_task['ctxs']['in'])
+
+        task_flow_entry = self.get_task_flow_entry(task_id, route)
 
         if task_flow_entry:
-            in_ctx_idx = task_flow_entry.get('ctx')
-            return copy.deepcopy(self.flow.contexts[in_ctx_idx])
+            return self.get_task_context(task_flow_entry['ctxs']['in'])
 
         raise ValueError('Unable to determine context for task "%s".' % task_id)
 

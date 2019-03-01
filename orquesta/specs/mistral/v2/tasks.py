@@ -162,7 +162,7 @@ class TaskSpec(base.Spec):
         errors = []
 
         if not re.match(expected_criteria_pattern, criteria[0]):
-            return in_ctx, errors
+            return in_ctx, new_ctx, errors
 
         task_publish_spec = getattr(self, 'publish') or {}
 
@@ -180,7 +180,7 @@ class TaskSpec(base.Spec):
             if key.startswith('__'):
                 out_ctx.pop(key)
 
-        return out_ctx, errors
+        return out_ctx, new_ctx, errors
 
 
 class TaskMappingSpec(base.MappingSpec):

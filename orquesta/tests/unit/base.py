@@ -223,7 +223,9 @@ class WorkflowConductorTest(WorkflowComposerTest):
 
     def assert_conducting_sequences(self, wf_name, expected_task_seq, expected_routes=None,
                                     inputs=None, mock_states=None, mock_results=None,
-                                    expected_workflow_state=None, expected_output=None):
+                                    expected_workflow_state=None, expected_output=None,
+                                    expected_term_tasks=None):
+
         if not expected_routes:
             expected_routes = [[]]
 
@@ -307,6 +309,16 @@ class WorkflowConductorTest(WorkflowComposerTest):
 
         if expected_output is not None:
             self.assertDictEqual(conductor.get_workflow_output(), expected_output)
+
+        if expected_term_tasks:
+            expected_term_tasks = [
+                (task, 0) if not isinstance(task, tuple) else task
+                for task in expected_term_tasks
+            ]
+
+            term_tasks = conductor.flow.get_terminal_tasks()
+            actual_term_tasks = [(task['id'], task['route']) for task in term_tasks]
+            self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
     def assert_workflow_state(self, wf_name, mock_flow, expected_wf_states, conductor=None):
         if not conductor:

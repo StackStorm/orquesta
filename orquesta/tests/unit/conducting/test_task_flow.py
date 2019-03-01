@@ -88,7 +88,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
 
         task_route = 0
         task_name = 'task1'
-        conductor.add_task_flow(task_name, task_route, in_ctx_idx=0)
+        conductor.add_task_flow(task_name, task_route)
 
         expected_task_flow_idx = 0
         actual_task_flow_idx = conductor._get_task_flow_idx(task_name, task_route)
@@ -97,7 +97,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         expected_task_flow_entry = {
             'id': task_name,
             'route': task_route,
-            'ctx': 0,
+            'ctxs': {'in': [0]},
             'next': {},
             'prev': {}
         }
@@ -119,7 +119,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         expected_task_flow_entry = {
             'id': task_name,
             'route': task_route,
-            'ctx': None,
+            'ctxs': {'in': [0]},
             'next': {},
             'prev': {}
         }
@@ -141,7 +141,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         expected_task_flow_entry = {
             'id': task_name,
             'route': task_route,
-            'ctx': 0,
+            'ctxs': {'in': [0]},
             'state': 'running',
             'next': {},
             'prev': {}
@@ -155,7 +155,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         expected_task_flow_entry = {
             'id': task_name,
             'route': task_route,
-            'ctx': 0,
+            'ctxs': {'in': [0]},
             'state': 'succeeded',
             'next': {
                 'task2__t0': True,
@@ -181,7 +181,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         expected_task_flow_entry = {
             'id': task_name,
             'route': task_route,
-            'ctx': 0,
+            'ctxs': {'in': [0]},
             'state': 'running',
             'next': {},
             'prev': {}
@@ -200,13 +200,14 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         expected_task_flow_entry = {
             'id': task_name,
             'route': task_route,
-            'ctx': 0,
+            'ctxs': {'in': [0]},
             'state': 'failed',
             'next': {
                 'task2__t0': False,
                 'task5__t0': False
             },
-            'prev': {}
+            'prev': {},
+            'term': True
         }
 
         actual_task_flow_entry = conductor.get_task_flow_entry(task_name, task_route)
@@ -270,7 +271,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         expected_task_flow_entry = {
             'id': task_name,
             'route': task_route,
-            'ctx': 0,
+            'ctxs': {'in': [0]},
             'state': 'requested',
             'next': {},
             'prev': {}
@@ -286,7 +287,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         expected_task_flow_entry = {
             'id': task_name,
             'route': task_route,
-            'ctx': 0,
+            'ctxs': {'in': [0]},
             'state': 'requested',
             'next': {},
             'prev': {}
@@ -310,7 +311,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         expected_task_flow_entry = {
             'id': task_name,
             'route': task_route,
-            'ctx': 0,
+            'ctxs': {'in': [0]},
             'state': 'running',
             'next': {},
             'prev': {}
@@ -324,7 +325,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         expected_task_flow_entry = {
             'id': task_name,
             'route': task_route,
-            'ctx': 0,
+            'ctxs': {'in': [0]},
             'state': 'succeeded',
             'next': {
                 'task2__t0': True,
@@ -350,7 +351,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         expected_task_flow_entry = {
             'id': task_name,
             'route': task_route,
-            'ctx': 0,
+            'ctxs': {'in': [0]},
             'state': 'running',
             'next': {},
             'prev': {
@@ -366,7 +367,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         expected_task_flow_entry = {
             'id': task_name,
             'route': task_route,
-            'ctx': 0,
+            'ctxs': {'in': [0]},
             'state': 'succeeded',
             'next': {
                 'task3__t0': True
@@ -410,7 +411,9 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             {
                 'id': 'task1',
                 'route': task_route,
-                'ctx': 0,
+                'ctxs': {
+                    'in': [0]
+                },
                 'state': 'succeeded',
                 'next': {
                     'task2__t0': True,
@@ -421,7 +424,9 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             {
                 'id': 'task2',
                 'route': task_route,
-                'ctx': 0,
+                'ctxs': {
+                    'in': [0]
+                },
                 'state': 'succeeded',
                 'next': {
                     'task3__t0': True
@@ -433,7 +438,9 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             {
                 'id': 'task3',
                 'route': task_route,
-                'ctx': 0,
+                'ctxs': {
+                    'in': [0]
+                },
                 'state': 'succeeded',
                 'next': {
                     'task4__t0': True
@@ -445,7 +452,9 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             {
                 'id': 'task4',
                 'route': task_route,
-                'ctx': 0,
+                'ctxs': {
+                    'in': [0]
+                },
                 'state': 'succeeded',
                 'next': {
                     'task2__t0': True
@@ -457,7 +466,9 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             {
                 'id': 'task2',
                 'route': task_route,
-                'ctx': 0,
+                'ctxs': {
+                    'in': [0]
+                },
                 'state': 'running',
                 'next': {},
                 'prev': {
