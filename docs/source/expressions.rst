@@ -1,9 +1,9 @@
 Expressions
 ===========
 
-Expressions can be employed almost anywhere in the workflow definition, from assigning value to
-action input, to evaluating criteria in the task transition, and data transformation when publishing
-variables.
+Expressions can be employed almost anywhere in the workflow definition, from the action name,
+to assigning value to action input, to evaluating criteria in the task transition,
+and data transformation when publishing variables.
 
 Here are some of the things that an expression can accomplish:
 
@@ -16,6 +16,7 @@ Here are some of the things that an expression can accomplish:
 
 Applied to workflows, here are some use cases:
 
+* Define what action to execute.
 * Define input values to action execution.
 * Define criteria for task transition.
 * Publish variables to the runtime context on task completion.
