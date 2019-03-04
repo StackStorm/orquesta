@@ -242,7 +242,7 @@ class TaskSpec(base.Spec):
             if key.startswith('__'):
                 out_ctx.pop(key)
 
-        return out_ctx, errors
+        return out_ctx, new_ctx, errors
 
 
 class TaskMappingSpec(base.MappingSpec):

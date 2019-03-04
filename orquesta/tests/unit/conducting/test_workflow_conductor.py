@@ -102,8 +102,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         default_inputs = {'a': None, 'b': False}
         init_ctx_value = dx.merge_dicts(default_inputs, user_inputs, True)
         init_ctx_value = dx.merge_dicts(init_ctx_value, parent_context, True)
-        expected_ctx_entry = {'srcs': [], 'value': init_ctx_value}
-        self.assertDictEqual(conductor.get_workflow_initial_context(), expected_ctx_entry)
+        self.assertDictEqual(conductor.get_workflow_initial_context(), init_ctx_value)
 
         return conductor
 
@@ -127,13 +126,11 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
                     []
                 ],
                 'staged': [
-                    {'id': 'task1', 'route': 0, 'prev': {}, 'ctxs': [0], 'ready': True}
+                    {'id': 'task1', 'route': 0, 'prev': {}, 'ctxs': {'in': [0]}, 'ready': True}
                 ],
                 'tasks': {},
                 'sequence': [],
-                'contexts': [
-                    {'srcs': [], 'value': {'a': None, 'b': False}}
-                ]
+                'contexts': [{'a': None, 'b': False}]
             }
         }
 
@@ -170,13 +167,11 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
                     []
                 ],
                 'staged': [
-                    {'id': 'task1', 'route': 0, 'prev': {}, 'ctxs': [0], 'ready': True}
+                    {'id': 'task1', 'route': 0, 'prev': {}, 'ctxs': {'in': [0]}, 'ready': True}
                 ],
                 'tasks': {},
                 'sequence': [],
-                'contexts': [
-                    {'srcs': [], 'value': inputs}
-                ]
+                'contexts': [inputs]
             }
         }
 
@@ -215,13 +210,11 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
                     []
                 ],
                 'staged': [
-                    {'id': 'task1', 'route': 0, 'prev': {}, 'ctxs': [0], 'ready': True}
+                    {'id': 'task1', 'route': 0, 'prev': {}, 'ctxs': {'in': [0]}, 'ready': True}
                 ],
                 'tasks': {},
                 'sequence': [],
-                'contexts': [
-                    {'srcs': [], 'value': expected_initial_ctx}
-                ]
+                'contexts': [expected_initial_ctx]
             }
         }
 
@@ -261,13 +254,11 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
                     []
                 ],
                 'staged': [
-                    {'id': 'task1', 'route': 0, 'prev': {}, 'ctxs': [0], 'ready': True}
+                    {'id': 'task1', 'route': 0, 'prev': {}, 'ctxs': {'in': [0]}, 'ready': True}
                 ],
                 'tasks': {},
                 'sequence': [],
-                'contexts': [
-                    {'srcs': [], 'value': init_ctx}
-                ]
+                'contexts': [init_ctx]
             }
         }
 
@@ -321,14 +312,14 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
     def test_get_workflow_initial_context(self):
         conductor = self._prep_conductor()
-        expected_ctx_entry = {'srcs': [], 'value': {'a': None, 'b': False}}
-        self.assertDictEqual(conductor.get_workflow_initial_context(), expected_ctx_entry)
+        expected_init_ctx = {'a': None, 'b': False}
+        self.assertDictEqual(conductor.get_workflow_initial_context(), expected_init_ctx)
 
     def test_get_workflow_initial_context_with_inputs(self):
         inputs = {'a': 123, 'b': True}
-        expected_ctx_entry = {'srcs': [], 'value': inputs}
+        expected_init_ctx = inputs
         conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
-        self.assertDictEqual(conductor.get_workflow_initial_context(), expected_ctx_entry)
+        self.assertDictEqual(conductor.get_workflow_initial_context(), expected_init_ctx)
 
     def test_get_start_tasks(self):
         inputs = {'a': 123}
@@ -545,19 +536,17 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
     def test_get_task_initial_context(self):
         inputs = {'a': 123}
         expected_init_ctx = dx.merge_dicts(copy.deepcopy(inputs), {'b': False})
-        expected_task_ctx = dx.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
         conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
 
         task_route = 0
         task_name = 'task1'
         self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
 
-        expected_ctx = {'srcs': [], 'value': expected_init_ctx}
-        task1_in_ctx = conductor.get_task_initial_context(task_name, task_route)
-        self.assertDictEqual(task1_in_ctx, expected_ctx)
+        actual_task_ctx = conductor.get_task_initial_context(task_name, task_route)
+        self.assertDictEqual(actual_task_ctx, expected_init_ctx)
 
-        task2_in_ctx = {'srcs': [0], 'value': expected_task_ctx}
-        expected_context_list = [task1_in_ctx, task2_in_ctx]
+        expected_task_out_ctx = {'c': 'xyz'}
+        expected_context_list = [expected_init_ctx, expected_task_out_ctx]
         self.assertListEqual(conductor.flow.contexts, expected_context_list)
 
     def test_get_task_transition_contexts(self):
@@ -572,7 +561,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         next_task_name = 'task2'
         self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
 
-        next_task_in_ctx = {'srcs': [0], 'value': expected_task_ctx}
+        next_task_in_ctx = expected_task_ctx
         expected_task_transition_ctx = {'%s__t0' % next_task_name: next_task_in_ctx}
 
         self.assertDictEqual(
@@ -603,6 +592,50 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             task_route
         )
 
+    def test_get_terminal_tasks_when_workflow_incomplete(self):
+        inputs = {'a': 123, 'b': True}
+        conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
+
+        for i in range(1, 5):
+            task_name = 'task' + str(i)
+            self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
+
+        self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
+        self.assertListEqual(conductor.flow.get_terminal_tasks(), [])
+
+    def test_get_terminal_tasks_when_workflow_completed(self):
+        inputs = {'a': 123, 'b': True}
+        conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
+
+        for i in range(1, 6):
+            task_name = 'task' + str(i)
+            self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
+
+        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
+
+        term_tasks = conductor.flow.get_terminal_tasks()
+        actual_term_tasks = [t['id'] for t in term_tasks]
+        expected_term_tasks = ['task5']
+        self.assertListEqual(actual_term_tasks, expected_term_tasks)
+
+    def test_get_terminal_tasks_when_workflow_failed(self):
+        inputs = {'a': 123, 'b': True}
+        conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
+
+        for i in range(1, 4):
+            task_name = 'task' + str(i)
+            self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
+
+        task_name = 'task4'
+        self.forward_task_states(conductor, task_name, [states.RUNNING, states.FAILED])
+
+        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+
+        term_tasks = conductor.flow.get_terminal_tasks()
+        actual_term_tasks = [t['id'] for t in term_tasks]
+        expected_term_tasks = ['task4']
+        self.assertListEqual(actual_term_tasks, expected_term_tasks)
+
     def test_get_workflow_terminal_context_when_workflow_incomplete(self):
         inputs = {'a': 123, 'b': True}
         conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
@@ -611,16 +644,15 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
     def test_get_workflow_terminal_context_when_workflow_completed(self):
         inputs = {'a': 123, 'b': True}
         expected_init_ctx = copy.deepcopy(inputs)
-        expected_task_ctx = dx.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
+        expected_term_ctx = dx.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
         conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
 
         for i in range(1, 6):
             task_name = 'task' + str(i)
             self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
 
-        expected_term_ctx_entry = {'src': [4], 'term': True, 'value': expected_task_ctx}
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
-        self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx_entry)
+        self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
 
     def test_get_workflow_output_when_workflow_incomplete(self):
         inputs = {'a': 123, 'b': True}
@@ -818,13 +850,11 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
                     []
                 ],
                 'staged': [
-                    {'id': 'task1', 'route': 0, 'prev': {}, 'ctxs': [0], 'ready': True}
+                    {'id': 'task1', 'route': 0, 'prev': {}, 'ctxs': {'in': [0]}, 'ready': True}
                 ],
                 'tasks': {},
                 'sequence': [],
-                'contexts': [
-                    {'srcs': [], 'value': inputs}
-                ]
+                'contexts': [inputs]
             }
         }
 

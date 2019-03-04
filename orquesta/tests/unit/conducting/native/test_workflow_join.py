@@ -155,3 +155,50 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             expected_task_seq,
             mock_states=mock_states
         )
+
+    def test_join_context(self):
+        wf_name = 'join-context'
+
+        expected_output = {
+            'messages': [
+                'Fee fi fo fum',
+                'I smell the blood of an English man',
+                'Be alive, or be he dead',
+                "I'll grind his bones to make my bread"
+            ]
+        }
+
+        expected_task_seq = [
+            'task1',
+            'task2',
+            'task4',
+            'task6',
+            'task8',
+            'task3',
+            'task5',
+            'task7',
+            'task9',
+            'task10'
+        ]
+
+        mock_results = [
+            None,                                   # task1
+            'Fee fi',                               # task2
+            'I smell the blood of an English man',  # task4
+            None,                                   # task6
+            None,                                   # task8
+            'fo fum',                               # task3
+            None,                                   # task5
+            'Be alive, or be he dead',              # task7
+            None,                                   # task9
+            None                                    # task10
+        ]
+
+        self.assert_spec_inspection(wf_name)
+
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            mock_results=mock_results,
+            expected_output=expected_output
+        )

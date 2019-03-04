@@ -52,7 +52,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
         next_task_name = 'task2'
         self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
         expected_task_ctx = {'loop': True}
-        expected_txsn_ctx = {'%s__t0' % next_task_name: {'srcs': [], 'value': expected_task_ctx}}
+        expected_txsn_ctx = {'%s__t0' % next_task_name: expected_task_ctx}
         actual_txsn_ctx = conductor.get_task_transition_contexts(task_name, task_route)
         self.assertDictEqual(actual_txsn_ctx, expected_txsn_ctx)
         self.assert_next_task(conductor, next_task_name, expected_task_ctx)
@@ -62,7 +62,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
         next_task_name = 'task2'
         self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
         expected_task_ctx = {'loop': False}
-        expected_txsn_ctx = {'%s__t0' % next_task_name: {'srcs': [1], 'value': expected_task_ctx}}
+        expected_txsn_ctx = {'%s__t0' % next_task_name: expected_task_ctx}
         actual_txsn_ctx = conductor.get_task_transition_contexts(task_name, task_route)
         self.assertDictEqual(actual_txsn_ctx, expected_txsn_ctx)
         self.assert_next_task(conductor, next_task_name, expected_task_ctx)
@@ -73,8 +73,11 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
         self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
         self.assert_next_task(conductor, has_next_task=False)
 
+        # Check the list of tasks and make sure only the last entry for task2 is term=True.
+        tasks = [task for task in conductor.flow.sequence if task['id'] == 'task2']
+        self.assertListEqual([task.get('term', False) for task in tasks], [False, True])
+
         # Check workflow state and context.
         expected_term_ctx = {'loop': False}
-        expected_term_ctx_entry = {'src': [2], 'term': True, 'value': expected_term_ctx}
-        self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx_entry)
+        self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
         self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
