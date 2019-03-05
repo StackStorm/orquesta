@@ -13,7 +13,7 @@
 import logging
 
 from orquesta import exceptions as exc
-from orquesta import states
+from orquesta import statuses
 
 
 LOG = logging.getLogger(__name__)
@@ -252,36 +252,36 @@ ENGINE_OPERATION_EVENTS = [
 
 class ExecutionEvent(object):
 
-    def __init__(self, name, state, result=None, context=None):
-        if not states.is_valid(state):
-            raise exc.InvalidState(state)
+    def __init__(self, name, status, result=None, context=None):
+        if not statuses.is_valid(status):
+            raise exc.InvalidStatus(status)
 
         self.name = name
-        self.state = state
+        self.status = status
         self.result = result
         self.context = context
 
 
 class WorkflowExecutionEvent(ExecutionEvent):
 
-    def __init__(self, state):
-        super(WorkflowExecutionEvent, self).__init__('workflow_%s' % state, state)
+    def __init__(self, status):
+        super(WorkflowExecutionEvent, self).__init__('workflow_%s' % status, status)
 
 
 class TaskExecutionEvent(ExecutionEvent):
 
-    def __init__(self, task_id, route, state):
-        super(TaskExecutionEvent, self).__init__('task_%s' % state, state)
+    def __init__(self, task_id, route, status):
+        super(TaskExecutionEvent, self).__init__('task_%s' % status, status)
         self.task_id = task_id
         self.route = route
 
 
 class ActionExecutionEvent(ExecutionEvent):
 
-    def __init__(self, state, result=None, context=None):
+    def __init__(self, status, result=None, context=None):
         super(ActionExecutionEvent, self).__init__(
-            'action_%s' % state,
-            state,
+            'action_%s' % status,
+            status,
             result=result,
             context=context
         )
@@ -295,7 +295,7 @@ class TaskNoopEvent(EngineOperationEvent):
 
     def __init__(self):
         self.name = TASK_NOOP_REQUESTED
-        self.state = states.SUCCEEDED
+        self.status = statuses.SUCCEEDED
         self.result = None
         self.context = None
 
@@ -304,7 +304,7 @@ class TaskFailEvent(EngineOperationEvent):
 
     def __init__(self):
         self.name = TASK_FAIL_REQUESTED
-        self.state = states.FAILED
+        self.status = statuses.FAILED
         self.result = None
         self.context = None
 

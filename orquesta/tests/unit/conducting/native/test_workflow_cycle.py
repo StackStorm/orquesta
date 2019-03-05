@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta import states
+from orquesta import statuses
 from orquesta.tests.unit.conducting.native import base
 
 
@@ -77,15 +77,15 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'delete'
         ]
 
-        mock_states = [
-            states.SUCCEEDED,   # init
-            states.FAILED,      # check
-            states.SUCCEEDED,   # create
-            states.SUCCEEDED,   # rollback
-            states.SUCCEEDED,   # check
-            states.SUCCEEDED    # delete
+        mock_statuses = [
+            statuses.SUCCEEDED,   # init
+            statuses.FAILED,      # check
+            statuses.SUCCEEDED,   # create
+            statuses.SUCCEEDED,   # rollback
+            statuses.SUCCEEDED,   # check
+            statuses.SUCCEEDED    # delete
         ]
 
         self.assert_spec_inspection(wf_name)
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq, mock_states=mock_states)
+        self.assert_conducting_sequences(wf_name, expected_task_seq, mock_statuses=mock_statuses)

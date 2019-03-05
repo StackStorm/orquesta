@@ -12,7 +12,7 @@
 
 from orquesta import conducting
 from orquesta.specs import native as specs
-from orquesta import states
+from orquesta import statuses
 from orquesta.tests.unit import base
 
 
@@ -59,10 +59,10 @@ class WorkflowConductorContextTest(base.WorkflowConductorTest):
 
         # Run the workflow.
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # Check workflow status and result.
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertIsNone(conductor.get_workflow_output())
 
@@ -100,14 +100,14 @@ class WorkflowConductorContextTest(base.WorkflowConductorTest):
 
         # Run the workflow.
         conductor = conducting.WorkflowConductor(spec, context=app_ctx)
-        conductor.request_workflow_state(states.RUNNING)
-        self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
+        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
         self.assertListEqual(conductor.errors, expected_errors)
 
         # Complete tasks
-        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
 
         # Check workflow status and output.
-        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)

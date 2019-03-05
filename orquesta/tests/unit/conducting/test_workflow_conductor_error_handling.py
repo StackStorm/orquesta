@@ -12,7 +12,7 @@
 
 from orquesta import conducting
 from orquesta.specs import native as specs
-from orquesta import states
+from orquesta import statuses
 from orquesta.tests.unit import base
 
 
@@ -34,10 +34,10 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         self.assertListEqual(conductor.get_next_tasks(), [])
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
 
     def test_workflow_input_seq_ref_error(self):
         wf_def = """
@@ -68,10 +68,10 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         self.assert_next_task(conductor, has_next_task=False)
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)
 
     def test_workflow_vars_error(self):
@@ -90,10 +90,10 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         self.assert_next_task(conductor, has_next_task=False)
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
 
     def test_workflow_vars_seq_ref_error(self):
         wf_def = """
@@ -124,10 +124,10 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         self.assert_next_task(conductor, has_next_task=False)
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)
 
     def test_task_transition_criteria_error(self):
@@ -179,13 +179,13 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # The workflow should fail on completion of task1 while evaluating task transition.
-        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
 
         # The workflow should fail with the expected errors.
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
 
@@ -255,15 +255,15 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # Manually complete task1 and task2. Although the workflow failed when
         # processing task1, task flow can still be updated for task2.
-        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
-        self.forward_task_states(conductor, 'task2', [states.RUNNING, states.SUCCEEDED])
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING, statuses.SUCCEEDED])
 
         # The workflow should fail with the expected errors.
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
 
@@ -316,13 +316,13 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # The workflow should fail on completion of task1 while evaluating task transition.
-        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
 
         # The workflow should fail with the expected errors.
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
         self.assertNotIn('task2', conductor.flow.staged)
@@ -375,13 +375,13 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # The workflow should fail on completion of task1 while evaluating task transition.
-        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
 
         # The workflow should fail with the expected errors.
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
         self.assertNotIn('task2', conductor.flow.staged)
@@ -425,13 +425,13 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # The get_start_tasks method should not return any tasks.
         self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
 
@@ -471,13 +471,13 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # The get_next_tasks method should not return any tasks.
         self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
 
@@ -517,16 +517,16 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # Manually complete task1.
-        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
 
         # The get_next_tasks method should not return any tasks.
         self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
 
@@ -568,13 +568,13 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # The get_start_tasks method should not return any tasks.
         self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
 
@@ -616,13 +616,13 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # The get_next_tasks method should not return any tasks.
         self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
 
@@ -664,16 +664,16 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # Manually complete task1.
-        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
 
         # The get_next_tasks method should not return any tasks.
         self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
 
@@ -730,13 +730,13 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # The get_start_tasks method should not return any tasks.
         self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
 
@@ -793,13 +793,13 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # The get_next_tasks method should not return any tasks.
         self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
 
@@ -852,16 +852,16 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # Manually complete task1.
-        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
 
         # The get_next_tasks method should not return any tasks.
         self.assert_next_task(conductor, has_next_task=False)
 
         # The workflow should fail with the expected errors.
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
 
@@ -892,12 +892,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # Manually complete task1.
-        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
 
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertIsNone(conductor.get_workflow_output())
 
@@ -935,11 +935,11 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # Manually complete task1.
-        self.forward_task_states(conductor, 'task1', [states.RUNNING, states.SUCCEEDED])
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
 
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)

@@ -12,7 +12,7 @@
 
 from orquesta import conducting
 from orquesta.specs import native as specs
-from orquesta import states
+from orquesta import statuses
 from orquesta.tests.unit import base
 
 
@@ -51,11 +51,11 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
         tasks = conductor.get_next_tasks()
 
         self.assertListEqual(tasks, [])
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)
 
     def test_bad_item_type(self):
@@ -91,11 +91,11 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
         tasks = conductor.get_next_tasks()
 
         self.assertListEqual(tasks, [])
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)
 
     def test_bad_items_type(self):
@@ -124,11 +124,11 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
         tasks = conductor.get_next_tasks()
 
         self.assertListEqual(tasks, [])
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)
 
     def test_start_task_rendering(self):
@@ -152,7 +152,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         task_route = 0
         next_task_name = 'task1'
@@ -205,7 +205,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # Process start task.
         task_route = 0
@@ -228,7 +228,9 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         expected_tasks = [expected_task]
         actual_tasks = conductor.get_next_tasks()
         self.assert_task_list(conductor, actual_tasks, expected_tasks)
-        self.forward_task_states(conductor, next_task_name, [states.RUNNING, states.SUCCEEDED])
+
+        status_changes = [statuses.RUNNING, statuses.SUCCEEDED]
+        self.forward_task_statuses(conductor, next_task_name, status_changes)
 
         # Process next task.
         next_task_name = 'task2'
@@ -277,7 +279,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         task_route = 0
         next_task_name = 'task1'
@@ -326,7 +328,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         task_route = 0
         next_task_name = 'task1'
@@ -378,7 +380,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         task_route = 0
         next_task_name = 'task1'

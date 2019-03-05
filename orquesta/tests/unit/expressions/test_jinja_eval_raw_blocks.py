@@ -30,7 +30,7 @@ class JinjaEvaluationTest(base.ExpressionEvaluatorTest):
 
         self.assertEqual(e, jinja.JinjaEvaluator)
         self.assertIn('ctx', e._custom_functions.keys())
-        self.assertIn('task_state', e._custom_functions.keys())
+        self.assertIn('task_status', e._custom_functions.keys())
 
     def test_block_eval(self):
         expr = '{% for i in ctx().x %}{{ i }}{% endfor %}'

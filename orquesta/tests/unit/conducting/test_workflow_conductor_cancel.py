@@ -12,7 +12,7 @@
 
 from orquesta import conducting
 from orquesta.specs import native as specs
-from orquesta import states
+from orquesta import statuses
 from orquesta.tests.unit import base
 
 
@@ -43,15 +43,15 @@ class WorkflowConductorCancelTest(base.WorkflowConductorTest):
 
         # Run the workflow and keep it running.
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
-        self.forward_task_states(conductor, 'task1', [states.RUNNING])
+        conductor.request_workflow_status(statuses.RUNNING)
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
 
         # Cancels the workflow and complete task1.
-        conductor.request_workflow_state(states.CANCELING)
-        self.forward_task_states(conductor, 'task1', [states.SUCCEEDED])
+        conductor.request_workflow_status(statuses.CANCELING)
+        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
 
         # Check workflow status and output.
-        self.assertEqual(conductor.get_workflow_state(), states.CANCELED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
@@ -90,14 +90,14 @@ class WorkflowConductorCancelTest(base.WorkflowConductorTest):
 
         # Run the workflow and keep it running.
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
-        self.forward_task_states(conductor, 'task1', [states.RUNNING])
+        conductor.request_workflow_status(statuses.RUNNING)
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
 
         # Cancels the workflow and complete task1.
-        conductor.request_workflow_state(states.CANCELING)
-        self.forward_task_states(conductor, 'task1', [states.SUCCEEDED])
+        conductor.request_workflow_status(statuses.CANCELING)
+        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
 
         # Check workflow status is not changed to failed given the output error.
-        self.assertEqual(conductor.get_workflow_state(), states.CANCELED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)

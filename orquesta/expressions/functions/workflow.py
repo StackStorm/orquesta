@@ -12,7 +12,7 @@
 
 from orquesta import constants
 from orquesta import exceptions as exc
-from orquesta import states
+from orquesta import statuses
 
 
 def _get_current_task(context):
@@ -30,9 +30,9 @@ def _get_current_task(context):
     return current_task
 
 
-def task_state_(context, task_id, route=None):
+def task_status_(context, task_id, route=None):
     if not context:
-        return states.UNSET
+        return statuses.UNSET
 
     if route is None:
         try:
@@ -61,17 +61,17 @@ def task_state_(context, task_id, route=None):
                     # The index is from a reversed list so need to calculate
                     # the index of the item in the list before the reverse.
                     prev_route = route - idx - 1
-                    return task_state_(context, task_id, route=prev_route)
+                    return task_status_(context, task_id, route=prev_route)
 
-        return states.UNSET
+        return statuses.UNSET
 
     task_flow_seqs = task_flow.get('sequence') or []
     task_flow_item = task_flow_seqs[task_flow_item_idx]
 
     if task_flow_item is None:
-        return states.UNSET
+        return statuses.UNSET
 
-    return task_flow_item.get('state', states.UNSET)
+    return task_flow_item.get('status', statuses.UNSET)
 
 
 def succeeded_(context):
@@ -79,7 +79,7 @@ def succeeded_(context):
     task_id = current_task['id']
     route = current_task['route']
 
-    return (task_state_(context, task_id, route=route) == states.SUCCEEDED)
+    return (task_status_(context, task_id, route=route) == statuses.SUCCEEDED)
 
 
 def failed_(context):
@@ -87,7 +87,7 @@ def failed_(context):
     task_id = current_task['id']
     route = current_task['route']
 
-    return (task_state_(context, task_id, route=route) == states.FAILED)
+    return (task_status_(context, task_id, route=route) == statuses.FAILED)
 
 
 def completed_(context):
@@ -95,7 +95,7 @@ def completed_(context):
     task_id = current_task['id']
     route = current_task['route']
 
-    return (task_state_(context, task_id, route=route) in states.COMPLETED_STATES)
+    return (task_status_(context, task_id, route=route) in statuses.COMPLETED_STATUSES)
 
 
 def result_(context):

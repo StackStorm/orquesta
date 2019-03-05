@@ -12,7 +12,7 @@
 
 from orquesta import conducting
 from orquesta.specs import native as specs
-from orquesta import states
+from orquesta import statuses
 from orquesta.tests.unit import base
 
 
@@ -54,7 +54,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         action_input = {'message': 'All your base are belong to us!'}
         inputs = {'action_name': action_name, 'action_input': action_input}
         conductor = conducting.WorkflowConductor(spec, inputs=inputs)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # Test that the action and input are rendered entirely from context.
         task_route = 0
@@ -80,8 +80,14 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         next_task_name = 'task2'
         mock_result = action_input['message']
 
-        self.forward_task_states(conductor, task_name, [states.RUNNING])
-        self.forward_task_states(conductor, task_name, [states.SUCCEEDED], results=[mock_result])
+        self.forward_task_statuses(conductor, task_name, [statuses.RUNNING])
+
+        self.forward_task_statuses(
+            conductor,
+            task_name,
+            [statuses.SUCCEEDED],
+            results=[mock_result]
+        )
 
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         next_task_action_specs = [{'action': 'core.echo', 'input': {'message': mock_result}}]
@@ -106,8 +112,14 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         next_task_name = 'task3'
         mock_result = action_input['message']
 
-        self.forward_task_states(conductor, task_name, [states.RUNNING])
-        self.forward_task_states(conductor, task_name, [states.SUCCEEDED], results=[mock_result])
+        self.forward_task_statuses(conductor, task_name, [statuses.RUNNING])
+
+        self.forward_task_statuses(
+            conductor,
+            task_name,
+            [statuses.SUCCEEDED],
+            results=[mock_result]
+        )
 
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
         next_task_action_specs = [{'action': 'core.echo', 'input': {'message': mock_result}}]
@@ -156,7 +168,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         # Instantiate conductor
         inputs = {'xs': ['fee', 'fi', 'fo', 'fum'], 'concurrency': 2}
         conductor = conducting.WorkflowConductor(spec, inputs=inputs)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # Test that the items and context of a task is rendered from context.
         task_route = 0
@@ -206,7 +218,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
         # Instantiate conductor
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # Ensure the task delay is rendered correctly.
         task_route = 0
@@ -258,9 +270,9 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
 
         # Instantiate conductor
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # Assert failed status and errors.
         self.assert_next_task(conductor, has_next_task=False)
-        self.assertEqual(conductor.get_workflow_state(), states.FAILED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)

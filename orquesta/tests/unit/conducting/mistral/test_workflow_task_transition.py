@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta import states
+from orquesta import statuses
 from orquesta.tests.unit.conducting.mistral import base
 
 
@@ -25,15 +25,15 @@ class TaskTransitionWorkflowConductorTest(base.MistralWorkflowConductorTest):
             'task2'
         ]
 
-        mock_states = [
-            states.SUCCEEDED,   # task1
-            states.SUCCEEDED    # task2
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED    # task2
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states
+            mock_statuses=mock_statuses
         )
 
         # Mock task1 error
@@ -42,15 +42,15 @@ class TaskTransitionWorkflowConductorTest(base.MistralWorkflowConductorTest):
             'task3'
         ]
 
-        mock_states = [
-            states.FAILED,      # task1
-            states.SUCCEEDED    # task3
+        mock_statuses = [
+            statuses.FAILED,      # task1
+            statuses.SUCCEEDED    # task3
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states
+            mock_statuses=mock_statuses
         )
 
     def test_on_complete(self):
@@ -63,16 +63,16 @@ class TaskTransitionWorkflowConductorTest(base.MistralWorkflowConductorTest):
             'task4'
         ]
 
-        mock_states = [
-            states.SUCCEEDED,   # task1
-            states.SUCCEEDED,   # task2
-            states.SUCCEEDED    # task4
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED    # task4
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states
+            mock_statuses=mock_statuses
         )
 
         # Mock task1 error
@@ -82,16 +82,16 @@ class TaskTransitionWorkflowConductorTest(base.MistralWorkflowConductorTest):
             'task4'
         ]
 
-        mock_states = [
-            states.FAILED,      # task1
-            states.SUCCEEDED,   # task3
-            states.SUCCEEDED    # task4
+        mock_statuses = [
+            statuses.FAILED,      # task1
+            statuses.SUCCEEDED,   # task3
+            statuses.SUCCEEDED    # task4
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states
+            mock_statuses=mock_statuses
         )
 
     def test_task_transitions_split(self):
@@ -110,17 +110,17 @@ class TaskTransitionWorkflowConductorTest(base.MistralWorkflowConductorTest):
             ('task2', 2)
         ]
 
-        mock_states = [
-            states.SUCCEEDED,   # task1
-            states.SUCCEEDED,   # task2__1 on-complete
-            states.SUCCEEDED    # task2__3 on-success
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2__1 on-complete
+            statuses.SUCCEEDED    # task2__3 on-success
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
             expected_routes=expected_routes,
-            mock_states=mock_states
+            mock_statuses=mock_statuses
         )
 
         # Mock task1 error
@@ -136,15 +136,15 @@ class TaskTransitionWorkflowConductorTest(base.MistralWorkflowConductorTest):
             ('task2', 2)
         ]
 
-        mock_states = [
-            states.FAILED,      # task1
-            states.SUCCEEDED,   # task2__1 on-complete
-            states.SUCCEEDED    # task2__2 on-error
+        mock_statuses = [
+            statuses.FAILED,      # task1
+            statuses.SUCCEEDED,   # task2__1 on-complete
+            statuses.SUCCEEDED    # task2__2 on-error
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
             expected_routes=expected_routes,
-            mock_states=mock_states
+            mock_statuses=mock_statuses
         )

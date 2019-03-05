@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta import states
+from orquesta import statuses
 from orquesta.tests.unit.conducting.mistral import base
 
 
@@ -45,21 +45,21 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
             'task8'
         ]
 
-        mock_states = [
-            states.SUCCEEDED,   # task1
-            states.SUCCEEDED,   # task2
-            states.SUCCEEDED,   # task4
-            states.RUNNING,     # task6
-            states.SUCCEEDED,   # task3
-            states.SUCCEEDED,   # task5
-            states.SUCCEEDED    # task8
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED,   # task4
+            statuses.RUNNING,     # task6
+            statuses.SUCCEEDED,   # task3
+            statuses.SUCCEEDED,   # task5
+            statuses.SUCCEEDED    # task8
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states,
-            expected_workflow_state=states.RUNNING
+            mock_statuses=mock_statuses,
+            expected_workflow_status=statuses.RUNNING
         )
 
         # Mock error at task7
@@ -74,22 +74,22 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
             'task8'
         ]
 
-        mock_states = [
-            states.SUCCEEDED,   # task1
-            states.SUCCEEDED,   # task2
-            states.SUCCEEDED,   # task4
-            states.SUCCEEDED,   # task6
-            states.SUCCEEDED,   # task3
-            states.SUCCEEDED,   # task5
-            states.RUNNING,     # task7
-            states.SUCCEEDED    # task8
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED,   # task4
+            statuses.SUCCEEDED,   # task6
+            statuses.SUCCEEDED,   # task3
+            statuses.SUCCEEDED,   # task5
+            statuses.RUNNING,     # task7
+            statuses.SUCCEEDED    # task8
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states,
-            expected_workflow_state=states.RUNNING
+            mock_statuses=mock_statuses,
+            expected_workflow_status=statuses.RUNNING
         )
 
     def test_join_count_with_branch_error(self):
@@ -104,18 +104,18 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
             'task6'
         ]
 
-        mock_states = [
-            states.SUCCEEDED,   # task1
-            states.SUCCEEDED,   # task2
-            states.SUCCEEDED,   # task4
-            states.FAILED       # task6
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED,   # task4
+            statuses.FAILED       # task6
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states,
-            expected_workflow_state=states.FAILED
+            mock_statuses=mock_statuses,
+            expected_workflow_status=statuses.FAILED
         )
 
         # Mock error at task7, note that task3 and task5 have
@@ -132,20 +132,20 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
             'task9'
         ]
 
-        mock_states = [
-            states.SUCCEEDED,   # task1
-            states.SUCCEEDED,   # task2
-            states.SUCCEEDED,   # task4
-            states.SUCCEEDED,   # task6
-            states.SUCCEEDED,   # task3
-            states.SUCCEEDED,   # task5
-            states.FAILED,      # task7
-            states.SUCCEEDED,   # task8
-            states.SUCCEEDED    # task9
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED,   # task4
+            statuses.SUCCEEDED,   # task6
+            statuses.SUCCEEDED,   # task3
+            statuses.SUCCEEDED,   # task5
+            statuses.FAILED,      # task7
+            statuses.SUCCEEDED,   # task8
+            statuses.SUCCEEDED    # task9
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states
+            mock_statuses=mock_statuses
         )

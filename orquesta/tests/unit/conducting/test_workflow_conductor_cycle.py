@@ -13,7 +13,7 @@
 
 from orquesta import conducting
 from orquesta.specs import native as specs
-from orquesta import states
+from orquesta import statuses
 from orquesta.tests.unit import base
 
 
@@ -44,13 +44,13 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
 
         spec = specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # Conduct task1 and check context and that there is no next tasks yet.
         task_route = 0
         task_name = 'task1'
         next_task_name = 'task2'
-        self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
+        self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
         expected_task_ctx = {'loop': True}
         expected_txsn_ctx = {'%s__t0' % next_task_name: expected_task_ctx}
         actual_txsn_ctx = conductor.get_task_transition_contexts(task_name, task_route)
@@ -60,7 +60,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
         # Conduct task2 and check next tasks and context.
         task_name = 'task2'
         next_task_name = 'task2'
-        self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
+        self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
         expected_task_ctx = {'loop': False}
         expected_txsn_ctx = {'%s__t0' % next_task_name: expected_task_ctx}
         actual_txsn_ctx = conductor.get_task_transition_contexts(task_name, task_route)
@@ -70,14 +70,14 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
         # Conduct task2 and check next tasks and context.
         task_name = 'task2'
         next_task_name = 'task2'
-        self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
+        self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
         self.assert_next_task(conductor, has_next_task=False)
 
         # Check the list of tasks and make sure only the last entry for task2 is term=True.
         tasks = [task for task in conductor.flow.sequence if task['id'] == 'task2']
         self.assertListEqual([task.get('term', False) for task in tasks], [False, True])
 
-        # Check workflow state and context.
+        # Check workflow status and context.
         expected_term_ctx = {'loop': False}
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
-        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)

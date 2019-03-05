@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta import states
+from orquesta import statuses
 from orquesta.tests.unit.conducting.native import base
 
 
@@ -25,9 +25,9 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
             'fail'
         ]
 
-        mock_states = [
-            states.FAILED,      # task1
-            states.SUCCEEDED    # log
+        mock_statuses = [
+            statuses.FAILED,      # task1
+            statuses.SUCCEEDED    # log
         ]
 
         mock_results = [
@@ -40,9 +40,9 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states,
+            mock_statuses=mock_statuses,
             mock_results=mock_results,
-            expected_workflow_state=states.FAILED
+            expected_workflow_status=statuses.FAILED
         )
 
     def test_error_concurrent_log_fail(self):
@@ -53,8 +53,8 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
             'fail'
         ]
 
-        mock_states = [
-            states.FAILED       # task1
+        mock_statuses = [
+            statuses.FAILED       # task1
         ]
 
         mock_results = [
@@ -66,7 +66,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states,
+            mock_statuses=mock_statuses,
             mock_results=mock_results,
-            expected_workflow_state=states.FAILED
+            expected_workflow_status=statuses.FAILED
         )

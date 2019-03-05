@@ -15,7 +15,7 @@ import string
 
 from orquesta import conducting
 from orquesta.specs import native as specs
-from orquesta import states
+from orquesta import statuses
 from orquesta.tests.unit import base
 
 
@@ -37,7 +37,7 @@ class WorkflowConductorStressTest(base.WorkflowConductorTest):
 
         return wf_def
 
-    def _prep_conductor(self, num_tasks, context=None, inputs=None, state=None):
+    def _prep_conductor(self, num_tasks, context=None, inputs=None, status=None):
         wf_def = self._prep_wf_def(num_tasks)
         spec = specs.WorkflowSpec(wf_def)
 
@@ -48,32 +48,32 @@ class WorkflowConductorStressTest(base.WorkflowConductorTest):
 
         conductor = conducting.WorkflowConductor(spec, **kwargs)
 
-        if state:
-            conductor.request_workflow_state(state)
+        if status:
+            conductor.request_workflow_status(status)
 
         return conductor
 
     def test_runtime_function_of_graph_size(self):
         num_tasks = 100
 
-        conductor = self._prep_conductor(num_tasks, state=states.RUNNING)
+        conductor = self._prep_conductor(num_tasks, status=statuses.RUNNING)
 
         for i in range(1, num_tasks + 1):
             task_name = 't' + str(i)
-            self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
+            self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
 
-        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
     def test_serialization_function_of_graph_size(self):
         num_tasks = 100
-        conductor = self._prep_conductor(num_tasks, state=states.RUNNING)
+        conductor = self._prep_conductor(num_tasks, status=statuses.RUNNING)
         conductor.deserialize(conductor.serialize())
 
     def test_serialization_function_of_data_size(self):
         data_length = 1000000
         data = ''.join(random.choice(string.ascii_lowercase) for _ in range(data_length))
         self.assertEqual(len(data), data_length)
-        conductor = self._prep_conductor(1, inputs={'data': data}, state=states.RUNNING)
+        conductor = self._prep_conductor(1, inputs={'data': data}, status=statuses.RUNNING)
         conductor.deserialize(conductor.serialize())
 
 
@@ -104,9 +104,9 @@ class WorkflowConductorWithItemsStressTest(base.WorkflowConductorWithItemsTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
-        # Mock the action execution for each item and assert expected task states.
+        # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
         task_name = 'task1'
         task_ctx = {'xs': [str(i) for i in range(0, num_items)]}
@@ -116,9 +116,9 @@ class WorkflowConductorWithItemsStressTest(base.WorkflowConductorWithItemsTest):
             for i in task_ctx['xs']
         ]
 
-        mock_ac_ex_states = [states.SUCCEEDED] * num_items
-        expected_task_states = [states.RUNNING] * (num_items - 1) + [states.SUCCEEDED]
-        expected_workflow_states = [states.RUNNING] * (num_items - 1) + [states.SUCCEEDED]
+        mock_ac_ex_statuses = [statuses.SUCCEEDED] * num_items
+        expected_task_statuses = [statuses.RUNNING] * (num_items - 1) + [statuses.SUCCEEDED]
+        expected_workflow_statuses = [statuses.RUNNING] * (num_items - 1) + [statuses.SUCCEEDED]
 
         self.assert_task_items(
             conductor,
@@ -127,16 +127,16 @@ class WorkflowConductorWithItemsStressTest(base.WorkflowConductorWithItemsTest):
             task_ctx,
             task_ctx['xs'],
             task_action_specs,
-            mock_ac_ex_states,
-            expected_task_states,
-            expected_workflow_states
+            mock_ac_ex_statuses,
+            expected_task_statuses,
+            expected_workflow_statuses
         )
 
         # Assert the task is removed from staging.
         self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
 
         # Assert the workflow succeeded.
-        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
         # Assert the workflow output is correct.
         expected_output = {'items': task_ctx['xs']}

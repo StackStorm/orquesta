@@ -10,12 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-
-
-LOG = logging.getLogger(__name__)
-
-
 REQUESTED = 'requested'
 SCHEDULED = 'scheduled'
 DELAYED = 'delayed'
@@ -33,7 +27,7 @@ CANCELED = 'canceled'
 UNSET = 'null'
 
 
-ALL_STATES = [
+ALL_STATUSES = [
     REQUESTED,
     SCHEDULED,
     DELAYED,
@@ -51,7 +45,7 @@ ALL_STATES = [
     UNSET
 ]
 
-STARTING_STATES = [
+STARTING_STATUSES = [
     REQUESTED,
     SCHEDULED,
     DELAYED,
@@ -59,7 +53,7 @@ STARTING_STATES = [
     PENDING
 ]
 
-RUNNING_STATES = [
+RUNNING_STATUSES = [
     REQUESTED,
     SCHEDULED,
     DELAYED,
@@ -67,7 +61,7 @@ RUNNING_STATES = [
     RESUMING
 ]
 
-ACTIVE_STATES = [
+ACTIVE_STATUSES = [
     REQUESTED,
     SCHEDULED,
     DELAYED,
@@ -77,23 +71,23 @@ ACTIVE_STATES = [
     CANCELING
 ]
 
-PAUSE_STATES = [
+PAUSE_STATUSES = [
     PAUSING,
     PAUSED
 ]
 
-CANCEL_STATES = [
+CANCEL_STATUSES = [
     CANCELING,
     CANCELED
 ]
 
-ABENDED_STATES = [
+ABENDED_STATUSES = [
     FAILED,
     EXPIRED,
     ABANDONED
 ]
 
-COMPLETED_STATES = [
+COMPLETED_STATUSES = [
     SUCCEEDED,
     FAILED,
     EXPIRED,
@@ -102,5 +96,5 @@ COMPLETED_STATES = [
 ]
 
 
-def is_valid(state):
-    return (state is None or state in ALL_STATES)
+def is_valid(status):
+    return (status is None or status in ALL_STATUSES)

@@ -14,13 +14,13 @@
 
 from orquesta import conducting
 from orquesta.specs import native as specs
-from orquesta import states
+from orquesta import statuses
 from orquesta.tests.unit import base
 
 
 class WorkflowConductorDataFlowTest(base.WorkflowConductorTest):
 
-    def _prep_conductor(self, context=None, inputs=None, state=None):
+    def _prep_conductor(self, context=None, inputs=None, status=None):
         wf_def = """
         version: 1.0
 
@@ -67,21 +67,21 @@ class WorkflowConductorDataFlowTest(base.WorkflowConductorTest):
 
         conductor = conducting.WorkflowConductor(spec, **kwargs)
 
-        if state:
-            conductor.request_workflow_state(state)
+        if status:
+            conductor.request_workflow_status(status)
 
         return conductor
 
     def assert_data_flow(self, input_value):
         inputs = {'a1': input_value}
         expected_output = {'a5': inputs['a1'], 'b5': inputs['a1']}
-        conductor = self._prep_conductor(inputs=inputs, state=states.RUNNING)
+        conductor = self._prep_conductor(inputs=inputs, status=statuses.RUNNING)
 
         for i in range(1, len(conductor.spec.tasks) + 1):
             task_name = 'task' + str(i)
-            self.forward_task_states(conductor, task_name, [states.RUNNING, states.SUCCEEDED])
+            self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
 
-        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
     def test_data_flow_string(self):
