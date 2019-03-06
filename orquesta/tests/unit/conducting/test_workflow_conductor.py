@@ -78,17 +78,17 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         self.assertIsNone(conductor._graph)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
 
-        self.assertIsNone(conductor._flow)
-        self.assertIsInstance(conductor.flow, conducting.TaskFlow)
+        self.assertIsNone(conductor._workflow_state)
+        self.assertIsInstance(conductor.workflow_state, conducting.WorkflowState)
 
         if status:
-            self.assertEqual(conductor._workflow_status, statuses.UNSET)
+            self.assertEqual(conductor.workflow_state.status, statuses.UNSET)
             self.assertEqual(conductor.get_workflow_status(), statuses.UNSET)
             conductor.request_workflow_status(status)
-            self.assertEqual(conductor._workflow_status, status)
+            self.assertEqual(conductor.workflow_state.status, status)
             self.assertEqual(conductor.get_workflow_status(), status)
         else:
-            self.assertEqual(conductor._workflow_status, statuses.UNSET)
+            self.assertEqual(conductor.workflow_state.status, statuses.UNSET)
             self.assertEqual(conductor.get_workflow_status(), statuses.UNSET)
 
         user_inputs = inputs or {}
@@ -118,10 +118,10 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'context': {},
             'input': {},
             'output': None,
-            'status': statuses.UNSET,
             'errors': [],
             'log': [],
-            'flow': {
+            'state': {
+                'status': statuses.UNSET,
                 'routes': [
                     []
                 ],
@@ -140,11 +140,11 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor.deserialize(data)
 
         self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
-        self.assertEqual(conductor._workflow_status, statuses.UNSET)
+        self.assertEqual(conductor.workflow_state.status, statuses.UNSET)
         self.assertEqual(conductor.get_workflow_status(), statuses.UNSET)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
-        self.assertIsInstance(conductor.flow, conducting.TaskFlow)
+        self.assertIsInstance(conductor.workflow_state, conducting.WorkflowState)
 
     def test_init_with_inputs(self):
         inputs = {'a': 123, 'b': True}
@@ -159,10 +159,10 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'context': {},
             'input': inputs,
             'output': None,
-            'status': statuses.UNSET,
             'errors': [],
             'log': [],
-            'flow': {
+            'state': {
+                'status': statuses.UNSET,
                 'routes': [
                     []
                 ],
@@ -181,11 +181,11 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor.deserialize(data)
 
         self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
-        self.assertEqual(conductor._workflow_status, statuses.UNSET)
+        self.assertEqual(conductor.workflow_state.status, statuses.UNSET)
         self.assertEqual(conductor.get_workflow_status(), statuses.UNSET)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
-        self.assertIsInstance(conductor.flow, conducting.TaskFlow)
+        self.assertIsInstance(conductor.workflow_state, conducting.WorkflowState)
 
     def test_init_with_partial_inputs(self):
         inputs = {'a': 123}
@@ -202,10 +202,10 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'context': {},
             'input': inputs,
             'output': None,
-            'status': statuses.UNSET,
             'errors': [],
             'log': [],
-            'flow': {
+            'state': {
+                'status': statuses.UNSET,
                 'routes': [
                     []
                 ],
@@ -224,11 +224,11 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor.deserialize(data)
 
         self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
-        self.assertEqual(conductor._workflow_status, statuses.UNSET)
+        self.assertEqual(conductor.workflow_state.status, statuses.UNSET)
         self.assertEqual(conductor.get_workflow_status(), statuses.UNSET)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
-        self.assertIsInstance(conductor.flow, conducting.TaskFlow)
+        self.assertIsInstance(conductor.workflow_state, conducting.WorkflowState)
 
     def test_init_with_context(self):
         context = {'parent': {'ex_id': '12345'}}
@@ -246,10 +246,10 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'context': context,
             'input': inputs,
             'output': None,
-            'status': statuses.UNSET,
             'errors': [],
             'log': [],
-            'flow': {
+            'state': {
+                'status': statuses.UNSET,
                 'routes': [
                     []
                 ],
@@ -268,11 +268,11 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor.deserialize(data)
 
         self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
-        self.assertEqual(conductor._workflow_status, statuses.UNSET)
+        self.assertEqual(conductor.workflow_state.status, statuses.UNSET)
         self.assertEqual(conductor.get_workflow_status(), statuses.UNSET)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
-        self.assertIsInstance(conductor.flow, conducting.TaskFlow)
+        self.assertIsInstance(conductor.workflow_state, conducting.WorkflowState)
 
     def test_serialization(self):
         inputs = {'a': 123, 'b': True}
@@ -289,8 +289,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         expected_data = {
             'spec': conductor.spec.serialize(),
             'graph': conductor.graph.serialize(),
-            'status': conductor.get_workflow_status(),
-            'flow': conductor.flow.serialize(),
+            'state': conductor.workflow_state.serialize(),
             'context': conductor.get_workflow_parent_context(),
             'input': conductor.get_workflow_input(),
             'output': conductor.get_workflow_output(),
@@ -307,9 +306,9 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
-        self.assertIsInstance(conductor.flow, conducting.TaskFlow)
-        self.assertEqual(len(conductor.flow.tasks), 5)
-        self.assertEqual(len(conductor.flow.sequence), 5)
+        self.assertIsInstance(conductor.workflow_state, conducting.WorkflowState)
+        self.assertEqual(len(conductor.workflow_state.tasks), 5)
+        self.assertEqual(len(conductor.workflow_state.sequence), 5)
 
     def test_get_workflow_initial_context(self):
         conductor = self._prep_conductor()
@@ -363,7 +362,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         task_name = 'task1'
         expected_ctx = dx.merge_dicts(copy.deepcopy(inputs), {'b': False})
         expected_ctx['__current_task'] = {'id': task_name, 'route': task_route}
-        expected_ctx['__flow'] = conductor.flow.serialize()
+        expected_ctx['__state'] = conductor.workflow_state.serialize()
         task = conductor.get_task(task_name, task_route)
         self.assertEqual(task['id'], task_name)
         self.assertEqual(task['route'], task_route)
@@ -374,7 +373,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         task_name = 'task2'
         expected_ctx = dx.merge_dicts(copy.deepcopy(expected_ctx), {'c': 'xyz'})
         expected_ctx['__current_task'] = {'id': task_name, 'route': task_route}
-        expected_ctx['__flow'] = conductor.flow.serialize()
+        expected_ctx['__state'] = conductor.workflow_state.serialize()
         task = conductor.get_task(task_name, task_route)
         self.assertEqual(task['id'], task_name)
         self.assertEqual(task['route'], task_route)
@@ -548,7 +547,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         expected_task_out_ctx = {'c': 'xyz'}
         expected_context_list = [expected_init_ctx, expected_task_out_ctx]
-        self.assertListEqual(conductor.flow.contexts, expected_context_list)
+        self.assertListEqual(conductor.workflow_state.contexts, expected_context_list)
 
     def test_get_task_transition_contexts(self):
         inputs = {'a': 123, 'b': True}
@@ -587,7 +586,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         # Get transition context for task3 that has not yet run.
         self.assertRaises(
-            exc.InvalidTaskFlowEntry,
+            exc.InvalidTaskStateEntry,
             conductor.get_task_transition_contexts,
             next_task_name,
             task_route
@@ -602,7 +601,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
 
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
-        self.assertListEqual(conductor.flow.get_terminal_tasks(), [])
+        self.assertListEqual(conductor.workflow_state.get_terminal_tasks(), [])
 
     def test_get_terminal_tasks_when_workflow_completed(self):
         inputs = {'a': 123, 'b': True}
@@ -614,7 +613,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
-        term_tasks = conductor.flow.get_terminal_tasks()
+        term_tasks = conductor.workflow_state.get_terminal_tasks()
         actual_term_tasks = [t['id'] for t in term_tasks]
         expected_term_tasks = ['task5']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
@@ -632,7 +631,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
 
-        term_tasks = conductor.flow.get_terminal_tasks()
+        term_tasks = conductor.workflow_state.get_terminal_tasks()
         actual_term_tasks = [t['id'] for t in term_tasks]
         expected_term_tasks = ['task4']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
@@ -843,10 +842,10 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             'context': {},
             'input': inputs,
             'output': None,
-            'status': statuses.RUNNING,
             'errors': expected_errors,
             'log': expected_log_entries,
-            'flow': {
+            'state': {
+                'status': statuses.RUNNING,
                 'routes': [
                     []
                 ],
@@ -868,7 +867,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
-        self.assertIsInstance(conductor.flow, conducting.TaskFlow)
+        self.assertIsInstance(conductor.workflow_state, conducting.WorkflowState)
         self.assertListEqual(conductor.log, expected_log_entries)
         self.assertListEqual(conductor.errors, expected_errors)
 

@@ -100,7 +100,7 @@ class InvalidWorkflowStatusTransition(Exception):
         Exception.__init__(self, message)
 
 
-class InvalidTaskFlowEntry(Exception):
+class InvalidTaskStateEntry(Exception):
 
     def __init__(self, task_id):
         Exception.__init__(self, 'Task "%s" is not staged or has not started yet.' % task_id)

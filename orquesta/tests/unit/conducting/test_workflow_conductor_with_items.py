@@ -66,7 +66,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is removed from staging.
-        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
@@ -133,7 +133,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is removed from staging.
-        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
@@ -206,7 +206,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is removed from staging.
-        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
@@ -265,7 +265,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is removed from staging.
-        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
@@ -329,7 +329,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is removed from staging.
-        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
@@ -386,7 +386,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is removed from staging.
-        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow failed.
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
@@ -443,7 +443,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is removed from staging.
-        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow failed.
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
@@ -507,7 +507,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is removed from staging.
-        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow failed.
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
@@ -569,7 +569,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is removed from staging.
-        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow failed.
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
@@ -638,7 +638,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is removed from staging.
-        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow failed.
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
@@ -718,7 +718,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is removed from staging.
-        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)
@@ -781,7 +781,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is removed from staging.
-        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow is canceled.
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)
@@ -847,12 +847,13 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [context])
 
         # Assert that the task is running.
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.RUNNING)
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.RUNNING)
 
         # Cancel the workflow.
         conductor.request_workflow_status(statuses.CANCELING)
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELING)
-        actual_task_status = conductor.flow.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
         self.assertEqual(actual_task_status, statuses.CANCELING)
 
         # Complete the items.
@@ -863,7 +864,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, status_changes, contexts, results)
 
         # Assert the task is completed and workflow is canceled.
-        actual_task_status = conductor.flow.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
         self.assertEqual(actual_task_status, statuses.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)
 
@@ -928,12 +929,13 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [context])
 
         # Assert that the task is running.
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.RUNNING)
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.RUNNING)
 
         # Cancel the workflow.
         conductor.request_workflow_status(statuses.CANCELED)
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELING)
-        actual_task_status = conductor.flow.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
         self.assertEqual(actual_task_status, statuses.CANCELING)
 
         # Complete the items.
@@ -944,7 +946,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, status_changes, contexts, results)
 
         # Assert the task is completed and workflow is canceled.
-        actual_task_status = conductor.flow.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
         self.assertEqual(actual_task_status, statuses.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)
 
@@ -1011,7 +1013,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is not removed from staging.
-        self.assertIsNotNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow is still running.
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
@@ -1019,7 +1021,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         # Cancel the workflow.
         conductor.request_workflow_status(statuses.CANCELING)
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)
-        actual_task_status = conductor.flow.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
         self.assertEqual(actual_task_status, statuses.CANCELED)
 
     def test_cancel_workflow_using_canceled_status_with_items_concurrency(self):
@@ -1085,7 +1087,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is not removed from staging.
-        self.assertIsNotNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow is still running.
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
@@ -1093,7 +1095,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         # Cancel the workflow.
         conductor.request_workflow_status(statuses.CANCELED)
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)
-        actual_task_status = conductor.flow.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
         self.assertEqual(actual_task_status, statuses.CANCELED)
 
     def test_cancel_workflow_with_items_concurrency_and_active(self):
@@ -1162,12 +1164,13 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [context])
 
         # Assert that the task is running.
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.RUNNING)
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.RUNNING)
 
         # Cancel the workflow.
         conductor.request_workflow_status(statuses.CANCELING)
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELING)
-        actual_task_status = conductor.flow.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
         self.assertEqual(actual_task_status, statuses.CANCELING)
 
         # Complete the items.
@@ -1178,7 +1181,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, status_changes, contexts, results)
 
         # Assert the task and workflow are canceled.
-        actual_task_status = conductor.flow.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
         self.assertEqual(actual_task_status, statuses.CANCELED)
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)
 
@@ -1257,7 +1260,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is not removed from staging.
-        self.assertIsNotNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow is paused.
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
@@ -1337,7 +1340,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is not removed from staging.
-        self.assertIsNotNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
@@ -1347,9 +1350,10 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [context])
 
         # Assert the task and workflow is running.
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.RUNNING)
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.RUNNING)
 
-        staged_task = conductor.flow.get_staged_task(task_name, task_route)
+        staged_task = conductor.workflow_state.get_staged_task(task_name, task_route)
         self.assertIsNotNone(staged_task)
         self.assertIn('items', staged_task)
         self.assertEqual(staged_task['items'][1]['status'], statuses.RUNNING)
@@ -1362,10 +1366,10 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         self.forward_task_statuses(conductor, task_name, [statuses.SUCCEEDED], [context], [result])
 
         # Assert the task is removed from staging.
-        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the task and workflow succeeded.
-        actual_task_status = conductor.flow.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
         self.assertEqual(actual_task_status, statuses.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
@@ -1430,12 +1434,15 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [context])
 
         # Assert that the task is running.
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.RUNNING)
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.RUNNING)
 
         # Pause the workflow.
         conductor.request_workflow_status(statuses.PAUSING)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSING)
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.PAUSING)
+
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.PAUSING)
 
         # Complete the items.
         for i in range(0, len(task_ctx['xs'])):
@@ -1445,7 +1452,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, status_changes, contexts, results)
 
         # Assert the task and workflow are completed.
-        actual_task_status = conductor.flow.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
         self.assertEqual(actual_task_status, statuses.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
 
@@ -1514,12 +1521,15 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [context])
 
         # Assert that the task is running.
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.RUNNING)
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.RUNNING)
 
         # Pause the workflow.
         conductor.request_workflow_status(statuses.PAUSED)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSING)
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.PAUSING)
+
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.PAUSING)
 
         # Complete the items.
         for i in range(0, len(task_ctx['xs'])):
@@ -1529,7 +1539,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, status_changes, contexts, results)
 
         # Assert the task and workflow are completed.
-        actual_task_status = conductor.flow.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
         self.assertEqual(actual_task_status, statuses.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
 
@@ -1600,7 +1610,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is not removed from staging.
-        self.assertIsNotNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow is still running.
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
@@ -1608,7 +1618,9 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         # Pause the workflow.
         conductor.request_workflow_status(statuses.PAUSING)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.PAUSED)
+
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.PAUSED)
 
         # Resume the workflow.
         conductor.request_workflow_status(statuses.RESUMING)
@@ -1635,7 +1647,8 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [context])
 
         # Assert that the task is running.
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.RUNNING)
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.RUNNING)
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
 
         # Complete the items.
@@ -1646,7 +1659,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, status_changes, contexts, results)
 
         # Assert the task and workflow are completed.
-        actual_task_status = conductor.flow.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
         self.assertEqual(actual_task_status, statuses.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
@@ -1713,7 +1726,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is not removed from staging.
-        self.assertIsNotNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow is still running.
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
@@ -1721,7 +1734,9 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         # Pause the workflow.
         conductor.request_workflow_status(statuses.PAUSED)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.PAUSED)
+
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.PAUSED)
 
         # Resume the workflow.
         conductor.request_workflow_status(statuses.RESUMING)
@@ -1748,7 +1763,8 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [context])
 
         # Assert that the task is running.
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.RUNNING)
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.RUNNING)
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
 
         # Complete the items.
@@ -1759,7 +1775,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, status_changes, contexts, results)
 
         # Assert the task and workflow are completed.
-        actual_task_status = conductor.flow.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
         self.assertEqual(actual_task_status, statuses.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
@@ -1829,12 +1845,15 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [context])
 
         # Assert that the task is running.
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.RUNNING)
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.RUNNING)
 
         # Pause the workflow.
         conductor.request_workflow_status(statuses.PAUSING)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSING)
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.PAUSING)
+
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.PAUSING)
 
         # Complete the items.
         for i in range(0, concurrency):
@@ -1844,7 +1863,8 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, status_changes, contexts, results)
 
         # Assert the task and workflow are paused.
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.PAUSED)
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.PAUSED)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
 
         # Resume the workflow.
@@ -1872,7 +1892,8 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [context])
 
         # Assert that the task is running.
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.RUNNING)
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.RUNNING)
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
 
         # Complete the items.
@@ -1883,7 +1904,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             self.forward_task_statuses(conductor, task_name, status_changes, contexts, results)
 
         # Assert the task and workflow are completed.
-        actual_task_status = conductor.flow.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
         self.assertEqual(actual_task_status, statuses.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
@@ -1962,7 +1983,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is not removed from staging.
-        self.assertIsNotNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow is paused.
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
@@ -2042,7 +2063,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is not removed from staging.
-        self.assertIsNotNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
@@ -2052,9 +2073,10 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [context])
 
         # Assert the task and workflow is running.
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.RUNNING)
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.RUNNING)
 
-        staged_task = conductor.flow.get_staged_task(task_name, task_route)
+        staged_task = conductor.workflow_state.get_staged_task(task_name, task_route)
         self.assertEqual(staged_task['items'][1]['status'], statuses.RUNNING)
 
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
@@ -2065,10 +2087,10 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         self.forward_task_statuses(conductor, task_name, [statuses.SUCCEEDED], [context], [result])
 
         # Assert the task is removed from staging.
-        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the task and workflow succeeded.
-        actual_task_status = conductor.flow.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
         self.assertEqual(actual_task_status, statuses.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
@@ -2147,7 +2169,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is not removed from staging.
-        self.assertIsNotNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
@@ -2157,9 +2179,10 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [context])
 
         # Assert the task and workflow is running.
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.RUNNING)
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.RUNNING)
 
-        staged_task = conductor.flow.get_staged_task(task_name, task_route)
+        staged_task = conductor.workflow_state.get_staged_task(task_name, task_route)
         self.assertEqual(staged_task['items'][1]['status'], statuses.RUNNING)
 
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
@@ -2170,10 +2193,11 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         self.forward_task_statuses(conductor, task_name, [statuses.SUCCEEDED], [context], [result])
 
         # Assert the task is removed from staging.
-        self.assertIsNotNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the task and workflow is paused.
-        self.assertEqual(conductor.flow.get_task(task_name, task_route)['status'], statuses.PAUSED)
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        self.assertEqual(actual_task_status, statuses.PAUSED)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
 
     def test_task_cycle(self):
@@ -2237,7 +2261,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is reset in staging.
-        staged_task = conductor.flow.get_staged_task(task_name, task_route)
+        staged_task = conductor.workflow_state.get_staged_task(task_name, task_route)
         self.assertIsNotNone(staged_task)
         self.assertNotIn('items', staged_task)
 
@@ -2262,7 +2286,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is removed from staging.
-        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)

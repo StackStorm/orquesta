@@ -11,6 +11,7 @@
 # limitations under the License.
 
 from orquesta import conducting
+from orquesta import exceptions as exc
 from orquesta.specs import native as specs
 from orquesta import statuses
 from orquesta.tests.unit import base
@@ -30,14 +31,31 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             action: core.noop
         """
 
+        expected_errors = [
+            {
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% result().foobar %>\'. ExpressionEvaluationException: '
+                    'The current task is not set in the context.'
+                )
+            }
+        ]
+
         spec = specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_status(statuses.RUNNING)
+
+        self.assertRaises(
+            exc.InvalidWorkflowStatusTransition,
+            conductor.request_workflow_status,
+            statuses.RUNNING
+        )
 
         self.assertListEqual(conductor.get_next_tasks(), [])
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
+        self.assertListEqual(conductor.errors, expected_errors)
 
     def test_workflow_input_seq_ref_error(self):
         wf_def = """
@@ -68,7 +86,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_status(statuses.RUNNING)
+
+        self.assertRaises(
+            exc.InvalidWorkflowStatusTransition,
+            conductor.request_workflow_status,
+            statuses.RUNNING
+        )
 
         self.assert_next_task(conductor, has_next_task=False)
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
@@ -86,14 +109,31 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             action: core.noop
         """
 
+        expected_errors = [
+            {
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% result().foobar %>\'. ExpressionEvaluationException: '
+                    'The current task is not set in the context.'
+                )
+            }
+        ]
+
         spec = specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_status(statuses.RUNNING)
+
+        self.assertRaises(
+            exc.InvalidWorkflowStatusTransition,
+            conductor.request_workflow_status,
+            statuses.RUNNING
+        )
 
         self.assert_next_task(conductor, has_next_task=False)
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
+        self.assertListEqual(conductor.errors, expected_errors)
 
     def test_workflow_vars_seq_ref_error(self):
         wf_def = """
@@ -124,7 +164,12 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_status(statuses.RUNNING)
+
+        self.assertRaises(
+            exc.InvalidWorkflowStatusTransition,
+            conductor.request_workflow_status,
+            statuses.RUNNING
+        )
 
         self.assert_next_task(conductor, has_next_task=False)
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
@@ -190,7 +235,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertListEqual(actual_errors, expected_errors)
 
         # There are two transitions in task1. The transition to task3 should be processed.
-        staged_tasks = list(filter(lambda x: x['id'] == 'task3', conductor.flow.staged))
+        staged_tasks = list(filter(lambda x: x['id'] == 'task3', conductor.workflow_state.staged))
         self.assertGreater(len(staged_tasks), 0)
 
         # Since the workflow failed, there should be no next tasks returned.
@@ -268,7 +313,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertListEqual(actual_errors, expected_errors)
 
         # Since both tasks fail evaluating task transition, task3 should not be staged.
-        self.assertNotIn('task3', conductor.flow.staged)
+        self.assertNotIn('task3', conductor.workflow_state.staged)
 
         # Since the workflow failed, there should be no next tasks returned.
         self.assert_next_task(conductor, has_next_task=False)
@@ -325,7 +370,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
-        self.assertNotIn('task2', conductor.flow.staged)
+        self.assertNotIn('task2', conductor.workflow_state.staged)
 
         # Since the workflow failed, there should be no next tasks returned.
         self.assert_next_task(conductor, has_next_task=False)
@@ -384,7 +429,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         actual_errors = sorted(conductor.errors, key=lambda x: x.get('task_id', None))
         self.assertListEqual(actual_errors, expected_errors)
-        self.assertNotIn('task2', conductor.flow.staged)
+        self.assertNotIn('task2', conductor.workflow_state.staged)
 
         # Since the workflow failed, there should be no next tasks returned.
         self.assert_next_task(conductor, has_next_task=False)

@@ -11,6 +11,7 @@
 # limitations under the License.
 
 from orquesta import conducting
+from orquesta import exceptions as exc
 from orquesta.specs import native as specs
 from orquesta import statuses
 from orquesta.tests.unit import base
@@ -59,7 +60,12 @@ class WorkflowConductorContextTest(base.WorkflowConductorTest):
 
         # Run the workflow.
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_status(statuses.RUNNING)
+
+        self.assertRaises(
+            exc.InvalidWorkflowStatusTransition,
+            conductor.request_workflow_status,
+            statuses.RUNNING
+        )
 
         # Check workflow status and result.
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)

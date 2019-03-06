@@ -133,7 +133,7 @@ class WorkflowConductorWithItemsStressTest(base.WorkflowConductorWithItemsTest):
         )
 
         # Assert the task is removed from staging.
-        self.assertIsNone(conductor.flow.get_staged_task(task_name, task_route))
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)

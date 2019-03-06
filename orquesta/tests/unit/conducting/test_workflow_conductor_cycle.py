@@ -74,7 +74,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
         self.assert_next_task(conductor, has_next_task=False)
 
         # Check the list of tasks and make sure only the last entry for task2 is term=True.
-        tasks = [task for task in conductor.flow.sequence if task['id'] == 'task2']
+        tasks = [task for task in conductor.workflow_state.sequence if task['id'] == 'task2']
         self.assertListEqual([task.get('term', False) for task in tasks], [False, True])
 
         # Check workflow status and context.

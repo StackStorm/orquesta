@@ -19,7 +19,7 @@ from orquesta import statuses
 from orquesta.tests.unit import base
 
 
-class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
+class WorkflowConductorTaskStateTest(base.WorkflowConductorTest):
 
     def _add_tasks(self, wf_graph):
         for i in range(1, 6):
@@ -83,18 +83,18 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
 
         return conductor
 
-    def test_add_task_flow(self):
+    def test_add_task_state(self):
         conductor = self._prep_conductor(status=statuses.RUNNING)
 
         task_route = 0
         task_name = 'task1'
-        conductor.add_task_flow(task_name, task_route)
+        conductor.add_task_state(task_name, task_route)
 
-        expected_task_flow_idx = 0
-        actual_task_flow_idx = conductor._get_task_flow_idx(task_name, task_route)
-        self.assertEqual(actual_task_flow_idx, expected_task_flow_idx)
+        expected_task_state_idx = 0
+        actual_task_state_idx = conductor._get_task_state_idx(task_name, task_route)
+        self.assertEqual(actual_task_state_idx, expected_task_state_idx)
 
-        expected_task_flow_entry = {
+        expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
             'ctxs': {'in': [0]},
@@ -102,21 +102,21 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             'prev': {}
         }
 
-        actual_task_flow_entry = conductor.get_task_flow_entry(task_name, task_route)
-        self.assertDictEqual(actual_task_flow_entry, expected_task_flow_entry)
+        actual_task_state_entry = conductor.get_task_state_entry(task_name, task_route)
+        self.assertDictEqual(actual_task_state_entry, expected_task_state_entry)
 
-    def test_add_task_flow_no_context(self):
+    def test_add_task_state_no_context(self):
         conductor = self._prep_conductor(status=statuses.RUNNING)
 
         task_route = 0
         task_name = 'task1'
-        conductor.add_task_flow(task_name, task_route)
+        conductor.add_task_state(task_name, task_route)
 
-        expected_task_flow_idx = 0
-        actual_task_flow_idx = conductor._get_task_flow_idx(task_name, task_route)
-        self.assertEqual(actual_task_flow_idx, expected_task_flow_idx)
+        expected_task_state_idx = 0
+        actual_task_state_idx = conductor._get_task_state_idx(task_name, task_route)
+        self.assertEqual(actual_task_state_idx, expected_task_state_idx)
 
-        expected_task_flow_entry = {
+        expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
             'ctxs': {'in': [0]},
@@ -124,21 +124,21 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             'prev': {}
         }
 
-        actual_task_flow_entry = conductor.get_task_flow_entry(task_name, task_route)
-        self.assertDictEqual(actual_task_flow_entry, expected_task_flow_entry)
+        actual_task_state_entry = conductor.get_task_state_entry(task_name, task_route)
+        self.assertDictEqual(actual_task_state_entry, expected_task_state_entry)
 
-    def test_update_task_flow(self):
+    def test_update_task_state(self):
         conductor = self._prep_conductor(status=statuses.RUNNING)
 
         task_route = 0
         task_name = 'task1'
         self.forward_task_statuses(conductor, task_name, [statuses.RUNNING])
 
-        expected_task_flow_idx = 0
-        actual_task_flow_idx = conductor._get_task_flow_idx(task_name, task_route)
-        self.assertEqual(actual_task_flow_idx, expected_task_flow_idx)
+        expected_task_state_idx = 0
+        actual_task_state_idx = conductor._get_task_state_idx(task_name, task_route)
+        self.assertEqual(actual_task_state_idx, expected_task_state_idx)
 
-        expected_task_flow_entry = {
+        expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
             'ctxs': {'in': [0]},
@@ -147,12 +147,12 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             'prev': {}
         }
 
-        actual_task_flow_entry = conductor.get_task_flow_entry(task_name, task_route)
-        self.assertDictEqual(actual_task_flow_entry, expected_task_flow_entry)
+        actual_task_state_entry = conductor.get_task_state_entry(task_name, task_route)
+        self.assertDictEqual(actual_task_state_entry, expected_task_state_entry)
 
         self.forward_task_statuses(conductor, task_name, [statuses.SUCCEEDED], results=['foobar'])
 
-        expected_task_flow_entry = {
+        expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
             'ctxs': {'in': [0]},
@@ -164,21 +164,21 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             'prev': {}
         }
 
-        actual_task_flow_entry = conductor.get_task_flow_entry(task_name, task_route)
-        self.assertDictEqual(actual_task_flow_entry, expected_task_flow_entry)
+        actual_task_state_entry = conductor.get_task_state_entry(task_name, task_route)
+        self.assertDictEqual(actual_task_state_entry, expected_task_state_entry)
 
-    def test_update_task_flow_with_failed_event(self):
+    def test_update_task_state_with_failed_event(self):
         conductor = self._prep_conductor(status=statuses.RUNNING)
 
         task_route = 0
         task_name = 'task1'
         self.forward_task_statuses(conductor, task_name, [statuses.RUNNING])
 
-        expected_task_flow_idx = 0
-        actual_task_flow_idx = conductor._get_task_flow_idx(task_name, task_route)
-        self.assertEqual(actual_task_flow_idx, expected_task_flow_idx)
+        expected_task_state_idx = 0
+        actual_task_state_idx = conductor._get_task_state_idx(task_name, task_route)
+        self.assertEqual(actual_task_state_idx, expected_task_state_idx)
 
-        expected_task_flow_entry = {
+        expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
             'ctxs': {'in': [0]},
@@ -187,8 +187,8 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             'prev': {}
         }
 
-        actual_task_flow_entry = conductor.get_task_flow_entry(task_name, task_route)
-        self.assertDictEqual(actual_task_flow_entry, expected_task_flow_entry)
+        actual_task_state_entry = conductor.get_task_state_entry(task_name, task_route)
+        self.assertDictEqual(actual_task_state_entry, expected_task_state_entry)
 
         self.forward_task_statuses(
             conductor,
@@ -197,7 +197,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             results=[{'stdout': 'boom!'}]
         )
 
-        expected_task_flow_entry = {
+        expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
             'ctxs': {'in': [0]},
@@ -210,8 +210,8 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             'term': True
         }
 
-        actual_task_flow_entry = conductor.get_task_flow_entry(task_name, task_route)
-        self.assertDictEqual(actual_task_flow_entry, expected_task_flow_entry)
+        actual_task_state_entry = conductor.get_task_state_entry(task_name, task_route)
+        self.assertDictEqual(actual_task_state_entry, expected_task_state_entry)
 
         expected_errors = [
             {
@@ -224,29 +224,29 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
 
         self.assertListEqual(conductor.errors, expected_errors)
 
-    def test_update_task_flow_for_not_ready_task(self):
+    def test_update_task_state_for_not_ready_task(self):
         conductor = self._prep_conductor(status=statuses.RUNNING)
 
         self.assertRaises(
-            exc.InvalidTaskFlowEntry,
-            conductor.update_task_flow,
+            exc.InvalidTaskStateEntry,
+            conductor.update_task_state,
             'task2',
             0,
             events.ActionExecutionEvent(statuses.RUNNING)
         )
 
-    def test_update_task_flow_for_nonexistent_task(self):
+    def test_update_task_state_for_nonexistent_task(self):
         conductor = self._prep_conductor(status=statuses.RUNNING)
 
         self.assertRaises(
             exc.InvalidTask,
-            conductor.update_task_flow,
+            conductor.update_task_state,
             'task999',
             0,
             events.ActionExecutionEvent(statuses.RUNNING)
         )
 
-    def test_update_invalid_status_to_task_flow_item(self):
+    def test_update_invalid_status_to_task_state_item(self):
         conductor = self._prep_conductor(status=statuses.RUNNING)
 
         task_route = 0
@@ -260,7 +260,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
 
         self.assertRaises(
             TypeError,
-            conductor.update_task_flow,
+            conductor.update_task_state,
             task_name,
             task_route,
             'foobar'
@@ -268,7 +268,7 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
 
         self.forward_task_statuses(conductor, task_name, [statuses.REQUESTED])
 
-        expected_task_flow_entry = {
+        expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
             'ctxs': {'in': [0]},
@@ -277,14 +277,14 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             'prev': {}
         }
 
-        actual_task_flow_entry = conductor.get_task_flow_entry(task_name, task_route)
-        self.assertDictEqual(actual_task_flow_entry, expected_task_flow_entry)
+        actual_task_state_entry = conductor.get_task_state_entry(task_name, task_route)
+        self.assertDictEqual(actual_task_state_entry, expected_task_state_entry)
 
         # When transition is not valid, the task status is not changed. For the test case below,
         # the status change from requested to succeeded is not a valid transition.
         self.forward_task_statuses(conductor, task_name, [statuses.SUCCEEDED])
 
-        expected_task_flow_entry = {
+        expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
             'ctxs': {'in': [0]},
@@ -293,10 +293,10 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             'prev': {}
         }
 
-        actual_task_flow_entry = conductor.get_task_flow_entry(task_name, task_route)
-        self.assertDictEqual(actual_task_flow_entry, expected_task_flow_entry)
+        actual_task_state_entry = conductor.get_task_state_entry(task_name, task_route)
+        self.assertDictEqual(actual_task_state_entry, expected_task_state_entry)
 
-    def test_add_sequence_to_task_flow(self):
+    def test_add_sequence_to_task_state(self):
         conductor = self._prep_conductor(status=statuses.RUNNING)
 
         # Update progress of task1 to task flow.
@@ -304,11 +304,11 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         task_name = 'task1'
         self.forward_task_statuses(conductor, task_name, [statuses.RUNNING])
 
-        expected_task_flow_idx = 0
-        actual_task_flow_idx = conductor._get_task_flow_idx(task_name, task_route)
-        self.assertEqual(actual_task_flow_idx, expected_task_flow_idx)
+        expected_task_state_idx = 0
+        actual_task_state_idx = conductor._get_task_state_idx(task_name, task_route)
+        self.assertEqual(actual_task_state_idx, expected_task_state_idx)
 
-        expected_task_flow_entry = {
+        expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
             'ctxs': {'in': [0]},
@@ -317,12 +317,12 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             'prev': {}
         }
 
-        actual_task_flow_entry = conductor.get_task_flow_entry(task_name, task_route)
-        self.assertDictEqual(actual_task_flow_entry, expected_task_flow_entry)
+        actual_task_state_entry = conductor.get_task_state_entry(task_name, task_route)
+        self.assertDictEqual(actual_task_state_entry, expected_task_state_entry)
 
         self.forward_task_statuses(conductor, task_name, [statuses.SUCCEEDED], results=['foobar'])
 
-        expected_task_flow_entry = {
+        expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
             'ctxs': {'in': [0]},
@@ -334,21 +334,21 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             'prev': {}
         }
 
-        actual_task_flow_entry = conductor.get_task_flow_entry(task_name, task_route)
-        self.assertDictEqual(actual_task_flow_entry, expected_task_flow_entry)
+        actual_task_state_entry = conductor.get_task_state_entry(task_name, task_route)
+        self.assertDictEqual(actual_task_state_entry, expected_task_state_entry)
 
-        expected_sequence = [expected_task_flow_entry]
-        self.assertListEqual(conductor.flow.sequence, expected_sequence)
+        expected_sequence = [expected_task_state_entry]
+        self.assertListEqual(conductor.workflow_state.sequence, expected_sequence)
 
         # Update progress of task2 to task flow.
         task_name = 'task2'
         self.forward_task_statuses(conductor, task_name, [statuses.RUNNING])
 
-        expected_task_flow_idx = 1
-        actual_task_flow_idx = conductor._get_task_flow_idx(task_name, task_route)
-        self.assertEqual(actual_task_flow_idx, expected_task_flow_idx)
+        expected_task_state_idx = 1
+        actual_task_state_idx = conductor._get_task_state_idx(task_name, task_route)
+        self.assertEqual(actual_task_state_idx, expected_task_state_idx)
 
-        expected_task_flow_entry = {
+        expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
             'ctxs': {'in': [0]},
@@ -359,12 +359,12 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             }
         }
 
-        actual_task_flow_entry = conductor.get_task_flow_entry(task_name, task_route)
-        self.assertDictEqual(actual_task_flow_entry, expected_task_flow_entry)
+        actual_task_state_entry = conductor.get_task_state_entry(task_name, task_route)
+        self.assertDictEqual(actual_task_state_entry, expected_task_state_entry)
 
         self.forward_task_statuses(conductor, task_name, [statuses.SUCCEEDED], results=['foobar'])
 
-        expected_task_flow_entry = {
+        expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
             'ctxs': {'in': [0]},
@@ -377,13 +377,13 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             }
         }
 
-        actual_task_flow_entry = conductor.get_task_flow_entry(task_name, task_route)
-        self.assertDictEqual(actual_task_flow_entry, expected_task_flow_entry)
+        actual_task_state_entry = conductor.get_task_state_entry(task_name, task_route)
+        self.assertDictEqual(actual_task_state_entry, expected_task_state_entry)
 
-        expected_sequence.append(expected_task_flow_entry)
-        self.assertListEqual(conductor.flow.sequence, expected_sequence)
+        expected_sequence.append(expected_task_state_entry)
+        self.assertListEqual(conductor.workflow_state.sequence, expected_sequence)
 
-    def test_add_cycle_to_task_flow(self):
+    def test_add_cycle_to_task_state(self):
         conductor = self._prep_conductor(status=statuses.RUNNING)
         task_route = 0
 
@@ -401,10 +401,10 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
         self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING])
 
         # Check the reference pointer. Task2 points to the latest instance.
-        self.assertEqual(conductor._get_task_flow_idx('task1', task_route), 0)
-        self.assertEqual(conductor._get_task_flow_idx('task2', task_route), 4)
-        self.assertEqual(conductor._get_task_flow_idx('task3', task_route), 2)
-        self.assertEqual(conductor._get_task_flow_idx('task4', task_route), 3)
+        self.assertEqual(conductor._get_task_state_idx('task1', task_route), 0)
+        self.assertEqual(conductor._get_task_state_idx('task2', task_route), 4)
+        self.assertEqual(conductor._get_task_state_idx('task3', task_route), 2)
+        self.assertEqual(conductor._get_task_state_idx('task4', task_route), 3)
 
         # Check sequence.
         expected_sequence = [
@@ -477,4 +477,4 @@ class WorkflowConductorTaskFlowTest(base.WorkflowConductorTest):
             }
         ]
 
-        self.assertListEqual(conductor.flow.sequence, expected_sequence)
+        self.assertListEqual(conductor.workflow_state.sequence, expected_sequence)

@@ -24,7 +24,7 @@ class WorkflowFunctionTest(unittest.TestCase):
     def test_task_status_empty_context(self):
         task_route = 0
         task_name = 't1'
-        task_flow_pointer_id = constants.TASK_FLOW_ROUTE_FORMAT % (task_name, str(task_route))
+        task_flow_pointer_id = constants.TASK_STATE_ROUTE_FORMAT % (task_name, str(task_route))
 
         context = None
         self.assertEqual(funcs.task_status_(context, task_name, task_route), statuses.UNSET)
@@ -32,40 +32,40 @@ class WorkflowFunctionTest(unittest.TestCase):
         context = {}
         self.assertEqual(funcs.task_status_(context, task_name, task_route), statuses.UNSET)
 
-        context = {'__flow': None}
+        context = {'__state': None}
         self.assertEqual(funcs.task_status_(context, task_name, task_route), statuses.UNSET)
 
-        context = {'__flow': {}}
+        context = {'__state': {}}
         self.assertEqual(funcs.task_status_(context, task_name, task_route), statuses.UNSET)
 
-        context = {'__flow': {'tasks': None}}
+        context = {'__state': {'tasks': None}}
         self.assertEqual(funcs.task_status_(context, task_name, task_route), statuses.UNSET)
 
-        context = {'__flow': {'tasks': {}}}
+        context = {'__state': {'tasks': {}}}
         self.assertEqual(funcs.task_status_(context, task_name, task_route), statuses.UNSET)
 
         task_pointers = {task_flow_pointer_id: None}
-        context = {'__flow': {'tasks': task_pointers}}
+        context = {'__state': {'tasks': task_pointers}}
         self.assertEqual(funcs.task_status_(context, task_name, task_route), statuses.UNSET)
 
         task_pointers = {task_flow_pointer_id: 0}
-        context = {'__flow': {'tasks': task_pointers, 'sequence': [None]}}
+        context = {'__state': {'tasks': task_pointers, 'sequence': [None]}}
         self.assertEqual(funcs.task_status_(context, task_name, task_route), statuses.UNSET)
 
     def test_task_status_empty_context_with_no_given_route(self):
         task_route = 0
         task_name = 't1'
-        task_flow_pointer_id = constants.TASK_FLOW_ROUTE_FORMAT % (task_name, str(task_route))
+        task_flow_pointer_id = constants.TASK_STATE_ROUTE_FORMAT % (task_name, str(task_route))
         task_pointers = {task_flow_pointer_id: None}
 
         context_test_cases = [
             None,
             {},
-            {'__flow': None},
-            {'__flow': {}},
-            {'__flow': {'tasks': None}},
-            {'__flow': {'tasks': task_pointers}},
-            {'__flow': {'tasks': task_pointers, 'sequence': [None]}}
+            {'__state': None},
+            {'__state': {}},
+            {'__state': {'tasks': None}},
+            {'__state': {'tasks': task_pointers}},
+            {'__state': {'tasks': task_pointers, 'sequence': [None]}}
         ]
 
         for context in context_test_cases:
@@ -74,16 +74,16 @@ class WorkflowFunctionTest(unittest.TestCase):
     def test_task_status_empty_context_with_no_given_route_but_current_task_set(self):
         task_route = 0
         task_name = 't1'
-        task_flow_pointer_id = constants.TASK_FLOW_ROUTE_FORMAT % (task_name, str(task_route))
+        task_flow_pointer_id = constants.TASK_STATE_ROUTE_FORMAT % (task_name, str(task_route))
         task_pointers = {task_flow_pointer_id: None}
 
         context_test_cases = [
             {},
-            {'__flow': None},
-            {'__flow': {}},
-            {'__flow': {'tasks': None}},
-            {'__flow': {'tasks': task_pointers}},
-            {'__flow': {'tasks': task_pointers, 'sequence': [None]}}
+            {'__state': None},
+            {'__state': {}},
+            {'__state': {'tasks': None}},
+            {'__state': {'tasks': task_pointers}},
+            {'__state': {'tasks': task_pointers, 'sequence': [None]}}
         ]
 
         for context in context_test_cases:
@@ -93,35 +93,35 @@ class WorkflowFunctionTest(unittest.TestCase):
     def test_task_status_dereference_errors(self):
         task_route = 0
         task_name = 't1'
-        task_flow_pointer_id = constants.TASK_FLOW_ROUTE_FORMAT % (task_name, str(task_route))
+        task_flow_pointer_id = constants.TASK_STATE_ROUTE_FORMAT % (task_name, str(task_route))
 
         task_pointers = {task_flow_pointer_id: 0}
-        context = {'__flow': {'tasks': task_pointers}}
+        context = {'__state': {'tasks': task_pointers}}
         self.assertRaises(IndexError, funcs.task_status_, context, task_name, task_route)
 
         task_pointers = {task_flow_pointer_id: 1}
-        context = {'__flow': {'tasks': task_pointers, 'sequence': [{'status': statuses.RUNNING}]}}
+        context = {'__state': {'tasks': task_pointers, 'sequence': [{'status': statuses.RUNNING}]}}
         self.assertRaises(IndexError, funcs.task_status_, context, task_name, task_route)
 
     def test_task_status(self):
         task_route = 0
         task_name = 't1'
-        task_flow_pointer_id = constants.TASK_FLOW_ROUTE_FORMAT % (task_name, str(task_route))
+        task_flow_pointer_id = constants.TASK_STATE_ROUTE_FORMAT % (task_name, str(task_route))
 
         task_pointers = {task_flow_pointer_id: 0}
-        context = {'__flow': {'tasks': task_pointers, 'sequence': [{'status': statuses.RUNNING}]}}
+        context = {'__state': {'tasks': task_pointers, 'sequence': [{'status': statuses.RUNNING}]}}
         actual_task_status = funcs.task_status_(context, task_name, route=task_route)
         self.assertEqual(actual_task_status, statuses.RUNNING)
 
     def test_task_status_route_from_current_task(self):
         task_route = 0
         task_name = 't1'
-        task_flow_pointer_id = constants.TASK_FLOW_ROUTE_FORMAT % (task_name, str(task_route))
+        task_flow_pointer_id = constants.TASK_STATE_ROUTE_FORMAT % (task_name, str(task_route))
 
         task_pointers = {task_flow_pointer_id: 0}
         context = {
             '__current_task': {'id': task_name, 'route': task_route},
-            '__flow': {
+            '__state': {
                 'tasks': task_pointers,
                 'sequence': [{'status': statuses.RUNNING}]}
         }
@@ -145,14 +145,14 @@ class WorkflowFunctionTest(unittest.TestCase):
     def test_succeeded(self):
         task_route = 0
         task_name = 't1'
-        task_flow_pointer_id = constants.TASK_FLOW_ROUTE_FORMAT % (task_name, str(task_route))
+        task_flow_pointer_id = constants.TASK_STATE_ROUTE_FORMAT % (task_name, str(task_route))
 
         context = {'__current_task': None}
         self.assertRaises(exc.ExpressionEvaluationException, funcs.succeeded_, context)
 
         context = {
             '__current_task': {'id': task_name, 'route': task_route},
-            '__flow': {
+            '__state': {
                 'tasks': {task_flow_pointer_id: 0},
                 'sequence': [{'status': statuses.RUNNING}]
             }
@@ -162,7 +162,7 @@ class WorkflowFunctionTest(unittest.TestCase):
 
         context = {
             '__current_task': {'id': task_name, 'route': task_route},
-            '__flow': {
+            '__state': {
                 'tasks': {task_flow_pointer_id: 0},
                 'sequence': [{'status': statuses.SUCCEEDED}]
             }
@@ -173,14 +173,14 @@ class WorkflowFunctionTest(unittest.TestCase):
     def test_failed(self):
         task_route = 0
         task_name = 't1'
-        task_flow_pointer_id = constants.TASK_FLOW_ROUTE_FORMAT % (task_name, str(task_route))
+        task_flow_pointer_id = constants.TASK_STATE_ROUTE_FORMAT % (task_name, str(task_route))
 
         context = {'__current_task': None}
         self.assertRaises(exc.ExpressionEvaluationException, funcs.failed_, context)
 
         context = {
             '__current_task': {'id': task_name, 'route': task_route},
-            '__flow': {
+            '__state': {
                 'tasks': {task_flow_pointer_id: 0},
                 'sequence': [{'status': statuses.RUNNING}]
             }
@@ -190,7 +190,7 @@ class WorkflowFunctionTest(unittest.TestCase):
 
         context = {
             '__current_task': {'id': task_name, 'route': task_route},
-            '__flow': {
+            '__state': {
                 'tasks': {task_flow_pointer_id: 0},
                 'sequence': [{'status': statuses.FAILED}]
             }
@@ -201,14 +201,14 @@ class WorkflowFunctionTest(unittest.TestCase):
     def test_completed(self):
         task_route = 0
         task_name = 't1'
-        task_flow_pointer_id = constants.TASK_FLOW_ROUTE_FORMAT % (task_name, str(task_route))
+        task_flow_pointer_id = constants.TASK_STATE_ROUTE_FORMAT % (task_name, str(task_route))
 
         context = {'__current_task': None}
         self.assertRaises(exc.ExpressionEvaluationException, funcs.completed_, context)
 
         context = {
             '__current_task': {'id': task_name, 'route': task_route},
-            '__flow': {
+            '__state': {
                 'tasks': {task_flow_pointer_id: 0},
                 'sequence': [{'status': statuses.RUNNING}]
             }
@@ -218,7 +218,7 @@ class WorkflowFunctionTest(unittest.TestCase):
 
         context = {
             '__current_task': {'id': task_name, 'route': task_route},
-            '__flow': {
+            '__state': {
                 'tasks': {task_flow_pointer_id: 0},
                 'sequence': [{'status': statuses.SUCCEEDED}]
             }
@@ -229,14 +229,14 @@ class WorkflowFunctionTest(unittest.TestCase):
     def test_result(self):
         task_route = 0
         task_name = 't1'
-        task_flow_pointer_id = constants.TASK_FLOW_ROUTE_FORMAT % (task_name, str(task_route))
+        task_flow_pointer_id = constants.TASK_STATE_ROUTE_FORMAT % (task_name, str(task_route))
 
         context = {'__current_task': None}
         self.assertRaises(exc.ExpressionEvaluationException, funcs.result_, context)
 
         context = {
             '__current_task': {'id': task_name, 'route': task_route, 'result': 'foobar'},
-            '__flow': {
+            '__state': {
                 'tasks': {task_flow_pointer_id: 0},
                 'sequence': [{'status': statuses.SUCCEEDED}]
             }
@@ -246,7 +246,7 @@ class WorkflowFunctionTest(unittest.TestCase):
 
         context = {
             '__current_task': {'id': task_name, 'route': task_route, 'result': {'fu': 'bar'}},
-            '__flow': {
+            '__state': {
                 'tasks': {task_flow_pointer_id: 0},
                 'sequence': [{'status': statuses.SUCCEEDED}]
             }
@@ -286,7 +286,7 @@ class WorkflowFunctionTest(unittest.TestCase):
         ]
 
         context = {
-            '__flow': {
+            '__state': {
                 'tasks': task_pointers,
                 'sequence': task_flow_entries,
                 'routes': routes
@@ -357,7 +357,7 @@ class WorkflowFunctionTest(unittest.TestCase):
         ]
 
         context = {
-            '__flow': {
+            '__state': {
                 'tasks': task_pointers,
                 'sequence': task_flow_entries,
                 'routes': routes

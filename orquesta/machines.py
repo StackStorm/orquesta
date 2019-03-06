@@ -375,7 +375,7 @@ class TaskStateMachine(object):
         return False
 
     @classmethod
-    def add_context_to_action_event(cls, conductor, task_id, task_route, ac_ex_event):
+    def add_context_to_action_event(cls, workflow_state, task_id, task_route, ac_ex_event):
         action_event = ac_ex_event.name
 
         requirements = [
@@ -389,7 +389,7 @@ class TaskStateMachine(object):
         if (ac_ex_event.status in requirements and
                 ac_ex_event.context and 'item_id' in ac_ex_event.context):
             # Make a copy of the items and remove current item under evaluation.
-            staged_task = conductor.flow.get_staged_task(task_id, task_route)
+            staged_task = workflow_state.get_staged_task(task_id, task_route)
             items = copy.deepcopy(staged_task['items'])
             del items[ac_ex_event.context['item_id']]
             items_status = [item['status'] for item in items]
@@ -423,18 +423,21 @@ class TaskStateMachine(object):
         return action_event
 
     @classmethod
-    def process_action_event(cls, conductor, task_flow_entry, ac_ex_event):
+    def process_action_event(cls, workflow_state, task_state, ac_ex_event):
         # Check if event is valid.
         if ac_ex_event.name not in events.ACTION_EXECUTION_EVENTS + events.ENGINE_OPERATION_EVENTS:
             raise exc.InvalidEvent(ac_ex_event.name)
 
         # Append additional task context to the event.
-        task_id = task_flow_entry['id']
-        task_route = task_flow_entry['route']
-        event_name = cls.add_context_to_action_event(conductor, task_id, task_route, ac_ex_event)
+        event_name = cls.add_context_to_action_event(
+            workflow_state,
+            task_state['id'],
+            task_state['route'],
+            ac_ex_event
+        )
 
         # Identify current task status.
-        current_task_status = task_flow_entry.get('status', statuses.UNSET)
+        current_task_status = task_state.get('status', statuses.UNSET)
 
         if current_task_status is None:
             current_task_status = statuses.UNSET
@@ -452,13 +455,13 @@ class TaskStateMachine(object):
         new_task_status = TASK_STATE_MACHINE_DATA[current_task_status][event_name]
 
         # Assign new status to the task flow entry.
-        task_flow_entry['status'] = new_task_status
+        task_state['status'] = new_task_status
 
     @classmethod
-    def add_context_to_workflow_event(cls, conductor, task_id, task_route, wf_ex_event):
+    def add_context_to_workflow_event(cls, workflow_state, task_id, task_route, wf_ex_event):
         workflow_event = wf_ex_event.name
         requirements = statuses.PAUSE_STATUSES + statuses.CANCEL_STATUSES
-        staged_task = conductor.flow.get_staged_task(task_id, task_route)
+        staged_task = workflow_state.get_staged_task(task_id, task_route)
 
         if wf_ex_event.status in requirements and staged_task and 'items' in staged_task:
             items_status = [item['status'] for item in staged_task['items']]
@@ -470,18 +473,21 @@ class TaskStateMachine(object):
         return workflow_event
 
     @classmethod
-    def process_workflow_event(cls, conductor, task_flow_entry, wf_ex_event):
+    def process_workflow_event(cls, workflow_state, task_state, wf_ex_event):
         # Check if event is valid.
         if wf_ex_event.name not in events.WORKFLOW_EXECUTION_EVENTS:
             raise exc.InvalidEvent(wf_ex_event.name)
 
         # Append additional task context to the event.
-        task_id = task_flow_entry['id']
-        task_route = task_flow_entry['route']
-        event_name = cls.add_context_to_workflow_event(conductor, task_id, task_route, wf_ex_event)
+        event_name = cls.add_context_to_workflow_event(
+            workflow_state,
+            task_state['id'],
+            task_state['route'],
+            wf_ex_event
+        )
 
         # Identify current task status.
-        current_task_status = task_flow_entry.get('status', statuses.UNSET)
+        current_task_status = task_state.get('status', statuses.UNSET)
 
         if current_task_status is None:
             current_task_status = statuses.UNSET
@@ -499,20 +505,20 @@ class TaskStateMachine(object):
         new_task_status = TASK_STATE_MACHINE_DATA[current_task_status][event_name]
 
         # Assign new status to the task flow entry.
-        task_flow_entry['status'] = new_task_status
+        task_state['status'] = new_task_status
 
     @classmethod
-    def process_event(cls, conductor, task_flow_entry, event):
+    def process_event(cls, workflow_state, task_state, event):
         if isinstance(event, events.WorkflowExecutionEvent):
-            cls.process_workflow_event(conductor, task_flow_entry, event)
+            cls.process_workflow_event(workflow_state, task_state, event)
             return
 
         if isinstance(event, events.ActionExecutionEvent):
-            cls.process_action_event(conductor, task_flow_entry, event)
+            cls.process_action_event(workflow_state, task_state, event)
             return
 
         if isinstance(event, events.EngineOperationEvent):
-            cls.process_action_event(conductor, task_flow_entry, event)
+            cls.process_action_event(workflow_state, task_state, event)
             return
 
         raise exc.InvalidEventType(type(event), event.name)
@@ -544,13 +550,13 @@ class WorkflowStateMachine(object):
         return False
 
     @classmethod
-    def add_context_to_task_event(cls, conductor, tk_ex_event):
+    def add_context_to_task_event(cls, workflow_state, tk_ex_event):
         # Identify current workflow status.
         task_event = tk_ex_event.name
         task_id = getattr(tk_ex_event, 'task_id', None)
         task_route = getattr(tk_ex_event, 'route', None)
-        has_next_tasks = conductor.has_next_tasks(task_id, task_route)
-        has_active_tasks = conductor.flow.has_active_tasks
+        has_next_tasks = workflow_state.has_next_tasks(task_id, task_route)
+        has_active_tasks = workflow_state.has_active_tasks
 
         # Mark task remediated if task is in abended statuses and there are transitions.
         if tk_ex_event.status in statuses.ABENDED_STATUSES and has_next_tasks:
@@ -572,28 +578,28 @@ class WorkflowStateMachine(object):
                 not task_event.startswith(events.TASK_REMEDIATED)):
             return task_event
 
-        if conductor.flow.has_canceling_tasks or conductor.flow.has_canceled_tasks:
+        if workflow_state.has_canceling_tasks or workflow_state.has_canceled_tasks:
             return task_event + '_canceled'
 
-        if conductor.flow.has_pausing_tasks or conductor.flow.has_paused_tasks:
+        if workflow_state.has_pausing_tasks or workflow_state.has_paused_tasks:
             return task_event + '_paused'
 
-        if conductor.flow.has_staged_tasks or has_next_tasks:
+        if workflow_state.has_staged_tasks or has_next_tasks:
             return task_event + '_incomplete'
 
         return task_event + '_completed'
 
     @classmethod
-    def process_task_event(cls, conductor, tk_ex_event):
+    def process_task_event(cls, workflow_state, tk_ex_event):
         # Append additional workflow context to the event.
-        event_name = cls.add_context_to_task_event(conductor, tk_ex_event)
+        event_name = cls.add_context_to_task_event(workflow_state, tk_ex_event)
 
         # Check if event is valid.
         if event_name not in events.TASK_EXECUTION_EVENTS:
             raise exc.InvalidEvent(event_name)
 
         # Capture current workflow status.
-        current_workflow_status = conductor.get_workflow_status()
+        current_workflow_status = workflow_state.status
         new_workflow_status = current_workflow_status
 
         # Check if the current workflow status can be transitioned.
@@ -609,13 +615,13 @@ class WorkflowStateMachine(object):
 
         # Assign new workflow status if there is change.
         if current_workflow_status != new_workflow_status:
-            conductor._set_workflow_status(new_workflow_status)
+            workflow_state.status = new_workflow_status
 
     @classmethod
-    def add_context_to_workflow_event(cls, conductor, wf_ex_event):
+    def add_context_to_workflow_event(cls, workflow_state, wf_ex_event):
         # Identify current workflow status.
         workflow_event = wf_ex_event.name
-        has_active_tasks = conductor.flow.has_active_tasks
+        has_active_tasks = workflow_state.has_active_tasks
 
         # For certain events like cancel and pause, whether there are tasks in active
         # status determine whether the workflow reached final status or still in progress.
@@ -625,26 +631,26 @@ class WorkflowStateMachine(object):
             workflow_event += '_workflow_active' if has_active_tasks else '_workflow_dormant'
 
         # If the workflow is paused and on resume, check whether it is already completed.
-        if (conductor.get_workflow_status() == statuses.PAUSED and
+        if (workflow_state.status == statuses.PAUSED and
                 wf_ex_event.status in [statuses.RUNNING, statuses.RESUMING] and
-                not conductor.flow.has_active_tasks and
-                not conductor.flow.has_staged_tasks and
-                not conductor.flow.has_paused_tasks):
+                not workflow_state.has_active_tasks and
+                not workflow_state.has_staged_tasks and
+                not workflow_state.has_paused_tasks):
             workflow_event += '_workflow_completed'
 
         return workflow_event
 
     @classmethod
-    def process_workflow_event(cls, conductor, wf_ex_event):
+    def process_workflow_event(cls, workflow_state, wf_ex_event):
         # Append additional workflow context to the event.
-        event_name = cls.add_context_to_workflow_event(conductor, wf_ex_event)
+        event_name = cls.add_context_to_workflow_event(workflow_state, wf_ex_event)
 
         # Check if event is valid.
         if event_name not in events.WORKFLOW_EXECUTION_EVENTS:
             raise exc.InvalidEvent(event_name)
 
         # Capture current workflow status.
-        current_workflow_status = conductor.get_workflow_status()
+        current_workflow_status = workflow_state.status
         new_workflow_status = current_workflow_status
 
         # Check if the current workflow status can be transitioned.
@@ -660,16 +666,16 @@ class WorkflowStateMachine(object):
 
         # Assign new workflow status if there is change.
         if current_workflow_status != new_workflow_status:
-            conductor._set_workflow_status(new_workflow_status)
+            workflow_state.status = new_workflow_status
 
     @classmethod
-    def process_event(cls, conductor, event):
+    def process_event(cls, workflow_state, event):
         if isinstance(event, events.WorkflowExecutionEvent):
-            cls.process_workflow_event(conductor, event)
+            cls.process_workflow_event(workflow_state, event)
             return
 
         if isinstance(event, events.TaskExecutionEvent):
-            cls.process_task_event(conductor, event)
+            cls.process_task_event(workflow_state, event)
             return
 
         raise exc.InvalidEventType(type(event), event.name)

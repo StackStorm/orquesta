@@ -175,7 +175,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
             if ctx:
                 ac_ex_event.context = ctx
 
-            conductor.update_task_flow(task_id, route, ac_ex_event)
+            conductor.update_task_state(task_id, route, ac_ex_event)
 
     # The conductor.get_next_tasks make copies of the task specs and render expressions
     # in the task action and task input. So comparing the task specs will not match. In
@@ -188,16 +188,16 @@ class WorkflowConductorTest(WorkflowComposerTest):
         for task in actual_copy:
             task['spec'] = task['spec'].serialize()
 
-            for staged_task in task['ctx']['__flow']['staged']:
+            for staged_task in task['ctx']['__state']['staged']:
                 if 'items' in staged_task:
                     del staged_task['items']
 
         for task in expected_copy:
             task['ctx']['__current_task'] = {'id': task['id'], 'route': task['route']}
-            task['ctx']['__flow'] = conductor.flow.serialize()
+            task['ctx']['__state'] = conductor.workflow_state.serialize()
             task['spec'] = task['spec'].serialize()
 
-            for staged_task in task['ctx']['__flow']['staged']:
+            for staged_task in task['ctx']['__state']['staged']:
                 if 'items' in staged_task:
                     del staged_task['items']
 
@@ -269,14 +269,14 @@ class WorkflowConductorTest(WorkflowComposerTest):
 
                 # Set task status to running.
                 ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
-                conductor.update_task_flow(current_task_id, current_task_route, ac_ex_event)
+                conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
 
                 # Mock completion of the task.
                 status = status_q.get() if not status_q.empty() else statuses.SUCCEEDED
                 result = result_q.get() if not result_q.empty() else None
 
                 ac_ex_event = events.ActionExecutionEvent(status, result=result)
-                conductor.update_task_flow(current_task_id, current_task_route, ac_ex_event)
+                conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
 
             # Identify the next set of tasks.
             for next_task in conductor.get_next_tasks():
@@ -291,7 +291,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
 
         actual_task_seq = [
             (entry['id'], entry['route'])
-            for entry in conductor.flow.sequence
+            for entry in conductor.workflow_state.sequence
         ]
 
         expected_task_seq = [
@@ -300,7 +300,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
         ]
 
         self.assertListEqual(actual_task_seq, expected_task_seq)
-        self.assertListEqual(conductor.flow.routes, expected_routes)
+        self.assertListEqual(conductor.workflow_state.routes, expected_routes)
 
         if expected_workflow_status is None:
             expected_workflow_status = statuses.SUCCEEDED
@@ -316,7 +316,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
                 for task in expected_term_tasks
             ]
 
-            term_tasks = conductor.flow.get_terminal_tasks()
+            term_tasks = conductor.workflow_state.get_terminal_tasks()
             actual_term_tasks = [(task['id'], task['route']) for task in term_tasks]
             self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
@@ -327,9 +327,9 @@ class WorkflowConductorTest(WorkflowComposerTest):
             conductor = conducting.WorkflowConductor(wf_spec)
             conductor.request_workflow_status(statuses.RUNNING)
 
-        for task_flow_entry, expected_wf_status in zip(mock_flow, expected_wf_statuses):
-            task_id = task_flow_entry['id']
-            task_status = task_flow_entry['status']
+        for _entry, expected_wf_status in zip(mock_flow, expected_wf_statuses):
+            task_id = _entry['id']
+            task_status = _entry['status']
 
             self.forward_task_statuses(conductor, task_id, [task_status])
 
@@ -371,13 +371,13 @@ class WorkflowConductorWithItemsTest(WorkflowConductorTest):
         # If items is an empty list, then mark the task as running.
         if len(items) == 0:
             ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
-            conductor.update_task_flow(task_id, task_route, ac_ex_event)
+            conductor.update_task_state(task_id, task_route, ac_ex_event)
         else:
             # Mark the first set of action executions as running.
             for i in range(0, min(len(tests), concurrency or len(items))):
                 context = {'item_id': i}
                 ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING, context=context)
-                conductor.update_task_flow(task_id, task_route, ac_ex_event)
+                conductor.update_task_state(task_id, task_route, ac_ex_event)
 
         # Ensure the actions listed is accurate when getting next tasks again.
         expected_tasks = []
@@ -411,7 +411,7 @@ class WorkflowConductorWithItemsTest(WorkflowConductorTest):
         # If items is an empty list, complete the task.
         if len(items) == 0:
             ac_ex_event = events.ActionExecutionEvent(statuses.SUCCEEDED)
-            conductor.update_task_flow(task_id, task_route, ac_ex_event)
+            conductor.update_task_state(task_id, task_route, ac_ex_event)
 
         # Mock the action execution for each item.
         for i in range(0, len(tests)):
@@ -419,10 +419,10 @@ class WorkflowConductorWithItemsTest(WorkflowConductorTest):
             result = items[i]
             ac_ex_status = tests[i][0]
             ac_ex_event = events.ActionExecutionEvent(ac_ex_status, result, context)
-            conductor.update_task_flow(task_id, task_route, ac_ex_event)
+            conductor.update_task_state(task_id, task_route, ac_ex_event)
 
             expected_task_status = tests[i][1]
-            actual_task_status = conductor.get_task_flow_entry(task_id, task_route)['status']
+            actual_task_status = conductor.get_task_state_entry(task_id, task_route)['status']
 
             error_message = (
                 'Task execution status "%s" does not match "%s" for item %s.' %
@@ -470,4 +470,4 @@ class WorkflowConductorWithItemsTest(WorkflowConductorTest):
                 for action in task['actions']:
                     ctx = {'item_id': action['item_id']}
                     ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING, context=ctx)
-                    conductor.update_task_flow(task_id, task_route, ac_ex_event)
+                    conductor.update_task_state(task_id, task_route, ac_ex_event)
