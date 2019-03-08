@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta import states
+from orquesta import statuses
 from orquesta.tests.unit.conducting.native import base
 
 
@@ -212,15 +212,15 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             ('task5', 4)
         ]
 
-        mock_states = [
-            states.SUCCEEDED,   # task1, 0
-            states.SUCCEEDED,   # task2, 0
-            states.SUCCEEDED,   # task3, 1
-            states.FAILED,      # task3, 2
-            states.SUCCEEDED,   # task4, 3
-            states.SUCCEEDED,   # task4, 4
-            states.SUCCEEDED,   # task5, 3
-            states.SUCCEEDED    # task5, 4
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1, 0
+            statuses.SUCCEEDED,   # task2, 0
+            statuses.SUCCEEDED,   # task3, 1
+            statuses.FAILED,      # task3, 2
+            statuses.SUCCEEDED,   # task4, 3
+            statuses.SUCCEEDED,   # task4, 4
+            statuses.SUCCEEDED,   # task5, 3
+            statuses.SUCCEEDED    # task5, 4
         ]
 
         expected_term_tasks = [
@@ -233,7 +233,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states,
+            mock_statuses=mock_statuses,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks
         )

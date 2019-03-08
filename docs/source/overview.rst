@@ -38,13 +38,13 @@ The workflow conductor traverses the graph, directs the flow of the workflow exe
 tracks runtime state of the execution. The conductor does not actually execute the action that is
 specified for the task. The action execution is perform by another provider such as StackStorm. The
 conductor directs the provider on what action to execute. As each action execution completes, the
-provider relays the status and result back to the conductor. The conductor then takes the state
-change, keeps track of the sequence of task execution, manages change history of the runtime
-context, evaluate outbound task transitions, identifies any new tasks for execution, and determines
-the overall workflow state and result.
+provider relays the status and result back to the conductor as an event. Then the conductor
+processes the event, keeps track of the sequence of task execution, manages change history of the
+runtime context, evaluate outbound task transitions, identifies any new tasks for execution, and
+determines the overall workflow status and result.
 
 When there is no more tasks identified to run next, the workflow is complete. On workflow
-completion, regardless of state, the workflow result contains the list of error(s) if any and the
+completion, regardless of status, the workflow result contains the list of error(s) if any and the
 output as defined in the workflow defintion. If the workflow failed, the workflow conductor will do
 its best to render the output from the latest version of the runtime context at completion of the
 workflow execution.

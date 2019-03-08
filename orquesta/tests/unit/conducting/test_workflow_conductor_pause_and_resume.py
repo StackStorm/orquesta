@@ -12,7 +12,7 @@
 
 from orquesta import conducting
 from orquesta.specs import native as specs
-from orquesta import states
+from orquesta import statuses
 from orquesta.tests.unit import base
 
 
@@ -43,31 +43,31 @@ class WorkflowConductorPauseResumeTest(base.WorkflowConductorTest):
 
         spec = specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # Run task1 and task2.
-        self.forward_task_states(conductor, 'task1', [states.RUNNING])
-        self.forward_task_states(conductor, 'task2', [states.RUNNING])
-        self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
+        self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING])
+        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
 
         # Pause the workflow.
-        conductor.request_workflow_state(states.PAUSING)
+        conductor.request_workflow_status(statuses.PAUSING)
 
         # Complete task1 only. The workflow should still be pausing
         # because task2 is still running.
-        self.forward_task_states(conductor, 'task1', [states.SUCCEEDED])
-        self.assertEqual(conductor.get_workflow_state(), states.PAUSING)
+        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
+        self.assertEqual(conductor.get_workflow_status(), statuses.PAUSING)
 
         # Complete task2. When task2 completes, the workflow should be paused
-        # because there is no task in active state.
-        self.forward_task_states(conductor, 'task2', [states.SUCCEEDED])
-        self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
+        # because there is no task in active status.
+        self.forward_task_statuses(conductor, 'task2', [statuses.SUCCEEDED])
+        self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
 
         # Resume the workflow, task3 should be staged, and complete task3.
-        conductor.request_workflow_state(states.RESUMING)
+        conductor.request_workflow_status(statuses.RESUMING)
         self.assert_next_task(conductor, 'task3', {})
-        self.forward_task_states(conductor, 'task3', [states.RUNNING, states.SUCCEEDED])
-        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
+        self.forward_task_statuses(conductor, 'task3', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
     def test_pause_and_resume_from_branches(self):
         wf_def = """
@@ -94,33 +94,33 @@ class WorkflowConductorPauseResumeTest(base.WorkflowConductorTest):
 
         spec = specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
-        conductor.request_workflow_state(states.RUNNING)
+        conductor.request_workflow_status(statuses.RUNNING)
 
         # Run task1 and task2.
-        self.forward_task_states(conductor, 'task1', [states.RUNNING])
-        self.forward_task_states(conductor, 'task2', [states.RUNNING])
-        self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
+        self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING])
+        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
 
         # Pause task1 and task2.
-        self.forward_task_states(conductor, 'task1', [states.PAUSED])
-        self.forward_task_states(conductor, 'task2', [states.PAUSED])
-        self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
+        self.forward_task_statuses(conductor, 'task1', [statuses.PAUSED])
+        self.forward_task_statuses(conductor, 'task2', [statuses.PAUSED])
+        self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
 
         # Resume and complete task1 only. Once task1 completes, the workflow
         # should pause again because there is no active task.
-        self.forward_task_states(conductor, 'task1', [states.RUNNING])
-        self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
-        self.forward_task_states(conductor, 'task1', [states.SUCCEEDED])
-        self.assertEqual(conductor.get_workflow_state(), states.PAUSED)
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
+        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
+        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
+        self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
 
         # Resume and complete task2. When task2 completes, the workflow
         # should stay running because task3 is now staged and ready.
-        self.forward_task_states(conductor, 'task2', [states.RUNNING])
-        self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
-        self.forward_task_states(conductor, 'task2', [states.SUCCEEDED])
-        self.assertEqual(conductor.get_workflow_state(), states.RUNNING)
+        self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING])
+        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
+        self.forward_task_statuses(conductor, 'task2', [statuses.SUCCEEDED])
+        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
         self.assert_next_task(conductor, 'task3', {})
 
         # Complete task3.
-        self.forward_task_states(conductor, 'task3', [states.RUNNING, states.SUCCEEDED])
-        self.assertEqual(conductor.get_workflow_state(), states.SUCCEEDED)
+        self.forward_task_statuses(conductor, 'task3', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)

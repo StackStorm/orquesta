@@ -74,33 +74,33 @@ class InvalidEvent(Exception):
         Exception.__init__(self, 'Event "%s" is not valid.' % value)
 
 
-class InvalidState(Exception):
+class InvalidStatus(Exception):
 
     def __init__(self, value):
-        Exception.__init__(self, 'State "%s" is not valid.' % value)
+        Exception.__init__(self, 'Status "%s" is not valid.' % value)
 
 
-class InvalidStateTransition(Exception):
+class InvalidStatusTransition(Exception):
 
     def __init__(self, old, new):
-        Exception.__init__(self, 'State transition from "%s" to "%s" is invalid.' % (old, new))
+        Exception.__init__(self, 'Status transition from "%s" to "%s" is invalid.' % (old, new))
 
 
-class InvalidTaskStateTransition(Exception):
+class InvalidTaskStatusTransition(Exception):
 
-    def __init__(self, state, event):
-        message = 'Unable to process event "%s" for task in "%s" state.' % (event, state)
+    def __init__(self, status, event):
+        message = 'Unable to process event "%s" for task in "%s" status.' % (event, status)
         Exception.__init__(self, message)
 
 
-class InvalidWorkflowStateTransition(Exception):
+class InvalidWorkflowStatusTransition(Exception):
 
-    def __init__(self, state, event):
-        message = 'Unable to process event "%s" for workflow in "%s" state.' % (event, state)
+    def __init__(self, status, event):
+        message = 'Unable to process event "%s" for workflow in "%s" status.' % (event, status)
         Exception.__init__(self, message)
 
 
-class InvalidTaskFlowEntry(Exception):
+class InvalidTaskStateEntry(Exception):
 
     def __init__(self, task_id):
         Exception.__init__(self, 'Task "%s" is not staged or has not started yet.' % task_id)

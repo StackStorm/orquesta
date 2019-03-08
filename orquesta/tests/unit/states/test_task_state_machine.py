@@ -14,15 +14,15 @@ import unittest
 
 from orquesta import events
 from orquesta import exceptions as exc
-from orquesta import states
-from orquesta.states import machines
+from orquesta import machines
+from orquesta import statuses
 
 
 class MockExecutionEvent(events.ActionExecutionEvent):
 
-    def __init__(self, name, state):
+    def __init__(self, name, status):
         self.name = name
-        self.state = state
+        self.status = status
 
 
 class TaskStateMachineTest(unittest.TestCase):
@@ -30,16 +30,16 @@ class TaskStateMachineTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super(TaskStateMachineTest, cls).setUpClass()
-        states.ALL_STATES.append('mock')
+        statuses.ALL_STATUSES.append('mock')
 
     @classmethod
     def tearDownClass(cls):
-        states.ALL_STATES.remove('mock')
+        statuses.ALL_STATUSES.remove('mock')
         super(TaskStateMachineTest, cls).tearDownClass()
 
     def test_bad_event_name(self):
         task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0}
-        mock_event = MockExecutionEvent('foobar', states.RUNNING)
+        mock_event = MockExecutionEvent('foobar', statuses.RUNNING)
 
         self.assertRaises(
             exc.InvalidEvent,
@@ -49,49 +49,49 @@ class TaskStateMachineTest(unittest.TestCase):
             mock_event
         )
 
-    def test_bad_event_state(self):
+    def test_bad_event_status(self):
         self.assertRaises(
-            exc.InvalidState,
+            exc.InvalidStatus,
             events.ExecutionEvent,
             'mock_event',
             'foobar'
         )
 
-    def test_bad_current_task_state(self):
-        task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0, 'state': 'mock'}
-        ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED)
+    def test_bad_current_task_status(self):
+        task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0, 'status': 'mock'}
+        ac_ex_event = events.ActionExecutionEvent(statuses.SUCCEEDED)
 
         self.assertRaises(
-            exc.InvalidTaskStateTransition,
+            exc.InvalidTaskStatusTransition,
             machines.TaskStateMachine.process_event,
             None,
             task_flow_entry,
             ac_ex_event
         )
 
-    def test_bad_current_task_state_to_event_mapping(self):
-        task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0, 'state': states.REQUESTED}
-        ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED)
+    def test_bad_current_task_status_to_event_mapping(self):
+        task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0, 'status': statuses.REQUESTED}
+        ac_ex_event = events.ActionExecutionEvent(statuses.SUCCEEDED)
         machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
-        self.assertEqual(task_flow_entry['state'], states.REQUESTED)
+        self.assertEqual(task_flow_entry['status'], statuses.REQUESTED)
 
-    def test_current_task_state_unset(self):
+    def test_current_task_status_unset(self):
         task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0}
-        ac_ex_event = events.ActionExecutionEvent(states.RUNNING)
+        ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
         machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
-        self.assertEqual(task_flow_entry['state'], states.RUNNING)
+        self.assertEqual(task_flow_entry['status'], statuses.RUNNING)
 
-    def test_current_task_state_none(self):
-        task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0, 'state': None}
-        ac_ex_event = events.ActionExecutionEvent(states.RUNNING)
+    def test_current_task_status_none(self):
+        task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0, 'status': None}
+        ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
         machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
-        self.assertEqual(task_flow_entry['state'], states.RUNNING)
+        self.assertEqual(task_flow_entry['status'], statuses.RUNNING)
 
-    def test_task_state_transition(self):
-        task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0, 'state': states.RUNNING}
-        ac_ex_event = events.ActionExecutionEvent(states.SUCCEEDED)
+    def test_task_status_transition(self):
+        task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0, 'status': statuses.RUNNING}
+        ac_ex_event = events.ActionExecutionEvent(statuses.SUCCEEDED)
         machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
-        self.assertEqual(task_flow_entry['state'], states.SUCCEEDED)
+        self.assertEqual(task_flow_entry['status'], statuses.SUCCEEDED)
 
 
 class FailedStateTransitionTest(unittest.TestCase):
@@ -99,41 +99,41 @@ class FailedStateTransitionTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super(FailedStateTransitionTest, cls).setUpClass()
-        states.ALL_STATES.append('mock')
+        statuses.ALL_STATUSES.append('mock')
 
     @classmethod
     def tearDownClass(cls):
-        states.ALL_STATES.remove('mock')
+        statuses.ALL_STATUSES.remove('mock')
         super(FailedStateTransitionTest, cls).tearDownClass()
 
-    def test_invalid_old_state(self):
+    def test_invalid_old_status(self):
         self.assertRaises(
-            exc.InvalidState,
+            exc.InvalidStatus,
             machines.TaskStateMachine.is_transition_valid,
             'foobar',
-            states.REQUESTED
+            statuses.REQUESTED
         )
 
-    def test_invalid_new_state(self):
+    def test_invalid_new_status(self):
         self.assertRaises(
-            exc.InvalidState,
+            exc.InvalidStatus,
             machines.TaskStateMachine.is_transition_valid,
-            states.UNSET,
+            statuses.UNSET,
             'foobar'
         )
 
-    def test_original_state_not_in_transition_map(self):
+    def test_original_status_not_in_transition_map(self):
         self.assertFalse(machines.TaskStateMachine.is_transition_valid('mock', None))
 
 
 class StateTransitionTest(unittest.TestCase):
 
-    def test_null_states(self):
+    def test_null_statuses(self):
         is_transition_valid = machines.TaskStateMachine.is_transition_valid
         self.assertTrue(is_transition_valid(None, None))
-        self.assertTrue(is_transition_valid(states.UNSET, None))
-        self.assertTrue(is_transition_valid(None, states.UNSET))
-        self.assertTrue(is_transition_valid(states.UNSET, states.UNSET))
+        self.assertTrue(is_transition_valid(statuses.UNSET, None))
+        self.assertTrue(is_transition_valid(None, statuses.UNSET))
+        self.assertTrue(is_transition_valid(statuses.UNSET, statuses.UNSET))
 
     def test_transition(self):
         cases = [

@@ -16,15 +16,15 @@ from six.moves import queue
 from orquesta.composers import base
 from orquesta import graphing
 from orquesta.specs import mistral as specs
-from orquesta import states
+from orquesta import statuses
 
 
 LOG = logging.getLogger(__name__)
 
 TASK_TRANSITION_MAP = {
-    'on-success': [states.SUCCEEDED],
-    'on-error': states.ABENDED_STATES,
-    'on-complete': states.COMPLETED_STATES
+    'on-success': [statuses.SUCCEEDED],
+    'on-error': statuses.ABENDED_STATUSES,
+    'on-complete': statuses.COMPLETED_STATUSES
 }
 
 
@@ -48,11 +48,11 @@ class WorkflowComposer(base.WorkflowComposer):
         condition = kwargs.get('condition')
         expr = kwargs.get('expr')
 
-        task_state_criterion = (
-            'task_state(%s) in %s' % (task_name, str(TASK_TRANSITION_MAP[condition]))
+        task_status_criterion = (
+            'task_status(%s) in %s' % (task_name, str(TASK_TRANSITION_MAP[condition]))
         )
 
-        criteria.append('<% ' + task_state_criterion + ' %>')
+        criteria.append('<% ' + task_status_criterion + ' %>')
 
         if expr:
             criteria.append(expr)

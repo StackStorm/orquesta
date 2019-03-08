@@ -157,7 +157,7 @@ class TaskSpec(base.Spec):
 
     def finalize_context(self, next_task_name, task_transition_meta, in_ctx):
         criteria = task_transition_meta[3].get('criteria') or []
-        expected_criteria_pattern = "<\% task_state\(\w+\) in \['succeeded'\] \%>"
+        expected_criteria_pattern = "<\% task_status\(\w+\) in \['succeeded'\] \%>"
         new_ctx = {}
         errors = []
 

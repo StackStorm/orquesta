@@ -12,7 +12,7 @@
 
 from orquesta import constants
 from orquesta import exceptions as exc
-from orquesta import states
+from orquesta import statuses
 
 
 def _get_current_task(context):
@@ -30,9 +30,9 @@ def _get_current_task(context):
     return current_task
 
 
-def task_state_(context, task_id, route=None):
+def task_status_(context, task_id, route=None):
     if not context:
-        return states.UNSET
+        return statuses.UNSET
 
     if route is None:
         try:
@@ -42,36 +42,36 @@ def task_state_(context, task_id, route=None):
             route = 0
 
     try:
-        task_flow = context['__flow'] or {}
+        workflow_state = context['__state'] or {}
     except KeyError:
-        task_flow = {}
+        workflow_state = {}
 
-    task_flow_pointers = task_flow.get('tasks') or {}
-    task_flow_task_uid = constants.TASK_FLOW_ROUTE_FORMAT % (task_id, str(route))
-    task_flow_item_idx = task_flow_pointers.get(task_flow_task_uid)
+    task_state_pointers = workflow_state.get('tasks') or {}
+    task_state_entry_uid = constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route))
+    task_state_entry_idx = task_state_pointers.get(task_state_entry_uid)
 
     # If unable to identify the task flow entry and if there are other routes, then
     # use an earlier route before the split to find the specific task.
-    if task_flow_item_idx is None:
+    if task_state_entry_idx is None:
         if route > 0:
-            current_route_details = task_flow['routes'][route]
+            current_route_details = workflow_state['routes'][route]
             # Reverse the list because we want to start with the next longest route.
-            for idx, prev_route_details in enumerate(reversed(task_flow['routes'][:route])):
+            for idx, prev_route_details in enumerate(reversed(workflow_state['routes'][:route])):
                 if len(set(prev_route_details) - set(current_route_details)) == 0:
                     # The index is from a reversed list so need to calculate
                     # the index of the item in the list before the reverse.
                     prev_route = route - idx - 1
-                    return task_state_(context, task_id, route=prev_route)
+                    return task_status_(context, task_id, route=prev_route)
 
-        return states.UNSET
+        return statuses.UNSET
 
-    task_flow_seqs = task_flow.get('sequence') or []
-    task_flow_item = task_flow_seqs[task_flow_item_idx]
+    task_seqs = workflow_state.get('sequence') or []
+    task_state_entry = task_seqs[task_state_entry_idx]
 
-    if task_flow_item is None:
-        return states.UNSET
+    if task_state_entry is None:
+        return statuses.UNSET
 
-    return task_flow_item.get('state', states.UNSET)
+    return task_state_entry.get('status', statuses.UNSET)
 
 
 def succeeded_(context):
@@ -79,7 +79,7 @@ def succeeded_(context):
     task_id = current_task['id']
     route = current_task['route']
 
-    return (task_state_(context, task_id, route=route) == states.SUCCEEDED)
+    return (task_status_(context, task_id, route=route) == statuses.SUCCEEDED)
 
 
 def failed_(context):
@@ -87,7 +87,7 @@ def failed_(context):
     task_id = current_task['id']
     route = current_task['route']
 
-    return (task_state_(context, task_id, route=route) == states.FAILED)
+    return (task_status_(context, task_id, route=route) == statuses.FAILED)
 
 
 def completed_(context):
@@ -95,7 +95,7 @@ def completed_(context):
     task_id = current_task['id']
     route = current_task['route']
 
-    return (task_state_(context, task_id, route=route) in states.COMPLETED_STATES)
+    return (task_status_(context, task_id, route=route) in statuses.COMPLETED_STATUSES)
 
 
 def result_(context):

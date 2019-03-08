@@ -10,5 +10,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-TASK_FLOW_ROUTE_FORMAT = '%s__r%s'
-TASK_FLOW_TRANSITION_FORMAT = '%s__t%s'
+TASK_STATE_ROUTE_FORMAT = '%s__r%s'
+TASK_STATE_TRANSITION_FORMAT = '%s__t%s'

@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta import states
+from orquesta import statuses
 from orquesta.tests.unit.conducting.native import base
 
 
@@ -27,9 +27,9 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task2'
         ]
 
-        mock_states = [
-            states.SUCCEEDED,   # task1
-            states.SUCCEEDED    # task2
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED    # task2
         ]
 
         expected_term_tasks = [
@@ -39,7 +39,7 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states,
+            mock_statuses=mock_statuses,
             expected_term_tasks=expected_term_tasks
         )
 
@@ -49,9 +49,9 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task3'
         ]
 
-        mock_states = [
-            states.FAILED,      # task1
-            states.SUCCEEDED    # task3
+        mock_statuses = [
+            statuses.FAILED,      # task1
+            statuses.SUCCEEDED    # task3
         ]
 
         expected_term_tasks = [
@@ -61,7 +61,7 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states,
+            mock_statuses=mock_statuses,
             expected_term_tasks=expected_term_tasks
         )
 
@@ -82,16 +82,16 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task4'
         ]
 
-        mock_states = [
-            states.SUCCEEDED,   # task1
-            states.SUCCEEDED,   # task2
-            states.SUCCEEDED    # task4
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED    # task4
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states,
+            mock_statuses=mock_statuses,
             expected_term_tasks=expected_term_tasks
         )
 
@@ -102,10 +102,10 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task4'
         ]
 
-        mock_states = [
-            states.FAILED,      # task1
-            states.SUCCEEDED,   # task3
-            states.SUCCEEDED    # task4
+        mock_statuses = [
+            statuses.FAILED,      # task1
+            statuses.SUCCEEDED,   # task3
+            statuses.SUCCEEDED    # task4
         ]
 
         expected_term_tasks = [
@@ -116,7 +116,7 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states,
+            mock_statuses=mock_statuses,
             expected_term_tasks=expected_term_tasks
         )
 
@@ -138,10 +138,10 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             ('task2', 2)
         ]
 
-        mock_states = [
-            states.SUCCEEDED,   # task1, 0
-            states.SUCCEEDED,   # task2, 1 on complete
-            states.SUCCEEDED    # task2, 2 on success
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1, 0
+            statuses.SUCCEEDED,   # task2, 1 on complete
+            statuses.SUCCEEDED    # task2, 2 on success
         ]
 
         expected_term_tasks = [
@@ -152,7 +152,7 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states,
+            mock_statuses=mock_statuses,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks
         )
@@ -170,10 +170,10 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             ('task2', 2)
         ]
 
-        mock_states = [
-            states.FAILED,      # task1, 0
-            states.SUCCEEDED,   # task2, 1 on complete
-            states.SUCCEEDED    # task2, 2 on failure
+        mock_statuses = [
+            statuses.FAILED,      # task1, 0
+            statuses.SUCCEEDED,   # task2, 1 on complete
+            statuses.SUCCEEDED    # task2, 2 on failure
         ]
 
         expected_term_tasks = [
@@ -184,7 +184,7 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
-            mock_states=mock_states,
+            mock_statuses=mock_statuses,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks
         )

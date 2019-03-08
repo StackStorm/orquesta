@@ -70,7 +70,7 @@ class YAQLEvaluator(base.Evaluator):
     def contextualize(cls, data):
         ctx = cls._root_ctx.create_child_context()
         ctx['__vars'] = data or {}
-        ctx['__flow'] = ctx['__vars'].get('__flow')
+        ctx['__state'] = ctx['__vars'].get('__state')
         ctx['__current_task'] = ctx['__vars'].get('__current_task')
         ctx['__current_item'] = ctx['__vars'].get('__current_item')
 

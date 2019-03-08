@@ -82,7 +82,7 @@ class JinjaEvaluator(base.Evaluator):
         ctx = {'__vars': data}
 
         if isinstance(data, dict):
-            ctx['__flow'] = ctx['__vars'].get('__flow')
+            ctx['__state'] = ctx['__vars'].get('__state')
             ctx['__current_task'] = ctx['__vars'].get('__current_task')
             ctx['__current_item'] = ctx['__vars'].get('__current_item')
 
