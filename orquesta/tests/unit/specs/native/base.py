@@ -10,8 +10,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.tests.unit import base
+from orquesta.tests.unit import base as test_base
 
 
-class OrchestraWorkflowSpecTest(base.WorkflowSpecTest):
+class OrchestraWorkflowSpecTest(test_base.WorkflowSpecTest):
     spec_module_name = 'native'

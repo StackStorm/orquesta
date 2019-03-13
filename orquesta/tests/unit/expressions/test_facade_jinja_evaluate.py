@@ -13,7 +13,7 @@
 import unittest
 
 from orquesta import exceptions as exc
-from orquesta.expressions import base as expressions
+from orquesta.expressions import base as expr_base
 
 
 class JinjaFacadeEvaluationTest(unittest.TestCase):
@@ -21,8 +21,8 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
     def test_basic_eval(self):
         data = {'foo': 'bar'}
 
-        self.assertEqual('bar', expressions.evaluate('{{ ctx().foo }}', data))
-        self.assertEqual('foobar', expressions.evaluate('foo{{ ctx().foo }}', data))
+        self.assertEqual('bar', expr_base.evaluate('{{ ctx().foo }}', data))
+        self.assertEqual('foobar', expr_base.evaluate('foo{{ ctx().foo }}', data))
 
     def test_basic_eval_undefined(self):
         expr = '{{ ctx().foo }}'
@@ -31,7 +31,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
 
         self.assertRaises(
             exc.ExpressionEvaluationException,
-            expressions.evaluate,
+            expr_base.evaluate,
             expr,
             data
         )
@@ -45,7 +45,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
             }
         }
 
-        self.assertEqual('bar', expressions.evaluate(expr, data))
+        self.assertEqual('bar', expr_base.evaluate(expr, data))
 
     def test_multi_eval(self):
         expr = '{{ ctx().foo }} and {{ ctx().marco }}'
@@ -55,7 +55,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
             'marco': 'polo'
         }
 
-        self.assertEqual('bar and polo', expressions.evaluate(expr, data))
+        self.assertEqual('bar and polo', expr_base.evaluate(expr, data))
 
     def test_eval_recursive(self):
         expr = '{{ ctx().fee }}'
@@ -67,7 +67,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
             'fum': 'fee-fi-fo-fum'
         }
 
-        self.assertEqual('fee-fi-fo-fum', expressions.evaluate(expr, data))
+        self.assertEqual('fee-fi-fo-fum', expr_base.evaluate(expr, data))
 
     def test_eval_recursive_undefined(self):
         expr = '{{ ctx().fee }}'
@@ -80,7 +80,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
 
         self.assertRaises(
             exc.ExpressionEvaluationException,
-            expressions.evaluate,
+            expr_base.evaluate,
             expr,
             data
         )
@@ -99,7 +99,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
 
         self.assertEqual(
             'fee-fi-fo-fum! i\'m hungry!',
-            expressions.evaluate(expr, data)
+            expr_base.evaluate(expr, data)
         )
 
     def test_eval_list(self):
@@ -114,7 +114,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
             'marco': 'polo'
         }
 
-        self.assertListEqual(['bar', 'polo', 'foobar'], expressions.evaluate(expr, data))
+        self.assertListEqual(['bar', 'polo', 'foobar'], expr_base.evaluate(expr, data))
 
     def test_eval_list_of_list(self):
         expr = [
@@ -131,7 +131,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
 
         expected = [['bar', 'polo']]
 
-        self.assertListEqual(expected, expressions.evaluate(expr, data))
+        self.assertListEqual(expected, expr_base.evaluate(expr, data))
 
     def test_eval_list_of_dict(self):
         expr = [
@@ -153,7 +153,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
             }
         ]
 
-        self.assertListEqual(expected, expressions.evaluate(expr, data))
+        self.assertListEqual(expected, expr_base.evaluate(expr, data))
 
     def test_eval_dict(self):
         expr = {
@@ -173,7 +173,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
             'foobar': 'foobar'
         }
 
-        self.assertDictEqual(expected, expressions.evaluate(expr, data))
+        self.assertDictEqual(expected, expr_base.evaluate(expr, data))
 
     def test_eval_dict_of_dict(self):
         expr = {
@@ -195,7 +195,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
             }
         }
 
-        self.assertDictEqual(expected, expressions.evaluate(expr, data))
+        self.assertDictEqual(expected, expr_base.evaluate(expr, data))
 
     def test_eval_dict_of_list(self):
         expr = {
@@ -214,7 +214,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
             'nested': ['bar', 'polo']
         }
 
-        self.assertDictEqual(expected, expressions.evaluate(expr, data))
+        self.assertDictEqual(expected, expr_base.evaluate(expr, data))
 
     def test_type_preservation(self):
         data = {
@@ -228,27 +228,27 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
 
         self.assertEqual(
             data['k1'],
-            expressions.evaluate('{{ ctx().k1 }}', data)
+            expr_base.evaluate('{{ ctx().k1 }}', data)
         )
 
         self.assertEqual(
             data['k2'],
-            expressions.evaluate('{{ ctx().k2 }}', data)
+            expr_base.evaluate('{{ ctx().k2 }}', data)
         )
 
-        self.assertTrue(expressions.evaluate('{{ ctx().k3 }}', data))
+        self.assertTrue(expr_base.evaluate('{{ ctx().k3 }}', data))
 
         self.assertListEqual(
             data['k4'],
-            expressions.evaluate('{{ ctx().k4 }}', data)
+            expr_base.evaluate('{{ ctx().k4 }}', data)
         )
 
         self.assertDictEqual(
             data['k5'],
-            expressions.evaluate('{{ ctx().k5 }}', data)
+            expr_base.evaluate('{{ ctx().k5 }}', data)
         )
 
-        self.assertIsNone(expressions.evaluate('{{ ctx().k6 }}', data))
+        self.assertIsNone(expr_base.evaluate('{{ ctx().k6 }}', data))
 
     def test_type_string_detection(self):
         expr = '{{ ctx().foo }} -> {{ ctx().bar }}'
@@ -258,19 +258,19 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
             'bar': 201
         }
 
-        self.assertEqual('101 -> 201', expressions.evaluate(expr, data))
+        self.assertEqual('101 -> 201', expr_base.evaluate(expr, data))
 
     def test_custom_function(self):
         expr = '{{ json(\'{"a": 123}\') }}'
 
-        self.assertDictEqual({'a': 123}, expressions.evaluate(expr))
+        self.assertDictEqual({'a': 123}, expr_base.evaluate(expr))
 
     def test_custom_function_failure(self):
         expr = '{{ json(int(123)) }}'
 
         self.assertRaises(
             exc.ExpressionEvaluationException,
-            expressions.evaluate,
+            expr_base.evaluate,
             expr
         )
 
@@ -281,7 +281,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
             'x': ['a', 'b', 'c']
         }
 
-        self.assertEqual('abc', expressions.evaluate(expr, data))
+        self.assertEqual('abc', expr_base.evaluate(expr, data))
 
     def test_block_eval_undefined(self):
         expr = '{% for i in ctx().x %}{{ ctx().y }}{% endfor %}'
@@ -292,7 +292,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
 
         self.assertRaises(
             exc.ExpressionEvaluationException,
-            expressions.evaluate,
+            expr_base.evaluate,
             expr,
             data
         )
@@ -313,7 +313,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
             'y': ['d', 'e', 'f']
         }
 
-        self.assertEqual('abcdef', expressions.evaluate(expr, data))
+        self.assertEqual('abcdef', expr_base.evaluate(expr, data))
 
     def test_multi_block_eval(self):
         expr = (
@@ -326,7 +326,7 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
             'y': ['d', 'e', 'f']
         }
 
-        self.assertEqual('abcdef', expressions.evaluate(expr, data))
+        self.assertEqual('abcdef', expr_base.evaluate(expr, data))
 
     def test_mix_block_and_expr_eval(self):
         expr = '{{ ctx().a }}{% for i in ctx().x %}{{ i }}{% endfor %}{{ ctx().d }}'
@@ -337,4 +337,4 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
             'd': 'd'
         }
 
-        self.assertEqual('abcd', expressions.evaluate(expr, data))
+        self.assertEqual('abcd', expr_base.evaluate(expr, data))

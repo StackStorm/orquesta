@@ -11,12 +11,12 @@
 # limitations under the License.
 
 from orquesta import conducting
-from orquesta.specs import native as specs
+from orquesta.specs import native as native_specs
 from orquesta import statuses
-from orquesta.tests.unit import base
+from orquesta.tests.unit import base as test_base
 
 
-class WorkflowConductorContextTest(base.WorkflowConductorTest):
+class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
 
     def test_get_task_status_at_various_locations(self):
         wf_def = """
@@ -45,7 +45,7 @@ class WorkflowConductorContextTest(base.WorkflowConductorTest):
             'task_status_at_output': 'succeeded'
         }
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         # Run the workflow.
@@ -105,7 +105,7 @@ class WorkflowConductorContextTest(base.WorkflowConductorTest):
             'task3_status': 'succeeded'
         }
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         # Run the workflow.
@@ -166,7 +166,7 @@ class WorkflowConductorContextTest(base.WorkflowConductorTest):
             'task3_status': 'succeeded'
         }
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         # Run the workflow.

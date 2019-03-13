@@ -10,10 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.tests.unit import base
+from orquesta.tests.unit import base as test_base
 
 
-class YAQLFacadeValidationTest(base.ExpressionFacadeEvaluatorTest):
+class YAQLFacadeValidationTest(test_base.ExpressionFacadeEvaluatorTest):
 
     def test_basic_validate(self):
         self.assertListEqual([], self.validate(None))

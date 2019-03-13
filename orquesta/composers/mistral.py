@@ -13,9 +13,9 @@
 import logging
 from six.moves import queue
 
-from orquesta.composers import base
+from orquesta.composers import base as comp_base
 from orquesta import graphing
-from orquesta.specs import mistral as specs
+from orquesta.specs import mistral as mistral_specs
 from orquesta import statuses
 
 
@@ -28,8 +28,8 @@ TASK_TRANSITION_MAP = {
 }
 
 
-class WorkflowComposer(base.WorkflowComposer):
-    wf_spec_type = specs.WorkflowSpec
+class WorkflowComposer(comp_base.WorkflowComposer):
+    wf_spec_type = mistral_specs.WorkflowSpec
 
     @classmethod
     def compose(cls, spec):

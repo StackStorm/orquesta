@@ -12,12 +12,12 @@
 
 
 from orquesta import conducting
-from orquesta.specs import native as specs
+from orquesta.specs import native as native_specs
 from orquesta import statuses
-from orquesta.tests.unit import base
+from orquesta.tests.unit import base as test_base
 
 
-class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
+class WorkflowConductorExtendedTest(test_base.WorkflowConductorTest):
 
     def test_self_looping(self):
         wf_def = """
@@ -42,7 +42,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
                 do: task2
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_status(statuses.RUNNING)
 

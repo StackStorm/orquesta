@@ -19,15 +19,15 @@ from six.moves import queue
 from orquesta import constants
 from orquesta import events
 from orquesta import exceptions as exc
-from orquesta.expressions import base as expr
+from orquesta.expressions import base as expr_base
 from orquesta import graphing
 from orquesta import machines
-from orquesta.specs import base as specs
-from orquesta.specs import loader as specs_loader
+from orquesta.specs import base as spec_base
+from orquesta.specs import loader as spec_loader
 from orquesta import statuses
-from orquesta.utils import context as ctx
-from orquesta.utils import dictionary as dx
-from orquesta.utils import plugin
+from orquesta.utils import context as ctx_util
+from orquesta.utils import dictionary as dict_util
+from orquesta.utils import plugin as plugin_util
 
 
 LOG = logging.getLogger(__name__)
@@ -149,13 +149,13 @@ class WorkflowState(object):
 class WorkflowConductor(object):
 
     def __init__(self, spec, context=None, inputs=None):
-        if not spec or not isinstance(spec, specs.Spec):
+        if not spec or not isinstance(spec, spec_base.Spec):
             raise ValueError('The value of "spec" is not type of Spec.')
 
         self.spec = spec
         self.catalog = self.spec.get_catalog()
-        self.spec_module = specs_loader.get_spec_module(self.catalog)
-        self.composer = plugin.get_module('orquesta.composers', self.catalog)
+        self.spec_module = spec_loader.get_spec_module(self.catalog)
+        self.composer = plugin_util.get_module('orquesta.composers', self.catalog)
 
         self._errors = []
         self._graph = None
@@ -206,7 +206,7 @@ class WorkflowConductor(object):
 
     @classmethod
     def deserialize(cls, data):
-        spec_module = specs_loader.get_spec_module(data['spec']['catalog'])
+        spec_module = spec_loader.get_spec_module(data['spec']['catalog'])
         spec = spec_module.WorkflowSpec.deserialize(data['spec'])
 
         graph = graphing.WorkflowGraph.deserialize(data['graph'])
@@ -240,11 +240,11 @@ class WorkflowConductor(object):
             # Render workflow inputs and merge into the initial context.
             workflow_input = self.get_workflow_input()
             rendered_inputs, input_errors = self.spec.render_input(workflow_input, init_ctx)
-            init_ctx = dx.merge_dicts(init_ctx, rendered_inputs, True)
+            init_ctx = dict_util.merge_dicts(init_ctx, rendered_inputs, True)
 
             # Render workflow variables and merge into the initial context.
             rendered_vars, var_errors = self.spec.render_vars(init_ctx)
-            init_ctx = dx.merge_dicts(init_ctx, rendered_vars, True)
+            init_ctx = dict_util.merge_dicts(init_ctx, rendered_vars, True)
 
             # Fail workflow if there are errors.
             errors = input_errors + var_errors
@@ -293,11 +293,11 @@ class WorkflowConductor(object):
 
         # Create the log entry.
         entry = {'type': entry_type, 'message': message}
-        dx.set_dict_value(entry, 'task_id', task_id, insert_null=False)
-        dx.set_dict_value(entry, 'route', route, insert_null=False)
-        dx.set_dict_value(entry, 'task_transition_id', task_transition_id, insert_null=False)
-        dx.set_dict_value(entry, 'result', result, insert_null=False)
-        dx.set_dict_value(entry, 'data', data, insert_null=False)
+        dict_util.set_dict_value(entry, 'task_id', task_id, insert_null=False)
+        dict_util.set_dict_value(entry, 'route', route, insert_null=False)
+        dict_util.set_dict_value(entry, 'task_transition_id', task_transition_id, insert_null=False)
+        dict_util.set_dict_value(entry, 'result', result, insert_null=False)
+        dict_util.set_dict_value(entry, 'data', data, insert_null=False)
 
         # Ignore if this is a duplicate.
         if len(list(filter(lambda x: x == entry, log))) > 0:
@@ -385,7 +385,7 @@ class WorkflowConductor(object):
             in_ctx_idxs = copy.deepcopy(task['ctxs']['in'])
             in_ctx_idxs.remove(0)
 
-            wf_term_ctx = dx.merge_dicts(
+            wf_term_ctx = dict_util.merge_dicts(
                 wf_term_ctx,
                 self.get_task_context(in_ctx_idxs),
                 overwrite=True
@@ -400,7 +400,7 @@ class WorkflowConductor(object):
         if wf_status in statuses.COMPLETED_STATUSES and not self._outputs:
             workflow_ctx = self.get_workflow_terminal_context()
             state_ctx = {'__state': self.workflow_state.serialize()}
-            workflow_ctx = dx.merge_dicts(workflow_ctx, state_ctx, True)
+            workflow_ctx = dict_util.merge_dicts(workflow_ctx, state_ctx, True)
             outputs, errors = self.spec.render_output(workflow_ctx)
 
             # Persist outputs if it is not empty.
@@ -449,8 +449,8 @@ class WorkflowConductor(object):
 
         state_ctx = {'__state': self.workflow_state.serialize()}
         current_task = {'id': task_id, 'route': route}
-        task_ctx = ctx.set_current_task(task_ctx, current_task)
-        task_ctx = dx.merge_dicts(task_ctx, state_ctx, True)
+        task_ctx = ctx_util.set_current_task(task_ctx, current_task)
+        task_ctx = dict_util.merge_dicts(task_ctx, state_ctx, True)
         task_spec = self.spec.tasks.get_task(task_id).copy()
         task_spec, action_specs = task_spec.render(task_ctx)
 
@@ -467,7 +467,7 @@ class WorkflowConductor(object):
             task_delay = task_spec.delay
 
             if isinstance(task_delay, six.string_types):
-                task_delay = expr.evaluate(task_delay, task_ctx)
+                task_delay = expr_base.evaluate(task_delay, task_ctx)
 
             if not isinstance(task_delay, int):
                 raise TypeError('The value of task delay is not type of integer.')
@@ -477,8 +477,9 @@ class WorkflowConductor(object):
         # Add items and related meta data to the task details.
         if task_spec.has_items():
             items_spec = getattr(task_spec, 'with')
+            concurrency = getattr(items_spec, 'concurrency', None)
             task['items_count'] = len(action_specs)
-            task['concurrency'] = expr.evaluate(getattr(items_spec, 'concurrency', None), task_ctx)
+            task['concurrency'] = expr_base.evaluate(concurrency, task_ctx)
 
         return task
 
@@ -690,11 +691,11 @@ class WorkflowConductor(object):
             in_ctx_idxs = task_state_entry['ctxs']['in']
             in_ctx_val = self.get_task_context(in_ctx_idxs)
             current_task = {'id': task_id, 'route': route, 'result': task_result}
-            current_ctx = ctx.set_current_task(in_ctx_val, current_task)
+            current_ctx = ctx_util.set_current_task(in_ctx_val, current_task)
 
             # Setup context for evaluating expressions in task transition criteria.
             state_ctx = {'__state': self.workflow_state.serialize()}
-            current_ctx = dx.merge_dicts(current_ctx, state_ctx, True)
+            current_ctx = dict_util.merge_dicts(current_ctx, state_ctx, True)
 
         # Evaluate task transitions if task is completed and status change is not processed.
         if new_task_status in statuses.COMPLETED_STATUSES and new_task_status != old_task_status:
@@ -716,7 +717,7 @@ class WorkflowConductor(object):
                 # evaluating expression(s), fail the workflow.
                 try:
                     criteria = task_transition[3].get('criteria') or []
-                    evaluated_criteria = [expr.evaluate(c, current_ctx) for c in criteria]
+                    evaluated_criteria = [expr_base.evaluate(c, current_ctx) for c in criteria]
                     task_state_entry['next'][task_transition_id] = all(evaluated_criteria)
                 except Exception as e:
                     self.log_error(e, task_id, route, task_transition_id)
@@ -848,7 +849,7 @@ class WorkflowConductor(object):
         ctx = {}
 
         for ctx_idx in ctx_idxs:
-            ctx = dx.merge_dicts(ctx, self.workflow_state.contexts[ctx_idx], overwrite=True)
+            ctx = dict_util.merge_dicts(ctx, self.workflow_state.contexts[ctx_idx], overwrite=True)
 
         return ctx
 

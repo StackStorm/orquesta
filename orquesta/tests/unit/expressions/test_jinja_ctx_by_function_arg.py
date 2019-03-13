@@ -10,10 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.tests.unit import base
+from orquesta.tests.unit import base as test_base
 
 
-class JinjaVariableExtractionTest(base.ExpressionEvaluatorTest):
+class JinjaVariableExtractionTest(test_base.ExpressionEvaluatorTest):
 
     @classmethod
     def setUpClass(cls):

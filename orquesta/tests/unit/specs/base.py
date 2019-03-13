@@ -10,21 +10,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.specs import base
-from orquesta.specs import types
+from orquesta.specs import base as spec_base
+from orquesta.specs import types as spec_types
 
 
-class MockBaseSpec(base.Spec):
+class MockBaseSpec(spec_base.Spec):
     _catalog = 'test'
     _version = '1.0'
 
 
-class MockBaseMappingSpec(base.MappingSpec):
+class MockBaseMappingSpec(spec_base.MappingSpec):
     _catalog = 'test'
     _version = '1.0'
 
 
-class MockBaseSequenceSpec(base.SequenceSpec):
+class MockBaseSequenceSpec(spec_base.SequenceSpec):
     _catalog = 'test'
     _version = '1.0'
 
@@ -33,8 +33,8 @@ class MockLeafSpec(MockBaseSpec):
     _schema = {
         'type': 'object',
         'properties': {
-            'attr1': types.NONEMPTY_STRING,
-            'attr2': types.NONEMPTY_STRING
+            'attr1': spec_types.NONEMPTY_STRING,
+            'attr2': spec_types.NONEMPTY_STRING
         },
         'required': ['attr1'],
         'additionalProperties': False
@@ -81,14 +81,14 @@ class MockSpec(MockBaseSpec):
     _schema = {
         'type': 'object',
         'properties': {
-            'inputs': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
-            'vars': types.NONEMPTY_DICT,
-            'attr1': types.NONEMPTY_STRING,
-            'attr1-1': types.NONEMPTY_STRING,
-            'attr1_2': types.NONEMPTY_STRING,
-            'attr2': types.NONEMPTY_DICT,
-            'attr3': types.UNIQUE_STRING_LIST,
-            'attr4': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+            'inputs': spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+            'vars': spec_types.NONEMPTY_DICT,
+            'attr1': spec_types.NONEMPTY_STRING,
+            'attr1-1': spec_types.NONEMPTY_STRING,
+            'attr1_2': spec_types.NONEMPTY_STRING,
+            'attr2': spec_types.NONEMPTY_DICT,
+            'attr3': spec_types.UNIQUE_STRING_LIST,
+            'attr4': spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
             'attr5': MockJointSpec,
             'attr6': MockMappingSpec,
             'attr7': MockSequenceSpec

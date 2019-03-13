@@ -15,7 +15,7 @@ import logging
 
 import six
 
-from orquesta.utils import date
+from orquesta.utils import date as date_util
 
 
 LOG = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ def serialize(obj):
 
     for k, v in six.iteritems(obj.__dict__):
         if isinstance(v, SERIALIZABLE_TYPES):
-            doc[k] = date.format(v) if date.valid(v) else v
+            doc[k] = date_util.format(v) if date_util.valid(v) else v
 
     return doc
 
@@ -47,7 +47,7 @@ def deserialize(obj_type, data):
 
     for k, v in six.iteritems(data):
         if isinstance(v, SERIALIZABLE_TYPES):
-            v = date.parse(v) if date.valid(v) else v
+            v = date_util.parse(v) if date_util.valid(v) else v
             setattr(obj, k, v)
 
     return obj

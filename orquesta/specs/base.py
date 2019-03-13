@@ -20,12 +20,12 @@ import six
 import yaml
 
 from orquesta import exceptions as exc
-from orquesta.expressions import base as expr
-from orquesta.specs import types
-from orquesta.utils import expression as expr_utils
-from orquesta.utils import parameters as args_utils
-from orquesta.utils import schema as schema_utils
-from orquesta.utils import strings as strings_utils
+from orquesta.expressions import base as expr_base
+from orquesta.specs import types as spec_types
+from orquesta.utils import expression as expr_util
+from orquesta.utils import parameters as args_util
+from orquesta.utils import schema as schema_util
+from orquesta.utils import strings as str_util
 
 
 LOG = logging.getLogger(__name__)
@@ -47,10 +47,10 @@ class Spec(object):
     _meta_schema = {
         'type': 'object',
         'properties': {
-            'name': types.NONEMPTY_STRING,
-            'version': types.VERSION,
-            'description': types.NONEMPTY_STRING,
-            'tags': types.UNIQUE_STRING_LIST
+            'name': spec_types.NONEMPTY_STRING,
+            'version': spec_types.VERSION,
+            'description': spec_types.NONEMPTY_STRING,
+            'tags': spec_types.UNIQUE_STRING_LIST
         }
     }
 
@@ -113,7 +113,7 @@ class Spec(object):
 
         schema = (
             self._schema if member else
-            schema_utils.merge_schema(self.get_meta_schema(), self._schema)
+            schema_util.merge_schema(self.get_meta_schema(), self._schema)
         )
 
         # Process attributes defined under properties in the schema.
@@ -190,9 +190,9 @@ class Spec(object):
 
         for base_cls in bases:
             parent_meta_schema = base_cls.get_meta_schema()
-            meta_schema = schema_utils.merge_schema(meta_schema, parent_meta_schema)
+            meta_schema = schema_util.merge_schema(meta_schema, parent_meta_schema)
 
-        return schema_utils.merge_schema(meta_schema, cls._meta_schema)
+        return schema_util.merge_schema(meta_schema, cls._meta_schema)
 
     @classmethod
     def get_schema(cls, includes=['meta'], resolve_specs=True):
@@ -202,13 +202,13 @@ class Spec(object):
 
         for base_cls in bases:
             parent_schema = base_cls.get_schema(includes=None)
-            schema = schema_utils.merge_schema(schema, parent_schema)
+            schema = schema_util.merge_schema(schema, parent_schema)
 
-        schema = schema_utils.merge_schema(schema, cls._schema)
+        schema = schema_util.merge_schema(schema, cls._schema)
 
         if includes and 'meta' in includes:
             meta_schema = cls.get_meta_schema()
-            schema = schema_utils.merge_schema(schema, meta_schema)
+            schema = schema_util.merge_schema(schema, meta_schema)
 
         if not resolve_specs:
             return schema
@@ -309,7 +309,7 @@ class Spec(object):
                 )
 
             entry = {
-                'message': strings_utils.unescape(e.message),
+                'message': str_util.unescape(e.message),
                 'spec_path': spec_path or None,
                 'schema_path': schema_path or None
             }
@@ -416,7 +416,7 @@ class Spec(object):
                 errors.extend(prop_value.inspect_expressions(parent=item_parent))
                 continue
 
-            result = expr.validate(prop_value).get('errors', [])
+            result = expr_base.validate(prop_value).get('errors', [])
 
             for entry in result:
                 entry['spec_path'] = spec_path
@@ -443,7 +443,7 @@ class Spec(object):
             }
 
         def decorate_ctx_var_error(var):
-            error = expr_utils.format_error(
+            error = expr_util.format_error(
                 var['type'],
                 var['expression'],
                 'Variable "%s" is referenced before assignment.' % var['name'],
@@ -457,7 +457,7 @@ class Spec(object):
             ctx_inputs = []
 
             # By default, context inputs support only dictionary,
-            # list of single item dictionaries, or string types.
+            # list of single item dictionaries, or string spec_types.
             if isinstance(prop_value, dict):
                 ctx_inputs = list(prop_value.keys())
             elif isinstance(prop_value, list):
@@ -474,7 +474,7 @@ class Spec(object):
         def inspect_ctx(prop_name, prop_value, spec_path, schema_path, rolling_ctx, errors):
             ctx_vars = []
 
-            for var in expr.extract_vars(prop_value):
+            for var in expr_base.extract_vars(prop_value):
                 ctx_vars.append(decorate_ctx_var(var, spec_path, schema_path))
 
             for ctx_var in ctx_vars:
@@ -516,7 +516,7 @@ class Spec(object):
 
             # Parse inline parameters from value if value is a string.
             if isinstance(prop_value, six.string_types):
-                inline_params = args_utils.parse_inline_params(prop_value)
+                inline_params = args_util.parse_inline_params(prop_value)
 
                 if inline_params:
                     prop_value = inline_params
@@ -616,7 +616,7 @@ class SequenceSpec(Spec, collections.MutableSequence):
 
         schema = (
             self._schema if member else
-            schema_utils.merge_schema(self.get_meta_schema(), self._schema)
+            schema_util.merge_schema(self.get_meta_schema(), self._schema)
         )
 
         if schema.get('type') != 'array':

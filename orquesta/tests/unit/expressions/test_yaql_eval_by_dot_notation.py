@@ -10,12 +10,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.expressions import yql
-from orquesta.tests.unit import base
-from orquesta.utils import plugin
+from orquesta.expressions import yql as yaql_expr
+from orquesta.tests.unit import base as test_base
+from orquesta.utils import plugin as plugin_util
 
 
-class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
+class YAQLEvaluationTest(test_base.ExpressionEvaluatorTest):
 
     @classmethod
     def setUpClass(cls):
@@ -23,12 +23,12 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
         super(YAQLEvaluationTest, cls).setUpClass()
 
     def test_get_evaluator(self):
-        e = plugin.get_module(
+        e = plugin_util.get_module(
             'orquesta.expressions.evaluators',
             self.language
         )
 
-        self.assertEqual(e, yql.YAQLEvaluator)
+        self.assertEqual(e, yaql_expr.YAQLEvaluator)
         self.assertIn('ctx', e._custom_functions.keys())
 
     def test_basic_eval(self):
@@ -43,7 +43,7 @@ class YAQLEvaluationTest(base.ExpressionEvaluatorTest):
 
         data = {}
 
-        with self.assertRaises(yql.YaqlEvaluationException) as raised:
+        with self.assertRaises(yaql_expr.YaqlEvaluationException) as raised:
             self.evaluator.evaluate(expr, data)
 
         expected = "Unable to resolve key 'foo' in expression '<% ctx().foo %>' from context."

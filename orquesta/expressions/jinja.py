@@ -19,17 +19,17 @@ import six
 import jinja2
 
 from orquesta import exceptions as exc
-from orquesta.expressions import base
-from orquesta.expressions.functions import base as functions
-from orquesta.utils import expression as utils
-from orquesta.utils import strings as strings_utils
+from orquesta.expressions import base as expr_base
+from orquesta.expressions.functions import base as func_base
+from orquesta.utils import expression as expr_util
+from orquesta.utils import strings as str_util
 
 
 LOG = logging.getLogger(__name__)
 
 
 def register_functions(env):
-    catalog = functions.load()
+    catalog = func_base.load()
 
     for name, func in six.iteritems(catalog):
         env.filters[name] = func
@@ -45,7 +45,7 @@ class JinjaEvaluationException(exc.ExpressionEvaluationException):
     pass
 
 
-class JinjaEvaluator(base.Evaluator):
+class JinjaEvaluator(expr_base.Evaluator):
     _type = 'jinja'
     _delimiter = '{{}}'
     _regex_pattern = '{{.*?}}'
@@ -87,7 +87,7 @@ class JinjaEvaluator(base.Evaluator):
             ctx['__current_item'] = ctx['__vars'].get('__current_item')
 
         for name, func in six.iteritems(cls._custom_functions):
-            ctx[name] = functools.partial(func, ctx) if base.func_has_ctx_arg(func) else func
+            ctx[name] = functools.partial(func, ctx) if expr_base.func_has_ctx_arg(func) else func
 
         return ctx
 
@@ -117,7 +117,7 @@ class JinjaEvaluator(base.Evaluator):
         try:
             cls._jinja_env.parse(text)
         except jinja2.exceptions.TemplateError as e:
-            errors.append(utils.format_error(cls._type, text, e))
+            errors.append(expr_util.format_error(cls._type, text, e))
 
         # Validate individual inline expressions.
         for expr in cls._regex_parser.findall(text):
@@ -134,13 +134,13 @@ class JinjaEvaluator(base.Evaluator):
 
                 parser.parse_expression()
             except jinja2.exceptions.TemplateError as e:
-                errors.append(utils.format_error(cls._type, expr, e))
+                errors.append(expr_util.format_error(cls._type, expr, e))
 
         return errors
 
     @classmethod
     def _evaluate_and_expand(cls, text, data=None):
-        output = strings_utils.unicode(text)
+        output = str_util.unicode(text)
         exprs = cls._regex_parser.findall(text)
         block_exprs = cls._regex_block_parser.findall(text)
         ctx = cls.contextualize(data)
@@ -165,9 +165,9 @@ class JinjaEvaluator(base.Evaluator):
                 # raise an exception with error description.
                 if not isinstance(result, jinja2.runtime.StrictUndefined):
                     if len(exprs) > 1 or block_exprs or len(output) > len(expr):
-                        output = output.replace(expr, strings_utils.unicode(result, force=True))
+                        output = output.replace(expr, str_util.unicode(result, force=True))
                     else:
-                        output = strings_utils.unicode(result)
+                        output = str_util.unicode(result)
 
             # Evaluate jinja block(s) after inline expressions are evaluated.
             if block_exprs and isinstance(output, six.string_types):

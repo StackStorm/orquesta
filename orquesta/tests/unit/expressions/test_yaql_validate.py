@@ -10,12 +10,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.expressions import yql
-from orquesta.tests.unit import base
-from orquesta.utils import plugin
+from orquesta.expressions import yql as yaql_expr
+from orquesta.tests.unit import base as test_base
+from orquesta.utils import plugin as plugin_util
 
 
-class YAQLValidationTest(base.ExpressionEvaluatorTest):
+class YAQLValidationTest(test_base.ExpressionEvaluatorTest):
 
     @classmethod
     def setUpClass(cls):
@@ -24,11 +24,11 @@ class YAQLValidationTest(base.ExpressionEvaluatorTest):
 
     def test_get_evaluator(self):
         self.assertEqual(
-            plugin.get_module(
+            plugin_util.get_module(
                 'orquesta.expressions.evaluators',
                 self.language
             ),
-            yql.YAQLEvaluator
+            yaql_expr.YAQLEvaluator
         )
 
     def test_basic_validate(self):

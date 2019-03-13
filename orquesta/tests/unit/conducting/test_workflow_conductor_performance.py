@@ -14,12 +14,12 @@ import random
 import string
 
 from orquesta import conducting
-from orquesta.specs import native as specs
+from orquesta.specs import native as native_specs
 from orquesta import statuses
-from orquesta.tests.unit import base
+from orquesta.tests.unit import base as test_base
 
 
-class WorkflowConductorStressTest(base.WorkflowConductorTest):
+class WorkflowConductorStressTest(test_base.WorkflowConductorTest):
 
     def _prep_wf_def(self, num_tasks):
         wf_def = {
@@ -39,7 +39,7 @@ class WorkflowConductorStressTest(base.WorkflowConductorTest):
 
     def _prep_conductor(self, num_tasks, context=None, inputs=None, status=None):
         wf_def = self._prep_wf_def(num_tasks)
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
 
         kwargs = {
             'context': context if context is not None else None,
@@ -77,7 +77,7 @@ class WorkflowConductorStressTest(base.WorkflowConductorTest):
         conductor.deserialize(conductor.serialize())
 
 
-class WorkflowConductorWithItemsStressTest(base.WorkflowConductorWithItemsTest):
+class WorkflowConductorWithItemsStressTest(test_base.WorkflowConductorWithItemsTest):
 
     def test_runtime_function_of_items_list_size(self):
         wf_def = """
@@ -100,7 +100,7 @@ class WorkflowConductorWithItemsStressTest(base.WorkflowConductorWithItemsTest):
 
         num_items = 500
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)

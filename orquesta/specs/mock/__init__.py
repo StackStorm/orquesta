@@ -10,11 +10,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.specs import base as mock_base
+from orquesta.specs import base as spec_base
 from orquesta.specs.mock import models as mock_models
 
 
-VERSION = mock_base.Spec.get_version()
+VERSION = spec_base.Spec.get_version()
 deserialize = mock_models.deserialize
 instantiate = mock_models.instantiate
 WorkflowSpec = mock_models.WorkflowSpec

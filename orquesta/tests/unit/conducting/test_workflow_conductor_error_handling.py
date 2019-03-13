@@ -12,12 +12,12 @@
 
 from orquesta import conducting
 from orquesta import exceptions as exc
-from orquesta.specs import native as specs
+from orquesta.specs import native as native_specs
 from orquesta import statuses
-from orquesta.tests.unit import base
+from orquesta.tests.unit import base as test_base
 
 
-class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
+class WorkflowConductorErrorHandlingTest(test_base.WorkflowConductorTest):
 
     def test_workflow_input_error(self):
         wf_def = """
@@ -42,7 +42,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -82,7 +82,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -120,7 +120,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -160,7 +160,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -220,7 +220,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -296,7 +296,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -357,7 +357,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -416,7 +416,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -466,7 +466,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -512,7 +512,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -558,7 +558,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -609,7 +609,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -657,7 +657,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -705,7 +705,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -771,7 +771,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -834,7 +834,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -893,7 +893,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -933,7 +933,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -976,7 +976,7 @@ class WorkflowConductorErrorHandlingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)

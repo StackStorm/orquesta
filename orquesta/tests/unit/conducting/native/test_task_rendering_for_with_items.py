@@ -11,12 +11,12 @@
 # limitations under the License.
 
 from orquesta import conducting
-from orquesta.specs import native as specs
+from orquesta.specs import native as native_specs
 from orquesta import statuses
-from orquesta.tests.unit import base
+from orquesta.tests.unit import base as test_base
 
 
-class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
+class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTest):
 
     def test_bad_item_key(self):
         wf_def = """
@@ -47,7 +47,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -87,7 +87,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -120,7 +120,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -148,7 +148,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
             action: core.echo message=<% item(x) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -201,7 +201,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
             action: core.echo message=<% item(x) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -275,7 +275,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
             action: core.echo message=<% item() %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -324,7 +324,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
             action: core.echo message=<% item() %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -376,7 +376,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(base.WorkflowConductorTest):
             action: core.echo message=<% item(x) + item(y) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)

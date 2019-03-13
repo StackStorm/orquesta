@@ -13,7 +13,7 @@
 import copy
 import unittest
 
-from orquesta.utils import dictionary as utils
+from orquesta.utils import dictionary as dict_util
 
 
 LEFT = {
@@ -43,7 +43,7 @@ class DictUtilsTest(unittest.TestCase):
         left = copy.deepcopy(LEFT)
         right = copy.deepcopy(RIGHT)
 
-        utils.merge_dicts(left, right)
+        dict_util.merge_dicts(left, right)
 
         expected = {
             'k1': '123',
@@ -64,7 +64,7 @@ class DictUtilsTest(unittest.TestCase):
         left = copy.deepcopy(LEFT)
         right = copy.deepcopy(RIGHT)
 
-        utils.merge_dicts(left, right, overwrite=False)
+        dict_util.merge_dicts(left, right, overwrite=False)
 
         expected = {
             'k1': '123',
@@ -97,23 +97,23 @@ class DictUtilsTest(unittest.TestCase):
             'y': None
         }
 
-        self.assertEqual('foo', utils.get_dict_value(data, 'a'))
-        self.assertEqual('bar', utils.get_dict_value(data, 'b.c'))
-        self.assertEqual(123, utils.get_dict_value(data, 'b.d.e'))
-        self.assertFalse(utils.get_dict_value(data, 'b.d.f'))
-        self.assertDictEqual({}, utils.get_dict_value(data, 'b.d.g'))
-        self.assertIsNone(utils.get_dict_value(data, 'b.d.h'))
-        self.assertDictEqual({}, utils.get_dict_value(data, 'x'))
-        self.assertIsNone(utils.get_dict_value(data, 'x.x'))
-        self.assertIsNone(utils.get_dict_value(data, 'y'))
-        self.assertIsNone(utils.get_dict_value(data, 'z'))
+        self.assertEqual('foo', dict_util.get_dict_value(data, 'a'))
+        self.assertEqual('bar', dict_util.get_dict_value(data, 'b.c'))
+        self.assertEqual(123, dict_util.get_dict_value(data, 'b.d.e'))
+        self.assertFalse(dict_util.get_dict_value(data, 'b.d.f'))
+        self.assertDictEqual({}, dict_util.get_dict_value(data, 'b.d.g'))
+        self.assertIsNone(dict_util.get_dict_value(data, 'b.d.h'))
+        self.assertDictEqual({}, dict_util.get_dict_value(data, 'x'))
+        self.assertIsNone(dict_util.get_dict_value(data, 'x.x'))
+        self.assertIsNone(dict_util.get_dict_value(data, 'y'))
+        self.assertIsNone(dict_util.get_dict_value(data, 'z'))
 
     def test_dict_dot_notation_access_type_error(self):
         data = {'a': 'foo'}
 
         self.assertRaises(
             TypeError,
-            utils.get_dict_value,
+            dict_util.get_dict_value,
             data,
             'a.b'
         )
@@ -123,7 +123,7 @@ class DictUtilsTest(unittest.TestCase):
 
         self.assertRaises(
             KeyError,
-            utils.get_dict_value,
+            dict_util.get_dict_value,
             data,
             'a.b',
             raise_key_error=True
@@ -146,19 +146,19 @@ class DictUtilsTest(unittest.TestCase):
         }
 
         # Test basic insert.
-        utils.set_dict_value(data, 'z', {'foo': 'bar'})
+        dict_util.set_dict_value(data, 'z', {'foo': 'bar'})
 
         # Test insert via dot notation on existing node.
-        utils.set_dict_value(data, 'b.d.h', 2.0)
+        dict_util.set_dict_value(data, 'b.d.h', 2.0)
 
         # Test insert via dot notation on nonexistent nodes.
-        utils.set_dict_value(data, 'm.n.o', True)
+        dict_util.set_dict_value(data, 'm.n.o', True)
 
         # Test insert non-null only.
-        utils.set_dict_value(data, 'b.d.i', None, insert_null=False)
+        dict_util.set_dict_value(data, 'b.d.i', None, insert_null=False)
 
         # Test insert null.
-        utils.set_dict_value(data, 'b.d.j', None, insert_null=True)
+        dict_util.set_dict_value(data, 'b.d.j', None, insert_null=True)
 
         expected_data = {
             'a': 'foo',
@@ -191,7 +191,7 @@ class DictUtilsTest(unittest.TestCase):
 
         self.assertRaises(
             TypeError,
-            utils.set_dict_value,
+            dict_util.set_dict_value,
             data,
             'a.b',
             'foobar'
@@ -202,7 +202,7 @@ class DictUtilsTest(unittest.TestCase):
 
         self.assertRaises(
             KeyError,
-            utils.set_dict_value,
+            dict_util.set_dict_value,
             data,
             'a.b',
             'foobar',

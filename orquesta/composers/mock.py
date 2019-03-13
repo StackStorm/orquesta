@@ -12,16 +12,16 @@
 
 import logging
 
-from orquesta.composers import base
+from orquesta.composers import base as comp_base
 from orquesta import graphing
-from orquesta.specs import mock as specs
+from orquesta.specs import mock as mock_specs
 
 
 LOG = logging.getLogger(__name__)
 
 
-class WorkflowComposer(base.WorkflowComposer):
-    wf_spec_type = specs.WorkflowSpec
+class WorkflowComposer(comp_base.WorkflowComposer):
+    wf_spec_type = mock_specs.WorkflowSpec
 
     @classmethod
     def compose(cls, spec):

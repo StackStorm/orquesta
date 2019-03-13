@@ -10,12 +10,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.tests.unit import base as common_base
-from orquesta.tests.unit.composition.mistral import base as mistral_base
+from orquesta.tests.unit import base as test_base
+from orquesta.tests.unit.composition.mistral import base as mistral_comp_test_base
 
 
 class MistralWorkflowConductorTest(
-    mistral_base.MistralWorkflowComposerTest,
-    common_base.WorkflowConductorTest
+    mistral_comp_test_base.MistralWorkflowComposerTest,
+    test_base.WorkflowConductorTest
 ):
     pass

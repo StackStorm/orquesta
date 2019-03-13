@@ -12,11 +12,11 @@
 
 import six
 
-from orquesta.specs import native as models
-from orquesta.tests.unit.specs.native import base
+from orquesta.specs import native as native_specs
+from orquesta.tests.unit.specs.native import base as test_base
 
 
-class TaskSpecTest(base.OrchestraWorkflowSpecTest):
+class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
 
     def test_delay_bad_syntax(self):
         wf_def = """
@@ -123,7 +123,10 @@ class TaskSpecTest(base.OrchestraWorkflowSpecTest):
         expected_errors = {
             'syntax': [
                 {
-                    'message': "'foobar' does not match '%s'" % models.ItemizedSpec._items_regex,
+                    'message': (
+                        "'foobar' does not match '%s'" %
+                        native_specs.ItemizedSpec._items_regex
+                    ),
                     'schema_path': (
                         'properties.tasks.patternProperties.^\\w+$.'
                         'properties.with.properties.items.pattern'
@@ -150,7 +153,10 @@ class TaskSpecTest(base.OrchestraWorkflowSpecTest):
         expected_errors = {
             'syntax': [
                 {
-                    'message': "'foobar' does not match '%s'" % models.ItemizedSpec._items_regex,
+                    'message': (
+                        "'foobar' does not match '%s'" %
+                        native_specs.ItemizedSpec._items_regex
+                    ),
                     'schema_path': (
                         'properties.tasks.patternProperties.^\\w+$.'
                         'properties.with.properties.items.pattern'
@@ -184,7 +190,7 @@ class TaskSpecTest(base.OrchestraWorkflowSpecTest):
                 {
                     'message': (
                         "'foo; bar in <%% zip(list(1, 2), list(a, b)) %%>' "
-                        "does not match '%s'" % models.ItemizedSpec._items_regex
+                        "does not match '%s'" % native_specs.ItemizedSpec._items_regex
                     ),
                     'schema_path': (
                         'properties.tasks.patternProperties.^\\w+$.'
@@ -195,7 +201,7 @@ class TaskSpecTest(base.OrchestraWorkflowSpecTest):
                 {
                     'message': (
                         "'foo bar in <%% zip(list(1, 2), list(a, b)) %%>' "
-                        "does not match '%s'" % models.ItemizedSpec._items_regex
+                        "does not match '%s'" % native_specs.ItemizedSpec._items_regex
                     ),
                     'schema_path': (
                         'properties.tasks.patternProperties.^\\w+$.'
@@ -228,7 +234,7 @@ class TaskSpecTest(base.OrchestraWorkflowSpecTest):
                 {
                     'message': (
                         "'foo; bar in <%% zip(list(1, 2), list(a, b)) %%>' "
-                        "does not match '%s'" % models.ItemizedSpec._items_regex
+                        "does not match '%s'" % native_specs.ItemizedSpec._items_regex
                     ),
                     'schema_path': (
                         'properties.tasks.patternProperties.^\\w+$.'
@@ -239,7 +245,7 @@ class TaskSpecTest(base.OrchestraWorkflowSpecTest):
                 {
                     'message': (
                         "'foo bar in <%% zip(list(1, 2), list(a, b)) %%>' "
-                        "does not match '%s'" % models.ItemizedSpec._items_regex
+                        "does not match '%s'" % native_specs.ItemizedSpec._items_regex
                     ),
                     'schema_path': (
                         'properties.tasks.patternProperties.^\\w+$.'

@@ -10,16 +10,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.specs import native as specs
-from orquesta.tests.unit.specs.native import base
+from orquesta.specs import native as native_specs
+from orquesta.tests.unit.specs.native import base as test_base
 
 
-class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
+class WorkflowSpecTest(test_base.OrchestraWorkflowSpecTest):
 
     def test_exception_empty_definition(self):
-        self.assertRaises(ValueError, specs.WorkflowSpec, None, {})
-        self.assertRaises(ValueError, specs.WorkflowSpec, None, '')
-        self.assertRaises(ValueError, specs.WorkflowSpec, None, None)
+        self.assertRaises(ValueError, native_specs.WorkflowSpec, None, {})
+        self.assertRaises(ValueError, native_specs.WorkflowSpec, None, '')
+        self.assertRaises(ValueError, native_specs.WorkflowSpec, None, None)
 
     def test_basic_spec_instantiation(self):
         wf_name = 'sequential'
@@ -27,7 +27,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
 
         self.assertIsNotNone(wf_spec)
         self.assertEqual(wf_spec.description, 'A basic sequential workflow.')
-        self.assertIsInstance(wf_spec.tasks, specs.TaskMappingSpec)
+        self.assertIsInstance(wf_spec.tasks, native_specs.TaskMappingSpec)
         self.assertEqual(len(wf_spec.tasks), 3)
 
         self.assertListEqual(
@@ -38,7 +38,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
         # Verify model for task1.
         task1 = wf_spec.tasks['task1']
 
-        self.assertIsInstance(task1, specs.TaskSpec)
+        self.assertIsInstance(task1, native_specs.TaskSpec)
         self.assertEqual(task1.action, 'core.echo')
         self.assertDictEqual(task1.input, {'message': '<% ctx().name %>'})
 
@@ -46,12 +46,12 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
 
         self.assertIsInstance(
             task1_transition_seqs,
-            specs.TaskTransitionSequenceSpec
+            native_specs.TaskTransitionSequenceSpec
         )
 
         self.assertIsInstance(
             task1_transition_seqs[0],
-            specs.TaskTransitionSpec
+            native_specs.TaskTransitionSpec
         )
 
         self.assertEqual(
@@ -72,7 +72,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
         # Verify model for task2.
         task2 = wf_spec.tasks['task2']
 
-        self.assertIsInstance(task2, specs.TaskSpec)
+        self.assertIsInstance(task2, native_specs.TaskSpec)
         self.assertEqual(task2.action, 'core.echo')
         self.assertDictEqual(task2.input, {'message': 'All your base are belong to us!'})
 
@@ -80,12 +80,12 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
 
         self.assertIsInstance(
             task2_transition_seqs,
-            specs.TaskTransitionSequenceSpec
+            native_specs.TaskTransitionSequenceSpec
         )
 
         self.assertIsInstance(
             task2_transition_seqs[0],
-            specs.TaskTransitionSpec
+            native_specs.TaskTransitionSpec
         )
 
         self.assertEqual(
@@ -106,7 +106,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
         # Verify model for task3.
         task3 = wf_spec.tasks['task3']
 
-        self.assertIsInstance(task3, specs.TaskSpec)
+        self.assertIsInstance(task3, native_specs.TaskSpec)
         self.assertEqual(task3.action, 'core.echo')
         self.assertDictEqual(task3.input, {'message': '<% ctx(\'greeting\') %>'})
 
@@ -114,12 +114,12 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
 
         self.assertIsInstance(
             task3_transition_seqs,
-            specs.TaskTransitionSequenceSpec
+            native_specs.TaskTransitionSequenceSpec
         )
 
         self.assertIsInstance(
             task3_transition_seqs[0],
-            specs.TaskTransitionSpec
+            native_specs.TaskTransitionSpec
         )
 
         self.assertEqual(
@@ -140,7 +140,7 @@ class WorkflowSpecTest(base.OrchestraWorkflowSpecTest):
     def test_basic_spec_serialization(self):
         wf_name = 'sequential'
         wf_spec_1 = self.get_wf_spec(wf_name)
-        wf_spec_2 = specs.WorkflowSpec.deserialize(wf_spec_1.serialize())
+        wf_spec_2 = native_specs.WorkflowSpec.deserialize(wf_spec_1.serialize())
 
         self.assertDictEqual(wf_spec_2.serialize(), wf_spec_1.serialize())
 

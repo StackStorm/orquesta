@@ -12,7 +12,7 @@
 
 import unittest
 
-from orquesta.utils import parameters as params
+from orquesta.utils import parameters as args_util
 
 
 class InlineParametersTest(unittest.TestCase):
@@ -31,7 +31,7 @@ class InlineParametersTest(unittest.TestCase):
         ]
 
         for s, d in tests:
-            self.assertDictEqual(params.parse_inline_params(s)[0], d)
+            self.assertDictEqual(args_util.parse_inline_params(s)[0], d)
 
     def test_parse_dictionary(self):
         tests = [
@@ -39,7 +39,7 @@ class InlineParametersTest(unittest.TestCase):
         ]
 
         for s, d in tests:
-            self.assertDictEqual(params.parse_inline_params(s)[0], d)
+            self.assertDictEqual(args_util.parse_inline_params(s)[0], d)
 
     def test_parse_expression(self):
         tests = [
@@ -48,7 +48,7 @@ class InlineParametersTest(unittest.TestCase):
         ]
 
         for s, d in tests:
-            self.assertDictEqual(params.parse_inline_params(s)[0], d)
+            self.assertDictEqual(args_util.parse_inline_params(s)[0], d)
 
     def test_parse_multiple(self):
         tests = [
@@ -61,7 +61,7 @@ class InlineParametersTest(unittest.TestCase):
         ]
 
         for s, d in tests:
-            self.assertListEqual(params.parse_inline_params(s), d)
+            self.assertListEqual(args_util.parse_inline_params(s), d)
 
     def test_parse_combination(self):
         s = 'i=123 j="abc" k=true x=<% $.abc %> y={{ _.abc }} z=\'{\"a\": 1}\''
@@ -75,13 +75,13 @@ class InlineParametersTest(unittest.TestCase):
             {'z': {'a': 1}}
         ]
 
-        self.assertListEqual(params.parse_inline_params(s), d)
+        self.assertListEqual(args_util.parse_inline_params(s), d)
 
     def test_parse_empty_string(self):
-        self.assertListEqual(params.parse_inline_params(str()), [])
+        self.assertListEqual(args_util.parse_inline_params(str()), [])
 
     def test_parse_null_type(self):
-        self.assertListEqual(params.parse_inline_params(None), [])
+        self.assertListEqual(args_util.parse_inline_params(None), [])
 
     def test_parse_bool_input(self):
         tests = [
@@ -94,7 +94,7 @@ class InlineParametersTest(unittest.TestCase):
         ]
 
         for s, d in tests:
-            self.assertListEqual(params.parse_inline_params(s), d)
+            self.assertListEqual(args_util.parse_inline_params(s), d)
 
     def test_parse_string_in_quotes_input(self):
         tests = [
@@ -113,10 +113,10 @@ class InlineParametersTest(unittest.TestCase):
         ]
 
         for s, d in tests:
-            self.assertListEqual(params.parse_inline_params(s), d)
+            self.assertListEqual(args_util.parse_inline_params(s), d)
 
     def test_parse_other_types(self):
-        self.assertListEqual(params.parse_inline_params(123), [])
-        self.assertListEqual(params.parse_inline_params(True), [])
-        self.assertListEqual(params.parse_inline_params([1, 2, 3]), [])
-        self.assertListEqual(params.parse_inline_params({'a': 123}), [])
+        self.assertListEqual(args_util.parse_inline_params(123), [])
+        self.assertListEqual(args_util.parse_inline_params(True), [])
+        self.assertListEqual(args_util.parse_inline_params([1, 2, 3]), [])
+        self.assertListEqual(args_util.parse_inline_params({'a': 123}), [])

@@ -14,7 +14,7 @@ import logging
 import six
 import yaml
 
-from orquesta.specs import loader
+from orquesta.specs import loader as spec_loader
 
 
 LOG = logging.getLogger(__name__)
@@ -30,7 +30,7 @@ def instantiate(spec_type, definition):
     if not isinstance(definition, dict):
         raise ValueError('Unable to convert workflow definition into dict.')
 
-    spec_module = loader.get_spec_module(spec_type)
+    spec_module = spec_loader.get_spec_module(spec_type)
 
     version = definition.pop('version', None)
 
@@ -50,6 +50,6 @@ def instantiate(spec_type, definition):
 
 def deserialize(data):
     spec_type = data.get('catalog')
-    spec_module = loader.get_spec_module(spec_type)
+    spec_module = spec_loader.get_spec_module(spec_type)
 
     return spec_module.deserialize(data)

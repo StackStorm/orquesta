@@ -13,7 +13,7 @@
 import copy
 import unittest
 
-from orquesta.utils import context as ctx
+from orquesta.utils import context as ctx_util
 
 
 class ContextUtilTest(unittest.TestCase):
@@ -22,7 +22,7 @@ class ContextUtilTest(unittest.TestCase):
         context = {'var1': 'foobar'}
         task = {'id': 't1', 'route': 0}
 
-        context = ctx.set_current_task(context, task)
+        context = ctx_util.set_current_task(context, task)
         expected_context = dict([('__current_task', copy.deepcopy(task))] + list(context.items()))
 
         self.assertDictEqual(context, expected_context)
@@ -31,7 +31,7 @@ class ContextUtilTest(unittest.TestCase):
         context = {'var1': 'foobar'}
         task = {'id': 't1', 'route': 0, 'result': 'foobar'}
 
-        context = ctx.set_current_task(context, task)
+        context = ctx_util.set_current_task(context, task)
         expected_context = dict([('__current_task', copy.deepcopy(task))] + list(context.items()))
 
         self.assertDictEqual(context, expected_context)
@@ -39,7 +39,7 @@ class ContextUtilTest(unittest.TestCase):
     def test_set_current_task_nonetype_context(self):
         task = {'id': 't1', 'route': 0}
 
-        context = ctx.set_current_task(None, task)
+        context = ctx_util.set_current_task(None, task)
         expected_context = {'__current_task': copy.deepcopy(task)}
 
         self.assertDictEqual(context, expected_context)
@@ -47,7 +47,7 @@ class ContextUtilTest(unittest.TestCase):
     def test_set_current_task_empty_context(self):
         task = {'id': 't1', 'route': 0}
 
-        context = ctx.set_current_task(dict(), task)
+        context = ctx_util.set_current_task(dict(), task)
         expected_context = {'__current_task': copy.deepcopy(task)}
 
         self.assertDictEqual(context, expected_context)
@@ -55,11 +55,11 @@ class ContextUtilTest(unittest.TestCase):
     def test_set_current_task_empty_task(self):
         context = {'var1': 'foobar'}
 
-        self.assertRaises(ValueError, ctx.set_current_task, context, dict())
+        self.assertRaises(ValueError, ctx_util.set_current_task, context, dict())
 
     def test_set_current_task_bad_types(self):
         task = {'id': 't1', 'route': 0}
 
-        self.assertRaises(TypeError, ctx.set_current_task, 'foobar', task)
+        self.assertRaises(TypeError, ctx_util.set_current_task, 'foobar', task)
 
-        self.assertRaises(TypeError, ctx.set_current_task, dict(), 'foobar')
+        self.assertRaises(TypeError, ctx_util.set_current_task, dict(), 'foobar')

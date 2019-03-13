@@ -12,12 +12,12 @@
 
 from orquesta import conducting
 from orquesta import exceptions as exc
-from orquesta.specs import native as specs
+from orquesta.specs import native as native_specs
 from orquesta import statuses
-from orquesta.tests.unit import base
+from orquesta.tests.unit import base as test_base
 
 
-class WorkflowConductorContextTest(base.WorkflowConductorTest):
+class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
 
     def test_bad_app_ctx_references(self):
         wf_def = """
@@ -56,7 +56,7 @@ class WorkflowConductorContextTest(base.WorkflowConductorTest):
             }
         ]
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
 
         # Run the workflow.
         conductor = conducting.WorkflowConductor(spec)
@@ -101,7 +101,7 @@ class WorkflowConductorContextTest(base.WorkflowConductorTest):
         expected_output = app_ctx
         expected_errors = []
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(app_ctx=app_ctx), {})
 
         # Run the workflow.

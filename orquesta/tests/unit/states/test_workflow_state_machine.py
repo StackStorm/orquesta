@@ -16,7 +16,7 @@ from orquesta import conducting
 from orquesta import events
 from orquesta import exceptions as exc
 from orquesta import machines
-from orquesta.specs import native as specs
+from orquesta.specs import native as native_specs
 from orquesta import statuses
 
 
@@ -43,7 +43,7 @@ class WorkflowStateMachineTest(unittest.TestCase):
             action: core.noop
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
 
         if status:

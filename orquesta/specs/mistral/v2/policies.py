@@ -12,38 +12,38 @@
 
 import logging
 
-from orquesta.specs.mistral.v2 import base
-from orquesta.specs import types
+from orquesta.specs.mistral.v2 import base as mistral_v2_spec_base
+from orquesta.specs import types as spec_types
 
 
 LOG = logging.getLogger(__name__)
 
 
-KEEP_RESULT_SCHEMA = types.STRING_OR_BOOLEAN
-WAIT_BEFORE_SCHEMA = types.STRING_OR_POSITIVE_INTEGER
-WAIT_AFTER_SCHEMA = types.STRING_OR_POSITIVE_INTEGER
-TIMEOUT_SCHEMA = types.STRING_OR_POSITIVE_INTEGER
-PAUSE_BEFORE_SCHEMA = types.STRING_OR_BOOLEAN
-CONCURRENCY_SCHEMA = types.STRING_OR_POSITIVE_INTEGER
-SAFE_RERUN_SCHEMA = types.STRING_OR_BOOLEAN
-TARGET_SCHEMA = types.NONEMPTY_STRING
+KEEP_RESULT_SCHEMA = spec_types.STRING_OR_BOOLEAN
+WAIT_BEFORE_SCHEMA = spec_types.STRING_OR_POSITIVE_INTEGER
+WAIT_AFTER_SCHEMA = spec_types.STRING_OR_POSITIVE_INTEGER
+TIMEOUT_SCHEMA = spec_types.STRING_OR_POSITIVE_INTEGER
+PAUSE_BEFORE_SCHEMA = spec_types.STRING_OR_BOOLEAN
+CONCURRENCY_SCHEMA = spec_types.STRING_OR_POSITIVE_INTEGER
+SAFE_RERUN_SCHEMA = spec_types.STRING_OR_BOOLEAN
+TARGET_SCHEMA = spec_types.NONEMPTY_STRING
 
 
-class RetrySpec(base.Spec):
+class RetrySpec(mistral_v2_spec_base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
-            'count': types.STRING_OR_POSITIVE_INTEGER,
-            'break-on': types.NONEMPTY_STRING,
-            'continue-on': types.NONEMPTY_STRING,
-            'delay': types.STRING_OR_POSITIVE_INTEGER
+            'count': spec_types.STRING_OR_POSITIVE_INTEGER,
+            'break-on': spec_types.NONEMPTY_STRING,
+            'continue-on': spec_types.NONEMPTY_STRING,
+            'delay': spec_types.STRING_OR_POSITIVE_INTEGER
         },
         'required': ['delay', 'count'],
         'additionalProperties': False
     }
 
 
-class PoliciesSpec(base.Spec):
+class PoliciesSpec(mistral_v2_spec_base.Spec):
     _schema = {
         'type': 'object',
         'properties': {

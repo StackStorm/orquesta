@@ -11,12 +11,12 @@
 # limitations under the License.
 
 from orquesta import conducting
-from orquesta.specs import native as specs
+from orquesta.specs import native as native_specs
 from orquesta import statuses
-from orquesta.tests.unit import base
+from orquesta.tests.unit import base as test_base
 
 
-class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
+class WorkflowConductorTaskRenderingTest(test_base.WorkflowConductorTest):
 
     def test_basic_rendering(self):
         wf_def = """
@@ -46,12 +46,12 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         """
 
         # Instantiate workflow spec.
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         # Instantiate conductor
         action_name = 'core.echo'
-        action_input = {'message': 'All your base are belong to us!'}
+        action_input = {'message': 'All your test_base are belong to us!'}
         inputs = {'action_name': action_name, 'action_input': action_input}
         conductor = conducting.WorkflowConductor(spec, inputs=inputs)
         conductor.request_workflow_status(statuses.RUNNING)
@@ -162,7 +162,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         """
 
         # Instantiate workflow spec.
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         # Instantiate conductor
@@ -213,7 +213,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         """
 
         # Instantiate workflow spec.
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         # Instantiate conductor
@@ -265,7 +265,7 @@ class WorkflowConductorTaskRenderingTest(base.WorkflowConductorTest):
         ]
 
         # Instantiate workflow spec.
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         # Instantiate conductor

@@ -13,7 +13,7 @@
 import unittest
 import yaml
 
-from orquesta.tests.unit.specs import base as specs
+from orquesta.tests.unit.specs import base as test_specs
 
 
 class SpecTest(unittest.TestCase):
@@ -25,7 +25,7 @@ class SpecTest(unittest.TestCase):
     def test_spec_init_arg_bad_yaml(self):
         self.assertRaises(
             ValueError,
-            specs.MockSpec,
+            test_specs.MockSpec,
             'foobar'
         )
 
@@ -51,7 +51,7 @@ class SpecTest(unittest.TestCase):
                 attr1: <% ctx().var2 %> <% ctx().var3 %>
         """
 
-        spec_obj = specs.MockSpec(spec)
+        spec_obj = test_specs.MockSpec(spec)
         spec_dict = yaml.safe_load(spec)
 
         self.assertDictEqual(spec_obj.spec, spec_dict)
@@ -63,8 +63,8 @@ class SpecTest(unittest.TestCase):
         self.assertDictEqual(spec_obj.attr2, spec_dict['attr2'])
         self.assertListEqual(spec_obj.attr3, spec_dict['attr3'])
 
-        self.assertIsInstance(spec_obj.attr5, specs.MockJointSpec)
-        self.assertIsInstance(spec_obj.attr5.attr1, specs.MockLeafSpec)
+        self.assertIsInstance(spec_obj.attr5, test_specs.MockJointSpec)
+        self.assertIsInstance(spec_obj.attr5.attr1, test_specs.MockLeafSpec)
 
         self.assertEqual(
             spec_obj.attr5.attr1.attr1,
@@ -95,7 +95,7 @@ class SpecTest(unittest.TestCase):
                 attr1: <% ctx().var2 %> <% ctx().var3 %>
         """
 
-        spec_obj = specs.MockSpec(spec)
+        spec_obj = test_specs.MockSpec(spec)
 
         self.assertDictEqual(spec_obj.spec, yaml.safe_load(spec))
         self.assertDictEqual(spec_obj.inspect(), {})

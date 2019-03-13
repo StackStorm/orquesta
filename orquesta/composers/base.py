@@ -14,14 +14,14 @@ import abc
 import logging
 import six
 
-from orquesta.utils import plugin
+from orquesta.utils import plugin as plugin_util
 
 
 LOG = logging.getLogger(__name__)
 
 
 def get_composer(catalog):
-    return plugin.get_module('orquesta.composers', catalog)
+    return plugin_util.get_module('orquesta.composers', catalog)
 
 
 @six.add_metaclass(abc.ABCMeta)

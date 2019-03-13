@@ -12,16 +12,16 @@
 
 import yaml
 
-from orquesta.specs import loader
-from orquesta.tests.unit import base
-from orquesta.utils import specs
+from orquesta.specs import loader as spec_loader
+from orquesta.tests.unit import base as test_base
+from orquesta.utils import specs as spec_util
 
 
-class SpecsUtilTest(base.WorkflowSpecTest):
+class SpecsUtilTest(test_base.WorkflowSpecTest):
 
     def setUp(self):
         super(SpecsUtilTest, self).setUp()
-        self.spec_module = loader.get_spec_module(self.spec_module_name)
+        self.spec_module = spec_loader.get_spec_module(self.spec_module_name)
 
     def test_convert_wf_def_dict_to_spec(self):
         wf_name = 'basic'
@@ -29,7 +29,7 @@ class SpecsUtilTest(base.WorkflowSpecTest):
 
         self.assertIsInstance(wf_def, dict)
 
-        wf_spec = specs.instantiate(self.spec_module_name, wf_def)
+        wf_spec = spec_util.instantiate(self.spec_module_name, wf_def)
 
         self.assertIsInstance(wf_spec, self.spec_module.WorkflowSpec)
         self.assertEqual(wf_name, wf_spec.name)
@@ -41,7 +41,7 @@ class SpecsUtilTest(base.WorkflowSpecTest):
 
         self.assertIsInstance(wf_def, str)
 
-        wf_spec = specs.instantiate(self.spec_module_name, wf_def)
+        wf_spec = spec_util.instantiate(self.spec_module_name, wf_def)
 
         self.assertIsInstance(wf_spec, self.spec_module.WorkflowSpec)
         self.assertEqual(wf_name, wf_spec.name)
@@ -50,7 +50,7 @@ class SpecsUtilTest(base.WorkflowSpecTest):
     def test_bad_wf_def_none(self):
         self.assertRaises(
             ValueError,
-            specs.instantiate,
+            spec_util.instantiate,
             self.spec_module_name,
             None
         )
@@ -58,7 +58,7 @@ class SpecsUtilTest(base.WorkflowSpecTest):
     def test_bad_wf_def_empty(self):
         self.assertRaises(
             ValueError,
-            specs.instantiate,
+            spec_util.instantiate,
             self.spec_module_name,
             dict()
         )
@@ -66,7 +66,7 @@ class SpecsUtilTest(base.WorkflowSpecTest):
     def test_bad_wf_def_not_yaml(self):
         self.assertRaises(
             ValueError,
-            specs.instantiate,
+            spec_util.instantiate,
             self.spec_module_name,
             'foobar'
         )
@@ -80,7 +80,7 @@ class SpecsUtilTest(base.WorkflowSpecTest):
 
         self.assertRaises(
             ValueError,
-            specs.instantiate,
+            spec_util.instantiate,
             self.spec_module_name,
             wf_def
         )
@@ -92,7 +92,7 @@ class SpecsUtilTest(base.WorkflowSpecTest):
 
         self.assertRaises(
             ValueError,
-            specs.instantiate,
+            spec_util.instantiate,
             self.spec_module_name,
             wf_def
         )
@@ -100,8 +100,8 @@ class SpecsUtilTest(base.WorkflowSpecTest):
     def test_deserialize(self):
         wf_name = 'basic'
         wf_def = self.get_wf_def(wf_name)
-        wf_spec_1 = specs.instantiate(self.spec_module_name, wf_def)
-        wf_spec_2 = specs.deserialize(wf_spec_1.serialize())
+        wf_spec_1 = spec_util.instantiate(self.spec_module_name, wf_def)
+        wf_spec_2 = spec_util.deserialize(wf_spec_1.serialize())
 
         self.assertIsInstance(wf_spec_2, self.spec_module.WorkflowSpec)
         self.assertEqual(wf_name, wf_spec_2.name)

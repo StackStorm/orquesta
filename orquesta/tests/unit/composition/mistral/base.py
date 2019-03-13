@@ -10,10 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.tests.unit import base
+from orquesta.tests.unit import base as test_base
 
 
-class MistralWorkflowComposerTest(base.WorkflowComposerTest):
+class MistralWorkflowComposerTest(test_base.WorkflowComposerTest):
 
     @classmethod
     def setUpClass(cls):

@@ -10,10 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.tests.unit import base
+from orquesta.tests.unit import base as test_base
 
 
-class OrchestraWorkflowConductorTest(base.WorkflowConductorTest):
+class OrchestraWorkflowConductorTest(test_base.WorkflowConductorTest):
 
     @classmethod
     def setUpClass(cls):

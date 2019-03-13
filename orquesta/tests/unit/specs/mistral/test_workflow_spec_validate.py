@@ -10,10 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.tests.unit.specs.mistral import base
+from orquesta.tests.unit.specs.mistral import base as test_base
 
 
-class WorkflowSpecValidationTest(base.MistralWorkflowSpecTest):
+class WorkflowSpecValidationTest(test_base.MistralWorkflowSpecTest):
 
     def test_success(self):
         wf_def = """

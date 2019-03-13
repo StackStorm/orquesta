@@ -18,8 +18,8 @@ import six
 
 from stevedore import extension
 
-from orquesta.utils import expression as expr_utils
-from orquesta.utils import plugin
+from orquesta.utils import expression as expr_util
+from orquesta.utils import plugin as plugin_util
 
 
 LOG = logging.getLogger(__name__)
@@ -66,7 +66,7 @@ class Evaluator(object):
 
 
 def get_evaluator(language):
-    return plugin.get_module(_EXP_EVALUATOR_NAMESPACE, language)
+    return plugin_util.get_module(_EXP_EVALUATOR_NAMESPACE, language)
 
 
 def get_evaluators():
@@ -118,7 +118,7 @@ def validate(statement):
             errors.extend(evaluators[0].validate(statement))
         elif len(evaluators) > 1:
             message = 'Expression with multiple types is not supported.'
-            errors.append(expr_utils.format_error(None, statement, message))
+            errors.append(expr_util.format_error(None, statement, message))
 
     return {'errors': errors}
 

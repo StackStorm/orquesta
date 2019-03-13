@@ -14,7 +14,7 @@ import logging
 
 from stevedore import driver
 
-from orquesta import exceptions
+from orquesta import exceptions as exc
 
 
 LOG = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ def get_module(namespace, name):
             invoke_on_load=False
         )
     except RuntimeError as e:
-        raise exceptions.PluginFactoryError(
+        raise exc.PluginFactoryError(
             'Unable to load plugin %s.%s. %s' % (namespace, name, str(e)))
 
     return mgr.driver
@@ -44,7 +44,7 @@ def get_instance(namespace, name, *args, **kwargs):
             invoke_kwds=kwargs
         )
     except RuntimeError as e:
-        raise exceptions.PluginFactoryError(
+        raise exc.PluginFactoryError(
             'Unable to load plugin %s.%s. %s' % (namespace, name, str(e)))
 
     return mgr.driver

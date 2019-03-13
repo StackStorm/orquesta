@@ -12,9 +12,9 @@
 
 import unittest
 
-from orquesta.specs import loader
-from orquesta.specs import native as orquesta_specs
-from orquesta.specs.native import v1 as orquesta_specs_v1
+from orquesta.specs import loader as spec_loader
+from orquesta.specs import native as native_specs
+from orquesta.specs.native import v1 as native_v1_specs
 
 
 class SpecTest(unittest.TestCase):
@@ -25,20 +25,20 @@ class SpecTest(unittest.TestCase):
 
     def test_get_module(self):
         self.assertEqual(
-            loader.get_spec_module(self.spec_module_name),
-            orquesta_specs
+            spec_loader.get_spec_module(self.spec_module_name),
+            native_specs
         )
 
     def test_get_spec(self):
-        spec_module = loader.get_spec_module(self.spec_module_name)
+        spec_module = spec_loader.get_spec_module(self.spec_module_name)
 
         self.assertEqual(
             spec_module.WorkflowSpec,
-            orquesta_specs.WorkflowSpec
+            native_specs.WorkflowSpec
         )
 
     def test_spec_catalog(self):
-        spec_module = loader.get_spec_module(self.spec_module_name)
+        spec_module = spec_loader.get_spec_module(self.spec_module_name)
 
         self.assertEqual(
             spec_module.WorkflowSpec.get_catalog(),
@@ -46,22 +46,22 @@ class SpecTest(unittest.TestCase):
         )
 
     def test_spec_version(self):
-        self.assertEqual('1.0', orquesta_specs_v1.VERSION)
-        self.assertEqual('1.0', orquesta_specs.VERSION)
+        self.assertEqual('1.0', native_v1_specs.VERSION)
+        self.assertEqual('1.0', native_specs.VERSION)
 
     def test_workflow_spec_imports(self):
         self.assertEqual(
-            orquesta_specs.WorkflowSpec,
-            orquesta_specs_v1.models.WorkflowSpec
+            native_specs.WorkflowSpec,
+            native_v1_specs.models.WorkflowSpec
         )
 
     def test_task_spec_imports(self):
         self.assertEqual(
-            orquesta_specs.TaskTransitionSpec,
-            orquesta_specs_v1.models.TaskTransitionSpec
+            native_specs.TaskTransitionSpec,
+            native_v1_specs.models.TaskTransitionSpec
         )
 
         self.assertEqual(
-            orquesta_specs.TaskSpec,
-            orquesta_specs_v1.models.TaskSpec
+            native_specs.TaskSpec,
+            native_v1_specs.models.TaskSpec
         )

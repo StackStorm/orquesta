@@ -10,15 +10,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.composers import mistral as composers
-from orquesta.tests.unit.composition.mistral import base
-from orquesta.utils import plugin
+from orquesta.composers import mistral as mistral_comp
+from orquesta.tests.unit.composition.mistral import base as mistral_comp_test_base
+from orquesta.utils import plugin as plugin_util
 
 
-class WorkflowComposerTest(base.MistralWorkflowComposerTest):
+class WorkflowComposerTest(mistral_comp_test_base.MistralWorkflowComposerTest):
 
     def test_get_composer(self):
         self.assertEqual(
-            plugin.get_module('orquesta.composers', self.spec_module_name),
-            composers.WorkflowComposer
+            plugin_util.get_module('orquesta.composers', self.spec_module_name),
+            mistral_comp.WorkflowComposer
         )

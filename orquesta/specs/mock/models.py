@@ -12,7 +12,7 @@
 
 import logging
 
-from orquesta.specs import base
+from orquesta.specs import base as spec_base
 
 
 LOG = logging.getLogger(__name__)
@@ -31,5 +31,5 @@ def deserialize(data):
     return WorkflowSpec.deserialize(data)
 
 
-class WorkflowSpec(base.Spec):
+class WorkflowSpec(spec_base.Spec):
     _catalog = 'mock'
