@@ -10,9 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-from orquesta.tests.hacking import imports as import_rules
+from orquesta.tests.hacking import import_aliases_rule
+from orquesta.tests.hacking import import_modules_rule
 
 
 def factory(register):
-    register(import_rules.check_import_modules_only)
+    register(import_aliases_rule.check_alias_naming)
+    register(import_modules_rule.check_module_only)
