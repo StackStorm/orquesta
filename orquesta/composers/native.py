@@ -13,16 +13,16 @@
 import logging
 from six.moves import queue
 
-from orquesta.composers import base
+from orquesta.composers import base as comp_base
 from orquesta import graphing
-from orquesta.specs import native as specs
+from orquesta.specs import native as native_specs
 
 
 LOG = logging.getLogger(__name__)
 
 
-class WorkflowComposer(base.WorkflowComposer):
-    wf_spec_type = specs.WorkflowSpec
+class WorkflowComposer(comp_base.WorkflowComposer):
+    wf_spec_type = native_specs.WorkflowSpec
 
     @classmethod
     def compose(cls, spec):

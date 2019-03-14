@@ -14,12 +14,12 @@ import logging
 import six
 
 from orquesta import exceptions as exc
-from orquesta.expressions import base as expr
-from orquesta.specs.mistral.v2 import base
-from orquesta.specs.mistral.v2 import tasks
-from orquesta.specs.mistral.v2 import types as mistral_types
-from orquesta.specs import types
-from orquesta.utils import dictionary as dx
+from orquesta.expressions import base as expr_base
+from orquesta.specs.mistral.v2 import base as mistral_spec_base
+from orquesta.specs.mistral.v2 import tasks as task_models
+from orquesta.specs.mistral.v2 import types as mistral_spec_types
+from orquesta.specs import types as spec_types
+from orquesta.utils import dictionary as dict_util
 
 
 LOG = logging.getLogger(__name__)
@@ -40,17 +40,17 @@ def deserialize(data):
     return WorkflowSpec.deserialize(data)
 
 
-class WorkflowSpec(base.Spec):
+class WorkflowSpec(mistral_spec_base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
-            'type': mistral_types.WORKFLOW_TYPE,
-            'vars': types.NONEMPTY_DICT,
-            'input': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
-            'output': types.NONEMPTY_DICT,
-            'output-on-error': types.NONEMPTY_DICT,
-            'task-defaults': tasks.TaskDefaultsSpec,
-            'tasks': tasks.TaskMappingSpec
+            'type': mistral_spec_types.WORKFLOW_TYPE,
+            'vars': spec_types.NONEMPTY_DICT,
+            'input': spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+            'output': spec_types.NONEMPTY_DICT,
+            'output-on-error': spec_types.NONEMPTY_DICT,
+            'task-defaults': task_models.TaskDefaultsSpec,
+            'tasks': task_models.TaskMappingSpec
         },
         'required': ['tasks'],
         'additionalProperties': False
@@ -71,12 +71,12 @@ class WorkflowSpec(base.Spec):
     def render_input(self, runtime_inputs, in_ctx=None):
         input_specs = getattr(self, 'input') or []
         default_inputs = dict([list(i.items())[0] for i in input_specs if isinstance(i, dict)])
-        merged_inputs = dx.merge_dicts(default_inputs, runtime_inputs, True)
+        merged_inputs = dict_util.merge_dicts(default_inputs, runtime_inputs, True)
         rendered_inputs = {}
         errors = []
 
         try:
-            rendered_inputs = expr.evaluate(merged_inputs, {})
+            rendered_inputs = expr_base.evaluate(merged_inputs, {})
         except exc.ExpressionEvaluationException as e:
             errors.append(str(e))
 
@@ -88,7 +88,7 @@ class WorkflowSpec(base.Spec):
         errors = []
 
         try:
-            rendered_vars = expr.evaluate(vars_specs, in_ctx)
+            rendered_vars = expr_base.evaluate(vars_specs, in_ctx)
         except exc.ExpressionEvaluationException as e:
             errors.append(str(e))
 
@@ -101,7 +101,7 @@ class WorkflowSpec(base.Spec):
 
         try:
             rendered_outputs = {
-                var_name: expr.evaluate(var_expr, in_ctx)
+                var_name: expr_base.evaluate(var_expr, in_ctx)
                 for var_name, var_expr in six.iteritems(output_specs)
             }
         except exc.ExpressionEvaluationException as e:
@@ -110,7 +110,7 @@ class WorkflowSpec(base.Spec):
         return rendered_outputs, errors
 
 
-class WorkbookSpec(base.Spec):
+class WorkbookSpec(mistral_spec_base.Spec):
     _schema = {
         'type': 'object',
         'properties': {

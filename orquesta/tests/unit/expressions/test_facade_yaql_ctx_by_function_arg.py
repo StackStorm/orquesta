@@ -10,44 +10,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.expressions import base as expressions
-from orquesta.tests.unit import base
+from orquesta.expressions import base as expr_base
+from orquesta.tests.unit import base as test_base
 
 
-class YAQLFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
+class YAQLFacadeVariableExtractionTest(test_base.ExpressionFacadeEvaluatorTest):
 
     def test_empty_extraction(self):
         expr = '<% just_text and $not_a_var %>'
 
-        self.assertListEqual([], expressions.extract_vars(expr))
+        self.assertListEqual([], expr_base.extract_vars(expr))
 
     def test_single_var_extraction(self):
         expr = '<% ctx(foobar) %>'
 
         expected_vars = [('yaql', expr, 'foobar')]
 
-        self.assertListEqual(expected_vars, expressions.extract_vars(expr))
+        self.assertListEqual(expected_vars, expr_base.extract_vars(expr))
 
     def test_single_dotted_var_extraction(self):
         expr = '<% ctx(foo).bar %>'
 
         expected_vars = [('yaql', expr, 'foo')]
 
-        self.assertListEqual(expected_vars, expressions.extract_vars(expr))
+        self.assertListEqual(expected_vars, expr_base.extract_vars(expr))
 
     def test_single_indexing_var_extraction(self):
         expr = '<% ctx(foo)[0] %>'
 
         expected_vars = [('yaql', expr, 'foo')]
 
-        self.assertListEqual(expected_vars, expressions.extract_vars(expr))
+        self.assertListEqual(expected_vars, expr_base.extract_vars(expr))
 
     def test_single_functional_var_extraction(self):
         expr = '<% ctx(foo).get(bar) %>'
 
         expected_vars = [('yaql', expr, 'foo')]
 
-        self.assertListEqual(expected_vars, expressions.extract_vars(expr))
+        self.assertListEqual(expected_vars, expr_base.extract_vars(expr))
 
     def test_multiple_vars_extraction(self):
         expr = '<% ctx(foobar) ctx(foo).get(bar) ctx(fu).bar ctx(fu).bar[0] %>'
@@ -58,7 +58,7 @@ class YAQLFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
             ('yaql', expr, 'fu')
         ]
 
-        self.assertListEqual(expected_vars, expressions.extract_vars(expr))
+        self.assertListEqual(expected_vars, expr_base.extract_vars(expr))
 
     def test_multiple_interleaved_vars_extraction(self):
         expr = '<% Why the ctx(foobar) are you so ctx(fu).bar serious? %>'
@@ -68,13 +68,13 @@ class YAQLFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
             ('yaql', expr, 'fu')
         ]
 
-        self.assertListEqual(expected_vars, expressions.extract_vars(expr))
+        self.assertListEqual(expected_vars, expr_base.extract_vars(expr))
 
     def test_vars_extraction_from_list(self):
         expr = [
             '<% abc %>',
             '<% Why the ctx(foobar) are you so ctx(fu).bar serious? %>',
-            'All your base are belong to us.',
+            'All your test_base are belong to us.',
             {'<% ctx(x) %>': 123, 'k2': '<% ctx(y) %>', 'k3': ['<% ctx(z) %>']}
         ]
 
@@ -86,7 +86,7 @@ class YAQLFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
             ('yaql', '<% ctx(z) %>', 'z')
         ]
 
-        self.assertListEqual(expected_vars, expressions.extract_vars(expr))
+        self.assertListEqual(expected_vars, expr_base.extract_vars(expr))
 
     def test_vars_extraction_from_dict(self):
         expr = {
@@ -105,4 +105,4 @@ class YAQLFacadeVariableExtractionTest(base.ExpressionFacadeEvaluatorTest):
             ('yaql', '<% ctx(z) %>', 'z')
         ]
 
-        self.assertListEqual(expected_vars, expressions.extract_vars(expr))
+        self.assertListEqual(expected_vars, expr_base.extract_vars(expr))

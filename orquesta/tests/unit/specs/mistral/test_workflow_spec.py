@@ -10,21 +10,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.specs import mistral as specs
-from orquesta.tests.unit.specs.mistral import base
+from orquesta.specs import mistral as mistral_specs
+from orquesta.tests.unit.specs.mistral import base as test_base
 
 
-class WorkflowSpecTest(base.MistralWorkflowSpecTest):
+class WorkflowSpecTest(test_base.MistralWorkflowSpecTest):
 
     def test_exception_empty_definition(self):
-        self.assertRaises(ValueError, specs.WorkflowSpec, None, {})
-        self.assertRaises(ValueError, specs.WorkflowSpec, None, '')
-        self.assertRaises(ValueError, specs.WorkflowSpec, None, None)
+        self.assertRaises(ValueError, mistral_specs.WorkflowSpec, None, {})
+        self.assertRaises(ValueError, mistral_specs.WorkflowSpec, None, '')
+        self.assertRaises(ValueError, mistral_specs.WorkflowSpec, None, None)
 
     def test_basic_spec_serialization(self):
         wf_name = 'sequential'
         wf_spec_1 = self.get_wf_spec(wf_name)
-        wf_spec_2 = specs.WorkflowSpec.deserialize(wf_spec_1.serialize())
+        wf_spec_2 = mistral_specs.WorkflowSpec.deserialize(wf_spec_1.serialize())
 
         self.assertDictEqual(wf_spec_2.serialize(), wf_spec_1.serialize())
 

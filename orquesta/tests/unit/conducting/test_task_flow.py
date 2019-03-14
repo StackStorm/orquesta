@@ -14,12 +14,12 @@ from orquesta import conducting
 from orquesta import events
 from orquesta import exceptions as exc
 from orquesta import graphing
-from orquesta.specs import native as specs
+from orquesta.specs import native as native_specs
 from orquesta import statuses
-from orquesta.tests.unit import base
+from orquesta.tests.unit import base as test_base
 
 
-class WorkflowConductorTaskStateTest(base.WorkflowConductorTest):
+class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
 
     def _add_tasks(self, wf_graph):
         for i in range(1, 6):
@@ -69,7 +69,7 @@ class WorkflowConductorTaskStateTest(base.WorkflowConductorTest):
             action: core.noop
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
 
         kwargs = {
             'context': context if context is not None else None,

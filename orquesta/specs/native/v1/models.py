@@ -18,12 +18,12 @@ import yaml
 
 from orquesta import events
 from orquesta import exceptions as exc
-from orquesta.expressions import base as expr
-from orquesta.specs.native.v1 import base
-from orquesta.specs import types
-from orquesta.utils import context as ctx
-from orquesta.utils import dictionary as dx
-from orquesta.utils import parameters as args_utils
+from orquesta.expressions import base as expr_base
+from orquesta.specs.native.v1 import base as native_v1_specs
+from orquesta.specs import types as spec_types
+from orquesta.utils import context as ctx_util
+from orquesta.utils import dictionary as dict_util
+from orquesta.utils import parameters as args_util
 
 
 LOG = logging.getLogger(__name__)
@@ -39,21 +39,21 @@ def deserialize(data):
     return WorkflowSpec.deserialize(data)
 
 
-class TaskTransitionSpec(base.Spec):
+class TaskTransitionSpec(native_v1_specs.Spec):
     _schema = {
         'type': 'object',
         'properties': {
-            'when': types.NONEMPTY_STRING,
+            'when': spec_types.NONEMPTY_STRING,
             'publish': {
                 'oneOf': [
-                    types.NONEMPTY_STRING,
-                    types.UNIQUE_ONE_KEY_DICT_LIST
+                    spec_types.NONEMPTY_STRING,
+                    spec_types.UNIQUE_ONE_KEY_DICT_LIST
                 ]
             },
             'do': {
                 'oneOf': [
-                    types.NONEMPTY_STRING,
-                    types.UNIQUE_STRING_LIST
+                    spec_types.NONEMPTY_STRING,
+                    spec_types.UNIQUE_STRING_LIST
                 ]
             }
         },
@@ -76,7 +76,7 @@ class TaskTransitionSpec(base.Spec):
         publish_spec = getattr(self, 'publish', None)
 
         if publish_spec and isinstance(publish_spec, six.string_types):
-            self.publish = args_utils.parse_inline_params(publish_spec or str())
+            self.publish = args_util.parse_inline_params(publish_spec or str())
 
         do_spec = getattr(self, 'do', None)
 
@@ -84,19 +84,19 @@ class TaskTransitionSpec(base.Spec):
             self.do = 'noop'
 
 
-class TaskTransitionSequenceSpec(base.SequenceSpec):
+class TaskTransitionSequenceSpec(native_v1_specs.SequenceSpec):
     _schema = {
         'type': 'array',
         'items': TaskTransitionSpec
     }
 
 
-class ItemizedSpec(base.Spec):
+class ItemizedSpec(native_v1_specs.Spec):
     _items_regex = (
         # Regular expression in the form "x, y, z, ... in <expression>"
         # or "x in <expression>" with optional space(s) on both end.
         '^(\s+)?({expr})(\s+)?$|^(\s+)?((\w+,\s?|\s+)+)?(\w+)\s+in\s+({expr})(\s+)?$'.format(
-            expr='|'.join(expr.get_statement_regexes().values())
+            expr='|'.join(expr_base.get_statement_regexes().values())
         )
     )
 
@@ -108,7 +108,7 @@ class ItemizedSpec(base.Spec):
                 'minLength': 1,
                 'pattern': _items_regex
             },
-            'concurrency': types.STRING_OR_POSITIVE_INTEGER
+            'concurrency': spec_types.STRING_OR_POSITIVE_INTEGER
         }
     }
 
@@ -118,23 +118,23 @@ class ItemizedSpec(base.Spec):
     ]
 
 
-class TaskSpec(base.Spec):
+class TaskSpec(native_v1_specs.Spec):
     _schema = {
         'type': 'object',
         'properties': {
-            'delay': types.STRING_OR_POSITIVE_INTEGER,
+            'delay': spec_types.STRING_OR_POSITIVE_INTEGER,
             'join': {
                 'oneOf': [
                     {'enum': ['all']},
-                    types.POSITIVE_INTEGER
+                    spec_types.POSITIVE_INTEGER
                 ]
             },
             'with': ItemizedSpec,
-            'action': types.NONEMPTY_STRING,
+            'action': spec_types.NONEMPTY_STRING,
             'input': {
                 'oneOf': [
-                    types.NONEMPTY_STRING,
-                    types.NONEMPTY_DICT,
+                    spec_types.NONEMPTY_STRING,
+                    spec_types.NONEMPTY_DICT,
                 ]
             },
             'next': TaskTransitionSequenceSpec,
@@ -154,7 +154,7 @@ class TaskSpec(base.Spec):
         super(TaskSpec, self).__init__(*args, **kwargs)
 
         action_spec = getattr(self, 'action', str())
-        input_spec = args_utils.parse_inline_params(action_spec, preserve_order=False)
+        input_spec = args_util.parse_inline_params(action_spec, preserve_order=False)
 
         if input_spec:
             self.action = action_spec[:action_spec.index(' ')]
@@ -174,8 +174,8 @@ class TaskSpec(base.Spec):
 
         if not self.has_items():
             action_spec = {
-                'action': expr.evaluate(self.action, in_ctx),
-                'input': expr.evaluate(getattr(self, 'input', {}), in_ctx)
+                'action': expr_base.evaluate(self.action, in_ctx),
+                'input': expr_base.evaluate(getattr(self, 'input', {}), in_ctx)
             }
 
             action_specs.append(action_spec)
@@ -187,7 +187,7 @@ class TaskSpec(base.Spec):
                 else items_spec.items[items_spec.items.index(' in ') + 4:].strip()
             )
 
-            items = expr.evaluate(items_expr, in_ctx)
+            items = expr_base.evaluate(items_expr, in_ctx)
 
             if not isinstance(items, list):
                 raise TypeError('The value of "%s" is not type of list.' % items_expr)
@@ -197,18 +197,18 @@ class TaskSpec(base.Spec):
                 else items_spec.items[:items_spec.items.index(' in ')].replace(' ', '').split(',')
             )
 
-            for idx, item in enumerate(items):
+            for idict_util, item in enumerate(items):
                 if item_keys and (isinstance(item, tuple) or isinstance(item, list)):
                     item = dict(zip(item_keys, list(item)))
                 elif item_keys and len(item_keys) == 1:
                     item = {item_keys[0]: item}
 
-                item_ctx_value = ctx.set_current_item(in_ctx, item)
+                item_ctx_value = ctx_util.set_current_item(in_ctx, item)
 
                 action_spec = {
-                    'action': expr.evaluate(self.action, item_ctx_value),
-                    'input': expr.evaluate(getattr(self, 'input', {}), item_ctx_value),
-                    'item_id': idx
+                    'action': expr_base.evaluate(self.action, item_ctx_value),
+                    'input': expr_base.evaluate(getattr(self, 'input', {}), item_ctx_value),
+                    'item_id': idict_util
                 }
 
                 action_specs.append(action_spec)
@@ -230,13 +230,13 @@ class TaskSpec(base.Spec):
                 default_var_value = list(task_publish_spec.items())[0][1]
 
                 try:
-                    rendered_var_value = expr.evaluate(default_var_value, rolling_ctx)
+                    rendered_var_value = expr_base.evaluate(default_var_value, rolling_ctx)
                     rolling_ctx[var_name] = rendered_var_value
                     new_ctx[var_name] = rendered_var_value
                 except exc.ExpressionEvaluationException as e:
                     errors.append(e)
 
-        out_ctx = dx.merge_dicts(in_ctx, new_ctx, overwrite=True)
+        out_ctx = dict_util.merge_dicts(in_ctx, new_ctx, overwrite=True)
 
         for key in list(out_ctx.keys()):
             if key.startswith('__'):
@@ -245,7 +245,7 @@ class TaskSpec(base.Spec):
         return out_ctx, new_ctx, errors
 
 
-class TaskMappingSpec(base.MappingSpec):
+class TaskMappingSpec(native_v1_specs.MappingSpec):
     _schema = {
         'type': 'object',
         'minProperties': 1,
@@ -273,7 +273,7 @@ class TaskMappingSpec(base.MappingSpec):
 
         task_transitions = getattr(task_spec, 'next') or []
 
-        for task_transition_item_idx, task_transition in enumerate(task_transitions):
+        for task_transition_item_idict_util, task_transition in enumerate(task_transitions):
             condition = getattr(task_transition, 'when') or None
             next_task_names = getattr(task_transition, 'do') or []
 
@@ -281,7 +281,7 @@ class TaskMappingSpec(base.MappingSpec):
                 next_task_names = [x.strip() for x in next_task_names.split(',')]
 
             for next_task_name in next_task_names:
-                next_tasks.append((next_task_name, condition, task_transition_item_idx))
+                next_tasks.append((next_task_name, condition, task_transition_item_idict_util))
 
         return sorted(next_tasks, key=lambda x: x[0])
 
@@ -417,7 +417,7 @@ class TaskMappingSpec(base.MappingSpec):
         q = queue.Queue()
 
         # Traverse the tasks spec and prep data for evaluation.
-        for task_name, condition, task_transition_item_idx in self.get_start_tasks():
+        for task_name, condition, task_transition_item_idict_util in self.get_start_tasks():
             q.put((None, task_name, []))
 
         while not q.empty():
@@ -449,7 +449,7 @@ class TaskMappingSpec(base.MappingSpec):
 
             next_tasks = self.get_next_tasks(task_name)
 
-            for next_task_name, condition, task_transition_item_idx in next_tasks:
+            for next_task_name, condition, task_transition_item_idict_util in next_tasks:
                 if next_task_name not in staging or not self.in_cycle(next_task_name):
                     q.put((task_name, next_task_name, list(splits)))
 
@@ -567,13 +567,13 @@ class TaskMappingSpec(base.MappingSpec):
         return (errors, rolling_ctx)
 
 
-class WorkflowSpec(base.Spec):
+class WorkflowSpec(native_v1_specs.Spec):
     _schema = {
         'type': 'object',
         'properties': {
-            'vars': types.UNIQUE_ONE_KEY_DICT_LIST,
-            'input': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
-            'output': types.UNIQUE_ONE_KEY_DICT_LIST,
+            'vars': spec_types.UNIQUE_ONE_KEY_DICT_LIST,
+            'input': spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+            'output': spec_types.UNIQUE_ONE_KEY_DICT_LIST,
             'tasks': TaskMappingSpec
         },
         'required': ['tasks'],
@@ -626,7 +626,7 @@ class WorkflowSpec(base.Spec):
             runtime_input_value = runtime_inputs.get(input_name, default_input_value)
 
             try:
-                rendered_input_value = expr.evaluate(runtime_input_value, rolling_ctx)
+                rendered_input_value = expr_base.evaluate(runtime_input_value, rolling_ctx)
                 rolling_ctx[input_name] = rendered_input_value
             except exc.ExpressionEvaluationException as e:
                 errors.append(e)
@@ -643,7 +643,7 @@ class WorkflowSpec(base.Spec):
             default_var_value = list(var_spec.items())[0][1]
 
             try:
-                rendered_var_value = expr.evaluate(default_var_value, rolling_ctx)
+                rendered_var_value = expr_base.evaluate(default_var_value, rolling_ctx)
                 rolling_ctx[var_name] = rendered_var_value
                 rendered_vars[var_name] = rendered_var_value
             except exc.ExpressionEvaluationException as e:
@@ -662,7 +662,7 @@ class WorkflowSpec(base.Spec):
             default_output_value = list(output_spec.items())[0][1]
 
             try:
-                rendered_output_value = expr.evaluate(default_output_value, rolling_ctx)
+                rendered_output_value = expr_base.evaluate(default_output_value, rolling_ctx)
                 rolling_ctx[output_name] = rendered_output_value
                 rendered_outputs[output_name] = rendered_output_value
             except exc.ExpressionEvaluationException as e:

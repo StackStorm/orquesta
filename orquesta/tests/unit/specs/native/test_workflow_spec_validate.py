@@ -10,10 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.tests.unit.specs.native import base
+from orquesta.tests.unit.specs.native import base as test_base
 
 
-class WorkflowSpecValidationTest(base.OrchestraWorkflowSpecTest):
+class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
 
     def test_success(self):
         wf_def = """

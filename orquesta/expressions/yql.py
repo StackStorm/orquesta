@@ -19,17 +19,17 @@ import yaql
 import yaql.language.exceptions as yaql_exc
 
 from orquesta import exceptions as exc
-from orquesta.expressions import base
-from orquesta.expressions.functions import base as functions
-from orquesta.utils import expression as utils
-from orquesta.utils import strings as strings_utils
+from orquesta.expressions import base as expr_base
+from orquesta.expressions.functions import base as func_base
+from orquesta.utils import expression as expr_util
+from orquesta.utils import strings as str_util
 
 
 LOG = logging.getLogger(__name__)
 
 
 def register_functions(ctx):
-    catalog = functions.load()
+    catalog = func_base.load()
 
     for name, func in six.iteritems(catalog):
         ctx.register_function(func, name=name)
@@ -45,7 +45,7 @@ class YaqlEvaluationException(exc.ExpressionEvaluationException):
     pass
 
 
-class YAQLEvaluator(base.Evaluator):
+class YAQLEvaluator(expr_base.Evaluator):
     _type = 'yaql'
     _delimiter = '<%>'
     _regex_pattern = '<%.*?%>'
@@ -101,7 +101,7 @@ class YAQLEvaluator(base.Evaluator):
             try:
                 cls._engine(cls.strip_delimiter(expr))
             except (yaql_exc.YaqlException, ValueError, TypeError) as e:
-                errors.append(utils.format_error(cls._type, expr, e))
+                errors.append(expr_util.format_error(cls._type, expr, e))
 
         return errors
 
@@ -113,7 +113,7 @@ class YAQLEvaluator(base.Evaluator):
         if data and not isinstance(data, dict):
             raise ValueError('Provided data is not typeof dict.')
 
-        output = strings_utils.unicode(text)
+        output = str_util.unicode(text)
         exprs = cls._regex_parser.findall(text)
         ctx = cls.contextualize(data)
 
@@ -129,9 +129,9 @@ class YAQLEvaluator(base.Evaluator):
                     result = cls.evaluate(result, data)
 
                 if len(exprs) > 1 or len(output) > len(expr):
-                    output = output.replace(expr, strings_utils.unicode(result, force=True))
+                    output = output.replace(expr, str_util.unicode(result, force=True))
                 else:
-                    output = strings_utils.unicode(result)
+                    output = str_util.unicode(result)
 
         except KeyError as e:
             error = str(getattr(e, 'message', e)).strip("'")

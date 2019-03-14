@@ -14,7 +14,7 @@ import json
 import re
 import six
 
-from orquesta.expressions import base as expr
+from orquesta.expressions import base as expr_base
 
 
 REGEX_VALUE_IN_BRACKETS = '\[.*\]\s*'
@@ -38,7 +38,10 @@ REGEX_INLINE_PARAM_VARIATIONS = [
     REGEX_NULL
 ]
 
-REGEX_INLINE_PARAM_VARIATIONS.extend([e._regex_pattern for e in expr.get_evaluators().values()])
+REGEX_INLINE_PARAM_VARIATIONS.extend(
+    [e._regex_pattern for e in expr_base.get_evaluators().values()]
+)
+
 REGEX_INLINE_PARAMS = '([\w]+)=(%s)' % '|'.join(REGEX_INLINE_PARAM_VARIATIONS)
 
 

@@ -13,7 +13,7 @@
 import copy
 
 from orquesta import exceptions as exc
-from orquesta.utils import dictionary as dict_utils
+from orquesta.utils import dictionary as dict_util
 
 
 def get_schema_type(s):
@@ -81,7 +81,7 @@ def merge_schema(s1, s2, overwrite=True):
 def merge_object_schema(s1, s2, overwrite=True):
     schema = {'type': 'object'}
 
-    properties = dict_utils.merge_dicts(
+    properties = dict_util.merge_dicts(
         copy.deepcopy(s1.get('properties', {})),
         copy.deepcopy(s2.get('properties', {})),
         overwrite=overwrite
@@ -106,7 +106,7 @@ def merge_object_schema(s1, s2, overwrite=True):
     if not additional:
         schema['additionalProperties'] = additional
 
-    pattern_properties = dict_utils.merge_dicts(
+    pattern_properties = dict_util.merge_dicts(
         copy.deepcopy(s1.get('patternProperties', {})),
         copy.deepcopy(s2.get('patternProperties', {})),
         overwrite=overwrite

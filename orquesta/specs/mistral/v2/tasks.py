@@ -17,11 +17,11 @@ import six
 from six.moves import queue
 
 from orquesta import exceptions as exc
-from orquesta.expressions import base as expr
-from orquesta.specs.mistral.v2 import base
-from orquesta.specs.mistral.v2 import policies
-from orquesta.specs import types
-from orquesta.utils import dictionary as dx
+from orquesta.expressions import base as expr_base
+from orquesta.specs.mistral.v2 import base as mistral_spec_base
+from orquesta.specs.mistral.v2 import policies as policy_models
+from orquesta.specs import types as spec_types
+from orquesta.utils import dictionary as dict_util
 
 
 LOG = logging.getLogger(__name__)
@@ -29,25 +29,25 @@ LOG = logging.getLogger(__name__)
 
 ON_CLAUSE_SCHEMA = {
     'oneOf': [
-        types.NONEMPTY_STRING,
-        types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST
+        spec_types.NONEMPTY_STRING,
+        spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST
     ]
 }
 
 
-class TaskDefaultsSpec(base.Spec):
+class TaskDefaultsSpec(mistral_spec_base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
-            'concurrency': policies.CONCURRENCY_SCHEMA,
-            'keep-result': policies.KEEP_RESULT_SCHEMA,
-            'retry': policies.RetrySpec,
-            'safe-rerun': policies.SAFE_RERUN_SCHEMA,
-            'wait-before': policies.WAIT_BEFORE_SCHEMA,
-            'wait-after': policies.WAIT_AFTER_SCHEMA,
-            'pause-before': policies.PAUSE_BEFORE_SCHEMA,
-            'target': policies.TARGET_SCHEMA,
-            'timeout': policies.TIMEOUT_SCHEMA,
+            'concurrency': policy_models.CONCURRENCY_SCHEMA,
+            'keep-result': policy_models.KEEP_RESULT_SCHEMA,
+            'retry': policy_models.RetrySpec,
+            'safe-rerun': policy_models.SAFE_RERUN_SCHEMA,
+            'wait-before': policy_models.WAIT_BEFORE_SCHEMA,
+            'wait-after': policy_models.WAIT_AFTER_SCHEMA,
+            'pause-before': policy_models.PAUSE_BEFORE_SCHEMA,
+            'target': policy_models.TARGET_SCHEMA,
+            'timeout': policy_models.TIMEOUT_SCHEMA,
             'on-complete': ON_CLAUSE_SCHEMA,
             'on-success': ON_CLAUSE_SCHEMA,
             'on-error': ON_CLAUSE_SCHEMA
@@ -56,36 +56,36 @@ class TaskDefaultsSpec(base.Spec):
     }
 
 
-class TaskSpec(base.Spec):
+class TaskSpec(mistral_spec_base.Spec):
     _schema = {
         'type': 'object',
         'properties': {
             'join': {
                 'oneOf': [
                     {'enum': ['all']},
-                    types.POSITIVE_INTEGER
+                    spec_types.POSITIVE_INTEGER
                 ]
             },
             'with-items': {
                 'oneOf': [
-                    types.NONEMPTY_STRING,
-                    types.UNIQUE_STRING_LIST
+                    spec_types.NONEMPTY_STRING,
+                    spec_types.UNIQUE_STRING_LIST
                 ]
             },
-            'concurrency': policies.CONCURRENCY_SCHEMA,
-            'action': types.NONEMPTY_STRING,
-            'workflow': types.NONEMPTY_STRING,
-            'input': types.NONEMPTY_DICT,
-            'publish': types.NONEMPTY_DICT,
-            'publish-on-error': types.NONEMPTY_DICT,
-            'keep-result': policies.KEEP_RESULT_SCHEMA,
-            'retry': policies.RetrySpec,
-            'safe-rerun': policies.SAFE_RERUN_SCHEMA,
-            'wait-before': policies.WAIT_BEFORE_SCHEMA,
-            'wait-after': policies.WAIT_AFTER_SCHEMA,
-            'pause-before': policies.PAUSE_BEFORE_SCHEMA,
-            'target': policies.TARGET_SCHEMA,
-            'timeout': policies.TIMEOUT_SCHEMA,
+            'concurrency': policy_models.CONCURRENCY_SCHEMA,
+            'action': spec_types.NONEMPTY_STRING,
+            'workflow': spec_types.NONEMPTY_STRING,
+            'input': spec_types.NONEMPTY_DICT,
+            'publish': spec_types.NONEMPTY_DICT,
+            'publish-on-error': spec_types.NONEMPTY_DICT,
+            'keep-result': policy_models.KEEP_RESULT_SCHEMA,
+            'retry': policy_models.RetrySpec,
+            'safe-rerun': policy_models.SAFE_RERUN_SCHEMA,
+            'wait-before': policy_models.WAIT_BEFORE_SCHEMA,
+            'wait-after': policy_models.WAIT_AFTER_SCHEMA,
+            'pause-before': policy_models.PAUSE_BEFORE_SCHEMA,
+            'target': policy_models.TARGET_SCHEMA,
+            'timeout': policy_models.TIMEOUT_SCHEMA,
             'on-complete': ON_CLAUSE_SCHEMA,
             'on-success': ON_CLAUSE_SCHEMA,
             'on-error': ON_CLAUSE_SCHEMA
@@ -147,8 +147,8 @@ class TaskSpec(base.Spec):
             raise NotImplementedError('Task with items is not implemented.')
 
         action_spec = {
-            'action': expr.evaluate(self.action, in_ctx),
-            'input': expr.evaluate(getattr(self, 'input', {}), in_ctx)
+            'action': expr_base.evaluate(self.action, in_ctx),
+            'input': expr_base.evaluate(getattr(self, 'input', {}), in_ctx)
         }
 
         action_specs.append(action_spec)
@@ -168,13 +168,13 @@ class TaskSpec(base.Spec):
 
         try:
             new_ctx = {
-                var_name: expr.evaluate(var_expr, in_ctx)
+                var_name: expr_base.evaluate(var_expr, in_ctx)
                 for var_name, var_expr in six.iteritems(task_publish_spec)
             }
         except exc.ExpressionEvaluationException as e:
             errors.append(str(e))
 
-        out_ctx = dx.merge_dicts(in_ctx, new_ctx, overwrite=True)
+        out_ctx = dict_util.merge_dicts(in_ctx, new_ctx, overwrite=True)
 
         for key in list(out_ctx.keys()):
             if key.startswith('__'):
@@ -183,7 +183,7 @@ class TaskSpec(base.Spec):
         return out_ctx, new_ctx, errors
 
 
-class TaskMappingSpec(base.MappingSpec):
+class TaskMappingSpec(mistral_spec_base.MappingSpec):
     _schema = {
         'type': 'object',
         'minProperties': 1,

@@ -12,20 +12,20 @@
 
 import unittest
 
-from orquesta.specs import loader
-from orquesta.specs import mock
+from orquesta.specs import loader as spec_loader
+from orquesta.specs import mock as mock_specs
 
 
 class SpecLoaderTest(unittest.TestCase):
 
     def test_get_bad_module(self):
-        self.assertRaises(ImportError, loader.get_spec_module, 'foobar')
+        self.assertRaises(ImportError, spec_loader.get_spec_module, 'foobar')
 
     def test_get_module(self):
-        self.assertEqual(loader.get_spec_module('mock'), mock)
+        self.assertEqual(spec_loader.get_spec_module('mock'), mock_specs)
 
     def test_get_spec(self):
-        spec_module = loader.get_spec_module('mock')
+        spec_module = spec_loader.get_spec_module('mock')
 
         self.assertEqual(spec_module.WorkflowSpec.get_catalog(), 'mock')
-        self.assertEqual(spec_module.WorkflowSpec, mock.WorkflowSpec)
+        self.assertEqual(spec_module.WorkflowSpec, mock_specs.WorkflowSpec)

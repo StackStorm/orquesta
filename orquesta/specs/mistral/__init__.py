@@ -10,17 +10,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.specs.mistral import v2 as mistral_v2
-from orquesta.specs.mistral.v2 import tasks as mistral_v2_task_models
-from orquesta.specs.mistral.v2 import workflows as mistral_v2_workflow_models
+from orquesta.specs.mistral import v2 as mistral_v2_specs
+from orquesta.specs.mistral.v2 import tasks as task_models
+from orquesta.specs.mistral.v2 import workflows as workflow_models
 
 
-VERSION = mistral_v2.VERSION
-deserialize = mistral_v2_workflow_models.deserialize
-instantiate = mistral_v2_workflow_models.instantiate
-TaskDefaultsSpec = mistral_v2_task_models.TaskDefaultsSpec
-TaskSpec = mistral_v2_task_models.TaskSpec
-WorkflowSpec = mistral_v2_workflow_models.WorkflowSpec
+VERSION = mistral_v2_specs.VERSION
+deserialize = workflow_models.deserialize
+instantiate = workflow_models.instantiate
+TaskDefaultsSpec = task_models.TaskDefaultsSpec
+TaskSpec = task_models.TaskSpec
+WorkflowSpec = workflow_models.WorkflowSpec
 
 __all__ = [
     instantiate.__name__,

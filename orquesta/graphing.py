@@ -20,7 +20,7 @@ from networkx.readwrite import json_graph
 import six
 
 from orquesta import exceptions as exc
-from orquesta.utils import dictionary as dict_utils
+from orquesta.utils import dictionary as dict_util
 
 
 LOG = logging.getLogger(__name__)
@@ -84,7 +84,7 @@ class WorkflowGraph(object):
         return task
 
     def get_task_attributes(self, attribute):
-        return dict_utils.merge_dicts(
+        return dict_util.merge_dicts(
             {n: None for n in self._graph.nodes()},
             nx.get_node_attributes(self._graph, attribute),
             overwrite=True

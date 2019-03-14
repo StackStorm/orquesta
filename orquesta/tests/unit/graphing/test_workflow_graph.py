@@ -14,7 +14,7 @@ import copy
 
 from orquesta import exceptions as exc
 from orquesta import graphing
-from orquesta.tests.unit import base
+from orquesta.tests.unit import base as test_base
 
 
 EXPECTED_WF_GRAPH = {
@@ -113,7 +113,7 @@ EXPECTED_WF_GRAPH = {
 }
 
 
-class WorkflowGraphTest(base.WorkflowGraphTest):
+class WorkflowGraphTest(test_base.WorkflowGraphTest):
 
     def _add_tasks(self, wf_graph):
         for i in range(1, 10):

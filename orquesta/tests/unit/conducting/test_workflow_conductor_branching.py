@@ -13,13 +13,13 @@
 import copy
 
 from orquesta import conducting
-from orquesta.specs import native as specs
+from orquesta.specs import native as native_specs
 from orquesta import statuses
-from orquesta.tests.unit import base
-from orquesta.utils import dictionary as dx
+from orquesta.tests.unit import base as test_base
+from orquesta.utils import dictionary as dict_util
 
 
-class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
+class WorkflowConductorExtendedTest(test_base.WorkflowConductorTest):
 
     def test_join(self):
         wf_def = """
@@ -59,7 +59,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
             action: core.noop
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_status(statuses.RUNNING)
 
@@ -87,7 +87,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
         self.forward_task_statuses(conductor, 'task3', [statuses.RUNNING, statuses.SUCCEEDED])
         expected_task_init_ctx = expected_task_ctx
         self.assertDictEqual(conductor.get_task_initial_context('task3', 0), expected_task_init_ctx)
-        expected_task_ctx = dx.merge_dicts(expected_task_ctx, {'var3': True})
+        expected_task_ctx = dict_util.merge_dicts(expected_task_ctx, {'var3': True})
         expected_txsn_ctx = {'task4__t0': expected_task_ctx}
         self.assertDictEqual(conductor.get_task_transition_contexts('task3', 0), expected_txsn_ctx)
         self.assert_next_task(conductor, 'task4', expected_task_ctx)
@@ -133,7 +133,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
             action: core.noop
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_status(statuses.RUNNING)
 
@@ -208,7 +208,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
         """
 
         inputs = {'var1': 'xyz'}
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec, inputs=inputs)
         conductor.request_workflow_status(statuses.RUNNING)
 
@@ -290,7 +290,7 @@ class WorkflowConductorExtendedTest(base.WorkflowConductorTest):
             'var2': 123
         }
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_status(statuses.RUNNING)
 

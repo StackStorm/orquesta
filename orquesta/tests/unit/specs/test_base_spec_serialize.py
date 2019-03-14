@@ -13,7 +13,7 @@
 import copy
 import unittest
 
-from orquesta.tests.unit.specs import base as specs
+from orquesta.tests.unit.specs import base as test_specs
 
 
 class SpecTest(unittest.TestCase):
@@ -75,7 +75,7 @@ class SpecTest(unittest.TestCase):
             ]
         }
 
-        spec_obj_1 = specs.MockSpec(spec)
+        spec_obj_1 = test_specs.MockSpec(spec)
 
         expected_data = {
             'catalog': spec_obj_1.get_catalog(),
@@ -88,7 +88,7 @@ class SpecTest(unittest.TestCase):
 
         self.assertDictEqual(spec_obj_1_json, expected_data)
 
-        spec_obj_2 = specs.MockSpec.deserialize(spec_obj_1_json)
+        spec_obj_2 = test_specs.MockSpec.deserialize(spec_obj_1_json)
 
         self.assertEqual(spec_obj_2.name, spec_obj_1.name)
         self.assertEqual(spec_obj_2.member, spec_obj_1.member)
@@ -147,7 +147,7 @@ class SpecTest(unittest.TestCase):
             ]
         }
 
-        spec_obj = specs.MockSpec(spec)
+        spec_obj = test_specs.MockSpec(spec)
 
         spec_obj_json = spec_obj.serialize()
 
@@ -155,19 +155,19 @@ class SpecTest(unittest.TestCase):
         test_json = copy.deepcopy(spec_obj_json)
         test_json.pop('catalog')
 
-        self.assertRaises(ValueError, specs.MockSpec.deserialize, test_json)
+        self.assertRaises(ValueError, test_specs.MockSpec.deserialize, test_json)
 
         # Test missing version information.
         test_json = copy.deepcopy(spec_obj_json)
         test_json.pop('version')
 
-        self.assertRaises(ValueError, specs.MockSpec.deserialize, test_json)
+        self.assertRaises(ValueError, test_specs.MockSpec.deserialize, test_json)
 
         # Test mismatch version information.
         test_json = copy.deepcopy(spec_obj_json)
         test_json['version'] = '99.99'
 
-        self.assertRaises(ValueError, specs.MockSpec.deserialize, test_json)
+        self.assertRaises(ValueError, test_specs.MockSpec.deserialize, test_json)
 
     def test_mapping_spec_serialization(self):
         spec = {
@@ -178,7 +178,7 @@ class SpecTest(unittest.TestCase):
             }
         }
 
-        spec_obj_1 = specs.MockMappingSpec(spec, member=True)
+        spec_obj_1 = test_specs.MockMappingSpec(spec, member=True)
 
         expected_data = {
             'catalog': spec_obj_1.get_catalog(),
@@ -191,7 +191,7 @@ class SpecTest(unittest.TestCase):
 
         self.assertDictEqual(spec_obj_1_json, expected_data)
 
-        spec_obj_2 = specs.MockMappingSpec.deserialize(spec_obj_1_json)
+        spec_obj_2 = test_specs.MockMappingSpec.deserialize(spec_obj_1_json)
 
         self.assertEqual(spec_obj_2.member, spec_obj_1.member)
         self.assertDictEqual(spec_obj_2.spec, spec_obj_1.spec)
@@ -210,7 +210,7 @@ class SpecTest(unittest.TestCase):
             }
         ]
 
-        spec_obj_1 = specs.MockSequenceSpec(spec, member=True)
+        spec_obj_1 = test_specs.MockSequenceSpec(spec, member=True)
 
         expected_data = {
             'catalog': spec_obj_1.get_catalog(),
@@ -223,7 +223,7 @@ class SpecTest(unittest.TestCase):
 
         self.assertDictEqual(spec_obj_1_json, expected_data)
 
-        spec_obj_2 = specs.MockSequenceSpec.deserialize(spec_obj_1_json)
+        spec_obj_2 = test_specs.MockSequenceSpec.deserialize(spec_obj_1_json)
 
         self.assertEqual(spec_obj_2.member, spec_obj_1.member)
         self.assertListEqual(spec_obj_2.spec, spec_obj_1.spec)

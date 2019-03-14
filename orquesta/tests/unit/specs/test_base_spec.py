@@ -15,8 +15,8 @@ import six
 import unittest
 
 from orquesta import exceptions as exc
-from orquesta.specs import types
-from orquesta.tests.unit.specs import base as specs
+from orquesta.specs import types as spec_types
+from orquesta.tests.unit.specs import base as test_specs
 
 
 class SpecTest(unittest.TestCase):
@@ -26,120 +26,120 @@ class SpecTest(unittest.TestCase):
         self.maxDiff = None
 
     def test_get_catalog(self):
-        self.assertEqual(specs.MockSpec.get_catalog(), 'test')
-        self.assertEqual(specs.MockMappingSpec.get_catalog(), 'test')
-        self.assertEqual(specs.MockSequenceSpec.get_catalog(), 'test')
+        self.assertEqual(test_specs.MockSpec.get_catalog(), 'test')
+        self.assertEqual(test_specs.MockMappingSpec.get_catalog(), 'test')
+        self.assertEqual(test_specs.MockSequenceSpec.get_catalog(), 'test')
 
     def test_get_version(self):
-        self.assertEqual('1.0', specs.MockSpec.get_version())
+        self.assertEqual('1.0', test_specs.MockSpec.get_version())
 
     def test_get_schema(self):
         schema = {
             'type': 'object',
             'properties': {
-                'name': types.NONEMPTY_STRING,
-                'version': types.VERSION,
-                'description': types.NONEMPTY_STRING,
-                'tags': types.UNIQUE_STRING_LIST,
-                'inputs': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
-                'vars': types.NONEMPTY_DICT,
-                'attr1': types.NONEMPTY_STRING,
-                'attr1-1': types.NONEMPTY_STRING,
-                'attr1_2': types.NONEMPTY_STRING,
-                'attr2': types.NONEMPTY_DICT,
-                'attr3': types.UNIQUE_STRING_LIST,
-                'attr4': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
-                'attr5': specs.MockJointSpec.get_schema(includes=None),
-                'attr6': specs.MockMappingSpec.get_schema(includes=None),
-                'attr7': specs.MockSequenceSpec.get_schema(includes=None)
+                'name': spec_types.NONEMPTY_STRING,
+                'version': spec_types.VERSION,
+                'description': spec_types.NONEMPTY_STRING,
+                'tags': spec_types.UNIQUE_STRING_LIST,
+                'inputs': spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+                'vars': spec_types.NONEMPTY_DICT,
+                'attr1': spec_types.NONEMPTY_STRING,
+                'attr1-1': spec_types.NONEMPTY_STRING,
+                'attr1_2': spec_types.NONEMPTY_STRING,
+                'attr2': spec_types.NONEMPTY_DICT,
+                'attr3': spec_types.UNIQUE_STRING_LIST,
+                'attr4': spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+                'attr5': test_specs.MockJointSpec.get_schema(includes=None),
+                'attr6': test_specs.MockMappingSpec.get_schema(includes=None),
+                'attr7': test_specs.MockSequenceSpec.get_schema(includes=None)
             },
             'required': ['attr1'],
             'additionalProperties': False
         }
 
-        self.assertDictEqual(schema, specs.MockSpec.get_schema())
+        self.assertDictEqual(schema, test_specs.MockSpec.get_schema())
 
     def test_get_schema_specs_not_resolved(self):
         schema = {
             'type': 'object',
             'properties': {
-                'name': types.NONEMPTY_STRING,
-                'version': types.VERSION,
-                'description': types.NONEMPTY_STRING,
-                'tags': types.UNIQUE_STRING_LIST,
-                'inputs': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
-                'vars': types.NONEMPTY_DICT,
-                'attr1': types.NONEMPTY_STRING,
-                'attr1-1': types.NONEMPTY_STRING,
-                'attr1_2': types.NONEMPTY_STRING,
-                'attr2': types.NONEMPTY_DICT,
-                'attr3': types.UNIQUE_STRING_LIST,
-                'attr4': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
-                'attr5': specs.MockJointSpec,
-                'attr6': specs.MockMappingSpec,
-                'attr7': specs.MockSequenceSpec
+                'name': spec_types.NONEMPTY_STRING,
+                'version': spec_types.VERSION,
+                'description': spec_types.NONEMPTY_STRING,
+                'tags': spec_types.UNIQUE_STRING_LIST,
+                'inputs': spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+                'vars': spec_types.NONEMPTY_DICT,
+                'attr1': spec_types.NONEMPTY_STRING,
+                'attr1-1': spec_types.NONEMPTY_STRING,
+                'attr1_2': spec_types.NONEMPTY_STRING,
+                'attr2': spec_types.NONEMPTY_DICT,
+                'attr3': spec_types.UNIQUE_STRING_LIST,
+                'attr4': spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+                'attr5': test_specs.MockJointSpec,
+                'attr6': test_specs.MockMappingSpec,
+                'attr7': test_specs.MockSequenceSpec
             },
             'required': ['attr1'],
             'additionalProperties': False
         }
 
-        self.assertDictEqual(schema, specs.MockSpec.get_schema(resolve_specs=False))
+        self.assertDictEqual(schema, test_specs.MockSpec.get_schema(resolve_specs=False))
 
     def test_get_schema_no_meta(self):
         schema = {
             'type': 'object',
             'properties': {
-                'inputs': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
-                'vars': types.NONEMPTY_DICT,
-                'attr1': types.NONEMPTY_STRING,
-                'attr1-1': types.NONEMPTY_STRING,
-                'attr1_2': types.NONEMPTY_STRING,
-                'attr2': types.NONEMPTY_DICT,
-                'attr3': types.UNIQUE_STRING_LIST,
-                'attr4': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
-                'attr5': specs.MockJointSpec.get_schema(includes=None),
-                'attr6': specs.MockMappingSpec.get_schema(includes=None),
-                'attr7': specs.MockSequenceSpec.get_schema(includes=None)
+                'inputs': spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+                'vars': spec_types.NONEMPTY_DICT,
+                'attr1': spec_types.NONEMPTY_STRING,
+                'attr1-1': spec_types.NONEMPTY_STRING,
+                'attr1_2': spec_types.NONEMPTY_STRING,
+                'attr2': spec_types.NONEMPTY_DICT,
+                'attr3': spec_types.UNIQUE_STRING_LIST,
+                'attr4': spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+                'attr5': test_specs.MockJointSpec.get_schema(includes=None),
+                'attr6': test_specs.MockMappingSpec.get_schema(includes=None),
+                'attr7': test_specs.MockSequenceSpec.get_schema(includes=None)
             },
             'required': ['attr1'],
             'additionalProperties': False
         }
 
-        self.assertDictEqual(schema, specs.MockSpec.get_schema(includes=None))
+        self.assertDictEqual(schema, test_specs.MockSpec.get_schema(includes=None))
 
     def test_instance_schema(self):
         schema = {
             'type': 'object',
             'properties': {
-                'inputs': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
-                'vars': types.NONEMPTY_DICT,
-                'attr1': types.NONEMPTY_STRING,
-                'attr1-1': types.NONEMPTY_STRING,
-                'attr1_2': types.NONEMPTY_STRING,
-                'attr2': types.NONEMPTY_DICT,
-                'attr3': types.UNIQUE_STRING_LIST,
-                'attr4': types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
-                'attr5': specs.MockJointSpec,
-                'attr6': specs.MockMappingSpec,
-                'attr7': specs.MockSequenceSpec
+                'inputs': spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+                'vars': spec_types.NONEMPTY_DICT,
+                'attr1': spec_types.NONEMPTY_STRING,
+                'attr1-1': spec_types.NONEMPTY_STRING,
+                'attr1_2': spec_types.NONEMPTY_STRING,
+                'attr2': spec_types.NONEMPTY_DICT,
+                'attr3': spec_types.UNIQUE_STRING_LIST,
+                'attr4': spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+                'attr5': test_specs.MockJointSpec,
+                'attr6': test_specs.MockMappingSpec,
+                'attr7': test_specs.MockSequenceSpec
             },
             'required': ['attr1'],
             'additionalProperties': False
         }
 
-        self.assertDictEqual(schema, specs.MockSpec._schema)
+        self.assertDictEqual(schema, test_specs.MockSpec._schema)
 
     def test_spec_init_arg_none_type(self):
         self.assertRaises(
             ValueError,
-            specs.MockSpec,
+            test_specs.MockSpec,
             None
         )
 
     def test_spec_init_arg_empty_str(self):
         self.assertRaises(
             ValueError,
-            specs.MockSpec,
+            test_specs.MockSpec,
             ''
         )
 
@@ -196,7 +196,7 @@ class SpecTest(unittest.TestCase):
             ]
         }
 
-        spec_obj = specs.MockSpec(spec)
+        spec_obj = test_specs.MockSpec(spec)
 
         self.assertDictEqual(spec_obj.spec, spec)
 
@@ -217,8 +217,8 @@ class SpecTest(unittest.TestCase):
         self.assertIsNone(getattr(spec_obj, 'attr1-2', None))
 
         # Test spec nesting.
-        self.assertIsInstance(spec_obj.attr5, specs.MockJointSpec)
-        self.assertIsInstance(spec_obj.attr5.attr1, specs.MockLeafSpec)
+        self.assertIsInstance(spec_obj.attr5, test_specs.MockJointSpec)
+        self.assertIsInstance(spec_obj.attr5.attr1, test_specs.MockLeafSpec)
 
         self.assertEqual(
             spec_obj.attr5.attr1.attr1,
@@ -226,9 +226,9 @@ class SpecTest(unittest.TestCase):
         )
 
         # Test dictionary based spec class.
-        self.assertIsInstance(spec_obj.attr6, specs.MockMappingSpec)
-        self.assertIsInstance(spec_obj.attr6.attr1, specs.MockJointSpec)
-        self.assertIsInstance(spec_obj.attr6.attr1.attr1, specs.MockLeafSpec)
+        self.assertIsInstance(spec_obj.attr6, test_specs.MockMappingSpec)
+        self.assertIsInstance(spec_obj.attr6.attr1, test_specs.MockJointSpec)
+        self.assertIsInstance(spec_obj.attr6.attr1.attr1, test_specs.MockLeafSpec)
 
         self.assertEqual(
             spec_obj.attr6.attr1.attr1.attr1,
@@ -249,10 +249,10 @@ class SpecTest(unittest.TestCase):
         self.assertEqual(spec_obj.attr6['attr1'], spec_obj.attr6.attr1)
 
         # Test list based spec class.
-        self.assertIsInstance(spec_obj.attr7, specs.MockSequenceSpec)
+        self.assertIsInstance(spec_obj.attr7, test_specs.MockSequenceSpec)
         self.assertEqual(len(spec_obj.attr7), 2)
-        self.assertIsInstance(spec_obj.attr7[0], specs.MockJointSpec)
-        self.assertIsInstance(spec_obj.attr7[1], specs.MockJointSpec)
+        self.assertIsInstance(spec_obj.attr7[0], test_specs.MockJointSpec)
+        self.assertIsInstance(spec_obj.attr7[1], test_specs.MockJointSpec)
 
         # Test non-existent attribute.
         self.assertRaises(AttributeError, getattr, spec_obj, 'attr9')
@@ -310,7 +310,7 @@ class SpecTest(unittest.TestCase):
             ]
         }
 
-        spec_obj_1 = specs.MockSpec(spec)
+        spec_obj_1 = test_specs.MockSpec(spec)
 
         expected_data = {
             'catalog': spec_obj_1.get_catalog(),
@@ -323,7 +323,7 @@ class SpecTest(unittest.TestCase):
 
         self.assertDictEqual(spec_obj_1_json, expected_data)
 
-        spec_obj_2 = specs.MockSpec.deserialize(spec_obj_1_json)
+        spec_obj_2 = test_specs.MockSpec.deserialize(spec_obj_1_json)
 
         self.assertEqual(spec_obj_2.name, spec_obj_1.name)
         self.assertEqual(spec_obj_2.member, spec_obj_1.member)
@@ -382,7 +382,7 @@ class SpecTest(unittest.TestCase):
             ]
         }
 
-        spec_obj = specs.MockSpec(spec)
+        spec_obj = test_specs.MockSpec(spec)
 
         spec_obj_json = spec_obj.serialize()
 
@@ -390,19 +390,19 @@ class SpecTest(unittest.TestCase):
         test_json = copy.deepcopy(spec_obj_json)
         test_json.pop('catalog')
 
-        self.assertRaises(ValueError, specs.MockSpec.deserialize, test_json)
+        self.assertRaises(ValueError, test_specs.MockSpec.deserialize, test_json)
 
         # Test missing version information.
         test_json = copy.deepcopy(spec_obj_json)
         test_json.pop('version')
 
-        self.assertRaises(ValueError, specs.MockSpec.deserialize, test_json)
+        self.assertRaises(ValueError, test_specs.MockSpec.deserialize, test_json)
 
         # Test mismatch version information.
         test_json = copy.deepcopy(spec_obj_json)
         test_json['version'] = '99.99'
 
-        self.assertRaises(ValueError, specs.MockSpec.deserialize, test_json)
+        self.assertRaises(ValueError, test_specs.MockSpec.deserialize, test_json)
 
     def test_spec_init_name_not_given(self):
         spec = {
@@ -416,7 +416,7 @@ class SpecTest(unittest.TestCase):
             'attr1': 'foobar'
         }
 
-        spec_obj = specs.MockSpec(spec)
+        spec_obj = test_specs.MockSpec(spec)
 
         self.assertDictEqual(spec_obj.spec, spec)
         self.assertIsNone(spec_obj.name)
@@ -433,7 +433,7 @@ class SpecTest(unittest.TestCase):
             'attr1': 'foobar'
         }
 
-        spec_obj = specs.MockSpec(spec, name='mock')
+        spec_obj = test_specs.MockSpec(spec, name='mock')
 
         self.assertDictEqual(spec_obj.spec, spec)
         self.assertEqual(spec_obj.name, 'mock')
@@ -451,7 +451,7 @@ class SpecTest(unittest.TestCase):
             'attr1': 'foobar'
         }
 
-        spec_obj = specs.MockSpec(spec)
+        spec_obj = test_specs.MockSpec(spec)
 
         self.assertDictEqual(spec_obj.spec, spec)
         self.assertEqual(spec_obj.name, spec['name'])
@@ -497,7 +497,7 @@ class SpecTest(unittest.TestCase):
             }
         }
 
-        spec_obj = specs.MockSpec(spec)
+        spec_obj = test_specs.MockSpec(spec)
 
         self.assertDictEqual(spec_obj.spec, spec)
         self.assertDictEqual(spec_obj.inspect(), {})
@@ -601,7 +601,7 @@ class SpecTest(unittest.TestCase):
             ]
         }
 
-        spec_obj = specs.MockSpec(spec)
+        spec_obj = test_specs.MockSpec(spec)
 
         self.assertDictEqual(spec_obj.inspect(), errors)
 
@@ -704,7 +704,7 @@ class SpecTest(unittest.TestCase):
             ]
         }
 
-        spec_obj = specs.MockSpec(spec)
+        spec_obj = test_specs.MockSpec(spec)
 
         with self.assertRaises(exc.WorkflowInspectionError) as ctx:
             spec_obj.inspect(raise_exception=True)
@@ -741,7 +741,7 @@ class SpecTest(unittest.TestCase):
             }
         }
 
-        spec_obj = specs.MockSpec(spec)
+        spec_obj = test_specs.MockSpec(spec)
         app_ctx = {'x': 'marco', 'y': 'polo'}
 
         self.assertDictEqual(spec_obj.spec, spec)
@@ -775,7 +775,7 @@ class SpecTest(unittest.TestCase):
             }
         }
 
-        spec_obj = specs.MockSpec(spec)
+        spec_obj = test_specs.MockSpec(spec)
         app_ctx = [{'x': 'marco'}, {'y': 'polo'}]
 
         self.assertDictEqual(spec_obj.spec, spec)

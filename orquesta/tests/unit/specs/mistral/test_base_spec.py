@@ -12,9 +12,9 @@
 
 import unittest
 
-from orquesta.specs import loader
-from orquesta.specs import mistral
-from orquesta.specs.mistral import v2 as mistral_v2
+from orquesta.specs import loader as spec_loader
+from orquesta.specs import mistral as mistral_specs
+from orquesta.specs.mistral import v2 as mistral_v2_specs
 
 
 class SpecTest(unittest.TestCase):
@@ -25,20 +25,20 @@ class SpecTest(unittest.TestCase):
 
     def test_get_module(self):
         self.assertEqual(
-            loader.get_spec_module(self.spec_module_name),
-            mistral
+            spec_loader.get_spec_module(self.spec_module_name),
+            mistral_specs
         )
 
     def test_get_spec(self):
-        spec_module = loader.get_spec_module(self.spec_module_name)
+        spec_module = spec_loader.get_spec_module(self.spec_module_name)
 
         self.assertEqual(
             spec_module.WorkflowSpec,
-            mistral.WorkflowSpec
+            mistral_specs.WorkflowSpec
         )
 
     def test_spec_catalog(self):
-        spec_module = loader.get_spec_module(self.spec_module_name)
+        spec_module = spec_loader.get_spec_module(self.spec_module_name)
 
         self.assertEqual(
             spec_module.WorkflowSpec.get_catalog(),
@@ -46,22 +46,22 @@ class SpecTest(unittest.TestCase):
         )
 
     def test_spec_version(self):
-        self.assertEqual('2.0', mistral_v2.VERSION)
-        self.assertEqual('2.0', mistral.VERSION)
+        self.assertEqual('2.0', mistral_v2_specs.VERSION)
+        self.assertEqual('2.0', mistral_specs.VERSION)
 
     def test_workflow_spec_imports(self):
         self.assertEqual(
-            mistral.WorkflowSpec,
-            mistral_v2.workflows.WorkflowSpec
+            mistral_specs.WorkflowSpec,
+            mistral_v2_specs.workflows.WorkflowSpec
         )
 
     def test_task_spec_imports(self):
         self.assertEqual(
-            mistral.TaskDefaultsSpec,
-            mistral_v2.tasks.TaskDefaultsSpec
+            mistral_specs.TaskDefaultsSpec,
+            mistral_v2_specs.tasks.TaskDefaultsSpec
         )
 
         self.assertEqual(
-            mistral.TaskSpec,
-            mistral_v2.tasks.TaskSpec
+            mistral_specs.TaskSpec,
+            mistral_v2_specs.tasks.TaskSpec
         )

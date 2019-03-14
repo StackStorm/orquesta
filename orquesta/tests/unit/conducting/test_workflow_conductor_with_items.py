@@ -11,12 +11,12 @@
 # limitations under the License.
 
 from orquesta import conducting
-from orquesta.specs import native as specs
+from orquesta.specs import native as native_specs
 from orquesta import statuses
-from orquesta.tests.unit import base
+from orquesta.tests.unit import base as test_base
 
 
-class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
+class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
     def test_empty_items_list(self):
         wf_def = """
@@ -37,7 +37,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
           - items: <% ctx(items) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -98,7 +98,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
           - items: <% ctx(items) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -170,7 +170,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         concurrency = 2
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -231,7 +231,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             action: core.echo message=<% item(x) + item(y) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -294,7 +294,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         concurrency = 1
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -351,7 +351,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             action: core.echo message=<% item() %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -408,7 +408,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             action: core.echo message=<% item() %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -465,7 +465,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
             action: core.echo message=<% item() %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -533,7 +533,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         concurrency = 2
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -595,7 +595,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         concurrency = 2
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -666,7 +666,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
           - items: <% ctx(items) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -746,7 +746,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
           - items: <% ctx(items) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -809,7 +809,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
           - items: <% ctx(items) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -891,7 +891,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
           - items: <% ctx(items) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -977,7 +977,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         concurrency = 2
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -1051,7 +1051,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         concurrency = 2
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -1125,7 +1125,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         concurrency = 2
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -1208,7 +1208,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
           - items: <% ctx(items) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -1288,7 +1288,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
           - items: <% ctx(items) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -1396,7 +1396,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
           - items: <% ctx(items) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -1483,7 +1483,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
           - items: <% ctx(items) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -1574,7 +1574,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         concurrency = 2
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -1690,7 +1690,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         concurrency = 2
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -1806,7 +1806,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
 
         concurrency = 2
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -1931,7 +1931,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
           - items: <% ctx(items) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -2011,7 +2011,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
           - items: <% ctx(items) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -2117,7 +2117,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
           - items: <% ctx(items) %>
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)
@@ -2223,7 +2223,7 @@ class WorkflowConductorWithItemsTest(base.WorkflowConductorWithItemsTest):
                 do: task1
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
         conductor = conducting.WorkflowConductor(spec)

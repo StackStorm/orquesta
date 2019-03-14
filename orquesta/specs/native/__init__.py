@@ -10,11 +10,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.specs.native import v1 as native_v1
+from orquesta.specs.native import v1 as native_v1_specs
 from orquesta.specs.native.v1 import models as native_v1_models
 
 
-VERSION = native_v1.VERSION
+VERSION = native_v1_specs.VERSION
 instantiate = native_v1_models.instantiate
 deserialize = native_v1_models.deserialize
 WorkflowSpec = native_v1_models.WorkflowSpec

@@ -15,13 +15,13 @@ import copy
 from orquesta import conducting
 from orquesta import exceptions as exc
 from orquesta import graphing
-from orquesta.specs import native as specs
+from orquesta.specs import native as native_specs
 from orquesta import statuses
-from orquesta.tests.unit import base
-from orquesta.utils import dictionary as dx
+from orquesta.tests.unit import base as test_base
+from orquesta.utils import dictionary as dict_util
 
 
-class WorkflowConductorTest(base.WorkflowConductorTest):
+class WorkflowConductorTest(test_base.WorkflowConductorTest):
 
     def _prep_conductor(self, context=None, inputs=None, status=None):
         wf_def = """
@@ -66,7 +66,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
             action: core.noop
         """
 
-        spec = specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(wf_def)
 
         kwargs = {
             'context': context if context is not None else None,
@@ -100,8 +100,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         self.assertDictEqual(conductor.get_workflow_parent_context(), parent_context)
 
         default_inputs = {'a': None, 'b': False}
-        init_ctx_value = dx.merge_dicts(default_inputs, user_inputs, True)
-        init_ctx_value = dx.merge_dicts(init_ctx_value, parent_context, True)
+        init_ctx_value = dict_util.merge_dicts(default_inputs, user_inputs, True)
+        init_ctx_value = dict_util.merge_dicts(init_ctx_value, parent_context, True)
         self.assertDictEqual(conductor.get_workflow_initial_context(), init_ctx_value)
 
         return conductor
@@ -139,7 +139,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         # Deserialize and check.
         conductor = conducting.WorkflowConductor.deserialize(data)
 
-        self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
+        self.assertIsInstance(conductor.spec, native_specs.WorkflowSpec)
         self.assertEqual(conductor.workflow_state.status, statuses.UNSET)
         self.assertEqual(conductor.get_workflow_status(), statuses.UNSET)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
@@ -180,7 +180,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         # Deserialize and check.
         conductor = conducting.WorkflowConductor.deserialize(data)
 
-        self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
+        self.assertIsInstance(conductor.spec, native_specs.WorkflowSpec)
         self.assertEqual(conductor.workflow_state.status, statuses.UNSET)
         self.assertEqual(conductor.get_workflow_status(), statuses.UNSET)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
@@ -190,7 +190,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
     def test_init_with_partial_inputs(self):
         inputs = {'a': 123}
         default_inputs = {'b': False}
-        expected_initial_ctx = dx.merge_dicts(inputs, default_inputs, True)
+        expected_initial_ctx = dict_util.merge_dicts(inputs, default_inputs, True)
         conductor = self._prep_conductor(inputs=inputs)
 
         # Serialize and check.
@@ -223,7 +223,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         # Deserialize and check.
         conductor = conducting.WorkflowConductor.deserialize(data)
 
-        self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
+        self.assertIsInstance(conductor.spec, native_specs.WorkflowSpec)
         self.assertEqual(conductor.workflow_state.status, statuses.UNSET)
         self.assertEqual(conductor.get_workflow_status(), statuses.UNSET)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
@@ -233,7 +233,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
     def test_init_with_context(self):
         context = {'parent': {'ex_id': '12345'}}
         inputs = {'a': 123, 'b': True}
-        init_ctx = dx.merge_dicts(copy.deepcopy(inputs), copy.deepcopy(context))
+        init_ctx = dict_util.merge_dicts(copy.deepcopy(inputs), copy.deepcopy(context))
 
         conductor = self._prep_conductor(context=context, inputs=inputs)
 
@@ -267,7 +267,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         # Deserialize and check.
         conductor = conducting.WorkflowConductor.deserialize(data)
 
-        self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
+        self.assertIsInstance(conductor.spec, native_specs.WorkflowSpec)
         self.assertEqual(conductor.workflow_state.status, statuses.UNSET)
         self.assertEqual(conductor.get_workflow_status(), statuses.UNSET)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
@@ -302,7 +302,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         # Deserialize and check.
         conductor = conducting.WorkflowConductor.deserialize(data)
 
-        self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
+        self.assertIsInstance(conductor.spec, native_specs.WorkflowSpec)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
@@ -323,7 +323,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
     def test_get_start_tasks(self):
         inputs = {'a': 123}
-        expected_task_ctx = dx.merge_dicts(copy.deepcopy(inputs), {'b': False})
+        expected_task_ctx = dict_util.merge_dicts(copy.deepcopy(inputs), {'b': False})
         conductor = self._prep_conductor(inputs=inputs, status=statuses.RUNNING)
         self.assert_next_task(conductor, 'task1', expected_task_ctx)
 
@@ -360,7 +360,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         task_route = 0
         task_name = 'task1'
-        expected_ctx = dx.merge_dicts(copy.deepcopy(inputs), {'b': False})
+        expected_ctx = dict_util.merge_dicts(copy.deepcopy(inputs), {'b': False})
         expected_ctx['__current_task'] = {'id': task_name, 'route': task_route}
         expected_ctx['__state'] = conductor.workflow_state.serialize()
         task = conductor.get_task(task_name, task_route)
@@ -371,7 +371,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
 
         task_name = 'task2'
-        expected_ctx = dx.merge_dicts(copy.deepcopy(expected_ctx), {'c': 'xyz'})
+        expected_ctx = dict_util.merge_dicts(copy.deepcopy(expected_ctx), {'c': 'xyz'})
         expected_ctx['__current_task'] = {'id': task_name, 'route': task_route}
         expected_ctx['__state'] = conductor.workflow_state.serialize()
         task = conductor.get_task(task_name, task_route)
@@ -396,8 +396,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
         task_name = 'task1'
         next_task_name = 'task2'
-        expected_init_ctx = dx.merge_dicts(copy.deepcopy(inputs), {'b': False})
-        expected_task_ctx = dx.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
+        expected_init_ctx = dict_util.merge_dicts(copy.deepcopy(inputs), {'b': False})
+        expected_task_ctx = dict_util.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
 
         self.assert_next_task(conductor, task_name, expected_init_ctx)
 
@@ -419,8 +419,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
     def test_get_next_tasks_when_this_task_paused(self):
         inputs = {'a': 123}
-        expected_init_ctx = dx.merge_dicts(copy.deepcopy(inputs), {'b': False})
-        expected_task_ctx = dx.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
+        expected_init_ctx = dict_util.merge_dicts(copy.deepcopy(inputs), {'b': False})
+        expected_task_ctx = dict_util.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
         conductor = self._prep_conductor(inputs=inputs, status=statuses.RUNNING)
 
         task_name = 'task1'
@@ -446,8 +446,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
     def test_get_next_tasks_when_graph_paused(self):
         inputs = {'a': 123}
-        expected_init_ctx = dx.merge_dicts(copy.deepcopy(inputs), {'b': False})
-        expected_task_ctx = dx.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
+        expected_init_ctx = dict_util.merge_dicts(copy.deepcopy(inputs), {'b': False})
+        expected_task_ctx = dict_util.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
         conductor = self._prep_conductor(inputs=inputs, status=statuses.RUNNING)
 
         task_name = 'task1'
@@ -466,8 +466,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
     def test_get_next_tasks_when_this_task_canceled(self):
         inputs = {'a': 123}
-        expected_init_ctx = dx.merge_dicts(copy.deepcopy(inputs), {'b': False})
-        expected_task_ctx = dx.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
+        expected_init_ctx = dict_util.merge_dicts(copy.deepcopy(inputs), {'b': False})
+        expected_task_ctx = dict_util.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
         conductor = self._prep_conductor(inputs=inputs, status=statuses.RUNNING)
 
         task_name = 'task1'
@@ -486,8 +486,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
     def test_get_next_tasks_when_graph_canceled(self):
         inputs = {'a': 123}
-        expected_init_ctx = dx.merge_dicts(copy.deepcopy(inputs), {'b': False})
-        expected_task_ctx = dx.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
+        expected_init_ctx = dict_util.merge_dicts(copy.deepcopy(inputs), {'b': False})
+        expected_task_ctx = dict_util.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
         conductor = self._prep_conductor(inputs=inputs, status=statuses.RUNNING)
 
         task_name = 'task1'
@@ -503,8 +503,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
     def test_get_next_tasks_when_this_task_abended(self):
         inputs = {'a': 123}
-        expected_init_ctx = dx.merge_dicts(copy.deepcopy(inputs), {'b': False})
-        expected_task_ctx = dx.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
+        expected_init_ctx = dict_util.merge_dicts(copy.deepcopy(inputs), {'b': False})
+        expected_task_ctx = dict_util.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
         conductor = self._prep_conductor(inputs=inputs, status=statuses.RUNNING)
 
         task_name = 'task1'
@@ -521,8 +521,8 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
     def test_get_next_tasks_when_graph_abended(self):
         inputs = {'a': 123}
-        expected_init_ctx = dx.merge_dicts(copy.deepcopy(inputs), {'b': False})
-        expected_task_ctx = dx.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
+        expected_init_ctx = dict_util.merge_dicts(copy.deepcopy(inputs), {'b': False})
+        expected_task_ctx = dict_util.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
         conductor = self._prep_conductor(inputs=inputs, status=statuses.RUNNING)
 
         task_name = 'task1'
@@ -535,7 +535,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
 
     def test_get_task_initial_context(self):
         inputs = {'a': 123}
-        expected_init_ctx = dx.merge_dicts(copy.deepcopy(inputs), {'b': False})
+        expected_init_ctx = dict_util.merge_dicts(copy.deepcopy(inputs), {'b': False})
         conductor = self._prep_conductor(inputs=inputs, status=statuses.RUNNING)
 
         task_route = 0
@@ -552,7 +552,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
     def test_get_task_transition_contexts(self):
         inputs = {'a': 123, 'b': True}
         expected_init_ctx = copy.deepcopy(inputs)
-        expected_task_ctx = dx.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
+        expected_task_ctx = dict_util.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
         conductor = self._prep_conductor(inputs=inputs, status=statuses.RUNNING)
 
         # Get context for task2 that is staged by not yet running.
@@ -644,7 +644,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
     def test_get_workflow_terminal_context_when_workflow_completed(self):
         inputs = {'a': 123, 'b': True}
         expected_init_ctx = copy.deepcopy(inputs)
-        expected_term_ctx = dx.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
+        expected_term_ctx = dict_util.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
         conductor = self._prep_conductor(inputs=inputs, status=statuses.RUNNING)
 
         for i in range(1, 6):
@@ -668,7 +668,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
     def test_get_workflow_output_when_workflow_failed(self):
         inputs = {'a': 123, 'b': True}
         expected_init_ctx = copy.deepcopy(inputs)
-        expected_task_ctx = dx.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
+        expected_task_ctx = dict_util.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
         conductor = self._prep_conductor(inputs=inputs, status=statuses.RUNNING)
 
         for i in range(1, 5):
@@ -685,7 +685,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
     def test_get_workflow_output_when_workflow_succeeded(self):
         inputs = {'a': 123, 'b': True}
         expected_init_ctx = copy.deepcopy(inputs)
-        expected_task_ctx = dx.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
+        expected_task_ctx = dict_util.merge_dicts(copy.deepcopy(expected_init_ctx), {'c': 'xyz'})
         conductor = self._prep_conductor(inputs=inputs, status=statuses.RUNNING)
 
         for i in range(1, 6):
@@ -863,7 +863,7 @@ class WorkflowConductorTest(base.WorkflowConductorTest):
         # Deserialize and check.
         conductor = conducting.WorkflowConductor.deserialize(data)
 
-        self.assertIsInstance(conductor.spec, specs.WorkflowSpec)
+        self.assertIsInstance(conductor.spec, native_specs.WorkflowSpec)
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
         self.assertEqual(len(conductor.graph._graph.node), 5)

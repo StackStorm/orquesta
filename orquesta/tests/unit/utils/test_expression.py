@@ -12,7 +12,7 @@
 
 import unittest
 
-from orquesta.utils import expression as utils
+from orquesta.utils import expression as expr_util
 
 
 class ExpressionUtilsTest(unittest.TestCase):
@@ -24,7 +24,7 @@ class ExpressionUtilsTest(unittest.TestCase):
             'message': 'Unknown error.'
         }
 
-        actual = utils.format_error(
+        actual = expr_util.format_error(
             'yaql',
             '$.foo in $.bar',
             Exception('Unknown error.')
@@ -39,7 +39,7 @@ class ExpressionUtilsTest(unittest.TestCase):
             'message': 'Unknown error.'
         }
 
-        actual = utils.format_error(
+        actual = expr_util.format_error(
             'yaql',
             '$.foo in $.bar',
             'Unknown error.'
@@ -56,7 +56,7 @@ class ExpressionUtilsTest(unittest.TestCase):
             'message': 'Unknown error.'
         }
 
-        actual = utils.format_error(
+        actual = expr_util.format_error(
             'yaql',
             '$.foo in $.bar',
             Exception('Unknown error.'),

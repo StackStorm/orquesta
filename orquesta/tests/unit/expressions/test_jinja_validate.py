@@ -10,12 +10,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.expressions import jinja
-from orquesta.tests.unit import base
-from orquesta.utils import plugin
+from orquesta.expressions import jinja as jinja_expr
+from orquesta.tests.unit import base as test_base
+from orquesta.utils import plugin as plugin_util
 
 
-class JinjaValidationTest(base.ExpressionEvaluatorTest):
+class JinjaValidationTest(test_base.ExpressionEvaluatorTest):
 
     @classmethod
     def setUpClass(cls):
@@ -24,11 +24,11 @@ class JinjaValidationTest(base.ExpressionEvaluatorTest):
 
     def test_get_evaluator(self):
         self.assertEqual(
-            plugin.get_module(
+            plugin_util.get_module(
                 'orquesta.expressions.evaluators',
                 self.language
             ),
-            jinja.JinjaEvaluator
+            jinja_expr.JinjaEvaluator
         )
 
     def test_basic_validate(self):

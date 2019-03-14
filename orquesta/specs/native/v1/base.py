@@ -12,13 +12,13 @@
 
 import logging
 
-from orquesta.specs import base
+from orquesta.specs import base as spec_base
 
 
 LOG = logging.getLogger(__name__)
 
 
-class Spec(base.Spec):
+class Spec(spec_base.Spec):
     _catalog = 'native'
 
     _version = '1.0'
@@ -33,7 +33,7 @@ class Spec(base.Spec):
     }
 
 
-class MappingSpec(base.MappingSpec):
+class MappingSpec(spec_base.MappingSpec):
     _catalog = 'native'
 
     _version = '1.0'
@@ -48,7 +48,7 @@ class MappingSpec(base.MappingSpec):
     }
 
 
-class SequenceSpec(base.SequenceSpec):
+class SequenceSpec(spec_base.SequenceSpec):
     _catalog = 'native'
 
     _version = '1.0'

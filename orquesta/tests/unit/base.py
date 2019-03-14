@@ -18,12 +18,12 @@ import unittest
 
 from orquesta import conducting
 from orquesta import events
-from orquesta.expressions import base as expressions
-from orquesta.specs import loader as specs_loader
+from orquesta.expressions import base as expr_base
+from orquesta.specs import loader as spec_loader
 from orquesta import statuses
 from orquesta.tests.fixtures import loader as fixture_loader
-from orquesta.utils import plugin
-from orquesta.utils import specs
+from orquesta.utils import plugin as plugin_util
+from orquesta.utils import specs as spec_util
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -33,14 +33,14 @@ class ExpressionEvaluatorTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.evaluator = plugin.get_module('orquesta.expressions.evaluators', cls.language)
+        cls.evaluator = plugin_util.get_module('orquesta.expressions.evaluators', cls.language)
 
 
 @six.add_metaclass(abc.ABCMeta)
 class ExpressionFacadeEvaluatorTest(unittest.TestCase):
 
     def validate(self, expr):
-        return expressions.validate(expr).get('errors', [])
+        return expr_base.validate(expr).get('errors', [])
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -91,11 +91,11 @@ class WorkflowSpecTest(unittest.TestCase):
 
     def get_wf_spec(self, wf_name):
         wf_def = self.get_wf_def(wf_name)
-        wf_spec = specs.instantiate(self.spec_module_name, wf_def)
+        wf_spec = spec_util.instantiate(self.spec_module_name, wf_def)
         return wf_spec
 
     def instantiate(self, wf_def):
-        return specs.instantiate(self.spec_module_name, wf_def)
+        return spec_util.instantiate(self.spec_module_name, wf_def)
 
     def assert_spec_inspection(self, wf_name, errors=None):
         wf_spec = self.get_wf_spec(wf_name)
@@ -112,8 +112,8 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
         WorkflowGraphTest.setUpClass()
         WorkflowSpecTest.setUpClass()
 
-        cls.composer = plugin.get_module('orquesta.composers', cls.spec_module_name)
-        cls.spec_module = specs_loader.get_spec_module(cls.spec_module_name)
+        cls.composer = plugin_util.get_module('orquesta.composers', cls.spec_module_name)
+        cls.spec_module = spec_loader.get_spec_module(cls.spec_module_name)
         cls.wf_spec_type = cls.spec_module.WorkflowSpec
 
     def compose_wf_graph(self, wf_name):

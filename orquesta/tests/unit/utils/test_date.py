@@ -15,30 +15,30 @@ import unittest
 
 import dateutil.tz
 
-from orquesta.utils import date
+from orquesta.utils import date as date_util
 
 
 class DateTest(unittest.TestCase):
 
     def test_date_valid(self):
-        self.assertFalse(date.valid(123))
-        self.assertFalse(date.valid(False))
-        self.assertFalse(date.valid('abcde'))
-        self.assertTrue(date.valid(datetime.datetime.utcnow()))
-        self.assertTrue(date.valid(str(datetime.datetime.utcnow())))
-        self.assertTrue(date.valid('2015-01-01 12:00:01.000000Z'))
-        self.assertTrue(date.valid('2015-01-01 12:00:01.000000+04'))
-        self.assertTrue(date.valid('2015-01-01 12:00:01.000000+0600'))
-        self.assertTrue(date.valid('2015-01-01 12:00:01.000000+08:30'))
+        self.assertFalse(date_util.valid(123))
+        self.assertFalse(date_util.valid(False))
+        self.assertFalse(date_util.valid('abcde'))
+        self.assertTrue(date_util.valid(datetime.datetime.utcnow()))
+        self.assertTrue(date_util.valid(str(datetime.datetime.utcnow())))
+        self.assertTrue(date_util.valid('2015-01-01 12:00:01.000000Z'))
+        self.assertTrue(date_util.valid('2015-01-01 12:00:01.000000+04'))
+        self.assertTrue(date_util.valid('2015-01-01 12:00:01.000000+0600'))
+        self.assertTrue(date_util.valid('2015-01-01 12:00:01.000000+08:30'))
 
     def test_date_parse(self):
         offset = dateutil.tz.tzoffset(None, 3600)
         expected = datetime.datetime(2015, 1, 1, 12, 0, 1, tzinfo=offset)
         dt_str = '2015-01-01T12:00:01.000000+01:00'
-        self.assertEqual(expected, date.parse(dt_str))
+        self.assertEqual(expected, date_util.parse(dt_str))
 
     def test_date_format(self):
         offset = dateutil.tz.tzoffset(None, 3600)
         dt = datetime.datetime(2015, 1, 1, 12, 0, 1, tzinfo=offset)
         expected = '2015-01-01T12:00:01.000000+01:00'
-        self.assertEqual(expected, date.format(dt))
+        self.assertEqual(expected, date_util.format(dt))
