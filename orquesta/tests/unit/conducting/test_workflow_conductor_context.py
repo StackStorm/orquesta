@@ -117,3 +117,45 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
+
+    def test_ctx_yaql_queries(self):
+        wf_def = """
+        version: 1.0
+
+        input:
+          - vms
+          - vm1: <% ctx(vms).get(vm1) %>
+          - vm2: <% ctx().vms.get(vm2) %>
+          - vm3: <% ctx(vms)[vm3] %>
+          - vm4: <% ctx().vms[vm4] %>
+
+        vars:
+          - vm1: <% ctx(vms).get(vm1) %>
+          - vm2: <% ctx().vms.get(vm2) %>
+          - vm3: <% ctx(vms)[vm3] %>
+          - vm4: <% ctx().vms[vm4] %>
+
+        tasks:
+          task1:
+            action: mock.create
+            input:
+              vm1: <% ctx(vms).get(vm1) %>
+              vm2: <% ctx().vms.get(vm2) %>
+              vm3: <% ctx(vms)[vm3] %>
+              vm4: <% ctx().vms[vm4] %>
+            next:
+              - publish:
+                  - vm1: <% ctx(vms).get(vm1) %>
+                  - vm2: <% ctx().vms.get(vm2) %>
+                  - vm3: <% ctx(vms)[vm3] %>
+                  - vm4: <% ctx().vms[vm4] %>
+
+        output:
+          - vm1: <% ctx(vms).get(vm1) %>
+          - vm2: <% ctx().vms.get(vm2) %>
+          - vm3: <% ctx(vms)[vm3] %>
+          - vm4: <% ctx().vms[vm4] %>
+        """
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
