@@ -83,7 +83,7 @@ of a value with the key). Let's take the same list of VM records from above and 
 dictionary where VM name is the key and the value is the record.
 
 YAQL can convert a list of lists to a dictionary where each list contains the key and value. For
-example, the expression ``<% dict(vms=>dict(ctx(vms).select([ctx(name), ctx()]))) %>`` returns the
+example, the expression ``<% dict(vms=>dict(ctx(vms).select([$.name, $]))) %>`` returns the
 following dictionary:
 
 .. code-block:: json
