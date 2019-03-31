@@ -58,3 +58,6 @@ target/
 
 # Temporary Files
 *.swp
+
+# Visual Studio Code
+.vscode/
