@@ -34,6 +34,12 @@ class VariableUndefinedError(Exception):
         Exception.__init__(self, 'The variable "%s" is undefined.' % var)
 
 
+class VariableInaccessibleError(Exception):
+
+    def __init__(self, var):
+        Exception.__init__(self, 'The variable "%s" is for internal use and inaccessible.' % var)
+
+
 class SchemaDefinitionError(Exception):
     pass
 

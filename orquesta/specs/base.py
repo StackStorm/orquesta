@@ -442,11 +442,11 @@ class Spec(object):
                 'schema_path': schema_path
             }
 
-        def decorate_ctx_var_error(var):
+        def decorate_ctx_var_error(var, msg):
             error = expr_util.format_error(
                 var['type'],
                 var['expression'],
-                'Variable "%s" is referenced before assignment.' % var['name'],
+                msg,
                 var['spec_path'],
                 var['schema_path']
             )
@@ -478,8 +478,16 @@ class Spec(object):
                 ctx_vars.append(decorate_ctx_var(var, spec_path, schema_path))
 
             for ctx_var in ctx_vars:
+                if ctx_var['name'].startswith('__'):
+                    err_msg = (
+                        'Variable "%s" that is prefixed with double underscores is considered '
+                        'a private variable and cannot be referenced.' % ctx_var['name']
+                    )
+                    errors.append(decorate_ctx_var_error(ctx_var, err_msg))
+
                 if ctx_var['name'] not in rolling_ctx:
-                    errors.append(decorate_ctx_var_error(ctx_var))
+                    err_msg = 'Variable "%s" is referenced before assignment.' % ctx_var['name']
+                    errors.append(decorate_ctx_var_error(ctx_var, err_msg))
 
             if prop_name in self._context_inputs:
                 updated_ctx = get_ctx_inputs(prop_name, prop_value)

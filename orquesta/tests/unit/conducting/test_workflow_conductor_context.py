@@ -159,3 +159,133 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
 
         spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
+
+    def test_ctx_ref_private_var(self):
+        app_ctx = {
+            '__xyz': 'phobar'
+        }
+
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - foobar: fubar
+
+        tasks:
+          task1:
+            action: core.noop
+            next:
+              - publish:
+                  - task1: <% ctx("__xyz") %>
+
+        output:
+          - data: <% ctx("__xyz") %>
+        """
+
+        expected_inspection_errors = {
+            'context': [
+                {
+                    'type': 'yaql',
+                    'expression': '<% ctx("__xyz") %>',
+                    'spec_path': 'output[0]',
+                    'schema_path': 'properties.output',
+                    'message': (
+                        'Variable "__xyz" that is prefixed with double underscores '
+                        'is considered a private variable and cannot be referenced.'
+                    )
+                },
+                {
+                    'type': 'yaql',
+                    'expression': '<% ctx("__xyz") %>',
+                    'spec_path': 'tasks.task1.next[0].publish[0]',
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.next.items.properties.publish'
+                    ),
+                    'message': (
+                        'Variable "__xyz" that is prefixed with double underscores '
+                        'is considered a private variable and cannot be referenced.'
+                    )
+                }
+            ]
+        }
+
+        expected_conducting_errors = [
+            {
+                'type': 'error',
+                'route': 0,
+                'task_id': 'task1',
+                'task_transition_id': 'noop__t0',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx("__xyz") %>\'. VariableInaccessibleError: The '
+                    'variable "__xyz" is for internal use and inaccessible.'
+                )
+            },
+            {
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to evaluate expression '
+                    '\'<% ctx("__xyz") %>\'. VariableInaccessibleError: The '
+                    'variable "__xyz" is for internal use and inaccessible.'
+                )
+            }
+        ]
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(app_ctx=app_ctx), expected_inspection_errors)
+
+        # Run the workflow.
+        conductor = conducting.WorkflowConductor(spec, context=app_ctx)
+        conductor.request_workflow_status(statuses.RUNNING)
+        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
+
+        # Complete tasks
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
+
+        # Check workflow status and output.
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
+        self.assertListEqual(conductor.errors, expected_conducting_errors)
+        self.assertIsNone(conductor.get_workflow_output())
+
+    def test_ctx_get_all(self):
+        app_ctx = {
+            '__xyz': 'phobar'
+        }
+
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - foobar: fubar
+
+        tasks:
+          task1:
+            action: core.noop
+            next:
+              - publish:
+                  - task1: <% ctx() %>
+
+        output:
+          - data: <% ctx() %>
+        """
+
+        # Ensure the private variables prefixed with double underscores are not included.
+        expected_output = {'data': {'foobar': 'fubar', 'task1': {'foobar': 'fubar'}}}
+        expected_errors = []
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(app_ctx=app_ctx), {})
+
+        # Run the workflow.
+        conductor = conducting.WorkflowConductor(spec, context=app_ctx)
+        conductor.request_workflow_status(statuses.RUNNING)
+        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
+
+        # Complete tasks
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
+
+        # Check workflow status and output.
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+        self.assertListEqual(conductor.errors, expected_errors)
+        self.assertDictEqual(conductor.get_workflow_output(), expected_output)
