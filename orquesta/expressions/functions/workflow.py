@@ -110,9 +110,6 @@ def item_(context, key=None):
 
     current_item = context['__current_item']
 
-    if not current_item:
-        return None
-
     if not key:
         return current_item
 
