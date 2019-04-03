@@ -38,7 +38,13 @@ def zip_(*args, **kwargs):
 
 
 def ctx_(context, key=None):
-    if key and key not in context['__vars']:
-        raise exc.VariableUndefinedError(key)
+    if key:
+        if key not in context['__vars']:
+            raise exc.VariableUndefinedError(key)
 
-    return context['__vars'][key] if key else context['__vars']
+        if key in context['__vars'] and key.startswith('__'):
+            raise exc.VariableInaccessibleError(key)
+
+        return context['__vars'][key]
+    else:
+        return {k: v for k, v in six.iteritems(context['__vars']) if not k.startswith('__')}

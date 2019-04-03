@@ -12,6 +12,7 @@
 
 import unittest
 
+from orquesta import exceptions as exc
 from orquesta.expressions.functions import common as funcs
 
 
@@ -83,3 +84,68 @@ class CommonFunctionTest(unittest.TestCase):
         result = [('z', 'a'), ('z', 'b'), ('z', 'c')]
 
         self.assertListEqual(funcs.zip_(l1, l2, pad=value), result)
+
+    def test_ctx_get_by_key(self):
+        data = {
+            '__vars': {
+                'a': 123,
+                'b': 'foobar',
+                'c': True,
+                'd': None,
+                'e': {'foobar': 'fubar'},
+                'f': ['foobar', 'fubar']
+            }
+        }
+
+        self.assertEqual(funcs.ctx_(data, 'a'), 123)
+        self.assertEqual(funcs.ctx_(data, 'b'), 'foobar')
+        self.assertTrue(funcs.ctx_(data, 'c'))
+        self.assertIsNone(funcs.ctx_(data, 'd'))
+        self.assertDictEqual(funcs.ctx_(data, 'e'), {'foobar': 'fubar'})
+        self.assertListEqual(funcs.ctx_(data, 'f'), ['foobar', 'fubar'])
+
+    def test_ctx_get_all(self):
+        data = {
+            '__vars': {
+                'a': 123,
+                'b': 'foobar',
+                'c': True,
+                'd': None,
+                'e': {'foobar': 'fubar'},
+                'f': ['foobar', 'fubar'],
+                '__state': {
+                    'foobar': 'fubar'
+                }
+            }
+        }
+
+        expected_data = {
+            'a': 123,
+            'b': 'foobar',
+            'c': True,
+            'd': None,
+            'e': {'foobar': 'fubar'},
+            'f': ['foobar', 'fubar']
+        }
+
+        self.assertDictEqual(funcs.ctx_(data), expected_data)
+
+    def test_ctx_get_undefined(self):
+        data = {'__vars': {}}
+
+        self.assertRaises(
+            exc.VariableUndefinedError,
+            funcs.ctx_,
+            data,
+            'a'
+        )
+
+    def test_ctx_get_private_var(self):
+        data = {'__vars': {'__state': {'foobar': 'fubar'}}}
+
+        self.assertRaises(
+            exc.VariableInaccessibleError,
+            funcs.ctx_,
+            data,
+            '__state'
+        )
