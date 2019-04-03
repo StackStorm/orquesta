@@ -561,6 +561,57 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
+    def test_fail_one_and_only_item(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - xs:
+              - fee
+
+        tasks:
+          task1:
+            with: <% ctx(xs) %>
+            action: core.echo message=<% item() %>
+        """
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_status(statuses.RUNNING)
+
+        # Mock the action execution for each item and assert expected task statuses.
+        task_route = 0
+        task_name = 'task1'
+        task_ctx = {'xs': ['fee']}
+
+        task_action_specs = [
+            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
+        ]
+
+        mock_ac_ex_statuses = [statuses.FAILED]
+        expected_task_statuses = [statuses.FAILED]
+        expected_workflow_statuses = [statuses.FAILED]
+
+        self.assert_task_items(
+            conductor,
+            task_name,
+            task_route,
+            task_ctx,
+            task_ctx['xs'],
+            task_action_specs,
+            mock_ac_ex_statuses,
+            expected_task_statuses,
+            expected_workflow_statuses
+        )
+
+        # Assert the task is removed from staging.
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
+
+        # Assert the workflow failed.
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
+
     def test_failed_item_task_dormant_other_incomplete(self):
         wf_def = """
         version: 1.0
