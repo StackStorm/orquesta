@@ -142,6 +142,99 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
         expected_output = {'items': task_ctx['xs']}
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
+    def test_basic_items_list_with_different_types(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - xs:
+              - null
+              - ""
+              - foobar
+              - 0
+              - 1
+              - 123
+              - 123.456
+              - False
+              - True
+              - {}
+              - {'foobar': 'fubar'}
+              - []
+              - ['foobar', 'fubar']
+
+        tasks:
+          task1:
+            with: <% ctx(xs) %>
+            action: core.echo message=<% item() %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
+        """
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_status(statuses.RUNNING)
+
+        # Mock the action execution for each item and assert expected task statuses.
+        task_route = 0
+        task_name = 'task1'
+
+        task_ctx = {
+            'xs': [
+                None,
+                '',
+                'foobar',
+                0,
+                1,
+                123,
+                123.456,
+                False,
+                True,
+                {},
+                {'foobar': 'fubar'},
+                [],
+                ['foobar', 'fubar']
+            ]
+        }
+
+        task_action_specs = []
+        for idx, item in enumerate(task_ctx['xs']):
+            task_action_specs.append(
+                {'action': 'core.echo', 'input': {'message': item}, 'item_id': idx}
+            )
+
+        items_count = len(task_ctx['xs'])
+        mock_ac_ex_statuses = [statuses.SUCCEEDED] * items_count
+        expected_task_statuses = [statuses.RUNNING] * (items_count - 1) + [statuses.SUCCEEDED]
+        expected_workflow_statuses = [statuses.RUNNING] * (items_count - 1) + [statuses.SUCCEEDED]
+
+        self.assert_task_items(
+            conductor,
+            task_name,
+            task_route,
+            task_ctx,
+            task_ctx['xs'],
+            task_action_specs,
+            mock_ac_ex_statuses,
+            expected_task_statuses,
+            expected_workflow_statuses
+        )
+
+        # Assert the task is removed from staging.
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
+
+        # Assert the workflow succeeded.
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+
+        # Assert the workflow output is correct.
+        expected_output = {'items': task_ctx['xs']}
+        self.assertDictEqual(conductor.get_workflow_output(), expected_output)
+
     def test_basic_items_list_with_concurrency(self):
         wf_def = """
         version: 1.0
@@ -229,6 +322,12 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
           task1:
             with: x, y in <% zip(ctx(xs), ctx(ys)) %>
             action: core.echo message=<% item(x) + item(y) %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
         """
 
         spec = native_specs.WorkflowSpec(wf_def)
@@ -269,6 +368,134 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+
+        # Assert the workflow output is correct.
+        expected_output = {'items': ['foobar', 'fubar', 'marcopolo']}
+        self.assertDictEqual(conductor.get_workflow_output(), expected_output)
+
+    def test_multiple_items_list_with_different_types(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - xs:
+              - null
+              - ""
+              - foobar
+              - 0
+              - 1
+              - 123
+              - 123.456
+              - False
+              - True
+              - {}
+              - {'foobar': 'fubar'}
+              - []
+              - ['foobar', 'fubar']
+          - ys:
+              - null
+              - ""
+              - foobar
+              - 0
+              - 1
+              - 123
+              - 123.456
+              - False
+              - True
+              - {}
+              - {'foobar': 'fubar'}
+              - []
+              - ['foobar', 'fubar']
+        tasks:
+          task1:
+            with: x, y in <% zip(ctx(xs), ctx(ys)) %>
+            action: core.foobar
+            input:
+              x: <% item(x) %>
+              y: <% item(y) %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
+        """
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_status(statuses.RUNNING)
+
+        # Mock the action execution for each item and assert expected task statuses.
+        task_route = 0
+        task_name = 'task1'
+
+        task_ctx = {
+            'xs': [
+                None,
+                '',
+                'foobar',
+                0,
+                1,
+                123,
+                123.456,
+                False,
+                True,
+                {},
+                {'foobar': 'fubar'},
+                [],
+                ['foobar', 'fubar']
+            ],
+            'ys': [
+                None,
+                '',
+                'foobar',
+                0,
+                1,
+                123,
+                123.456,
+                False,
+                True,
+                {},
+                {'foobar': 'fubar'},
+                [],
+                ['foobar', 'fubar']
+            ]
+        }
+
+        task_action_specs = []
+        for idx, pair in enumerate(zip(task_ctx['xs'], task_ctx['ys'])):
+            task_action_specs.append(
+                {'action': 'core.foobar', 'input': {'x': pair[0], 'y': pair[1]}, 'item_id': idx}
+            )
+
+        items_count = len(task_ctx['xs'])
+        mock_ac_ex_statuses = [statuses.SUCCEEDED] * items_count
+        expected_task_statuses = [statuses.RUNNING] * (items_count - 1) + [statuses.SUCCEEDED]
+        expected_workflow_statuses = [statuses.RUNNING] * (items_count - 1) + [statuses.SUCCEEDED]
+
+        self.assert_task_items(
+            conductor,
+            task_name,
+            task_route,
+            task_ctx,
+            list(zip(task_ctx['xs'], task_ctx['ys'])),
+            task_action_specs,
+            mock_ac_ex_statuses,
+            expected_task_statuses,
+            expected_workflow_statuses
+        )
+
+        # Assert the task is removed from staging.
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
+
+        # Assert the workflow succeeded.
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+
+        # Assert the workflow output is correct.
+        expected_output = {'items': [[i, j] for i, j in zip(task_ctx['xs'], task_ctx['ys'])]}
+        self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
     def test_multiple_items_list_with_concurrency(self):
         wf_def = """
