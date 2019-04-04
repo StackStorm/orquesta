@@ -18,7 +18,7 @@ from orquesta.tests.unit import base as test_base
 
 class WorkflowConductorWithItemsCancelTest(test_base.WorkflowConductorWithItemsTest):
 
-    def test_cancel_item(self):
+    def test_cancel_item_list_processed(self):
         wf_def = """
         version: 1.0
 
@@ -98,7 +98,7 @@ class WorkflowConductorWithItemsCancelTest(test_base.WorkflowConductorWithItemsT
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)
 
-    def test_cancel_with_items_incomplete(self):
+    def test_cancel_item_list_incomplete(self):
         wf_def = """
         version: 1.0
 

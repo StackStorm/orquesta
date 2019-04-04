@@ -556,7 +556,7 @@ class SequentialWorkflowStatusTest(base.OrchestraWorkflowConductorTest):
             statuses.RUNNING,
             statuses.CANCELING,
             statuses.CANCELING,
-            statuses.CANCELING,
+            statuses.CANCELED,
             statuses.CANCELED
         ]
 
