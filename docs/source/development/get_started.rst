@@ -57,7 +57,7 @@ module ``./orquesta/tests/unit/conducting/test_workflow_conductor.py`` as an exa
 is examples for creating the python virtualenv and running either all the tests in a module or
 running only a single test within the module.
 
-::
+.. code-block:: bash
 
     # Make and activate the virtualenv.
     $ make venv

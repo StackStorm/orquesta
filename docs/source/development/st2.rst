@@ -11,7 +11,7 @@ files, rebuild the StackStorm virtualenv, and run Orquesta related tests.
 2. Clone the StackStorm repo and checkout appropriate branch.
 3. Run the following command to update the Orquesta in the StackStorm requirement files.
 
-::
+.. code-block:: bash
 
     # Replace the value of my-dev-branch with the name of the feature branch.
     $ export ORQUESTA_BRANCH="my-dev-branch" 
@@ -21,7 +21,7 @@ files, rebuild the StackStorm virtualenv, and run Orquesta related tests.
 4. Rebuild the StackStorm virtualenv. Take note that auto-generation tool will update related
    requirements.txt files.
 
-::
+.. code-block:: bash
 
     # Remove and rebuild the StackStorm virtualenv.
     $ make distclean
@@ -30,7 +30,7 @@ files, rebuild the StackStorm virtualenv, and run Orquesta related tests.
 5. Run the Orquesta runner unit tests. The unit tests are located under the directory
    ``./contrib/runners/orquesta_runner/tests/unit``.
 
-::
+.. code-block:: bash
 
     # Run unit tests for the Orquesta runner.
     $ . virtualenv/bin/activate
@@ -39,7 +39,7 @@ files, rebuild the StackStorm virtualenv, and run Orquesta related tests.
 6. Run the Orquesta integration tests. The integration tests are located under the directory
    ``./st2tests/integration/orquesta``.
 
-::
+.. code-block:: bash
 
     # Launch StackStorm screen sessions and run the Orquesta integration tests.
     $ ./tools/launchdev.sh start -x
@@ -56,7 +56,7 @@ Orquesta version in appropriate StackStorm requirement files.
 2. Clone the StackStorm repo and create new feature branch.
 3. Run the following command to update the Orquesta in the StackStorm requirement files.
 
-::
+.. code-block:: bash
 
     # Replace the value of new-commit with the latest commit in Orquesta containing the change(s).
     $ export ORQUESTA_COMMIT="new-commit" 
@@ -66,7 +66,7 @@ Orquesta version in appropriate StackStorm requirement files.
 4. Rebuild the StackStorm virtualenv. Take note that auto-generation tool will update related
    requirements.txt files.
 
-::
+.. code-block:: bash
 
     # Remove and rebuild the StackStorm virtualenv.
     $ make distclean
@@ -75,7 +75,7 @@ Orquesta version in appropriate StackStorm requirement files.
 5. Run the Orquesta runner unit tests. The unit tests are located under the directory
    ``./contrib/runners/orquesta_runner/tests/unit``.
 
-::
+.. code-block:: bash
 
     # Run unit tests for the Orquesta runner.
     $ . virtualenv/bin/activate
@@ -84,7 +84,7 @@ Orquesta version in appropriate StackStorm requirement files.
 6. Run the Orquesta integration tests. The integration tests are located under the directory
    ``./st2tests/integration/orquesta``.
 
-::
+.. code-block:: bash
 
     # Launch StackStorm screen sessions and run the Orquesta integration tests.
     $ ./tools/launchdev.sh start -x
