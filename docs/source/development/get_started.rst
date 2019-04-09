@@ -36,10 +36,10 @@ Let's get started by walking thru the project structure and its contents.
     |   |-- events.py           # Module that defines events for workflow execution.
     |   |-- exceptions.py       # Module that defines custom exception types.
     |   |-- graphing.py         # Module for the workflow execution graph.
-    |   |-- machines.py         # Module for workflow and task state machines to processing events.
+    |   |-- machines.py         # Module for workflow and task state machines to process events.
     |   |-- statuses.py         # Module that defines status values for workflow execution.
     |-- requirements*.txt       # Files that list the project dependencies.
-    |-- setup.py                # Project info and entry points where plugins are defined.
+    |-- setup.py                # Project info and entry points where plugins are registered.
     |-- tox.ini                 # Configuration file for the tox command.
 
 
