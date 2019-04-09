@@ -1,9 +1,12 @@
 Getting Started
 ===============
 
+Project Structure
+^^^^^^^^^^^^^^^^^
+
 Let's get started by walking thru the project structure and its contents.
 
-.. code-block:: none
+::
 
     project
     |-- CHANGELOG.rst
@@ -39,8 +42,9 @@ Let's get started by walking thru the project structure and its contents.
     |-- setup.py                # Project info and entry points where plugins are defined.
     |-- tox.ini                 # Configuration file for the tox command.
 
+
 Running Tests
-=============
+^^^^^^^^^^^^^
 
 At the root of the project directory, run the command ``tox`` to run all the unit tests for various
 python versions, run pep8 to check code styles, and check docs for errors. The configuration for
@@ -49,10 +53,18 @@ passing the ``-e`` arg.  For example, the command ``tox -epy36`` runs the python
 the command ``tox -epep8`` runs the pylint and flake8 checks.
 
 It is possible to run a single unit test or tests within a single test module. Let use the test
-module ``./orquesta/tests/unit/conducting/test_workflow_conductor.py`` as an example. First create
-the python virtualenv ``./.venv`` by running ``make venv``. Once the venv is created, activate the
-venv by running ``. ./.venv/bin/activate``. Once the venv is activated, run all the tests in
-``./orquesta/tests/unit/conducting/test_workflow_conductor.py`` by running the command
-``python -m unittest orquesta.tests.unit.conducting.test_workflow_conductor``. Alternatively, to
-run a single unit test such as ``test_init`` in the ``WorkflowConductorTest`` class, run the command
-``python -m unittest orquesta.tests.unit.conducting.test_workflow_conductor.WorkflowConductorTest.test_init``.
+module ``./orquesta/tests/unit/conducting/test_workflow_conductor.py`` as an example. The following
+is examples for creating the python virtualenv and running either all the tests in a module or
+running only a single test within the module.
+
+::
+
+    # Make and activate the virtualenv.
+    $ make venv
+    $ . ./.venv/bin/activate
+
+    # Run all the tests in module ./orquesta/tests/unit/conducting/test_workflow_conductor.py.
+    $ python -m unittest orquesta.tests.unit.conducting.test_workflow_conductor
+
+    # Run a single test such as test_init in the WorkflowConductorTest class.
+    $ python -m unittest orquesta.tests.unit.conducting.test_workflow_conductor.WorkflowConductorTest.test_init
