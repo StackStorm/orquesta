@@ -7,3 +7,4 @@ Development
    Contributing <contributing>
    Coding Style <coding_style>
    Let's Get Started <get_started>
+   StackStorm Integration <st2>
