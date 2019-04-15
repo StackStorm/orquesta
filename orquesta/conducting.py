@@ -73,6 +73,9 @@ class WorkflowState(object):
             self.tasks[constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(task_route))]
         ]
 
+    def get_tasks(self):
+        return self.sequence
+
     def get_tasks_by_status(self, statuses):
         return [t for t in self.sequence if t['status'] in statuses]
 
@@ -1045,3 +1048,36 @@ class WorkflowConductor(object):
                 contexts[task_transition_id] = self.get_task_initial_context(t[1], route)
 
         return contexts
+
+    def request_workflow_rerun(self, rerun_options):
+        # Check current workflow status.
+        if self.get_workflow_status() not in statuses.ABENDED_STATUSES:
+            LOG.debug('Workflow execution cannot rerun from task(s) because it is not in a '
+                      'failed state')
+            return
+
+        # Force reset workflow status to running
+        self.workflow_state.status = statuses.RUNNING
+
+        # Create a new entry in staging for the next task.
+        tasks = self.workflow_state.get_tasks()
+        for i in range(len(tasks)):
+            if tasks[i]['status'] == statuses.FAILED and tasks[i]['id'] in rerun_options:
+                tasks[i]['status'] = statuses.UNSET
+                ctxs, route = [0], 0
+                # Add a new task entry
+                self.add_task_state(
+                        tasks[i]['id'],
+                        route,
+                        in_ctx_idxs=ctxs,
+                        prev=None
+                    )
+
+                # Create a new entry in staging for a failed task.
+                self._workflow_state.add_staged_task(
+                    tasks[i]['id'],
+                    route,
+                    ctxs=ctxs,
+                    ready=True
+                )
+
