@@ -1,6 +1,31 @@
 Changelog
 =========
 
+0.5
+---
+
+Added
+~~~~~
+
+* Add flake8 extension to restrict import alias. (improvement)
+* Add developer docs on getting started, testing, and StackStorm integration. (improvement) 
+
+Changed
+~~~~~~~
+
+* Refactor concept of task flow to workflow and task state. (improvement)
+* Restrict ctx function from returning internal vars. (improvement)
+
+Fixed
+~~~~~
+
+* Fix conductor performance for complex workflow definition. (bug fix)
+* Fix overwritten context variables on task join. (bug fix)
+* Fix with items task stuck in running when item(s) failed. (bug fix)
+* Fix task status for various scenarios on with item task. (bug fix)
+* Fix return value of item that evaluate to false. (bug fix)
+* Fix workflow stuck in resuming when pending task has transition error. (bug fix)
+
 0.4
 ---
 
