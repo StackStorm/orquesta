@@ -146,6 +146,7 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.WORKFLOW_RESUMING_WORKFLOW_COMPLETED: statuses.SUCCEEDED,
         events.WORKFLOW_CANCELING_WORKFLOW_DORMANT: statuses.CANCELED,
         events.WORKFLOW_CANCELED_WORKFLOW_DORMANT: statuses.CANCELED,
+        events.WORKFLOW_FAILED: statuses.FAILED,
         events.TASK_RUNNING: statuses.RUNNING,
         events.TASK_RESUMING: statuses.RUNNING
     },
