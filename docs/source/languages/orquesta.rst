@@ -210,9 +210,9 @@ be run two different times, resulting in this execution graph:
 With Items Model
 ----------------
 
-Use the ``with`` items section to process a list of items in a task. The task will iterate thru each
-item and request an action execution for each item. By default, all the items will be processed at
-the same time. When ``concurrency`` is specified, the number of items up to the concurrency value
+Use the ``with`` items section to process a list of items in a task. The task will iterate through
+each item and request an action execution for each item. By default, all the items will be processed
+at the same time. When ``concurrency`` is specified, the number of items up to the concurrency value
 will be processed and the remaining items will be queued. When the action execution for an item is
 completed, the next item in the list will be processed.
 
