@@ -76,8 +76,13 @@ class WorkflowState(object):
     def get_tasks(self):
         return self.sequence
 
-    def get_tasks_by_status(self, statuses):
-        return [t for t in self.sequence if t['status'] in statuses]
+    def get_tasks_by_status(self, list_statuses):
+        tasks = []
+        for t in self.sequence:
+            if 'status' in t and t['status'] in list_statuses:
+                tasks.append(t)
+
+        return tasks
 
     def get_terminal_tasks(self):
         return [t for t in self.sequence if t.get('term', False)]
@@ -436,6 +441,9 @@ class WorkflowConductor(object):
 
     def get_workflow_output(self):
         return json_util.deepcopy(self._outputs) if self._outputs else None
+
+    def clean_workflow_output(self):
+        self._outputs = None
 
     def _inbound_criteria_satisfied(self, task_id, route):
         inbounds = self.graph.get_prev_transitions(task_id)
@@ -1049,7 +1057,7 @@ class WorkflowConductor(object):
 
         return contexts
 
-    def request_workflow_rerun(self, rerun_options):
+    def request_workflow_rerun(self, options):
         # Check current workflow status.
         if self.get_workflow_status() not in statuses.ABENDED_STATUSES:
             LOG.debug('Workflow execution cannot rerun from task(s) because it is not in a '
@@ -1057,27 +1065,32 @@ class WorkflowConductor(object):
             return
 
         # Force reset workflow status to running
-        self.workflow_state.status = statuses.RUNNING
+        self.workflow_state.status = statuses.RESUMING
 
-        # Create a new entry in staging for the next task.
         tasks = self.workflow_state.get_tasks()
-        for i in range(len(tasks)):
-            if tasks[i]['status'] == statuses.FAILED and tasks[i]['id'] in rerun_options:
-                tasks[i]['status'] = statuses.UNSET
-                ctxs, route = [0], 0
-                # Add a new task entry
-                self.add_task_state(
-                        tasks[i]['id'],
+        # Create a new entry in staging for the next task.
+        for task_id in options.get('tasks', []):
+            if [task for task in tasks if task['id'] == task_id]:
+                task_route = 0
+                # Get latest task data
+                task = self.workflow_state.get_task(task_id, task_route)
+                if task and task['status'] in statuses.ABENDED_STATUSES:
+                    ctxs = task['ctxs']['in']
+                    route = task['route']
+                    prev = task['prev']
+
+                    # Add a new task entry
+                    self.add_task_state(
+                        task_id,
                         route,
                         in_ctx_idxs=ctxs,
-                        prev=None
+                        prev=prev
                     )
 
-                # Create a new entry in staging for a failed task.
-                self._workflow_state.add_staged_task(
-                    tasks[i]['id'],
-                    route,
-                    ctxs=ctxs,
-                    ready=True
-                )
-
+                    # Create a new entry in staging for a failed task.
+                    self._workflow_state.add_staged_task(
+                        task_id,
+                        route,
+                        ctxs=ctxs,
+                        ready=True
+                    )
