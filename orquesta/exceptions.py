@@ -125,3 +125,8 @@ class WorkflowContextError(Exception):
 
 class WorkflowLogEntryError(Exception):
     pass
+
+
+class WorkflowInvalidRerunStatus(Exception):
+    def __init__(self, msg):
+        Exception.__init__(self, msg)
