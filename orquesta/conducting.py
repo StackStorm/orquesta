@@ -332,6 +332,12 @@ class WorkflowConductor(object):
                 task_transition_id=task_transition_id
             )
 
+    def reset_errors_for_task(self, task_id):
+        error_copy = copy.deepcopy(self.errors)
+        for error in error_copy:
+            if error.get('task_id', None) == task_id:
+                self.errors.remove(error)
+
     def get_workflow_parent_context(self):
         return json_util.deepcopy(self._parent_ctx)
 
@@ -1081,6 +1087,7 @@ class WorkflowConductor(object):
 
         # Force reset workflow status to running
         self.workflow_state.status = statuses.RESUMING
+        self.reset_workflow_output()
 
         # Process the tasks that are identified for rerun.
         for task in rerun_tasks:
@@ -1094,12 +1101,4 @@ class WorkflowConductor(object):
             # Create a new entry in staging for a failed task.
             self._workflow_state.add_staged_task(task['id'], route, ctxs=ctxs, ready=True)
 
-            self.reset_errors_for_rerun_task(task)
-
-        self.reset_workflow_output()
-
-    def reset_errors_for_rerun_task(self, task_id):
-        error_copy = copy.deepcopy(self.errors)
-        for error in error_copy:
-            if error.get('task_id', None) == task_id:
-                self.errors.remove(error)
+            self.reset_errors_for_task(task)
