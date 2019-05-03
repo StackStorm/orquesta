@@ -76,13 +76,8 @@ class WorkflowState(object):
     def get_tasks(self):
         return self.sequence
 
-    def get_tasks_by_status(self, list_statuses):
-        tasks = []
-        for t in self.sequence:
-            if 'status' in t and t['status'] in list_statuses:
-                tasks.append(t)
-
-        return tasks
+    def get_tasks_by_status(self, statuses):
+        return [t for t in self.sequence if 'status' in t and t['status'] in statuses]
 
     def get_terminal_tasks(self):
         return [t for t in self.sequence if t.get('term', False)]
