@@ -127,6 +127,12 @@ class WorkflowLogEntryError(Exception):
     pass
 
 
-class WorkflowInvalidRerunStatus(Exception):
-    def __init__(self, msg):
-        Exception.__init__(self, msg)
+class InvalidWorkflowRerunStatus(Exception):
+    def __init__(self):
+        Exception.__init__(self, 'Workflow execution cannot rerun from task(s) because it is not '
+                                 'in a failed state')
+
+
+class InvalidTaskRerunStatus(Exception):
+    def __init__(self, task_id, status):
+        Exception.__init__(self, 'Task "%s" is not in abended status "%s"' % (task_id, status))

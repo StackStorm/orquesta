@@ -1060,49 +1060,55 @@ class WorkflowConductor(object):
     def request_workflow_rerun(self, options):
         # Check current workflow status.
         if self.get_workflow_status() not in statuses.ABENDED_STATUSES:
-            msg = 'Workflow execution cannot rerun from task(s) because it is not in a failed ' \
-                  'state'
-            raise exc.WorkflowInvalidRerunStatus(msg)
+            raise exc.InvalidWorkflowRerunStatus()
 
         # Force reset workflow status to running
         self.workflow_state.status = statuses.RESUMING
 
         # Create a new entry in staging for the next task.
-        number_reran_tasks = 0
+        failed_tasks = len(self.errors)
         for task_id in options.get('tasks', []):
             try:
                 task_route = 0
                 # Get latest task data
                 task = self.workflow_state.get_task(task_id, task_route)
-                if task and task['status'] in statuses.ABENDED_STATUSES:
-                    number_reran_tasks += 1
-                    ctxs = copy.deepcopy(task['ctxs']['in'])
-                    route = copy.deepcopy(task['route'])
-                    prev = copy.deepcopy(task['prev'])
+            except Exception:
+                self.workflow_state.status = statuses.FAILED
+                raise exc.InvalidTask(task_id)
 
-                    # Add a new task entry
-                    self.add_task_state(
-                        task_id,
-                        route,
-                        in_ctx_idxs=ctxs,
-                        prev=prev
-                    )
+            if task['status'] not in statuses.ABENDED_STATUSES:
+                self.workflow_state.status = statuses.FAILED
+                raise exc.InvalidTaskRerunStatus(task, task['status'])
 
-                    # Create a new entry in staging for a failed task.
-                    self._workflow_state.add_staged_task(
-                        task_id,
-                        route,
-                        ctxs=ctxs,
-                        ready=True
-                    )
-            except exc.VariableInaccessibleError:
-                self.log_error("Couldn't find task %s in task table for rerun.", task_id)
-                continue
-            except Exception as e:
-                self.log_error(e)
-                continue
+            ctxs = copy.deepcopy(task['ctxs']['in'])
+            route = copy.deepcopy(task['route'])
+            prev = copy.deepcopy(task['prev'])
 
-        if number_reran_tasks == 0:
-            tasks_list = ', '.join(["%s" % t for t in options.get('tasks', [])])
+            # Add a new task entry
+            self.add_task_state(
+                task_id,
+                route,
+                in_ctx_idxs=ctxs,
+                prev=prev
+            )
+
+            # Create a new entry in staging for a failed task.
+            self._workflow_state.add_staged_task(
+                task_id,
+                route,
+                ctxs=ctxs,
+                ready=True
+            )
+
+            self.reset_errors_for_rerun_task(task_id)
+
+        if len(self.errors) == failed_tasks:
             self.workflow_state.status = statuses.FAILED
-            raise exc.InvalidTask(tasks_list)
+        else:
+            self.reset_workflow_output()
+
+    def reset_errors_for_rerun_task(self, task_id):
+        error_copy = copy.deepcopy(self.errors)
+        for error in error_copy:
+            if error.get('task_id', None) == task_id:
+                self.errors.remove(error)

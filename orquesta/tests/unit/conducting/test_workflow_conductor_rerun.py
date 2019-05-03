@@ -149,6 +149,10 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         self.forward_task_statuses(conductor, 'task4', [statuses.RUNNING])
         self.forward_task_statuses(conductor, 'task4', [statuses.SUCCEEDED])
 
+        # log the error
+        error = 'test parallel rerun with first task'
+        conductor.log_error(error, 'task1')
+
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
         actual_term_tasks = [t['id'] for t in term_tasks]
@@ -213,6 +217,10 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         self.forward_task_statuses(conductor, 'task2', [statuses.SUCCEEDED])
         self.forward_task_statuses(conductor, 'task4', [statuses.FAILED])
 
+        # Log the errors
+        errors = ['error1', 'error2']
+        conductor.log_errors(errors, 'task4')
+
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
         actual_term_tasks = [t['id'] for t in term_tasks]
@@ -264,6 +272,11 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         # Conduct task2.
         self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING])
         self.forward_task_statuses(conductor, 'task2', [statuses.FAILED])
+
+        # Log the errors
+        errors = ['error1', 'error2']
+        conductor.log_errors(errors, 'task3')
+        conductor.log_errors(errors, 'task2')
 
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
@@ -322,6 +335,10 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         self.forward_task_statuses(conductor, 'task1', [statuses.FAILED])
         self.forward_task_statuses(conductor, 'task2', [statuses.SUCCEEDED])
+
+        # Log the errors
+        errors = ['error1', 'error2']
+        conductor.log_errors(errors, 'task1')
 
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
@@ -384,6 +401,10 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         self.forward_task_statuses(conductor, 'task3', [statuses.RUNNING])
         self.forward_task_statuses(conductor, 'task3', [statuses.FAILED])
+
+        # Log the errors
+        error = 'error1'
+        conductor.log_error(error, 'task3')
 
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
@@ -464,6 +485,10 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         task_name = 'task2'
         self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.FAILED])
 
+        # Log the errors
+        errors = ['error1', 'error2']
+        conductor.log_errors(errors, 'task2')
+
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
         actual_term_tasks = [t['id'] for t in term_tasks]
@@ -514,6 +539,11 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         conductor.reset_workflow_output()
 
+        # Log the errors
+        errors = ['error1', 'error2']
+        conductor.log_errors(errors, 'task1')
+        conductor.log_errors(errors, 'task3')
+
         # 3. Start rerun workflow only for task1
         rerun_tasks = ['task1']
         number_tasks = 2
@@ -553,7 +583,7 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         options = dict()
         options['tasks'] = "task1"
         self.assertRaises(
-            exc.WorkflowInvalidRerunStatus,
+            exc.InvalidWorkflowRerunStatus,
             conductor.request_workflow_rerun,
             options
         )
@@ -593,7 +623,8 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         # 3 Start rerun with valid and invalid task ids.
         options = dict()
         options['tasks'] = ["task1", "invalid_task_id1", "invalid_task_id2"]
-        conductor.request_workflow_rerun(options)
-        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
-        self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING, statuses.SUCCEEDED])
-        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+        self.assertRaises(
+            exc.InvalidTask,
+            conductor.request_workflow_rerun,
+            options
+        )
