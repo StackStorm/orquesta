@@ -1068,11 +1068,11 @@ class WorkflowConductor(object):
                 # Get latest task data
                 task = self.workflow_state.get_task(task_id, task_route)
             except Exception:
-                self.workflow_state.status = statuses.FAILED
+                self.request_workflow_status(statuses.FAILED)
                 raise exc.InvalidTask(task_id)
 
             if task['status'] not in statuses.ABENDED_STATUSES:
-                self.workflow_state.status = statuses.FAILED
+                self.request_workflow_status(statuses.FAILED)
                 raise exc.InvalidTaskRerunStatus(task, task['status'])
 
             ctxs = copy.deepcopy(task['ctxs']['in'])
@@ -1098,7 +1098,7 @@ class WorkflowConductor(object):
             self.reset_errors_for_rerun_task(task_id)
 
         if len(self.errors) == failed_tasks:
-            self.workflow_state.status = statuses.FAILED
+            self.request_workflow_status(statuses.FAILED)
         else:
             self.reset_workflow_output()
 
