@@ -603,7 +603,7 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         options = dict()
         options['tasks'] = ["wrong_task_id", "task"]
         self.assertRaises(
-            exc.InvalidTask,
+            exc.InvalidRerunTasks,
             conductor.request_workflow_rerun,
             options
         )
@@ -624,7 +624,7 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         options = dict()
         options['tasks'] = ["task1", "invalid_task_id1", "invalid_task_id2"]
         self.assertRaises(
-            exc.InvalidTask,
+            exc.InvalidRerunTasks,
             conductor.request_workflow_rerun,
             options
         )

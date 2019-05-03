@@ -133,6 +133,7 @@ class InvalidWorkflowRerunStatus(Exception):
                                  'in a failed state')
 
 
-class InvalidTaskRerunStatus(Exception):
-    def __init__(self, task_id, status):
-        Exception.__init__(self, 'Task "%s" is not in abended status "%s"' % (task_id, status))
+class InvalidRerunTasks(Exception):
+    def __init__(self, failed_rerun_tasks):
+        Exception.__init__(self, 'Unable to rerun workflow because one or more tasks is not found'
+                                 ' or not in failed status: %s' % ', '.join(failed_rerun_tasks))

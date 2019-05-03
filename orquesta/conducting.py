@@ -1057,50 +1057,46 @@ class WorkflowConductor(object):
         if self.get_workflow_status() not in statuses.ABENDED_STATUSES:
             raise exc.InvalidWorkflowRerunStatus()
 
-        # Force reset workflow status to running
-        self.workflow_state.status = statuses.RESUMING
+        failed_rerun_tasks = []
+        rerun_tasks = []
 
-        # Create a new entry in staging for the next task.
-        failed_tasks = len(self.errors)
+        # Identify tasks that are either invalid or cannot be rerun and
+        # raise an exception before rerunning the workflow execution.
         for task_id in options.get('tasks', []):
             try:
                 task_route = 0
-                # Get latest task data
                 task = self.workflow_state.get_task(task_id, task_route)
-            except Exception:
-                self.request_workflow_status(statuses.FAILED)
-                raise exc.InvalidTask(task_id)
+            except KeyError:
+                failed_rerun_tasks.append(task_id)
+                continue
 
             if task['status'] not in statuses.ABENDED_STATUSES:
-                self.request_workflow_status(statuses.FAILED)
-                raise exc.InvalidTaskRerunStatus(task, task['status'])
+                failed_rerun_tasks.append(task_id)
+                continue
 
+            rerun_tasks.append(task)
+
+        if failed_rerun_tasks:
+            raise exc.InvalidRerunTasks(failed_rerun_tasks)
+
+        # Force reset workflow status to running
+        self.workflow_state.status = statuses.RESUMING
+
+        # Process the tasks that are identified for rerun.
+        for task in rerun_tasks:
             ctxs = copy.deepcopy(task['ctxs']['in'])
             route = copy.deepcopy(task['route'])
             prev = copy.deepcopy(task['prev'])
 
             # Add a new task entry
-            self.add_task_state(
-                task_id,
-                route,
-                in_ctx_idxs=ctxs,
-                prev=prev
-            )
+            self.add_task_state(task['id'], route, in_ctx_idxs=ctxs, prev=prev)
 
             # Create a new entry in staging for a failed task.
-            self._workflow_state.add_staged_task(
-                task_id,
-                route,
-                ctxs=ctxs,
-                ready=True
-            )
+            self._workflow_state.add_staged_task(task['id'], route, ctxs=ctxs, ready=True)
 
-            self.reset_errors_for_rerun_task(task_id)
+            self.reset_errors_for_rerun_task(task)
 
-        if len(self.errors) == failed_tasks:
-            self.request_workflow_status(statuses.FAILED)
-        else:
-            self.reset_workflow_output()
+        self.reset_workflow_output()
 
     def reset_errors_for_rerun_task(self, task_id):
         error_copy = copy.deepcopy(self.errors)
