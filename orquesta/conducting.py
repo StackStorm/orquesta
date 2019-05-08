@@ -82,12 +82,35 @@ class WorkflowState(object):
     def get_terminal_tasks(self):
         return [t for t in self.sequence if t.get('term', False)]
 
+    def reset_terminal_tasks(self, task_ids):
+        for term_task in self.get_terminal_tasks():
+            # Reset term status for provided tasks.
+            if term_task['id'] in task_ids:
+                term_task.pop('term', None)
+                continue
+
+            # Reset term status for task that has task transition.
+            next_tasks = {k: v for k, v in six.iteritems(term_task.get('next', {})) if v}
+
+            if next_tasks:
+                term_task.pop('term', None)
+                continue
+
     def has_next_tasks(self, task_id=None, route=None):
         return self.conductor.has_next_tasks(task_id=task_id, route=route)
 
     @property
     def has_active_tasks(self):
         return len(self.get_tasks_by_status(statuses.ACTIVE_STATUSES)) > 0
+
+    @property
+    def has_abended_tasks(self):
+        abended_term_tasks = [
+            t for t in self.get_terminal_tasks()
+            if 'status' in t and t['status'] in statuses.ABENDED_STATUSES
+        ]
+
+        return len(abended_term_tasks) > 0
 
     @property
     def has_pausing_tasks(self):
@@ -333,8 +356,7 @@ class WorkflowConductor(object):
             )
 
     def reset_errors_for_task(self, task_id):
-        error_copy = copy.deepcopy(self.errors)
-        for error in error_copy:
+        for error in copy.copy(self.errors):
             if error.get('task_id', None) == task_id:
                 self.errors.remove(error)
 
@@ -1076,7 +1098,7 @@ class WorkflowConductor(object):
                 failed_rerun_tasks.append(task_id)
                 continue
 
-            if task['status'] not in statuses.ABENDED_STATUSES:
+            if not task.get('term', False) or task['status'] not in statuses.ABENDED_STATUSES:
                 failed_rerun_tasks.append(task_id)
                 continue
 
@@ -1087,6 +1109,7 @@ class WorkflowConductor(object):
 
         # Force reset workflow status to running
         self.workflow_state.status = statuses.RESUMING
+        self.workflow_state.reset_terminal_tasks([t['id'] for t in rerun_tasks])
         self.reset_workflow_output()
 
         # Process the tasks that are identified for rerun.
@@ -1101,4 +1124,4 @@ class WorkflowConductor(object):
             # Create a new entry in staging for a failed task.
             self._workflow_state.add_staged_task(task['id'], route, ctxs=ctxs, ready=True)
 
-            self.reset_errors_for_task(task)
+            self.reset_errors_for_task(task['id'])

@@ -86,6 +86,7 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.TASK_SUCCEEDED_WORKFLOW_DORMANT_COMPLETED: statuses.SUCCEEDED,
         events.TASK_SUCCEEDED_WORKFLOW_DORMANT_PAUSED: statuses.PAUSED,
         events.TASK_SUCCEEDED_WORKFLOW_DORMANT_CANCELED: statuses.CANCELED,
+        events.TASK_SUCCEEDED_WORKFLOW_DORMANT_ABENDED: statuses.FAILED,
         # Fail the workflow quickly even if there are still running tasks.
         events.TASK_FAILED_WORKFLOW_ACTIVE: statuses.FAILED,
         events.TASK_FAILED_WORKFLOW_DORMANT: statuses.FAILED,
@@ -127,6 +128,7 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.TASK_SUCCEEDED_WORKFLOW_DORMANT_COMPLETED: statuses.PAUSED,
         events.TASK_SUCCEEDED_WORKFLOW_DORMANT_PAUSED: statuses.PAUSED,
         events.TASK_SUCCEEDED_WORKFLOW_DORMANT_CANCELED: statuses.CANCELED,
+        events.TASK_SUCCEEDED_WORKFLOW_DORMANT_ABENDED: statuses.FAILED,
         events.TASK_FAILED_WORKFLOW_ACTIVE: statuses.FAILED,
         events.TASK_FAILED_WORKFLOW_DORMANT: statuses.FAILED,
         events.TASK_REMEDIATED_WORKFLOW_ACTIVE_INCOMPLETE: statuses.PAUSING,
@@ -174,6 +176,7 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.TASK_SUCCEEDED_WORKFLOW_DORMANT_COMPLETED: statuses.SUCCEEDED,
         events.TASK_SUCCEEDED_WORKFLOW_DORMANT_PAUSED: statuses.PAUSED,
         events.TASK_SUCCEEDED_WORKFLOW_DORMANT_CANCELED: statuses.CANCELED,
+        events.TASK_SUCCEEDED_WORKFLOW_DORMANT_ABENDED: statuses.FAILED,
         events.TASK_FAILED_WORKFLOW_ACTIVE: statuses.FAILED,
         events.TASK_FAILED_WORKFLOW_DORMANT: statuses.FAILED,
         events.TASK_REMEDIATED_WORKFLOW_ACTIVE_INCOMPLETE: statuses.RUNNING,
@@ -202,6 +205,7 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.TASK_SUCCEEDED_WORKFLOW_DORMANT_COMPLETED: statuses.CANCELED,
         events.TASK_SUCCEEDED_WORKFLOW_DORMANT_PAUSED: statuses.CANCELED,
         events.TASK_SUCCEEDED_WORKFLOW_DORMANT_CANCELED: statuses.CANCELED,
+        events.TASK_SUCCEEDED_WORKFLOW_DORMANT_ABENDED: statuses.FAILED,
         events.TASK_FAILED_WORKFLOW_ACTIVE: statuses.CANCELING,
         events.TASK_FAILED_WORKFLOW_DORMANT: statuses.CANCELED,
         events.TASK_REMEDIATED_WORKFLOW_ACTIVE_INCOMPLETE: statuses.CANCELING,
@@ -731,6 +735,10 @@ class WorkflowStateMachine(object):
 
         if workflow_state.has_canceling_tasks or workflow_state.has_canceled_tasks:
             return task_event + '_canceled'
+
+        if (workflow_state.has_abended_tasks and
+                not (workflow_state.has_staged_tasks or has_next_tasks)):
+            return task_event + '_abended'
 
         if workflow_state.has_pausing_tasks or workflow_state.has_paused_tasks:
             return task_event + '_paused'

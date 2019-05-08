@@ -94,6 +94,42 @@ tasks:
     action: core.noop
 """
 
+REMEDIATED_WF_DEF = """
+version: 1.0
+
+description: A basic branching workflow.
+
+vars:
+  - var1: abc
+  - var2: 234
+
+tasks:
+  # branch 1
+  task1:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - var1: 'xyz'
+        do: task2
+  task2:
+    action: core.noop
+
+  # branch 2
+  task3:
+    action: core.noop
+    next:
+      - publish:
+          - var2: 123
+        do: task4
+  task4:
+    action: core.noop
+
+output:
+  - var1: <% ctx().var1 %>
+  - var2: <% ctx().var2 %>
+"""
+
 
 class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
@@ -107,7 +143,10 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         return conductor
 
-    def assert_workflow_rerun_request(self, conductor, rerun_tasks, number_tasks):
+    def assert_workflow_rerun_request(self, conductor, rerun_tasks):
+        prev_num_tasks = len(conductor.workflow_state.get_tasks())
+        prev_num_staged_tasks = len(conductor.workflow_state.get_staged_tasks())
+
         options = dict()
         options['tasks'] = rerun_tasks
         conductor.request_workflow_rerun(options)
@@ -115,16 +154,17 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         # Assert the workflow status.
         self.assertEqual(conductor.get_workflow_status(), statuses.RESUMING)
 
-        # Assert the number of tasks, staged tasks
+        # Assert the number of tasks and staged tasks.
         tasks = conductor.workflow_state.get_tasks()
-        self.assertEqual(len(tasks), number_tasks + len(rerun_tasks))
+        self.assertEqual(len(tasks), prev_num_tasks + len(rerun_tasks))
 
         staged_tasks = conductor.workflow_state.get_staged_tasks()
-        self.assertEqual(len(staged_tasks), len(rerun_tasks))
+        self.assertEqual(len(staged_tasks), prev_num_staged_tasks + len(rerun_tasks))
 
-        for i in range(len(staged_tasks)):
-            self.assertEqual(staged_tasks[i]['id'], rerun_tasks[i])
-            self.assertEqual(staged_tasks[i]['ready'], True)
+        # Assert the rerun tasks are staged and ready.
+        for task in rerun_tasks:
+            matched = filter(lambda x: x['id'] == task and x.get('ready', False), staged_tasks)
+            self.assertEqual(len(list(matched)), 1)
 
         # Assert the workflow status.
         self.assertEqual(conductor.get_workflow_status(), statuses.RESUMING)
@@ -156,7 +196,7 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
         expected_term_tasks = ['task1', 'task3']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
@@ -192,14 +232,15 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
-        expected_term_tasks = ['task1', 'task3', 'task4', 'task2']
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
+        expected_term_tasks = ['task2', 'task4']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
         # Check workflow status, context and output.
         expected_term_ctx = {'var1': 'xyz', 'var2': 123}
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
+        self.assertEqual(len(conductor.errors), 0)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
     def test_parallel_rerun_with_last_task(self):
@@ -222,21 +263,16 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         self.forward_task_statuses(conductor, 'task2', [statuses.SUCCEEDED])
         self.forward_task_statuses(conductor, 'task4', [statuses.FAILED])
 
-        # Log the errors
-        errors = ['error1', 'error2']
-        conductor.log_errors(errors, 'task4')
-
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
         expected_term_tasks = ['task2', 'task4']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
 
         # 3. Start rerun workflow
         rerun_tasks = ['task4']
-        number_tasks = 4
-        self.assert_workflow_rerun_request(conductor, rerun_tasks, number_tasks)
+        self.assert_workflow_rerun_request(conductor, rerun_tasks)
 
         # Conduct task4 and check context.
         self.forward_task_statuses(conductor, 'task4', [statuses.RUNNING])
@@ -246,14 +282,15 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
-        expected_term_tasks = ['task2', 'task4', 'task4']
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
+        expected_term_tasks = ['task2', 'task4']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
         # Check workflow status, context and output.
         expected_term_ctx = {'var1': 'xyz', 'var2': 123}
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
+        self.assertEqual(len(conductor.errors), 0)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
     def test_parallel_rerun_with_more_than_one_tasks(self):
@@ -277,22 +314,16 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING])
         self.forward_task_statuses(conductor, 'task2', [statuses.FAILED])
 
-        # Log the errors
-        errors = ['error1', 'error2']
-        conductor.log_errors(errors, 'task3')
-        conductor.log_errors(errors, 'task2')
-
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
-        expected_term_tasks = ['task3', 'task2']
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
+        expected_term_tasks = ['task2', 'task3']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
 
         # 3. Start rerun workflow
         rerun_tasks = ['task2', 'task3']
-        number_tasks = 3
-        self.assert_workflow_rerun_request(conductor, rerun_tasks, number_tasks)
+        self.assert_workflow_rerun_request(conductor, rerun_tasks)
 
         # Conduct task2, task3 and check context.
         self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING])
@@ -317,14 +348,15 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
-        expected_term_tasks = ['task3', 'task2', 'task2', 'task4']
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
+        expected_term_tasks = ['task2', 'task4']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
         # Check workflow status, context and output.
         expected_term_ctx = {'var1': 'xyz', 'var2': 123}
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
+        self.assertEqual(len(conductor.errors), 0)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
     def test_join_rerun_with_first_task(self):
@@ -339,21 +371,16 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         self.forward_task_statuses(conductor, 'task1', [statuses.FAILED])
         self.forward_task_statuses(conductor, 'task2', [statuses.SUCCEEDED])
 
-        # Log the errors
-        errors = ['error1', 'error2']
-        conductor.log_errors(errors, 'task1')
-
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
         expected_term_tasks = ['task1', 'task2']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
 
         # 3. Start rerun workflow
         rerun_tasks = ['task1']
-        number_tasks = 2
-        self.assert_workflow_rerun_request(conductor, rerun_tasks, number_tasks)
+        self.assert_workflow_rerun_request(conductor, rerun_tasks)
 
         # Conduct task1 and check context.
         self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
@@ -380,13 +407,14 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
-        expected_term_tasks = ['task1', 'task2', 'task4']
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
+        expected_term_tasks = ['task4']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
         # Check workflow status and context.
         expected_term_ctx = copy.deepcopy(expected_task_ctx)
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
+        self.assertEqual(len(conductor.errors), 0)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
     def test_join_rerun_with_join_task(self):
@@ -404,21 +432,16 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         self.forward_task_statuses(conductor, 'task3', [statuses.RUNNING])
         self.forward_task_statuses(conductor, 'task3', [statuses.FAILED])
 
-        # Log the errors
-        error = 'error1'
-        conductor.log_error(error, 'task3')
-
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
         expected_term_tasks = ['task3']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
 
         # 3. Start rerun workflow
         rerun_tasks = ['task3']
-        number_tasks = 3
-        self.assert_workflow_rerun_request(conductor, rerun_tasks, number_tasks)
+        self.assert_workflow_rerun_request(conductor, rerun_tasks)
 
         # Conduct task3 and check merged context.
         self.forward_task_statuses(conductor, 'task3', [statuses.RUNNING])
@@ -438,13 +461,14 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
-        expected_term_tasks = ['task3', 'task4']
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
+        expected_term_tasks = ['task4']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
         # Check workflow status and context.
         expected_term_ctx = copy.deepcopy(expected_task_ctx)
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
+        self.assertEqual(len(conductor.errors), 0)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
     def test_self_looping_rerun(self):
@@ -486,21 +510,16 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         task_name = 'task2'
         self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.FAILED])
 
-        # Log the errors
-        errors = ['error1', 'error2']
-        conductor.log_errors(errors, 'task2')
-
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
         expected_term_tasks = ['task2']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
 
         # 3. Start rerun workflow
         rerun_tasks = ['task2']
-        number_tasks = 3
-        self.assert_workflow_rerun_request(conductor, rerun_tasks, number_tasks)
+        self.assert_workflow_rerun_request(conductor, rerun_tasks)
 
         # Conduct task2 and check merged context.
         task_name = 'task2'
@@ -509,7 +528,7 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Check the list of tasks and make sure only the last entry for task2 is term=True.
         tasks = [task for task in conductor.workflow_state.sequence if task['id'] == task_name]
-        self.assertListEqual([task.get('term', False) for task in tasks], [False, True, True])
+        self.assertListEqual([task.get('term', False) for task in tasks], [False, False, True])
 
         # Check workflow status and context.
         expected_term_ctx = {'loop': False}
@@ -518,11 +537,12 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
-        expected_term_tasks = [task_name, task_name]
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
+        expected_term_tasks = ['task2']
+        self.assertEqual(len(conductor.errors), 0)
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
-    def test_workflow_rerun_one_task_with_multiple_tasks_failure(self):
+    def test_rerun_task_individually_for_workflow_with_many_tasks_failure(self):
         # 1. Prepare rerun workflow
         conductor = self.pre_rerun_workflow(PARALLEL_WF_DEF)
 
@@ -533,20 +553,14 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
         expected_term_tasks = ['task1', 'task3']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
 
-        # Log the errors
-        errors = ['error1', 'error2']
-        conductor.log_errors(errors, 'task1')
-        conductor.log_errors(errors, 'task3')
-
         # 3. Start rerun workflow only for task1
         rerun_tasks = ['task1']
-        number_tasks = 2
-        self.assert_workflow_rerun_request(conductor, rerun_tasks, number_tasks)
+        self.assert_workflow_rerun_request(conductor, rerun_tasks)
 
         # Conduct task1 and check context.
         self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
@@ -567,11 +581,45 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
-        expected_term_tasks = ['task1', 'task3', 'task2']
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
+        expected_term_tasks = ['task2', 'task3']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
-        # Check workflow status, context and output.
+        # Check workflow errors. There should be an entry for task3.
+        self.assertEqual(len(conductor.errors), 1)
+
+        # Workflow should be in failed status because task3 has error and not rerun.
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
+
+        # 4. Start rerun workflow only for task3
+        rerun_tasks = ['task3']
+        self.assert_workflow_rerun_request(conductor, rerun_tasks)
+
+        # Conduct task1 and check context.
+        self.forward_task_statuses(conductor, 'task3', [statuses.RUNNING, statuses.SUCCEEDED])
+
+        expected_t3_ctx = {'var1': 'abc', 'var2': 123}
+        expected_txsn_ctx = {'task4__t0': expected_t3_ctx}
+        self.assertDictEqual(conductor.get_task_transition_contexts('task3', 0), expected_txsn_ctx)
+
+        task_ids = ['task4']
+        task_ctxs = [expected_t3_ctx]
+        task_routes = [0]
+        self.assert_next_tasks(conductor, task_ids, task_ctxs, task_routes)
+
+        # Conduct task4 and check context.
+        self.forward_task_statuses(conductor, 'task4', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.assertDictEqual(conductor.get_task_transition_contexts('task4', 0), {})
+        self.assert_next_task(conductor, has_next_task=False)
+
+        # Check the list of terminal tasks.
+        term_tasks = conductor.workflow_state.get_terminal_tasks()
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
+        expected_term_tasks = ['task2', 'task4']
+        self.assertListEqual(actual_term_tasks, expected_term_tasks)
+
+        # Check workflow status and errors.
+        self.assertEqual(len(conductor.errors), 0)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
     def test_workflow_rerun_with_unrerunnable_status(self):
@@ -587,7 +635,7 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
             options
         )
 
-    def test_workflow_rerun_with_all_invalid_taskids(self):
+    def test_workflow_rerun_with_all_invalid_task_ids(self):
         # 1. Prepare rerun workflow
         conductor = self.pre_rerun_workflow(PARALLEL_WF_DEF)
 
@@ -608,7 +656,7 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         )
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
 
-    def test_workflow_rerun_with_valid_and_invalid_taskids(self):
+    def test_workflow_rerun_with_valid_and_invalid_task_ids(self):
         # 1. Prepare rerun workflow
         conductor = self.pre_rerun_workflow(PARALLEL_WF_DEF)
 
@@ -627,3 +675,57 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
             conductor.request_workflow_rerun,
             options
         )
+
+    def test_workflow_rerun_with_remediated_task(self):
+        # 1. Prepare rerun workflow
+        conductor = self.pre_rerun_workflow(REMEDIATED_WF_DEF)
+
+        # 2. Fail task1 and task3
+        # Conduct tasks1 and task3.
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.FAILED])
+        self.forward_task_statuses(conductor, 'task3', [statuses.RUNNING, statuses.FAILED])
+
+        # Check the list of terminal tasks.
+        term_tasks = conductor.workflow_state.get_terminal_tasks()
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
+        expected_term_tasks = ['task1', 'task3']
+        self.assertListEqual(actual_term_tasks, expected_term_tasks)
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
+
+        # 3. Start rerun workflow only for task1
+        rerun_tasks = ['task1']
+        self.assert_workflow_rerun_request(conductor, rerun_tasks)
+
+        # Conduct task1 and check context.
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
+
+        expected_t1_ctx = {'var1': 'xyz', 'var2': 234}
+        expected_txsn_ctx = {'task2__t0': expected_t1_ctx}
+        self.assertDictEqual(conductor.get_task_transition_contexts('task1', 0), expected_txsn_ctx)
+
+        expected_t3_ctx = {'var1': 'abc', 'var2': 123}
+        expected_txsn_ctx = {'task4__t0': expected_t3_ctx}
+        self.assertDictEqual(conductor.get_task_transition_contexts('task3', 0), expected_txsn_ctx)
+
+        task_ids = ['task2', 'task4']
+        task_ctxs = [expected_t1_ctx, expected_t3_ctx]
+        task_routes = [0, 0]
+        self.assert_next_tasks(conductor, task_ids, task_ctxs, task_routes)
+
+        # Conduct task2 and task4.
+        self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, 'task4', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.assert_next_task(conductor, has_next_task=False)
+
+        # Check the list of terminal tasks.
+        term_tasks = conductor.workflow_state.get_terminal_tasks()
+        actual_term_tasks = sorted([t['id'] for t in term_tasks])
+        expected_term_tasks = ['task2', 'task4']
+        self.assertListEqual(actual_term_tasks, expected_term_tasks)
+
+        # Although remediated, there should be one error from the task3 failure.
+        self.assertEqual(len(conductor.errors), 1)
+        self.assertEqual(len(list(filter(lambda x: x['task_id'] == 'task3', conductor.errors))), 1)
+
+        # Check workflow status.
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
