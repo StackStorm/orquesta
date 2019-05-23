@@ -256,14 +256,14 @@ class WorkflowConductorTest(WorkflowComposerTest):
             run_q.put(task)
 
         # Serialize workflow conductor to mock async execution.
-        wf_conducting_status = conductor.serialize()
+        wf_conducting_state = conductor.serialize()
 
-        # Process until workflow reaches a completed status.
-        while conductor.get_workflow_status() not in statuses.COMPLETED_STATUSES:
+        # Process until there are not more tasks in queue.
+        while not run_q.empty():
             # Deserialize workflow conductor to mock async execution.
-            conductor = conducting.WorkflowConductor.deserialize(wf_conducting_status)
+            conductor = conducting.WorkflowConductor.deserialize(wf_conducting_state)
 
-            # Clear the run queue and move all the tasks to running.
+            # Process all the tasks in the run queue.
             while not run_q.empty():
                 current_task = run_q.get()
                 current_task_id = current_task['id']
@@ -285,11 +285,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
                 run_q.put(next_task)
 
             # Serialize workflow execution graph to mock async execution.
-            wf_conducting_status = conductor.serialize()
-
-            # Exit if run queue is empty.
-            if run_q.empty():
-                break
+            wf_conducting_state = conductor.serialize()
 
         actual_task_seq = [
             (entry['id'], entry['route'])

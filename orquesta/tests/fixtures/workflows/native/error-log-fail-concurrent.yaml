@@ -11,5 +11,3 @@ tasks:
         do: log, fail
   log:
     action: core.echo message=<% ctx().error %>
-    next:
-      - when: <% succeeded() %>
