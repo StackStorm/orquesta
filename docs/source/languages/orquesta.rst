@@ -216,9 +216,9 @@ at the same time. When ``concurrency`` is specified, the number of items up to t
 will be processed and the remaining items will be queued. When the action execution for an item is
 completed, the next item in the list will be processed.
 
-The task result is a list of the action execution result in the same order as the items. All action
-executions must be completely successfully for the task to reach a succeeded state. If one ore more
-action executions abended, then the task will result in a failed state.
+The task result is a list of the action execution results in the same order as the items. All action
+executions must complete successfully for the task to reach a succeeded state. If one or more
+action executions fail, then the task will result in a failed state.
 
 When there's a request to cancel or pause the workflow, the task will be in a canceling or pausing
 state respectively until all action executions in the process of being executed are completed. Once
@@ -236,8 +236,8 @@ items.
 +-------------+-------------+-------------------------------------------------------------------+
 
 The following is a simple example with a single list of items defined in a task. The task is given
-a list of messages to echo. For an items list where no concurrency is required, there is a short
-hand notation to pass just the list directly to the ``with`` statement. The individual items can be
+a list of messages to echo. For an items list where no concurrency is required, there is a shorthand
+notation to pass just the list directly to the ``with`` statement. The individual items can be
 passed into the action as input for execution using the ``item`` function.
 
 .. code-block:: yaml
