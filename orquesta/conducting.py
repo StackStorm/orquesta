@@ -547,14 +547,24 @@ class WorkflowConductor(object):
         return False
 
     def get_next_tasks(self):
+        fail_on_task_rendering = False
+        staged_tasks = self.workflow_state.get_staged_tasks()
+        remediation_tasks = []
         next_tasks = []
 
-        # Return an empty list if the workflow is not running.
-        if self.get_workflow_status() not in statuses.RUNNING_STATUSES:
+        # Identify remediation tasks if workflow failed.
+        if self.get_workflow_status() == statuses.FAILED:
+            remediation_tasks = [s for s in staged_tasks if s.get('run_on_fail', False) is True]
+
+        # Return an empty list if the workflow is not running and there is no remediation tasks.
+        if self.get_workflow_status() not in statuses.RUNNING_STATUSES and not remediation_tasks:
             return next_tasks
 
-        # Return the list of tasks that are staged and readied.
-        for staged_task in self.workflow_state.get_staged_tasks():
+        # Return the list of tasks that are staged and readied. If there is exception on
+        # task rendering, then log the error and continue. This allows user to know about
+        # all task rendering errors for this task transition instead of getting rendering
+        # error one at a time during runtime.
+        for staged_task in remediation_tasks or staged_tasks:
             try:
                 next_task = self.get_task(staged_task['id'], staged_task['route'])
                 next_task = self._evaluate_task_actions(next_task)
@@ -564,12 +574,13 @@ class WorkflowConductor(object):
                 elif 'items_count' in next_task and next_task['items_count'] == 0:
                     next_tasks.append(next_task)
             except Exception as e:
+                fail_on_task_rendering = True
                 self.log_error(e, task_id=staged_task['id'], route=staged_task['route'])
-                self.request_workflow_status(statuses.FAILED)
                 continue
 
         # Return nothing if there is error(s) on determining next tasks.
-        if self.get_workflow_status() in statuses.COMPLETED_STATUSES:
+        if fail_on_task_rendering:
+            self.request_workflow_status(statuses.FAILED)
             return []
 
         return sorted(next_tasks, key=lambda x: (x['id'], x['route']))
@@ -701,6 +712,9 @@ class WorkflowConductor(object):
 
         # Evaluate task transitions if task is completed and status change is not processed.
         if new_task_status in statuses.COMPLETED_STATUSES and new_task_status != old_task_status:
+            has_manual_fail = False
+            staged_next_tasks = []
+
             # Identify task transitions for the current completed task.
             task_transitions = self.graph.get_next_transitions(task_id)
 
@@ -799,9 +813,32 @@ class WorkflowConductor(object):
                         route
                     )
 
-                    # If the next task is noop, then mark the task as completed.
+                    # Put the next task in the engine event queue if it is an engine command.
                     if next_task_id in events.ENGINE_EVENT_MAP.keys():
-                        engine_event_queue.put((staged_next_task['id'], staged_next_task['route']))
+                        queue_entry = (staged_next_task['id'], staged_next_task['route'])
+                        engine_event_queue.put(queue_entry)
+
+                        # Flag if there is at least one fail command in the task transition.
+                        if not has_manual_fail:
+                            has_manual_fail = (next_task_id == 'fail')
+                    else:
+                        # If not an engine command and the next task is ready, then
+                        # make a record of it for processing manual fail below.
+                        if staged_next_task['ready']:
+                            staged_next_tasks.append(staged_next_task)
+
+            # Task failure is remediable. For example, there may be workflow that wants
+            # to run a cleanup task on failure. In certain cases, we still want to fail
+            # the workflow after the remediation. The fail command can be in the
+            # task transition under the cleanup task. However, the cleanup task may be
+            # reusable when either workflow succeed or fail. It does not make sense to
+            # put the fail command in the task transition of the cleanup task. So we
+            # want to allow user to be able to define both the cleanup and fail in the
+            # task transition under the current task but still return the cleanup task
+            # even when the workflow is set to failed status.
+            if has_manual_fail:
+                for staged_next_task in staged_next_tasks:
+                    staged_next_task['run_on_fail'] = True
 
         # Process the task event using the workflow state machine and update the workflow status.
         task_ex_event = events.TaskExecutionEvent(task_id, route, task_state_entry['status'])

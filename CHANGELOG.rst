@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.6
+---
+
+Fixed
+~~~~~
+
+* Allow tasks in the same transition with a "fail" command to run. (bug fix)
+
 0.5
 ---
 

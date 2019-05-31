@@ -52,7 +52,8 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_task_seq = [
             'task1',
-            'fail'
+            'fail',
+            'log'
         ]
 
         mock_statuses = [
