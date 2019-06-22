@@ -4,6 +4,11 @@ Changelog
 0.6
 ---
 
+Changed
+~~~~~~~
+
+* Rephrased the error message for the unreachable join task. Fixes #162 (improvement)
+
 Fixed
 ~~~~~
 

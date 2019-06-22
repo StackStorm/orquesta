@@ -465,8 +465,15 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                 meta['reachable'] = (meta['splits'] == staging[prev_task_name]['splits'])
 
                 if not meta['reachable']:
+                    msg = (
+                        'The join task "%s" is unreachable. A join task is determined to be '
+                        'unreachable if there are nested forks from multi-referenced tasks '
+                        'that join on the said task. This is ambiguous to the workflow engine '
+                        'because it does not know at which level should the join occurs.'
+                    )
+
                     entry = {
-                        'message': 'The join task "%s" is unreachable.' % task_name,
+                        'message': msg % task_name,
                         'spec_path': meta['spec_path'],
                         'schema_path': meta['schema_path']
                     }
