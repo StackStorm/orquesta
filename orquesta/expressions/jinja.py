@@ -142,42 +142,47 @@ class JinjaEvaluator(expr_base.Evaluator):
 
     @classmethod
     def _evaluate_and_expand(cls, text, data=None):
-        output = str_util.unicode(text)
         exprs = cls._regex_parser.findall(text)
         block_exprs = cls._regex_block_parser.findall(text)
         ctx = cls.contextualize(data)
         opts = {'undefined_to_none': False}
 
         try:
-            # Evaluate inline jinja expressions first.
-            for expr in exprs:
-                stripped = cls.strip_delimiter(expr)
-                compiled = cls._jinja_env.compile_expression(stripped, **opts)
-                result = compiled(**ctx)
-
-                if inspect.isgenerator(result):
-                    result = list(result)
-
-                if isinstance(result, six.string_types):
-                    result = cls._evaluate_and_expand(result, data)
-
-                # For StrictUndefined values, UndefinedError only gets raised when the value is
-                # accessed, not when it gets created. The simplest way to access it is to try
-                # and cast it to string. When StrictUndefined is cast to str below, this will
-                # raise an exception with error description.
-                if not isinstance(result, jinja2.runtime.StrictUndefined):
-                    if len(exprs) > 1 or block_exprs or len(output) > len(expr):
-                        output = output.replace(expr, str_util.unicode(result, force=True))
-                    else:
-                        output = str_util.unicode(result)
-
-            # Evaluate jinja block(s) after inline expressions are evaluated.
-            if block_exprs and isinstance(output, six.string_types):
-                output = cls._jinja_env.from_string(output).render(ctx)
+            # If there is a Jinja block expression in the text, then process the whole text.
+            if block_exprs:
+                expr = text
+                output = cls._jinja_env.from_string(expr).render(ctx)
+                output = str_util.unicode(output)
 
                 # Traverse and evaulate again in case additional inline epxressions are
                 # introduced after the jinja block is evaluated.
                 output = cls._evaluate_and_expand(output, data)
+            else:
+                # The output will first be the original text and the expressions
+                # will be substituted by the evaluated value.
+                output = str_util.unicode(text)
+
+                # Evaluate inline jinja expressions first.
+                for expr in exprs:
+                    stripped = cls.strip_delimiter(expr)
+                    compiled = cls._jinja_env.compile_expression(stripped, **opts)
+                    result = compiled(**ctx)
+
+                    if inspect.isgenerator(result):
+                        result = list(result)
+
+                    if isinstance(result, six.string_types):
+                        result = cls._evaluate_and_expand(result, data)
+
+                    # For StrictUndefined values, UndefinedError only gets raised when the value is
+                    # accessed, not when it gets created. The simplest way to access it is to try
+                    # and cast it to string. When StrictUndefined is cast to str below, this will
+                    # raise an exception with error description.
+                    if not isinstance(result, jinja2.runtime.StrictUndefined):
+                        if len(exprs) > 1 or block_exprs or len(output) > len(expr):
+                            output = output.replace(expr, str_util.unicode(result, force=True))
+                        else:
+                            output = str_util.unicode(result)
 
         except jinja2.exceptions.UndefinedError as e:
             msg = "Unable to evaluate expression '%s'. %s: %s"
