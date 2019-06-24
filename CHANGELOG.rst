@@ -1,12 +1,13 @@
 Changelog
 =========
 
-0.6
----
+1.0.0
+-----
 
 Changed
 ~~~~~~~
 
+* Change the version number to the semver format and from 0.6 -> 1.0.0 to indicate GA.
 * Rephrased the error message for the unreachable join task. Fixes #162 (improvement)
 
 Fixed
