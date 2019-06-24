@@ -43,6 +43,20 @@ class JinjaEvaluationTest(test_base.ExpressionEvaluatorTest):
 
         self.assertEqual('abc', self.evaluator.evaluate(expr, data))
 
+    def test_block_eval_complex_data(self):
+        expr = '{% for i in ctx().x %}{{ i.k }}{{ ctx().z }}{% endfor %}'
+
+        data = {
+            'x': [
+                {'k': 'a'},
+                {'k': 'b'},
+                {'k': 'c'}
+            ],
+            'z': '->'
+        }
+
+        self.assertEqual('a->b->c->', self.evaluator.evaluate(expr, data))
+
     def test_block_eval_undefined(self):
         expr = '{% for i in ctx().x %}{{ ctx().y }}{% endfor %}'
 
