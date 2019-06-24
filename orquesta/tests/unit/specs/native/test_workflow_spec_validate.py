@@ -412,7 +412,12 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
         expected_errors = {
             'semantics': [
                 {
-                    'message': 'The join task "task5" is unreachable.',
+                    'message': (
+                        'The join task "task5" is unreachable. A join task is determined to be '
+                        'unreachable if there are nested forks from multi-referenced tasks '
+                        'that join on the said task. This is ambiguous to the workflow engine '
+                        'because it does not know at which level should the join occurs.'
+                    ),
                     'spec_path': 'tasks.task5',
                     'schema_path': 'properties.tasks.patternProperties.^\\w+$'
                 }
