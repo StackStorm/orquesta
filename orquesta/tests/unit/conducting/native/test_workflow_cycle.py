@@ -91,3 +91,36 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         self.assert_spec_inspection(wf_name)
 
         self.assert_conducting_sequences(wf_name, expected_task_seq, mock_statuses=mock_statuses)
+
+    def test_cycle_and_fork(self):
+        wf_name = 'cycle-fork'
+
+        expected_task_seq = [
+            'init',
+            'query',
+            'decide_cheer',
+            'decide_work',
+            'cheer',
+            'notify_work',
+            'toil',
+            'query',
+            'decide_cheer',
+            'decide_work'
+        ]
+
+        mock_results = [
+            None,   # init
+            True,   # query
+            None,   # decide_cheer
+            None,   # decide_work
+            None,   # cheer
+            None,   # notify_work
+            None,   # toil
+            False,  # query
+            None,   # decide_cheer
+            None,   # decide_work
+        ]
+
+        self.assert_spec_inspection(wf_name)
+
+        self.assert_conducting_sequences(wf_name, expected_task_seq, mock_results=mock_results)

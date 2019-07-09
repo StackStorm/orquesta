@@ -653,8 +653,12 @@ class WorkflowConductor(object):
         task_state_idx = self._get_task_state_idx(task_id, route)
 
         # If task is already completed and in cycle, then create new task state entry.
-        if (self.graph.in_cycle(task_id) and
-                task_state_entry.get('status') in statuses.COMPLETED_STATUSES):
+        # Unfortunately, the method in the graph to check for cycle is too simple and
+        # misses forks that extends from the cycle. The check here assumes that the
+        # last task entry is already completed and the new task status is one of the
+        # starting statuses, then there is high likelihood that this is a cycle.
+        if (task_state_entry.get('status') in statuses.COMPLETED_STATUSES and
+                event.status and event.status in statuses.STARTING_STATUSES):
             task_state_entry = self.add_task_state(
                 task_id,
                 staged_task['route'],
