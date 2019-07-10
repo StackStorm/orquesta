@@ -1,6 +1,14 @@
 Changelog
 =========
 
+In development
+--------------
+
+Fixed
+-----
+
+* Fix conducting of cycle with a fork. Fixes #169 (bug fix)
+
 1.0.0
 -----
 

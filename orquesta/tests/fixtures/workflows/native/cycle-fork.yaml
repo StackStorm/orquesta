@@ -1,0 +1,46 @@
+---
+version: '1.0'
+
+description: A sample workflow with a fork that stems from a cycle.
+
+vars:
+  - cheer: false
+  - work: false
+
+tasks:
+  # This init task is required to tell the workflow engine where to start.
+  # Otherwise with just a cycle, the workflow engine cannot tell where to start.
+  init:
+    action: core.noop
+    next:
+      - do: query
+
+  # This is the start of the cycle in the workflow.
+  query:
+    action: core.noop
+    next:
+      - when: <% succeeded() %>
+        publish: cheer=<% result() %> work=<% result() %>
+        do: decide_cheer, decide_work
+
+
+  # The branch under the decide_work task will cycle back to the query task.
+  decide_work:
+    next:
+      - when: <% ctx().work %>
+        do: notify_work, toil
+  notify_work:
+    action: core.noop
+  toil:
+    action: core.echo message="This is hard work."
+    next:
+      - do: query
+
+
+  # The branch under the decide_cheer task is a fork from the cycle.
+  decide_cheer:
+    next:
+      - when: <% ctx().cheer %>
+        do: cheer
+  cheer:
+    action: core.echo message="You can do it!"
