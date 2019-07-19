@@ -82,10 +82,26 @@ ONE_KEY_DICT = {
     }
 }
 
+STRING_OR_INTEGER = {
+    "oneOf": [
+        NONEMPTY_STRING,
+        {
+            'type': 'integer'
+        }
+    ]
+}
+
 STRING_OR_POSITIVE_INTEGER = {
     "oneOf": [
         NONEMPTY_STRING,
         POSITIVE_INTEGER
+    ]
+}
+
+STRING_OR_POSITIVE_NUMBER = {
+    "oneOf": [
+        NONEMPTY_STRING,
+        POSITIVE_NUMBER
     ]
 }
 
