@@ -632,17 +632,26 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
             'syntax': [
                 {
                     'message': "'when' is a required property",
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.retry.required',
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.retry.required'
+                    ),
                     'spec_path': 'tasks.task1.retry'
                 },
                 {
                     'message': "'count' is a required property",
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.retry.required',
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.retry.required'
+                    ),
                     'spec_path': 'tasks.task1.retry'
                 },
                 {
                     'message': "'delay' is a required property",
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.retry.required',
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.retry.required'
+                    ),
                     'spec_path': 'tasks.task1.retry'
                 },
             ]
@@ -672,17 +681,26 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
             'syntax': [
                 {
                     'message': "['abc'] is not valid under any of the given schemas",
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.retry.properties.count.oneOf',
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.retry.properties.count.oneOf'
+                    ),
                     'spec_path': 'tasks.task1.retry.count'
                 },
                 {
                     'message': 'True is not valid under any of the given schemas',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.retry.properties.delay.oneOf',
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.retry.properties.delay.oneOf'
+                    ),
                     'spec_path': 'tasks.task1.retry.delay'
                 },
                 {
                     'message': "1 is not of type 'string'",
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.retry.properties.when.type',
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.retry.properties.when.type'
+                    ),
                     'spec_path': 'tasks.task1.retry.when'
                 }
             ]
