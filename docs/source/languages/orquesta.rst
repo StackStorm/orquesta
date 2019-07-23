@@ -490,15 +490,22 @@ The following is a list of engine commands with special meaning to the workflow 
 When specified under ``do`` in the task transition, the engine will act accordingly. These
 commands are also reserved words that cannot be used for task name.
 
-+-------------+-------------------------------------------------------------------+
-| Command     | Description                                                       |
-+=============+===================================================================+
-| noop        | No operation or do not execute anything else.                     |
-+-------------+-------------------------------------------------------------------+
-| fail        | Fails the workflow execution.                                     |
-+-------------+-------------------------------------------------------------------+
++-------------+------------------------------------------------------------------------------------+
+| Command     | Description                                                                        |
++=============+====================================================================================+
+| continue    | Default value when ``do`` is not specified. The workflow engine will not alter the |
+|             | previous task state and will continue to conduct the workflow execution. If the    |
+|             | previous task state is one of the failure states, the conductor will continue and  |
+|             | fail the workflow execution.                                                       |
++-------------+------------------------------------------------------------------------------------+
+| fail        | The workflow engine will fail the workflow execution.                              |
++-------------+------------------------------------------------------------------------------------+
+| noop        | The workflow engine will perform no operation given previous task state. If the    |
+|             | previous task state is one of the failure states, the conductcor will ignore the   |
+|             | task failure and assume a remediation has occurred.                                |
++-------------+------------------------------------------------------------------------------------+
 
-The following example illustrates the use of the ``fail`` command:
+The following example illustrates the use of the ``fail`` command to explicitly fail the workflow:
 
 .. code-block:: yaml
 
