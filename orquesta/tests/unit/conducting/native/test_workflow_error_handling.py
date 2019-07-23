@@ -73,3 +73,36 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
             mock_results=mock_results,
             expected_workflow_status=statuses.FAILED
         )
+
+    def test_error_with_transition_but_no_remediation(self):
+        wf_name = 'task-fail-no-remediation'
+
+        expected_task_seq = [
+            'task1',
+            'task2',
+            'task3',
+            'continue'
+        ]
+
+        mock_statuses = [
+            statuses.SUCCEEDED,     # task1
+            statuses.SUCCEEDED,     # task2
+            statuses.FAILED         # task3
+        ]
+
+        mock_results = [
+            'Stanley',
+            'All your base are belong to us!',
+            'Stanley, All your base are belong to us!'
+        ]
+
+        self.assert_spec_inspection(wf_name)
+
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            inputs={'name': 'Stanley'},
+            mock_statuses=mock_statuses,
+            mock_results=mock_results,
+            expected_workflow_status=statuses.FAILED
+        )
