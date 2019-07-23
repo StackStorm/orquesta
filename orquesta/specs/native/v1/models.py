@@ -83,7 +83,7 @@ class TaskTransitionSpec(native_v1_specs.Spec):
         do_spec = getattr(self, 'do', None)
 
         if not do_spec:
-            self.do = 'noop'
+            self.do = 'continue'
 
 
 class TaskTransitionSequenceSpec(native_v1_specs.SequenceSpec):

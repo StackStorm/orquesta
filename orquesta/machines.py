@@ -230,6 +230,7 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_DELAYED: statuses.DELAYED,
         events.ACTION_RUNNING: statuses.RUNNING,
         events.ACTION_PENDING: statuses.PENDING,
+        events.TASK_CONTINUE_REQUESTED: statuses.SUCCEEDED,
         events.TASK_NOOP_REQUESTED: statuses.SUCCEEDED,
         events.TASK_FAIL_REQUESTED: statuses.FAILED
     },

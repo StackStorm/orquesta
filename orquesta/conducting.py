@@ -534,6 +534,10 @@ class WorkflowConductor(object):
                     (next_task_id, str(seq_key))
                 )
 
+                # Ignore if the next task is the engine command to "continue".
+                if next_task_id == 'continue':
+                    continue
+
                 # Evaluate if outbound criteria is satisfied.
                 if not task_state_entry['next'].get(task_transition_id):
                     continue

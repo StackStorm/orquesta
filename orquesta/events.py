@@ -297,10 +297,12 @@ ACTION_EXECUTION_EVENTS = [
 
 
 # Events for special workflow engine operations.
+TASK_CONTINUE_REQUESTED = 'task_continue_requested'
 TASK_NOOP_REQUESTED = 'task_noop_requested'
 TASK_FAIL_REQUESTED = 'task_fail_requested'
 
 ENGINE_OPERATION_EVENTS = [
+    TASK_CONTINUE_REQUESTED,
     TASK_NOOP_REQUESTED,
     TASK_FAIL_REQUESTED
 ]
@@ -347,6 +349,15 @@ class EngineOperationEvent(ExecutionEvent):
     pass
 
 
+class TaskContinueEvent(EngineOperationEvent):
+
+    def __init__(self):
+        self.name = TASK_CONTINUE_REQUESTED
+        self.status = statuses.SUCCEEDED
+        self.result = None
+        self.context = None
+
+
 class TaskNoopEvent(EngineOperationEvent):
 
     def __init__(self):
@@ -366,6 +377,7 @@ class TaskFailEvent(EngineOperationEvent):
 
 
 ENGINE_EVENT_MAP = {
+    'continue': TaskContinueEvent,
     'noop': TaskNoopEvent,
     'fail': TaskFailEvent
 }
