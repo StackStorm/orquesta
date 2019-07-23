@@ -136,7 +136,7 @@ class WorkflowSpecTest(test_base.OrchestraWorkflowSpecTest):
 
         self.assertEqual(
             getattr(task3_transition_seqs[0], 'do'),
-            'noop'
+            'continue'
         )
 
     def test_basic_spec_serialization(self):

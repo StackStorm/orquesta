@@ -217,7 +217,7 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
                 'type': 'error',
                 'route': 0,
                 'task_id': 'task1',
-                'task_transition_id': 'noop__t0',
+                'task_transition_id': 'continue__t0',
                 'message': (
                     'YaqlEvaluationException: Unable to evaluate expression '
                     '\'<% ctx("__xyz") %>\'. VariableInaccessibleError: The '

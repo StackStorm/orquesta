@@ -34,7 +34,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     'id': 'task3'
                 },
                 {
-                    'id': 'noop'
+                    'id': 'continue'
                 }
             ],
             'adjacency': [
@@ -56,7 +56,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'noop',
+                        'id': 'continue',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -83,7 +83,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     'id': 'task3'
                 },
                 {
-                    'id': 'noop'
+                    'id': 'continue'
                 }
             ],
             'adjacency': [
@@ -105,7 +105,7 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'noop',
+                        'id': 'continue',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']

@@ -24,7 +24,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             'task1',
             'task2',
             'task3',
-            'noop'
+            'continue'
         ]
 
         mock_results = [
