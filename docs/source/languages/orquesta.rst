@@ -457,7 +457,11 @@ of ``do``. The following is a revision of the previous example:
       - result: <% ctx().abcd %>
 
 The following example illustrates separate task transitions with different publishes
-on different condition:
+on different condition. After different message is published, both transition to the
+same task to log the message. In the task transition for failure, an explicit
+``fail`` command is specified to tell the workflow execution to fail. If the ``fail``
+command is not specified, ``task2`` is considered a remediation task and the workflow
+execution will succeed:
 
 .. code-block:: yaml
 
@@ -475,10 +479,13 @@ on different condition:
         next:
           - when: <% succeeded() %>
             publish: msg="Successfully posted message."
-            do: task2
+            do:
+              - task2
           - when: <% failed() %>
             publish: msg="Unable to post message due to error: <% result() %>"
-            do: task2
+            do:
+              - task2
+              - fail
       task2:
         action: core.log message=<% ctx(msg) %>
 
@@ -490,27 +497,43 @@ The following is a list of engine commands with special meaning to the workflow 
 When specified under ``do`` in the task transition, the engine will act accordingly. These
 commands are also reserved words that cannot be used for task name.
 
-+-------------+-------------------------------------------------------------------+
-| Command     | Description                                                       |
-+=============+===================================================================+
-| noop        | No operation or do not execute anything else.                     |
-+-------------+-------------------------------------------------------------------+
-| fail        | Fails the workflow execution.                                     |
-+-------------+-------------------------------------------------------------------+
++-------------+------------------------------------------------------------------------------------+
+| Command     | Description                                                                        |
++=============+====================================================================================+
+| continue    | Default value when ``do`` is not specified. The workflow engine will not alter the |
+|             | previous task state and will continue to conduct the workflow execution. If the    |
+|             | previous task state is one of the failure states, the conductor will continue and  |
+|             | fail the workflow execution.                                                       |
++-------------+------------------------------------------------------------------------------------+
+| fail        | The workflow engine will fail the workflow execution.                              |
++-------------+------------------------------------------------------------------------------------+
+| noop        | The workflow engine will perform no operation given previous task state. If the    |
+|             | previous task state is one of the failure states, the conductcor will ignore the   |
+|             | task failure and assume a remediation has occurred.                                |
++-------------+------------------------------------------------------------------------------------+
 
-The following example illustrates the use of the ``fail`` command:
+The following example illustrates the use of the default ``continue`` command to let the workflow
+continue processing the task failure (or any other state) as normal. If ``task1`` fails, the second
+task transition will publish the ``stderr`` and the conductor will continue with ``failed`` as the
+final state of the workflow execution:
 
 .. code-block:: yaml
 
     version: 1.0
 
     description: >
-        A workflow example that illustrates error handling. By default
-        when any task fails, the notify_on_error task will be executed
-        and the workflow will transition to the failed state.
+        A workflow example that illustrates error handling. By default if no task
+        is specified under "do", the "continue" command is assumed. In this case
+        where there is a task failure, the "continue" command will process the
+        publish and then cascade the task failure to the workflow and the workflow
+        execution will fail as a result.
 
     input:
       - cmd
+
+    vars:
+      - stdout: null
+      - stderr: null
 
     tasks:
       task1:
@@ -520,13 +543,104 @@ The following example illustrates the use of the ``fail`` command:
             publish: stdout=<% result().stdout %>
           - when: <% failed() %>
             publish: stderr=<% result().stderr %>
-            do: notify_on_error
-      notify_on_error:
-        action: core.echo message=<% ctx(stderr) %>
-        next:
-          # The fail specified here tells the workflow to go into
-          # failed state on completion of the notify_on_error task.
-          - do: fail
 
     output:
-      - result: <% ctx(stdout) %>
+      - stdout: <% ctx(stdout) %>
+      - stderr: <% ctx(stderr) %>
+
+The following example is the same as the example above except the ``continue`` command is
+explicit:
+
+.. code-block:: yaml
+
+    version: 1.0
+
+    description: >
+        A workflow example that illustrates error handling. In this case, the "continue"
+        command is explicit. When there is a task failure, the "continue" command will
+        process the publish and then cascade the task failure to the workflow and the
+        workflow execution will fail as a result.
+
+    input:
+      - cmd
+
+    vars:
+      - stdout: null
+      - stderr: null
+
+    tasks:
+      task1:
+        action: core.local cmd=<% ctx(cmd) %>
+        next:
+          - when: <% succeeded() %>
+            publish: stdout=<% result().stdout %>
+            do: continue
+          - when: <% failed() %>
+            publish: stderr=<% result().stderr %>
+            do: continue
+
+    output:
+      - stdout: <% ctx(stdout) %>
+      - stderr: <% ctx(stderr) %>
+
+The following example illustrates the use of the ``noop`` command to let the workflow
+complete successfully even when there is a failure:
+
+.. code-block:: yaml
+
+    version: 1.0
+
+    description: >
+        A workflow example that illustrates error handling. When there is a task
+        failure, the "noop" command specified will be treated as a remediation task
+        and the conductor will succeed the workflow execution as normal.
+
+    input:
+      - cmd
+
+    vars:
+      - stdout: null
+      - stderr: null
+
+    tasks:
+      task1:
+        action: core.local cmd=<% ctx(cmd) %>
+        next:
+          - when: <% succeeded() %>
+            publish: stdout=<% result().stdout %>
+          - when: <% failed() %>
+            publish: stderr=<% result().stderr %>
+            do: noop
+
+    output:
+      - stdout: <% ctx(stdout) %>
+      - stderr: <% ctx(stderr) %>
+
+
+The following example is similar to the the one in previous section where it illustrates the use of
+the ``fail`` command to explicitly fail the workflow. In this case where the failure of the http
+call is communicated with a status number, a task transition is used to catch error when the
+status code is not 200. An explicit ``fail`` command is used to signal the workflow execution
+to fail:
+
+.. code-block:: yaml
+
+    version: 1.0
+
+    description: A sample workflow to fetch data from a REST API.
+
+    vars:
+      - body: null
+
+    tasks:
+      task1:
+        action: core.http url="https://api.xyz.com/objects"
+        next:
+          - when: <% succeeded() and result().status_code = 200 %>
+            publish: body=<% result().body %>
+          - when: <% succeeded() and result().status_code != 200 %>
+            publish: body=<% result().body %>
+            do: fail
+
+    output:
+      - body: <% ctx(body) %>

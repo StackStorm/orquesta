@@ -15,10 +15,10 @@
 from orquesta.tests.unit.composition.native import base
 
 
-class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
+class ErrorHandlingWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
 
-    def test_sequential(self):
-        wf_name = 'sequential'
+    def test_error_handling_continue(self):
+        wf_name = 'error-handling-continue'
 
         expected_wf_graph = {
             'directed': True,
@@ -31,24 +31,20 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     'id': 'task2'
                 },
                 {
-                    'id': 'task3'
-                },
-                {
-                    'id': 'continue'
+                    'id': 'continue',
+                    'splits': ['continue']
                 }
             ],
             'adjacency': [
                 [
                     {
-                        'id': 'task2',
+                        'id': 'continue',
                         'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
+                        'ref': 1,
+                        'criteria': ['<% failed() %>']
+                    },
                     {
-                        'id': 'task3',
+                        'id': 'task2',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -80,24 +76,20 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     'id': 'task2'
                 },
                 {
-                    'id': 'task3'
-                },
-                {
-                    'id': 'continue'
+                    'id': 'continue',
+                    'splits': ['continue']
                 }
             ],
             'adjacency': [
                 [
                     {
-                        'id': 'task2',
+                        'id': 'continue',
                         'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
+                        'ref': 1,
+                        'criteria': ['<% failed() %>']
+                    },
                     {
-                        'id': 'task3',
+                        'id': 'task2',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -118,8 +110,8 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
 
         self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
 
-    def test_parallel(self):
-        wf_name = 'parallel'
+    def test_error_handling_noop(self):
+        wf_name = 'error-handling-noop'
 
         expected_wf_graph = {
             'directed': True,
@@ -132,20 +124,20 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     'id': 'task2'
                 },
                 {
-                    'id': 'task3'
+                    'id': 'continue'
                 },
                 {
-                    'id': 'task4'
-                },
-                {
-                    'id': 'task5'
-                },
-                {
-                    'id': 'task6'
+                    'id': 'noop'
                 }
             ],
             'adjacency': [
                 [
+                    {
+                        'id': 'noop',
+                        'key': 0,
+                        'ref': 1,
+                        'criteria': ['<% failed() %>']
+                    },
                     {
                         'id': 'task2',
                         'key': 0,
@@ -155,29 +147,13 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task3',
+                        'id': 'continue',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task6',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
                 []
             ],
             'multigraph': True
@@ -196,20 +172,20 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     'id': 'task2'
                 },
                 {
-                    'id': 'task3'
+                    'id': 'continue'
                 },
                 {
-                    'id': 'task4'
-                },
-                {
-                    'id': 'task5'
-                },
-                {
-                    'id': 'task6'
+                    'id': 'noop'
                 }
             ],
             'adjacency': [
                 [
+                    {
+                        'id': 'noop',
+                        'key': 0,
+                        'ref': 1,
+                        'criteria': ['<% failed() %>']
+                    },
                     {
                         'id': 'task2',
                         'key': 0,
@@ -219,29 +195,13 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task3',
+                        'id': 'continue',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'task6',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
                 []
             ],
             'multigraph': True
@@ -249,8 +209,8 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
 
         self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
 
-    def test_branching(self):
-        wf_name = 'branching'
+    def test_error_handling_fail(self):
+        wf_name = 'error-handling-fail'
 
         expected_wf_graph = {
             'directed': True,
@@ -266,10 +226,10 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     'id': 'task3'
                 },
                 {
-                    'id': 'task4'
+                    'id': 'continue'
                 },
                 {
-                    'id': 'task5'
+                    'id': 'fail'
                 }
             ],
             'adjacency': [
@@ -281,7 +241,15 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                         'criteria': ['<% succeeded() %>']
                     },
                     {
-                        'id': 'task4',
+                        'id': 'task3',
+                        'key': 0,
+                        'ref': 1,
+                        'criteria': ['<% failed() %>']
+                    }
+                ],
+                [
+                    {
+                        'id': 'continue',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
@@ -289,21 +257,13 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                 ],
                 [
                     {
-                        'id': 'task3',
+                        'id': 'fail',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
                 [],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
                 []
             ],
             'multigraph': True
@@ -325,10 +285,10 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                     'id': 'task3'
                 },
                 {
-                    'id': 'task4'
+                    'id': 'continue'
                 },
                 {
-                    'id': 'task5'
+                    'id': 'fail'
                 }
             ],
             'adjacency': [
@@ -340,125 +300,28 @@ class BasicWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
                         'criteria': ['<% succeeded() %>']
                     },
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
                         'id': 'task3',
                         'key': 0,
+                        'ref': 1,
+                        'criteria': ['<% failed() %>']
+                    }
+                ],
+                [
+                    {
+                        'id': 'continue',
+                        'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
-                [],
                 [
                     {
-                        'id': 'task5',
+                        'id': 'fail',
                         'key': 0,
                         'ref': 0,
                         'criteria': ['<% succeeded() %>']
                     }
                 ],
-                []
-            ],
-            'multigraph': True
-        }
-
-        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
-
-    def test_decision_tree(self):
-        wf_name = 'decision'
-
-        expected_wf_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 't1'
-                },
-                {
-                    'id': 'a'
-                },
-                {
-                    'id': 'b'
-                },
-                {
-                    'id': 'c'
-                }
-            ],
-            'adjacency': [
-                [
-                    {
-                        'id': 'a',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() and ctx().which = "a" %>']
-                    },
-                    {
-                        'id': 'b',
-                        'key': 0,
-                        'ref': 1,
-                        'criteria': ['<% succeeded() and ctx().which = "b" %>']
-                    },
-                    {
-                        'id': 'c',
-                        'key': 0,
-                        'ref': 2,
-                        'criteria': ['<% succeeded() and not ctx().which in list(a, b) %>']
-                    }
-                ],
-                [],
-                [],
-                []
-            ],
-            'multigraph': True
-        }
-
-        self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
-
-        expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 't1'
-                },
-                {
-                    'id': 'a'
-                },
-                {
-                    'id': 'b'
-                },
-                {
-                    'id': 'c'
-                }
-            ],
-            'adjacency': [
-                [
-                    {
-                        'id': 'a',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() and ctx().which = "a" %>']
-                    },
-                    {
-                        'id': 'b',
-                        'key': 0,
-                        'ref': 1,
-                        'criteria': ['<% succeeded() and ctx().which = "b" %>']
-                    },
-                    {
-                        'id': 'c',
-                        'key': 0,
-                        'ref': 2,
-                        'criteria': ['<% succeeded() and not ctx().which in list(a, b) %>']
-                    }
-                ],
-                [],
                 [],
                 []
             ],
