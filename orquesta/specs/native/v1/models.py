@@ -125,6 +125,7 @@ class TaskSpec(native_v1_specs.Spec):
         'type': 'object',
         'properties': {
             'delay': spec_types.STRING_OR_POSITIVE_INTEGER,
+            'start': spec_types.BOOLEAN,
             'join': {
                 'oneOf': [
                     {'enum': ['all']},
@@ -301,10 +302,20 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         start_tasks = [
             (task_name, None, None)
             for task_name in self.keys()
-            if not self.get_prev_tasks(task_name)
+            if self.is_start_task(task_name)
         ]
 
         return sorted(start_tasks, key=lambda x: x[0])
+
+    def is_start_task(self, task_name):
+        task_spec = self.get_task(task_name)
+        if getattr(task_spec, 'start', False):
+            return True
+
+        if not self.get_prev_tasks(task_name):
+            return True
+
+        return False
 
     def is_join_task(self, task_name):
         task_spec = self.get_task(task_name)
