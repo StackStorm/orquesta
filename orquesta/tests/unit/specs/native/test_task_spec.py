@@ -603,3 +603,70 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_start_with_cycle(self):
+        wf_def = """
+            version: 1.0
+            description: A basic workflow that has no start tasks.
+            tasks:
+              task1:
+                action: core.noop
+                next:
+                  - do: task2
+              task2:
+                action: core.noop
+                next:
+                  - do: task1
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+        
+        # start_tasks() dict is empty because there are no tasks with
+        # 0 inbound task transitions
+        self.assertListEqual(wf_spec.tasks.get_start_tasks(), [])
+
+    def test_start(self):
+        wf_def = """
+            version: 1.0
+            description: A basic workflow with a start task explicitly defined.
+            tasks:
+              task1:
+                start: true
+                action: core.noop
+                next:
+                  - do: task2
+              task2:
+                action: core.noop
+                next:
+                  - do: task1
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+        self.assertListEqual(wf_spec.tasks.get_start_tasks(), [('task1', None, None)])
+
+    def test_start_false(self):
+        wf_def = """
+            version: 1.0
+            description: Test that the start flag evaluating to false is working correctly.
+            tasks:
+              task1:
+                start: false
+                action: core.noop
+                next:
+                  - do: task2
+              task2:
+                action: core.noop
+                next:
+                  - do: task1
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+        self.assertListEqual(wf_spec.tasks.get_start_tasks(), [])
