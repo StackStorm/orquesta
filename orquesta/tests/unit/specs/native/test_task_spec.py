@@ -622,7 +622,7 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.inspect(), {})
-        
+
         # start_tasks() dict is empty because there are no tasks with
         # 0 inbound task transitions
         self.assertListEqual(wf_spec.tasks.get_start_tasks(), [])
