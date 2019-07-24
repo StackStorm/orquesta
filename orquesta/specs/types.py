@@ -96,6 +96,10 @@ STRING_OR_BOOLEAN = {
     ]
 }
 
+BOOLEAN = {
+    "type": "boolean"
+}
+
 STRING_OR_ONE_KEY_DICT = {
     "oneOf": [
         NONEMPTY_STRING,
