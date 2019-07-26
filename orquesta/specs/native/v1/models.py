@@ -133,7 +133,7 @@ class TaskRetrySpec(native_v1_specs.Spec):
             # float allows for partial seconds of sleeping
             'delay': spec_types.STRING_OR_POSITIVE_NUMBER,
         },
-        'required': ['when', 'count', 'delay'],
+        'required': ['when', 'count'],
         'additionalProperties': False,
     }
 
@@ -195,6 +195,9 @@ class TaskSpec(native_v1_specs.Spec):
 
     def has_join(self):
         return hasattr(self, 'join') and self.join
+
+    def has_retry(self):
+        return hasattr(self, 'retry') and self.retry
 
     def render(self, in_ctx):
         action_specs = []
