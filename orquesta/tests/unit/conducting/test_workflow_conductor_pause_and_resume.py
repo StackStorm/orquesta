@@ -149,6 +149,10 @@ class WorkflowConductorPauseResumeTest(test_base.WorkflowConductorTest):
         self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
 
+        # Pause the workflow.
+        conductor.request_workflow_status(statuses.PAUSING)
+        self.assertEqual(conductor.get_workflow_status(), statuses.PAUSING)
+
         # Complete task1 and assert the workflow execution fails
         # due to the expression error in the task transition.
         self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
