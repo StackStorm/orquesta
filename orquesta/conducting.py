@@ -358,7 +358,19 @@ class WorkflowConductor(object):
         # Get workflow status after event is processed.
         updated_status = self.get_workflow_status()
 
-        # If status has not changed as expected, then raise exception.
+        # Ignore if workflow hasn't changed from paused to pausing.
+        if (status == statuses.PAUSED and
+                current_status == statuses.PAUSING and
+                updated_status == statuses.PAUSING):
+            return
+
+        # Ignore if workflow hasn't changed from canceled to canceling.
+        if (status == statuses.CANCELED and
+                current_status == statuses.CANCELING and
+                updated_status == statuses.CANCELING):
+            return
+
+        # Otherwise, if status has not changed as expected, then raise exception.
         if status != current_status and current_status == updated_status:
             raise exc.InvalidWorkflowStatusTransition(current_status, wf_ex_event.name)
 

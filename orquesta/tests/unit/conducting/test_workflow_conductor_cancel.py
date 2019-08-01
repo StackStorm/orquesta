@@ -103,3 +103,34 @@ class WorkflowConductorCancelTest(test_base.WorkflowConductorTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
+
+    def test_cancel_workflow_already_canceling(self):
+        wf_def = """
+        version: 1.0
+
+        tasks:
+          task1:
+            action: core.noop
+        """
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        # Run the workflow and keep it running.
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_status(statuses.RUNNING)
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
+
+        # Cancels the workflow and complete task1.
+        conductor.request_workflow_status(statuses.CANCELING)
+        self.assertEqual(conductor.get_workflow_status(), statuses.CANCELING)
+
+        # Cancels the workflow again.
+        conductor.request_workflow_status(statuses.CANCELING)
+        self.assertEqual(conductor.get_workflow_status(), statuses.CANCELING)
+        conductor.request_workflow_status(statuses.CANCELED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.CANCELING)
+
+        # Complete task1 and check workflow status.
+        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
+        self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)
