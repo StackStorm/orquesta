@@ -153,3 +153,60 @@ class WorkflowConductorPauseResumeTest(test_base.WorkflowConductorTest):
         # due to the expression error in the task transition.
         self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
+
+    def test_pause_workflow_already_pausing(self):
+        wf_def = """
+        version: 1.0
+        description: A basic branching workflow.
+        tasks:
+          # branch 1
+          task1:
+            action: core.noop
+            next:
+              - when: <% succeeded() %>
+                do: task3
+          # branch 2
+          task2:
+            action: core.noop
+            next:
+              - when: <% succeeded() %>
+                do: task3
+          # adjoining branch
+          task3:
+            join: all
+            action: core.noop
+        """
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_status(statuses.RUNNING)
+
+        # Run task1 and task2.
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
+        self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING])
+        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
+
+        # Pause the workflow.
+        conductor.request_workflow_status(statuses.PAUSING)
+
+        # Complete task1 only. The workflow should still be pausing
+        # because task2 is still running.
+        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
+        self.assertEqual(conductor.get_workflow_status(), statuses.PAUSING)
+
+        # Pause the workflow.
+        conductor.request_workflow_status(statuses.PAUSING)
+        self.assertEqual(conductor.get_workflow_status(), statuses.PAUSING)
+        conductor.request_workflow_status(statuses.PAUSED)
+        self.assertEqual(conductor.get_workflow_status(), statuses.PAUSING)
+
+        # Complete task2. When task2 completes, the workflow should be paused
+        # because there is no task in active status.
+        self.forward_task_statuses(conductor, 'task2', [statuses.SUCCEEDED])
+        self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
+
+        # Resume the workflow, task3 should be staged, and complete task3.
+        conductor.request_workflow_status(statuses.RESUMING)
+        self.assert_next_task(conductor, 'task3', {})
+        self.forward_task_statuses(conductor, 'task3', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
