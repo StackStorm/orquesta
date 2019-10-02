@@ -583,16 +583,21 @@ class WorkflowConductor(object):
         # all task rendering errors for this task transition instead of getting rendering
         # error one at a time during runtime.
         for staged_task in remediation_tasks or staged_tasks:
+            next_state = self.get_task_state_entry(staged_task['id'], staged_task['route'])
+
             # When specified task is repeated and its spec has 'delay' parameter, this might delay
             # task scheduling processing until time has come.
-            next_state = self.get_task_state_entry(staged_task['id'], staged_task['route'])
-            if next_state:
-                if 'retry' in next_state['ctxs'] and next_state['ctxs']['retry']['running_time']:
-                    while (int(datetime.datetime.now().strftime('%s')) <
-                           next_state['ctxs']['retry']['running_time']):
+            will_delay_task_scheduling = (
+                next_state and
+                'retry' in next_state['ctxs'] and
+                next_state['ctxs']['retry']['running_time']
+            )
+            if will_delay_task_scheduling:
+                while (int(datetime.datetime.now().strftime('%s')) <
+                       next_state['ctxs']['retry']['running_time']):
 
-                        # Task scheduling will be delay until it's time which is specified in spec
-                        time.sleep(1)
+                    # Task scheduling will be delay until it's time which is specified in spec
+                    time.sleep(1)
 
             try:
                 next_task = self.get_task(staged_task['id'], staged_task['route'])
