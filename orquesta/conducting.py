@@ -13,11 +13,10 @@
 # limitations under the License.
 
 import copy
+import datetime
 import logging
 import six
-
-# TODO DEBUG
-import json
+import time
 
 from six.moves import queue
 
@@ -112,7 +111,7 @@ class WorkflowState(object):
     def has_staged_tasks(self):
         return len(self.get_staged_tasks()) > 0
 
-    def add_staged_task(self, task_id, route, ctxs=None, prev=None, ready=True, retry_idx=None):
+    def add_staged_task(self, task_id, route, ctxs=None, prev=None, ready=True):
         if not ctxs:
             ctxs = [0]
 
@@ -123,8 +122,7 @@ class WorkflowState(object):
             },
             'route': route,
             'prev': prev if isinstance(prev, dict) else {},
-            'ready': ready,
-            'retry_idx': retry_idx,
+            'ready': ready
         }
 
         self.staged.append(entry)
@@ -492,16 +490,6 @@ class WorkflowConductor(object):
 
             task['delay'] = task_delay
 
-        # If there is a task retry specified, initialize details needed to keep track of
-        # the retries
-        if task_spec.has_retry():
-            retry_spec = task_spec.retry
-            count = getattr(retry_spec, 'count')
-            delay = getattr(retry_spec, 'delay', None)
-            task['retry_count'] = expr_base.evaluate(count, task_ctx)
-            task['retry_delay'] = expr_base.evaluate(delay, task_ctx)
-            task['ctx']['retry_idx'] = 0
-
         # Add items and related meta data to the task details.
         if task_spec.has_items():
             items_spec = getattr(task_spec, 'with')
@@ -595,15 +583,24 @@ class WorkflowConductor(object):
         # all task rendering errors for this task transition instead of getting rendering
         # error one at a time during runtime.
         for staged_task in remediation_tasks or staged_tasks:
+            # When specified task is repeated and its spec has 'delay' parameter, this might delay
+            # task scheduling processing until time has come.
+            next_state = self.get_task_state_entry(staged_task['id'], staged_task['route'])
+            if next_state:
+                if 'retry' in next_state['ctxs'] and next_state['ctxs']['retry']['running_time']:
+                    while (int(datetime.datetime.now().strftime('%s')) <
+                           next_state['ctxs']['retry']['running_time']):
+
+                        # Task scheduling will be delay until it's time which is specified in spec
+                        time.sleep(1)
+
             try:
                 next_task = self.get_task(staged_task['id'], staged_task['route'])
                 next_task = self._evaluate_task_actions(next_task)
 
                 if 'actions' in next_task and len(next_task['actions']) > 0:
-                    LOG.info("NICK: next_task actions = {}".format(next_task))
                     next_tasks.append(next_task)
                 elif 'items_count' in next_task and next_task['items_count'] == 0:
-                    LOG.info("NICK: next_task items = {}".format(next_task))
                     next_tasks.append(next_task)
             except Exception as e:
                 fail_on_task_rendering = True
@@ -615,8 +612,7 @@ class WorkflowConductor(object):
             self.request_workflow_status(statuses.FAILED)
             return []
 
-        result = sorted(next_tasks, key=lambda x: (x['id'], x['route']))
-        return result
+        return sorted(next_tasks, key=lambda x: (x['id'], x['route']))
 
     def _get_task_state_idx(self, task_id, route):
         return self.workflow_state.tasks.get(
@@ -631,22 +627,34 @@ class WorkflowConductor(object):
 
         return self.workflow_state.sequence[task_state_seq_idx]
 
-    def add_task_state(self, task_id, route, in_ctx_idxs=None, prev=None, retry_idx=None):
+    def add_task_state(self, task_id, route, in_ctx_idxs=None, prev=None):
         if not self.graph.has_task(task_id):
             raise exc.InvalidTask(task_id)
 
         if not in_ctx_idxs:
             in_ctx_idxs = [0]
 
+        #
+        # This is the datastructure to know present situation for each tasks.
+        #
+        # The 'retry' parameter in its ctxs is for task retrying feature. These are descriptions
+        # how each member values are used by the orquesta.
+        # - count : This indicates how many times was this task executed so far.
+        # - running_time : This task will stand by until this time is come even though this is a
+        #                  staged task.
+        #
         task_state_entry = {
             'id': task_id,
             'route': route,
             'ctxs': {
-                'in': in_ctx_idxs
+                'in': in_ctx_idxs,
+                'retry': {
+                    'count': 0,
+                    'running_time': None,
+                }
             },
             'prev': prev or {},
-            'next': {},
-            'retry_idx': retry_idx,
+            'next': {}
         }
 
         task_state_entry_id = constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route))
@@ -656,9 +664,6 @@ class WorkflowConductor(object):
         return task_state_entry
 
     def update_task_state(self, task_id, route, event):
-        LOG.info('NICK: task_id = {}'.format(task_id))
-        LOG.info('NICK: route = {}'.format(route))
-        LOG.info('NICK: event = {}'.format(json.dumps(event.__dict__, indent=4, sort_keys=True)))
         engine_event_queue = queue.Queue()
 
         # Throw exception if not expected event type.
@@ -679,7 +684,6 @@ class WorkflowConductor(object):
 
         # Create new task state entry if it does not exist.
         if not task_state_entry:
-            LOG.info('NICK: task_state_entry is None, creating a new one')
             task_state_entry = self.add_task_state(
                 task_id,
                 staged_task['route'],
@@ -687,13 +691,8 @@ class WorkflowConductor(object):
                 prev=staged_task['prev']
             )
 
-        LOG.info('NICK: staged_task = {}'.format(staged_task))
-        LOG.info('NICK: task_state_entry = {}'.format(json.dumps(task_state_entry, indent=4, sort_keys=True)))
-
         # Identify the index for the task state object for later use.
         task_state_idx = self._get_task_state_idx(task_id, route)
-
-        LOG.info('NICK: task_state_idx = {}'.format(task_state_idx))
 
         # If task is already completed and in cycle, then create new task state entry.
         # Unfortunately, the method in the graph to check for cycle is too simple and
@@ -702,7 +701,6 @@ class WorkflowConductor(object):
         # starting statuses, then there is high likelihood that this is a cycle.
         if (task_state_entry.get('status') in statuses.COMPLETED_STATUSES and
                 event.status and event.status in statuses.STARTING_STATUSES):
-            LOG.info('NICK: cycle')
             task_state_entry = self.add_task_state(
                 task_id,
                 staged_task['route'],
@@ -715,7 +713,6 @@ class WorkflowConductor(object):
 
         # Remove task from staging if task is not with items.
         if event.status and staged_task and 'items' not in staged_task:
-            LOG.info('NICK: remove task from staging')
             self.workflow_state.remove_staged_task(task_id, route)
 
         # If action execution is for a task item, then record the execution status for the item.
@@ -735,16 +732,10 @@ class WorkflowConductor(object):
         machines.TaskStateMachine.process_event(self.workflow_state, task_state_entry, event)
         new_task_status = task_state_entry.get('status', statuses.UNSET)
 
-        LOG.info('NICK: old_task_status = {}'.format(old_task_status))
-        LOG.info('NICK: new_task_status = {}'.format(new_task_status))
-
         # Get task result and set current context if task is completed.
         if new_task_status in statuses.COMPLETED_STATUSES:
-            LOG.info('NICK: task completed')
-
             # Get task details required for updating outgoing context.
             task_spec = self.spec.tasks.get_task(task_id)
-            LOG.info('NICK: task spec = {}'.format(json.dumps(task_spec.serialize(), indent=4, sort_keys=True)))
 
             # Get task result.
             if not task_spec.has_items():
@@ -766,43 +757,53 @@ class WorkflowConductor(object):
             current_task = {'id': task_id, 'route': route, 'result': task_result}
             current_ctx = ctx_util.set_current_task(in_ctx_val, current_task)
 
-            LOG.info('NICK: in_ctx_idxs = {}'.format(in_ctx_idxs))
-            LOG.info('NICK: in_ctx_val = {}'.format(json.dumps(in_ctx_val, indent=4, sort_keys=True)))
-            LOG.info('NICK: current_task = {}'.format(json.dumps(current_task, indent=4, sort_keys=True)))
-            LOG.info('NICK: current_ctx = {}'.format(json.dumps(current_ctx, indent=4, sort_keys=True)))
-
             # Setup context for evaluating expressions in task transition criteria.
             state_ctx = {'__state': self.workflow_state.serialize()}
             current_ctx = dict_util.merge_dicts(current_ctx, state_ctx, True)
 
-            LOG.info('NICK: state_ctx = {}'.format(json.dumps(state_ctx, indent=4, sort_keys=True)))
-            LOG.info('NICK: current_ctx = {}'.format(json.dumps(current_ctx, indent=4, sort_keys=True)))
+            # This decides whether this task would be retried or not when 'retry' is specified
+            may_retry = (
+                hasattr(task_spec, 'retry') and
+                hasattr(task_spec.retry, 'when') and
+                task_spec.has_retry()
+            )
+            if may_retry:
+                spec_retry_count = expr_base.evaluate(task_spec.retry.count, current_ctx)
 
-        retry_idx = None
-        if new_task_status in statuses.ABENDED_STATUSES and task_spec.has_retry():
-            LOG.info("NICK: task failed and it has a retry")
-            retry_spec = task_spec.retry
-            when = getattr(retry_spec, 'when')
-            count = getattr(retry_spec, 'count')
-            # TODO figure out how to pass this delay back in our task *shrug*,
-            # maybe as part of get_next_task?
-            delay = getattr(retry_spec, 'delay', None)
-            retry_when = expr_base.evaluate(when, current_ctx)
-            retry_count = expr_base.evaluate(count, current_ctx)
-            if retry_when:
-                LOG.info("NICK: evaluated retry when clause and it evaluated to truthey: {} [{}]".format(retry_when, type(retry_when)))
-                if task_state_entry['retry_idx'] is None:
-                    retry_idx = 0
-                elif task_state_entry['retry_idx'] < retry_count:
-                    retry_idx = task_state_entry['retry_idx'] + 1
-                else:
-                    pass # done retrying
-            else:
-                LOG.info("NICK: evaluated retry when clause and it evaluated to falsey: {} [{}]".format(retry_when, type(retry_when)))
+                # This is a measure to pass through this processing safely when invalid values
+                # are specified in retry parameter
+                try:
+                    # Current task will be retried when all these conditions are satisfied
+                    #   - new status is same as the one which is specified one.
+                    #   - task has never been repeated for specified times.
+                    will_retry = (
+                        int(spec_retry_count) > task_state_entry['ctxs']['retry']['count'] and
+                        expr_base.evaluate(task_spec.retry.when, current_ctx)
+                    )
+                    if will_retry:
+                        # This turns task_status back to old one.
+                        task_state_entry['status'] = new_task_status = old_task_status
 
-            if retry_idx is not None:
-                LOG.info("NICK: going to retry with index: {}".format(retry_idx))
-                # TODO add retry index to next task state entry
+                        # Increment task count to keep track of how many times task is repeated.
+                        task_state_entry['ctxs']['retry']['count'] += 1
+
+                        # This sets timer when this task would be run when valid delay parameter is
+                        if task_spec.retry.delay:
+                            task_state_entry['ctxs']['retry']['running_time'] = (
+                                int(datetime.datetime.now().strftime('%s')) +
+                                int(expr_base.evaluate(task_spec.retry.delay, current_ctx))
+                            )
+
+                        # This task is pushed back into the task queue again.
+                        self.workflow_state.add_staged_task(
+                            task_id,
+                            route,
+                            ctxs=task_state_entry['ctxs']['in'],
+                            prev=task_state_entry['prev'],
+                        )
+                except ValueError as e:
+                    self.log_error('Invalid value was specified at retry parameter (%s)' % str(e),
+                                   task_id, route)
 
         # Evaluate task transitions if task is completed and status change is not processed.
         if new_task_status in statuses.COMPLETED_STATUSES and new_task_status != old_task_status:
@@ -897,8 +898,7 @@ class WorkflowConductor(object):
                             next_task_route,
                             ctxs=out_ctx_idxs,
                             prev={backref: task_state_idx},
-                            ready=False,
-                            retry_idx=retry_idx,
+                            ready=False
                         )
 
                     # Check if inbound criteria are met. Must use the original route

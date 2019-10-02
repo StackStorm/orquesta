@@ -14,6 +14,11 @@ Changed
   and/or result size is huge per item, then there will be a performance impact on database
   write operations when recording the conductor state. (improvement)
 
+Added
+~~~~~
+* Add a feature to be able to specify how many times would task be retried and how long
+  would it be delayed for schedule in a selected condition.
+
 Fixed
 -----
 

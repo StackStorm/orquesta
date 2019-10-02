@@ -99,7 +99,7 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
         expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
-            'ctxs': {'in': [0]},
+            'ctxs': {'in': [0], 'retry': {'count': 0, 'running_time': None}},
             'next': {},
             'prev': {}
         }
@@ -121,7 +121,7 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
         expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
-            'ctxs': {'in': [0]},
+            'ctxs': {'in': [0], 'retry': {'count': 0, 'running_time': None}},
             'next': {},
             'prev': {}
         }
@@ -143,7 +143,7 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
         expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
-            'ctxs': {'in': [0]},
+            'ctxs': {'in': [0], 'retry': {'count': 0, 'running_time': None}},
             'status': 'running',
             'next': {},
             'prev': {}
@@ -157,7 +157,7 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
         expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
-            'ctxs': {'in': [0]},
+            'ctxs': {'in': [0], 'retry': {'count': 0, 'running_time': None}},
             'status': 'succeeded',
             'next': {
                 'task2__t0': True,
@@ -183,7 +183,7 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
         expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
-            'ctxs': {'in': [0]},
+            'ctxs': {'in': [0], 'retry': {'count': 0, 'running_time': None}},
             'status': 'running',
             'next': {},
             'prev': {}
@@ -202,7 +202,7 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
         expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
-            'ctxs': {'in': [0]},
+            'ctxs': {'in': [0], 'retry': {'count': 0, 'running_time': None}},
             'status': 'failed',
             'next': {
                 'task2__t0': False,
@@ -273,7 +273,7 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
         expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
-            'ctxs': {'in': [0]},
+            'ctxs': {'in': [0], 'retry': {'count': 0, 'running_time': None}},
             'status': 'requested',
             'next': {},
             'prev': {}
@@ -289,7 +289,7 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
         expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
-            'ctxs': {'in': [0]},
+            'ctxs': {'in': [0], 'retry': {'count': 0, 'running_time': None}},
             'status': 'requested',
             'next': {},
             'prev': {}
@@ -313,7 +313,7 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
         expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
-            'ctxs': {'in': [0]},
+            'ctxs': {'in': [0], 'retry': {'count': 0, 'running_time': None}},
             'status': 'running',
             'next': {},
             'prev': {}
@@ -327,7 +327,7 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
         expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
-            'ctxs': {'in': [0]},
+            'ctxs': {'in': [0], 'retry': {'count': 0, 'running_time': None}},
             'status': 'succeeded',
             'next': {
                 'task2__t0': True,
@@ -353,7 +353,7 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
         expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
-            'ctxs': {'in': [0]},
+            'ctxs': {'in': [0], 'retry': {'count': 0, 'running_time': None}},
             'status': 'running',
             'next': {},
             'prev': {
@@ -369,7 +369,7 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
         expected_task_state_entry = {
             'id': task_name,
             'route': task_route,
-            'ctxs': {'in': [0]},
+            'ctxs': {'in': [0], 'retry': {'count': 0, 'running_time': None}},
             'status': 'succeeded',
             'next': {
                 'task3__t0': True
@@ -414,7 +414,8 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
                 'id': 'task1',
                 'route': task_route,
                 'ctxs': {
-                    'in': [0]
+                    'in': [0],
+                    'retry': {'count': 0, 'running_time': None}
                 },
                 'status': 'succeeded',
                 'next': {
@@ -427,7 +428,8 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
                 'id': 'task2',
                 'route': task_route,
                 'ctxs': {
-                    'in': [0]
+                    'in': [0],
+                    'retry': {'count': 0, 'running_time': None}
                 },
                 'status': 'succeeded',
                 'next': {
@@ -441,7 +443,8 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
                 'id': 'task3',
                 'route': task_route,
                 'ctxs': {
-                    'in': [0]
+                    'in': [0],
+                    'retry': {'count': 0, 'running_time': None}
                 },
                 'status': 'succeeded',
                 'next': {
@@ -455,7 +458,8 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
                 'id': 'task4',
                 'route': task_route,
                 'ctxs': {
-                    'in': [0]
+                    'in': [0],
+                    'retry': {'count': 0, 'running_time': None}
                 },
                 'status': 'succeeded',
                 'next': {
@@ -469,7 +473,8 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
                 'id': 'task2',
                 'route': task_route,
                 'ctxs': {
-                    'in': [0]
+                    'in': [0],
+                    'retry': {'count': 0, 'running_time': None}
                 },
                 'status': 'running',
                 'next': {},

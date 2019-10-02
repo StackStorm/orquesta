@@ -646,14 +646,6 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
                     ),
                     'spec_path': 'tasks.task1.retry'
                 },
-                {
-                    'message': "'delay' is a required property",
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.retry.required'
-                    ),
-                    'spec_path': 'tasks.task1.retry'
-                },
             ]
         }
 
