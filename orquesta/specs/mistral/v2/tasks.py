@@ -142,6 +142,9 @@ class TaskSpec(mistral_spec_base.Spec):
     def has_join(self):
         return hasattr(self, 'join') and self.join
 
+    def has_retry(self):
+        return hasattr(self, 'retry') and self.retry
+
     def render(self, in_ctx):
         action_specs = []
 

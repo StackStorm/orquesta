@@ -591,6 +591,21 @@ class TaskStateMachine(object):
         # Assign new status to the task flow entry.
         task_state['status'] = new_task_status
 
+        # When task is retried, status of task won't be changed and decrements retry_count of it
+        if (new_task_status in statuses.COMPLETED_STATUSES and
+                hasattr(task_state, 'will_retry') and task_state.will_retry()):
+            task_state['status'] = current_task_status
+            task_state['retry_count'] -= 1
+
+            # Put it back on staged_task when task is removed from it
+            if not workflow_state.get_staged_task(task_state['id'], task_state['route']):
+                workflow_state.add_staged_task(
+                    task_state['id'],
+                    task_state['route'],
+                    ctxs=task_state['ctxs']['in'],
+                    prev=task_state['prev'],
+                )
+
     @classmethod
     def add_context_to_workflow_event(cls, workflow_state, task_id, task_route, wf_ex_event):
         workflow_event = wf_ex_event.name
