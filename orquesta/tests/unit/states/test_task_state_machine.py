@@ -14,9 +14,11 @@
 
 import unittest
 
+from orquesta import conducting
 from orquesta import events
 from orquesta import exceptions as exc
 from orquesta import machines
+from orquesta.specs import native as native_specs
 from orquesta import statuses
 
 
@@ -94,6 +96,39 @@ class TaskStateMachineTest(unittest.TestCase):
         ac_ex_event = events.ActionExecutionEvent(statuses.SUCCEEDED)
         machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
         self.assertEqual(task_flow_entry['status'], statuses.SUCCEEDED)
+
+    def test_task_retry(self):
+        wf_def = """
+        version: 1.0
+
+        tasks:
+          task1:
+            action: core.noop
+            retry:
+              when: '<% succeeded() %>'
+              count: 5
+              delay: 10
+        """
+
+        # make workflow spec and conductor to make proper TaskState instance
+        spec = native_specs.WorkflowSpec(wf_def)
+        conductor = conducting.WorkflowConductor(spec)
+
+        # initialize TaskState entry for testing retry state transition
+        task_state = conductor.add_task_state('task1', 0)
+        task_state['status'] = statuses.RUNNING
+
+        # set retrying task on staged_task to test the case that retried task has already
+        # been staged task queue.
+        conductor.workflow_state.add_staged_task('task1', 0)
+
+        # request to change task state
+        ac_ex_event = events.ActionExecutionEvent(statuses.SUCCEEDED)
+        machines.TaskStateMachine.process_event(conductor.workflow_state, task_state, ac_ex_event)
+
+        self.assertEqual(task_state['status'], statuses.RUNNING)
+        self.assertEqual(task_state['retry_count'], 4)
+        self.assertTrue(task_state.is_retried())
 
 
 class FailedStateTransitionTest(unittest.TestCase):

@@ -164,7 +164,7 @@ class TaskState(collections.defaultdict):
     def _get_context(self):
         """This is a wrapper method of get_task_context in Conductor"""
 
-        if 'in' in self.get('ctxs'):
+        if self.get('ctxs') and 'in' in self.get('ctxs'):
             return self.conductor.get_task_context(self['ctxs']['in'])
 
     def _get_retry_count(self):

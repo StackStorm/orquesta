@@ -17,34 +17,48 @@ import unittest
 from orquesta import conducting
 from orquesta.specs import native as native_specs
 from orquesta.specs.native.v1 import models as native_v1_models
+from orquesta import statuses
+
+TEST_WF_DEF = """
+version: 1.0
+
+tasks:
+  task1:
+    action: core.noop
+    retry:
+      when: '<% failed() %>'
+      count: 5
+      delay: 10
+"""
 
 
 class TaskStateTest(unittest.TestCase):
 
     def test_task_state(self):
-        wf_def = """
-        version: 1.0
-
-        tasks:
-          task1:
-            action: core.noop
-            retry:
-              when: '<% failed() %>'
-              count: 5
-              delay: 10
-        """
-
         # Initialize workflow spec and conductor
-        spec = native_specs.WorkflowSpec(wf_def)
+        spec = native_specs.WorkflowSpec(TEST_WF_DEF)
+        conductor = conducting.WorkflowConductor(spec)
+
+        # Create task_state_entry manually
+        task_state_entry = conductor.add_task_state('task1', 0)
+        task_state_entry['status'] = statuses.FAILED
+
+        self.assertIsInstance(task_state_entry, conducting.TaskState)
+        self.assertIsInstance(task_state_entry.task_spec, native_v1_models.TaskSpec)
+        self.assertEqual(task_state_entry.retry_count, 5)
+        self.assertTrue(task_state_entry.will_retry())
+        self.assertFalse(task_state_entry.is_retried())
+
+    def test_task_state_without_task_context(self):
+        # Initialize workflow spec and conductor
+        spec = native_specs.WorkflowSpec(TEST_WF_DEF)
         conductor = conducting.WorkflowConductor(spec)
 
         # Create task_state_entry manually
         task_state_entry = conducting.TaskState(conductor, **{
             'id': 'task1',
             'route': 0,
-            'ctxs': {
-                'in': [0],
-            },
+            'ctxs': None,
             'prev': {},
             'next': {}
         })
