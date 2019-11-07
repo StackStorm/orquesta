@@ -689,11 +689,11 @@ class WorkflowConductor(object):
         if event.status and staged_task and 'items' not in staged_task:
             self.workflow_state.remove_staged_task(task_id, route)
 
-        # If action execution is for a task item, then store the execution status for the item.
-        if (staged_task and event.status and event.context and
-                'item_id' in event.context and event.context['item_id'] is not None):
-            item_result = {'status': event.status, 'result': event.result}
-            staged_task['items'][event.context['item_id']] = item_result
+        # If action execution is for a task item, then record the execution status for the item.
+        # Result for each item is not recorded in the staged_task because it impacts database
+        # write performance if there are a lot of items and/or item result size is huge.
+        if staged_task and isinstance(event, events.TaskItemActionExecutionEvent):
+            staged_task['items'][event.item_id] = {'status': event.status}
 
         # Log the error if it is a failed execution event.
         if event.status == statuses.FAILED:
@@ -712,10 +712,15 @@ class WorkflowConductor(object):
             task_spec = self.spec.tasks.get_task(task_id)
 
             # Get task result.
-            task_result = (
-                [item.get('result') for item in staged_task.get('items', [])]
-                if staged_task and task_spec.has_items() else event.result
-            )
+            if not task_spec.has_items():
+                task_result = event.result
+            else:
+                # For with items task, use the accumulated result from the event.
+                task_result = (
+                    event.accumulated_result or []
+                    if isinstance(event, events.TaskItemActionExecutionEvent)
+                    else event.result or []
+                )
 
             # Remove remaining task from staging.
             self.workflow_state.remove_staged_task(task_id, route)

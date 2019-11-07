@@ -469,54 +469,7 @@ class TaskStateMachine(object):
 
     @classmethod
     def add_context_to_action_event(cls, workflow_state, task_id, task_route, ac_ex_event):
-        action_event = ac_ex_event.name
-
-        requirements = [
-            statuses.RESUMING,
-            statuses.PENDING,
-            statuses.PAUSED,
-            statuses.SUCCEEDED,
-            statuses.FAILED,
-            statuses.EXPIRED,
-            statuses.ABANDONED,
-            statuses.CANCELED
-        ]
-
-        if (ac_ex_event.status in requirements and
-                ac_ex_event.context and 'item_id' in ac_ex_event.context):
-            # Make a copy of the items and remove current item under evaluation.
-            staged_task = workflow_state.get_staged_task(task_id, task_route)
-            items = copy.deepcopy(staged_task['items'])
-            del items[ac_ex_event.context['item_id']]
-            items_status = [item['status'] for item in items]
-
-            # Assess various situations.
-            active = list(filter(lambda x: x in statuses.ACTIVE_STATUSES, items_status))
-            incomplete = list(filter(lambda x: x not in statuses.COMPLETED_STATUSES, items_status))
-            paused = list(filter(lambda x: x in [statuses.PENDING, statuses.PAUSED], items_status))
-            canceled = list(filter(lambda x: x == statuses.CANCELED, items_status))
-            failed = list(filter(lambda x: x in statuses.ABENDED_STATUSES, items_status))
-
-            # Attach info on whether task is still active or dormant.
-            action_event += '_task_active' if active else '_task_dormant'
-
-            # Attach info on whether there are paused execution on the items and return.
-            if not active and paused:
-                return action_event + '_items_paused'
-
-            # Attach info on whether there are canceled execution on the items and return.
-            if not active and canceled:
-                return action_event + '_items_canceled'
-
-            # Attach info on whether there are failed execution on the items and return.
-            if not active and failed:
-                return action_event + '_items_failed'
-
-            # If items are not paused, canceled, or failed, then attach info on whether
-            # there are items that are not in one of the completed statuses.
-            return action_event + ('_items_incomplete' if incomplete else '_items_completed')
-
-        return action_event
+        return ac_ex_event.name
 
     @classmethod
     def process_action_event(cls, workflow_state, task_state, ac_ex_event):
@@ -554,13 +507,98 @@ class TaskStateMachine(object):
         task_state['status'] = new_task_status
 
     @classmethod
+    def add_context_to_task_item_event(cls, workflow_state, task_id, task_route, ac_ex_event):
+        action_event = ac_ex_event.name
+
+        requirements = [
+            statuses.RESUMING,
+            statuses.PENDING,
+            statuses.PAUSED,
+            statuses.SUCCEEDED,
+            statuses.FAILED,
+            statuses.EXPIRED,
+            statuses.ABANDONED,
+            statuses.CANCELED
+        ]
+
+        if ac_ex_event.status in requirements:
+            # Make a copy of the items and remove current item under evaluation.
+            staged_task = workflow_state.get_staged_task(task_id, task_route)
+            items = copy.deepcopy(staged_task['items'])
+            del items[ac_ex_event.item_id]
+            items_status = [item.get('status', statuses.UNSET) for item in items]
+
+            # Assess various situations.
+            active = list(filter(lambda x: x in statuses.ACTIVE_STATUSES, items_status))
+            incomplete = list(filter(lambda x: x not in statuses.COMPLETED_STATUSES, items_status))
+            paused = list(filter(lambda x: x in [statuses.PENDING, statuses.PAUSED], items_status))
+            canceled = list(filter(lambda x: x == statuses.CANCELED, items_status))
+            failed = list(filter(lambda x: x in statuses.ABENDED_STATUSES, items_status))
+
+            # Attach info on whether task is still active or dormant.
+            action_event += '_task_active' if active else '_task_dormant'
+
+            # Attach info on whether there are paused execution on the items and return.
+            if not active and paused:
+                return action_event + '_items_paused'
+
+            # Attach info on whether there are canceled execution on the items and return.
+            if not active and canceled:
+                return action_event + '_items_canceled'
+
+            # Attach info on whether there are failed execution on the items and return.
+            if not active and failed:
+                return action_event + '_items_failed'
+
+            # If items are not paused, canceled, or failed, then attach info on whether
+            # there are items that are not in one of the completed statuses.
+            return action_event + ('_items_incomplete' if incomplete else '_items_completed')
+
+        return action_event
+
+    @classmethod
+    def process_task_item_event(cls, workflow_state, task_state, ac_ex_event):
+        # Check if event is valid.
+        if ac_ex_event.name not in events.ACTION_EXECUTION_EVENTS + events.ENGINE_OPERATION_EVENTS:
+            raise exc.InvalidEvent(ac_ex_event.name)
+
+        # Append additional task context to the event.
+        event_name = cls.add_context_to_task_item_event(
+            workflow_state,
+            task_state['id'],
+            task_state['route'],
+            ac_ex_event
+        )
+
+        # Identify current task status.
+        current_task_status = task_state.get('status', statuses.UNSET)
+
+        if current_task_status is None:
+            current_task_status = statuses.UNSET
+
+        if current_task_status not in statuses.ALL_STATUSES:
+            raise exc.InvalidStatus(current_task_status)
+
+        if current_task_status not in TASK_STATE_MACHINE_DATA:
+            raise exc.InvalidTaskStatusTransition(current_task_status, event_name)
+
+        # If no transition is identified, then there is no status change.
+        if event_name not in TASK_STATE_MACHINE_DATA[current_task_status]:
+            return
+
+        new_task_status = TASK_STATE_MACHINE_DATA[current_task_status][event_name]
+
+        # Assign new status to the task flow entry.
+        task_state['status'] = new_task_status
+
+    @classmethod
     def add_context_to_workflow_event(cls, workflow_state, task_id, task_route, wf_ex_event):
         workflow_event = wf_ex_event.name
         requirements = statuses.PAUSE_STATUSES + statuses.CANCEL_STATUSES
         staged_task = workflow_state.get_staged_task(task_id, task_route)
 
         if wf_ex_event.status in requirements and staged_task and 'items' in staged_task:
-            items_status = [item['status'] for item in staged_task['items']]
+            items_status = [item.get('status', statuses.UNSET) for item in staged_task['items']]
             active = list(filter(lambda x: x in statuses.ACTIVE_STATUSES, items_status))
             incomplete = list(filter(lambda x: x not in statuses.COMPLETED_STATUSES, items_status))
             workflow_event += '_task_active' if active else '_task_dormant'
@@ -607,6 +645,10 @@ class TaskStateMachine(object):
     def process_event(cls, workflow_state, task_state, event):
         if isinstance(event, events.WorkflowExecutionEvent):
             cls.process_workflow_event(workflow_state, task_state, event)
+            return
+
+        if isinstance(event, events.TaskItemActionExecutionEvent):
+            cls.process_task_item_event(workflow_state, task_state, event)
             return
 
         if isinstance(event, events.ActionExecutionEvent):

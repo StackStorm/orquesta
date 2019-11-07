@@ -10,6 +10,9 @@ Changed
 * Replace "noop" with "continue" when "do" is not specified. The new "continue" command
   will not alter the previous task state and will continue to conduct the workflow
   execution. StackStorm/st2#4740 (improvement)
+* Refactor conductor to not store each item result in task state. If there are a lot of items
+  and/or result size is huge per item, then there will be a performance impact on database
+  write operations when recording the conductor state. (improvement)
 
 Fixed
 -----

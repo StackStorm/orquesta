@@ -345,6 +345,14 @@ class ActionExecutionEvent(ExecutionEvent):
         )
 
 
+class TaskItemActionExecutionEvent(ActionExecutionEvent):
+
+    def __init__(self, item_id, status, result=None, accumulated_result=None):
+        super(TaskItemActionExecutionEvent, self).__init__(status, result=result)
+        self.item_id = item_id
+        self.accumulated_result = accumulated_result
+
+
 class EngineOperationEvent(ExecutionEvent):
     pass
 
