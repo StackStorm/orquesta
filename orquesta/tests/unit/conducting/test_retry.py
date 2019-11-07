@@ -28,7 +28,7 @@ tasks:
   task1:
     action: core.noop
     retry:
-      when: <% succeeded() %>
+      when: succeeded
       count: <% ctx(count) %>
       delay: <% ctx(delay) %>
 """
@@ -57,7 +57,7 @@ class WorkflowConductorRetryTaskTest(test_base.WorkflowConductorTest):
           task1:
             action: core.noop
             retry:
-              when: '<% failed() %>'
+              when: failed
               count: 2
         """
         conductor = self._prep_conductor(wf_def)
@@ -132,10 +132,7 @@ class WorkflowConductorRetryTaskTest(test_base.WorkflowConductorTest):
         self.assertIsInstance(serialized_task_state, dict)
         self.assertEqual(serialized_task_state['retry_count'], task_inputs['count'] - 1)
 
-        # Confirms whetheer task_state_etnry is restored as an instance of TaskState
+        # Confirms whetheer task_state_etnry is restored as expected
         deserialized_conductor = conducting.WorkflowConductor.deserialize(serialized_data)
         task_state_entry = deserialized_conductor.get_task_state_entry('task1', 0)
-
-        self.assertIsInstance(task_state_entry, conducting.TaskState)
         self.assertEqual(task_state_entry['retry_count'], task_inputs['count'] - 1)
-        self.assertTrue(task_state_entry.is_retried())

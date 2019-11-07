@@ -16,8 +16,8 @@ Changed
 
 Added
 ~~~~~
-* Add a feature to be able to specify how many times would task be retried and how long
-  would it be delayed for schedule in a selected condition.
+* Add a feature to retry task execution on given condition with
+  delay in between retries and max number of retries.
 
 Fixed
 -----

@@ -23,6 +23,7 @@ from orquesta import exceptions as exc
 from orquesta.expressions import base as expr_base
 from orquesta.specs.native.v1 import base as native_v1_specs
 from orquesta.specs import types as spec_types
+from orquesta import statuses
 from orquesta.utils import context as ctx_util
 from orquesta.utils import dictionary as dict_util
 from orquesta.utils import parameters as args_util
@@ -124,7 +125,9 @@ class TaskRetrySpec(native_v1_specs.Spec):
     _schema = {
         'type': 'object',
         'properties': {
-            'when': spec_types.NONEMPTY_STRING,
+            'when': {
+                'enum': [statuses.FAILED, statuses.SUCCEEDED]
+            },
             # number of times to retry, whole numbers
             # -N (any negative) =  retry forever
             # 0 = don't retry

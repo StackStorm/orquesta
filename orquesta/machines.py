@@ -280,6 +280,7 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_PENDING_TASK_DORMANT_ITEMS_FAILED: statuses.FAILED,
         events.ACTION_PENDING_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.PAUSED,
         events.ACTION_PENDING_TASK_DORMANT_ITEMS_COMPLETED: statuses.PAUSED,
+        events.ACTION_PENDING_TASK_DORMANT_ITEMS_RETRYING: statuses.PAUSED,
         events.ACTION_PAUSING: statuses.PAUSING,
         events.ACTION_PAUSED: statuses.PAUSED,
         events.ACTION_PAUSED_TASK_ACTIVE_ITEMS_INCOMPLETE: statuses.PAUSING,
@@ -288,6 +289,7 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_PAUSED_TASK_DORMANT_ITEMS_FAILED: statuses.FAILED,
         events.ACTION_PAUSED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.PAUSED,
         events.ACTION_PAUSED_TASK_DORMANT_ITEMS_COMPLETED: statuses.PAUSED,
+        events.ACTION_PAUSED_TASK_DORMANT_ITEMS_RETRYING: statuses.PAUSED,
         events.ACTION_CANCELING: statuses.CANCELING,
         events.ACTION_CANCELED: statuses.CANCELED,
         events.ACTION_CANCELED_TASK_ACTIVE_ITEMS_INCOMPLETE: statuses.CANCELING,
@@ -296,31 +298,38 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_CANCELED_TASK_DORMANT_ITEMS_FAILED: statuses.CANCELED,
         events.ACTION_CANCELED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.CANCELED,
         events.ACTION_CANCELED_TASK_DORMANT_ITEMS_COMPLETED: statuses.CANCELED,
+        events.ACTION_CANCELED_TASK_DORMANT_ITEMS_RETRYING: statuses.CANCELED,
         events.ACTION_FAILED: statuses.FAILED,
+        events.ACTION_FAILED_RETRYING: statuses.RUNNING,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_PAUSED: statuses.FAILED,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_CANCELED: statuses.CANCELED,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_FAILED: statuses.FAILED,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.FAILED,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_COMPLETED: statuses.FAILED,
+        events.ACTION_FAILED_TASK_DORMANT_ITEMS_RETRYING: statuses.RUNNING,
         events.ACTION_EXPIRED: statuses.FAILED,
         events.ACTION_EXPIRED_TASK_DORMANT_ITEMS_PAUSED: statuses.FAILED,
         events.ACTION_EXPIRED_TASK_DORMANT_ITEMS_CANCELED: statuses.CANCELED,
         events.ACTION_EXPIRED_TASK_DORMANT_ITEMS_FAILED: statuses.FAILED,
         events.ACTION_EXPIRED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.FAILED,
         events.ACTION_EXPIRED_TASK_DORMANT_ITEMS_COMPLETED: statuses.FAILED,
+        events.ACTION_EXPIRED_TASK_DORMANT_ITEMS_RETRYING: statuses.FAILED,
         events.ACTION_ABANDONED: statuses.FAILED,
         events.ACTION_ABANDONED_TASK_DORMANT_ITEMS_PAUSED: statuses.FAILED,
         events.ACTION_ABANDONED_TASK_DORMANT_ITEMS_CANCELED: statuses.CANCELED,
         events.ACTION_ABANDONED_TASK_DORMANT_ITEMS_FAILED: statuses.FAILED,
         events.ACTION_ABANDONED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.FAILED,
         events.ACTION_ABANDONED_TASK_DORMANT_ITEMS_COMPLETED: statuses.FAILED,
+        events.ACTION_ABANDONED_TASK_DORMANT_ITEMS_RETRYING: statuses.FAILED,
         events.ACTION_SUCCEEDED: statuses.SUCCEEDED,
+        events.ACTION_SUCCEEDED_RETRYING: statuses.RUNNING,
         events.ACTION_SUCCEEDED_TASK_ACTIVE_ITEMS_INCOMPLETE: statuses.RUNNING,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_CANCELED: statuses.CANCELED,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_PAUSED: statuses.PAUSED,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_FAILED: statuses.FAILED,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.RUNNING,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_COMPLETED: statuses.SUCCEEDED,
+        events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_RETRYING: statuses.RUNNING,
         events.WORKFLOW_PAUSING_TASK_ACTIVE_ITEMS_INCOMPLETE: statuses.PAUSING,
         events.WORKFLOW_PAUSING_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.PAUSED,
         events.WORKFLOW_PAUSED_TASK_ACTIVE_ITEMS_INCOMPLETE: statuses.PAUSING,
@@ -523,7 +532,7 @@ class TaskStateMachine(object):
 
         if ac_ex_event.status in requirements:
             # Make a copy of the items and remove current item under evaluation.
-            staged_task = workflow_state.get_staged_task(task_id, task_route)
+            staged_task = workflow_state.get_staged_task(task_state['id'], task_state['route'])
             items = copy.deepcopy(staged_task['items'])
             del items[ac_ex_event.item_id]
             items_status = [item.get('status', statuses.UNSET) for item in items]
@@ -546,6 +555,16 @@ class TaskStateMachine(object):
             if not active and canceled:
                 return action_event + '_items_canceled'
 
+            # Attach info which current task might be retried whether there were (failed|succeeded)
+            # items and task is supposed to be retried when there are.
+            if (not active and may_retry and (
+                (not failed and task_state['retry_condition'] == statuses.SUCCEEDED) or
+                    (failed and task_state['retry_condition'] == statuses.FAILED))):
+                return action_event + '_items_retrying'
+
+            # Attach info on whether there are succeeded items and task is supposed to be retried.
+                return action_event + '_items_retrying'
+
             # Attach info on whether there are failed execution on the items and return.
             if not active and failed:
                 return action_event + '_items_failed'
@@ -553,6 +572,15 @@ class TaskStateMachine(object):
             # If items are not paused, canceled, or failed, then attach info on whether
             # there are items that are not in one of the completed statuses.
             return action_event + ('_items_incomplete' if incomplete else '_items_completed')
+
+        # Attach info which current task might be retried whether task was (failed|succeeded) and
+        # task is supposed to be retried when it is.
+        if (may_retry and (
+            (action_event == events.ACTION_SUCCEEDED and
+                task_state['retry_condition'] == statuses.SUCCEEDED) or
+            (action_event == events.ACTION_FAILED and
+                task_state['retry_condition'] == statuses.FAILED))):
+            return action_event + '_retrying'
 
         return action_event
 
@@ -565,8 +593,7 @@ class TaskStateMachine(object):
         # Append additional task context to the event.
         event_name = cls.add_context_to_task_item_event(
             workflow_state,
-            task_state['id'],
-            task_state['route'],
+            task_state,
             ac_ex_event
         )
 
@@ -591,20 +618,7 @@ class TaskStateMachine(object):
         # Assign new status to the task flow entry.
         task_state['status'] = new_task_status
 
-        # When task is retried, status of task won't be changed and decrements retry_count of it
-        if (new_task_status in statuses.COMPLETED_STATUSES and
-                hasattr(task_state, 'will_retry') and task_state.will_retry()):
-            task_state['status'] = current_task_status
-            task_state['retry_count'] -= 1
-
-            # Put it back on staged_task when task is removed from it
-            if not workflow_state.get_staged_task(task_state['id'], task_state['route']):
-                workflow_state.add_staged_task(
-                    task_state['id'],
-                    task_state['route'],
-                    ctxs=task_state['ctxs']['in'],
-                    prev=task_state['prev'],
-                )
+        return event_name
 
     @classmethod
     def add_context_to_workflow_event(cls, workflow_state, task_id, task_route, wf_ex_event):
@@ -656,23 +670,22 @@ class TaskStateMachine(object):
         # Assign new status to the task flow entry.
         task_state['status'] = new_task_status
 
+        return event_name
+
     @classmethod
     def process_event(cls, workflow_state, task_state, event):
         if isinstance(event, events.WorkflowExecutionEvent):
-            cls.process_workflow_event(workflow_state, task_state, event)
-            return
+            return cls.process_workflow_event(workflow_state, task_state, event)
 
         if isinstance(event, events.TaskItemActionExecutionEvent):
             cls.process_task_item_event(workflow_state, task_state, event)
             return
 
         if isinstance(event, events.ActionExecutionEvent):
-            cls.process_action_event(workflow_state, task_state, event)
-            return
+            return cls.process_action_event(workflow_state, task_state, event)
 
         if isinstance(event, events.EngineOperationEvent):
-            cls.process_action_event(workflow_state, task_state, event)
-            return
+            return cls.process_action_event(workflow_state, task_state, event)
 
         raise exc.InvalidEventType(type(event), event.name)
 

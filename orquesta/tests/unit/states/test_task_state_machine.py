@@ -14,11 +14,9 @@
 
 import unittest
 
-from orquesta import conducting
 from orquesta import events
 from orquesta import exceptions as exc
 from orquesta import machines
-from orquesta.specs import native as native_specs
 from orquesta import statuses
 
 
@@ -76,59 +74,30 @@ class TaskStateMachineTest(unittest.TestCase):
     def test_bad_current_task_status_to_event_mapping(self):
         task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0, 'status': statuses.REQUESTED}
         ac_ex_event = events.ActionExecutionEvent(statuses.SUCCEEDED)
-        machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
+        transition_ev = machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
+        self.assertIsNone(transition_ev)
         self.assertEqual(task_flow_entry['status'], statuses.REQUESTED)
 
     def test_current_task_status_unset(self):
         task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0}
         ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
-        machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
+        transition_ev = machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
+        self.assertEqual(transition_ev, events.ACTION_RUNNING)
         self.assertEqual(task_flow_entry['status'], statuses.RUNNING)
 
     def test_current_task_status_none(self):
         task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0, 'status': None}
         ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
-        machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
+        transition_ev = machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
+        self.assertEqual(transition_ev, events.ACTION_RUNNING)
         self.assertEqual(task_flow_entry['status'], statuses.RUNNING)
 
     def test_task_status_transition(self):
         task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0, 'status': statuses.RUNNING}
         ac_ex_event = events.ActionExecutionEvent(statuses.SUCCEEDED)
-        machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
+        transition_ev = machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
+        self.assertEqual(transition_ev, events.ACTION_SUCCEEDED)
         self.assertEqual(task_flow_entry['status'], statuses.SUCCEEDED)
-
-    def test_task_retry(self):
-        wf_def = """
-        version: 1.0
-
-        tasks:
-          task1:
-            action: core.noop
-            retry:
-              when: '<% succeeded() %>'
-              count: 5
-              delay: 10
-        """
-
-        # make workflow spec and conductor to make proper TaskState instance
-        spec = native_specs.WorkflowSpec(wf_def)
-        conductor = conducting.WorkflowConductor(spec)
-
-        # initialize TaskState entry for testing retry state transition
-        task_state = conductor.add_task_state('task1', 0)
-        task_state['status'] = statuses.RUNNING
-
-        # set retrying task on staged_task to test the case that retried task has already
-        # been staged task queue.
-        conductor.workflow_state.add_staged_task('task1', 0)
-
-        # request to change task state
-        ac_ex_event = events.ActionExecutionEvent(statuses.SUCCEEDED)
-        machines.TaskStateMachine.process_event(conductor.workflow_state, task_state, ac_ex_event)
-
-        self.assertEqual(task_state['status'], statuses.RUNNING)
-        self.assertEqual(task_state['retry_count'], 4)
-        self.assertTrue(task_state.is_retried())
 
 
 class FailedStateTransitionTest(unittest.TestCase):
@@ -182,3 +151,96 @@ class StateTransitionTest(unittest.TestCase):
         for x, y in cases:
             expected = (x == y or y in machines.TASK_STATE_MACHINE_DATA[x].values())
             self.assertEqual(machines.TaskStateMachine.is_transition_valid(x, y), expected)
+
+
+class RetryStateTransitionTest(unittest.TestCase):
+    def test_task_retry(self):
+        task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0}
+
+        # This defines each cases concerning about retrying
+        test_cases = [
+            {
+                # Task will be retried because retry condition is satisfied.
+                'retry_count': 1, 'retry_condition': statuses.FAILED,
+                'action_status': statuses.FAILED,
+                'expected_event': events.ACTION_FAILED_RETRYING,
+                'expected_status': statuses.RUNNING
+            }, {
+                # Task won't be retried because retry condition isn't satisfied.
+                'retry_count': 1, 'retry_condition': statuses.FAILED,
+                'action_status': statuses.SUCCEEDED,
+                'expected_event': events.ACTION_SUCCEEDED,
+                'expected_status': statuses.SUCCEEDED
+            }, {
+                # Task won't be retried because retry condition isn't satisfied.
+                'retry_count': 1, 'retry_condition': statuses.SUCCEEDED,
+                'action_status': statuses.FAILED,
+                'expected_event': events.ACTION_FAILED,
+                'expected_status': statuses.FAILED
+            }, {
+                # Task will be retried because retry condition is satisfied.
+                'retry_count': 1, 'retry_condition': statuses.SUCCEEDED,
+                'action_status': statuses.SUCCEEDED,
+                'expected_event': events.ACTION_SUCCEEDED_RETRYING,
+                'expected_status': statuses.RUNNING
+            }, {
+                # Task won't be retried because retry_count doesn't left
+                'retry_count': 0, 'retry_condition': statuses.FAILED,
+                'action_status': statuses.FAILED,
+                'expected_event': events.ACTION_FAILED,
+                'expected_status': statuses.FAILED
+            }, {
+                # Task won't be retried because retry_count doesn't left
+                'retry_count': 0, 'retry_condition': statuses.SUCCEEDED,
+                'action_status': statuses.SUCCEEDED,
+                'expected_event': events.ACTION_SUCCEEDED,
+                'expected_status': statuses.SUCCEEDED
+            }, {
+                # Below cases confirm retry parameter doesn't affect for other events
+                'retry_count': 1, 'retry_condition': statuses.FAILED,
+                'action_status': statuses.RUNNING,
+                'expected_event': events.ACTION_RUNNING,
+                'expected_status': statuses.RUNNING
+            }, {
+                'retry_count': 1, 'retry_condition': statuses.FAILED,
+                'action_status': statuses.PENDING,
+                'expected_event': events.ACTION_PENDING,
+                'expected_status': statuses.PENDING
+            }, {
+                'retry_count': 1, 'retry_condition': statuses.FAILED,
+                'action_status': statuses.PAUSED,
+                'expected_event': events.ACTION_PAUSED,
+                'expected_status': statuses.PAUSED
+            }, {
+                'retry_count': 1, 'retry_condition': statuses.FAILED,
+                'action_status': statuses.CANCELING,
+                'expected_event': events.ACTION_CANCELING,
+                'expected_status': statuses.CANCELING
+            }, {
+                'retry_count': 1, 'retry_condition': statuses.FAILED,
+                'action_status': statuses.CANCELED,
+                'expected_event': events.ACTION_CANCELED,
+                'expected_status': statuses.CANCELED
+            }, {
+                'retry_count': 1, 'retry_condition': statuses.FAILED,
+                'action_status': statuses.EXPIRED,
+                'expected_event': events.ACTION_EXPIRED,
+                'expected_status': statuses.FAILED
+            }, {
+                'retry_count': 1, 'retry_condition': statuses.FAILED,
+                'action_status': statuses.ABANDONED,
+                'expected_event': events.ACTION_ABANDONED,
+                'expected_status': statuses.FAILED
+            }
+        ]
+        for case in test_cases:
+            # reset task status every time because it is updated after state transition
+            task_flow_entry['status'] = statuses.RUNNING
+            task_flow_entry['retry_count'] = case['retry_count']
+            task_flow_entry['retry_condition'] = case['retry_condition']
+
+            ac_ex_event = events.ActionExecutionEvent(case['action_status'])
+            event = machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
+
+            self.assertEqual(event, case['expected_event'])
+            self.assertEqual(task_flow_entry['status'], case['expected_status'])
