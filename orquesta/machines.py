@@ -562,9 +562,6 @@ class TaskStateMachine(object):
                     (failed and task_state['retry_condition'] == statuses.FAILED))):
                 return action_event + '_items_retrying'
 
-            # Attach info on whether there are succeeded items and task is supposed to be retried.
-                return action_event + '_items_retrying'
-
             # Attach info on whether there are failed execution on the items and return.
             if not active and failed:
                 return action_event + '_items_failed'

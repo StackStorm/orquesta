@@ -129,6 +129,16 @@ class WorkflowConductorTaskStateTest(test_base.WorkflowConductorTest):
         actual_task_state_entry = conductor.get_task_state_entry(task_name, task_route)
         self.assertDictEqual(actual_task_state_entry, expected_task_state_entry)
 
+    def test_add_invalid_task_state(self):
+        conductor = self._prep_conductor(status=statuses.RUNNING)
+
+        self.assertRaises(
+            exc.InvalidTask,
+            conductor.add_task_state,
+            'INVALID-TASK-ID',
+            0
+        )
+
     def test_update_task_state(self):
         conductor = self._prep_conductor(status=statuses.RUNNING)
 

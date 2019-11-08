@@ -131,6 +131,12 @@ class FailedStateTransitionTest(unittest.TestCase):
     def test_original_status_not_in_transition_map(self):
         self.assertFalse(machines.TaskStateMachine.is_transition_valid('mock', None))
 
+    def test_invalid_transition(self):
+        self.assertFalse(machines.TaskStateMachine.is_transition_valid(
+            statuses.FAILED,
+            statuses.SUCCEEDED
+        ))
+
 
 class StateTransitionTest(unittest.TestCase):
 

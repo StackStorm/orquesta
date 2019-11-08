@@ -136,3 +136,51 @@ class WorkflowConductorRetryTaskTest(test_base.WorkflowConductorTest):
         deserialized_conductor = conducting.WorkflowConductor.deserialize(serialized_data)
         task_state_entry = deserialized_conductor.get_task_state_entry('task1', 0)
         self.assertEqual(task_state_entry['retry_count'], task_inputs['count'] - 1)
+
+    def test_add_task_state_with_invalid_variable_reference_in_yaql(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - VALID_REFERENCE: 10
+
+        tasks:
+          task1:
+            action: core.noop
+            retry:
+              when: failed
+              count: <% ctx(VALID_REFERENCE) %>
+              delay: <% ctx(INVALID_REFERENCE) %>
+        """
+
+        # Initialize workflow spec and conductor
+        conductor = self._prep_conductor(wf_def)
+
+        # Create task_state_entry and confirm it is initialized as expected
+        task_state_entry = conductor.add_task_state('task1', 0)
+        self.assertEqual(task_state_entry['retry_count'], 10)
+        self.assertEqual(task_state_entry['retry_delay'], 0)
+
+    def test_add_task_state_with_invalid_variable_reference_in_jinja(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - VALID_REFERENCE: 10
+
+        tasks:
+          task1:
+            action: core.noop
+            retry:
+              when: failed
+              count: '{{ ctx("VALID_REFERENCE") }}'
+              delay: '{{ ctx("INVALID_REFERENCE") }}'
+        """
+
+        # Initialize workflow spec and conductor
+        conductor = self._prep_conductor(wf_def, {'count': 10, 'delay': 5})
+
+        # Create task_state_entry and confirm it is initialized as expected
+        task_state_entry = conductor.add_task_state('task1', 0)
+        self.assertEqual(task_state_entry['retry_count'], 10)
+        self.assertEqual(task_state_entry['retry_delay'], 0)
