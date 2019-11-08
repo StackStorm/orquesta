@@ -253,7 +253,7 @@ class WorkflowConductor(object):
 
             if errors:
                 self.log_errors(errors)
-                self.request_workflow_status(statuses.FAILED)
+                self._abort_workflow()
 
             # Proceed if there is no issue with rendering of inputs and vars.
             if self.get_workflow_status() not in statuses.ABENDED_STATUSES:
@@ -341,6 +341,14 @@ class WorkflowConductor(object):
 
         self.workflow_state.status = value
 
+    def _abort_workflow(self):
+        """This aborts workflow and set every tasks in it not to be retried any more"""
+
+        for task_entry in self.workflow_state.sequence:
+            task_entry['retry_count'] = 0
+
+        self.request_workflow_status(statuses.FAILED)
+
     def request_workflow_status(self, status):
         # Record current workflow status.
         current_status = self.get_workflow_status()
@@ -426,7 +434,7 @@ class WorkflowConductor(object):
                 self.log_errors(errors)
 
                 if wf_status not in [statuses.EXPIRED, statuses.ABANDONED, statuses.CANCELED]:
-                    self.request_workflow_status(statuses.FAILED)
+                    self._abort_workflow()
 
     def get_workflow_output(self):
         return copy.deepcopy(self._outputs) if self._outputs else None
@@ -603,7 +611,7 @@ class WorkflowConductor(object):
 
         # Return nothing if there is error(s) on determining next tasks.
         if fail_on_task_rendering:
-            self.request_workflow_status(statuses.FAILED)
+            self._abort_workflow()
             return []
 
         return sorted(next_tasks, key=lambda x: (x['id'], x['route']))
@@ -626,13 +634,18 @@ class WorkflowConductor(object):
 
         def _eval_expression(expression, context):
             evaluated_value = 0
-            if expression is not None:
+
+            # In these cases, this returns 0 (it means task woulenever be retried)
+            # - valid expression doesn't specified
+            # - workflow has already been finished or aborted
+            if (expression is not None and
+                    self.get_workflow_status() not in statuses.COMPLETED_STATUSES):
                 try:
                     value = expr_base.evaluate(expression, context)
                     if value is not None and str(value).isdigit():
                         evaluated_value = int(value)
 
-                except exc.VariableUndefinedError:
+                except exc.ExpressionEvaluationException:
                     # This is the case when undefined value is specified in the expression
                     return 0
 
@@ -822,7 +835,7 @@ class WorkflowConductor(object):
                     task_state_entry['next'][task_transition_id] = all(evaluated_criteria)
                 except Exception as e:
                     self.log_error(e, task_id, route, task_transition_id)
-                    self.request_workflow_status(statuses.FAILED)
+                    self._abort_workflow()
                     continue
 
                 # If criteria met, then mark the next task staged and calculate outgoing context.
@@ -840,7 +853,7 @@ class WorkflowConductor(object):
 
                     if errors:
                         self.log_errors(errors, task_id, route, task_transition_id)
-                        self.request_workflow_status(statuses.FAILED)
+                        self._abort_workflow()
                         continue
 
                     out_ctx_idxs = copy.deepcopy(task_state_entry['ctxs']['in'])
