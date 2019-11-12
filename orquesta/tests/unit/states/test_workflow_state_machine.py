@@ -183,7 +183,7 @@ class RetryStateTransitionTest(unittest.TestCase):
         staged_task['items'] = [{'status': x} for x in itm_status]
 
         # create event for testing state transition
-        ac_ex_event = events.ActionExecutionEvent(exe_status, context={'item_id': 0})
+        ac_ex_event = events.TaskItemActionExecutionEvent(0, exe_status)
 
         # create mock task_state entry to be updated status
         task_state = dict({'id': 'task', 'route': 0, 'status': statuses.RUNNING}, **retry_info)

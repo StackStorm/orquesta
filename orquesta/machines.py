@@ -477,8 +477,24 @@ class TaskStateMachine(object):
         return False
 
     @classmethod
-    def add_context_to_action_event(cls, workflow_state, task_id, task_route, ac_ex_event):
-        return ac_ex_event.name
+    def add_context_to_action_event(cls, workflow_state, task_state, ac_ex_event):
+        action_event = ac_ex_event.name
+
+        may_retry = (
+            task_state.get('retry_count', 0) > 0 and
+            task_state.get('status') == statuses.RUNNING
+        )
+
+        # Attach info which current task might be retried whether task was (failed|succeeded) and
+        # task is supposed to be retried when it is.
+        if (may_retry and (
+            (action_event == events.ACTION_SUCCEEDED and
+                task_state['retry_condition'] == statuses.SUCCEEDED) or
+            (action_event == events.ACTION_FAILED and
+                task_state['retry_condition'] == statuses.FAILED))):
+            return action_event + '_retrying'
+
+        return action_event
 
     @classmethod
     def process_action_event(cls, workflow_state, task_state, ac_ex_event):
@@ -489,8 +505,7 @@ class TaskStateMachine(object):
         # Append additional task context to the event.
         event_name = cls.add_context_to_action_event(
             workflow_state,
-            task_state['id'],
-            task_state['route'],
+            task_state,
             ac_ex_event
         )
 
@@ -515,8 +530,10 @@ class TaskStateMachine(object):
         # Assign new status to the task flow entry.
         task_state['status'] = new_task_status
 
+        return event_name
+
     @classmethod
-    def add_context_to_task_item_event(cls, workflow_state, task_id, task_route, ac_ex_event):
+    def add_context_to_task_item_event(cls, workflow_state, task_state, ac_ex_event):
         action_event = ac_ex_event.name
 
         requirements = [
@@ -569,15 +586,6 @@ class TaskStateMachine(object):
             # If items are not paused, canceled, or failed, then attach info on whether
             # there are items that are not in one of the completed statuses.
             return action_event + ('_items_incomplete' if incomplete else '_items_completed')
-
-        # Attach info which current task might be retried whether task was (failed|succeeded) and
-        # task is supposed to be retried when it is.
-        if (may_retry and (
-            (action_event == events.ACTION_SUCCEEDED and
-                task_state['retry_condition'] == statuses.SUCCEEDED) or
-            (action_event == events.ACTION_FAILED and
-                task_state['retry_condition'] == statuses.FAILED))):
-            return action_event + '_retrying'
 
         return action_event
 
@@ -675,8 +683,7 @@ class TaskStateMachine(object):
             return cls.process_workflow_event(workflow_state, task_state, event)
 
         if isinstance(event, events.TaskItemActionExecutionEvent):
-            cls.process_task_item_event(workflow_state, task_state, event)
-            return
+            return cls.process_task_item_event(workflow_state, task_state, event)
 
         if isinstance(event, events.ActionExecutionEvent):
             return cls.process_action_event(workflow_state, task_state, event)
