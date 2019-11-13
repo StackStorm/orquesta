@@ -68,7 +68,8 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         # Complete task2.
         self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING, statuses.SUCCEEDED])
 
-        # Check workflow status and output.
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
@@ -123,7 +124,8 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         self.forward_task_statuses(conductor, 'task3', status_changes, route=1)
         self.forward_task_statuses(conductor, 'task3', status_changes, route=2)
 
-        # Check workflow status and output.
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
@@ -183,7 +185,8 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         self.forward_task_statuses(conductor, 'task2', status_changes, route=1)
         self.forward_task_statuses(conductor, 'task3', status_changes, route=2)
 
-        # Check workflow status and output.
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)

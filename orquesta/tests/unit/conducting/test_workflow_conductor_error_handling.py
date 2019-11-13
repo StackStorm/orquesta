@@ -944,6 +944,8 @@ class WorkflowConductorErrorHandlingTest(test_base.WorkflowConductorTest):
         # Manually complete task1.
         self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
 
+        # Render workflow output and checkout workflow status and output.
+        conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertIsNone(conductor.get_workflow_output())
@@ -987,6 +989,8 @@ class WorkflowConductorErrorHandlingTest(test_base.WorkflowConductorTest):
         # Manually complete task1.
         self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
 
+        # Render workflow output and checkout workflow status and output.
+        conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)

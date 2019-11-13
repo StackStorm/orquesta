@@ -83,6 +83,8 @@ class WorkflowConductorDataFlowTest(test_base.WorkflowConductorTest):
             task_name = 'task' + str(i)
             self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
 
+        # Render workflow output and checkout workflow status and output.
+        conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 

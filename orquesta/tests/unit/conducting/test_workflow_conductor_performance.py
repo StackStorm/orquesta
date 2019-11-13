@@ -141,5 +141,6 @@ class WorkflowConductorWithItemsStressTest(test_base.WorkflowConductorWithItemsT
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
         # Assert the workflow output is correct.
+        conductor.render_workflow_output()
         expected_output = {'items': task_ctx['xs']}
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)

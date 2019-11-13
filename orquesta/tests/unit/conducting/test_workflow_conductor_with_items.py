@@ -74,6 +74,7 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
         # Assert the workflow output is correct.
+        conductor.render_workflow_output()
         expected_output = {'items': []}
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
@@ -141,6 +142,7 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
         # Assert the workflow output is correct.
+        conductor.render_workflow_output()
         expected_output = {'items': task_ctx['xs']}
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
@@ -234,6 +236,7 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
         # Assert the workflow output is correct.
+        conductor.render_workflow_output()
         expected_output = {'items': task_ctx['xs']}
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
@@ -372,6 +375,7 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
         # Assert the workflow output is correct.
+        conductor.render_workflow_output()
         expected_output = {'items': ['foobar', 'fubar', 'marcopolo']}
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
@@ -496,6 +500,7 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
         # Assert the workflow output is correct.
+        conductor.render_workflow_output()
         expected_output = {'items': [[i, j] for i, j in zip(task_ctx['xs'], task_ctx['ys'])]}
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
@@ -1012,4 +1017,5 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
         self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow succeeded.
+        conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)

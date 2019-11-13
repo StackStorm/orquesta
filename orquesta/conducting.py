@@ -407,7 +407,7 @@ class WorkflowConductor(object):
 
         return wf_term_ctx
 
-    def _render_workflow_outputs(self):
+    def render_workflow_output(self):
         wf_status = self.get_workflow_status()
 
         # Render workflow outputs if workflow is completed.
@@ -875,10 +875,9 @@ class WorkflowConductor(object):
             engine_event = events.ENGINE_EVENT_MAP[next_task_id]
             self.update_task_state(next_task_id, next_task_route, engine_event())
 
-        # Render workflow output if workflow is completed.
+        # Mark the task as a terminal task if workflow execution is completed.
         if self.get_workflow_status() in statuses.COMPLETED_STATUSES:
             task_state_entry['term'] = True
-            self._render_workflow_outputs()
 
         return task_state_entry
 
