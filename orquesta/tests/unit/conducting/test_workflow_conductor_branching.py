@@ -338,7 +338,8 @@ class WorkflowConductorExtendedTest(test_base.WorkflowConductorTest):
         expected_term_tasks = ['task2', 'task4']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
-        # Check workflow status and context.
+        # Render workflow output and check workflow status and context.
+        conductor.render_workflow_output()
         expected_term_ctx = {'var1': 'xyz', 'var2': 123}
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)

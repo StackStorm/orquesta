@@ -52,7 +52,8 @@ class WorkflowConductorCancelTest(test_base.WorkflowConductorTest):
         conductor.request_workflow_status(statuses.CANCELING)
         self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
 
-        # Check workflow status and output.
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
@@ -100,6 +101,7 @@ class WorkflowConductorCancelTest(test_base.WorkflowConductorTest):
         self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
 
         # Check workflow status is not changed to failed given the output error.
+        conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)

@@ -315,6 +315,9 @@ class WorkflowConductorTest(WorkflowComposerTest):
         self.assertListEqual(actual_task_seq, expected_task_seq)
         self.assertListEqual(conductor.workflow_state.routes, expected_routes)
 
+        if conductor.get_workflow_status() in statuses.COMPLETED_STATUSES:
+            conductor.render_workflow_output()
+
         if expected_workflow_status is None:
             expected_workflow_status = statuses.SUCCEEDED
 

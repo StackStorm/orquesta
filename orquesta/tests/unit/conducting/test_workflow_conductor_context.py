@@ -41,6 +41,10 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
             action: core.noop
         """
 
+        # The YaqlEvaluationException on variables "x" and "y" are a result of using unassigned
+        # variables in the input and vars section. The YaqlEvaluationException on variables
+        # "a", "b", and "z" are a result of rendering workflow output with unassigned variables
+        # on workflow execution completion.
         expected_errors = [
             {
                 'type': 'error',
@@ -54,6 +58,27 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
                 'message': (
                     'YaqlEvaluationException: Unable to resolve key \'y\' in '
                     'expression \'<% ctx().y %>\' from context.'
+                )
+            },
+            {
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to resolve key \'a\' in '
+                    'expression \'<% ctx().a %>\' from context.'
+                )
+            },
+            {
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to resolve key \'b\' in '
+                    'expression \'<% ctx().b %>\' from context.'
+                )
+            },
+            {
+                'type': 'error',
+                'message': (
+                    'YaqlEvaluationException: Unable to resolve key \'z\' in '
+                    'expression \'<% ctx().z %>\' from context.'
                 )
             }
         ]
@@ -69,7 +94,8 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
             statuses.RUNNING
         )
 
-        # Check workflow status and result.
+        # Render workflow output and check workflow status and result.
+        conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertIsNone(conductor.get_workflow_output())
@@ -115,7 +141,8 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         # Complete tasks
         self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
 
-        # Check workflow status and output.
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
@@ -245,7 +272,8 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         # Complete tasks
         self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
 
-        # Check workflow status and output.
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         self.assertListEqual(conductor.errors, expected_conducting_errors)
         self.assertIsNone(conductor.get_workflow_output())
@@ -287,7 +315,8 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         # Complete tasks
         self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
 
-        # Check workflow status and output.
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertListEqual(conductor.errors, expected_errors)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)

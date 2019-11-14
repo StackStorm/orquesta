@@ -664,6 +664,8 @@ class WorkflowConductorTest(test_base.WorkflowConductorTest):
             task_name = 'task' + str(i)
             self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
 
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
         self.assertIsNone(conductor.get_workflow_output())
 
@@ -680,6 +682,8 @@ class WorkflowConductorTest(test_base.WorkflowConductorTest):
         task_name = 'task5'
         self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.FAILED])
 
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         expected_output = {'data': expected_task_ctx}
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
@@ -694,6 +698,8 @@ class WorkflowConductorTest(test_base.WorkflowConductorTest):
             task_name = 'task' + str(i)
             self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
 
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         expected_output = {'data': expected_task_ctx}
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)

@@ -20,6 +20,9 @@ Fixed
 * Fix conducting of cycle with a fork. Fixes #169 (bug fix)
 * Fix request_workflow_status to ignore certain status change errors such as pausing a workflow
   that is already pausing and canceling a workflow that is already canceling. (bug fix)
+* Remove rendering of workflow output automatically when updating task state. This caused
+  workflow output to render incorrectly in certain use case. The render_workflow_output function
+  must be called separately. (bug fix)
 
 1.0.0
 -----
