@@ -170,4 +170,8 @@ def extract_vars(statement):
 
 
 def func_has_ctx_arg(func):
-    return 'context' in inspect.getargspec(func).args
+    getargspec = (
+        inspect.getargspec if six.PY2 else inspect.getfullargspec  # pylint: disable=no-member
+    )
+
+    return 'context' in getargspec(func).args

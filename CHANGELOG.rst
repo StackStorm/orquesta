@@ -23,6 +23,8 @@ Fixed
 * Remove rendering of workflow output automatically when updating task state. This caused
   workflow output to render incorrectly in certain use case. The render_workflow_output function
   must be called separately. (bug fix)
+* When inspecting custom YAQL/Jinja function to see if there is a context arg, use getargspec
+  for py2 and getfullargspec for py3. (bug fix)
 
 1.0.0
 -----
