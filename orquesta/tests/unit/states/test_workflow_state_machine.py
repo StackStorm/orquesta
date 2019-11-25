@@ -173,89 +173,122 @@ class StateTransitionTest(unittest.TestCase):
 
 class RetryStateTransitionTest(unittest.TestCase):
 
-    def assert_retry_with_items(self, itm_status, exe_status, retry_info, exp_action, exp_status):
+    def assert_retry_task_with_items(self, case):
         # create mock workflow state and register mock task in the staged task queue
         workflow_state = conducting.WorkflowState()
         workflow_state.add_staged_task('task', 0)
 
         # set status of each staged task items
         staged_task = workflow_state.get_staged_task('task', 0)
-        staged_task['items'] = [{'status': x} for x in itm_status]
+        staged_task['items'] = [{'status': x} for x in case['itm_status']]
 
         # create event for testing state transition
-        ac_ex_event = events.TaskItemActionExecutionEvent(0, exe_status)
+        ac_ex_event = events.TaskItemActionExecutionEvent(0, case['exe_status'])
 
         # create mock task_state entry to be updated status
-        task_state = dict({'id': 'task', 'route': 0, 'status': statuses.RUNNING}, **retry_info)
+        task_state = {'id': 'task', 'route': 0, 'status': statuses.RUNNING, 'ctxs': {'in': [0]}}
+        task_state.update(case['retry_info'])
+
+        workflow_state.tasks['task__r0'] = 0
+        workflow_state.sequence.append(task_state)
+        workflow_state.contexts.append({})
 
         # transit task status
         event = machines.TaskStateMachine.process_event(workflow_state, task_state, ac_ex_event)
 
         # confirm result of task transition and transition path are expected ones
-        self.assertEqual(event, exp_action)
-        self.assertEqual(task_state['status'], exp_status)
+        self.assertEqual(event, case['exp_action'])
+        self.assertEqual(task_state['status'], case['exp_status'])
 
-    def test_task_retry_with_items(self):
+    def test_task_will_be_retried_with_items(self):
+        # This tests all state transitions of tasks which has items with item task.
         test_cases = [
             {
-                # The case task will be retried
+                # The case task will be retried because task with items failed
                 'exe_status': statuses.FAILED,
                 'itm_status': [statuses.SUCCEEDED, statuses.FAILED],
-                'retry_info': {'retry_count': 1, 'retry_condition': statuses.FAILED},
-                'exp_action': events.ACTION_FAILED_TASK_DORMANT_ITEMS_RETRYING,
+                'retry_info': {'retry_count': 1, 'retry_condition': '<% failed() %>'},
+                'exp_action': events.ACTION_FAILED_RETRYING,
                 'exp_status': statuses.RUNNING,
             }, {
-                # The case of retry_count is expired
+                'exe_status': statuses.SUCCEEDED,
+                'itm_status': [statuses.SUCCEEDED, statuses.SUCCEEDED],
+                'retry_info': {'retry_count': 1, 'retry_condition': '<% succeeded() %>'},
+                'exp_action': events.ACTION_SUCCEEDED_RETRYING,
+                'exp_status': statuses.RUNNING,
+            }, {
                 'exe_status': statuses.FAILED,
-                'itm_status': [statuses.SUCCEEDED, statuses.FAILED],
-                'retry_info': {'retry_count': 0, 'retry_condition': statuses.FAILED},
-                'exp_action': events.ACTION_FAILED_TASK_DORMANT_ITEMS_FAILED,
-                'exp_status': statuses.FAILED,
-            }, {
-                # The case task will be retried
-                'exe_status': statuses.SUCCEEDED,
                 'itm_status': [statuses.SUCCEEDED, statuses.SUCCEEDED],
-                'retry_info': {'retry_count': 1, 'retry_condition': statuses.SUCCEEDED},
-                'exp_action': events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_RETRYING,
+                'retry_info': {'retry_count': 1, 'retry_condition': '<% completed() %>'},
+                'exp_action': events.ACTION_FAILED_RETRYING,
                 'exp_status': statuses.RUNNING,
             }, {
-                # The case of retry_count is expired
                 'exe_status': statuses.SUCCEEDED,
-                'itm_status': [statuses.SUCCEEDED, statuses.SUCCEEDED],
-                'retry_info': {'retry_count': 0, 'retry_condition': statuses.SUCCEEDED},
-                'exp_action': events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_COMPLETED,
-                'exp_status': statuses.SUCCEEDED,
+                'itm_status': [statuses.SUCCEEDED, statuses.FAILED],
+                'retry_info': {'retry_count': 1, 'retry_condition': '<% completed() %>'},
+                'exp_action': events.ACTION_SUCCEEDED_RETRYING,
+                'exp_status': statuses.RUNNING,
             }, {
-                'exe_status': statuses.PENDING,
-                'itm_status': [statuses.SUCCEEDED, statuses.SUCCEEDED],
-                'retry_info': {'retry_count': 1, 'retry_condition': statuses.SUCCEEDED},
-                'exp_action': events.ACTION_PENDING_TASK_DORMANT_ITEMS_RETRYING,
-                'exp_status': statuses.PAUSED,
-            }, {
-                'exe_status': statuses.PAUSED,
-                'itm_status': [statuses.SUCCEEDED, statuses.SUCCEEDED],
-                'retry_info': {'retry_count': 1, 'retry_condition': statuses.SUCCEEDED},
-                'exp_action': events.ACTION_PAUSED_TASK_DORMANT_ITEMS_RETRYING,
-                'exp_status': statuses.PAUSED,
-            }, {
-                'exe_status': statuses.CANCELED,
-                'itm_status': [statuses.SUCCEEDED, statuses.SUCCEEDED],
-                'retry_info': {'retry_count': 1, 'retry_condition': statuses.SUCCEEDED},
-                'exp_action': events.ACTION_CANCELED_TASK_DORMANT_ITEMS_RETRYING,
-                'exp_status': statuses.CANCELED,
+                'exe_status': statuses.EXPIRED,
+                'itm_status': [statuses.SUCCEEDED, statuses.FAILED],
+                'retry_info': {'retry_count': 1, 'retry_condition': '<% completed() %>'},
+                'exp_action': events.ACTION_EXPIRED_RETRYING,
+                'exp_status': statuses.RUNNING,
             }, {
                 'exe_status': statuses.EXPIRED,
                 'itm_status': [statuses.SUCCEEDED, statuses.SUCCEEDED],
-                'retry_info': {'retry_count': 1, 'retry_condition': statuses.SUCCEEDED},
-                'exp_action': events.ACTION_EXPIRED_TASK_DORMANT_ITEMS_RETRYING,
-                'exp_status': statuses.FAILED,
+                'retry_info': {'retry_count': 1, 'retry_condition': '<% completed() %>'},
+                'exp_action': events.ACTION_EXPIRED_RETRYING,
+                'exp_status': statuses.RUNNING,
+            }, {
+                'exe_status': statuses.ABANDONED,
+                'itm_status': [statuses.SUCCEEDED, statuses.FAILED],
+                'retry_info': {'retry_count': 1, 'retry_condition': '<% completed() %>'},
+                'exp_action': events.ACTION_ABANDONED_RETRYING,
+                'exp_status': statuses.RUNNING,
             }, {
                 'exe_status': statuses.ABANDONED,
                 'itm_status': [statuses.SUCCEEDED, statuses.SUCCEEDED],
-                'retry_info': {'retry_count': 1, 'retry_condition': statuses.SUCCEEDED},
-                'exp_action': events.ACTION_ABANDONED_TASK_DORMANT_ITEMS_RETRYING,
-                'exp_status': statuses.FAILED,
+                'retry_info': {'retry_count': 1, 'retry_condition': '<% completed() %>'},
+                'exp_action': events.ACTION_ABANDONED_RETRYING,
+                'exp_status': statuses.RUNNING,
+            }, {
+                'exe_status': statuses.ABANDONED,
+                'itm_status': [statuses.SUCCEEDED, statuses.SUCCEEDED],
+                'retry_info': {'retry_count': 1, 'retry_condition': '<% "foo" = "foo" %>'},
+                'exp_action': events.ACTION_ABANDONED_RETRYING,
+                'exp_status': statuses.RUNNING,
             }
         ]
         for case in test_cases:
-            self.assert_retry_with_items(**case)
+            self.assert_retry_task_with_items(case)
+
+    def test_task_will_not_be_retried_with_items(self):
+        # This tests cases task with items won't be retried
+        test_cases = [
+            {
+                # The case task won't be retried because retry_count is expired
+                'exe_status': statuses.FAILED,
+                'itm_status': [statuses.SUCCEEDED, statuses.FAILED],
+                'retry_info': {'retry_count': 0, 'retry_condition': '<% failed() %>'},
+                'exp_action': events.ACTION_FAILED_TASK_DORMANT_ITEMS_FAILED,
+                'exp_status': statuses.FAILED,
+            }, {
+                # The case task won't be retried because retry_condition doesn't match with
+                # task status.
+                'exe_status': statuses.SUCCEEDED,
+                'itm_status': [statuses.SUCCEEDED],
+                'retry_info': {'retry_count': 1, 'retry_condition': '<% failed() %>'},
+                'exp_action': events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_COMPLETED,
+                'exp_status': statuses.SUCCEEDED,
+            }, {
+                # The case task won't be retried because retry_condition returns False
+                'exe_status': statuses.SUCCEEDED,
+                'itm_status': [statuses.SUCCEEDED],
+                'retry_info': {'retry_count': 1, 'retry_condition': '<% "foo" = "bar" %>'},
+                'exp_action': events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_COMPLETED,
+                'exp_status': statuses.SUCCEEDED,
+            }
+        ]
+        for case in test_cases:
+            self.assert_retry_task_with_items(case)

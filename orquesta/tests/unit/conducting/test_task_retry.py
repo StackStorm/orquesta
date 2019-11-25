@@ -28,9 +28,39 @@ tasks:
   task1:
     action: core.noop
     retry:
-      when: succeeded
+      when: <% succeeded() %>
       count: <% ctx(count) %>
       delay: <% ctx(delay) %>
+"""
+
+WF_DEF_TO_TEST_RETRYING_TASK_WITH_ITEMS = """
+version: 1.0
+
+vars:
+  - xs:
+    - foo
+
+tasks:
+  task1:
+    with: <% ctx(xs) %>
+    action: core.echo message=<% item() %>
+    retry:
+      when: <% failed() %>
+      count: 1
+"""
+
+WF_DEF_TO_TEST_RETRYING_DUE_TO_RESULTS = """
+version: 1.0
+
+input:
+  - retry_status_code
+
+tasks:
+  task1:
+    action: some.action
+    retry:
+      when: <% failed() or result().status_code = ctx(retry_status_code) %>
+      count: 1
 """
 
 WF_DEF_TO_TEST_ABORTING_WORKFLOW = """
@@ -51,17 +81,12 @@ tasks:
   task3:
     action: core.noop
     retry:
-      when: failed
+      when: <% failed() %>
       count: 3
 """
 
 
 class WorkflowConductorRetryTaskTest(test_base.WorkflowConductorTest):
-
-    def setUp(self, *args, **kwargs):
-        super(WorkflowConductorRetryTaskTest, self).setUp(*args, **kwargs)
-
-        self.test_ctx = {}
 
     def _prep_conductor(self, wf_def, inputs={}):
         # This nitializes workflow spec and conductor
@@ -79,7 +104,7 @@ class WorkflowConductorRetryTaskTest(test_base.WorkflowConductorTest):
           task1:
             action: core.noop
             retry:
-              when: failed
+              when: <% failed() %>
               count: 2
         """
         conductor = self._prep_conductor(wf_def)
@@ -105,7 +130,7 @@ class WorkflowConductorRetryTaskTest(test_base.WorkflowConductorTest):
 
         # This confirms whether get_next_tasks method returns object that has delay parameter that
         # indicates workflow engine to delay task execution for specified seconds in the spec.
-        expected_tasks = self.format_task_item(
+        expected_task = self.format_task_item(
             task_id='task1',
             route=0,
             ctx=task_inputs,
@@ -115,7 +140,7 @@ class WorkflowConductorRetryTaskTest(test_base.WorkflowConductorTest):
         )
         actual_tasks = conductor.get_next_tasks()
 
-        self.assert_task_list(conductor, actual_tasks, [expected_tasks])
+        self.assert_task_list(conductor, actual_tasks, [expected_task])
 
         # This checks task would be finish up after being successful for specified times
         self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
@@ -135,6 +160,78 @@ class WorkflowConductorRetryTaskTest(test_base.WorkflowConductorTest):
             self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
             self.assertEqual(conductor.get_workflow_status(), task_info['wf_status'])
             self.assertEqual(len(conductor.errors), 0)
+
+    def test_retrying_task_due_to_task_result_matches_with_retry_condition(self):
+        conductor = self._prep_conductor(WF_DEF_TO_TEST_RETRYING_DUE_TO_RESULTS, {
+            'retry_status_code': 401,
+        })
+
+        # Task will be retried even tough task status  match with retry condition because
+        # additional condition, result().status_code = 401, matches with its condition.
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
+        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED], results=[{
+            'status_code': 401
+        }])
+        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
+
+        # Even through task status and results are mached with retry condition, task won't be
+        # retried because retry_count is run out.
+        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED], results=[{
+            'status_code': 401
+        }])
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+
+    def test_not_retrying_task_due_to_task_result_does_not_match_with_retry_condition(self):
+        conductor = self._prep_conductor(WF_DEF_TO_TEST_RETRYING_DUE_TO_RESULTS, {
+            'retry_status_code': 200,
+        })
+
+        # Task will be retried even tough task status  match with retry condition because
+        # additional condition, result().status_code = 401, matches with its condition.
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
+        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED], results=[{
+            'status_code': 401
+        }])
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+
+    def test_retrying_task_has_items(self):
+        conductor = self._prep_conductor(WF_DEF_TO_TEST_RETRYING_TASK_WITH_ITEMS)
+
+        # Initialize task has items and check it
+        expected_task = self.format_task_item(
+            task_id='task1',
+            route=0,
+            ctx={'xs': ['foo']},
+            spec=conductor.spec.tasks.get_task('task1'),
+            actions=[{'action': 'core.echo', 'input': {'message': 'foo'}, 'item_id': 0}],
+            items_count=1,
+            delay=0,
+        )
+        actual_tasks = conductor.get_next_tasks()
+
+        self.assert_task_list(conductor, actual_tasks, [expected_task])
+
+        # Task which has items will be retried, because result status and retry condition
+        # are matched.
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING], [0])
+        self.forward_task_statuses(conductor, 'task1', [statuses.FAILED], [0])
+        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
+
+        # When task_state runs out of retry_count, task will be finished as appropriate status
+        self.forward_task_statuses(conductor, 'task1', [statuses.FAILED], [0])
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
+
+    def test_not_retrying_task_has_items(self):
+        conductor = self._prep_conductor(WF_DEF_TO_TEST_RETRYING_TASK_WITH_ITEMS)
+
+        # Initialize task has items
+        conductor.get_next_tasks()
+
+        # Task which has items won't be retried, because result status and retry condition
+        # aren't matched.
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING], [0])
+        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED], [0])
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
     def test_serialization(self):
         task_inputs = {'count': 3}
@@ -170,7 +267,7 @@ class WorkflowConductorRetryTaskTest(test_base.WorkflowConductorTest):
           task1:
             action: core.noop
             retry:
-              when: failed
+              when: <% failed() %>
               count: <% ctx(VALID_VARIABLE) %>
               delay: <% ctx(INVALID_VARIABLE) %>
         """
@@ -194,7 +291,7 @@ class WorkflowConductorRetryTaskTest(test_base.WorkflowConductorTest):
           task1:
             action: core.noop
             retry:
-              when: failed
+              when: <% failed() %>
               count: '{{ ctx("VALID_VARIABLE") }}'
               delay: '{{ ctx("INVALID_VARIABLE") }}'
         """

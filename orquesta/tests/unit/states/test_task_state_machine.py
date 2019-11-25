@@ -14,6 +14,7 @@
 
 import unittest
 
+from orquesta import conducting
 from orquesta import events
 from orquesta import exceptions as exc
 from orquesta import machines
@@ -160,93 +161,122 @@ class StateTransitionTest(unittest.TestCase):
 
 
 class RetryStateTransitionTest(unittest.TestCase):
-    def test_task_retry(self):
-        task_flow_entry = {'id': 'task1', 'route': 0, 'ctx': 0}
 
-        # This defines each cases concerning about retrying
+    def setUp(self):
+        self.workflow_state = conducting.WorkflowState()
+        self.task_flow_entry = {'id': 'task', 'route': 0, 'ctxs': {'in': [0]}}
+
+        # initialize workflow_state instance to be able to work state transition processing propery
+        self.workflow_state.tasks['task__r0'] = 0
+        self.workflow_state.sequence.append(self.task_flow_entry)
+        self.workflow_state.contexts.append({})
+
+    def assert_retry_task(self, case):
+        self.task_flow_entry['status'] = statuses.RUNNING
+        self.task_flow_entry['retry_count'] = case['retry_count']
+        self.task_flow_entry['retry_condition'] = case['retry_condition']
+
+        ac_ex_event = events.ActionExecutionEvent(case['action_status'])
+        event = machines.TaskStateMachine.process_event(self.workflow_state,
+                                                        self.task_flow_entry,
+                                                        ac_ex_event)
+
+        self.assertEqual(event, case['expected_event'])
+        self.assertEqual(self.task_flow_entry['status'], case['expected_status'])
+
+    def test_task_will_be_retry(self):
+        # This defines each task state and event conditions that tasks will be retried through
+        # all state transition about retrying.
         test_cases = [
             {
-                # Task will be retried because retry condition is satisfied.
-                'retry_count': 1, 'retry_condition': statuses.FAILED,
+                'retry_count': 1, 'retry_condition': '<% failed() %>',
                 'action_status': statuses.FAILED,
                 'expected_event': events.ACTION_FAILED_RETRYING,
                 'expected_status': statuses.RUNNING
             }, {
+                'retry_count': 1, 'retry_condition': '<% succeeded() %>',
+                'action_status': statuses.SUCCEEDED,
+                'expected_event': events.ACTION_SUCCEEDED_RETRYING,
+                'expected_status': statuses.RUNNING
+            }, {
+                'retry_count': 1, 'retry_condition': '<% completed() %>',
+                'action_status': statuses.EXPIRED,
+                'expected_event': events.ACTION_EXPIRED_RETRYING,
+                'expected_status': statuses.RUNNING
+            }, {
+                'retry_count': 1, 'retry_condition': '<% completed() %>',
+                'action_status': statuses.ABANDONED,
+                'expected_event': events.ACTION_ABANDONED_RETRYING,
+                'expected_status': statuses.RUNNING
+            }, {
+                'retry_count': 1, 'retry_condition': '<% "foo" = "foo" %>',
+                'action_status': statuses.FAILED,
+                'expected_event': events.ACTION_FAILED_RETRYING,
+                'expected_status': statuses.RUNNING
+            }
+        ]
+        for case in test_cases:
+            self.assert_retry_task(case)
+
+    def test_task_will_not_be_retryed(self):
+        # This defines each task state and event conditions that tasks won't be retried.
+        test_cases = [
+            {
                 # Task won't be retried because retry condition isn't satisfied.
-                'retry_count': 1, 'retry_condition': statuses.FAILED,
+                'retry_count': 1, 'retry_condition': '<% failed() %>',
                 'action_status': statuses.SUCCEEDED,
                 'expected_event': events.ACTION_SUCCEEDED,
                 'expected_status': statuses.SUCCEEDED
             }, {
                 # Task won't be retried because retry condition isn't satisfied.
-                'retry_count': 1, 'retry_condition': statuses.SUCCEEDED,
-                'action_status': statuses.FAILED,
-                'expected_event': events.ACTION_FAILED,
-                'expected_status': statuses.FAILED
-            }, {
-                # Task will be retried because retry condition is satisfied.
-                'retry_count': 1, 'retry_condition': statuses.SUCCEEDED,
-                'action_status': statuses.SUCCEEDED,
-                'expected_event': events.ACTION_SUCCEEDED_RETRYING,
-                'expected_status': statuses.RUNNING
-            }, {
-                # Task won't be retried because retry_count doesn't left
-                'retry_count': 0, 'retry_condition': statuses.FAILED,
+                'retry_count': 1, 'retry_condition': '<% succeeded() %>',
                 'action_status': statuses.FAILED,
                 'expected_event': events.ACTION_FAILED,
                 'expected_status': statuses.FAILED
             }, {
                 # Task won't be retried because retry_count doesn't left
-                'retry_count': 0, 'retry_condition': statuses.SUCCEEDED,
+                'retry_count': 0, 'retry_condition': '<% failed() %>',
+                'action_status': statuses.FAILED,
+                'expected_event': events.ACTION_FAILED,
+                'expected_status': statuses.FAILED
+            }, {
+                # Task won't be retried because retry_count doesn't left
+                'retry_count': 0, 'retry_condition': '<% succeeded() %>',
                 'action_status': statuses.SUCCEEDED,
                 'expected_event': events.ACTION_SUCCEEDED,
                 'expected_status': statuses.SUCCEEDED
             }, {
                 # Below cases confirm retry parameter doesn't affect for other events
-                'retry_count': 1, 'retry_condition': statuses.FAILED,
+                'retry_count': 1, 'retry_condition': '<% completed() %>',
                 'action_status': statuses.RUNNING,
                 'expected_event': events.ACTION_RUNNING,
                 'expected_status': statuses.RUNNING
             }, {
-                'retry_count': 1, 'retry_condition': statuses.FAILED,
+                'retry_count': 1, 'retry_condition': '<% completed() %>',
                 'action_status': statuses.PENDING,
                 'expected_event': events.ACTION_PENDING,
                 'expected_status': statuses.PENDING
             }, {
-                'retry_count': 1, 'retry_condition': statuses.FAILED,
+                'retry_count': 1, 'retry_condition': '<% completed() %>',
                 'action_status': statuses.PAUSED,
                 'expected_event': events.ACTION_PAUSED,
                 'expected_status': statuses.PAUSED
             }, {
-                'retry_count': 1, 'retry_condition': statuses.FAILED,
+                'retry_count': 1, 'retry_condition': '<% completed() %>',
                 'action_status': statuses.CANCELING,
                 'expected_event': events.ACTION_CANCELING,
                 'expected_status': statuses.CANCELING
             }, {
-                'retry_count': 1, 'retry_condition': statuses.FAILED,
+                'retry_count': 1, 'retry_condition': '<% completed() %>',
                 'action_status': statuses.CANCELED,
                 'expected_event': events.ACTION_CANCELED,
                 'expected_status': statuses.CANCELED
             }, {
-                'retry_count': 1, 'retry_condition': statuses.FAILED,
-                'action_status': statuses.EXPIRED,
-                'expected_event': events.ACTION_EXPIRED,
-                'expected_status': statuses.FAILED
-            }, {
-                'retry_count': 1, 'retry_condition': statuses.FAILED,
-                'action_status': statuses.ABANDONED,
-                'expected_event': events.ACTION_ABANDONED,
+                'retry_count': 1, 'retry_condition': '<% "foo" = "bar" %>',
+                'action_status': statuses.FAILED,
+                'expected_event': events.ACTION_FAILED,
                 'expected_status': statuses.FAILED
             }
         ]
         for case in test_cases:
-            # reset task status every time because it is updated after state transition
-            task_flow_entry['status'] = statuses.RUNNING
-            task_flow_entry['retry_count'] = case['retry_count']
-            task_flow_entry['retry_condition'] = case['retry_condition']
-
-            ac_ex_event = events.ActionExecutionEvent(case['action_status'])
-            event = machines.TaskStateMachine.process_event(None, task_flow_entry, ac_ex_event)
-
-            self.assertEqual(event, case['expected_event'])
-            self.assertEqual(task_flow_entry['status'], case['expected_status'])
+            self.assert_retry_task(case)

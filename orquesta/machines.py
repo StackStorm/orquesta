@@ -18,6 +18,7 @@ import logging
 from orquesta import events
 from orquesta import exceptions as exc
 from orquesta import statuses
+from orquesta.utils import task_state as state_util
 
 
 LOG = logging.getLogger(__name__)
@@ -280,7 +281,6 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_PENDING_TASK_DORMANT_ITEMS_FAILED: statuses.FAILED,
         events.ACTION_PENDING_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.PAUSED,
         events.ACTION_PENDING_TASK_DORMANT_ITEMS_COMPLETED: statuses.PAUSED,
-        events.ACTION_PENDING_TASK_DORMANT_ITEMS_RETRYING: statuses.PAUSED,
         events.ACTION_PAUSING: statuses.PAUSING,
         events.ACTION_PAUSED: statuses.PAUSED,
         events.ACTION_PAUSED_TASK_ACTIVE_ITEMS_INCOMPLETE: statuses.PAUSING,
@@ -289,7 +289,6 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_PAUSED_TASK_DORMANT_ITEMS_FAILED: statuses.FAILED,
         events.ACTION_PAUSED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.PAUSED,
         events.ACTION_PAUSED_TASK_DORMANT_ITEMS_COMPLETED: statuses.PAUSED,
-        events.ACTION_PAUSED_TASK_DORMANT_ITEMS_RETRYING: statuses.PAUSED,
         events.ACTION_CANCELING: statuses.CANCELING,
         events.ACTION_CANCELED: statuses.CANCELED,
         events.ACTION_CANCELED_TASK_ACTIVE_ITEMS_INCOMPLETE: statuses.CANCELING,
@@ -298,38 +297,31 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_CANCELED_TASK_DORMANT_ITEMS_FAILED: statuses.CANCELED,
         events.ACTION_CANCELED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.CANCELED,
         events.ACTION_CANCELED_TASK_DORMANT_ITEMS_COMPLETED: statuses.CANCELED,
-        events.ACTION_CANCELED_TASK_DORMANT_ITEMS_RETRYING: statuses.CANCELED,
         events.ACTION_FAILED: statuses.FAILED,
-        events.ACTION_FAILED_RETRYING: statuses.RUNNING,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_PAUSED: statuses.FAILED,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_CANCELED: statuses.CANCELED,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_FAILED: statuses.FAILED,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.FAILED,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_COMPLETED: statuses.FAILED,
-        events.ACTION_FAILED_TASK_DORMANT_ITEMS_RETRYING: statuses.RUNNING,
         events.ACTION_EXPIRED: statuses.FAILED,
         events.ACTION_EXPIRED_TASK_DORMANT_ITEMS_PAUSED: statuses.FAILED,
         events.ACTION_EXPIRED_TASK_DORMANT_ITEMS_CANCELED: statuses.CANCELED,
         events.ACTION_EXPIRED_TASK_DORMANT_ITEMS_FAILED: statuses.FAILED,
         events.ACTION_EXPIRED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.FAILED,
         events.ACTION_EXPIRED_TASK_DORMANT_ITEMS_COMPLETED: statuses.FAILED,
-        events.ACTION_EXPIRED_TASK_DORMANT_ITEMS_RETRYING: statuses.FAILED,
         events.ACTION_ABANDONED: statuses.FAILED,
         events.ACTION_ABANDONED_TASK_DORMANT_ITEMS_PAUSED: statuses.FAILED,
         events.ACTION_ABANDONED_TASK_DORMANT_ITEMS_CANCELED: statuses.CANCELED,
         events.ACTION_ABANDONED_TASK_DORMANT_ITEMS_FAILED: statuses.FAILED,
         events.ACTION_ABANDONED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.FAILED,
         events.ACTION_ABANDONED_TASK_DORMANT_ITEMS_COMPLETED: statuses.FAILED,
-        events.ACTION_ABANDONED_TASK_DORMANT_ITEMS_RETRYING: statuses.FAILED,
         events.ACTION_SUCCEEDED: statuses.SUCCEEDED,
-        events.ACTION_SUCCEEDED_RETRYING: statuses.RUNNING,
         events.ACTION_SUCCEEDED_TASK_ACTIVE_ITEMS_INCOMPLETE: statuses.RUNNING,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_CANCELED: statuses.CANCELED,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_PAUSED: statuses.PAUSED,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_FAILED: statuses.FAILED,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.RUNNING,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_COMPLETED: statuses.SUCCEEDED,
-        events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_RETRYING: statuses.RUNNING,
         events.WORKFLOW_PAUSING_TASK_ACTIVE_ITEMS_INCOMPLETE: statuses.PAUSING,
         events.WORKFLOW_PAUSING_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.PAUSED,
         events.WORKFLOW_PAUSED_TASK_ACTIVE_ITEMS_INCOMPLETE: statuses.PAUSING,
@@ -446,8 +438,13 @@ TASK_STATE_MACHINE_DATA = {
     statuses.CANCELED: {
     },
     statuses.SUCCEEDED: {
+        events.ACTION_SUCCEEDED_RETRYING: statuses.RUNNING,
     },
     statuses.FAILED: {
+        events.ACTION_ABANDONED_RETRYING: statuses.RUNNING,
+        events.ACTION_EXPIRED_RETRYING: statuses.RUNNING,
+        events.ACTION_FAILED_RETRYING: statuses.RUNNING,
+        events.ACTION_SUCCEEDED_RETRYING: statuses.RUNNING,
     }
 }
 
@@ -477,27 +474,17 @@ class TaskStateMachine(object):
         return False
 
     @classmethod
-    def add_context_to_action_event(cls, workflow_state, task_state, ac_ex_event):
+    def add_context_to_action_event(cls, workflow_state, task_state, ac_ex_event, will_retry):
         action_event = ac_ex_event.name
 
-        may_retry = (
-            task_state.get('retry_count', 0) > 0 and
-            task_state.get('status') == statuses.RUNNING
-        )
-
-        # Attach info which current task might be retried whether task was (failed|succeeded) and
-        # task is supposed to be retried when it is.
-        if (may_retry and (
-            (action_event == events.ACTION_SUCCEEDED and
-                task_state['retry_condition'] == statuses.SUCCEEDED) or
-            (action_event == events.ACTION_FAILED and
-                task_state['retry_condition'] == statuses.FAILED))):
+        # Attach info whether task will be retried, or not
+        if will_retry:
             return action_event + '_retrying'
 
         return action_event
 
     @classmethod
-    def process_action_event(cls, workflow_state, task_state, ac_ex_event):
+    def process_action_event(cls, workflow_state, task_state, ac_ex_event, will_retry=False):
         # Check if event is valid.
         if ac_ex_event.name not in events.ACTION_EXECUTION_EVENTS + events.ENGINE_OPERATION_EVENTS:
             raise exc.InvalidEvent(ac_ex_event.name)
@@ -506,7 +493,8 @@ class TaskStateMachine(object):
         event_name = cls.add_context_to_action_event(
             workflow_state,
             task_state,
-            ac_ex_event
+            ac_ex_event,
+            will_retry
         )
 
         # Identify current task status.
@@ -530,10 +518,15 @@ class TaskStateMachine(object):
         # Assign new status to the task flow entry.
         task_state['status'] = new_task_status
 
+        # Transit task state again to retry task if necessary
+        if (not will_retry and workflow_state and
+                state_util.will_retry(task_state, workflow_state, ac_ex_event.result)):
+            return cls.process_action_event(workflow_state, task_state, ac_ex_event, True)
+
         return event_name
 
     @classmethod
-    def add_context_to_task_item_event(cls, workflow_state, task_state, ac_ex_event):
+    def add_context_to_task_item_event(cls, workflow_state, task_state, ac_ex_event, will_retry):
         action_event = ac_ex_event.name
 
         requirements = [
@@ -572,13 +565,6 @@ class TaskStateMachine(object):
             if not active and canceled:
                 return action_event + '_items_canceled'
 
-            # Attach info which current task might be retried whether there were (failed|succeeded)
-            # items and task is supposed to be retried when there are.
-            if (not active and may_retry and (
-                (not failed and task_state['retry_condition'] == statuses.SUCCEEDED) or
-                    (failed and task_state['retry_condition'] == statuses.FAILED))):
-                return action_event + '_items_retrying'
-
             # Attach info on whether there are failed execution on the items and return.
             if not active and failed:
                 return action_event + '_items_failed'
@@ -590,7 +576,7 @@ class TaskStateMachine(object):
         return action_event
 
     @classmethod
-    def process_task_item_event(cls, workflow_state, task_state, ac_ex_event):
+    def process_task_item_event(cls, workflow_state, task_state, ac_ex_event, will_retry=False):
         # Check if event is valid.
         if ac_ex_event.name not in events.ACTION_EXECUTION_EVENTS + events.ENGINE_OPERATION_EVENTS:
             raise exc.InvalidEvent(ac_ex_event.name)
@@ -599,7 +585,8 @@ class TaskStateMachine(object):
         event_name = cls.add_context_to_task_item_event(
             workflow_state,
             task_state,
-            ac_ex_event
+            ac_ex_event,
+            will_retry
         )
 
         # Identify current task status.
@@ -622,6 +609,11 @@ class TaskStateMachine(object):
 
         # Assign new status to the task flow entry.
         task_state['status'] = new_task_status
+
+        # Transit task state again to retry task if necessary
+        if (not will_retry and workflow_state and
+                state_util.will_retry(task_state, workflow_state, ac_ex_event.accumulated_result)):
+            return cls.process_task_item_event(workflow_state, task_state, ac_ex_event, True)
 
         return event_name
 

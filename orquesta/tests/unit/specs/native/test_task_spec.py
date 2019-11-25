@@ -611,7 +611,7 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
               task1:
                 action: core.noop
                 retry:
-                  when: "failed"
+                  when: "true"
                   count: 3
                   delay: 10.5
         """
@@ -688,10 +688,10 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
                     'spec_path': 'tasks.task1.retry.delay'
                 },
                 {
-                    'message': "1 is not one of ['failed', 'succeeded']",
+                    'message': "1 is not of type 'string'",
                     'schema_path': (
                         'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.retry.properties.when.enum'
+                        'properties.retry.properties.when.type'
                     ),
                     'spec_path': 'tasks.task1.retry.when'
                 }
