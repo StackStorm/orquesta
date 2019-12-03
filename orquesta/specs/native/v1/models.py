@@ -125,13 +125,12 @@ class TaskRetrySpec(native_v1_specs.Spec):
         'type': 'object',
         'properties': {
             'when': spec_types.NONEMPTY_STRING,
-            # number of times to retry, whole numbers
-            # -N (any negative) =  retry forever
-            # 0 = don't retry
-            # N (any positive) = max number of times to retry
+            # The number of times to retry.
+            # 0 = do not retry
+            # n = max number of times to retry
             'count': spec_types.STRING_OR_POSITIVE_INTEGER,
-            # float allows for partial seconds of sleeping
-            'delay': spec_types.STRING_OR_POSITIVE_NUMBER,
+            # The use of a floating number allows for partial seconds of sleeping.
+            'delay': spec_types.STRING_OR_POSITIVE_NUMBER
         },
         'required': ['when', 'count'],
         'additionalProperties': False,
@@ -140,7 +139,7 @@ class TaskRetrySpec(native_v1_specs.Spec):
     _context_evaluation_sequence = [
         'when',
         'count',
-        'delay',
+        'delay'
     ]
 
 

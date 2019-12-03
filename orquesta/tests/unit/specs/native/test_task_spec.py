@@ -611,7 +611,7 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
               task1:
                 action: core.noop
                 retry:
-                  when: "true"
+                  when: <% failed() %>
                   count: 3
                   delay: 10.5
         """
@@ -645,7 +645,7 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
                         'properties.retry.required'
                     ),
                     'spec_path': 'tasks.task1.retry'
-                },
+                }
             ]
         }
 
