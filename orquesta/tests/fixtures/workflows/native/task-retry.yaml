@@ -1,0 +1,16 @@
+version: 1.0
+  
+description: A basic workflow with task that has retry defined.
+
+tasks:
+  task1:
+    action: core.noop
+    retry:
+      when: <% failed() %>
+      delay: 1
+      count: 3
+    next:
+      - when: <% succeeded() %>
+        do: task2
+  task2:
+    action: core.noop
