@@ -226,7 +226,7 @@ class TaskSpec(native_v1_specs.Spec):
                 else items_spec.items[:items_spec.items.index(' in ')].replace(' ', '').split(',')
             )
 
-            for idict_util, item in enumerate(items):
+            for idx, item in enumerate(items):
                 if item_keys and (isinstance(item, tuple) or isinstance(item, list)):
                     item = dict(zip(item_keys, list(item)))
                 elif item_keys and len(item_keys) == 1:
@@ -237,7 +237,7 @@ class TaskSpec(native_v1_specs.Spec):
                 action_spec = {
                     'action': expr_base.evaluate(self.action, item_ctx_value),
                     'input': expr_base.evaluate(getattr(self, 'input', {}), item_ctx_value),
-                    'item_id': idict_util
+                    'item_id': idx
                 }
 
                 action_specs.append(action_spec)
@@ -302,7 +302,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
 
         task_transitions = getattr(task_spec, 'next') or []
 
-        for task_transition_item_idict_util, task_transition in enumerate(task_transitions):
+        for task_transition_item_idx, task_transition in enumerate(task_transitions):
             condition = getattr(task_transition, 'when') or None
             next_task_names = getattr(task_transition, 'do') or []
 
@@ -310,7 +310,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                 next_task_names = [x.strip() for x in next_task_names.split(',')]
 
             for next_task_name in next_task_names:
-                next_tasks.append((next_task_name, condition, task_transition_item_idict_util))
+                next_tasks.append((next_task_name, condition, task_transition_item_idx))
 
         return sorted(next_tasks, key=lambda x: x[0])
 
@@ -446,7 +446,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         q = queue.Queue()
 
         # Traverse the tasks spec and prep data for evaluation.
-        for task_name, condition, task_transition_item_idict_util in self.get_start_tasks():
+        for task_name, condition, task_transition_item_idx in self.get_start_tasks():
             q.put((None, task_name, []))
 
         while not q.empty():
@@ -478,7 +478,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
 
             next_tasks = self.get_next_tasks(task_name)
 
-            for next_task_name, condition, task_transition_item_idict_util in next_tasks:
+            for next_task_name, condition, task_transition_item_idx in next_tasks:
                 if next_task_name not in staging or not self.in_cycle(next_task_name):
                     q.put((task_name, next_task_name, list(splits)))
 
