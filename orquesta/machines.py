@@ -18,7 +18,6 @@ import logging
 from orquesta import events
 from orquesta import exceptions as exc
 from orquesta import statuses
-from orquesta.utils import task_state as state_util
 
 
 LOG = logging.getLogger(__name__)
@@ -438,13 +437,8 @@ TASK_STATE_MACHINE_DATA = {
     statuses.CANCELED: {
     },
     statuses.SUCCEEDED: {
-        events.ACTION_SUCCEEDED_RETRYING: statuses.RUNNING,
     },
     statuses.FAILED: {
-        events.ACTION_ABANDONED_RETRYING: statuses.RUNNING,
-        events.ACTION_EXPIRED_RETRYING: statuses.RUNNING,
-        events.ACTION_FAILED_RETRYING: statuses.RUNNING,
-        events.ACTION_SUCCEEDED_RETRYING: statuses.RUNNING,
     }
 }
 
@@ -474,17 +468,11 @@ class TaskStateMachine(object):
         return False
 
     @classmethod
-    def add_context_to_action_event(cls, workflow_state, task_state, ac_ex_event, will_retry):
-        action_event = ac_ex_event.name
-
-        # Attach info whether task will be retried, or not
-        if will_retry:
-            return action_event + '_retrying'
-
-        return action_event
+    def add_context_to_action_event(cls, workflow_state, task_id, task_route, ac_ex_event):
+        return ac_ex_event.name
 
     @classmethod
-    def process_action_event(cls, workflow_state, task_state, ac_ex_event, will_retry=False):
+    def process_action_event(cls, workflow_state, task_state, ac_ex_event):
         # Check if event is valid.
         if ac_ex_event.name not in events.ACTION_EXECUTION_EVENTS + events.ENGINE_OPERATION_EVENTS:
             raise exc.InvalidEvent(ac_ex_event.name)
@@ -492,9 +480,9 @@ class TaskStateMachine(object):
         # Append additional task context to the event.
         event_name = cls.add_context_to_action_event(
             workflow_state,
-            task_state,
-            ac_ex_event,
-            will_retry
+            task_state['id'],
+            task_state['route'],
+            ac_ex_event
         )
 
         # Identify current task status.
@@ -518,15 +506,8 @@ class TaskStateMachine(object):
         # Assign new status to the task flow entry.
         task_state['status'] = new_task_status
 
-        # Transit task state again to retry task if necessary
-        if (not will_retry and workflow_state and
-                state_util.will_retry(task_state, workflow_state, ac_ex_event.result)):
-            return cls.process_action_event(workflow_state, task_state, ac_ex_event, True)
-
-        return event_name
-
     @classmethod
-    def add_context_to_task_item_event(cls, workflow_state, task_state, ac_ex_event, will_retry):
+    def add_context_to_task_item_event(cls, workflow_state, task_id, task_route, ac_ex_event):
         action_event = ac_ex_event.name
 
         requirements = [
@@ -542,7 +523,7 @@ class TaskStateMachine(object):
 
         if ac_ex_event.status in requirements:
             # Make a copy of the items and remove current item under evaluation.
-            staged_task = workflow_state.get_staged_task(task_state['id'], task_state['route'])
+            staged_task = workflow_state.get_staged_task(task_id, task_route)
             items = copy.deepcopy(staged_task['items'])
             del items[ac_ex_event.item_id]
             items_status = [item.get('status', statuses.UNSET) for item in items]
@@ -576,7 +557,7 @@ class TaskStateMachine(object):
         return action_event
 
     @classmethod
-    def process_task_item_event(cls, workflow_state, task_state, ac_ex_event, will_retry=False):
+    def process_task_item_event(cls, workflow_state, task_state, ac_ex_event):
         # Check if event is valid.
         if ac_ex_event.name not in events.ACTION_EXECUTION_EVENTS + events.ENGINE_OPERATION_EVENTS:
             raise exc.InvalidEvent(ac_ex_event.name)
@@ -584,9 +565,9 @@ class TaskStateMachine(object):
         # Append additional task context to the event.
         event_name = cls.add_context_to_task_item_event(
             workflow_state,
-            task_state,
-            ac_ex_event,
-            will_retry
+            task_state['id'],
+            task_state['route'],
+            ac_ex_event
         )
 
         # Identify current task status.
@@ -609,13 +590,6 @@ class TaskStateMachine(object):
 
         # Assign new status to the task flow entry.
         task_state['status'] = new_task_status
-
-        # Transit task state again to retry task if necessary
-        if (not will_retry and workflow_state and
-                state_util.will_retry(task_state, workflow_state, ac_ex_event.accumulated_result)):
-            return cls.process_task_item_event(workflow_state, task_state, ac_ex_event, True)
-
-        return event_name
 
     @classmethod
     def add_context_to_workflow_event(cls, workflow_state, task_id, task_route, wf_ex_event):
@@ -667,21 +641,23 @@ class TaskStateMachine(object):
         # Assign new status to the task flow entry.
         task_state['status'] = new_task_status
 
-        return event_name
-
     @classmethod
     def process_event(cls, workflow_state, task_state, event):
         if isinstance(event, events.WorkflowExecutionEvent):
-            return cls.process_workflow_event(workflow_state, task_state, event)
+            cls.process_workflow_event(workflow_state, task_state, event)
+            return
 
         if isinstance(event, events.TaskItemActionExecutionEvent):
-            return cls.process_task_item_event(workflow_state, task_state, event)
+            cls.process_task_item_event(workflow_state, task_state, event)
+            return
 
         if isinstance(event, events.ActionExecutionEvent):
-            return cls.process_action_event(workflow_state, task_state, event)
+            cls.process_action_event(workflow_state, task_state, event)
+            return
 
         if isinstance(event, events.EngineOperationEvent):
-            return cls.process_action_event(workflow_state, task_state, event)
+            cls.process_action_event(workflow_state, task_state, event)
+            return
 
         raise exc.InvalidEventType(type(event), event.name)
 

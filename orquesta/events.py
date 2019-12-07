@@ -200,7 +200,6 @@ ACTION_PAUSED_TASK_DORMANT_ITEMS_CANCELED = 'action_paused_task_dormant_items_ca
 ACTION_PAUSED_TASK_DORMANT_ITEMS_FAILED = 'action_paused_task_dormant_items_failed'
 ACTION_RESUMING = 'action_resuming'
 ACTION_SUCCEEDED = 'action_succeeded'
-ACTION_SUCCEEDED_RETRYING = 'action_succeeded_retrying'
 ACTION_SUCCEEDED_TASK_ACTIVE_ITEMS_INCOMPLETE = 'action_succeeded_task_active_items_incomplete'
 ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_INCOMPLETE = 'action_succeeded_task_dormant_items_incomplete'
 ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_COMPLETED = 'action_succeeded_task_dormant_items_completed'
@@ -208,7 +207,6 @@ ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_PAUSED = 'action_succeeded_task_dormant_item
 ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_CANCELED = 'action_succeeded_task_dormant_items_canceled'
 ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_FAILED = 'action_succeeded_task_dormant_items_failed'
 ACTION_FAILED = 'action_failed'
-ACTION_FAILED_RETRYING = 'action_failed_retrying'
 ACTION_FAILED_TASK_ACTIVE_ITEMS_INCOMPLETE = 'action_failed_task_active_items_incomplete'
 ACTION_FAILED_TASK_DORMANT_ITEMS_INCOMPLETE = 'action_failed_task_dormant_items_incomplete'
 ACTION_FAILED_TASK_DORMANT_ITEMS_COMPLETED = 'action_failed_task_dormant_items_completed'
@@ -216,7 +214,6 @@ ACTION_FAILED_TASK_DORMANT_ITEMS_PAUSED = 'action_failed_task_dormant_items_paus
 ACTION_FAILED_TASK_DORMANT_ITEMS_CANCELED = 'action_failed_task_dormant_items_canceled'
 ACTION_FAILED_TASK_DORMANT_ITEMS_FAILED = 'action_failed_task_dormant_items_failed'
 ACTION_EXPIRED = 'action_timeout'
-ACTION_EXPIRED_RETRYING = 'action_timeout_retrying'
 ACTION_EXPIRED_TASK_ACTIVE_ITEMS_INCOMPLETE = 'action_timeout_task_active_items_incomplete'
 ACTION_EXPIRED_TASK_DORMANT_ITEMS_INCOMPLETE = 'action_timeout_task_dormant_items_incomplete'
 ACTION_EXPIRED_TASK_DORMANT_ITEMS_COMPLETED = 'action_timeout_task_dormant_items_completed'
@@ -224,7 +221,6 @@ ACTION_EXPIRED_TASK_DORMANT_ITEMS_PAUSED = 'action_timeout_task_dormant_items_pa
 ACTION_EXPIRED_TASK_DORMANT_ITEMS_CANCELED = 'action_timeout_task_dormant_items_canceled'
 ACTION_EXPIRED_TASK_DORMANT_ITEMS_FAILED = 'action_timeout_task_dormant_items_failed'
 ACTION_ABANDONED = 'action_abandoned'
-ACTION_ABANDONED_RETRYING = 'action_abandoned_retrying'
 ACTION_ABANDONED_TASK_ACTIVE_ITEMS_INCOMPLETE = 'action_abandoned_task_active_items_incomplete'
 ACTION_ABANDONED_TASK_DORMANT_ITEMS_INCOMPLETE = 'action_abandoned_task_dormant_items_incomplete'
 ACTION_ABANDONED_TASK_DORMANT_ITEMS_COMPLETED = 'action_abandoned_task_dormant_items_completed'
@@ -239,13 +235,6 @@ ACTION_CANCELED_TASK_DORMANT_ITEMS_COMPLETED = 'action_canceled_task_dormant_ite
 ACTION_CANCELED_TASK_DORMANT_ITEMS_PAUSED = 'action_canceled_task_dormant_items_paused'
 ACTION_CANCELED_TASK_DORMANT_ITEMS_CANCELED = 'action_canceled_task_dormant_items_canceled'
 ACTION_CANCELED_TASK_DORMANT_ITEMS_FAILED = 'action_canceled_task_dormant_items_failed'
-
-ACTION_RETRYING_EVENTS = [
-    ACTION_SUCCEEDED_RETRYING,
-    ACTION_FAILED_RETRYING,
-    ACTION_EXPIRED_RETRYING,
-    ACTION_ABANDONED_RETRYING,
-]
 
 ACTION_EXECUTION_EVENTS = [
     ACTION_REQUESTED,
