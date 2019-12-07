@@ -137,7 +137,7 @@ class WorkflowConductorTaskRetryTest(test_base.WorkflowConductorTest):
 
         self.assertRaisesRegexp(
             ValueError,
-            'The value of delay in retry of task "task1" is not type of integer.',
+            'The retry delay for task "task1" is not an integer.',
             conductor.add_task_state,
             task_name,
             task_route
@@ -169,7 +169,7 @@ class WorkflowConductorTaskRetryTest(test_base.WorkflowConductorTest):
 
         self.assertRaisesRegexp(
             ValueError,
-            'The value of count in retry of task "task1" is not type of integer.',
+            'The retry count for task "task1" is not an integer.',
             conductor.add_task_state,
             task_name,
             task_route

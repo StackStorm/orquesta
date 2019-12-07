@@ -643,8 +643,7 @@ class WorkflowConductor(object):
                 delay_value = expr_base.evaluate(task_state_entry['retry']['delay'], in_ctx)
 
                 if not isinstance(delay_value, int):
-                    message = 'The value of delay in retry of task "%s" is not type of integer.'
-                    raise ValueError(message % task_id)
+                    raise ValueError('The retry delay for task "%s" is not an integer.' % task_id)
 
                 task_state_entry['retry']['delay'] = delay_value
 
@@ -653,8 +652,7 @@ class WorkflowConductor(object):
                 count_value = expr_base.evaluate(task_state_entry['retry']['count'], in_ctx)
 
                 if not isinstance(count_value, int):
-                    message = 'The value of count in retry of task "%s" is not type of integer.'
-                    raise ValueError(message % task_id)
+                    raise ValueError('The retry count for task "%s" is not an integer.' % task_id)
 
                 task_state_entry['retry']['count'] = count_value
 
