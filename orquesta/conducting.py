@@ -614,6 +614,22 @@ class WorkflowConductor(object):
 
         return self.workflow_state.sequence[task_state_seq_idx]
 
+    def make_task_context(self, task_state_entry, task_result=None):
+        in_ctx_idxs = task_state_entry['ctxs']['in']
+        in_ctx_val = self.get_task_context(in_ctx_idxs)
+
+        current_task = {
+            'id': task_state_entry['id'],
+            'route': task_state_entry['route'],
+            'result': task_result
+        }
+
+        current_ctx = ctx_util.set_current_task(in_ctx_val, current_task)
+        state_ctx = {'__state': self.workflow_state.serialize()}
+        current_ctx = dict_util.merge_dicts(current_ctx, state_ctx, True)
+
+        return current_ctx
+
     def add_task_state(self, task_id, route, in_ctx_idxs=None, prev=None):
         if not self.graph.has_task(task_id):
             raise exc.InvalidTask(task_id)
@@ -752,14 +768,7 @@ class WorkflowConductor(object):
             self.workflow_state.remove_staged_task(task_id, route)
 
             # Set current task in the context.
-            in_ctx_idxs = task_state_entry['ctxs']['in']
-            in_ctx_val = self.get_task_context(in_ctx_idxs)
-            current_task = {'id': task_id, 'route': route, 'result': task_result}
-            current_ctx = ctx_util.set_current_task(in_ctx_val, current_task)
-
-            # Setup context for evaluating expressions in task transition criteria.
-            state_ctx = {'__state': self.workflow_state.serialize()}
-            current_ctx = dict_util.merge_dicts(current_ctx, state_ctx, True)
+            current_ctx = self.make_task_context(task_state_entry, task_result=task_result)
 
         # Evaluate task transitions if task is completed and status change is not processed.
         if new_task_status in statuses.COMPLETED_STATUSES and new_task_status != old_task_status:
@@ -933,6 +942,25 @@ class WorkflowConductor(object):
         self.workflow_state.routes.append(new_route_details)
 
         return len(self.workflow_state.routes) - 1
+
+    def _evaluate_task_retry(self, task_state_entry, current_ctx):
+        if 'retry' not in task_state_entry:
+            return False
+
+        task_status = task_state_entry.get('status', statuses.UNSET)
+        retry_count = task_state_entry['retry']['count']
+        retry_tally = task_state_entry['retry']['tally']
+
+        if (retry_tally >= retry_count):
+            return False
+
+        if task_status in statuses.ABENDED_STATUSES and task_state_entry['retry']['when'] is None:
+            return True
+
+        if expr_base.evaluate(task_state_entry['retry']['when'], current_ctx):
+            return True
+
+        return False
 
     def get_task_context(self, ctx_idxs):
         ctx = {}
