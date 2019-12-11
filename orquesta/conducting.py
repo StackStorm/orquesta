@@ -644,6 +644,36 @@ class WorkflowConductor(object):
 
         return task_result
 
+    def setup_retry_in_task_state(self, task_state_entry, in_ctx_idxs):
+        # Setup the retry in the task state.
+        task_id = task_state_entry['id']
+        task_retry_spec = self.graph.get_task_retry_spec(task_id)
+        task_state_entry['retry'] = copy.deepcopy(task_retry_spec)
+        task_state_entry['retry']['tally'] = 0
+
+        # Get task context for evaluating the expression in delay and count.
+        in_ctx = self.get_task_context(in_ctx_idxs)
+
+        # Evaluate the retry delay value.
+        if ('delay' in task_state_entry['retry'] and
+                isinstance(task_state_entry['retry']['delay'], six.string_types)):
+            delay_value = expr_base.evaluate(task_state_entry['retry']['delay'], in_ctx)
+
+            if not isinstance(delay_value, int):
+                raise ValueError('The retry delay for task "%s" is not an integer.' % task_id)
+
+            task_state_entry['retry']['delay'] = delay_value
+
+        # Evaluate the retry count value.
+        if ('count' in task_state_entry['retry'] and
+                isinstance(task_state_entry['retry']['count'], six.string_types)):
+            count_value = expr_base.evaluate(task_state_entry['retry']['count'], in_ctx)
+
+            if not isinstance(count_value, int):
+                raise ValueError('The retry count for task "%s" is not an integer.' % task_id)
+
+            task_state_entry['retry']['count'] = count_value
+
     def add_task_state(self, task_id, route, in_ctx_idxs=None, prev=None):
         if not self.graph.has_task(task_id):
             raise exc.InvalidTask(task_id)
@@ -663,28 +693,7 @@ class WorkflowConductor(object):
 
         # If the task has retry spec defined, then setup the retry in the task state entry.
         if self.graph.task_has_retry(task_id):
-            in_ctx = self.get_task_context(in_ctx_idxs)
-
-            task_state_entry['retry'] = copy.deepcopy(self.graph.get_task_retry_spec(task_id))
-            task_state_entry['retry']['tally'] = 0
-
-            if ('delay' in task_state_entry['retry'] and
-                    isinstance(task_state_entry['retry']['delay'], six.string_types)):
-                delay_value = expr_base.evaluate(task_state_entry['retry']['delay'], in_ctx)
-
-                if not isinstance(delay_value, int):
-                    raise ValueError('The retry delay for task "%s" is not an integer.' % task_id)
-
-                task_state_entry['retry']['delay'] = delay_value
-
-            if ('count' in task_state_entry['retry'] and
-                    isinstance(task_state_entry['retry']['count'], six.string_types)):
-                count_value = expr_base.evaluate(task_state_entry['retry']['count'], in_ctx)
-
-                if not isinstance(count_value, int):
-                    raise ValueError('The retry count for task "%s" is not an integer.' % task_id)
-
-                task_state_entry['retry']['count'] = count_value
+            self.setup_retry_in_task_state(task_state_entry, in_ctx_idxs)
 
         # Append the task state entry to the list of task execution.
         task_state_entry_id = constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route))
