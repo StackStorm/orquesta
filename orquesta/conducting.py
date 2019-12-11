@@ -630,6 +630,20 @@ class WorkflowConductor(object):
 
         return current_ctx
 
+    def make_task_result(self, task_spec, event):
+        # Format task result depending on the type of task.
+        if not task_spec.has_items():
+            task_result = event.result
+        else:
+            # For with items task, use the accumulated result from the event.
+            task_result = (
+                event.accumulated_result or []
+                if isinstance(event, events.TaskItemActionExecutionEvent)
+                else event.result or []
+            )
+
+        return task_result
+
     def add_task_state(self, task_id, route, in_ctx_idxs=None, prev=None):
         if not self.graph.has_task(task_id):
             raise exc.InvalidTask(task_id)
@@ -694,6 +708,9 @@ class WorkflowConductor(object):
         staged_task = self.workflow_state.get_staged_task(task_id, route)
         task_state_entry = self.get_task_state_entry(task_id, route)
 
+        # Get the task spec for the task which contains additional meta data.
+        task_spec = self.spec.tasks.get_task(task_id)
+
         # Throw exception if task is not staged and there is no task state entry.
         if not staged_task and not task_state_entry:
             raise exc.InvalidTaskStateEntry(task_id)
@@ -750,25 +767,14 @@ class WorkflowConductor(object):
 
         # Get task result and set current context if task is completed.
         if new_task_status in statuses.COMPLETED_STATUSES:
-            # Get task details required for updating outgoing context.
-            task_spec = self.spec.tasks.get_task(task_id)
-
-            # Get task result.
-            if not task_spec.has_items():
-                task_result = event.result
-            else:
-                # For with items task, use the accumulated result from the event.
-                task_result = (
-                    event.accumulated_result or []
-                    if isinstance(event, events.TaskItemActionExecutionEvent)
-                    else event.result or []
-                )
-
-            # Remove remaining task from staging.
-            self.workflow_state.remove_staged_task(task_id, route)
+            # Format task result depending on the type of task.
+            task_result = self.make_task_result(task_spec, event)
 
             # Set current task in the context.
             current_ctx = self.make_task_context(task_state_entry, task_result=task_result)
+
+            # Remove remaining task from staging.
+            self.workflow_state.remove_staged_task(task_id, route)
 
         # Evaluate task transitions if task is completed and status change is not processed.
         if new_task_status in statuses.COMPLETED_STATUSES and new_task_status != old_task_status:
