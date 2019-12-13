@@ -396,6 +396,8 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_RUNNING: statuses.RUNNING,
         events.ACTION_CANCELING: statuses.CANCELING,
         events.ACTION_CANCELED: statuses.CANCELED,
+        events.WORKFLOW_CANCELING: statuses.CANCELED,
+        events.WORKFLOW_CANCELED: statuses.CANCELED
     },
     statuses.CANCELING: {
         events.ACTION_PENDING_TASK_DORMANT_ITEMS_PAUSED: statuses.CANCELED,
