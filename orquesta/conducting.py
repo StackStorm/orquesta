@@ -588,12 +588,10 @@ class WorkflowConductor(object):
                 next_task = self.get_task(staged_task['id'], staged_task['route'])
                 next_task = self._evaluate_task_actions(next_task)
 
-                # Calculate total task delay which is the sum of the delay specified in the
-                # task definition and the delay specified in the task retry definition.
+                # Assign the task retry delay which will overwrite any task delay
+                # specified in the task definition.
                 if 'retry' in staged_task:
-                    task_delay = next_task.get('delay') or 0
-                    retry_delay = staged_task['retry'].get('delay') or 0
-                    next_task['delay'] = task_delay + retry_delay
+                    next_task['delay'] = staged_task['retry'].get('delay') or 0
 
                 if 'actions' in next_task and len(next_task['actions']) > 0:
                     next_tasks.append(next_task)

@@ -162,7 +162,7 @@ class WorkflowConductorTaskRetryTest(test_base.WorkflowConductorTest):
         actual_task_sequence = [item['id'] for item in conductor.workflow_state.sequence]
         self.assertListEqual(expected_task_sequence, actual_task_sequence)
 
-    def test_action_delay_plus_retry_delay(self):
+    def test_retry_delay_with_task_delay_defined(self):
         wf_def = """
         version: 1.0
 
@@ -204,6 +204,51 @@ class WorkflowConductorTaskRetryTest(test_base.WorkflowConductorTest):
         next_tasks = conductor.get_next_tasks()
         self.assertEqual(len(next_tasks), 1)
         self.assertEqual(next_tasks[0]['id'], 'task1')
-        self.assertEqual(next_tasks[0]['delay'], 3)
+        self.assertEqual(next_tasks[0]['delay'], 1)
+        self.assertDictEqual(next_tasks[0]['actions'][0], expected_tk1_action_spec)
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
+
+    def test_no_retry_delay_with_task_delay_defined(self):
+        wf_def = """
+        version: 1.0
+
+        tasks:
+          task1:
+            delay: 2
+            action: core.echo message="$RANDOM"
+            retry:
+              count: 3
+            next:
+              - when: <% succeeded() %>
+                do: task2
+          task2:
+            action: core.noop
+        """
+
+        expected_tk1_action_spec = {'action': 'core.echo', 'input': {'message': '$RANDOM'}}
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_status(statuses.RUNNING)
+
+        # Failed execution for task1.
+        next_tasks = conductor.get_next_tasks()
+        self.assertEqual(len(next_tasks), 1)
+        self.assertEqual(next_tasks[0]['id'], 'task1')
+        self.assertEqual(next_tasks[0]['delay'], 2)
+        self.assertDictEqual(next_tasks[0]['actions'][0], expected_tk1_action_spec)
+        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.FAILED])
+
+        # Successful retry for task1.
+        tk1_state = conductor.get_task_state_entry('task1', 0)
+        self.assertEqual(tk1_state['status'], statuses.RETRYING)
+        self.assertEqual(tk1_state['retry']['count'], 3)
+        self.assertEqual(tk1_state['retry']['tally'], 1)
+        next_tasks = conductor.get_next_tasks()
+        self.assertEqual(len(next_tasks), 1)
+        self.assertEqual(next_tasks[0]['id'], 'task1')
+        self.assertEqual(next_tasks[0]['delay'], 0)
         self.assertDictEqual(next_tasks[0]['actions'][0], expected_tk1_action_spec)
         self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
