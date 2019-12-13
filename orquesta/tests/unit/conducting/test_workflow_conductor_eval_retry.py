@@ -134,6 +134,9 @@ class WorkflowConductorEvalTaskRetryTest(test_base.WorkflowConductorTest):
         # Get task state for task1.
         task_state_entry = conductor.get_task_state_entry(task_id, route)
 
+        # Mock the task status.
+        task_state_entry['status'] = statuses.FAILED
+
         # Set context for task1.
         current_task_ctx = conductor.make_task_context(task_state_entry, task_result=None)
 

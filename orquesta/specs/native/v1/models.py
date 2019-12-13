@@ -132,7 +132,7 @@ class TaskRetrySpec(native_v1_specs.Spec):
             # The use of a floating number allows for partial seconds of sleeping.
             'delay': spec_types.STRING_OR_POSITIVE_NUMBER
         },
-        'required': ['when', 'count'],
+        'required': ['count'],
         'additionalProperties': False,
     }
 

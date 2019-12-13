@@ -392,6 +392,11 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_CANCELING: statuses.CANCELING,
         events.ACTION_CANCELED: statuses.CANCELED,
     },
+    statuses.RETRYING: {
+        events.ACTION_RUNNING: statuses.RUNNING,
+        events.ACTION_CANCELING: statuses.CANCELING,
+        events.ACTION_CANCELED: statuses.CANCELED,
+    },
     statuses.CANCELING: {
         events.ACTION_PENDING_TASK_DORMANT_ITEMS_PAUSED: statuses.CANCELED,
         events.ACTION_PENDING_TASK_DORMANT_ITEMS_CANCELED: statuses.CANCELED,
@@ -437,8 +442,10 @@ TASK_STATE_MACHINE_DATA = {
     statuses.CANCELED: {
     },
     statuses.SUCCEEDED: {
+        events.TASK_RETRY_REQUESTED: statuses.RETRYING
     },
     statuses.FAILED: {
+        events.TASK_RETRY_REQUESTED: statuses.RETRYING
     }
 }
 

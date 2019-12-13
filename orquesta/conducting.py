@@ -109,7 +109,7 @@ class WorkflowState(object):
     def has_staged_tasks(self):
         return len(self.get_staged_tasks()) > 0
 
-    def add_staged_task(self, task_id, route, ctxs=None, prev=None, ready=True):
+    def add_staged_task(self, task_id, route, ctxs=None, prev=None, ready=True, retry=False):
         if not ctxs:
             ctxs = [0]
 
@@ -122,6 +122,9 @@ class WorkflowState(object):
             'prev': prev if isinstance(prev, dict) else {},
             'ready': ready
         }
+
+        if retry:
+            entry['retry'] = retry
 
         self.staged.append(entry)
 
@@ -585,6 +588,13 @@ class WorkflowConductor(object):
                 next_task = self.get_task(staged_task['id'], staged_task['route'])
                 next_task = self._evaluate_task_actions(next_task)
 
+                # Calculate total task delay which is the sum of the delay specified in the
+                # task definition and the delay specified in the task retry definition.
+                if 'retry' in staged_task:
+                    task_delay = next_task.get('delay') or 0
+                    retry_delay = staged_task['retry'].get('delay') or 0
+                    next_task['delay'] = task_delay + retry_delay
+
                 if 'actions' in next_task and len(next_task['actions']) > 0:
                     next_tasks.append(next_task)
                 elif 'items_count' in next_task and next_task['items_count'] == 0:
@@ -774,16 +784,38 @@ class WorkflowConductor(object):
         machines.TaskStateMachine.process_event(self.workflow_state, task_state_entry, event)
         new_task_status = task_state_entry.get('status', statuses.UNSET)
 
+        # If retrying, staged the task to be returned in get_next_tasks.
+        if new_task_status == statuses.RETRYING:
+            # Increment the number of times that the task has retried.
+            task_state_entry['retry']['tally'] += 1
+
+            # Staged the task to be returned in get_next_tasks
+            self.workflow_state.add_staged_task(
+                task_id,
+                route,
+                ctxs=task_state_entry['ctxs']['in'],
+                prev=task_state_entry['prev'],
+                retry=task_state_entry['retry'],
+                ready=True
+            )
+
         # Get task result and set current context if task is completed.
         if new_task_status in statuses.COMPLETED_STATUSES:
+            # Remove remaining task from staging.
+            self.workflow_state.remove_staged_task(task_id, route)
+
             # Format task result depending on the type of task.
             task_result = self.make_task_result(task_spec, event)
 
             # Set current task in the context.
             current_ctx = self.make_task_context(task_state_entry, task_result=task_result)
 
-            # Remove remaining task from staging.
-            self.workflow_state.remove_staged_task(task_id, route)
+            # Evaluate if there is a task retry. The task retry can only be evaluated after
+            # the state machine has determined the status for the task execution. If the task
+            # is completed, get the task result and context which is required to evaluate the
+            # the condition if a retry for the task is required.
+            if self._evaluate_task_retry(task_state_entry, current_ctx):
+                self.update_task_state(task_id, route, events.TaskRetryEvent())
 
         # Evaluate task transitions if task is completed and status change is not processed.
         if new_task_status in statuses.COMPLETED_STATUSES and new_task_status != old_task_status:

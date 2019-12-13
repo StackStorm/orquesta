@@ -631,14 +631,6 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
         expected_errors = {
             'syntax': [
                 {
-                    'message': "'when' is a required property",
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.retry.required'
-                    ),
-                    'spec_path': 'tasks.task1.retry'
-                },
-                {
                     'message': "'count' is a required property",
                     'schema_path': (
                         'properties.tasks.patternProperties.^\\w+$.'
