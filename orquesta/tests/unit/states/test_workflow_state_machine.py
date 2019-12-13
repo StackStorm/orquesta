@@ -27,7 +27,9 @@ class WorkflowStateMachineTest(unittest.TestCase):
     def _prep_conductor(self, status=None):
         wf_def = """
         version: 1.0
+
         description: A basic sequential workflow.
+
         tasks:
           task1:
             action: core.noop
