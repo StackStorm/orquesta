@@ -812,7 +812,7 @@ class WorkflowConductor(object):
             # the state machine has determined the status for the task execution. If the task
             # is completed, get the task result and context which is required to evaluate the
             # the condition if a retry for the task is required.
-            if (self.get_workflow_status() in statuses.RUNNING_STATUSES + [statuses.PAUSING] and
+            if (self.get_workflow_status() in statuses.ACTIVE_STATUSES and
                     self._evaluate_task_retry(task_state_entry, current_ctx)):
                 self.update_task_state(task_id, route, events.TaskRetryEvent())
 

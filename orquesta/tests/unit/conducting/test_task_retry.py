@@ -463,7 +463,7 @@ class WorkflowConductorTaskRetryTest(test_base.WorkflowConductorTest):
 
         # Fail task1 and assert the task is not returned in get_next_tasks.
         self.forward_task_statuses(conductor, 'task1', [statuses.FAILED])
-        self.assertEqual(tk1_state['status'], statuses.FAILED)
+        self.assertEqual(tk1_state['status'], statuses.RETRYING)
         next_tasks = conductor.get_next_tasks()
         self.assertEqual(len(next_tasks), 0)
 
@@ -525,7 +525,7 @@ class WorkflowConductorTaskRetryTest(test_base.WorkflowConductorTest):
         # Fail tasks and assert workflow transition from canceling to canceled.
         self.forward_task_statuses(conductor, 'task1', [statuses.FAILED])
         tk1_state = conductor.get_task_state_entry('task1', 0)
-        self.assertEqual(tk1_state['status'], statuses.FAILED)
+        self.assertEqual(tk1_state['status'], statuses.RETRYING)
         tk2_state = conductor.get_task_state_entry('task2', 0)
         self.assertEqual(tk2_state['status'], statuses.RETRYING)
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)
@@ -591,11 +591,11 @@ class WorkflowConductorTaskRetryTest(test_base.WorkflowConductorTest):
         # Fail tasks and assert workflow transition from canceling to canceled.
         self.forward_task_statuses(conductor, 'task1', [statuses.FAILED])
         tk1_state = conductor.get_task_state_entry('task1', 0)
-        self.assertEqual(tk1_state['status'], statuses.FAILED)
+        self.assertEqual(tk1_state['status'], statuses.RETRYING)
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELING)
         self.forward_task_statuses(conductor, 'task2', [statuses.FAILED])
         tk2_state = conductor.get_task_state_entry('task2', 0)
-        self.assertEqual(tk2_state['status'], statuses.FAILED)
+        self.assertEqual(tk2_state['status'], statuses.RETRYING)
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)
 
     def test_workflow_pause_before_retry_running(self):
