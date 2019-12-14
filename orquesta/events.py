@@ -126,6 +126,8 @@ TASK_CANCELED = 'task_canceled'
 TASK_CANCELED_WORKFLOW_ACTIVE = 'task_canceled_workflow_active'
 TASK_CANCELED_WORKFLOW_DORMANT = 'task_canceled_workflow_dormant'
 TASK_RETRYING = 'task_retrying'
+TASK_RETRYING_WORKFLOW_ACTIVE = 'task_retrying_workflow_active'
+TASK_RETRYING_WORKFLOW_DORMANT = 'task_retrying_workflow_dormant'
 
 # Task events that require additional workflow context for processing.
 # These are events related to the tasks being complete or inactive.
@@ -135,7 +137,8 @@ TASK_CONDITIONAL_EVENTS = [
     TASK_SUCCEEDED,
     TASK_FAILED,
     TASK_REMEDIATED,
-    TASK_CANCELED
+    TASK_CANCELED,
+    TASK_RETRYING
 ]
 
 TASK_EXECUTION_EVENTS = [
@@ -176,7 +179,9 @@ TASK_EXECUTION_EVENTS = [
     TASK_CANCELED,
     TASK_CANCELED_WORKFLOW_ACTIVE,
     TASK_CANCELED_WORKFLOW_DORMANT,
-    TASK_RETRYING
+    TASK_RETRYING,
+    TASK_RETRYING_WORKFLOW_ACTIVE,
+    TASK_RETRYING_WORKFLOW_DORMANT
 ]
 
 
