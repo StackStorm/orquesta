@@ -290,9 +290,9 @@ class WorkflowConductorTaskRetryTest(test_base.WorkflowConductorTest):
         # Request workflow cancellation.
         conductor.request_workflow_status(statuses.CANCELING)
 
-        # Assert task1 is canceled and not returned in get_next_tasks.
+        # Assert task1 is still retrying but not returned in get_next_tasks.
         tk1_state = conductor.get_task_state_entry('task1', 0)
-        self.assertEqual(tk1_state['status'], statuses.CANCELED)
+        self.assertEqual(tk1_state['status'], statuses.RETRYING)
         next_tasks = conductor.get_next_tasks()
         self.assertEqual(len(next_tasks), 0)
 
