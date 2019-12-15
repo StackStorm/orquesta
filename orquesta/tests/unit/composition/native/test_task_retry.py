@@ -17,8 +17,8 @@ from orquesta.tests.unit.composition.native import base
 
 class TaskRetryComposerTest(base.OrchestraWorkflowComposerTest):
 
-    def test_task_with_retry(self):
-        wf_name = 'task-retry'
+    def test_task_with_retry_spec(self):
+        wf_name = 'task-retry-spec'
 
         expected_wf_graph = {
             'directed': True,
@@ -61,6 +61,136 @@ class TaskRetryComposerTest(base.OrchestraWorkflowComposerTest):
                     'retry': {
                         'when': '<% failed() %>',
                         'delay': 1,
+                        'count': 3
+                    }
+                },
+                {
+                    'id': 'task2'
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'id': 'task2',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                []
+            ],
+            'multigraph': True
+        }
+
+        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
+
+    def test_task_with_retry_command(self):
+        wf_name = 'task-retry-command'
+
+        expected_wf_graph = {
+            'directed': True,
+            'graph': {},
+            'nodes': [
+                {
+                    'id': 'task1',
+                    'retry': {
+                        'when': '<% failed() %>',
+                        'count': 3
+                    }
+                },
+                {
+                    'id': 'task2'
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'id': 'task2',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                []
+            ],
+            'multigraph': True
+        }
+
+        self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
+
+        expected_wf_ex_graph = {
+            'directed': True,
+            'graph': {},
+            'nodes': [
+                {
+                    'id': 'task1',
+                    'retry': {
+                        'when': '<% failed() %>',
+                        'count': 3
+                    }
+                },
+                {
+                    'id': 'task2'
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'id': 'task2',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                []
+            ],
+            'multigraph': True
+        }
+
+        self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
+
+    def test_task_with_retry_command_default_when(self):
+        wf_name = 'task-retry-command-default-when'
+
+        expected_wf_graph = {
+            'directed': True,
+            'graph': {},
+            'nodes': [
+                {
+                    'id': 'task1',
+                    'retry': {
+                        'when': '<% completed() %>',
+                        'count': 3
+                    }
+                },
+                {
+                    'id': 'task2'
+                }
+            ],
+            'adjacency': [
+                [
+                    {
+                        'id': 'task2',
+                        'key': 0,
+                        'ref': 0,
+                        'criteria': ['<% succeeded() %>']
+                    }
+                ],
+                []
+            ],
+            'multigraph': True
+        }
+
+        self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
+
+        expected_wf_ex_graph = {
+            'directed': True,
+            'graph': {},
+            'nodes': [
+                {
+                    'id': 'task1',
+                    'retry': {
+                        'when': '<% completed() %>',
                         'count': 3
                     }
                 },
