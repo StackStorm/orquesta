@@ -129,8 +129,7 @@ class TaskRetrySpec(native_v1_specs.Spec):
             # 0 = do not retry
             # n = max number of times to retry
             'count': spec_types.STRING_OR_POSITIVE_INTEGER,
-            # The use of a floating number allows for partial seconds of sleeping.
-            'delay': spec_types.STRING_OR_POSITIVE_NUMBER
+            'delay': spec_types.STRING_OR_POSITIVE_INTEGER
         },
         'required': ['count'],
         'additionalProperties': False,

@@ -613,7 +613,7 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
                 retry:
                   when: <% failed() %>
                   count: 3
-                  delay: 10.5
+                  delay: 10
         """
 
         wf_spec = self.instantiate(wf_def)
