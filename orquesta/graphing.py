@@ -207,3 +207,11 @@ class WorkflowGraph(object):
                     return False
 
         return True
+
+    def get_task_retry_spec(self, task_id):
+        return self.get_task(task_id).get('retry')
+
+    def task_has_retry(self, task_id):
+        r = self.get_task_retry_spec(task_id)
+
+        return (r is not None and isinstance(r, dict) and 'count' in r)

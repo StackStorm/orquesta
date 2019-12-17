@@ -24,6 +24,7 @@ SUCCEEDED = 'succeeded'
 FAILED = 'failed'
 EXPIRED = 'timeout'
 ABANDONED = 'abandoned'
+RETRYING = 'retrying'
 CANCELING = 'canceling'
 CANCELED = 'canceled'
 UNSET = 'null'
@@ -42,6 +43,7 @@ ALL_STATUSES = [
     FAILED,
     EXPIRED,
     ABANDONED,
+    RETRYING,
     CANCELING,
     CANCELED,
     UNSET
@@ -60,7 +62,8 @@ RUNNING_STATUSES = [
     SCHEDULED,
     DELAYED,
     RUNNING,
-    RESUMING
+    RESUMING,
+    RETRYING
 ]
 
 ACTIVE_STATUSES = [

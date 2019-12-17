@@ -139,7 +139,9 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.TASK_REMEDIATED_WORKFLOW_DORMANT_CANCELED: statuses.CANCELED,
         events.TASK_CANCELING: statuses.CANCELING,
         events.TASK_CANCELED_WORKFLOW_ACTIVE: statuses.CANCELING,
-        events.TASK_CANCELED_WORKFLOW_DORMANT: statuses.CANCELED
+        events.TASK_CANCELED_WORKFLOW_DORMANT: statuses.CANCELED,
+        events.TASK_RETRYING_WORKFLOW_ACTIVE: statuses.PAUSING,
+        events.TASK_RETRYING_WORKFLOW_DORMANT: statuses.PAUSED
     },
     statuses.PAUSED: {
         events.WORKFLOW_RUNNING: statuses.RUNNING,
@@ -209,7 +211,9 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.TASK_REMEDIATED_WORKFLOW_DORMANT_PAUSED: statuses.CANCELED,
         events.TASK_REMEDIATED_WORKFLOW_DORMANT_CANCELED: statuses.CANCELED,
         events.TASK_CANCELED_WORKFLOW_ACTIVE: statuses.CANCELING,
-        events.TASK_CANCELED_WORKFLOW_DORMANT: statuses.CANCELED
+        events.TASK_CANCELED_WORKFLOW_DORMANT: statuses.CANCELED,
+        events.TASK_RETRYING_WORKFLOW_ACTIVE: statuses.CANCELING,
+        events.TASK_RETRYING_WORKFLOW_DORMANT: statuses.CANCELED
     },
     statuses.CANCELED: {
     },
@@ -392,6 +396,13 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_CANCELING: statuses.CANCELING,
         events.ACTION_CANCELED: statuses.CANCELED,
     },
+    statuses.RETRYING: {
+        events.ACTION_RUNNING: statuses.RUNNING,
+        events.ACTION_CANCELING: statuses.CANCELING,
+        events.ACTION_CANCELED: statuses.CANCELED,
+        events.WORKFLOW_CANCELING: statuses.CANCELED,
+        events.WORKFLOW_CANCELED: statuses.CANCELED
+    },
     statuses.CANCELING: {
         events.ACTION_PENDING_TASK_DORMANT_ITEMS_PAUSED: statuses.CANCELED,
         events.ACTION_PENDING_TASK_DORMANT_ITEMS_CANCELED: statuses.CANCELED,
@@ -437,8 +448,10 @@ TASK_STATE_MACHINE_DATA = {
     statuses.CANCELED: {
     },
     statuses.SUCCEEDED: {
+        events.TASK_RETRY_REQUESTED: statuses.RETRYING
     },
     statuses.FAILED: {
+        events.TASK_RETRY_REQUESTED: statuses.RETRYING
     }
 }
 

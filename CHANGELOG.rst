@@ -4,6 +4,13 @@ Changelog
 In development
 --------------
 
+Added
+~~~~~
+
+* Add feature to retry task execution on given condition with delay in between retries and
+  max number of retries. (new feature)
+  Contributed by Hiroyasu Ohyama (@userlocalhost) and Nick Maludy (@nmaludy)
+
 Changed
 ~~~~~~~
 
@@ -15,7 +22,7 @@ Changed
   write operations when recording the conductor state. (improvement)
 
 Fixed
------
+~~~~~
 
 * Fix conducting of cycle with a fork. Fixes #169 (bug fix)
 * Fix request_workflow_status to ignore certain status change errors such as pausing a workflow

@@ -125,6 +125,9 @@ TASK_CANCELING = 'task_canceling'
 TASK_CANCELED = 'task_canceled'
 TASK_CANCELED_WORKFLOW_ACTIVE = 'task_canceled_workflow_active'
 TASK_CANCELED_WORKFLOW_DORMANT = 'task_canceled_workflow_dormant'
+TASK_RETRYING = 'task_retrying'
+TASK_RETRYING_WORKFLOW_ACTIVE = 'task_retrying_workflow_active'
+TASK_RETRYING_WORKFLOW_DORMANT = 'task_retrying_workflow_dormant'
 
 # Task events that require additional workflow context for processing.
 # These are events related to the tasks being complete or inactive.
@@ -134,7 +137,8 @@ TASK_CONDITIONAL_EVENTS = [
     TASK_SUCCEEDED,
     TASK_FAILED,
     TASK_REMEDIATED,
-    TASK_CANCELED
+    TASK_CANCELED,
+    TASK_RETRYING
 ]
 
 TASK_EXECUTION_EVENTS = [
@@ -174,7 +178,10 @@ TASK_EXECUTION_EVENTS = [
     TASK_CANCELING,
     TASK_CANCELED,
     TASK_CANCELED_WORKFLOW_ACTIVE,
-    TASK_CANCELED_WORKFLOW_DORMANT
+    TASK_CANCELED_WORKFLOW_DORMANT,
+    TASK_RETRYING,
+    TASK_RETRYING_WORKFLOW_ACTIVE,
+    TASK_RETRYING_WORKFLOW_DORMANT
 ]
 
 
@@ -298,13 +305,15 @@ ACTION_EXECUTION_EVENTS = [
 
 # Events for special workflow engine operations.
 TASK_CONTINUE_REQUESTED = 'task_continue_requested'
-TASK_NOOP_REQUESTED = 'task_noop_requested'
 TASK_FAIL_REQUESTED = 'task_fail_requested'
+TASK_NOOP_REQUESTED = 'task_noop_requested'
+TASK_RETRY_REQUESTED = 'task_retry_requested'
 
 ENGINE_OPERATION_EVENTS = [
     TASK_CONTINUE_REQUESTED,
+    TASK_FAIL_REQUESTED,
     TASK_NOOP_REQUESTED,
-    TASK_FAIL_REQUESTED
+    TASK_RETRY_REQUESTED
 ]
 
 
@@ -366,6 +375,15 @@ class TaskContinueEvent(EngineOperationEvent):
         self.context = None
 
 
+class TaskRetryEvent(EngineOperationEvent):
+
+    def __init__(self):
+        self.name = TASK_RETRY_REQUESTED
+        self.status = statuses.RETRYING
+        self.result = None
+        self.context = None
+
+
 class TaskNoopEvent(EngineOperationEvent):
 
     def __init__(self):
@@ -386,6 +404,7 @@ class TaskFailEvent(EngineOperationEvent):
 
 ENGINE_EVENT_MAP = {
     'continue': TaskContinueEvent,
+    'fail': TaskFailEvent,
     'noop': TaskNoopEvent,
-    'fail': TaskFailEvent
+    'retry': TaskRetryEvent
 }

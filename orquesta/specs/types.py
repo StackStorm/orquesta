@@ -89,6 +89,13 @@ STRING_OR_POSITIVE_INTEGER = {
     ]
 }
 
+STRING_OR_POSITIVE_NUMBER = {
+    "oneOf": [
+        NONEMPTY_STRING,
+        POSITIVE_NUMBER
+    ]
+}
+
 STRING_OR_BOOLEAN = {
     "oneOf": [
         NONEMPTY_STRING,

@@ -88,6 +88,8 @@ Task Model
 +-------------+-------------+-------------------------------------------------------------------+
 | input       | No          | A dictionary of input arguments for the action execution.         |
 +-------------+-------------+-------------------------------------------------------------------+
+| retry       | No          | If specified, define requirements for task to be retried.         |
++-------------+-------------+-------------------------------------------------------------------+
 | next        | No          | Define what happens after this task is completed.                 |
 +-------------+-------------+-------------------------------------------------------------------+
 
@@ -308,6 +310,68 @@ command value is accessed via ``<% item(command) %>``.
         with: host, command in <% zip(ctx(hosts), ctx(commands)) %>
         action: core.remote hosts=<% item(host) %> cmd=<% item(command) %>
 
+Task Retry Model
+----------------
+
+If ``retry`` is defined, the task will be retried when the condition is met. The ``when`` condition
+can be an expression that evaluates the status of the last action execution or its result. If the
+number of retries are exhausted, then the final task state will be determined from the last action
+execution for the task.
+
++-------------+-------------+-------------------------------------------------------------------+
+| Attribute   | Required    | Description                                                       |
++=============+=============+===================================================================+
+| when        | No          | The criteria defined as an expression required for retry.         |
++-------------+-------------+-------------------------------------------------------------------+
+| count       | Yes         | The number of times to retry.                                     |
++-------------+-------------+-------------------------------------------------------------------+
+| delay       | No          | The number of seconds to delay in between retries.                |
++-------------+-------------+-------------------------------------------------------------------+
+
+In the following example, if task1 fails, it will be retried up to 3 times with 1 second delay.
+
+.. code-block:: yaml
+
+    version: 1.0
+
+    input:
+      - command
+
+    tasks:
+      task1:
+        action: core.remote cmd=<% ctx().command %>
+        retry:
+          delay: 1
+          count: 3
+        next:
+          - when: <% succeeded() %>
+            do: task2
+
+      task2:
+        action: core.noop
+
+In another example, task1 will be retried if the action execution returns status code other than
+200. The task will be retried up to 3 times with no delay.
+
+.. code-block:: yaml
+
+    version: 1.0
+
+    input:
+      - url
+
+    tasks:
+      task1:
+        action: core.http url=<% ctx().url %>
+        retry:
+          when: <% result().status_code != 200 %>
+          count: 3
+        next:
+          - when: <% result().status_code = 200 %>
+            do: task2
+
+      task2:
+        action: core.noop
 
 Task Transition Model
 ---------------------
@@ -511,6 +575,8 @@ commands are also reserved words that cannot be used for task name.
 |             | previous task state is one of the failure states, the conductcor will ignore the   |
 |             | task failure and assume a remediation has occurred.                                |
 +-------------+------------------------------------------------------------------------------------+
+| retry       | The workflow engine will retry the task up to 3 times with no delay.               |
++-------------+------------------------------------------------------------------------------------+
 
 The following example illustrates the use of the default ``continue`` command to let the workflow
 continue processing the task failure (or any other state) as normal. If ``task1`` fails, the second
@@ -644,3 +710,27 @@ to fail:
 
     output:
       - body: <% ctx(body) %>
+
+The example below illustrates the use of the ``retry`` command. The task will be retried if the
+status code returned from the action execution is not 200. This is similar to using the more
+explicit task retry model. The difference is that the retry command only retry up to 3 times with
+no delay in between retries.
+
+.. code-block:: yaml
+
+    version: 1.0
+
+    input:
+      - url
+
+    tasks:
+      task1:
+        action: core.http url=<% ctx().url %>
+        next:
+          - when: <% result().status_code != 200 %>
+            do: retry
+          - when: <% result().status_code = 200 %>
+            do: task2
+
+      task2:
+        action: core.noop

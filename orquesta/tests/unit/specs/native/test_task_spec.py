@@ -603,3 +603,93 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_retry_basic(self):
+        wf_def = """
+            version: 1.0
+            tasks:
+              task1:
+                action: core.noop
+                retry:
+                  when: <% failed() %>
+                  count: 3
+                  delay: 10
+        """
+
+        wf_spec = self.instantiate(wf_def)
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+    def test_retry_missing_when_count_delay(self):
+        wf_def = """
+            version: 1.0
+            tasks:
+              task1:
+                action: core.noop
+                retry: {}
+        """
+
+        expected_errors = {
+            'syntax': [
+                {
+                    'message': "'count' is a required property",
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.retry.required'
+                    ),
+                    'spec_path': 'tasks.task1.retry'
+                }
+            ]
+        }
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_retry_bad_vars(self):
+        wf_def = """
+            version: 1.0
+            tasks:
+              task1:
+                action: core.noop
+                retry:
+                  # should be a string
+                  when: 1
+                  # should be an int
+                  count:
+                    - "abc"
+                  # should be a number
+                  delay: true
+        """
+
+        expected_errors = {
+            'syntax': [
+                {
+                    'message': "['abc'] is not valid under any of the given schemas",
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.retry.properties.count.oneOf'
+                    ),
+                    'spec_path': 'tasks.task1.retry.count'
+                },
+                {
+                    'message': 'True is not valid under any of the given schemas',
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.retry.properties.delay.oneOf'
+                    ),
+                    'spec_path': 'tasks.task1.retry.delay'
+                },
+                {
+                    'message': "1 is not of type 'string'",
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.retry.properties.when.type'
+                    ),
+                    'spec_path': 'tasks.task1.retry.when'
+                }
+            ]
+        }
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)

@@ -65,9 +65,27 @@ class WorkflowComposer(comp_base.WorkflowComposer):
             if splits:
                 wf_graph.update_task(task_name, splits=splits)
 
+            # Update task attributes if task spec has retry criteria.
+            task_spec = wf_spec.tasks.get_task(task_name)
+
+            if task_spec.has_retry():
+                retry_spec = {
+                    'when': getattr(task_spec.retry, 'when', None),
+                    'count': getattr(task_spec.retry, 'count', None),
+                    'delay': getattr(task_spec.retry, 'delay', None)
+                }
+
+                wf_graph.update_task(task_name, retry=retry_spec)
+
+            # Add task transition to the workflow graph.
             next_tasks = wf_spec.tasks.get_next_tasks(task_name)
 
             for next_task_name, condition, task_transition_item_idx in next_tasks:
+                if next_task_name == 'retry':
+                    retry_spec = {'when': condition or '<% completed() %>', 'count': 3}
+                    wf_graph.update_task(task_name, retry=retry_spec)
+                    continue
+
                 if (not wf_graph.has_task(next_task_name) or
                         not wf_spec.tasks.in_cycle(next_task_name)):
                     q.put((next_task_name, list(splits)))
