@@ -236,7 +236,8 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         expected_term_tasks = ['task2', 'task4']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
-        # Check workflow status, context and output.
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         expected_term_ctx = {'var1': 'xyz', 'var2': 123}
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
@@ -286,7 +287,8 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         expected_term_tasks = ['task2', 'task4']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
-        # Check workflow status, context and output.
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         expected_term_ctx = {'var1': 'xyz', 'var2': 123}
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
@@ -352,7 +354,8 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         expected_term_tasks = ['task2', 'task4']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
-        # Check workflow status, context and output.
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         expected_term_ctx = {'var1': 'xyz', 'var2': 123}
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
@@ -411,7 +414,8 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         expected_term_tasks = ['task4']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
-        # Check workflow status and context.
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         expected_term_ctx = copy.deepcopy(expected_task_ctx)
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
         self.assertEqual(len(conductor.errors), 0)
@@ -465,7 +469,8 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         expected_term_tasks = ['task4']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
-        # Check workflow status and context.
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         expected_term_ctx = copy.deepcopy(expected_task_ctx)
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
         self.assertEqual(len(conductor.errors), 0)
@@ -530,7 +535,8 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         tasks = [task for task in conductor.workflow_state.sequence if task['id'] == task_name]
         self.assertListEqual([task.get('term', False) for task in tasks], [False, False, True])
 
-        # Check workflow status and context.
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         expected_term_ctx = {'loop': False}
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
@@ -618,7 +624,8 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         expected_term_tasks = ['task2', 'task4']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
-        # Check workflow status and errors.
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         self.assertEqual(len(conductor.errors), 0)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
@@ -727,5 +734,6 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         self.assertEqual(len(conductor.errors), 1)
         self.assertEqual(len(list(filter(lambda x: x['task_id'] == 'task3', conductor.errors))), 1)
 
-        # Check workflow status.
+        # Render workflow output and check workflow status and output.
+        conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
