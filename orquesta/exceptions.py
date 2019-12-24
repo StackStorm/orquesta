@@ -127,13 +127,19 @@ class WorkflowLogEntryError(Exception):
     pass
 
 
-class InvalidWorkflowRerunStatus(Exception):
+class WorkflowNotInRerunableStatusError(Exception):
     def __init__(self):
-        Exception.__init__(self, 'Workflow execution cannot rerun from task(s) because it is not '
-                                 'in a failed state')
+        message = 'Unable to rerun workflow from task(s) because it is not in a failed state.'
+        Exception.__init__(self, message)
 
 
-class InvalidRerunTasks(Exception):
-    def __init__(self, failed_rerun_tasks):
-        Exception.__init__(self, 'Unable to rerun workflow because one or more tasks is not found'
-                                 ' or not in failed status: %s' % ', '.join(failed_rerun_tasks))
+class InvalidTaskRerunRequest(Exception):
+    def __init__(self, tasks):
+        tasks_str = ''
+
+        for task in tasks:
+            tasks_str += '; ' if tasks_str else ''
+            tasks_str += 'task "%s", route "%s"' % (task[0], str(task[1]))
+
+        message = 'Unable to rerun task(s) because it does not exist or not in a failed state: %s'
+        Exception.__init__(self, message % tasks_str)
