@@ -1053,35 +1053,34 @@ class WorkflowConductor(object):
         return contexts
 
     def request_workflow_rerun(self, tasks=None):
+        # Throw exception if workflow is still active.
+        if self.get_workflow_status() not in statuses.COMPLETED_STATUSES:
+            raise exc.WorkflowIsActiveAndNotRerunableError()
+
         # Concatenate task id and route so it is easier to use in filter below.
         tasks = [
             (t[0], t[1], constants.TASK_STATE_ROUTE_FORMAT % (t[0], str(t[1])))
             for t in tasks or []
         ]
 
-        # Throw exception if workflow is still active.
-        if self.get_workflow_status() not in statuses.ABENDED_STATUSES:
-            raise exc.WorkflowNotInRerunableStatusError()
-
-        # Get the list of terminal tasks that abended.
-        rerunnable_candidates = {
-            constants.TASK_STATE_ROUTE_FORMAT % (t['id'], str(t['route'])): t
-            for t in self.workflow_state.get_terminal_tasks()
-            if 'status' in t and t['status'] in statuses.ABENDED_STATUSES and
-            len([k for k, v in six.iteritems(t['next']) if v]) <= 0
-        }
-
-        # If the list of tasks is provided, then verify tasks status.
-        invalid_rerun_requests = [t for t in tasks if t[2] not in rerunnable_candidates]
+        # If the list of tasks is provided, verify if task exist and rerunnable.
+        invalid_rerun_requests = [t for t in tasks if t[2] not in self.workflow_state.tasks]
 
         if invalid_rerun_requests:
             raise exc.InvalidTaskRerunRequest(invalid_rerun_requests)
 
-        # If the list of tasks is provided, then filter the list of rerun candidates.
-        if tasks:
+        # If no tasks specified, then get the list of terminal tasks that abended.
+        if not tasks:
             rerunnable_candidates = {
-                k: t for k, t in six.iteritems(rerunnable_candidates)
-                if k in [task[2] for task in tasks]
+                constants.TASK_STATE_ROUTE_FORMAT % (t['id'], str(t['route'])): t
+                for t in self.workflow_state.get_terminal_tasks()
+                if 'status' in t and t['status'] in statuses.ABENDED_STATUSES and
+                len([k for k, v in six.iteritems(t['next']) if v]) <= 0
+            }
+        # Otherwise if the list of tasks is provided, then filter the list of rerun candidates.
+        else:
+            rerunnable_candidates = {
+                t[2]: self.workflow_state.get_task(t[0], t[1]) for t in tasks
             }
 
         # Setup task candidates for rerun.

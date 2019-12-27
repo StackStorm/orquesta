@@ -48,7 +48,7 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Assert rerun cannot happen because workflow is still running.
         self.assertRaises(
-            exc.WorkflowNotInRerunableStatusError,
+            exc.WorkflowIsActiveAndNotRerunableError,
             conductor.request_workflow_rerun
         )
 
@@ -63,6 +63,11 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
               - when: <% succeeded() %>
                 do: task2
           task2:
+            action: core.noop
+            next:
+              - when: <% succeeded() %>
+                do: task3
+          task3:
             action: core.noop
         """
 
@@ -85,21 +90,21 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         # Assert workflow failed.
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
 
-        # Assert rerun cannot happen because task1 is already succeeded.
-        self.assertRaises(
-            exc.InvalidTaskRerunRequest,
-            conductor.request_workflow_rerun,
-            tasks=[('task1', 0)]
-        )
-
-        # Assert rerun cannot happen because task3 does not exist.
+        # Assert rerun cannot happen because task3 has not happened yet.
         self.assertRaises(
             exc.InvalidTaskRerunRequest,
             conductor.request_workflow_rerun,
             tasks=[('task3', 0)]
         )
 
-    def test_basic_rerun(self):
+        # Assert rerun cannot happen because task4 does not exists.
+        self.assertRaises(
+            exc.InvalidTaskRerunRequest,
+            conductor.request_workflow_rerun,
+            tasks=[('task4', 0)]
+        )
+
+    def test_rerun_from_failed_task(self):
         wf_def = """
         version: 1.0
 
@@ -219,6 +224,89 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Succeed task2.
         next_tasks = conductor.get_next_tasks()
+        fast_forward_statuses = [statuses.RUNNING, statuses.SUCCEEDED]
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_statuses)
+
+        # Assert workflow is completed.
+        conductor.render_workflow_output()
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+        self.assertDictEqual(conductor.get_workflow_output(), {'foobar': 'fubar'})
+
+    def test_rerun_from_succeeded_task(self):
+        wf_def = """
+        version: 1.0
+
+        tasks:
+          task1:
+            action: core.echo message="$RANDOM"
+            next:
+              - when: <% succeeded() %>
+                publish: foobar="foobar"
+                do: task2
+          task2:
+            action: core.noop
+            next:
+              - when: <% succeeded() %>
+                publish: foobar="fubar"
+
+        output:
+          - foobar: <% ctx().foobar %>
+        """
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_status(statuses.RUNNING)
+
+        # Succeed task1.
+        next_tasks = conductor.get_next_tasks()
+        fast_forward_statuses = [statuses.RUNNING, statuses.SUCCEEDED]
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_statuses)
+
+        # Fail task2.
+        next_tasks = conductor.get_next_tasks()
+        fast_forward_statuses = [statuses.RUNNING, statuses.FAILED]
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_statuses)
+
+        # Render workflow output and assert workflow status, error, and output.
+        conductor.render_workflow_output()
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
+        self.assertDictEqual(conductor.get_workflow_output(), {'foobar': 'foobar'})
+        actual_task2_errors = [e for e in conductor.errors if e.get('task_id', None) == 'task2']
+        self.assertGreater(len(actual_task2_errors), 0)
+
+        # Request workflow rerun from the succeeded task1 previous to the failed task2.
+        conductor.request_workflow_rerun(tasks=[('task1', 0)])
+
+        # Assert workflow status is running and state is reset.
+        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
+        self.assertIsNone(conductor.get_workflow_output())
+        next_tasks = conductor.get_next_tasks()
+        self.assertEqual(len(next_tasks), 1)
+        self.assertEqual(next_tasks[0]['id'], 'task1')
+
+        # Assert sequence of tasks is correct.
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task('task1', 0))
+        self.assertIsNone(conductor.workflow_state.get_staged_task('task2', 0))
+
+        task_states = [
+            t for t in list(enumerate(conductor.workflow_state.sequence))
+            if t[1]['id'] == 'task1' and t[1]['route'] == 0
+        ]
+
+        self.assertEqual(len(task_states), 2)
+        self.assertListEqual([t[0] for t in task_states], [0, 2])
+
+        # Succeed task1.
+        next_tasks = conductor.get_next_tasks()
+        self.assertEqual(next_tasks[0]['id'], 'task1')
+        fast_forward_statuses = [statuses.RUNNING, statuses.SUCCEEDED]
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_statuses)
+
+        # Succeed task2.
+        next_tasks = conductor.get_next_tasks()
+        self.assertEqual(next_tasks[0]['id'], 'task2')
         fast_forward_statuses = [statuses.RUNNING, statuses.SUCCEEDED]
         self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_statuses)
 
