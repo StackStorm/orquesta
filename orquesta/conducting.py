@@ -79,6 +79,26 @@ class WorkflowState(object):
     def get_tasks_by_status(self, statuses):
         return [t for t in self.sequence if 'status' in t and t['status'] in statuses]
 
+    def get_task_sequence(self, task_id, route):
+        idx = self.tasks[constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route))]
+        seq = [(idx, self.sequence[idx])]
+
+        q = queue.Queue()
+        q.put((task_id, route))
+
+        while not q.empty():
+            task_id, route = q.get()
+
+            for i, t in enumerate(self.sequence):
+                for k, v in six.iteritems(t['prev']):
+                    p = self.sequence[v]
+                    if p['id'] == task_id and p['route'] == route:
+                        seq.append((i, t))
+                        if (i, t) not in seq:
+                            q.put((t['id'], t['route']))
+
+        return seq
+
     def get_terminal_tasks(self):
         return [t for t in self.sequence if t.get('term', False)]
 
@@ -738,8 +758,8 @@ class WorkflowConductor(object):
         if not staged_task and not task_state_entry:
             raise exc.InvalidTaskStateEntry(task_id)
 
-        # Create new task state entry if it does not exist.
-        if not task_state_entry:
+        # Create new task state entry if it does not exist or if it is an engine command.
+        if not task_state_entry or task_id in events.ENGINE_EVENT_MAP.keys():
             task_state_entry = self.add_task_state(
                 task_id,
                 staged_task['route'],
@@ -1052,6 +1072,27 @@ class WorkflowConductor(object):
 
         return contexts
 
+    def _request_task_rerun(self, task_id, route):
+        task = self.workflow_state.get_task(task_id, route)
+        task_ctx = copy.deepcopy(task['ctxs']['in'])
+        task_prev = copy.deepcopy(task['prev'])
+
+        # Reset terminal status for the rerunnable candidate.
+        task.pop('term', None)
+        task.pop('ignore', None)
+
+        # Reset the list of errors for the task.
+        for e in [e for e in self.errors if e.get('task_id', None) == task_id]:
+            self.errors.remove(e)
+
+        # Add a new task state entry and stage task to be returned in get_next_tasks.
+        self.add_task_state(task_id, route, in_ctx_idxs=task_ctx, prev=task_prev)
+        self.workflow_state.add_staged_task(task_id, route, ctxs=task_ctx, prev=task_prev)
+
+        # Reset terminal status for the task branch which will also be rerun.
+        for _, next_task in self.workflow_state.get_task_sequence(task_id, route):
+            next_task.pop('term', None)
+
     def request_workflow_rerun(self, tasks=None):
         # Throw exception if workflow is still active.
         if self.get_workflow_status() not in statuses.COMPLETED_STATUSES:
@@ -1085,21 +1126,7 @@ class WorkflowConductor(object):
 
         # Setup task candidates for rerun.
         for _, task in sorted(six.iteritems(rerunnable_candidates), key=lambda x: x[0]):
-            task_id = task['id']
-            task_route = task['route']
-            task_ctx = copy.deepcopy(task['ctxs']['in'])
-            task_prev = copy.deepcopy(task['prev'])
-
-            # Reset terminal status for the rerunnable candidate.
-            task.pop('term', None)
-
-            # Reset the list of errors for the task.
-            for e in [e for e in self.errors if e.get('task_id', None) == task_id]:
-                self.errors.remove(e)
-
-            # Add a new task state entry and stage task to be returned in get_next_tasks.
-            self.add_task_state(task_id, task_route, in_ctx_idxs=task_ctx, prev=task_prev)
-            self.workflow_state.add_staged_task(task_id, task_route, ctxs=task_ctx, prev=task_prev)
+            self._request_task_rerun(task['id'], task['route'])
 
         # Get the list of terminal tasks with next or remediation task(s).
         continuable_candidates = {

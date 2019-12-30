@@ -35,6 +35,8 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
             action: core.noop
         """
 
+        fast_forward_success = [statuses.RUNNING, statuses.SUCCEEDED]
+
         spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
@@ -43,8 +45,7 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Succeed task1.
         next_tasks = conductor.get_next_tasks()
-        fast_forward_statuses = [statuses.RUNNING, statuses.SUCCEEDED]
-        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_statuses)
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_success)
 
         # Assert rerun cannot happen because workflow is still running.
         self.assertRaises(
@@ -71,6 +72,9 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
             action: core.noop
         """
 
+        fast_forward_failure = [statuses.RUNNING, statuses.FAILED]
+        fast_forward_success = [statuses.RUNNING, statuses.SUCCEEDED]
+
         spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
@@ -79,13 +83,11 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Succeed task1.
         next_tasks = conductor.get_next_tasks()
-        fast_forward_statuses = [statuses.RUNNING, statuses.SUCCEEDED]
-        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_statuses)
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_success)
 
         # Fail task2.
         next_tasks = conductor.get_next_tasks()
-        fast_forward_statuses = [statuses.RUNNING, statuses.FAILED]
-        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_statuses)
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_failure)
 
         # Assert workflow failed.
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
@@ -125,6 +127,9 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
           - foobar: <% ctx().foobar %>
         """
 
+        fast_forward_failure = [statuses.RUNNING, statuses.FAILED]
+        fast_forward_success = [statuses.RUNNING, statuses.SUCCEEDED]
+
         spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
@@ -133,13 +138,11 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Succeed task1.
         next_tasks = conductor.get_next_tasks()
-        fast_forward_statuses = [statuses.RUNNING, statuses.SUCCEEDED]
-        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_statuses)
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_success)
 
         # Fail task2.
         next_tasks = conductor.get_next_tasks()
-        fast_forward_statuses = [statuses.RUNNING, statuses.FAILED]
-        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_statuses)
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_failure)
 
         # Render workflow output and assert workflow status, error, and output.
         conductor.render_workflow_output()
@@ -181,8 +184,7 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Fail task2 again.
         next_tasks = conductor.get_next_tasks()
-        fast_forward_statuses = [statuses.RUNNING, statuses.FAILED]
-        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_statuses)
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_failure)
 
         # Render workflow output and assert workflow status, error, and output.
         conductor.render_workflow_output()
@@ -224,8 +226,7 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Succeed task2.
         next_tasks = conductor.get_next_tasks()
-        fast_forward_statuses = [statuses.RUNNING, statuses.SUCCEEDED]
-        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_statuses)
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_success)
 
         # Assert workflow is completed.
         conductor.render_workflow_output()
@@ -253,6 +254,9 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
           - foobar: <% ctx().foobar %>
         """
 
+        fast_forward_failure = [statuses.RUNNING, statuses.FAILED]
+        fast_forward_success = [statuses.RUNNING, statuses.SUCCEEDED]
+
         spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
 
@@ -261,20 +265,17 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
 
         # Succeed task1.
         next_tasks = conductor.get_next_tasks()
-        fast_forward_statuses = [statuses.RUNNING, statuses.SUCCEEDED]
-        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_statuses)
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_success)
 
         # Fail task2.
         next_tasks = conductor.get_next_tasks()
-        fast_forward_statuses = [statuses.RUNNING, statuses.FAILED]
-        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_statuses)
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_failure)
 
         # Render workflow output and assert workflow status, error, and output.
         conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
         self.assertDictEqual(conductor.get_workflow_output(), {'foobar': 'foobar'})
-        actual_task2_errors = [e for e in conductor.errors if e.get('task_id', None) == 'task2']
-        self.assertGreater(len(actual_task2_errors), 0)
+        self.assertIn('task2', [e['task_id'] for e in conductor.errors])
 
         # Request workflow rerun from the succeeded task1 previous to the failed task2.
         conductor.request_workflow_rerun(tasks=[('task1', 0)])
@@ -301,16 +302,254 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         # Succeed task1.
         next_tasks = conductor.get_next_tasks()
         self.assertEqual(next_tasks[0]['id'], 'task1')
-        fast_forward_statuses = [statuses.RUNNING, statuses.SUCCEEDED]
-        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_statuses)
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_success)
 
         # Succeed task2.
         next_tasks = conductor.get_next_tasks()
         self.assertEqual(next_tasks[0]['id'], 'task2')
-        fast_forward_statuses = [statuses.RUNNING, statuses.SUCCEEDED]
-        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_statuses)
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_success)
 
         # Assert workflow is completed.
         conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_output(), {'foobar': 'fubar'})
+
+    def test_rerun_succeeded_workflow(self):
+        wf_def = """
+        version: 1.0
+
+        tasks:
+          task1:
+            action: core.echo message="$RANDOM"
+            next:
+              - when: <% succeeded() %>
+                publish: foobar="foobar"
+                do: task2
+          task2:
+            action: core.noop
+            next:
+              - when: <% succeeded() %>
+                publish: foobar="fubar"
+
+        output:
+          - foobar: <% ctx().foobar %>
+        """
+
+        fast_forward_failure = [statuses.RUNNING, statuses.FAILED]
+        fast_forward_success = [statuses.RUNNING, statuses.SUCCEEDED]
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_status(statuses.RUNNING)
+
+        # Succeed task1.
+        next_tasks = conductor.get_next_tasks()
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_success)
+
+        # Succeed task2.
+        next_tasks = conductor.get_next_tasks()
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_success)
+
+        # Assert workflow is completed.
+        conductor.render_workflow_output()
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+        self.assertDictEqual(conductor.get_workflow_output(), {'foobar': 'fubar'})
+
+        # Request workflow rerun from the succeeded task1.
+        conductor.request_workflow_rerun(tasks=[('task1', 0)])
+
+        # Succeed task1.
+        next_tasks = conductor.get_next_tasks()
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_success)
+
+        # Fail task2.
+        next_tasks = conductor.get_next_tasks()
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_failure)
+
+        # Render workflow output and assert workflow status, error, and output.
+        conductor.render_workflow_output()
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
+        self.assertDictEqual(conductor.get_workflow_output(), {'foobar': 'foobar'})
+        task2 = conductor.get_task_state_entry('task2', 0)
+        self.assertEqual(task2['status'], statuses.FAILED)
+        self.assertIn('task2', [e['task_id'] for e in conductor.errors])
+
+        # Request workflow rerun.
+        conductor.request_workflow_rerun()
+
+        # Succeed task2.
+        next_tasks = conductor.get_next_tasks()
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_success)
+
+        # Assert workflow is completed.
+        conductor.render_workflow_output()
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+        self.assertDictEqual(conductor.get_workflow_output(), {'foobar': 'fubar'})
+
+    def test_rerun_default_with_remediated_task(self):
+        wf_def = """
+        version: 1.0
+        vars:
+          - foobar: null
+          - fubar: null
+        tasks:
+          task1:
+            action: core.echo message="$RANDOM"
+            next:
+              - when: <% failed() %>
+                publish: foobar="fubar"
+                do: task3
+              - when: <% succeeded() %>
+                publish: foobar="foobar"
+          task2:
+            action: core.noop
+            next:
+              - when: <% succeeded() %>
+                publish: fubar="fubar"
+          task3:
+            action: core.noop
+        output:
+          - foobar: <% ctx().foobar %>
+          - fubar: <% ctx().fubar %>
+        """
+
+        fast_forward_failure = [statuses.RUNNING, statuses.FAILED]
+        fast_forward_success = [statuses.RUNNING, statuses.SUCCEEDED]
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_status(statuses.RUNNING)
+
+        # Fail task1 to trigger the remediation task.
+        next_tasks = conductor.get_next_tasks()
+        self.assertEqual(next_tasks[0]['id'], 'task1')
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_failure)
+
+        # Succeed the remediation task3.
+        next_tasks = conductor.get_next_tasks()
+        self.assertEqual(next_tasks[1]['id'], 'task3')
+        self.forward_task_statuses(conductor, next_tasks[1]['id'], fast_forward_success)
+
+        # Fail task2 to stop the workflow.
+        next_tasks = conductor.get_next_tasks()
+        self.assertEqual(next_tasks[0]['id'], 'task2')
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_failure)
+
+        # Render workflow output and assert workflow status, error, and output.
+        conductor.render_workflow_output()
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
+        task1 = conductor.get_task_state_entry('task1', 0)
+        self.assertEqual(task1['status'], statuses.FAILED)
+        self.assertIn('task1', [e['task_id'] for e in conductor.errors])
+        task2 = conductor.get_task_state_entry('task2', 0)
+        self.assertEqual(task2['status'], statuses.FAILED)
+        self.assertIn('task2', [e['task_id'] for e in conductor.errors])
+
+        # Request workflow rerun. By default, since task1 is remediated, only task2 will be rerun.
+        conductor.request_workflow_rerun()
+
+        # Succeed task2.
+        next_tasks = conductor.get_next_tasks()
+        self.assertEqual(next_tasks[0]['id'], 'task2')
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_success)
+
+        # Render workflow output and assert workflow status, error, and output.
+        self.assertEqual(len(conductor.get_next_tasks()), 0)
+        conductor.render_workflow_output()
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+        task1 = conductor.get_task_state_entry('task1', 0)
+        self.assertEqual(task1['status'], statuses.FAILED)
+        self.assertIn('task1', [e['task_id'] for e in conductor.errors])
+        task2 = conductor.get_task_state_entry('task2', 0)
+        self.assertEqual(task2['status'], statuses.SUCCEEDED)
+        self.assertNotIn('task2', [e['task_id'] for e in conductor.errors])
+        expected_workflow_output = {'foobar': 'fubar', 'fubar': 'fubar'}
+        self.assertDictEqual(conductor.get_workflow_output(), expected_workflow_output)
+
+    def test_rerun_from_remediated_task(self):
+        wf_def = """
+        version: 1.0
+        vars:
+          - foobar: null
+          - fubar: null
+        tasks:
+          task1:
+            action: core.echo message="$RANDOM"
+            next:
+              - when: <% failed() %>
+                publish: foobar="fubar"
+                do: task3
+              - when: <% succeeded() %>
+                publish: foobar="foobar"
+          task2:
+            action: core.noop
+            next:
+              - when: <% succeeded() %>
+                publish: fubar="fubar"
+          task3:
+            action: core.noop
+        output:
+          - foobar: <% ctx().foobar %>
+          - fubar: <% ctx().fubar %>
+        """
+
+        fast_forward_failure = [statuses.RUNNING, statuses.FAILED]
+        fast_forward_success = [statuses.RUNNING, statuses.SUCCEEDED]
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_status(statuses.RUNNING)
+
+        # Fail task1 to trigger the remediation task.
+        next_tasks = conductor.get_next_tasks()
+        self.assertEqual(next_tasks[0]['id'], 'task1')
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_failure)
+
+        # Succeed the remediation task3.
+        next_tasks = conductor.get_next_tasks()
+        self.assertEqual(next_tasks[1]['id'], 'task3')
+        self.forward_task_statuses(conductor, next_tasks[1]['id'], fast_forward_success)
+
+        # Fail task2 to stop the workflow.
+        next_tasks = conductor.get_next_tasks()
+        self.assertEqual(next_tasks[0]['id'], 'task2')
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_failure)
+
+        # Render workflow output and assert workflow status, error, and output.
+        conductor.render_workflow_output()
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
+        task1 = conductor.get_task_state_entry('task1', 0)
+        self.assertEqual(task1['status'], statuses.FAILED)
+        self.assertIn('task1', [e['task_id'] for e in conductor.errors])
+        task2 = conductor.get_task_state_entry('task2', 0)
+        self.assertEqual(task2['status'], statuses.FAILED)
+        self.assertIn('task2', [e['task_id'] for e in conductor.errors])
+
+        # Request workflow rerun and explicitly ask the remediated task1 to rerun.
+        conductor.request_workflow_rerun(tasks=[('task1', 0), ('task2', 0)])
+
+        # Succeed task1 and task2.
+        next_tasks = conductor.get_next_tasks()
+        self.assertEqual(next_tasks[0]['id'], 'task1')
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_success)
+        self.assertEqual(next_tasks[1]['id'], 'task2')
+        self.forward_task_statuses(conductor, next_tasks[1]['id'], fast_forward_success)
+
+        # Render workflow output and assert workflow status, error, and output.
+        self.assertEqual(len(conductor.get_next_tasks()), 0)
+        conductor.render_workflow_output()
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+        task1 = conductor.get_task_state_entry('task1', 0)
+        self.assertEqual(task1['status'], statuses.SUCCEEDED)
+        self.assertNotIn('task1', [e['task_id'] for e in conductor.errors])
+        task2 = conductor.get_task_state_entry('task2', 0)
+        self.assertEqual(task2['status'], statuses.SUCCEEDED)
+        self.assertNotIn('task2', [e['task_id'] for e in conductor.errors])
+        expected_workflow_output = {'foobar': 'foobar', 'fubar': 'fubar'}
+        self.assertDictEqual(conductor.get_workflow_output(), expected_workflow_output)
