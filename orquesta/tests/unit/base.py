@@ -167,42 +167,24 @@ class WorkflowConductorTest(WorkflowComposerTest):
 
         return task
 
-    def forward_task_statuses(self, conductor, task_id, statuses,
-                              item_ids=None, results=None, accumulated_results=None, route=0):
-        if item_ids is None:
-            item_ids = []
+    def forward_task_statuses(self, conductor, task_id, status_changes, route=0, result=None):
+        for status in status_changes:
+            ac_ex_event = events.ActionExecutionEvent(status)
 
-        if results is None:
-            results = []
-
-        if accumulated_results is None:
-            accumulated_results = []
-
-        status_changes = six.moves.zip_longest(statuses, item_ids, results, accumulated_results)
-
-        for status, item_id, result, accumulated_result in status_changes:
-            ac_ex_event = (
-                events.ActionExecutionEvent(status) if item_id is None or item_id < 0 else
-                events.TaskItemActionExecutionEvent(item_id, status)
-            )
-
-            if item_id and item_id >= 0 and accumulated_result is not None:
-                ac_ex_event.accumulated_result = accumulated_result
-
-            if result:
+            if result is not None and status in statuses.COMPLETED_STATUSES:
                 ac_ex_event.result = result
 
             conductor.update_task_state(task_id, route, ac_ex_event)
 
-    def forward_task_item_statuses(self, conductor, task_id, item_id, statuses,
-                                   result=None, accumulated_result=None, route=0):
-        for idx, status in enumerate(statuses):
+    def forward_task_item_statuses(self, conductor, task_id, item_id, status_changes,
+                                   route=0, result=None, accumulated_result=None):
+        for status in status_changes:
             ac_ex_event = events.TaskItemActionExecutionEvent(item_id, status)
 
-            if idx == len(statuses) - 1 and accumulated_result:
+            if accumulated_result is not None and status in statuses.COMPLETED_STATUSES:
                 ac_ex_event.accumulated_result = accumulated_result
 
-            if idx == len(statuses) - 1 and result:
+            if result is not None and status in statuses.COMPLETED_STATUSES:
                 ac_ex_event.result = result
 
             conductor.update_task_state(task_id, route, ac_ex_event)
