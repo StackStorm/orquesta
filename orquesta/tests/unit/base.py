@@ -194,6 +194,19 @@ class WorkflowConductorTest(WorkflowComposerTest):
 
             conductor.update_task_state(task_id, route, ac_ex_event)
 
+    def forward_task_item_statuses(self, conductor, task_id, item_id, statuses,
+                                   result=None, accumulated_result=None, route=0):
+        for idx, status in enumerate(statuses):
+            ac_ex_event = events.TaskItemActionExecutionEvent(item_id, status)
+
+            if idx == len(statuses) - 1 and accumulated_result:
+                ac_ex_event.accumulated_result = accumulated_result
+
+            if idx == len(statuses) - 1 and result:
+                ac_ex_event.result = result
+
+            conductor.update_task_state(task_id, route, ac_ex_event)
+
     # The conductor.get_next_tasks make copies of the task specs and render expressions
     # in the task action and task input. So comparing the task specs will not match. In
     # order to match in unit tests. This method is used to serialize the task specs and
