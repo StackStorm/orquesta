@@ -515,7 +515,7 @@ class WorkflowConductorRerunTest(WorkflowConductorTest):
                 result_q.put(item)
 
         # Request workflow rerun and assert workflow status is running.
-        conductor.request_workflow_rerun(tasks=rerun_tasks)
+        conductor.request_workflow_rerun(task_requests=rerun_tasks)
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
 
         # Get next tasks and resume conducting workflow.
