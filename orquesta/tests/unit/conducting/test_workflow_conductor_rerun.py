@@ -14,6 +14,7 @@
 
 from orquesta import conducting
 from orquesta import exceptions as exc
+from orquesta import requests
 from orquesta.specs import native as native_specs
 from orquesta import statuses
 from orquesta.tests.unit import base as test_base
@@ -96,14 +97,14 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         self.assertRaises(
             exc.InvalidTaskRerunRequest,
             conductor.request_workflow_rerun,
-            task_requests=[('task3', 0)]
+            task_requests=[requests.TaskRerunRequest('task3', 0)]
         )
 
         # Assert rerun cannot happen because task4 does not exists.
         self.assertRaises(
             exc.InvalidTaskRerunRequest,
             conductor.request_workflow_rerun,
-            task_requests=[('task4', 0)]
+            task_requests=[requests.TaskRerunRequest('task4', 0)]
         )
 
     def test_rerun_from_failed_task(self):
@@ -194,7 +195,8 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         self.assertGreater(len(actual_task2_errors), 0)
 
         # Request workflow rerun from task.
-        conductor.request_workflow_rerun(task_requests=[('task2', 0)])
+        task_rerun_req = requests.TaskRerunRequest('task2', 0)
+        conductor.request_workflow_rerun(task_requests=[task_rerun_req])
 
         # Assert workflow status is running and state is reset.
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
@@ -278,7 +280,8 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         self.assertIn('task2', [e['task_id'] for e in conductor.errors])
 
         # Request workflow rerun from the succeeded task1 previous to the failed task2.
-        conductor.request_workflow_rerun(task_requests=[('task1', 0)])
+        task_rerun_req = requests.TaskRerunRequest('task1', 0)
+        conductor.request_workflow_rerun(task_requests=[task_rerun_req])
 
         # Assert workflow status is running and state is reset.
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
@@ -358,7 +361,8 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         self.assertDictEqual(conductor.get_workflow_output(), {'foobar': 'fubar'})
 
         # Request workflow rerun from the succeeded task1.
-        conductor.request_workflow_rerun(task_requests=[('task1', 0)])
+        task_rerun_req = requests.TaskRerunRequest('task1', 0)
+        conductor.request_workflow_rerun(task_requests=[task_rerun_req])
 
         # Succeed task1.
         next_tasks = conductor.get_next_tasks()
@@ -532,7 +536,9 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         self.assertIn('task2', [e['task_id'] for e in conductor.errors])
 
         # Request workflow rerun and explicitly ask the remediated task1 to rerun.
-        conductor.request_workflow_rerun(task_requests=[('task1', 0), ('task2', 0)])
+        tk1_rerun_req = requests.TaskRerunRequest('task1', 0)
+        tk2_rerun_req = requests.TaskRerunRequest('task2', 0)
+        conductor.request_workflow_rerun(task_requests=[tk1_rerun_req, tk2_rerun_req])
 
         # Succeed task1 and task2.
         next_tasks = conductor.get_next_tasks()
@@ -617,7 +623,8 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         self.assertDictEqual(conductor.get_workflow_output(), {'items': []})
 
         # Request workflow rerun.
-        conductor.request_workflow_rerun(task_requests=[('task1', 0, True)])
+        task_rerun_req = requests.TaskRerunRequest('task1', 0, reset_items=True)
+        conductor.request_workflow_rerun(task_requests=[task_rerun_req])
 
         # Assert items are preserved in get next tasks.
         next_tasks = conductor.get_next_tasks()

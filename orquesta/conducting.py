@@ -1113,16 +1113,8 @@ class WorkflowConductor(object):
         if self.get_workflow_status() not in statuses.COMPLETED_STATUSES:
             raise exc.WorkflowIsActiveAndNotRerunableError()
 
-        # Normalize task rerun requests.
-        task_requests = [
-            (t[0], t[1], t[2] if len(t) == 3 else False) for t in task_requests or []
-        ]
-
         # Concatenate task id and route so it is easier to use in filter below.
-        tasks = {
-            constants.TASK_STATE_ROUTE_FORMAT % (t[0], str(t[1])): t
-            for t in task_requests or []
-        }
+        tasks = {t.task_state_entry_id: t for t in task_requests or []}
 
         # If the list of tasks is provided, verify if task exist and rerunnable.
         invalid_rerun_requests = [
@@ -1143,13 +1135,13 @@ class WorkflowConductor(object):
         # Otherwise if the list of tasks is provided, then filter the list of rerun candidates.
         else:
             rerunnable_candidates = {
-                k: self.workflow_state.get_task(t[0], t[1]) for k, t in six.iteritems(tasks)
+                k: self.workflow_state.get_task(t.task_id, t.route) for k, t in six.iteritems(tasks)
             }
 
         # Setup task candidates for rerun.
         for _, task in sorted(six.iteritems(rerunnable_candidates), key=lambda x: x[0]):
             k = constants.TASK_STATE_ROUTE_FORMAT % (task['id'], str(task['route']))
-            reset_items = False if k not in tasks else tasks[k][2]
+            reset_items = False if k not in tasks else tasks[k].reset_items
             self._request_task_rerun(task['id'], task['route'], reset_items=reset_items)
 
         # Get the list of terminal tasks with next or remediation task(s).

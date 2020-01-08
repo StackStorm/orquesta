@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from orquesta import requests
 from orquesta import statuses
 from orquesta.tests.unit.conducting.native import base
 
@@ -99,7 +100,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest):
         self.assert_rerun_failed_tasks(
             conductor,
             expected_task_seq,
-            rerun_tasks=[('task2', 0)],
+            rerun_tasks=[requests.TaskRerunRequest('task2', 0)],
             expected_term_tasks=expected_term_tasks
         )
 

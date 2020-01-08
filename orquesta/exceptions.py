@@ -139,7 +139,7 @@ class InvalidTaskRerunRequest(Exception):
 
         for task in tasks:
             tasks_str += ', ' if tasks_str else ''
-            tasks_str += '%s|%s' % (task[0], str(task[1]))
+            tasks_str += '%s|%s' % (task.task_id, task.route)
 
         message = "Unable to rerun task|route(s) because it doesn't exist or isn't rerunnable: %s"
         Exception.__init__(self, message % tasks_str)
