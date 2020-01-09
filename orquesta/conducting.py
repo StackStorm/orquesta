@@ -45,9 +45,10 @@ class WorkflowState(object):
         self.staged = list()
         self.status = statuses.UNSET
         self.tasks = dict()
+        self.reruns = list()
 
     def serialize(self):
-        return {
+        data = {
             'contexts': json_util.deepcopy(self.contexts),
             'routes': json_util.deepcopy(self.routes),
             'sequence': json_util.deepcopy(self.sequence),
@@ -55,6 +56,11 @@ class WorkflowState(object):
             'status': self.status,
             'tasks': json_util.deepcopy(self.tasks)
         }
+
+        if self.reruns:
+            data['reruns'] = json_util.deepcopy(self.reruns)
+
+        return data
 
     @classmethod
     def deserialize(cls, data):
@@ -65,6 +71,7 @@ class WorkflowState(object):
         instance.staged = json_util.deepcopy(data.get('staged', dict()))
         instance.status = data.get('status', statuses.UNSET)
         instance.tasks = json_util.deepcopy(data.get('tasks', dict()))
+        instance.reruns = json_util.deepcopy(data.get('reruns', list()))
 
         return instance
 
@@ -1136,6 +1143,14 @@ class WorkflowConductor(object):
             rerunnable_candidates = {
                 k: self.workflow_state.get_task(t.task_id, t.route) for k, t in six.iteritems(tasks)
             }
+
+        # Keep record of which task sequence(s) is being rerun in the workflow state.
+        rerun_entry = [
+            self._get_task_state_idx(task['id'], task['route'])
+            for task in rerunnable_candidates.values()
+        ]
+
+        self.workflow_state.reruns.append(rerun_entry)
 
         # Setup task candidates for rerun.
         for _, task in sorted(six.iteritems(rerunnable_candidates), key=lambda x: x[0]):

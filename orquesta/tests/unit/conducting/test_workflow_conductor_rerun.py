@@ -194,6 +194,10 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         actual_task2_errors = [e for e in conductor.errors if e.get('task_id', None) == 'task2']
         self.assertGreater(len(actual_task2_errors), 0)
 
+        # Assert there is a rerun record.
+        expected_rerun_records = [[1]]
+        self.assertListEqual(conductor.workflow_state.reruns, expected_rerun_records)
+
         # Request workflow rerun from task.
         task_rerun_req = requests.TaskRerunRequest('task2', 0)
         conductor.request_workflow_rerun(task_requests=[task_rerun_req])
@@ -234,6 +238,10 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_output(), {'foobar': 'fubar'})
+
+        # Assert there are two separate rerun records.
+        expected_rerun_records = [[1], [2]]
+        self.assertListEqual(conductor.workflow_state.reruns, expected_rerun_records)
 
     def test_rerun_from_succeeded_task(self):
         wf_def = """
