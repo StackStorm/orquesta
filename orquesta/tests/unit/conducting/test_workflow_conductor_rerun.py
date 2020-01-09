@@ -764,3 +764,52 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         self.assertNotIn('task2', [e['task_id'] for e in conductor.errors])
         expected_workflow_output = {'items': ['fee', 'fi', 'fo', 'fum']}
         self.assertDictEqual(conductor.get_workflow_output(), expected_workflow_output)
+
+    def test_rerun_from_failed_task_with_implicit_continue(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - foobar: fubar
+
+        tasks:
+          task1:
+            action: core.echo message="$RANDOM"
+            next:
+              - publish: foobar="foobar"
+
+        output:
+          - foobar: <% ctx().foobar %>
+        """
+
+        fast_forward_failure = [statuses.RUNNING, statuses.FAILED]
+        fast_forward_success = [statuses.RUNNING, statuses.SUCCEEDED]
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_status(statuses.RUNNING)
+
+        # Fail task1.
+        next_tasks = conductor.get_next_tasks()
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_failure)
+
+        # Render workflow output and assert workflow status, error, and output.
+        conductor.render_workflow_output()
+        self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
+
+        # Request workflow rerun.
+        conductor.request_workflow_rerun()
+
+        # Succeed task1.
+        next_tasks = conductor.get_next_tasks()
+        self.assertEqual(next_tasks[0]['id'], 'task1')
+        self.forward_task_statuses(conductor, next_tasks[0]['id'], fast_forward_success)
+
+        # Render workflow output and assert workflow status, error, and output.
+        self.assertEqual(len(conductor.get_next_tasks()), 0)
+        conductor.render_workflow_output()
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+        expected_workflow_output = {'foobar': 'foobar'}
+        self.assertDictEqual(conductor.get_workflow_output(), expected_workflow_output)

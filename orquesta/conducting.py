@@ -1129,8 +1129,7 @@ class WorkflowConductor(object):
             rerunnable_candidates = {
                 constants.TASK_STATE_ROUTE_FORMAT % (t['id'], str(t['route'])): t
                 for t in self.workflow_state.get_terminal_tasks()
-                if 'status' in t and t['status'] in statuses.ABENDED_STATUSES and
-                len([k for k, v in six.iteritems(t['next']) if v]) <= 0
+                if 'status' in t and t['status'] in statuses.ABENDED_STATUSES
             }
         # Otherwise if the list of tasks is provided, then filter the list of rerun candidates.
         else:
