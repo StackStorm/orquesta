@@ -623,7 +623,7 @@ class WorkflowConductorTest(test_base.WorkflowConductorTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
+        actual_term_tasks = [t['id'] for i, t in term_tasks]
         expected_term_tasks = ['task5']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
@@ -641,7 +641,7 @@ class WorkflowConductorTest(test_base.WorkflowConductorTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
 
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
+        actual_term_tasks = [t['id'] for i, t in term_tasks]
         expected_term_tasks = ['task4']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 

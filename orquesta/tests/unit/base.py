@@ -325,7 +325,7 @@ class WorkflowConductorTest(WorkflowComposerTest):
             ]
 
             term_tasks = conductor.workflow_state.get_terminal_tasks()
-            actual_term_tasks = [(task['id'], task['route']) for task in term_tasks]
+            actual_term_tasks = [(t['id'], t['route']) for i, t in term_tasks]
             expected_term_tasks = sorted(expected_term_tasks, key=lambda x: x[0])
             actual_term_tasks = sorted(actual_term_tasks, key=lambda x: x[0])
             self.assertListEqual(actual_term_tasks, expected_term_tasks)
@@ -585,7 +585,7 @@ class WorkflowConductorRerunTest(WorkflowConductorTest):
             ]
 
             term_tasks = conductor.workflow_state.get_terminal_tasks()
-            actual_term_tasks = [(task['id'], task['route']) for task in term_tasks]
+            actual_term_tasks = [(t['id'], t['route']) for i, t in term_tasks]
             expected_term_tasks = sorted(expected_term_tasks, key=lambda x: x[0])
             actual_term_tasks = sorted(actual_term_tasks, key=lambda x: x[0])
             self.assertListEqual(actual_term_tasks, expected_term_tasks)

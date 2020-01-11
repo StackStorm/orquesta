@@ -75,16 +75,31 @@ class WorkflowState(object):
 
         return instance
 
-    def get_task(self, task_id, task_route):
+    def get_task(self, task_id, route):
         return self.sequence[
-            self.tasks[constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(task_route))]
+            self.tasks[constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route))]
         ]
 
-    def get_tasks(self):
-        return self.sequence
+    def get_tasks(self, task_id=None, route=None):
+        if task_id and route is None:
+            return [
+                (i, t) for i, t in enumerate(self.sequence)
+                if t['id'] == task_id
+            ]
+
+        if task_id and route is not None:
+            return [
+                (i, t) for i, t in enumerate(self.sequence)
+                if t['id'] == task_id and t['route'] == route
+            ]
+
+        return list(enumerate(self.sequence))
 
     def get_tasks_by_status(self, statuses):
-        return [t for t in self.sequence if 'status' in t and t['status'] in statuses]
+        return [
+            (i, t) for i, t in enumerate(self.sequence)
+            if 'status' in t and t['status'] in statuses
+        ]
 
     def get_task_sequence(self, task_id, route):
         idx = self.tasks[constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route))]
@@ -107,7 +122,10 @@ class WorkflowState(object):
         return seq
 
     def get_terminal_tasks(self):
-        return [t for t in self.sequence if t.get('term', False)]
+        return [
+            (i, t) for i, t in enumerate(self.sequence)
+            if t.get('term', False)
+        ]
 
     def has_next_tasks(self, task_id=None, route=None):
         return self.conductor.has_next_tasks(task_id=task_id, route=route)
@@ -382,7 +400,7 @@ class WorkflowConductor(object):
         wf_ex_event = events.WorkflowExecutionEvent(status)
 
         # Push the event to all the active tasks. The event may trigger status changes to the task.
-        for task_state in self.workflow_state.get_tasks_by_status(statuses.ACTIVE_STATUSES):
+        for idx, task_state in self.workflow_state.get_tasks_by_status(statuses.ACTIVE_STATUSES):
             machines.TaskStateMachine.process_event(self.workflow_state, task_state, wf_ex_event)
 
         # Process the workflow status change event.
@@ -421,12 +439,12 @@ class WorkflowConductor(object):
         if not term_tasks:
             return wf_term_ctx
 
-        first_term_task = term_tasks[0:1][0]
+        _, first_term_task = term_tasks[0:1][0]
         other_term_tasks = term_tasks[1:]
 
         wf_term_ctx = self.get_task_context(first_term_task['ctxs']['in'])
 
-        for task in other_term_tasks:
+        for idx, task in other_term_tasks:
             # Remove the initial context since the first task processed above already
             # inclulded that and we only want to apply the differences.
             in_ctx_idxs = json_util.deepcopy(task['ctxs']['in'])
@@ -1134,26 +1152,31 @@ class WorkflowConductor(object):
         # If no tasks specified, then get the list of terminal tasks that abended.
         if not tasks:
             rerunnable_candidates = {
-                constants.TASK_STATE_ROUTE_FORMAT % (t['id'], str(t['route'])): t
-                for t in self.workflow_state.get_terminal_tasks()
+                constants.TASK_STATE_ROUTE_FORMAT % (t['id'], str(t['route'])): (i, t)
+                for i, t in self.workflow_state.get_terminal_tasks()
                 if 'status' in t and t['status'] in statuses.ABENDED_STATUSES
             }
         # Otherwise if the list of tasks is provided, then filter the list of rerun candidates.
         else:
             rerunnable_candidates = {
-                k: self.workflow_state.get_task(t.task_id, t.route) for k, t in six.iteritems(tasks)
+                k: (
+                    self._get_task_state_idx(t.task_id, t.route),
+                    self.workflow_state.get_task(t.task_id, t.route)
+                )
+                for k, t in six.iteritems(tasks)
             }
 
         # Keep record of which task sequence(s) is being rerun in the workflow state.
-        rerun_entry = [
-            self._get_task_state_idx(task['id'], task['route'])
-            for task in rerunnable_candidates.values()
-        ]
-
+        rerun_entry = [i for i, t in rerunnable_candidates.values()]
         self.workflow_state.reruns.append(rerun_entry)
 
         # Setup task candidates for rerun.
-        for _, task in sorted(six.iteritems(rerunnable_candidates), key=lambda x: x[0]):
+        sorted_rerunnable_candidates = sorted(
+            rerunnable_candidates.values(),
+            key=lambda x: (x[1]['id'], x[1]['route'])
+        )
+
+        for _, task in sorted_rerunnable_candidates:
             k = constants.TASK_STATE_ROUTE_FORMAT % (task['id'], str(task['route']))
             reset_items = False if k not in tasks else tasks[k].reset_items
             self._request_task_rerun(task['id'], task['route'], reset_items=reset_items)
@@ -1161,7 +1184,7 @@ class WorkflowConductor(object):
         # Get the list of terminal tasks with next or remediation task(s).
         continuable_candidates = {
             constants.TASK_STATE_ROUTE_FORMAT % (t['id'], str(t['route'])): t
-            for t in self.workflow_state.get_terminal_tasks()
+            for i, t in self.workflow_state.get_terminal_tasks()
             if len([k for k, v in six.iteritems(t['next']) if v]) > 0
         }
 
