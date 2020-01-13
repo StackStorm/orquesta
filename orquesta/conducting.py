@@ -80,26 +80,35 @@ class WorkflowState(object):
             self.tasks[constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route))]
         ]
 
-    def get_tasks(self, task_id=None, route=None):
+    def get_tasks(self, task_id=None, route=None, last_occurrence=True):
         if task_id and route is None:
-            return [
+            result = [
                 (i, t) for i, t in enumerate(self.sequence)
                 if t['id'] == task_id
             ]
-
-        if task_id and route is not None:
-            return [
+        elif task_id and route is not None:
+            result = [
                 (i, t) for i, t in enumerate(self.sequence)
                 if t['id'] == task_id and t['route'] == route
             ]
+        else:
+            result = list(enumerate(self.sequence))
 
-        return list(enumerate(self.sequence))
+        if last_occurrence:
+            result = [s for s in result if s[0] in self.tasks.values()]
 
-    def get_tasks_by_status(self, statuses):
-        return [
+        return result
+
+    def get_tasks_by_status(self, statuses, last_occurrence=True):
+        result = [
             (i, t) for i, t in enumerate(self.sequence)
             if 'status' in t and t['status'] in statuses
         ]
+
+        if last_occurrence:
+            result = [s for s in result if s[0] in self.tasks.values()]
+
+        return result
 
     def get_task_sequence(self, task_id, route):
         idx = self.tasks[constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route))]
