@@ -155,8 +155,8 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         # Request workflow rerun.
         conductor.request_workflow_rerun()
 
-        # Assert workflow status is running and state is reset.
-        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
+        # Assert workflow status is resuming and state is reset.
+        self.assertEqual(conductor.get_workflow_status(), statuses.RESUMING)
         self.assertIsNone(conductor.get_workflow_output())
         actual_task2_errors = [e for e in conductor.errors if e.get('task_id', None) == 'task2']
         self.assertEqual(len(actual_task2_errors), 0)
@@ -202,8 +202,8 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         task_rerun_req = requests.TaskRerunRequest('task2', 0)
         conductor.request_workflow_rerun(task_requests=[task_rerun_req])
 
-        # Assert workflow status is running and state is reset.
-        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
+        # Assert workflow status is resuming and state is reset.
+        self.assertEqual(conductor.get_workflow_status(), statuses.RESUMING)
         self.assertIsNone(conductor.get_workflow_output())
         actual_task2_errors = [e for e in conductor.errors if e.get('task_id', None) == 'task2']
         self.assertEqual(len(actual_task2_errors), 0)
@@ -291,8 +291,8 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         task_rerun_req = requests.TaskRerunRequest('task1', 0)
         conductor.request_workflow_rerun(task_requests=[task_rerun_req])
 
-        # Assert workflow status is running and state is reset.
-        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
+        # Assert workflow status is resuming and state is reset.
+        self.assertEqual(conductor.get_workflow_status(), statuses.RESUMING)
         self.assertIsNone(conductor.get_workflow_output())
         next_tasks = conductor.get_next_tasks()
         self.assertEqual(len(next_tasks), 1)

@@ -1205,5 +1205,5 @@ class WorkflowConductor(object):
         # Reset the workflow output.
         self.reset_workflow_output()
 
-        # Finally, force reset workflow status to running if previous steps succeeded.
-        self.workflow_state.status = statuses.RUNNING
+        # Finally, reset workflow status to resuming if preparation above succeeded.
+        self.workflow_state.status = statuses.RESUMING
