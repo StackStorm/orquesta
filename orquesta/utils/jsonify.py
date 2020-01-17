@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import datetime
 import logging
-
 import six
+import ujson
 
 from orquesta.utils import date as date_util
 
@@ -53,3 +54,15 @@ def deserialize(obj_type, data):
             setattr(obj, k, v)
 
     return obj
+
+
+def deepcopy(value):
+    # NOTE: ujson round-trip is up to 10 times faster on smaller and larger dicts compared
+    # to copy.deepcopy(), but it has some edge cases with non-simple types such as datetimes.
+    try:
+        value = ujson.loads(ujson.dumps(value))  # pylint: disable=no-member
+    except (OverflowError, ValueError):
+        # NOTE: ujson doesn't support 5 or 6 bytes utf-8 sequences so we fallback to copy.deepcopy.
+        value = copy.deepcopy(value)
+
+    return value

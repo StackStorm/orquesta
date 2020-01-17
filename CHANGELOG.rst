@@ -20,6 +20,7 @@ Changed
 * Refactor conductor to not store each item result in task state. If there are a lot of items
   and/or result size is huge per item, then there will be a performance impact on database
   write operations when recording the conductor state. (improvement)
+* Use ujson to deepcopy dict(s) for faster performance. (improvement)
 
 Fixed
 ~~~~~

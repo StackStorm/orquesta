@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import unittest
 
 from orquesta.utils import dictionary as dict_util
+from orquesta.utils import jsonify as json_util
 
 
 LEFT = {
@@ -42,8 +42,8 @@ RIGHT = {
 class DictUtilsTest(unittest.TestCase):
 
     def test_dict_merge_overwrite(self):
-        left = copy.deepcopy(LEFT)
-        right = copy.deepcopy(RIGHT)
+        left = json_util.deepcopy(LEFT)
+        right = json_util.deepcopy(RIGHT)
 
         dict_util.merge_dicts(left, right)
 
@@ -63,8 +63,8 @@ class DictUtilsTest(unittest.TestCase):
         self.assertDictEqual(left, expected)
 
     def test_dict_merge_overwrite_false(self):
-        left = copy.deepcopy(LEFT)
-        right = copy.deepcopy(RIGHT)
+        left = json_util.deepcopy(LEFT)
+        right = json_util.deepcopy(RIGHT)
 
         dict_util.merge_dicts(left, right, overwrite=False)
 

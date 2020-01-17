@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import logging
 import six
 
@@ -29,6 +28,7 @@ from orquesta.specs import loader as spec_loader
 from orquesta import statuses
 from orquesta.utils import context as ctx_util
 from orquesta.utils import dictionary as dict_util
+from orquesta.utils import jsonify as json_util
 from orquesta.utils import plugin as plugin_util
 
 
@@ -48,23 +48,23 @@ class WorkflowState(object):
 
     def serialize(self):
         return {
-            'contexts': copy.deepcopy(self.contexts),
-            'routes': copy.deepcopy(self.routes),
-            'sequence': copy.deepcopy(self.sequence),
-            'staged': copy.deepcopy(self.staged),
+            'contexts': json_util.deepcopy(self.contexts),
+            'routes': json_util.deepcopy(self.routes),
+            'sequence': json_util.deepcopy(self.sequence),
+            'staged': json_util.deepcopy(self.staged),
             'status': self.status,
-            'tasks': copy.deepcopy(self.tasks)
+            'tasks': json_util.deepcopy(self.tasks)
         }
 
     @classmethod
     def deserialize(cls, data):
         instance = cls()
-        instance.contexts = copy.deepcopy(data.get('contexts', list()))
-        instance.routes = copy.deepcopy(data.get('routes', list()))
-        instance.sequence = copy.deepcopy(data.get('sequence', list()))
-        instance.staged = copy.deepcopy(data.get('staged', dict()))
+        instance.contexts = json_util.deepcopy(data.get('contexts', list()))
+        instance.routes = json_util.deepcopy(data.get('routes', list()))
+        instance.sequence = json_util.deepcopy(data.get('sequence', list()))
+        instance.staged = json_util.deepcopy(data.get('staged', dict()))
         instance.status = data.get('status', statuses.UNSET)
-        instance.tasks = copy.deepcopy(data.get('tasks', dict()))
+        instance.tasks = json_util.deepcopy(data.get('tasks', dict()))
 
         return instance
 
@@ -204,8 +204,8 @@ class WorkflowConductor(object):
             'input': self.get_workflow_input(),
             'context': self.get_workflow_parent_context(),
             'state': self.workflow_state.serialize(),
-            'log': copy.deepcopy(self.log),
-            'errors': copy.deepcopy(self.errors),
+            'log': json_util.deepcopy(self.log),
+            'errors': json_util.deepcopy(self.errors),
             'output': self.get_workflow_output()
         }
 
@@ -215,12 +215,12 @@ class WorkflowConductor(object):
         spec = spec_module.WorkflowSpec.deserialize(data['spec'])
 
         graph = graphing.WorkflowGraph.deserialize(data['graph'])
-        inputs = copy.deepcopy(data['input'])
-        context = copy.deepcopy(data['context'])
+        inputs = json_util.deepcopy(data['input'])
+        context = json_util.deepcopy(data['context'])
         state = WorkflowState.deserialize(data['state'])
-        log = copy.deepcopy(data.get('log', []))
-        errors = copy.deepcopy(data['errors'])
-        outputs = copy.deepcopy(data['output'])
+        log = json_util.deepcopy(data.get('log', []))
+        errors = json_util.deepcopy(data['errors'])
+        outputs = json_util.deepcopy(data['output'])
 
         instance = cls(spec)
         instance.restore(graph, log, errors, state, inputs, outputs, context)
@@ -330,10 +330,10 @@ class WorkflowConductor(object):
             )
 
     def get_workflow_parent_context(self):
-        return copy.deepcopy(self._parent_ctx)
+        return json_util.deepcopy(self._parent_ctx)
 
     def get_workflow_input(self):
-        return copy.deepcopy(self._inputs)
+        return json_util.deepcopy(self._inputs)
 
     def get_workflow_status(self):
         return self.workflow_state.status
@@ -378,7 +378,7 @@ class WorkflowConductor(object):
             raise exc.InvalidWorkflowStatusTransition(current_status, wf_ex_event.name)
 
     def get_workflow_initial_context(self):
-        return copy.deepcopy(self.workflow_state.contexts[0])
+        return json_util.deepcopy(self.workflow_state.contexts[0])
 
     def get_workflow_terminal_context(self):
         if self.get_workflow_status() not in statuses.COMPLETED_STATUSES:
@@ -399,7 +399,7 @@ class WorkflowConductor(object):
         for task in other_term_tasks:
             # Remove the initial context since the first task processed above already
             # inclulded that and we only want to apply the differences.
-            in_ctx_idxs = copy.deepcopy(task['ctxs']['in'])
+            in_ctx_idxs = json_util.deepcopy(task['ctxs']['in'])
             in_ctx_idxs.remove(0)
 
             wf_term_ctx = dict_util.merge_dicts(
@@ -432,7 +432,7 @@ class WorkflowConductor(object):
                     self.request_workflow_status(statuses.FAILED)
 
     def get_workflow_output(self):
-        return copy.deepcopy(self._outputs) if self._outputs else None
+        return json_util.deepcopy(self._outputs) if self._outputs else None
 
     def _inbound_criteria_satisfied(self, task_id, route):
         inbounds = self.graph.get_prev_transitions(task_id)
@@ -656,7 +656,7 @@ class WorkflowConductor(object):
         # Setup the retry in the task state.
         task_id = task_state_entry['id']
         task_retry_spec = self.graph.get_task_retry_spec(task_id)
-        task_state_entry['retry'] = copy.deepcopy(task_retry_spec)
+        task_state_entry['retry'] = json_util.deepcopy(task_retry_spec)
         task_state_entry['retry']['tally'] = 0
 
         # Get task context for evaluating the expression in delay and count.
@@ -856,7 +856,7 @@ class WorkflowConductor(object):
                     out_ctx, new_ctx, errors = task_spec.finalize_context(
                         next_task_id,
                         task_transition,
-                        copy.deepcopy(current_ctx)
+                        json_util.deepcopy(current_ctx)
                     )
 
                     if errors:
@@ -864,7 +864,7 @@ class WorkflowConductor(object):
                         self.request_workflow_status(statuses.FAILED)
                         continue
 
-                    out_ctx_idxs = copy.deepcopy(task_state_entry['ctxs']['in'])
+                    out_ctx_idxs = json_util.deepcopy(task_state_entry['ctxs']['in'])
 
                     if new_ctx:
                         self.workflow_state.contexts.append(new_ctx)
@@ -977,7 +977,7 @@ class WorkflowConductor(object):
             return prev_route
 
         old_route_details = self.workflow_state.routes[prev_route]
-        new_route_details = copy.deepcopy(old_route_details)
+        new_route_details = json_util.deepcopy(old_route_details)
 
         if prev_task_transition_id not in old_route_details:
             new_route_details.append(prev_task_transition_id)

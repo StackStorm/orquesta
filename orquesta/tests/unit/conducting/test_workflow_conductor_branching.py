@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
-
 from orquesta import conducting
 from orquesta.specs import native as native_specs
 from orquesta import statuses
 from orquesta.tests.unit import base as test_base
 from orquesta.utils import dictionary as dict_util
+from orquesta.utils import jsonify as json_util
 
 
 class WorkflowConductorExtendedTest(test_base.WorkflowConductorTest):
@@ -99,7 +98,7 @@ class WorkflowConductorExtendedTest(test_base.WorkflowConductorTest):
         self.assert_next_task(conductor, has_next_task=False)
 
         # Check workflow status and context.
-        expected_term_ctx = copy.deepcopy(expected_task_ctx)
+        expected_term_ctx = json_util.deepcopy(expected_task_ctx)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
 
@@ -222,7 +221,7 @@ class WorkflowConductorExtendedTest(test_base.WorkflowConductorTest):
 
         # Succeed task1 and check context.
         self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
-        expected_task_ctx = copy.deepcopy(inputs)
+        expected_task_ctx = json_util.deepcopy(inputs)
         expected_txsn_ctx = {'task3__t0': expected_task_ctx}
         self.assertDictEqual(conductor.get_task_transition_contexts('task1', 0), expected_txsn_ctx)
         self.assert_next_task(conductor, has_next_task=False)
@@ -245,7 +244,7 @@ class WorkflowConductorExtendedTest(test_base.WorkflowConductorTest):
         self.assert_next_task(conductor, has_next_task=False)
 
         # Check workflow status and context.
-        expected_term_ctx = copy.deepcopy(expected_task_ctx)
+        expected_term_ctx = json_util.deepcopy(expected_task_ctx)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
 

@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import unittest
 
 from orquesta.utils import context as ctx_util
+from orquesta.utils import jsonify as json_util
 
 
 class ContextUtilTest(unittest.TestCase):
@@ -25,7 +25,9 @@ class ContextUtilTest(unittest.TestCase):
         task = {'id': 't1', 'route': 0}
 
         context = ctx_util.set_current_task(context, task)
-        expected_context = dict([('__current_task', copy.deepcopy(task))] + list(context.items()))
+        expected_context = dict(
+            [('__current_task', json_util.deepcopy(task))] + list(context.items())
+        )
 
         self.assertDictEqual(context, expected_context)
 
@@ -34,7 +36,9 @@ class ContextUtilTest(unittest.TestCase):
         task = {'id': 't1', 'route': 0, 'result': 'foobar'}
 
         context = ctx_util.set_current_task(context, task)
-        expected_context = dict([('__current_task', copy.deepcopy(task))] + list(context.items()))
+        expected_context = dict(
+            [('__current_task', json_util.deepcopy(task))] + list(context.items())
+        )
 
         self.assertDictEqual(context, expected_context)
 
@@ -42,7 +46,7 @@ class ContextUtilTest(unittest.TestCase):
         task = {'id': 't1', 'route': 0}
 
         context = ctx_util.set_current_task(None, task)
-        expected_context = {'__current_task': copy.deepcopy(task)}
+        expected_context = {'__current_task': json_util.deepcopy(task)}
 
         self.assertDictEqual(context, expected_context)
 
@@ -50,7 +54,7 @@ class ContextUtilTest(unittest.TestCase):
         task = {'id': 't1', 'route': 0}
 
         context = ctx_util.set_current_task(dict(), task)
-        expected_context = {'__current_task': copy.deepcopy(task)}
+        expected_context = {'__current_task': json_util.deepcopy(task)}
 
         self.assertDictEqual(context, expected_context)
 

@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import logging
+
+from orquesta.utils import jsonify as json_util
 
 
 LOG = logging.getLogger(__name__)
@@ -29,7 +30,7 @@ def set_current_task(context, task):
     if not isinstance(task, dict):
         raise TypeError('The task is not type of dict.')
 
-    ctx = copy.deepcopy(context) if context else dict()
+    ctx = json_util.deepcopy(context) if context else dict()
 
     ctx['__current_task'] = {
         'id': task.get('id'),
@@ -46,7 +47,7 @@ def set_current_item(context, item):
     if context and not isinstance(context, dict):
         raise TypeError('The context is not type of dict.')
 
-    ctx = copy.deepcopy(context) if context else dict()
+    ctx = json_util.deepcopy(context) if context else dict()
     ctx['__current_item'] = item
 
     return ctx

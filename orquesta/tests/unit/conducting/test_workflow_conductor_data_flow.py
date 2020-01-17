@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import six
+
 from orquesta import conducting
 from orquesta.specs import native as native_specs
 from orquesta import statuses
@@ -88,6 +90,20 @@ class WorkflowConductorDataFlowTest(test_base.WorkflowConductorTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
+    def assert_unicode_data_flow(self, input_value):
+        inputs = {u'a1': unicode(input_value, 'utf8') if six.PY2 else input_value}
+        expected_output = {u'a5': inputs['a1'], u'b5': inputs['a1']}
+        conductor = self._prep_conductor(inputs=inputs, status=statuses.RUNNING)
+
+        for i in range(1, len(conductor.spec.tasks) + 1):
+            task_name = 'task' + str(i)
+            self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
+
+        # Render workflow output and checkout workflow status and output.
+        conductor.render_workflow_output()
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+        self.assertDictEqual(conductor.get_workflow_output(), expected_output)
+
     def test_data_flow_string(self):
         self.assert_data_flow('xyz')
 
@@ -110,4 +126,4 @@ class WorkflowConductorDataFlowTest(test_base.WorkflowConductorTest):
         self.assert_data_flow([123, 'abc', True])
 
     def test_data_flow_unicode(self):
-        self.assert_data_flow('光合作用')
+        self.assert_unicode_data_flow('光合作用')

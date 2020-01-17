@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import six
 import unittest
 
 from orquesta import exceptions as exc
 from orquesta.specs import types as spec_types
 from orquesta.tests.unit.specs import base as test_specs
+from orquesta.utils import jsonify as json_util
 
 
 class SpecTest(unittest.TestCase):
@@ -389,19 +389,19 @@ class SpecTest(unittest.TestCase):
         spec_obj_json = spec_obj.serialize()
 
         # Test missing catalog information.
-        test_json = copy.deepcopy(spec_obj_json)
+        test_json = json_util.deepcopy(spec_obj_json)
         test_json.pop('catalog')
 
         self.assertRaises(ValueError, test_specs.MockSpec.deserialize, test_json)
 
         # Test missing version information.
-        test_json = copy.deepcopy(spec_obj_json)
+        test_json = json_util.deepcopy(spec_obj_json)
         test_json.pop('version')
 
         self.assertRaises(ValueError, test_specs.MockSpec.deserialize, test_json)
 
         # Test mismatch version information.
-        test_json = copy.deepcopy(spec_obj_json)
+        test_json = json_util.deepcopy(spec_obj_json)
         test_json['version'] = '99.99'
 
         self.assertRaises(ValueError, test_specs.MockSpec.deserialize, test_json)

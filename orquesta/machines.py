@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import logging
 
 from orquesta import events
 from orquesta import exceptions as exc
 from orquesta import statuses
+from orquesta.utils import jsonify as json_util
 
 
 LOG = logging.getLogger(__name__)
@@ -537,7 +537,7 @@ class TaskStateMachine(object):
         if ac_ex_event.status in requirements:
             # Make a copy of the items and remove current item under evaluation.
             staged_task = workflow_state.get_staged_task(task_id, task_route)
-            items = copy.deepcopy(staged_task['items'])
+            items = json_util.deepcopy(staged_task['items'])
             del items[ac_ex_event.item_id]
             items_status = [item.get('status', statuses.UNSET) for item in items]
 
