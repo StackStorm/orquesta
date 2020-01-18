@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import unittest
 
 from orquesta import constants
 from orquesta import exceptions as exc
 from orquesta.expressions.functions import workflow as funcs
 from orquesta import statuses
+from orquesta.utils import jsonify as json_util
 
 
 class WorkflowFunctionTest(unittest.TestCase):
@@ -296,7 +296,7 @@ class WorkflowFunctionTest(unittest.TestCase):
         }
 
         # Check the task statuses along route 1.
-        current_ctx = copy.deepcopy(context)
+        current_ctx = json_util.deepcopy(context)
         current_ctx['__current_task'] = {'id': 't6', 'route': 1}
         self.assertEqual(funcs.task_status_(current_ctx, 't1'), statuses.SUCCEEDED)
         self.assertEqual(funcs.task_status_(current_ctx, 't2'), statuses.SUCCEEDED)
@@ -306,7 +306,7 @@ class WorkflowFunctionTest(unittest.TestCase):
         self.assertEqual(funcs.task_status_(current_ctx, 't6'), statuses.SUCCEEDED)
 
         # Check the task statuses along route 2.
-        current_ctx = copy.deepcopy(context)
+        current_ctx = json_util.deepcopy(context)
         current_ctx['__current_task'] = {'id': 't6', 'route': 2}
         self.assertEqual(funcs.task_status_(current_ctx, 't1'), statuses.SUCCEEDED)
         self.assertEqual(funcs.task_status_(current_ctx, 't2'), statuses.SUCCEEDED)
@@ -367,7 +367,7 @@ class WorkflowFunctionTest(unittest.TestCase):
         }
 
         # Check the task statuses along route 1.
-        current_ctx = copy.deepcopy(context)
+        current_ctx = json_util.deepcopy(context)
         current_ctx['__current_task'] = {'id': 't7', 'route': 3}
         self.assertEqual(funcs.task_status_(current_ctx, 't1'), statuses.SUCCEEDED)
         self.assertEqual(funcs.task_status_(current_ctx, 't2'), statuses.SUCCEEDED)
@@ -378,7 +378,7 @@ class WorkflowFunctionTest(unittest.TestCase):
         self.assertEqual(funcs.task_status_(current_ctx, 't7'), statuses.SUCCEEDED)
 
         # Check the task statuses along route 2.
-        current_ctx = copy.deepcopy(context)
+        current_ctx = json_util.deepcopy(context)
         current_ctx['__current_task'] = {'id': 't7', 'route': 4}
         self.assertEqual(funcs.task_status_(current_ctx, 't1'), statuses.SUCCEEDED)
         self.assertEqual(funcs.task_status_(current_ctx, 't2'), statuses.SUCCEEDED)
@@ -389,7 +389,7 @@ class WorkflowFunctionTest(unittest.TestCase):
         self.assertEqual(funcs.task_status_(current_ctx, 't7'), statuses.FAILED)
 
         # Check the task statuses along route 3.
-        current_ctx = copy.deepcopy(context)
+        current_ctx = json_util.deepcopy(context)
         current_ctx['__current_task'] = {'id': 't7', 'route': 5}
         self.assertEqual(funcs.task_status_(current_ctx, 't1'), statuses.SUCCEEDED)
         self.assertEqual(funcs.task_status_(current_ctx, 't2'), statuses.SUCCEEDED)
@@ -400,7 +400,7 @@ class WorkflowFunctionTest(unittest.TestCase):
         self.assertEqual(funcs.task_status_(current_ctx, 't7'), statuses.RUNNING)
 
         # Check the task statuses along route 4.
-        current_ctx = copy.deepcopy(context)
+        current_ctx = json_util.deepcopy(context)
         current_ctx['__current_task'] = {'id': 't7', 'route': 6}
         self.assertEqual(funcs.task_status_(current_ctx, 't1'), statuses.SUCCEEDED)
         self.assertEqual(funcs.task_status_(current_ctx, 't2'), statuses.SUCCEEDED)
