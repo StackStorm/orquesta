@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import logging
 import re
 import six
@@ -24,6 +23,7 @@ from orquesta.specs.mistral.v2 import base as mistral_spec_base
 from orquesta.specs.mistral.v2 import policies as policy_models
 from orquesta.specs import types as spec_types
 from orquesta.utils import dictionary as dict_util
+from orquesta.utils import jsonify as json_util
 
 
 LOG = logging.getLogger(__name__)
@@ -300,7 +300,7 @@ class TaskMappingSpec(mistral_spec_base.MappingSpec):
         q = queue.Queue()
 
         for task in self.get_start_tasks():
-            q.put((task[0], copy.deepcopy(rolling_ctx)))
+            q.put((task[0], json_util.deepcopy(rolling_ctx)))
 
         while not q.empty():
             task_name, task_ctx = q.get()

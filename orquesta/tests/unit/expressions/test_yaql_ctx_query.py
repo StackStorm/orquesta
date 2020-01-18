@@ -12,9 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
-
 from orquesta.tests.unit import base as test_base
+from orquesta.utils import jsonify as json_util
 
 
 MOCK_LIST_DATA = {
@@ -102,7 +101,7 @@ class YAQLContextQueryTest(test_base.ExpressionEvaluatorTest):
         self.assertDictEqual(self.evaluator.evaluate(expr, MOCK_LIST_DATA), expected_result)
 
     def test_ctx_list_to_dict_transform(self):
-        expected_result = copy.deepcopy(MOCK_DICT_DATA)
+        expected_result = json_util.deepcopy(MOCK_DICT_DATA)
 
         expr = '<% dict(vms=>dict(ctx(vms).select([$.name, $]))) %>'
         self.assertListEqual([], self.evaluator.validate(expr))

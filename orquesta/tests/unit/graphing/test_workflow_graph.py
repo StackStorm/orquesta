@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
-
 from orquesta import exceptions as exc
 from orquesta import graphing
 from orquesta.tests.unit import base as test_base
+from orquesta.utils import jsonify as json_util
 
 
 EXPECTED_WF_GRAPH = {
@@ -196,7 +195,7 @@ class WorkflowGraphTest(test_base.WorkflowGraphTest):
 
         wf_graph.add_transition('task1', 'task2', attr1='fubar')
 
-        expected_wf_graph = copy.deepcopy(EXPECTED_WF_GRAPH)
+        expected_wf_graph = json_util.deepcopy(EXPECTED_WF_GRAPH)
         expected_transition = {'id': 'task2', 'key': 1, 'attr1': 'fubar'}
         expected_wf_graph['adjacency'][0].append(expected_transition)
 

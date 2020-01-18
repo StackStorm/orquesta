@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import abc
-import copy
 import logging
 
 import networkx as nx
@@ -23,6 +22,7 @@ import six
 
 from orquesta import exceptions as exc
 from orquesta.utils import dictionary as dict_util
+from orquesta.utils import jsonify as json_util
 
 
 LOG = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ class WorkflowGraph(object):
 
     @classmethod
     def deserialize(cls, data):
-        g = json_graph.adjacency_graph(copy.deepcopy(data), directed=True, multigraph=True)
+        g = json_graph.adjacency_graph(json_util.deepcopy(data), directed=True, multigraph=True)
         return cls(graph=g)
 
     @staticmethod
@@ -81,7 +81,7 @@ class WorkflowGraph(object):
             raise exc.InvalidTask(task_id)
 
         task = {'id': task_id}
-        task.update(copy.deepcopy(self._graph.node[task_id]))
+        task.update(json_util.deepcopy(self._graph.node[task_id]))
 
         return task
 

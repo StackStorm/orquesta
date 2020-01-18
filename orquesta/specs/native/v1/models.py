@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import copy
 import logging
 import six
 from six.moves import queue
@@ -25,6 +24,7 @@ from orquesta.specs.native.v1 import base as native_v1_specs
 from orquesta.specs import types as spec_types
 from orquesta.utils import context as ctx_util
 from orquesta.utils import dictionary as dict_util
+from orquesta.utils import jsonify as json_util
 from orquesta.utils import parameters as args_util
 
 
@@ -244,7 +244,7 @@ class TaskSpec(native_v1_specs.Spec):
         return self, action_specs
 
     def finalize_context(self, next_task_name, task_transition_meta, in_ctx):
-        rolling_ctx = copy.deepcopy(in_ctx)
+        rolling_ctx = json_util.deepcopy(in_ctx)
         new_ctx = {}
         errors = []
 
@@ -526,7 +526,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         q = queue.Queue()
 
         for task in self.get_start_tasks():
-            q.put((task[0], copy.deepcopy(rolling_ctx)))
+            q.put((task[0], json_util.deepcopy(rolling_ctx)))
 
         while not q.empty():
             task_name, task_ctx = q.get()
@@ -647,7 +647,7 @@ class WorkflowSpec(native_v1_specs.Spec):
         super(WorkflowSpec, self).__init__(spec, name=name, member=member)
 
     def render_input(self, runtime_inputs, in_ctx=None):
-        rolling_ctx = copy.deepcopy(in_ctx) if in_ctx else {}
+        rolling_ctx = json_util.deepcopy(in_ctx) if in_ctx else {}
         errors = []
 
         for input_spec in (getattr(self, 'input') or []):
@@ -669,7 +669,7 @@ class WorkflowSpec(native_v1_specs.Spec):
         return rolling_ctx, errors
 
     def render_vars(self, in_ctx):
-        rolling_ctx = copy.deepcopy(in_ctx)
+        rolling_ctx = json_util.deepcopy(in_ctx)
         rendered_vars = {}
         errors = []
 
@@ -688,7 +688,7 @@ class WorkflowSpec(native_v1_specs.Spec):
 
     def render_output(self, in_ctx):
         output_specs = getattr(self, 'output') or []
-        rolling_ctx = copy.deepcopy(in_ctx)
+        rolling_ctx = json_util.deepcopy(in_ctx)
         rendered_outputs = {}
         errors = []
 

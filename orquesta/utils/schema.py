@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Use copy.deepcopy instead of orquesta.utils.jsonify.deepcopy because
+# the schema contains instance(s) of Spec class(es) in which the
+# jsonify.deepcopy method will convert the Spec class(es) to dict.
 import copy
 
 from orquesta import exceptions as exc
