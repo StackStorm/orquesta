@@ -1115,8 +1115,8 @@ class WorkflowConductor(object):
 
     def _request_task_rerun(self, task_id, route, reset_items=False):
         task = self.workflow_state.get_task(task_id, route)
-        task_ctx = copy.deepcopy(task['ctxs']['in'])
-        task_prev = copy.deepcopy(task['prev'])
+        task_ctx = json_util.deepcopy(task['ctxs']['in'])
+        task_prev = json_util.deepcopy(task['prev'])
         task_spec = self.spec.tasks.get_task(task_id)
 
         # Reset terminal status for the rerunnable candidate.
