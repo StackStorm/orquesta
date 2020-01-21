@@ -10,6 +10,7 @@ Added
 * Add feature to retry task execution on given condition with delay in between retries and
   max number of retries. (new feature)
   Contributed by Hiroyasu Ohyama (@userlocalhost) and Nick Maludy (@nmaludy)
+* Add support to rerun completed workflow (failed or succeeded) from given task(s). (new feature)
 
 Changed
 ~~~~~~~
