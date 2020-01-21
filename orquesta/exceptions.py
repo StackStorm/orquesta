@@ -125,3 +125,21 @@ class WorkflowContextError(Exception):
 
 class WorkflowLogEntryError(Exception):
     pass
+
+
+class WorkflowIsActiveAndNotRerunableError(Exception):
+    def __init__(self):
+        message = 'Unable to rerun workflow because it is not in a completed state.'
+        Exception.__init__(self, message)
+
+
+class InvalidTaskRerunRequest(Exception):
+    def __init__(self, tasks):
+        tasks_str = ''
+
+        for task in tasks:
+            tasks_str += ', ' if tasks_str else ''
+            tasks_str += '%s|%s' % (task.task_id, task.route)
+
+        message = "Unable to rerun task|route(s) because it doesn't exist or isn't rerunnable: %s"
+        Exception.__init__(self, message % tasks_str)

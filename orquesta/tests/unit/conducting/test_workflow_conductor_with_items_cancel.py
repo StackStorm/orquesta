@@ -220,7 +220,7 @@ class WorkflowConductorWithItemsCancelTest(test_base.WorkflowConductorWithItemsT
 
         # Set the items to running status.
         for i in range(0, len(task_ctx['xs'])):
-            self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [i])
+            self.forward_task_item_statuses(conductor, task_name, i, [statuses.RUNNING])
 
         # Assert that the task is running.
         actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
@@ -234,10 +234,9 @@ class WorkflowConductorWithItemsCancelTest(test_base.WorkflowConductorWithItemsT
 
         # Complete the items.
         for i in range(0, len(task_ctx['xs'])):
-            item_ids = [i]
-            results = [task_ctx['xs'][i]]
+            result = task_ctx['xs'][i]
             status_changes = [statuses.SUCCEEDED]
-            self.forward_task_statuses(conductor, task_name, status_changes, item_ids, results)
+            self.forward_task_item_statuses(conductor, task_name, i, status_changes, result=result)
 
         # Assert the task is completed and workflow is canceled.
         actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
@@ -301,7 +300,7 @@ class WorkflowConductorWithItemsCancelTest(test_base.WorkflowConductorWithItemsT
 
         # Set the items to running status.
         for i in range(0, len(task_ctx['xs'])):
-            self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [i])
+            self.forward_task_item_statuses(conductor, task_name, i, [statuses.RUNNING])
 
         # Assert that the task is running.
         actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
@@ -315,10 +314,9 @@ class WorkflowConductorWithItemsCancelTest(test_base.WorkflowConductorWithItemsT
 
         # Complete the items.
         for i in range(0, len(task_ctx['xs'])):
-            item_ids = [i]
-            results = [task_ctx['xs'][i]]
+            result = task_ctx['xs'][i]
             status_changes = [statuses.SUCCEEDED]
-            self.forward_task_statuses(conductor, task_name, status_changes, item_ids, results)
+            self.forward_task_item_statuses(conductor, task_name, i, status_changes, result=result)
 
         # Assert the task is completed and workflow is canceled.
         actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
@@ -535,7 +533,7 @@ class WorkflowConductorWithItemsCancelTest(test_base.WorkflowConductorWithItemsT
 
         # Set the items to running status.
         for i in range(0, concurrency):
-            self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [i])
+            self.forward_task_item_statuses(conductor, task_name, i, [statuses.RUNNING])
 
         # Assert that the task is running.
         actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
@@ -549,10 +547,9 @@ class WorkflowConductorWithItemsCancelTest(test_base.WorkflowConductorWithItemsT
 
         # Complete the items.
         for i in range(0, concurrency):
-            item_ids = [i]
-            results = [task_ctx['xs'][i]]
+            result = task_ctx['xs'][i]
             status_changes = [statuses.SUCCEEDED]
-            self.forward_task_statuses(conductor, task_name, status_changes, item_ids, results)
+            self.forward_task_item_statuses(conductor, task_name, i, status_changes, result=result)
 
         # Assert the task and workflow are canceled.
         actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']

@@ -12,20 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.tests.unit import base as test_base
+from orquesta import constants
 
 
-class OrchestraWorkflowConductorTest(test_base.WorkflowConductorTest):
+class TaskRerunRequest(object):
 
-    @classmethod
-    def setUpClass(cls):
-        cls.spec_module_name = 'native'
-        super(OrchestraWorkflowConductorTest, cls).setUpClass()
-
-
-class OrchestraWorkflowConductorRerunTest(test_base.WorkflowConductorRerunTest):
-
-    @classmethod
-    def setUpClass(cls):
-        cls.spec_module_name = 'native'
-        super(OrchestraWorkflowConductorRerunTest, cls).setUpClass()
+    def __init__(self, task_id, route, reset_items=False):
+        self.task_id = task_id
+        self.route = route
+        self.reset_items = reset_items
+        self.task_state_entry_id = constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route))

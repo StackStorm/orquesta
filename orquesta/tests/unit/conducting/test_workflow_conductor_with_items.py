@@ -613,8 +613,9 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             expected_workflow_statuses
         )
 
-        # Assert the task is removed from staging.
-        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
+        # Assert the task is not removed from staging. This is intentional so the with items
+        # task can be rerun partially for failed items or items that hasn't been run.
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow failed.
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
@@ -670,8 +671,9 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             expected_workflow_statuses
         )
 
-        # Assert the task is removed from staging.
-        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
+        # Assert the task is not removed from staging. This is intentional so the with items
+        # task can be rerun partially for failed items or items that hasn't been run.
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow failed.
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
@@ -727,8 +729,9 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             expected_workflow_statuses
         )
 
-        # Assert the task is removed from staging.
-        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
+        # Assert the task is not removed from staging. This is intentional so the with items
+        # task can be rerun partially for failed items or items that hasn't been run.
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow failed.
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
@@ -791,8 +794,9 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             expected_workflow_statuses
         )
 
-        # Assert the task is removed from staging.
-        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
+        # Assert the task is not removed from staging. This is intentional so the with items
+        # task can be rerun partially for failed items or items that hasn't been run.
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow failed.
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
@@ -853,8 +857,9 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             concurrency=concurrency
         )
 
-        # Assert the task is removed from staging.
-        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
+        # Assert the task is not removed from staging. This is intentional so the with items
+        # task can be rerun partially for failed items or items that hasn't been run.
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow failed.
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)
@@ -922,8 +927,9 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             concurrency=concurrency
         )
 
-        # Assert the task is removed from staging.
-        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
+        # Assert the task is not removed from staging. This is intentional so the with items
+        # task can be rerun partially for failed items or items that hasn't been run.
+        self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the workflow failed.
         self.assertEqual(conductor.get_workflow_status(), statuses.FAILED)

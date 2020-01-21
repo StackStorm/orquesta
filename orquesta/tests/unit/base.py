@@ -167,29 +167,24 @@ class WorkflowConductorTest(WorkflowComposerTest):
 
         return task
 
-    def forward_task_statuses(self, conductor, task_id, statuses,
-                              item_ids=None, results=None, accumulated_results=None, route=0):
-        if item_ids is None:
-            item_ids = []
+    def forward_task_statuses(self, conductor, task_id, status_changes, route=0, result=None):
+        for status in status_changes:
+            ac_ex_event = events.ActionExecutionEvent(status)
 
-        if results is None:
-            results = []
+            if result is not None and status in statuses.COMPLETED_STATUSES:
+                ac_ex_event.result = result
 
-        if accumulated_results is None:
-            accumulated_results = []
+            conductor.update_task_state(task_id, route, ac_ex_event)
 
-        status_changes = six.moves.zip_longest(statuses, item_ids, results, accumulated_results)
+    def forward_task_item_statuses(self, conductor, task_id, item_id, status_changes,
+                                   route=0, result=None, accumulated_result=None):
+        for status in status_changes:
+            ac_ex_event = events.TaskItemActionExecutionEvent(item_id, status)
 
-        for status, item_id, result, accumulated_result in status_changes:
-            ac_ex_event = (
-                events.ActionExecutionEvent(status) if item_id is None or item_id < 0 else
-                events.TaskItemActionExecutionEvent(item_id, status)
-            )
-
-            if item_id and item_id >= 0 and accumulated_result is not None:
+            if accumulated_result is not None and status in statuses.COMPLETED_STATUSES:
                 ac_ex_event.accumulated_result = accumulated_result
 
-            if result:
+            if result is not None and status in statuses.COMPLETED_STATUSES:
                 ac_ex_event.result = result
 
             conductor.update_task_state(task_id, route, ac_ex_event)
@@ -330,8 +325,12 @@ class WorkflowConductorTest(WorkflowComposerTest):
             ]
 
             term_tasks = conductor.workflow_state.get_terminal_tasks()
-            actual_term_tasks = [(task['id'], task['route']) for task in term_tasks]
+            actual_term_tasks = [(t['id'], t['route']) for i, t in term_tasks]
+            expected_term_tasks = sorted(expected_term_tasks, key=lambda x: x[0])
+            actual_term_tasks = sorted(actual_term_tasks, key=lambda x: x[0])
             self.assertListEqual(actual_term_tasks, expected_term_tasks)
+
+        return conductor
 
     def assert_workflow_status(self, wf_name, mock_flow, expected_wf_statuses, conductor=None):
         if not conductor:
@@ -491,3 +490,104 @@ class WorkflowConductorWithItemsTest(WorkflowConductorTest):
                     item_id = action['item_id']
                     ac_ex_event = events.TaskItemActionExecutionEvent(item_id, statuses.RUNNING)
                     conductor.update_task_state(task_id, task_route, ac_ex_event)
+
+
+class WorkflowConductorRerunTest(WorkflowConductorTest):
+
+    def assert_rerun_failed_tasks(self, conductor, expected_task_seq, expected_routes=None,
+                                  rerun_tasks=None, mock_statuses=None, mock_results=None,
+                                  expected_workflow_status=None, expected_output=None,
+                                  expected_term_tasks=None):
+        # Setup the test.
+        run_q = queue.Queue()
+        status_q = queue.Queue()
+        result_q = queue.Queue()
+
+        if not expected_routes:
+            expected_routes = [[]]
+
+        if mock_statuses:
+            for item in mock_statuses:
+                status_q.put(item)
+
+        if mock_results:
+            for item in mock_results:
+                result_q.put(item)
+
+        # Request workflow rerun and assert workflow status is running.
+        conductor.request_workflow_rerun(task_requests=rerun_tasks)
+        self.assertEqual(conductor.get_workflow_status(), statuses.RESUMING)
+
+        # Get next tasks and resume conducting workflow.
+        for task in conductor.get_next_tasks():
+            run_q.put(task)
+
+        # Serialize workflow conductor to mock async execution.
+        wf_conducting_state = conductor.serialize()
+
+        # Process until there are not more tasks in queue.
+        while not run_q.empty():
+            # Deserialize workflow conductor to mock async execution.
+            conductor = conducting.WorkflowConductor.deserialize(wf_conducting_state)
+
+            # Process all the tasks in the run queue.
+            while not run_q.empty():
+                current_task = run_q.get()
+                current_task_id = current_task['id']
+                current_task_route = current_task['route']
+
+                # Set task status to running.
+                ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
+                conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
+
+                # Mock completion of the task.
+                status = status_q.get() if not status_q.empty() else statuses.SUCCEEDED
+                result = result_q.get() if not result_q.empty() else None
+
+                ac_ex_event = events.ActionExecutionEvent(status, result=result)
+                conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
+
+            # Identify the next set of tasks.
+            for next_task in conductor.get_next_tasks():
+                run_q.put(next_task)
+
+            # Serialize workflow execution graph to mock async execution.
+            wf_conducting_state = conductor.serialize()
+
+        actual_task_seq = [
+            (entry['id'], entry['route'])
+            for entry in conductor.workflow_state.sequence
+        ]
+
+        expected_task_seq = [
+            task_seq if isinstance(task_seq, tuple) else (task_seq, 0)
+            for task_seq in expected_task_seq
+        ]
+
+        self.assertListEqual(actual_task_seq, expected_task_seq)
+        self.assertListEqual(conductor.workflow_state.routes, expected_routes)
+
+        if conductor.get_workflow_status() in statuses.COMPLETED_STATUSES:
+            conductor.render_workflow_output()
+
+        if expected_workflow_status is None:
+            expected_workflow_status = statuses.SUCCEEDED
+
+        self.assertEqual(conductor.get_workflow_status(), expected_workflow_status)
+
+        if expected_output is not None:
+            self.assertDictEqual(conductor.get_workflow_output(), expected_output)
+
+        if expected_term_tasks:
+            expected_term_tasks = [
+                (task, 0) if not isinstance(task, tuple) else task
+                for task in expected_term_tasks
+            ]
+
+            term_tasks = conductor.workflow_state.get_terminal_tasks()
+            actual_term_tasks = [(t['id'], t['route']) for i, t in term_tasks]
+            expected_term_tasks = sorted(expected_term_tasks, key=lambda x: x[0])
+            actual_term_tasks = sorted(actual_term_tasks, key=lambda x: x[0])
+            self.assertListEqual(actual_term_tasks, expected_term_tasks)
+
+        return conductor

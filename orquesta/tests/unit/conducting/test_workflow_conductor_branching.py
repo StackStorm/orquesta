@@ -333,7 +333,7 @@ class WorkflowConductorExtendedTest(test_base.WorkflowConductorTest):
 
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for t in term_tasks]
+        actual_term_tasks = [t['id'] for i, t in term_tasks]
         expected_term_tasks = ['task2', 'task4']
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 

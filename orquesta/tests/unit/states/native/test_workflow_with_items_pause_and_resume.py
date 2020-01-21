@@ -64,7 +64,7 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
         self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # Set the item to running status.
-        self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [0])
+        self.forward_task_item_statuses(conductor, task_name, 0, [statuses.RUNNING])
 
         # Assert that the task is running.
         actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
@@ -77,10 +77,9 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
         self.assertEqual(actual_task_status, statuses.PAUSING)
 
         # Change status for the item.
-        item_ids = [0]
-        results = [task_ctx['xs'][0]]
+        result = task_ctx['xs'][0]
         status_changes = [ac_ex_status]
-        self.forward_task_statuses(conductor, task_name, status_changes, item_ids, results)
+        self.forward_task_item_statuses(conductor, task_name, 0, status_changes, result=result)
 
         # Assert task and workflow status.
         actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
@@ -156,7 +155,7 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
 
         # Set the items to running status.
         for i in range(0, len(ac_ex_statuses)):
-            self.forward_task_statuses(conductor, task_name, [statuses.RUNNING], [i])
+            self.forward_task_item_statuses(conductor, task_name, i, [statuses.RUNNING])
 
         # Assert that the task is running.
         actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
@@ -170,19 +169,17 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
 
         # Change status for all but one item.
         for i in range(0, len(ac_ex_statuses) - 1):
-            item_ids = [i]
-            results = [task_ctx['xs'][i]]
+            result = task_ctx['xs'][i]
             status_changes = [ac_ex_statuses[i]]
-            self.forward_task_statuses(conductor, task_name, status_changes, item_ids, results)
+            self.forward_task_item_statuses(conductor, task_name, i, status_changes, result=result)
             actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
             self.assertEqual(actual_task_status, statuses.PAUSING)
 
         # Change status for the last item.
         i = len(ac_ex_statuses) - 1
-        item_ids = [i]
-        results = [task_ctx['xs'][i]]
+        result = task_ctx['xs'][i]
         status_changes = [ac_ex_statuses[i]]
-        self.forward_task_statuses(conductor, task_name, status_changes, item_ids, results)
+        self.forward_task_item_statuses(conductor, task_name, i, status_changes, result=result)
 
         # Assert task and workflow status.
         actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']

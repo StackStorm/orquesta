@@ -88,7 +88,7 @@ class WorkflowConductorTaskRenderingTest(test_base.WorkflowConductorTest):
             conductor,
             task_name,
             [statuses.SUCCEEDED],
-            results=[mock_result]
+            result=mock_result
         )
 
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
@@ -120,7 +120,7 @@ class WorkflowConductorTaskRenderingTest(test_base.WorkflowConductorTest):
             conductor,
             task_name,
             [statuses.SUCCEEDED],
-            results=[mock_result]
+            result=mock_result
         )
 
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)

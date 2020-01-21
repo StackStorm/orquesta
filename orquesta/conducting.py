@@ -45,9 +45,10 @@ class WorkflowState(object):
         self.staged = list()
         self.status = statuses.UNSET
         self.tasks = dict()
+        self.reruns = list()
 
     def serialize(self):
-        return {
+        data = {
             'contexts': json_util.deepcopy(self.contexts),
             'routes': json_util.deepcopy(self.routes),
             'sequence': json_util.deepcopy(self.sequence),
@@ -55,6 +56,11 @@ class WorkflowState(object):
             'status': self.status,
             'tasks': json_util.deepcopy(self.tasks)
         }
+
+        if self.reruns:
+            data['reruns'] = json_util.deepcopy(self.reruns)
+
+        return data
 
     @classmethod
     def deserialize(cls, data):
@@ -65,19 +71,70 @@ class WorkflowState(object):
         instance.staged = json_util.deepcopy(data.get('staged', dict()))
         instance.status = data.get('status', statuses.UNSET)
         instance.tasks = json_util.deepcopy(data.get('tasks', dict()))
+        instance.reruns = json_util.deepcopy(data.get('reruns', list()))
 
         return instance
 
-    def get_task(self, task_id, task_route):
+    def get_task(self, task_id, route):
         return self.sequence[
-            self.tasks[constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(task_route))]
+            self.tasks[constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route))]
         ]
 
-    def get_tasks_by_status(self, statuses):
-        return [t for t in self.sequence if t['status'] in statuses]
+    def get_tasks(self, task_id=None, route=None, last_occurrence=True):
+        if task_id and route is None:
+            result = [
+                (i, t) for i, t in enumerate(self.sequence)
+                if t['id'] == task_id
+            ]
+        elif task_id and route is not None:
+            result = [
+                (i, t) for i, t in enumerate(self.sequence)
+                if t['id'] == task_id and t['route'] == route
+            ]
+        else:
+            result = list(enumerate(self.sequence))
+
+        if last_occurrence:
+            result = [s for s in result if s[0] in self.tasks.values()]
+
+        return result
+
+    def get_tasks_by_status(self, statuses, last_occurrence=True):
+        result = [
+            (i, t) for i, t in enumerate(self.sequence)
+            if 'status' in t and t['status'] in statuses
+        ]
+
+        if last_occurrence:
+            result = [s for s in result if s[0] in self.tasks.values()]
+
+        return result
+
+    def get_task_sequence(self, task_id, route):
+        idx = self.tasks[constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route))]
+        seq = [(idx, self.sequence[idx])]
+
+        q = queue.Queue()
+        q.put((task_id, route))
+
+        while not q.empty():
+            task_id, route = q.get()
+
+            for i, t in enumerate(self.sequence):
+                for k, v in six.iteritems(t['prev']):
+                    p = self.sequence[v]
+                    if p['id'] == task_id and p['route'] == route:
+                        seq.append((i, t))
+                        if (i, t) not in seq:
+                            q.put((t['id'], t['route']))
+
+        return seq
 
     def get_terminal_tasks(self):
-        return [t for t in self.sequence if t.get('term', False)]
+        return [
+            (i, t) for i, t in enumerate(self.sequence)
+            if t.get('term', False)
+        ]
 
     def has_next_tasks(self, task_id=None, route=None):
         return self.conductor.has_next_tasks(task_id=task_id, route=route)
@@ -352,7 +409,7 @@ class WorkflowConductor(object):
         wf_ex_event = events.WorkflowExecutionEvent(status)
 
         # Push the event to all the active tasks. The event may trigger status changes to the task.
-        for task_state in self.workflow_state.get_tasks_by_status(statuses.ACTIVE_STATUSES):
+        for idx, task_state in self.workflow_state.get_tasks_by_status(statuses.ACTIVE_STATUSES):
             machines.TaskStateMachine.process_event(self.workflow_state, task_state, wf_ex_event)
 
         # Process the workflow status change event.
@@ -391,12 +448,12 @@ class WorkflowConductor(object):
         if not term_tasks:
             return wf_term_ctx
 
-        first_term_task = term_tasks[0:1][0]
+        _, first_term_task = term_tasks[0:1][0]
         other_term_tasks = term_tasks[1:]
 
         wf_term_ctx = self.get_task_context(first_term_task['ctxs']['in'])
 
-        for task in other_term_tasks:
+        for idx, task in other_term_tasks:
             # Remove the initial context since the first task processed above already
             # inclulded that and we only want to apply the differences.
             in_ctx_idxs = json_util.deepcopy(task['ctxs']['in'])
@@ -433,6 +490,9 @@ class WorkflowConductor(object):
 
     def get_workflow_output(self):
         return json_util.deepcopy(self._outputs) if self._outputs else None
+
+    def reset_workflow_output(self):
+        self._outputs = None
 
     def _inbound_criteria_satisfied(self, task_id, route):
         inbounds = self.graph.get_prev_transitions(task_id)
@@ -732,8 +792,8 @@ class WorkflowConductor(object):
         if not staged_task and not task_state_entry:
             raise exc.InvalidTaskStateEntry(task_id)
 
-        # Create new task state entry if it does not exist.
-        if not task_state_entry:
+        # Create new task state entry if it does not exist or if it is an engine command.
+        if not task_state_entry or task_id in events.ENGINE_EVENT_MAP.keys():
             task_state_entry = self.add_task_state(
                 task_id,
                 staged_task['route'],
@@ -787,7 +847,9 @@ class WorkflowConductor(object):
             # Increment the number of times that the task has retried.
             task_state_entry['retry']['tally'] += 1
 
-            # Staged the task to be returned in get_next_tasks
+            # Reset the staged task to be returned in get_next_tasks
+            self.workflow_state.remove_staged_task(task_id, route)
+
             self.workflow_state.add_staged_task(
                 task_id,
                 route,
@@ -799,8 +861,10 @@ class WorkflowConductor(object):
 
         # Get task result and set current context if task is completed.
         if new_task_status in statuses.COMPLETED_STATUSES:
-            # Remove remaining task from staging.
-            self.workflow_state.remove_staged_task(task_id, route)
+            # Remove task from staging if exists but keep entry
+            # if task has items and failed for manual rerun.
+            if not (task_spec.has_items() and new_task_status in statuses.ABENDED_STATUSES):
+                self.workflow_state.remove_staged_task(task_id, route)
 
             # Format task result depending on the type of task.
             task_result = self.make_task_result(task_spec, event)
@@ -902,6 +966,9 @@ class WorkflowConductor(object):
 
                         # Add a backref for the current task in the next task.
                         staged_next_task['prev'][backref] = task_state_idx
+
+                        # Clear list of items for with items task.
+                        staged_next_task.pop('items', None)
                     else:
                         # Otherwise create a new entry in staging for the next task.
                         staged_next_task = self.workflow_state.add_staged_task(
@@ -1045,3 +1112,98 @@ class WorkflowConductor(object):
                 contexts[task_transition_id] = self.get_task_initial_context(t[1], route)
 
         return contexts
+
+    def _request_task_rerun(self, task_id, route, reset_items=False):
+        task = self.workflow_state.get_task(task_id, route)
+        task_ctx = json_util.deepcopy(task['ctxs']['in'])
+        task_prev = json_util.deepcopy(task['prev'])
+        task_spec = self.spec.tasks.get_task(task_id)
+
+        # Reset terminal status for the rerunnable candidate.
+        task.pop('term', None)
+        task.pop('ignore', None)
+
+        # Reset the list of errors for the task.
+        for e in [e for e in self.errors if e.get('task_id', None) == task_id]:
+            self.errors.remove(e)
+
+        # If task has items, then use existing staged task entry and reset failed items.
+        if task_spec.has_items():
+            staged_task = self.workflow_state.get_staged_task(task_id, route)
+            for item in staged_task.get('items', []):
+                if reset_items or item['status'] in statuses.ABENDED_STATUSES:
+                    item['status'] = statuses.UNSET
+        # Otherwise, add a new task state entry and stage task to be returned in get_next_tasks.
+        else:
+            self.add_task_state(task_id, route, in_ctx_idxs=task_ctx, prev=task_prev)
+            self.workflow_state.add_staged_task(task_id, route, ctxs=task_ctx, prev=task_prev)
+
+        # Reset terminal status for the task branch which will also be rerun.
+        for _, next_task in self.workflow_state.get_task_sequence(task_id, route):
+            next_task.pop('term', None)
+
+    def request_workflow_rerun(self, task_requests=None):
+        # Throw exception if workflow is still active.
+        if self.get_workflow_status() not in statuses.COMPLETED_STATUSES:
+            raise exc.WorkflowIsActiveAndNotRerunableError()
+
+        # Concatenate task id and route so it is easier to use in filter below.
+        tasks = {t.task_state_entry_id: t for t in task_requests or []}
+
+        # If the list of tasks is provided, verify if task exist and rerunnable.
+        invalid_rerun_requests = [
+            t for k, t in six.iteritems(tasks) if k not in self.workflow_state.tasks
+        ]
+
+        if invalid_rerun_requests:
+            raise exc.InvalidTaskRerunRequest(invalid_rerun_requests)
+
+        # If no tasks specified, then get the list of terminal tasks that abended.
+        if not tasks:
+            rerunnable_candidates = {
+                constants.TASK_STATE_ROUTE_FORMAT % (t['id'], str(t['route'])): (i, t)
+                for i, t in self.workflow_state.get_terminal_tasks()
+                if 'status' in t and t['status'] in statuses.ABENDED_STATUSES
+            }
+        # Otherwise if the list of tasks is provided, then filter the list of rerun candidates.
+        else:
+            rerunnable_candidates = {
+                k: (
+                    self._get_task_state_idx(t.task_id, t.route),
+                    self.workflow_state.get_task(t.task_id, t.route)
+                )
+                for k, t in six.iteritems(tasks)
+            }
+
+        # Keep record of which task sequence(s) is being rerun in the workflow state.
+        rerun_entry = [i for i, t in rerunnable_candidates.values()]
+        self.workflow_state.reruns.append(rerun_entry)
+
+        # Setup task candidates for rerun.
+        sorted_rerunnable_candidates = sorted(
+            rerunnable_candidates.values(),
+            key=lambda x: (x[1]['id'], x[1]['route'])
+        )
+
+        for _, task in sorted_rerunnable_candidates:
+            k = constants.TASK_STATE_ROUTE_FORMAT % (task['id'], str(task['route']))
+            reset_items = False if k not in tasks else tasks[k].reset_items
+            self._request_task_rerun(task['id'], task['route'], reset_items=reset_items)
+
+        # Get the list of terminal tasks with next or remediation task(s).
+        continuable_candidates = {
+            constants.TASK_STATE_ROUTE_FORMAT % (t['id'], str(t['route'])): t
+            for i, t in self.workflow_state.get_terminal_tasks()
+            if len([k for k, v in six.iteritems(t['next']) if v]) > 0
+        }
+
+        # Automatically resume all continuable candidates.
+        for _, task in sorted(six.iteritems(continuable_candidates), key=lambda x: x[0]):
+            # Reset terminal status for the continuable candidate.
+            task.pop('term', None)
+
+        # Reset the workflow output.
+        self.reset_workflow_output()
+
+        # Finally, reset workflow status to resuming if preparation above succeeded.
+        self.workflow_state.status = statuses.RESUMING
