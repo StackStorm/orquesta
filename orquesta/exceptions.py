@@ -33,13 +33,15 @@ class ExpressionEvaluationException(Exception):
 class VariableUndefinedError(Exception):
 
     def __init__(self, var):
-        Exception.__init__(self, 'The variable "%s" is undefined.' % var)
+        message = 'The variable "%s" is undefined.' % var
+        super(VariableUndefinedError, self).__init__(message)
 
 
 class VariableInaccessibleError(Exception):
 
     def __init__(self, var):
-        Exception.__init__(self, 'The variable "%s" is for internal use and inaccessible.' % var)
+        message = 'The variable "%s" is for internal use and inaccessible.' % var
+        super(VariableInaccessibleError, self).__init__(message)
 
 
 class SchemaDefinitionError(Exception):
@@ -53,13 +55,15 @@ class SchemaIncompatibleError(Exception):
 class InvalidTask(Exception):
 
     def __init__(self, task_id):
-        Exception.__init__(self, 'Task "%s" does not exist.' % task_id)
+        message = 'Task "%s" does not exist.' % task_id
+        super(InvalidTask, self).__init__(message)
 
 
 class InvalidTaskTransition(Exception):
 
     def __init__(self, src, dest):
-        Exception.__init__(self, 'Task transition from "%s" to "%s" does not exist.' % (src, dest))
+        message = 'Task transition from "%s" to "%s" does not exist.' % (src, dest)
+        super(InvalidTaskTransition, self).__init__(message)
 
 
 class AmbiguousTaskTransition(Exception):
@@ -79,44 +83,50 @@ class InvalidEventType(Exception):
 class InvalidEvent(Exception):
 
     def __init__(self, value):
-        Exception.__init__(self, 'Event "%s" is not valid.' % value)
+        message = 'Event "%s" is not valid.' % value
+        super(InvalidEvent, self).__init__(message)
 
 
 class InvalidStatus(Exception):
 
     def __init__(self, value):
-        Exception.__init__(self, 'Status "%s" is not valid.' % value)
+        message = 'Status "%s" is not valid.' % value
+        super(InvalidStatus, self).__init__(message)
 
 
 class InvalidStatusTransition(Exception):
 
     def __init__(self, old, new):
-        Exception.__init__(self, 'Status transition from "%s" to "%s" is invalid.' % (old, new))
+        message = 'Status transition from "%s" to "%s" is invalid.' % (old, new)
+        super(InvalidStatusTransition, self).__init__(message)
 
 
 class InvalidTaskStatusTransition(Exception):
 
     def __init__(self, status, event):
         message = 'Unable to process event "%s" for task in "%s" status.' % (event, status)
-        Exception.__init__(self, message)
+        super(InvalidTaskStatusTransition, self).__init__(message)
 
 
 class InvalidWorkflowStatusTransition(Exception):
 
     def __init__(self, status, event):
         message = 'Unable to process event "%s" for workflow in "%s" status.' % (event, status)
-        Exception.__init__(self, message)
+        super(InvalidWorkflowStatusTransition, self).__init__(message)
 
 
 class InvalidTaskStateEntry(Exception):
 
     def __init__(self, task_id):
-        Exception.__init__(self, 'Task "%s" is not staged or has not started yet.' % task_id)
+        message = 'Task "%s" is not staged or has not started yet.' % task_id
+        super(InvalidTaskStateEntry, self).__init__(message)
 
 
 class WorkflowInspectionError(Exception):
+
     def __init__(self, errors):
-        Exception.__init__(self, 'Workflow definition failed inspection.', errors)
+        message = 'Workflow definition failed inspection.'
+        super(WorkflowInspectionError, self).__init__(message, errors)
 
 
 class WorkflowContextError(Exception):
@@ -128,12 +138,14 @@ class WorkflowLogEntryError(Exception):
 
 
 class WorkflowIsActiveAndNotRerunableError(Exception):
+
     def __init__(self):
         message = 'Unable to rerun workflow because it is not in a completed state.'
-        Exception.__init__(self, message)
+        super(WorkflowIsActiveAndNotRerunableError, self).__init__(message)
 
 
 class InvalidTaskRerunRequest(Exception):
+
     def __init__(self, tasks):
         tasks_str = ''
 
@@ -142,4 +154,4 @@ class InvalidTaskRerunRequest(Exception):
             tasks_str += '%s|%s' % (task.task_id, task.route)
 
         message = "Unable to rerun task|route(s) because it doesn't exist or isn't rerunnable: %s"
-        Exception.__init__(self, message % tasks_str)
+        super(InvalidTaskRerunRequest, self).__init__(message % tasks_str)
