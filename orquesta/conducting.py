@@ -1142,12 +1142,38 @@ class WorkflowConductor(object):
         for _, next_task in self.workflow_state.get_task_sequence(task_id, route):
             next_task.pop('term', None)
 
+    def _collapse_task_rerun_requests(self, tasks=None):
+        # Get the subsequent sequence of tasks that already ran for each task in the task requests.
+        # The method get_task_sequence returns the index and the dictionary for the task entry.
+        # Only the index is required for further evaluation below.
+        result = {
+            k: [i[0] for i in self.workflow_state.get_task_sequence(t.task_id, t.route)]
+            for k, t in six.iteritems(tasks)
+        }
+
+        # If the list of task request is greater than one, then we have to check whether
+        # there are task rerun requests that are subsequent task executions for another
+        # task rerun requests. If they are not collapsed/consolidated, then the rerun
+        # will result in multiple branches of executions.
+        if len(tasks) > 1:
+            # The for loops below identify task requests that have subsequent task sequences
+            # not in other task requests.
+            result = {
+                k: i
+                for k, i in six.iteritems(result)
+                for j in result.values()
+                if len(set(i) - set(j)) > 0
+            }
+
+        return result
+
     def request_workflow_rerun(self, task_requests=None):
         # Throw exception if workflow is still active.
         if self.get_workflow_status() not in statuses.COMPLETED_STATUSES:
             raise exc.WorkflowIsActiveAndNotRerunableError()
 
         # Concatenate task id and route so it is easier to use in filter below.
+        # This conversion also removes any duplicate task rerun requests.
         tasks = {t.task_state_entry_id: t for t in task_requests or []}
 
         # If the list of tasks is provided, verify if task exist and rerunnable.
@@ -1173,6 +1199,7 @@ class WorkflowConductor(object):
                     self.workflow_state.get_task(t.task_id, t.route)
                 )
                 for k, t in six.iteritems(tasks)
+                if k in self._collapse_task_rerun_requests(tasks)
             }
 
         # Keep record of which task sequence(s) is being rerun in the workflow state.
