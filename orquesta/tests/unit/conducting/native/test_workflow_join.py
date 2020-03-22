@@ -204,3 +204,86 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             mock_results=mock_results,
             expected_output=expected_output
         )
+
+    def test_join_on_complete(self):
+        wf_name = 'join-on-complete'
+
+        self.assert_spec_inspection(wf_name)
+
+        expected_task_seq = [
+            'task1',
+            'task2',
+            'task4',
+            'task3',
+            'task5',
+            'task6',
+            'task7'
+        ]
+
+        # The tasks before the join, task3 and task5, both succeeded.
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED,   # task4
+            statuses.SUCCEEDED,   # task3
+            statuses.SUCCEEDED,   # task5
+            statuses.SUCCEEDED,   # task6
+            statuses.SUCCEEDED    # task7
+        ]
+
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            mock_statuses=mock_statuses
+        )
+
+        # First tasks before the join, task3, failed.
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED,   # task4
+            statuses.FAILED,      # task3
+            statuses.SUCCEEDED,   # task5
+            statuses.SUCCEEDED,   # task6
+            statuses.SUCCEEDED    # task7
+        ]
+
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            mock_statuses=mock_statuses
+        )
+
+        # Second tasks before the join, task5, failed.
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED,   # task4
+            statuses.SUCCEEDED,   # task3
+            statuses.FAILED,      # task5
+            statuses.SUCCEEDED,   # task6
+            statuses.SUCCEEDED    # task7
+        ]
+
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            mock_statuses=mock_statuses
+        )
+
+        # Both tasks before the join, task3 and task5, failed.
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED,   # task4
+            statuses.FAILED,      # task3
+            statuses.FAILED,      # task5
+            statuses.SUCCEEDED,   # task6
+            statuses.SUCCEEDED    # task7
+        ]
+
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            mock_statuses=mock_statuses
+        )

@@ -136,8 +136,12 @@ class WorkflowState(object):
             if t.get('term', False)
         ]
 
-    def has_next_tasks(self, task_id=None, route=None):
-        return self.conductor.has_next_tasks(task_id=task_id, route=route)
+    def has_next_tasks(self, task_id=None, route=None, speculate_join=False):
+        return self.conductor.has_next_tasks(
+            task_id=task_id,
+            route=route,
+            speculate_join=speculate_join
+        )
 
     @property
     def has_active_tasks(self):
@@ -590,7 +594,7 @@ class WorkflowConductor(object):
 
         return task
 
-    def has_next_tasks(self, task_id=None, route=None):
+    def has_next_tasks(self, task_id=None, route=None, speculate_join=False):
         if not task_id:
             return True if self.workflow_state.get_staged_tasks() else False
         else:
@@ -617,8 +621,9 @@ class WorkflowConductor(object):
                 if not task_state_entry['next'].get(task_transition_id):
                     continue
 
-                # Evaluate if inbound criteria for the next task is satisfied.
-                if not self._inbound_criteria_satisfied(next_task_id, route):
+                # If not speculating join task, then evaluate if inbound criteria
+                # for the next task is satisfied.
+                if not speculate_join and not self._inbound_criteria_satisfied(next_task_id, route):
                     continue
 
                 return True

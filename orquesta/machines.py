@@ -706,7 +706,7 @@ class WorkflowStateMachine(object):
         task_event = tk_ex_event.name
         task_id = getattr(tk_ex_event, 'task_id', None)
         task_route = getattr(tk_ex_event, 'route', None)
-        has_next_tasks = workflow_state.has_next_tasks(task_id, task_route)
+        has_next_tasks = workflow_state.has_next_tasks(task_id, task_route, speculate_join=True)
         has_active_tasks = workflow_state.has_active_tasks
 
         # Mark task remediated if task is in abended statuses and there are transitions.
