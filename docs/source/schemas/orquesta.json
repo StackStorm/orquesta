@@ -1,379 +1,379 @@
 {
-    "type": "object",
+    "additionalProperties": false, 
+    "required": [
+        "tasks"
+    ], 
+    "type": "object", 
     "properties": {
-        "vars": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "minProperties": 1,
-                "maxProperties": 1,
-                "patternProperties": {
-                    "^\\w+$": {
-                        "anyOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "array"
-                            },
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "number"
-                            },
-                            {
-                                "type": "object"
-                            },
-                            {
-                                "type": "string"
-                            }
-                        ]
-                    }
-                }
-            },
-            "uniqueItems": true,
-            "minItems": 1
-        },
-        "input": {
-            "type": "array",
-            "items": {
-                "oneOf": [
-                    {
-                        "type": "string",
-                        "minLength": 1
-                    },
-                    {
-                        "type": "object",
-                        "minProperties": 1,
-                        "maxProperties": 1,
-                        "patternProperties": {
-                            "^\\w+$": {
-                                "anyOf": [
-                                    {
-                                        "type": "null"
-                                    },
-                                    {
-                                        "type": "array"
-                                    },
-                                    {
-                                        "type": "boolean"
-                                    },
-                                    {
-                                        "type": "integer"
-                                    },
-                                    {
-                                        "type": "number"
-                                    },
-                                    {
-                                        "type": "object"
-                                    },
-                                    {
-                                        "type": "string"
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                ]
-            },
-            "uniqueItems": true,
-            "minItems": 1
-        },
-        "output": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "minProperties": 1,
-                "maxProperties": 1,
-                "patternProperties": {
-                    "^\\w+$": {
-                        "anyOf": [
-                            {
-                                "type": "null"
-                            },
-                            {
-                                "type": "array"
-                            },
-                            {
-                                "type": "boolean"
-                            },
-                            {
-                                "type": "integer"
-                            },
-                            {
-                                "type": "number"
-                            },
-                            {
-                                "type": "object"
-                            },
-                            {
-                                "type": "string"
-                            }
-                        ]
-                    }
-                }
-            },
-            "uniqueItems": true,
-            "minItems": 1
-        },
         "tasks": {
-            "type": "object",
-            "minProperties": 1,
+            "type": "object", 
             "patternProperties": {
                 "^\\w+$": {
-                    "type": "object",
+                    "additionalProperties": false, 
+                    "type": "object", 
                     "properties": {
-                        "delay": {
-                            "oneOf": [
-                                {
-                                    "type": "string",
-                                    "minLength": 1
-                                },
-                                {
-                                    "type": "integer",
-                                    "minimum": 0
+                        "retry": {
+                            "additionalProperties": false, 
+                            "required": [
+                                "count"
+                            ], 
+                            "type": "object", 
+                            "properties": {
+                                "count": {
+                                    "oneOf": [
+                                        {
+                                            "minLength": 1, 
+                                            "type": "string"
+                                        }, 
+                                        {
+                                            "minimum": 0, 
+                                            "type": "integer"
+                                        }
+                                    ]
+                                }, 
+                                "delay": {
+                                    "oneOf": [
+                                        {
+                                            "minLength": 1, 
+                                            "type": "string"
+                                        }, 
+                                        {
+                                            "minimum": 0, 
+                                            "type": "integer"
+                                        }
+                                    ]
+                                }, 
+                                "when": {
+                                    "minLength": 1, 
+                                    "type": "string"
                                 }
-                            ]
-                        },
+                            }
+                        }, 
                         "join": {
                             "oneOf": [
                                 {
                                     "enum": [
                                         "all"
                                     ]
-                                },
+                                }, 
                                 {
-                                    "type": "integer",
-                                    "minimum": 0
+                                    "minimum": 0, 
+                                    "type": "integer"
                                 }
                             ]
-                        },
-                        "with": {
-                            "type": "object",
-                            "properties": {
-                                "items": {
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "pattern": "^(\\s+)?({{.*?}}|<%.*?%>)(\\s+)?$|^(\\s+)?((\\w+,\\s?|\\s+)+)?(\\w+)\\s+in\\s+({{.*?}}|<%.*?%>)(\\s+)?$"
-                                },
-                                "concurrency": {
-                                    "oneOf": [
-                                        {
-                                            "type": "string",
-                                            "minLength": 1
-                                        },
-                                        {
-                                            "type": "integer",
-                                            "minimum": 0
-                                        }
-                                    ]
-                                }
-                            }
-                        },
-                        "action": {
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        "input": {
-                            "oneOf": [
-                                {
-                                    "type": "string",
-                                    "minLength": 1
-                                },
-                                {
-                                    "type": "object",
-                                    "minProperties": 1,
-                                    "patternProperties": {
-                                        "^\\w+$": {
-                                            "anyOf": [
-                                                {
-                                                    "type": "null"
-                                                },
-                                                {
-                                                    "type": "array"
-                                                },
-                                                {
-                                                    "type": "boolean"
-                                                },
-                                                {
-                                                    "type": "integer"
-                                                },
-                                                {
-                                                    "type": "number"
-                                                },
-                                                {
-                                                    "type": "object"
-                                                },
-                                                {
-                                                    "type": "string"
-                                                }
-                                            ]
-                                        }
-                                    }
-                                }
-                            ]
-                        },
-                        "retry": {
-                            "type": "object",
-                            "properties": {
-                                "when": {
-                                    "type": "string",
-                                    "minLength": 1
-                                },
-                                "count": {
-                                    "oneOf": [
-                                        {
-                                            "type": "string",
-                                            "minLength": 1
-                                        },
-                                        {
-                                            "type": "integer",
-                                            "minimum": 0
-                                        }
-                                    ]
-                                },
-                                "delay": {
-                                    "oneOf": [
-                                        {
-                                            "type": "string",
-                                            "minLength": 1
-                                        },
-                                        {
-                                            "type": "integer",
-                                            "minimum": 0
-                                        }
-                                    ]
-                                }
-                            },
-                            "required": [
-                                "count"
-                            ],
-                            "additionalProperties": false
-                        },
+                        }, 
                         "next": {
-                            "type": "array",
                             "items": {
-                                "type": "object",
+                                "additionalProperties": false, 
+                                "type": "object", 
                                 "properties": {
+                                    "do": {
+                                        "oneOf": [
+                                            {
+                                                "minLength": 1, 
+                                                "type": "string"
+                                            }, 
+                                            {
+                                                "uniqueItems": true, 
+                                                "items": {
+                                                    "minLength": 1, 
+                                                    "type": "string"
+                                                }, 
+                                                "type": "array", 
+                                                "minItems": 1
+                                            }
+                                        ]
+                                    }, 
                                     "when": {
-                                        "type": "string",
-                                        "minLength": 1
-                                    },
+                                        "minLength": 1, 
+                                        "type": "string"
+                                    }, 
                                     "publish": {
                                         "oneOf": [
                                             {
-                                                "type": "string",
-                                                "minLength": 1
-                                            },
+                                                "minLength": 1, 
+                                                "type": "string"
+                                            }, 
                                             {
-                                                "type": "array",
+                                                "uniqueItems": true, 
                                                 "items": {
-                                                    "type": "object",
-                                                    "minProperties": 1,
-                                                    "maxProperties": 1,
                                                     "patternProperties": {
                                                         "^\\w+$": {
                                                             "anyOf": [
                                                                 {
                                                                     "type": "null"
-                                                                },
+                                                                }, 
                                                                 {
                                                                     "type": "array"
-                                                                },
+                                                                }, 
                                                                 {
                                                                     "type": "boolean"
-                                                                },
+                                                                }, 
                                                                 {
                                                                     "type": "integer"
-                                                                },
+                                                                }, 
                                                                 {
                                                                     "type": "number"
-                                                                },
+                                                                }, 
                                                                 {
                                                                     "type": "object"
-                                                                },
+                                                                }, 
                                                                 {
                                                                     "type": "string"
                                                                 }
                                                             ]
                                                         }
-                                                    }
-                                                },
-                                                "uniqueItems": true,
-                                                "minItems": 1
-                                            }
-                                        ]
-                                    },
-                                    "do": {
-                                        "oneOf": [
-                                            {
-                                                "type": "string",
-                                                "minLength": 1
-                                            },
-                                            {
-                                                "type": "array",
-                                                "items": {
-                                                    "type": "string",
-                                                    "minLength": 1
-                                                },
-                                                "uniqueItems": true,
+                                                    }, 
+                                                    "maxProperties": 1, 
+                                                    "minProperties": 1, 
+                                                    "type": "object"
+                                                }, 
+                                                "type": "array", 
                                                 "minItems": 1
                                             }
                                         ]
                                     }
-                                },
-                                "additionalProperties": false
+                                }
+                            }, 
+                            "type": "array"
+                        }, 
+                        "delay": {
+                            "oneOf": [
+                                {
+                                    "minLength": 1, 
+                                    "type": "string"
+                                }, 
+                                {
+                                    "minimum": 0, 
+                                    "type": "integer"
+                                }
+                            ]
+                        }, 
+                        "action": {
+                            "minLength": 1, 
+                            "type": "string"
+                        }, 
+                        "input": {
+                            "oneOf": [
+                                {
+                                    "minLength": 1, 
+                                    "type": "string"
+                                }, 
+                                {
+                                    "type": "object", 
+                                    "patternProperties": {
+                                        "^\\w+$": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "null"
+                                                }, 
+                                                {
+                                                    "type": "array"
+                                                }, 
+                                                {
+                                                    "type": "boolean"
+                                                }, 
+                                                {
+                                                    "type": "integer"
+                                                }, 
+                                                {
+                                                    "type": "number"
+                                                }, 
+                                                {
+                                                    "type": "object"
+                                                }, 
+                                                {
+                                                    "type": "string"
+                                                }
+                                            ]
+                                        }
+                                    }, 
+                                    "minProperties": 1
+                                }
+                            ]
+                        }, 
+                        "with": {
+                            "type": "object", 
+                            "properties": {
+                                "items": {
+                                    "minLength": 1, 
+                                    "type": "string", 
+                                    "pattern": "^(\\s+)?({{.*?}}|<%.*?%>)(\\s+)?$|^(\\s+)?((\\w+,\\s?|\\s+)+)?(\\w+)\\s+in\\s+({{.*?}}|<%.*?%>)(\\s+)?$"
+                                }, 
+                                "concurrency": {
+                                    "oneOf": [
+                                        {
+                                            "minLength": 1, 
+                                            "type": "string"
+                                        }, 
+                                        {
+                                            "minimum": 0, 
+                                            "type": "integer"
+                                        }
+                                    ]
+                                }
                             }
                         }
-                    },
-                    "additionalProperties": false
+                    }
                 }
-            }
-        },
-        "name": {
-            "type": "string",
-            "minLength": 1
-        },
+            }, 
+            "minProperties": 1
+        }, 
+        "description": {
+            "minLength": 1, 
+            "type": "string"
+        }, 
+        "vars": {
+            "uniqueItems": true, 
+            "items": {
+                "maxProperties": 1, 
+                "patternProperties": {
+                    "^\\w+$": {
+                        "anyOf": [
+                            {
+                                "type": "null"
+                            }, 
+                            {
+                                "type": "array"
+                            }, 
+                            {
+                                "type": "boolean"
+                            }, 
+                            {
+                                "type": "integer"
+                            }, 
+                            {
+                                "type": "number"
+                            }, 
+                            {
+                                "type": "object"
+                            }, 
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    }
+                }, 
+                "minProperties": 1, 
+                "type": "object"
+            }, 
+            "type": "array", 
+            "minItems": 1
+        }, 
+        "tags": {
+            "uniqueItems": true, 
+            "items": {
+                "minLength": 1, 
+                "type": "string"
+            }, 
+            "type": "array", 
+            "minItems": 1
+        }, 
         "version": {
+            "enum": [
+                "1.0", 
+                1.0
+            ], 
             "anyOf": [
                 {
-                    "type": "string",
-                    "minLength": 1
-                },
+                    "minLength": 1, 
+                    "type": "string"
+                }, 
                 {
-                    "type": "integer",
-                    "minimum": 0
-                },
+                    "minimum": 0, 
+                    "type": "integer"
+                }, 
                 {
-                    "type": "number",
-                    "minimum": 0.0
+                    "minimum": 0.0, 
+                    "type": "number"
                 }
-            ],
-            "enum": [
-                "1.0",
-                1.0
             ]
-        },
-        "description": {
-            "type": "string",
-            "minLength": 1
-        },
-        "tags": {
-            "type": "array",
+        }, 
+        "output": {
+            "uniqueItems": true, 
             "items": {
-                "type": "string",
-                "minLength": 1
-            },
-            "uniqueItems": true,
+                "maxProperties": 1, 
+                "patternProperties": {
+                    "^\\w+$": {
+                        "anyOf": [
+                            {
+                                "type": "null"
+                            }, 
+                            {
+                                "type": "array"
+                            }, 
+                            {
+                                "type": "boolean"
+                            }, 
+                            {
+                                "type": "integer"
+                            }, 
+                            {
+                                "type": "number"
+                            }, 
+                            {
+                                "type": "object"
+                            }, 
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    }
+                }, 
+                "minProperties": 1, 
+                "type": "object"
+            }, 
+            "type": "array", 
             "minItems": 1
+        }, 
+        "input": {
+            "uniqueItems": true, 
+            "items": {
+                "oneOf": [
+                    {
+                        "minLength": 1, 
+                        "type": "string"
+                    }, 
+                    {
+                        "maxProperties": 1, 
+                        "patternProperties": {
+                            "^\\w+$": {
+                                "anyOf": [
+                                    {
+                                        "type": "null"
+                                    }, 
+                                    {
+                                        "type": "array"
+                                    }, 
+                                    {
+                                        "type": "boolean"
+                                    }, 
+                                    {
+                                        "type": "integer"
+                                    }, 
+                                    {
+                                        "type": "number"
+                                    }, 
+                                    {
+                                        "type": "object"
+                                    }, 
+                                    {
+                                        "type": "string"
+                                    }
+                                ]
+                            }
+                        }, 
+                        "minProperties": 1, 
+                        "type": "object"
+                    }
+                ]
+            }, 
+            "type": "array", 
+            "minItems": 1
+        }, 
+        "name": {
+            "minLength": 1, 
+            "type": "string"
         }
-    },
-    "required": [
-        "tasks"
-    ],
-    "additionalProperties": false
+    }
 }
