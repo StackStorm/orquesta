@@ -19,6 +19,7 @@ import six
 
 import yaql
 import yaql.language.exceptions as yaql_exc
+import yaql.language.utils as yaql_utils
 
 from orquesta import exceptions as exc
 from orquesta.expressions import base as expr_base
@@ -71,7 +72,7 @@ class YAQLEvaluator(expr_base.Evaluator):
     @classmethod
     def contextualize(cls, data):
         ctx = cls._root_ctx.create_child_context()
-        ctx['__vars'] = data or {}
+        ctx['__vars'] = yaql_utils.convert_input_data(data or {})
         ctx['__state'] = ctx['__vars'].get('__state')
         ctx['__current_task'] = ctx['__vars'].get('__current_task')
         ctx['__current_item'] = ctx['__vars'].get('__current_item')
