@@ -706,7 +706,7 @@ class WorkflowStateMachine(object):
         task_event = tk_ex_event.name
         task_id = getattr(tk_ex_event, 'task_id', None)
         task_route = getattr(tk_ex_event, 'route', None)
-        has_next_tasks = workflow_state.has_next_tasks(task_id, task_route, speculate_join=True)
+        has_next_tasks = workflow_state.has_next_tasks(task_id, task_route)
         has_active_tasks = workflow_state.has_active_tasks
 
         # Mark task remediated if task is in abended statuses and there are transitions.
@@ -767,6 +767,22 @@ class WorkflowStateMachine(object):
         # Assign new workflow status if there is change.
         if current_workflow_status != new_workflow_status:
             workflow_state.status = new_workflow_status
+
+        # If the final workflow status here is completed, then ensure there is no unreachable
+        # barrier task(s). A barrier task is unreachable if the workflow is completed but then one
+        # or more criteria for the task is satisified. In this case, log the task and fail the
+        # workflow to notify that the execution is incomplete but unable to proceed.
+        if workflow_state.status in statuses.COMPLETED_STATUSES:
+            unreachable_barriers = workflow_state.get_unreachable_barriers()
+
+            # If there are unreachable barrier tasks, then change workflow status to failed
+            # and write an error log for each case.
+            if unreachable_barriers:
+                workflow_state.status = statuses.FAILED
+
+                for entry in unreachable_barriers:
+                    e = exc.UnreachableJoinError(entry['id'], entry['route'])
+                    workflow_state.conductor.log_error(e, task_id=entry['id'], route=entry['route'])
 
     @classmethod
     def add_context_to_workflow_event(cls, workflow_state, wf_ex_event):

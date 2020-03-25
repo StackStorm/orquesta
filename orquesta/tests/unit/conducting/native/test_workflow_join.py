@@ -35,6 +35,71 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         self.assert_conducting_sequences(wf_name, expected_task_seq)
 
+    def test_join_not_satisfied(self):
+        wf_name = 'join'
+
+        expected_task_seq = [
+            'task1',
+            'task2',
+            'task4',
+            'task3',
+            'task5'
+        ]
+
+        # The tasks before the join, task3 and task5, both failed.
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED,   # task4
+            statuses.FAILED,      # task3
+            statuses.FAILED       # task5
+        ]
+
+        self.assert_spec_inspection(wf_name)
+
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            mock_statuses=mock_statuses,
+            expected_workflow_status=statuses.FAILED
+        )
+
+        # First task before the join, task3, failed.
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED,   # task4
+            statuses.SUCCEEDED,   # task3
+            statuses.FAILED       # task5
+        ]
+
+        self.assert_spec_inspection(wf_name)
+
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            mock_statuses=mock_statuses,
+            expected_workflow_status=statuses.FAILED
+        )
+
+        # Second task before the join, task5, failed.
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED,   # task4
+            statuses.FAILED,      # task3
+            statuses.SUCCEEDED    # task5
+        ]
+
+        self.assert_spec_inspection(wf_name)
+
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            mock_statuses=mock_statuses,
+            expected_workflow_status=statuses.FAILED
+        )
+
     def test_join_count(self):
         wf_name = 'join-count'
 
@@ -205,7 +270,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             expected_output=expected_output
         )
 
-    def test_join_on_complete(self):
+    def test_join_task_transition_on_completed(self):
         wf_name = 'join-on-complete'
 
         self.assert_spec_inspection(wf_name)
@@ -283,6 +348,133 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         ]
 
         self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            mock_statuses=mock_statuses
+        )
+
+    def test_join_task_transition_on_failed(self):
+        wf_name = 'join-on-fail'
+
+        self.assert_spec_inspection(wf_name)
+
+        expected_task_seq = [
+            'task1',
+            'task2',
+            'task4',
+            'task3',
+            'task5'
+        ]
+
+        # The tasks before the join, task3 and task5, both succeeded.
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED,   # task4
+            statuses.SUCCEEDED,   # task3
+            statuses.SUCCEEDED    # task5
+        ]
+
+        self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            mock_statuses=mock_statuses
+        )
+
+        # First task before the join, task3, failed.
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED,   # task4
+            statuses.FAILED,      # task3
+            statuses.SUCCEEDED    # task5
+        ]
+
+        conductor = self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            mock_statuses=mock_statuses,
+            expected_workflow_status=statuses.FAILED
+        )
+
+        expected_errors = [
+            {
+                "message": "Execution failed. See result for details.",
+                "type": "error",
+                "task_id": "task3"
+            },
+            {
+                "message": (
+                    "UnreachableJoinError: The join task|route \"task6|0\" "
+                    "is partially satisfied but unreachable."
+
+                ),
+                "type": "error",
+                "route": 0,
+                "task_id": "task6"
+            }
+        ]
+
+        self.assertListEqual(conductor.errors, expected_errors)
+
+        # Second task before the join, task5, failed.
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED,   # task4
+            statuses.SUCCEEDED,   # task3
+            statuses.FAILED       # task5
+        ]
+
+        conductor = self.assert_conducting_sequences(
+            wf_name,
+            expected_task_seq,
+            mock_statuses=mock_statuses,
+            expected_workflow_status=statuses.FAILED
+        )
+
+        expected_errors = [
+            {
+                "message": "Execution failed. See result for details.",
+                "type": "error",
+                "task_id": "task5"
+            },
+            {
+                "message": (
+                    "UnreachableJoinError: The join task|route \"task6|0\" "
+                    "is partially satisfied but unreachable."
+
+                ),
+                "type": "error",
+                "route": 0,
+                "task_id": "task6"
+            }
+        ]
+
+        self.assertListEqual(conductor.errors, expected_errors)
+
+        # The tasks before the join, task3 and task5, both failed.
+        expected_task_seq = [
+            'task1',
+            'task2',
+            'task4',
+            'task3',
+            'task5',
+            'task6',
+            'task7'
+        ]
+
+        mock_statuses = [
+            statuses.SUCCEEDED,   # task1
+            statuses.SUCCEEDED,   # task2
+            statuses.SUCCEEDED,   # task4
+            statuses.FAILED,      # task3
+            statuses.FAILED,      # task5
+            statuses.SUCCEEDED,   # task6
+            statuses.SUCCEEDED    # task7
+        ]
+
+        conductor = self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
             mock_statuses=mock_statuses
