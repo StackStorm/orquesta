@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PY3 := /usr/bin/python3
+PY3 := $(shell which python3)
 
 # Virtual Environment
 VENV_DIR ?= .venv
@@ -40,7 +40,7 @@ clean:
 
 .PHONY: venv
 venv:
-	test -d $(VENV_DIR) || virtualenv --no-site-packages $(VENV_DIR)
+	test -d $(VENV_DIR) || virtualenv -p $(PY3) --no-site-packages $(VENV_DIR)
 
 .PHONY: reqs
 reqs: venv
