@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
+
 from orquesta import constants
 from orquesta import exceptions as exc
 from orquesta import statuses
@@ -115,8 +117,8 @@ def item_(context, key=None):
     if not key:
         return current_item
 
-    if not isinstance(current_item, dict):
-        raise exc.ExpressionEvaluationException('Item is not type of dict.')
+    if not isinstance(current_item, collections.Mapping):
+        raise exc.ExpressionEvaluationException('Item is not type of collections.Mapping.')
 
     if key not in current_item:
         raise exc.ExpressionEvaluationException('Item does not have key "%s".' % key)
