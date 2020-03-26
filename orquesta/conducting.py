@@ -553,9 +553,12 @@ class WorkflowConductor(object):
         if list(inbound_evaluation.values()).count(True) >= requirement:
             return constants.INBOUND_CRITERIA_SATISFIED
 
-        # If there is an inbound task(s) where the criteria is None,
-        # then this means not all inbound task(s) have run.
-        if None in inbound_evaluation.values():
+        # If there is an inbound task(s) where the criteria is None and there is still
+        # active task(s) or staged task(s) that is ready,  then this means that the
+        # workflow is still active and it is possible that not all inbound branch(es)
+        # and subsequent task(s) have run.
+        if (None in inbound_evaluation.values() and
+                (self.workflow_state.has_active_tasks or self.workflow_state.has_staged_tasks)):
             return constants.INBOUND_CRITERIA_WIP
 
         # If reached here, then the requirement is not satisified.
