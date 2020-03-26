@@ -168,17 +168,17 @@ The following is the corresponding workflow execution graph.
 
     setup_task --+
                  |
-                 +------ parallel_task_1 --------------------------+
-                 |                                                 |
-                 +-- parallel_task_2 --+                           |
-                 |                     |                           |
-                 |                     +---- intermediate_task ----+
-                 |                                                 |
-                 |                                                 +-- barrier_task --+
-                 |                                                                    |
-                 +-- parallel_task_3 -------------------------------------------------+
-                                                                                      |
-                                                                                      +-- [finish]
+                 +-- parallel_task_1 --------------------------+
+                 |                                             |
+                 +-- parallel_task_2 --+                       |
+                 |                     |                       |
+                 |                     +-- intermediate_task --+
+                 |                                             |
+                 |                                             +-- barrier_task --+
+                 |                                                                |
+                 +-- parallel_task_3 ---------------------------------------------+
+                                                                                  |
+                                                                                  +-- [finish]
 
 Conversely, if more than one tasks transition to the same task and ``join`` is **not** specified in
 the latter, then the target task will be invoked immediately following the completion of the
@@ -195,19 +195,74 @@ be run two different times, resulting in this execution graph:
 
     setup_task --+
                  |
-                 +------ parallel_task_1 ------+
-                 |                             |
-                 |                             +-- barrier_task (1) ----------------------+
-                 |                                                                        |
-                 +-- parallel_task_2 --+                                                  |
-                 |                     |                                                  |
-                 |                     +---- intermediate_task ----+                      |
-                 |                                                 |                      |
-                 |                                                 +-- barrier_task (2) --+
-                 |                                                                        |
-                 +-- parallel_task_3 -----------------------------------------------------+
-                                                                                          |
-                                                                                          +-- [finish]
+                 +-- parallel_task_1 -------+
+                 |                          |
+                 |                          +-- barrier_task (1) ---------------------+
+                 |                                                                    |
+                 +-- parallel_task_2 --+                                              |
+                 |                     |                                              |
+                 |                     +-- intermediate_task --+                      |
+                 |                                             |                      |
+                 |                                             +-- barrier_task (2) --+
+                 |                                                                    |
+                 +-- parallel_task_3 -------------------------------------------------+
+                                                                                      |
+                                                                                      +-- [finish]
+
+An alternative use case of join is to specify an integer value such as ``join: <integer>``
+instead of ``join: all``. In this use case, the join is satisified when the number of task
+transitioned into the join is greater than or equal to the value specified. Take the following
+workflow definition below, which is a revised version of the workflow from previous example.
+There are three tasks that run in parallel and will join at the barrier task. The join has a
+value of 2 which means the join will be satisfied when two out of the three parallel tasks
+complete and transition into the join task. The join will immediately run when the criteria
+is satisfied.
+
+.. code-block:: yaml
+
+    version: 1.0
+
+    tasks:
+      setup_task:
+        next:
+          - do:
+              - parallel_task_1
+              - parallel_task_2
+              - parallel_task_3
+
+      parallel_task_1:
+        action: core.noop
+        next:
+          - when: <% succeeded() %>
+            do: barrier_task
+
+      parallel_task_2:
+        action: core.noop
+        next:
+          - when: <% succeeded() %>
+            do: barrier_task
+
+      barrier_task:
+        join: 2
+        action: core.noop
+
+The following is the corresponding workflow execution graph.
+
+.. code-block:: none
+
+    =---- time (not to scale) ---->
+
+    setup_task --+
+                 |
+                 +-- parallel_task_1 --+
+                 |                     |
+                 +-- parallel_task_2 --+
+                 |                     |
+                 +-- parallel_task_3 --+
+                                       |
+                                       +-- barrier_task (only requires 2 of 3 tasks) --+
+                                                                                       |
+                                                                                       +-- [finish]
 
 With Items Model
 ----------------
