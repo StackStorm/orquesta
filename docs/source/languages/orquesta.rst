@@ -122,7 +122,6 @@ will be blocked until all the parallel branches complete and reach it.
 
     tasks:
       setup_task:
-        # ...
         # Run tasks in parallel
         next:
           - do:
@@ -131,34 +130,34 @@ will be blocked until all the parallel branches complete and reach it.
               - parallel_task_3
 
       parallel_task_1:
-        # ...
         # Wait to run barrier_task after this
+        action: core.noop
         next:
-          - do:
-              - barrier_task
+          - when: <% succeeded() %>
+            do: barrier_task
 
       parallel_task_2:
-        # ...
         # Eventually run barrier_task
+        action: core.noop
         next:
-          - do:
-              - intermediate_task
+          - when: <% succeeded() %>
+            do: intermediate_task
 
       intermediate_task:
-        # ...
         # Wait to run barrier_task after this
+        action: core.noop
         next:
-          - do:
-              - barrier_task
+          - when: <% succeeded() %>
+            do: barrier_task
 
       barrier_task:
-        # ...
         # Run after parallel_task_1, parallel_task_2, and intermediate_task have all finished
         join: all
+        action: core.noop
 
       parallel_task_3:
-        # ...
         # Run immediately after setup_task, do NOT wait for barrier_task
+        action: core.noop
 
 The following is the corresponding workflow execution graph.
 
@@ -237,6 +236,12 @@ is satisfied.
             do: barrier_task
 
       parallel_task_2:
+        action: core.noop
+        next:
+          - when: <% succeeded() %>
+            do: barrier_task
+
+      parallel_task_3:
         action: core.noop
         next:
           - when: <% succeeded() %>
