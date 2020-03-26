@@ -22,6 +22,8 @@ Changed
   and/or result size is huge per item, then there will be a performance impact on database
   write operations when recording the conductor state. (improvement)
 * Use ujson to deepcopy dict(s) for faster performance. (improvement)
+* Refactor how inbound criteria for join task is evaluated to count by task completion
+  instead of task transition. (improvement)
 
 Fixed
 ~~~~~
