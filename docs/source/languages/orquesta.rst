@@ -214,8 +214,8 @@ transitioned into the join is greater than or equal to the value specified. Take
 workflow definition below, which is a revised version of the workflow from previous example.
 There are three tasks that run in parallel and will join at the barrier task. The join has a
 value of 2 which means the join will be satisfied when two out of the three parallel tasks
-complete and transition into the join task. The join will immediately run when the criteria
-is satisfied.
+complete and transition into the join. The ``barrier_task`` will immediately run when the
+join criteria is satisfied.
 
 .. code-block:: yaml
 
