@@ -209,7 +209,7 @@ be run two different times, resulting in this execution graph:
                                                                                       +-- [finish]
 
 An alternative use case of join is to specify an integer value such as ``join: <integer>``
-instead of ``join: all``. In this use case, the join is satisified when the number of task
+instead of ``join: all``. In this use case, the join is satisified when the number of tasks
 transitioned into the join is greater than or equal to the value specified. Take the following
 workflow definition below, which is a revised version of the workflow from previous example.
 There are three tasks that run in parallel and will join at the barrier task. The join has a
