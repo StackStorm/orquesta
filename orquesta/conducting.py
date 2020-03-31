@@ -172,7 +172,7 @@ class WorkflowState(object):
                 continue
 
             # Determine the status of the inbound criteria for the barrier task.
-            inbound_criteria_status = self.conductor.inbound_criteria_satisfied(
+            inbound_criteria_status = self.conductor.get_inbound_criteria_status(
                 staged_task['id'], staged_task['route']
             )
 
@@ -517,7 +517,7 @@ class WorkflowConductor(object):
     def reset_workflow_output(self):
         self._outputs = None
 
-    def inbound_criteria_satisfied(self, task_id, route):
+    def get_inbound_criteria_status(self, task_id, route):
         # Get the list of inbound task transitions for the barrier task.
         inbound_transitions = self.graph.get_prev_transitions(task_id)
 
@@ -665,7 +665,7 @@ class WorkflowConductor(object):
 
                 # Evaluate if inbound criteria is satisified for barrier (join) task.
                 if self.graph.has_barrier(next_task_id):
-                    inbound_criteria_status = self.inbound_criteria_satisfied(next_task_id, route)
+                    inbound_criteria_status = self.get_inbound_criteria_status(next_task_id, route)
                     if inbound_criteria_status == constants.INBOUND_CRITERIA_NOT_SATISFIED:
                         continue
 
@@ -1030,7 +1030,7 @@ class WorkflowConductor(object):
                     # Check if inbound criteria are met. Must use the original route
                     # to identify the inbound task transitions.
                     staged_next_task['ready'] = (
-                        self.inbound_criteria_satisfied(next_task_id, route) ==
+                        self.get_inbound_criteria_status(next_task_id, route) ==
                         constants.INBOUND_CRITERIA_SATISFIED
                     )
 
