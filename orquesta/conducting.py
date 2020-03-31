@@ -168,7 +168,7 @@ class WorkflowState(object):
         # Evaluate each task that is already staged.
         for staged_task in self.get_staged_tasks(filtered=False):
             # If the task is not a barrier or it is already ready, then it is not unreachable.
-            if staged_task['id'] not in barriers or staged_task['ready'] is True:
+            if staged_task['id'] not in barriers or bool(staged_task['ready']):
                 continue
 
             # Determine the status of the inbound criteria for the barrier task.
@@ -545,7 +545,7 @@ class WorkflowConductor(object):
                 prev_task_state_entry['next'][prev_task_transition_id]
             )
 
-            if inbound_evaluation[prev_transition[0]] is not True:
+            if not bool(inbound_evaluation[prev_transition[0]]):
                 inbound_evaluation[prev_transition[0]] = satisfied
 
         # If the count of inbound task(s) where the criteria is True >= requirements,
