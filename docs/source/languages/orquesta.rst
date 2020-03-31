@@ -259,13 +259,14 @@ The following is the corresponding workflow execution graph.
 
     setup_task --+
                  |
-                 +-- parallel_task_1 --+
-                 |                     |
-                 +-- parallel_task_2 --+
-                 |                     |
-                 +-- parallel_task_3 --+
-                                       |
-                                       +-- barrier_task (only requires 2 of 3 tasks) --+
+                 +-- parallel_task_1 * * * * * *
+                 |                             *
+                 +-- parallel_task_2 * * * *   *
+                 |                         *   *
+                 +-- parallel_task_3 * *   *   *
+                                       *   *   *
+                                       *   *   *
+                                       * * barrier_task (only requires 2 of 3 tasks) --+
                                                                                        |
                                                                                        +-- [finish]
 
