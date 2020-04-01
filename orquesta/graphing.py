@@ -178,6 +178,11 @@ class WorkflowGraph(object):
             key=lambda x: x[1]
         )
 
+    def get_barriers(self):
+        return {
+            x[0]: x[1] for x in filter(lambda x: x[1].get('barrier'), self._graph.nodes(data=True))
+        }
+
     def set_barrier(self, task_id, value='*'):
         self.update_task(task_id, barrier=value)
 
