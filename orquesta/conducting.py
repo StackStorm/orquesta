@@ -159,8 +159,31 @@ class WorkflowState(object):
     def has_canceled_tasks(self):
         return len(self.get_tasks_by_status([statuses.CANCELED])) > 0
 
-    def get_staged_tasks(self):
-        return list(filter(lambda x: x['ready'] is True, self.staged))
+    def get_unreachable_barriers(self):
+        unreachable_barriers = []
+
+        # Identify the list of barriers (or join tasks) in the workflow.
+        barriers = self.conductor.graph.get_barriers()
+
+        # Evaluate each task that is already staged.
+        for staged_task in self.get_staged_tasks(filtered=False):
+            # If the task is not a barrier or it is already ready, then it is not unreachable.
+            if staged_task['id'] not in barriers or bool(staged_task['ready']):
+                continue
+
+            # Determine the status of the inbound criteria for the barrier task.
+            inbound_criteria_status = self.conductor.get_inbound_criteria_status(
+                staged_task['id'], staged_task['route']
+            )
+
+            # If the inbound criteria is not satisfied, then flag the task.
+            if inbound_criteria_status == constants.INBOUND_CRITERIA_NOT_SATISFIED:
+                unreachable_barriers.append(staged_task)
+
+        return unreachable_barriers
+
+    def get_staged_tasks(self, filtered=True):
+        return list(filter(lambda x: x['ready'] is True, self.staged)) if filtered else self.staged
 
     @property
     def has_staged_tasks(self):
@@ -494,29 +517,52 @@ class WorkflowConductor(object):
     def reset_workflow_output(self):
         self._outputs = None
 
-    def _inbound_criteria_satisfied(self, task_id, route):
-        inbounds = self.graph.get_prev_transitions(task_id)
-        inbounds_satisfied = []
-        barrier = 1
+    def get_inbound_criteria_status(self, task_id, route):
+        # Get the list of inbound task transitions for the barrier task.
+        inbound_transitions = self.graph.get_prev_transitions(task_id)
 
-        if self.graph.has_barrier(task_id):
-            barrier = self.graph.get_barrier(task_id)
-            barrier = len(inbounds) if barrier == '*' else barrier
+        # Setup the result for the evaluation of the criteria for inbound task transitions.
+        inbound_evaluation = {i: None for i in list(set(t[0] for t in inbound_transitions))}
 
-        for prev_transition in inbounds:
+        # Identify the join requirement.
+        barrier = self.graph.get_barrier(task_id) or 1
+        requirement = len(inbound_evaluation.keys()) if barrier == "*" else barrier
+
+        # Evaluate the criteria for each inbound task transitions.
+        for prev_transition in inbound_transitions:
             prev_task_state_entry = self.get_task_state_entry(prev_transition[0], route)
 
-            if prev_task_state_entry:
-                prev_task_transition_id = (
-                    constants.TASK_STATE_TRANSITION_FORMAT %
-                    (prev_transition[1], str(prev_transition[2]))
-                )
+            if not prev_task_state_entry:
+                continue
 
-                if (prev_task_transition_id in prev_task_state_entry['next'] and
-                        prev_task_state_entry['next'][prev_task_transition_id]):
-                    inbounds_satisfied.append(prev_task_transition_id)
+            prev_task_transition_id = (
+                constants.TASK_STATE_TRANSITION_FORMAT %
+                (prev_transition[1], str(prev_transition[2]))
+            )
 
-        return (len(inbounds_satisfied) >= barrier)
+            satisfied = (
+                prev_task_transition_id in prev_task_state_entry['next'] and
+                prev_task_state_entry['next'][prev_task_transition_id]
+            )
+
+            if not bool(inbound_evaluation[prev_transition[0]]):
+                inbound_evaluation[prev_transition[0]] = satisfied
+
+        # If the count of inbound task(s) where the criteria is True >= requirements,
+        # then the join requirement is satisified.
+        if list(inbound_evaluation.values()).count(True) >= requirement:
+            return constants.INBOUND_CRITERIA_SATISFIED
+
+        # If there is an inbound task(s) where the criteria is None and there is still
+        # active task(s) or staged task(s) that is ready,  then this means that the
+        # workflow is still active and it is possible that not all inbound branch(es)
+        # and subsequent task(s) have run.
+        if (None in inbound_evaluation.values() and
+                (self.workflow_state.has_active_tasks or self.workflow_state.has_staged_tasks)):
+            return constants.INBOUND_CRITERIA_WIP
+
+        # If reached here, then the requirement is not satisified.
+        return constants.INBOUND_CRITERIA_NOT_SATISFIED
 
     def get_task(self, task_id, route):
         try:
@@ -617,9 +663,11 @@ class WorkflowConductor(object):
                 if not task_state_entry['next'].get(task_transition_id):
                     continue
 
-                # Evaluate if inbound criteria for the next task is satisfied.
-                if not self._inbound_criteria_satisfied(next_task_id, route):
-                    continue
+                # Evaluate if inbound criteria is satisified for barrier (join) task.
+                if self.graph.has_barrier(next_task_id):
+                    inbound_criteria_status = self.get_inbound_criteria_status(next_task_id, route)
+                    if inbound_criteria_status == constants.INBOUND_CRITERIA_NOT_SATISFIED:
+                        continue
 
                 return True
 
@@ -981,9 +1029,9 @@ class WorkflowConductor(object):
 
                     # Check if inbound criteria are met. Must use the original route
                     # to identify the inbound task transitions.
-                    staged_next_task['ready'] = self._inbound_criteria_satisfied(
-                        next_task_id,
-                        route
+                    staged_next_task['ready'] = (
+                        self.get_inbound_criteria_status(next_task_id, route) ==
+                        constants.INBOUND_CRITERIA_SATISFIED
                     )
 
                     # Put the next task in the engine event queue if it is an engine command.

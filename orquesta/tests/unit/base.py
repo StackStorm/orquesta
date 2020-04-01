@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import abc
+import copy
 import six
 from six.moves import queue
 import unittest
@@ -23,7 +24,6 @@ from orquesta.expressions import base as expr_base
 from orquesta.specs import loader as spec_loader
 from orquesta import statuses
 from orquesta.tests.fixtures import loader as fixture_loader
-from orquesta.utils import jsonify as json_util
 from orquesta.utils import plugin as plugin_util
 from orquesta.utils import specs as spec_util
 
@@ -194,13 +194,15 @@ class WorkflowConductorTest(WorkflowComposerTest):
     # order to match in unit tests. This method is used to serialize the task specs and
     # compare the lists.
     def assert_task_list(self, conductor, actual, expected):
-        actual_copy = json_util.deepcopy(actual)
-        expected_copy = json_util.deepcopy(expected)
+        actual_copy = copy.deepcopy(actual)
+        expected_copy = copy.deepcopy(expected)
 
         for task in actual_copy:
             for staged_task in task['ctx']['__state']['staged']:
                 if 'items' in staged_task:
                     del staged_task['items']
+
+            task['spec'] = task['spec'].serialize()
 
         for task in expected_copy:
             task['ctx']['__current_task'] = {'id': task['id'], 'route': task['route']}
@@ -209,6 +211,8 @@ class WorkflowConductorTest(WorkflowComposerTest):
             for staged_task in task['ctx']['__state']['staged']:
                 if 'items' in staged_task:
                     del staged_task['items']
+
+            task['spec'] = task['spec'].serialize()
 
         self.assertListEqual(actual_copy, expected_copy)
 

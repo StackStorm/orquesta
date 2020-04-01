@@ -155,3 +155,10 @@ class InvalidTaskRerunRequest(Exception):
 
         message = "Unable to rerun task|route(s) because it doesn't exist or isn't rerunnable: %s"
         super(InvalidTaskRerunRequest, self).__init__(message % tasks_str)
+
+
+class UnreachableJoinError(Exception):
+
+    def __init__(self, task_id, route):
+        message = 'The join task|route "%s|%s" is partially satisfied but unreachable.'
+        super(UnreachableJoinError, self).__init__(message % (task_id, route))

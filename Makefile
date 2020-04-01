@@ -10,11 +10,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PY3 := /usr/bin/python3
-VER := $(shell cat ./orquesta/__init__.py | grep -Po "__version__ = '\K[^']*")
+PY3 := $(shell which python3)
 
 # Virtual Environment
 VENV_DIR ?= .venv
+
+# Tox Environment
+TOX_DIR ?= .tox
 
 # Sphinx Document Options
 SPHINXOPTS    =
@@ -31,13 +33,14 @@ PKGBUILDDIR   = build
 .PHONY: clean
 clean:
 	rm -rf $(VENV_DIR)
+	rm -rf $(TOX_DIR)
 	rm -rf $(BUILDDIR)
 	rm -rf $(PKGDISTDIR)
 	rm -rf $(PKGBUILDDIR)
 
 .PHONY: venv
 venv:
-	test -d $(VENV_DIR) || virtualenv --no-site-packages $(VENV_DIR)
+	test -d $(VENV_DIR) || virtualenv -p $(PY3) --no-site-packages $(VENV_DIR)
 
 .PHONY: reqs
 reqs: venv
@@ -51,6 +54,10 @@ reqs: venv
 .PHONY: schemas
 schemas: reqs
 	$(VENV_DIR)/bin/python bin/orquesta-generate-schemas
+
+.PHONY: check
+check:
+	tox
 
 .PHONY: docs
 docs: reqs
@@ -67,3 +74,6 @@ package:
 	rm -rf $(PKGDISTDIR)
 	rm -rf $(PKGBUILDDIR)
 	$(PY3) setup.py sdist bdist_wheel
+
+.PHONY: all
+all: clean reqs schemas check package
