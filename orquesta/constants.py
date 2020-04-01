@@ -14,3 +14,7 @@
 
 TASK_STATE_ROUTE_FORMAT = '%s__r%s'
 TASK_STATE_TRANSITION_FORMAT = '%s__t%s'
+
+INBOUND_CRITERIA_WIP = 'inbound_criteria_wip'
+INBOUND_CRITERIA_SATISFIED = 'inbound_criteria_satisfied'
+INBOUND_CRITERIA_NOT_SATISFIED = 'inbound_criteria_not_satisfied'
