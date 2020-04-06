@@ -78,6 +78,109 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
         expected_output = {'items': []}
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
+    def test_bad_with_items_syntax(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - xs:
+              - fee
+              - fi
+              - fo
+              - fum
+
+        tasks:
+          task1:
+            with:
+                items: <% ctx(xs) %>
+                action: core.echo message=<% item() %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
+        """
+
+        expected_errors = {
+            'syntax': [
+                {
+                    'message': 'Additional properties are not allowed (\'action\' was unexpected)',
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.with.additionalProperties'
+                    ),
+                    'spec_path': 'tasks.task1.with'
+                }
+            ]
+        }
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), expected_errors)
+
+    def test_with_items_that_is_action_less(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - xs:
+              - fee
+              - fi
+              - fo
+              - fum
+
+        tasks:
+          task1:
+            with:
+                items: <% ctx(xs) %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
+        """
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_status(statuses.RUNNING)
+
+        # Mock the action execution for each item and assert expected task statuses.
+        task_route = 0
+        task_name = 'task1'
+        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_action_specs = [{'action': None, 'input': None, 'item_id': i} for i in range(0, 4)]
+
+        mock_ac_ex_statuses = [statuses.SUCCEEDED] * 4
+        expected_task_statuses = [statuses.RUNNING] * 3 + [statuses.SUCCEEDED]
+        expected_workflow_statuses = [statuses.RUNNING] * 3 + [statuses.SUCCEEDED]
+
+        self.assert_task_items(
+            conductor,
+            task_name,
+            task_route,
+            task_ctx,
+            task_ctx['xs'],
+            task_action_specs,
+            mock_ac_ex_statuses,
+            expected_task_statuses,
+            expected_workflow_statuses,
+            mock_ac_ex_results=[None] * 4
+        )
+
+        # Assert the task is removed from staging.
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
+
+        # Assert the workflow succeeded.
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+
+        # Assert the workflow output is correct.
+        conductor.render_workflow_output()
+        expected_output = {'items': [None] * 4}
+        self.assertDictEqual(conductor.get_workflow_output(), expected_output)
+
     def test_basic_items_list(self):
         wf_def = """
         version: 1.0

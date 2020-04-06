@@ -364,11 +364,14 @@ class WorkflowConductorWithItemsTest(WorkflowConductorTest):
 
     def assert_task_items(self, conductor, task_id, task_route, task_ctx, items, action_specs,
                           mock_ac_ex_statuses, expected_task_statuses, expected_workflow_statuses,
-                          concurrency=None):
+                          concurrency=None, mock_ac_ex_results=None):
 
         # Set up test cases.
         tests = list(zip(mock_ac_ex_statuses, expected_task_statuses, expected_workflow_statuses))
         tk_ex_result = [None] * len(items)
+
+        if mock_ac_ex_results is None:
+            mock_ac_ex_results = items
 
         # Verify the first set of action executions.
         expected_task = self.format_task_item(
@@ -431,7 +434,7 @@ class WorkflowConductorWithItemsTest(WorkflowConductorTest):
 
         # Mock the action execution for each item.
         for item_id in range(0, len(tests)):
-            ac_ex_result = items[item_id]
+            ac_ex_result = mock_ac_ex_results[item_id]
             tk_ex_result[item_id] = ac_ex_result
             ac_ex_status = tests[item_id][0]
 

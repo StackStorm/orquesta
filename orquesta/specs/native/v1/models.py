@@ -111,7 +111,8 @@ class ItemizedSpec(native_v1_specs.Spec):
                 'pattern': _items_regex
             },
             'concurrency': spec_types.STRING_OR_POSITIVE_INTEGER
-        }
+        },
+        'additionalProperties': False
     }
 
     _context_evaluation_sequence = [
