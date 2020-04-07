@@ -111,7 +111,8 @@ class ItemizedSpec(native_v1_specs.Spec):
                 'pattern': _items_regex
             },
             'concurrency': spec_types.STRING_OR_POSITIVE_INTEGER
-        }
+        },
+        'additionalProperties': False
     }
 
     _context_evaluation_sequence = [
@@ -377,6 +378,20 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
 
         return False
 
+    def detect_actionless_with_items(self, parent=None):
+        result = []
+
+        # Identify with items task with no action defined.
+        for task_name, task_spec in six.iteritems(self):
+            if task_spec.has_items() and not task_spec.action:
+                message = 'The action property is required for with items task.'
+                spec_path = parent.get('spec_path') + '.' + task_name
+                schema_path = parent.get('schema_path') + '.patternProperties.^\\w+$'
+                entry = {'message': message, 'spec_path': spec_path, 'schema_path': schema_path}
+                result.append(entry)
+
+        return result
+
     def detect_reserved_names(self, parent=None):
         result = []
 
@@ -514,6 +529,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         result = self.detect_reserved_names(parent=parent)
         result.extend(self.detect_undefined_tasks(parent=parent))
         result.extend(self.detect_unreachable_tasks(parent=parent))
+        result.extend(self.detect_actionless_with_items(parent=parent))
 
         return result
 
