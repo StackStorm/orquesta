@@ -20,6 +20,7 @@ from orquesta import conducting
 from orquesta.specs import native as native_specs
 from orquesta import statuses
 from orquesta.tests.unit import base as test_base
+import yaql.language.utils as yaql_utils
 
 
 class WorkflowConductorDataFlowTest(test_base.WorkflowConductorTest):
@@ -142,10 +143,16 @@ class WorkflowConductorDataFlowTest(test_base.WorkflowConductorTest):
         self.assert_data_flow(None)
 
     def test_data_flow_dict(self):
-        self.assert_data_flow(self._get_combined_value())
+        mapping_typed_data = self._get_combined_value()
+
+        self.assertIsInstance(mapping_typed_data, yaql_utils.MappingType)
+        self.assert_data_flow(mapping_typed_data)
 
     def test_data_flow_list(self):
-        self.assert_data_flow(list(self._get_combined_value().values()))
+        sequence_typed_data = list(self._get_combined_value().values())
+
+        self.assertIsInstance(sequence_typed_data, yaql_utils.SequenceType)
+        self.assert_data_flow(sequence_typed_data)
 
     def test_data_flow_unicode(self):
         self.assert_unicode_data_flow('光合作用')
