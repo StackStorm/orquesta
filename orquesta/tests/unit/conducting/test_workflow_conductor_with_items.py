@@ -78,6 +78,89 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
         expected_output = {'items': []}
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
+    def test_bad_with_items_syntax(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - xs:
+              - fee
+              - fi
+              - fo
+              - fum
+
+        tasks:
+          task1:
+            with:
+                items: <% ctx(xs) %>
+                action: core.echo message=<% item() %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
+        """
+
+        expected_errors = {
+            'semantics': [
+                {
+                    'message': 'The action property is required for with items task.',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$',
+                    'spec_path': 'tasks.task1'
+                }
+            ],
+            'syntax': [
+                {
+                    'message': 'Additional properties are not allowed (\'action\' was unexpected)',
+                    'schema_path': (
+                        'properties.tasks.patternProperties.^\\w+$.'
+                        'properties.with.additionalProperties'
+                    ),
+                    'spec_path': 'tasks.task1.with'
+                }
+            ]
+        }
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), expected_errors)
+
+    def test_with_items_that_is_action_less(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - xs:
+              - fee
+              - fi
+              - fo
+              - fum
+
+        tasks:
+          task1:
+            with:
+                items: <% ctx(xs) %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
+        """
+
+        expected_errors = {
+            'semantics': [
+                {
+                    'message': 'The action property is required for with items task.',
+                    'schema_path': 'properties.tasks.patternProperties.^\\w+$',
+                    'spec_path': 'tasks.task1'
+                }
+            ]
+        }
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), expected_errors)
+
     def test_basic_items_list(self):
         wf_def = """
         version: 1.0
