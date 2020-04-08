@@ -342,11 +342,17 @@ class WorkflowGraphTest(test_base.WorkflowGraphTest):
             sorted(expected_transitions)
         )
 
-    def test_barrier_task(self):
+    def test_task_has_barrier(self):
         wf_graph = self._prep_graph()
 
         self.assertTrue(wf_graph.has_barrier('task5'))
         self.assertFalse(wf_graph.has_barrier('task9'))
+
+    def test_get_barrier_tasks(self):
+        wf_graph = self._prep_graph()
+
+        expected_result = {'task5': {'barrier': '*'}}
+        self.assertDictEqual(wf_graph.get_barriers(), expected_result)
 
     def test_split_from_reused_task(self):
         wf_graph = self._prep_graph()

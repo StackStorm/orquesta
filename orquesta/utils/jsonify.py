@@ -61,8 +61,9 @@ def deepcopy(value):
     # to copy.deepcopy(), but it has some edge cases with non-simple types such as datetimes.
     try:
         value = ujson.loads(ujson.dumps(value))  # pylint: disable=no-member
-    except (OverflowError, ValueError):
-        # NOTE: ujson doesn't support 5 or 6 bytes utf-8 sequences so we fallback to copy.deepcopy.
+    except (OverflowError, ValueError, TypeError):
+        # NOTE: ujson doesn't support 5 or 6 bytes utf-8 sequences or
+        # non-JSON serializable object so we fallback to copy.deepcopy.
         value = copy.deepcopy(value)
 
     return value

@@ -768,6 +768,22 @@ class WorkflowStateMachine(object):
         if current_workflow_status != new_workflow_status:
             workflow_state.status = new_workflow_status
 
+        # If the final workflow status here is completed, then ensure there is no unreachable
+        # barrier task(s). A barrier task is unreachable if the workflow is completed but then one
+        # or more criteria for the task is satisified. In this case, log the task and fail the
+        # workflow to notify that the execution is incomplete but unable to proceed.
+        if workflow_state.status in statuses.COMPLETED_STATUSES:
+            unreachable_barriers = workflow_state.get_unreachable_barriers()
+
+            # If there are unreachable barrier tasks, then change workflow status to failed
+            # and write an error log for each case.
+            if unreachable_barriers:
+                workflow_state.status = statuses.FAILED
+
+                for entry in unreachable_barriers:
+                    e = exc.UnreachableJoinError(entry['id'], entry['route'])
+                    workflow_state.conductor.log_error(e, task_id=entry['id'], route=entry['route'])
+
     @classmethod
     def add_context_to_workflow_event(cls, workflow_state, wf_ex_event):
         # Identify current workflow status.
