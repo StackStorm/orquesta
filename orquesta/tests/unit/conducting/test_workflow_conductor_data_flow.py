@@ -76,6 +76,25 @@ class WorkflowConductorDataFlowTest(test_base.WorkflowConductorTest):
 
         return conductor
 
+    def _get_combined_value(self, callstack_depth=0):
+        # This returns dict typed value all Python built-in type values
+        # which orquesta spec could accept.
+        if callstack_depth < 2:
+            return {
+                'null': None,
+                'integer_positive': 123,
+                'integer_negative': -123,
+                'number_positive': 99.99,
+                'number_negative': -99.99,
+                'string': 'xyz',
+                'boolean_true': True,
+                'boolean_false': False,
+                'array': list(self._get_combined_value(callstack_depth + 1).values()),
+                'object': self._get_combined_value(callstack_depth + 1),
+            }
+        else:
+            return {}
+
     def assert_data_flow(self, input_value):
         inputs = {'a1': input_value}
         expected_output = {'a5': inputs['a1'], 'b5': inputs['a1']}
@@ -119,11 +138,14 @@ class WorkflowConductorDataFlowTest(test_base.WorkflowConductorTest):
         self.assert_data_flow(True)
         self.assert_data_flow(False)
 
+    def test_data_flow_none(self):
+        self.assert_data_flow(None)
+
     def test_data_flow_dict(self):
-        self.assert_data_flow({'x': 123, 'y': 'abc'})
+        self.assert_data_flow(self._get_combined_value())
 
     def test_data_flow_list(self):
-        self.assert_data_flow([123, 'abc', True])
+        self.assert_data_flow(list(self._get_combined_value().values()))
 
     def test_data_flow_unicode(self):
         self.assert_unicode_data_flow('光合作用')
