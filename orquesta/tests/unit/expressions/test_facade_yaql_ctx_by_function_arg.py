@@ -19,7 +19,7 @@ from orquesta.tests.unit import base as test_base
 class YAQLFacadeVariableExtractionTest(test_base.ExpressionFacadeEvaluatorTest):
 
     def test_empty_extraction(self):
-        expr = '<% just_text and $not_a_var and fooctx(foo) and fooctx("bar") and fooctx(\'fu\') %>'
+        expr = '<% just_text and $not_a_var and notctx(foo) and notctx("bar") and notctx(\'fu\') %>'
 
         self.assertListEqual([], expr_base.extract_vars(expr))
 
@@ -113,6 +113,16 @@ class YAQLFacadeVariableExtractionTest(test_base.ExpressionFacadeEvaluatorTest):
 
     def test_ignore_ctx_dict_funcs(self):
         expr = '<%ctx().keys() and ctx().values() and ctx().set("b", 3) %>'
+
+        expected_vars = []
+
+        self.assertListEqual(expected_vars, expr_base.extract_vars(expr))
+
+    def test_ignore_ctx_get_func_calls(self):
+        expr = (
+            '<%ctx().get(foo) and ctx().get(bar) and ctx().get("fu") and ctx().get(\'baz\') and '
+            'ctx().get(foo, "bar") and ctx().get("fu", "bar") and ctx().get(\'bar\', \'foo\') %>'
+        )
 
         expected_vars = []
 
