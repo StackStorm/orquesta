@@ -19,7 +19,7 @@ from orquesta.tests.unit import base as test_base
 class YAQLFacadeVariableExtractionTest(test_base.ExpressionFacadeEvaluatorTest):
 
     def test_empty_extraction(self):
-        expr = '<% just_text and $not_a_var %>'
+        expr = '<% just_text and $not_a_var and fooctx(foo) and fooctx("bar") and fooctx(\'fu\') %>'
 
         self.assertListEqual([], expr_base.extract_vars(expr))
 
@@ -52,12 +52,14 @@ class YAQLFacadeVariableExtractionTest(test_base.ExpressionFacadeEvaluatorTest):
         self.assertListEqual(expected_vars, expr_base.extract_vars(expr))
 
     def test_multiple_vars_extraction(self):
-        expr = '<% ctx(foobar) ctx(foo).get(bar) ctx(fu).bar ctx(fu).bar[0] %>'
+        expr = '<%ctx(fubar) ctx(foobar) ctx(foo).get(bar) ctx(fu).bar ctx(foobaz).bar[0] %>'
 
         expected_vars = [
             ('yaql', expr, 'foo'),
             ('yaql', expr, 'foobar'),
-            ('yaql', expr, 'fu')
+            ('yaql', expr, 'foobaz'),
+            ('yaql', expr, 'fu'),
+            ('yaql', expr, 'fubar')
         ]
 
         self.assertListEqual(expected_vars, expr_base.extract_vars(expr))
@@ -106,5 +108,12 @@ class YAQLFacadeVariableExtractionTest(test_base.ExpressionFacadeEvaluatorTest):
             ('yaql', '<% ctx(y) %>', 'y'),
             ('yaql', '<% ctx(z) %>', 'z')
         ]
+
+        self.assertListEqual(expected_vars, expr_base.extract_vars(expr))
+
+    def test_ignore_ctx_dict_funcs(self):
+        expr = '<%ctx().keys() and ctx().values() and ctx().set("b", 3) %>'
+
+        expected_vars = []
 
         self.assertListEqual(expected_vars, expr_base.extract_vars(expr))

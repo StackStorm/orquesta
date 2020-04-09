@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import inspect
+import itertools
 import logging
 import re
 import six
@@ -54,15 +55,26 @@ class YAQLEvaluator(expr_base.Evaluator):
     _regex_parser = re.compile(_regex_pattern)
 
     _regex_dot_pattern = '[a-zA-Z0-9_\'"\.\[\]\(\)]*'
-    _regex_ctx_pattern_1 = 'ctx\(\)\.%s' % _regex_dot_pattern
-    _regex_ctx_pattern_2 = 'ctx\([\'|"]?{0}[\'|"]?\)[\.{0}]?'.format(_regex_dot_pattern)
-    _regex_var_pattern = '.*?(%s|%s).*?' % (_regex_ctx_pattern_1, _regex_ctx_pattern_2)
+    _regex_ctx_patterns = [
+        '^ctx\(\)\.%s' % _regex_dot_pattern,                                # line start ctx().*
+        '^ctx\([\'|"]?{0}[\'|"]?\)[\.{0}]?'.format(_regex_dot_pattern),     # line start ctx(*).*
+        '[\s]ctx\(\)\.%s' % _regex_dot_pattern,                             # whitespace ctx().*
+        '[\s]ctx\([\'|"]?{0}[\'|"]?\)[\.{0}]?'.format(_regex_dot_pattern)   # whitespace ctx(*).*
+    ]
+    _regex_var_pattern = '.*?(%s).*?' % '|'.join(_regex_ctx_patterns)
     _regex_var_parser = re.compile(_regex_var_pattern)
 
-    _regex_dot_extract = '([a-zA-Z0-9_\-]*)'
-    _regex_ctx_extract_1 = 'ctx\(\)\.%s' % _regex_dot_extract
-    _regex_ctx_extract_2 = 'ctx\([\'|"]?%s(%s)' % (_regex_dot_extract, _regex_dot_pattern)
-    _regex_var_extracts = ['%s\.?' % _regex_ctx_extract_1, '%s\.?' % _regex_ctx_extract_2]
+    _regex_dot_extract = '[a-zA-Z0-9_\-]+'
+    _regex_var_extracts = [
+        r'(?<=^ctx\(\)\.)(\b%s\b)(?!\()\.?' % _regex_dot_extract,       # line start ctx().foobar
+        r'(?<=^ctx\()(\b%s\b)(?=\))\.?' % _regex_dot_extract,           # line start ctx(foobar)
+        r'(?<=^ctx\(\')(\b%s\b)(?=\'\))\.?' % _regex_dot_extract,       # line start ctx('foobar')
+        r'(?<=^ctx\(")(\b%s\b)(?="\))\.?' % _regex_dot_extract,         # line start ctx("foobar")
+        r'(?<=[\s]ctx\(\)\.)(\b%s\b)(?!\()\.?' % _regex_dot_extract,    # whitespace ctx().foobar
+        r'(?<=[\s]ctx\()(\b%s\b)(?=\))\.?' % _regex_dot_extract,        # whitespace ctx(foobar)
+        r'(?<=[\s]ctx\(\')(\b%s\b)(?=\'\))\.?' % _regex_dot_extract,    # whitespace ctx('foobar')
+        r'(?<=[\s]ctx\(")(\b%s\b)(?="\))\.?' % _regex_dot_extract       # whitespace ctx("foobar")
+    ]
 
     _engine = yaql.language.factory.YaqlFactory().create()
     _root_ctx = yaql.create_context()
@@ -153,9 +165,11 @@ class YAQLEvaluator(expr_base.Evaluator):
         if not isinstance(text, six.string_types):
             raise ValueError('Text to be evaluated is not typeof string.')
 
-        variables = []
+        results = [
+            cls._regex_var_parser.findall(expr.strip(cls._delimiter).strip())
+            for expr in cls._regex_parser.findall(text)
+        ]
 
-        for expr in cls._regex_parser.findall(text):
-            variables.extend(cls._regex_var_parser.findall(expr))
+        variables = [v.strip() for v in itertools.chain.from_iterable(results)]
 
         return sorted(list(set(variables)))
