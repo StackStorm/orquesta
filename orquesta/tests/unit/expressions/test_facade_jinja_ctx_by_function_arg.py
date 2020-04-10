@@ -19,7 +19,12 @@ from orquesta.tests.unit import base as test_base
 class JinjaFacadeVariableExtractionTest(test_base.ExpressionFacadeEvaluatorTest):
 
     def test_empty_extraction(self):
-        expr = '{{ just_text and $not_a_var and notctx(foo) and notctx("bar") and notctx(\'fu\') }}'
+        expr = (
+            '{{ just_text and $not_a_var and '
+            'notctx(foo) and notctx("bar") and notctx(\'fu\') '
+            'ctx("foo\') and ctx(\'foo") and ctx(foo") and '
+            'ctx("foo) and ctx(foo\') and ctx(\'foo) }}'
+        )
 
         self.assertListEqual([], expr_base.extract_vars(expr))
 
@@ -124,7 +129,8 @@ class JinjaFacadeVariableExtractionTest(test_base.ExpressionFacadeEvaluatorTest)
     def test_ignore_ctx_get_func_calls(self):
         expr = (
             '{{ctx().get(foo) and ctx().get(bar) and ctx().get("fu") and ctx().get(\'baz\') and '
-            'ctx().get(foo, "bar") and ctx().get("fu", "bar") and ctx().get(\'bar\', \'foo\') }}'
+            'ctx().get(foo, "bar") and ctx().get("fu", "bar") and ctx().get(\'bar\', \'foo\') and '
+            'ctx().get("foo\') and ctx().get(\'foo") and ctx().get("foo) and ctx().get(foo") }}'
         )
 
         expected_vars = []
