@@ -23,7 +23,7 @@ class JinjaVariableExtractionTest(test_base.ExpressionEvaluatorTest):
         super(JinjaVariableExtractionTest, cls).setUpClass()
 
     def test_empty_extraction(self):
-        expr = '{{ just_text and _not_a_var }}'
+        expr = '{{ just_text and $not_a_var and notctx().bar }}'
 
         self.assertListEqual([], self.evaluator.extract_vars(expr))
 
@@ -64,13 +64,14 @@ class JinjaVariableExtractionTest(test_base.ExpressionEvaluatorTest):
         self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
 
     def test_multiple_vars_extraction(self):
-        expr = '{{ ctx().foobar ctx().foo.get(bar) ctx().fu.bar ctx().fu.bar[0] }}'
+        expr = '{{ctx().fubar ctx().foobar ctx().foo.get(bar) ctx().fu.bar ctx().foobaz.bar[0] }}'
 
         expected_vars = [
             'ctx().foobar',
+            'ctx().foobaz.bar[0]',
             'ctx().foo.get(bar)',
-            'ctx().fu.bar',
-            'ctx().fu.bar[0]'
+            'ctx().fubar',
+            'ctx().fu.bar'
         ]
 
         self.assertListEqual(
