@@ -23,7 +23,10 @@ class YAQLFacadeVariableExtractionTest(test_base.ExpressionFacadeEvaluatorTest):
             '<% just_text and $not_a_var and '
             'notctx(foo) and notctx("bar") and notctx(\'fu\') '
             'ctx("foo\') and ctx(\'foo") and ctx(foo") and '
-            'ctx("foo) and ctx(foo\') and ctx(\'foo) %>'
+            'ctx("foo) and ctx(foo\') and ctx(\'foo) and '
+            'ctx(-foo) and ctx("-bar") and ctx(\'-fu\') and '
+            'ctx(foo.bar) and ctx("foo.bar") and ctx(\'foo.bar\') and '
+            'ctx(foo()) and ctx("foo()") and ctx(\'foo()\') %>'
         )
 
         self.assertListEqual([], expr_base.extract_vars(expr))

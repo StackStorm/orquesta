@@ -54,14 +54,14 @@ class JinjaEvaluator(expr_base.Evaluator):
     _regex_pattern = '{{.*?}}'
     _regex_parser = re.compile(_regex_pattern)
 
-    _regex_reference_pattern = r'[][a-zA-Z0-9_\'"\.()]*'
+    _regex_ctx_ref_pattern = r'[][a-zA-Z0-9_\'"\.()]*'
     # match any of:
     #   word boundary ctx(*)
     #   word boundary ctx()*
     #   word boundary ctx().*
     #   word boundary ctx(*)*
     #   word boundary ctx(*).*
-    _regex_ctx_pattern = r'\bctx\([\'"]?{0}[\'"]?\)\.?{0}'.format(_regex_reference_pattern)
+    _regex_ctx_pattern = r'\bctx\([\'"]?{0}[\'"]?\)\.?{0}'.format(_regex_ctx_ref_pattern)
     _regex_ctx_var_parser = re.compile(_regex_ctx_pattern)
 
     _regex_var = r'[a-zA-Z0-9_-]+'

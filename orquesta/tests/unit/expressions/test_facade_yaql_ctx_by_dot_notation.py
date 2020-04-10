@@ -19,7 +19,10 @@ from orquesta.tests.unit import base as test_base
 class YAQLFacadeVariableExtractionTest(test_base.ExpressionFacadeEvaluatorTest):
 
     def test_empty_extraction(self):
-        expr = '<% just_text and $not_a_var and fooctx(foo) and fooctx("bar") and fooctx(\'fu\') %>'
+        expr = (
+            '<% just_text and $not_a_var and notctx().bar and '
+            'ctx(). and ctx().() and ctx().-foobar and ctx().foobar() %>'
+        )
 
         self.assertListEqual([], expr_base.extract_vars(expr))
 

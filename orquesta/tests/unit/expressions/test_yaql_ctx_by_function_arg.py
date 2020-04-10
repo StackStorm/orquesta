@@ -23,7 +23,7 @@ class YAQLVariableExtractionTest(test_base.ExpressionEvaluatorTest):
         super(YAQLVariableExtractionTest, cls).setUpClass()
 
     def test_empty_extraction(self):
-        expr = '<% just_text and $not_a_var and fooctx(foo) and fooctx("bar") and fooctx(\'fu\') %>'
+        expr = '<% just_text and $not_a_var and notctx(foo) and notctx("bar") and notctx(\'fu\') %>'
 
         self.assertListEqual([], self.evaluator.extract_vars(expr))
 
