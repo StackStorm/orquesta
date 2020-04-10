@@ -66,14 +66,10 @@ class YAQLEvaluator(expr_base.Evaluator):
 
     _regex_var = '[a-zA-Z0-9_\-]+'
     _regex_var_extracts = [
-        r'(?<=^ctx\(\)\.)(\b%s\b)(?!\()\.?' % _regex_var,               # line start ctx().x
-        r'(?<=^ctx\()(\b%s\b)(?=\))\.?' % _regex_var,                   # line start ctx(x)
-        r'(?<=^ctx\(\')(\b%s\b)(?=\'\))\.?' % _regex_var,               # line start ctx('x')
-        r'(?<=^ctx\(")(\b%s\b)(?="\))\.?' % _regex_var,                 # line start ctx("x")
-        r'(?<=[\s]ctx\(\)\.)(\b%s\b)(?!\()\.?' % _regex_var,            # whitespace ctx().x
-        r'(?<=[\s]ctx\()(\b%s\b)(?=\))\.?' % _regex_var,                # whitespace ctx(x)
-        r'(?<=[\s]ctx\(\')(\b%s\b)(?=\'\))\.?' % _regex_var,            # whitespace ctx('x')
-        r'(?<=[\s]ctx\(")(\b%s\b)(?="\))\.?' % _regex_var               # whitespace ctx("x")
+        r'(?<=^ctx\(\)\.)(\b%s\b)(?!\()\.?' % _regex_var,                   # extract x in ctx().x
+        r'(?<=^ctx\()(\b%s\b)(?=\))\.?' % _regex_var,                       # extract x in ctx(x)
+        r'(?<=^ctx\(\')(\b%s\b)(?=\'\))\.?' % _regex_var,                   # extract x in ctx('x')
+        r'(?<=^ctx\(")(\b%s\b)(?="\))\.?' % _regex_var                      # extract x in ctx("x")
     ]
 
     _engine = yaql.language.factory.YaqlFactory().create()
