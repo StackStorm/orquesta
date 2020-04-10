@@ -54,17 +54,17 @@ class JinjaEvaluator(expr_base.Evaluator):
     _regex_pattern = '{{.*?}}'
     _regex_parser = re.compile(_regex_pattern)
 
-    _regex_ctx_pattern = '[a-zA-Z0-9_\'"\.\[\]\(\)]*'
+    _regex_ctx_pattern = r'[a-zA-Z0-9_\'"\.\[\]\(\)]*'
     _regex_ctx_patterns = [
-        '^ctx\(\)\.%s' % _regex_ctx_pattern,                                # line start ctx().*
-        '^ctx\([\'|"]?{0}[\'|"]?\)[\.{0}]?'.format(_regex_ctx_pattern),     # line start ctx(*).*
-        '[\s]ctx\(\)\.%s' % _regex_ctx_pattern,                             # whitespace ctx().*
-        '[\s]ctx\([\'|"]?{0}[\'|"]?\)[\.{0}]?'.format(_regex_ctx_pattern)   # whitespace ctx(*).*
+        r'^ctx\(\)\.%s' % _regex_ctx_pattern,                                # line start ctx().*
+        r'^ctx\([\'|"]?{0}[\'|"]?\)[\.{0}]?'.format(_regex_ctx_pattern),     # line start ctx(*).*
+        r'[\s]ctx\(\)\.%s' % _regex_ctx_pattern,                             # whitespace ctx().*
+        r'[\s]ctx\([\'|"]?{0}[\'|"]?\)[\.{0}]?'.format(_regex_ctx_pattern)   # whitespace ctx(*).*
     ]
-    _regex_ctx_var = '.*?(%s).*?' % '|'.join(_regex_ctx_patterns)
+    _regex_ctx_var = r'.*?(%s).*?' % '|'.join(_regex_ctx_patterns)
     _regex_ctx_var_parser = re.compile(_regex_ctx_var)
 
-    _regex_var = '[a-zA-Z0-9_\-]+'
+    _regex_var = r'[a-zA-Z0-9_\-]+'
     _regex_var_extracts = [
         r'(?<=^ctx\(\)\.)(\b%s\b)(?!\()\.?' % _regex_var,                   # extract x in ctx().x
         r'(?<=^ctx\()(\b%s\b)(?=\))\.?' % _regex_var,                       # extract x in ctx(x)
