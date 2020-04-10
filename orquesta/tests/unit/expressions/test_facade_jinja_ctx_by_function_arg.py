@@ -23,7 +23,7 @@ class JinjaFacadeVariableExtractionTest(test_base.ExpressionFacadeEvaluatorTest)
             '{{ just_text and $not_a_var and '
             'notctx(foo) and notctx("bar") and notctx(\'fu\') '
             'ctx("foo\') and ctx(\'foo") and ctx(foo") and '
-            'ctx("foo) and ctx(foo\') and ctx(\'foo) }}'
+            'ctx("foo) and ctx(foo\') and ctx(\'foo) and ctx(-foobar) }}'
         )
 
         self.assertListEqual([], expr_base.extract_vars(expr))
