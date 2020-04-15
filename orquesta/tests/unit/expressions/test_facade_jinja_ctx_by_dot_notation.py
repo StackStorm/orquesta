@@ -19,7 +19,10 @@ from orquesta.tests.unit import base as test_base
 class JinjaFacadeVariableExtractionTest(test_base.ExpressionFacadeEvaluatorTest):
 
     def test_empty_extraction(self):
-        expr = '{{ just_text and _not_a_var }}'
+        expr = (
+            '{{ just_text and $not_a_var and notctx().bar and '
+            'ctx(). and ctx().() and ctx().-foobar and ctx().foobar() }}'
+        )
 
         self.assertListEqual([], expr_base.extract_vars(expr))
 
@@ -52,12 +55,14 @@ class JinjaFacadeVariableExtractionTest(test_base.ExpressionFacadeEvaluatorTest)
         self.assertListEqual(expected_vars, expr_base.extract_vars(expr))
 
     def test_multiple_vars_extraction(self):
-        expr = '{{ ctx().foobar ctx().foo.get(bar) ctx().fu.bar ctx().fu.bar[0] }}'
+        expr = '{{ctx().fubar ctx().foobar ctx().foo.get(bar) ctx().fu.bar ctx().foobaz.bar[0] }}'
 
         expected_vars = [
             ('jinja', expr, 'foo'),
             ('jinja', expr, 'foobar'),
-            ('jinja', expr, 'fu')
+            ('jinja', expr, 'foobaz'),
+            ('jinja', expr, 'fu'),
+            ('jinja', expr, 'fubar')
         ]
 
         self.assertListEqual(expected_vars, expr_base.extract_vars(expr))
