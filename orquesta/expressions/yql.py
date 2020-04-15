@@ -20,6 +20,7 @@ import six
 
 import yaql
 import yaql.language.exceptions as yaql_exc
+import yaql.language.utils as yaql_utils
 
 from orquesta import exceptions as exc
 from orquesta.expressions import base as expr_base
@@ -79,7 +80,15 @@ class YAQLEvaluator(expr_base.Evaluator):
     @classmethod
     def contextualize(cls, data):
         ctx = cls._root_ctx.create_child_context()
-        ctx['__vars'] = data or {}
+
+        # Some yaql expressions (e.g. distinct()) refer to hash value of variable.
+        # But some built-in Python type values (e.g. list and dict) don't have __hash__() method.
+        # The convert_input_data method parses specified variable and convert it to hashable one.
+        if isinstance(data, yaql_utils.SequenceType) or isinstance(data, yaql_utils.MappingType):
+            ctx['__vars'] = yaql_utils.convert_input_data(data)
+        else:
+            ctx['__vars'] = data or {}
+
         ctx['__state'] = ctx['__vars'].get('__state')
         ctx['__current_task'] = ctx['__vars'].get('__current_task')
         ctx['__current_item'] = ctx['__vars'].get('__current_item')

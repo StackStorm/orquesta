@@ -269,3 +269,24 @@ class YAQLFacadeEvaluationTest(unittest.TestCase):
             expr_base.evaluate,
             expr
         )
+
+    def test_distinct_operator(self):
+        test_cases = [
+            {
+                'expr': '<% ctx(val).distinct() %>',
+                'input': {'val': [1, 2, 3, 1]},
+                'expect': [1, 2, 3]
+            },
+            {
+                'expr': '<% ctx(val).distinct() %>',
+                'input': {'val': [{'a': 1}, {'b': 2}, {'a': 1}]},
+                'expect': [{'a': 1}, {'b': 2}]
+            },
+            {
+                'expr': '<% ctx(val).distinct($[1]) %>',
+                'input': {'val': [['a', 1], ['b', 2], ['c', 1], ['a', 3]]},
+                'expect': [['a', 1], ['b', 2], ['a', 3]]
+            }
+        ]
+        for case in test_cases:
+            self.assertEqual(case['expect'], expr_base.evaluate(case['expr'], case['input']))

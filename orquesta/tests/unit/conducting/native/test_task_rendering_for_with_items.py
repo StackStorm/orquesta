@@ -82,7 +82,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTes
                 'type': 'error',
                 'message': (
                     'YaqlEvaluationException: Unable to evaluate expression \'<% item(x) %>\'. '
-                    'ExpressionEvaluationException: Item is not type of dict.'
+                    'ExpressionEvaluationException: Item is not type of collections.Mapping.'
                 ),
                 'task_id': 'task1',
                 'route': 0

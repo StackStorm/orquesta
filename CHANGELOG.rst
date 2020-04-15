@@ -39,6 +39,9 @@ Fixed
 * Check syntax on with items task to ensure action is indented correctly. Fixes #184 (bug fix)
 * Fix variable inspection where ctx().get() method calls are identified as errors.
   Fixes StackStorm/st2#4866 (bug fix)
+* Fix a problem of TypeError orccuring when a list (or dict) value that contains unhashable typed
+  value (list or dict) is passed in some YAQL operators (e.g. distinct()). Fixes #176 (bug fix)
+  Contributed by Hiroyasu Ohyama (@userlocalhost)
 
 1.0.0
 -----
