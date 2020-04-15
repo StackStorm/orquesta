@@ -37,6 +37,8 @@ Fixed
 * When inspecting custom YAQL/Jinja function to see if there is a context arg, use getargspec
   for py2 and getfullargspec for py3. (bug fix)
 * Check syntax on with items task to ensure action is indented correctly. Fixes #184 (bug fix)
+* Fix variable inspection where ctx().get() method calls are identified as errors.
+  Fixes StackStorm/st2#4866 (bug fix)
 
 1.0.0
 -----

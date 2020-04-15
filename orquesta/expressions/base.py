@@ -144,7 +144,6 @@ def evaluate(statement, data=None):
 
 
 def extract_vars(statement):
-
     variables = []
 
     if isinstance(statement, dict):
