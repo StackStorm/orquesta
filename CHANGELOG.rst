@@ -1,6 +1,14 @@
 Changelog
 =========
 
+In Development
+--------------
+
+Fixed
+~~~~~
+
+* Fix task retry where transition on error is also executed along with retry. (bug fix)
+
 1.1.0
 -----
 

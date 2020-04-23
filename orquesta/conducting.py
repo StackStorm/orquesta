@@ -926,7 +926,7 @@ class WorkflowConductor(object):
             # the condition if a retry for the task is required.
             if (self.get_workflow_status() in statuses.ACTIVE_STATUSES and
                     self._evaluate_task_retry(task_state_entry, current_ctx)):
-                self.update_task_state(task_id, route, events.TaskRetryEvent())
+                return self.update_task_state(task_id, route, events.TaskRetryEvent())
 
         # Evaluate task transitions if task is completed and status change is not processed.
         if new_task_status in statuses.COMPLETED_STATUSES and new_task_status != old_task_status:
