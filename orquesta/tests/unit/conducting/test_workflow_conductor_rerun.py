@@ -121,6 +121,9 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
             next:
               - when: <% succeeded() %>
                 publish: foobar="fubar"
+                do: task3
+          task3:
+            action: core.noop
 
         output:
           - foobar: <% ctx().foobar %>
@@ -234,6 +237,14 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         next_tasks = conductor.get_next_tasks()
         self.forward_task_statuses(conductor, next_tasks[0]["id"], fast_forward_success)
 
+        # Assert workflow is still running.
+        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
+
+        # Succeed task3.
+        next_tasks = conductor.get_next_tasks()
+        self.assertEqual(next_tasks[0]["id"], "task3")
+        self.forward_task_statuses(conductor, next_tasks[0]["id"], fast_forward_success)
+
         # Assert workflow is completed.
         conductor.render_workflow_output()
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
@@ -259,6 +270,9 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
             next:
               - when: <% succeeded() %>
                 publish: foobar="fubar"
+                do: task3
+          task3:
+            action: core.noop
 
         output:
           - foobar: <% ctx().foobar %>
@@ -319,6 +333,14 @@ class WorkflowConductorRerunTest(test_base.WorkflowConductorTest):
         # Succeed task2.
         next_tasks = conductor.get_next_tasks()
         self.assertEqual(next_tasks[0]["id"], "task2")
+        self.forward_task_statuses(conductor, next_tasks[0]["id"], fast_forward_success)
+
+        # Assert workflow is still running.
+        self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
+
+        # Succeed task3.
+        next_tasks = conductor.get_next_tasks()
+        self.assertEqual(next_tasks[0]["id"], "task3")
         self.forward_task_statuses(conductor, next_tasks[0]["id"], fast_forward_success)
 
         # Assert workflow is completed.
