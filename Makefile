@@ -57,7 +57,7 @@ schemas: reqs
 
 .PHONY: format
 format:
-	$(VENV_DIR)/bin/black orquesta
+	$(VENV_DIR)/bin/black orquesta -l 100
 
 .PHONY: check
 check:
