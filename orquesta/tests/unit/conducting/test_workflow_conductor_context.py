@@ -20,7 +20,6 @@ from orquesta.tests.unit import base as test_base
 
 
 class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
-
     def test_bad_app_ctx_references(self):
         wf_def = """
         version: 1.0
@@ -47,40 +46,40 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         # on workflow execution completion.
         expected_errors = [
             {
-                'type': 'error',
-                'message': (
-                    'YaqlEvaluationException: Unable to resolve key \'x\' in '
-                    'expression \'<% ctx().x %>\' from context.'
-                )
+                "type": "error",
+                "message": (
+                    "YaqlEvaluationException: Unable to resolve key 'x' in "
+                    "expression '<% ctx().x %>' from context."
+                ),
             },
             {
-                'type': 'error',
-                'message': (
-                    'YaqlEvaluationException: Unable to resolve key \'y\' in '
-                    'expression \'<% ctx().y %>\' from context.'
-                )
+                "type": "error",
+                "message": (
+                    "YaqlEvaluationException: Unable to resolve key 'y' in "
+                    "expression '<% ctx().y %>' from context."
+                ),
             },
             {
-                'type': 'error',
-                'message': (
-                    'YaqlEvaluationException: Unable to resolve key \'a\' in '
-                    'expression \'<% ctx().a %>\' from context.'
-                )
+                "type": "error",
+                "message": (
+                    "YaqlEvaluationException: Unable to resolve key 'a' in "
+                    "expression '<% ctx().a %>' from context."
+                ),
             },
             {
-                'type': 'error',
-                'message': (
-                    'YaqlEvaluationException: Unable to resolve key \'b\' in '
-                    'expression \'<% ctx().b %>\' from context.'
-                )
+                "type": "error",
+                "message": (
+                    "YaqlEvaluationException: Unable to resolve key 'b' in "
+                    "expression '<% ctx().b %>' from context."
+                ),
             },
             {
-                'type': 'error',
-                'message': (
-                    'YaqlEvaluationException: Unable to resolve key \'z\' in '
-                    'expression \'<% ctx().z %>\' from context.'
-                )
-            }
+                "type": "error",
+                "message": (
+                    "YaqlEvaluationException: Unable to resolve key 'z' in "
+                    "expression '<% ctx().z %>' from context."
+                ),
+            },
         ]
 
         spec = native_specs.WorkflowSpec(wf_def)
@@ -89,9 +88,7 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         conductor = conducting.WorkflowConductor(spec)
 
         self.assertRaises(
-            exc.InvalidWorkflowStatusTransition,
-            conductor.request_workflow_status,
-            statuses.RUNNING
+            exc.InvalidWorkflowStatusTransition, conductor.request_workflow_status, statuses.RUNNING
         )
 
         # Render workflow output and check workflow status and result.
@@ -101,11 +98,7 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         self.assertIsNone(conductor.get_workflow_output())
 
     def test_app_ctx_references(self):
-        app_ctx = {
-            'x': 'foobar',
-            'y': 'fubar',
-            'z': 'phobar'
-        }
+        app_ctx = {"x": "foobar", "y": "fubar", "z": "phobar"}
 
         wf_def = """
         version: 1.0
@@ -139,7 +132,7 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         self.assertListEqual(conductor.errors, expected_errors)
 
         # Complete tasks
-        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, "task1", [statuses.RUNNING, statuses.SUCCEEDED])
 
         # Render workflow output and check workflow status and output.
         conductor.render_workflow_output()
@@ -190,9 +183,7 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         self.assertDictEqual(spec.inspect(), {})
 
     def test_ctx_ref_private_var(self):
-        app_ctx = {
-            '__xyz': 'phobar'
-        }
+        app_ctx = {"__xyz": "phobar"}
 
         wf_def = """
         version: 1.0
@@ -212,53 +203,53 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         """
 
         expected_inspection_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx("__xyz") %>',
-                    'spec_path': 'output[0]',
-                    'schema_path': 'properties.output',
-                    'message': (
+                    "type": "yaql",
+                    "expression": '<% ctx("__xyz") %>',
+                    "spec_path": "output[0]",
+                    "schema_path": "properties.output",
+                    "message": (
                         'Variable "__xyz" that is prefixed with double underscores '
-                        'is considered a private variable and cannot be referenced.'
-                    )
+                        "is considered a private variable and cannot be referenced."
+                    ),
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx("__xyz") %>',
-                    'spec_path': 'tasks.task1.next[0].publish[0]',
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.next.items.properties.publish'
+                    "type": "yaql",
+                    "expression": '<% ctx("__xyz") %>',
+                    "spec_path": "tasks.task1.next[0].publish[0]",
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.next.items.properties.publish"
                     ),
-                    'message': (
+                    "message": (
                         'Variable "__xyz" that is prefixed with double underscores '
-                        'is considered a private variable and cannot be referenced.'
-                    )
-                }
+                        "is considered a private variable and cannot be referenced."
+                    ),
+                },
             ]
         }
 
         expected_conducting_errors = [
             {
-                'type': 'error',
-                'route': 0,
-                'task_id': 'task1',
-                'task_transition_id': 'continue__t0',
-                'message': (
-                    'YaqlEvaluationException: Unable to evaluate expression '
-                    '\'<% ctx("__xyz") %>\'. VariableInaccessibleError: The '
+                "type": "error",
+                "route": 0,
+                "task_id": "task1",
+                "task_transition_id": "continue__t0",
+                "message": (
+                    "YaqlEvaluationException: Unable to evaluate expression "
+                    "'<% ctx(\"__xyz\") %>'. VariableInaccessibleError: The "
                     'variable "__xyz" is for internal use and inaccessible.'
-                )
+                ),
             },
             {
-                'type': 'error',
-                'message': (
-                    'YaqlEvaluationException: Unable to evaluate expression '
-                    '\'<% ctx("__xyz") %>\'. VariableInaccessibleError: The '
+                "type": "error",
+                "message": (
+                    "YaqlEvaluationException: Unable to evaluate expression "
+                    "'<% ctx(\"__xyz\") %>'. VariableInaccessibleError: The "
                     'variable "__xyz" is for internal use and inaccessible.'
-                )
-            }
+                ),
+            },
         ]
 
         spec = native_specs.WorkflowSpec(wf_def)
@@ -270,7 +261,7 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
 
         # Complete tasks
-        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, "task1", [statuses.RUNNING, statuses.SUCCEEDED])
 
         # Render workflow output and check workflow status and output.
         conductor.render_workflow_output()
@@ -279,9 +270,7 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         self.assertIsNone(conductor.get_workflow_output())
 
     def test_ctx_get_all(self):
-        app_ctx = {
-            '__xyz': 'phobar'
-        }
+        app_ctx = {"__xyz": "phobar"}
 
         wf_def = """
         version: 1.0
@@ -301,7 +290,7 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         """
 
         # Ensure the private variables prefixed with double underscores are not included.
-        expected_output = {'data': {'foobar': 'fubar', 'task1': {'foobar': 'fubar'}}}
+        expected_output = {"data": {"foobar": "fubar", "task1": {"foobar": "fubar"}}}
         expected_errors = []
 
         spec = native_specs.WorkflowSpec(wf_def)
@@ -313,7 +302,7 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
 
         # Complete tasks
-        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, "task1", [statuses.RUNNING, statuses.SUCCEEDED])
 
         # Render workflow output and check workflow status and output.
         conductor.render_workflow_output()

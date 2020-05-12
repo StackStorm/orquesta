@@ -16,7 +16,6 @@ from orquesta.tests.unit.specs.mistral import base as test_base
 
 
 class WorkflowSpecValidationTest(test_base.MistralWorkflowSpecTest):
-
     def test_success(self):
         wf_def = """
             version: '2.0'
@@ -114,11 +113,11 @@ class WorkflowSpecValidationTest(test_base.MistralWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': '\'tasks\' is a required property',
-                    'schema_path': 'required',
-                    'spec_path': None
+                    "message": "'tasks' is a required property",
+                    "schema_path": "required",
+                    "spec_path": None,
                 }
             ]
         }
@@ -137,11 +136,11 @@ class WorkflowSpecValidationTest(test_base.MistralWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': '{} does not have enough properties',
-                    'schema_path': 'properties.tasks.minProperties',
-                    'spec_path': 'tasks'
+                    "message": "{} does not have enough properties",
+                    "schema_path": "properties.tasks.minProperties",
+                    "spec_path": "tasks",
                 }
             ]
         }
@@ -248,11 +247,11 @@ class WorkflowSpecValidationTest(test_base.MistralWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': "'junk' is not one of ['reverse', 'direct']",
-                    'schema_path': 'properties.type.enum',
-                    'spec_path': 'type'
+                    "message": "'junk' is not one of ['reverse', 'direct']",
+                    "schema_path": "properties.type.enum",
+                    "spec_path": "type",
                 }
             ]
         }
@@ -297,11 +296,11 @@ class WorkflowSpecValidationTest(test_base.MistralWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': '{} does not have enough properties',
-                    'schema_path': 'properties.output-on-error.minProperties',
-                    'spec_path': 'output-on-error'
+                    "message": "{} does not have enough properties",
+                    "schema_path": "properties.output-on-error.minProperties",
+                    "spec_path": "output-on-error",
                 }
             ]
         }
@@ -386,60 +385,69 @@ class WorkflowSpecValidationTest(test_base.MistralWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': '[] is not valid under any of the given schemas',
-                    'schema_path': ('properties.tasks.patternProperties'
-                                    '.^\\w+$.properties.concurrency.oneOf'),
-                    'spec_path': 'tasks.task1.concurrency'
+                    "message": "[] is not valid under any of the given schemas",
+                    "schema_path": (
+                        "properties.tasks.patternProperties" ".^\\w+$.properties.concurrency.oneOf"
+                    ),
+                    "spec_path": "tasks.task1.concurrency",
                 },
                 {
-                    'message': '{} is not valid under any of the given schemas',
-                    'schema_path': ('properties.tasks.patternProperties'
-                                    '.^\\w+$.properties.keep-result.oneOf'),
-                    'spec_path': 'tasks.task1.keep-result'
+                    "message": "{} is not valid under any of the given schemas",
+                    "schema_path": (
+                        "properties.tasks.patternProperties" ".^\\w+$.properties.keep-result.oneOf"
+                    ),
+                    "spec_path": "tasks.task1.keep-result",
                 },
                 {
-                    'message': '[] is not valid under any of the given schemas',
-                    'schema_path': ('properties.tasks.patternProperties'
-                                    '.^\\w+$.properties.pause-before.oneOf'),
-                    'spec_path': 'tasks.task1.pause-before'
+                    "message": "[] is not valid under any of the given schemas",
+                    "schema_path": (
+                        "properties.tasks.patternProperties" ".^\\w+$.properties.pause-before.oneOf"
+                    ),
+                    "spec_path": "tasks.task1.pause-before",
                 },
                 {
-                    'message': "'' is not of type 'object'",
-                    'schema_path': ('properties.tasks.patternProperties'
-                                    '.^\\w+$.properties.retry.type'),
-                    'spec_path': 'tasks.task1.retry'
+                    "message": "'' is not of type 'object'",
+                    "schema_path": (
+                        "properties.tasks.patternProperties" ".^\\w+$.properties.retry.type"
+                    ),
+                    "spec_path": "tasks.task1.retry",
                 },
                 {
-                    'message': '[] is not valid under any of the given schemas',
-                    'schema_path': ('properties.tasks.patternProperties'
-                                    '.^\\w+$.properties.safe-rerun.oneOf'),
-                    'spec_path': 'tasks.task1.safe-rerun'
+                    "message": "[] is not valid under any of the given schemas",
+                    "schema_path": (
+                        "properties.tasks.patternProperties" ".^\\w+$.properties.safe-rerun.oneOf"
+                    ),
+                    "spec_path": "tasks.task1.safe-rerun",
                 },
                 {
-                    'message': "{} is not of type 'string'",
-                    'schema_path': ('properties.tasks.patternProperties'
-                                    '.^\\w+$.properties.target.type'),
-                    'spec_path': 'tasks.task1.target'
+                    "message": "{} is not of type 'string'",
+                    "schema_path": (
+                        "properties.tasks.patternProperties" ".^\\w+$.properties.target.type"
+                    ),
+                    "spec_path": "tasks.task1.target",
                 },
                 {
-                    'message': '[] is not valid under any of the given schemas',
-                    'schema_path': ('properties.tasks.patternProperties'
-                                    '.^\\w+$.properties.timeout.oneOf'),
-                    'spec_path': 'tasks.task1.timeout'
+                    "message": "[] is not valid under any of the given schemas",
+                    "schema_path": (
+                        "properties.tasks.patternProperties" ".^\\w+$.properties.timeout.oneOf"
+                    ),
+                    "spec_path": "tasks.task1.timeout",
                 },
                 {
-                    'message': '[] is not valid under any of the given schemas',
-                    'schema_path': ('properties.tasks.patternProperties'
-                                    '.^\\w+$.properties.wait-after.oneOf'),
-                    'spec_path': 'tasks.task1.wait-after'
+                    "message": "[] is not valid under any of the given schemas",
+                    "schema_path": (
+                        "properties.tasks.patternProperties" ".^\\w+$.properties.wait-after.oneOf"
+                    ),
+                    "spec_path": "tasks.task1.wait-after",
                 },
                 {
-                    'message': '[] is not valid under any of the given schemas',
-                    'schema_path': ('properties.tasks.patternProperties'
-                                    '.^\\w+$.properties.wait-before.oneOf'),
-                    'spec_path': 'tasks.task1.wait-before'
+                    "message": "[] is not valid under any of the given schemas",
+                    "schema_path": (
+                        "properties.tasks.patternProperties" ".^\\w+$.properties.wait-before.oneOf"
+                    ),
+                    "spec_path": "tasks.task1.wait-before",
                 },
             ]
         }

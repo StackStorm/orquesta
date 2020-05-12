@@ -20,50 +20,31 @@ from orquesta.specs.native import v1 as native_v1_specs
 
 
 class SpecTest(unittest.TestCase):
-
     def setUp(self):
         super(SpecTest, self).setUp()
-        self.spec_module_name = 'native'
+        self.spec_module_name = "native"
 
     def test_get_module(self):
-        self.assertEqual(
-            spec_loader.get_spec_module(self.spec_module_name),
-            native_specs
-        )
+        self.assertEqual(spec_loader.get_spec_module(self.spec_module_name), native_specs)
 
     def test_get_spec(self):
         spec_module = spec_loader.get_spec_module(self.spec_module_name)
 
-        self.assertEqual(
-            spec_module.WorkflowSpec,
-            native_specs.WorkflowSpec
-        )
+        self.assertEqual(spec_module.WorkflowSpec, native_specs.WorkflowSpec)
 
     def test_spec_catalog(self):
         spec_module = spec_loader.get_spec_module(self.spec_module_name)
 
-        self.assertEqual(
-            spec_module.WorkflowSpec.get_catalog(),
-            self.spec_module_name
-        )
+        self.assertEqual(spec_module.WorkflowSpec.get_catalog(), self.spec_module_name)
 
     def test_spec_version(self):
-        self.assertEqual('1.0', native_v1_specs.VERSION)
-        self.assertEqual('1.0', native_specs.VERSION)
+        self.assertEqual("1.0", native_v1_specs.VERSION)
+        self.assertEqual("1.0", native_specs.VERSION)
 
     def test_workflow_spec_imports(self):
-        self.assertEqual(
-            native_specs.WorkflowSpec,
-            native_v1_specs.models.WorkflowSpec
-        )
+        self.assertEqual(native_specs.WorkflowSpec, native_v1_specs.models.WorkflowSpec)
 
     def test_task_spec_imports(self):
-        self.assertEqual(
-            native_specs.TaskTransitionSpec,
-            native_v1_specs.models.TaskTransitionSpec
-        )
+        self.assertEqual(native_specs.TaskTransitionSpec, native_v1_specs.models.TaskTransitionSpec)
 
-        self.assertEqual(
-            native_specs.TaskSpec,
-            native_v1_specs.models.TaskSpec
-        )
+        self.assertEqual(native_specs.TaskSpec, native_v1_specs.models.TaskSpec)

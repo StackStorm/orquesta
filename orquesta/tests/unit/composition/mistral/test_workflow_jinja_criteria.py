@@ -16,118 +16,79 @@ from orquesta.tests.unit.composition.mistral import base
 
 
 class JinjaCriteriaComposerTest(base.MistralWorkflowComposerTest):
-
     def test_decision_tree_with_jinja_expr(self):
-        wf_name = 'decision-jinja'
+        wf_name = "decision-jinja"
 
         expected_wf_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 't1'
-                },
-                {
-                    'id': 'a'
-                },
-                {
-                    'id': 'b'
-                },
-                {
-                    'id': 'c'
-                }
-            ],
-            'adjacency': [
+            "directed": True,
+            "graph": {},
+            "nodes": [{"id": "t1"}, {"id": "a"}, {"id": "b"}, {"id": "c"}],
+            "adjacency": [
                 [
                     {
-                        'id': 'a',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            't1',
-                            condition='on-success',
-                            expr="{{ ctx().which == 'a' }}"
-                        )
+                        "id": "a",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr(
+                            "t1", condition="on-success", expr="{{ ctx().which == 'a' }}"
+                        ),
                     },
                     {
-                        'id': 'b',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            't1',
-                            condition='on-success',
-                            expr="{{ ctx().which == 'b' }}"
-                        )
+                        "id": "b",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr(
+                            "t1", condition="on-success", expr="{{ ctx().which == 'b' }}"
+                        ),
                     },
                     {
-                        'id': 'c',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            't1',
-                            condition='on-success',
-                            expr="{{ not ctx().which in ['a', 'b'] }}"
-                        )
-                    }
+                        "id": "c",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr(
+                            "t1", condition="on-success", expr="{{ not ctx().which in ['a', 'b'] }}"
+                        ),
+                    },
                 ],
                 [],
                 [],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 't1'
-                },
-                {
-                    'id': 'a'
-                },
-                {
-                    'id': 'b'
-                },
-                {
-                    'id': 'c'
-                }
-            ],
-            'adjacency': [
+            "directed": True,
+            "graph": {},
+            "nodes": [{"id": "t1"}, {"id": "a"}, {"id": "b"}, {"id": "c"}],
+            "adjacency": [
                 [
                     {
-                        'id': 'a',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            't1',
-                            condition='on-success',
-                            expr="{{ ctx().which == 'a' }}"
-                        )
+                        "id": "a",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr(
+                            "t1", condition="on-success", expr="{{ ctx().which == 'a' }}"
+                        ),
                     },
                     {
-                        'id': 'b',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            't1',
-                            condition='on-success',
-                            expr="{{ ctx().which == 'b' }}"
-                        )
+                        "id": "b",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr(
+                            "t1", condition="on-success", expr="{{ ctx().which == 'b' }}"
+                        ),
                     },
                     {
-                        'id': 'c',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            't1',
-                            condition='on-success',
-                            expr="{{ not ctx().which in ['a', 'b'] }}"
-                        )
-                    }
+                        "id": "c",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr(
+                            "t1", condition="on-success", expr="{{ not ctx().which in ['a', 'b'] }}"
+                        ),
+                    },
                 ],
                 [],
                 [],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)

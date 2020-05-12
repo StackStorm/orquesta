@@ -49,9 +49,9 @@ class JinjaEvaluationException(exc.ExpressionEvaluationException):
 
 
 class JinjaEvaluator(expr_base.Evaluator):
-    _type = 'jinja'
-    _delimiter = '{{}}'
-    _regex_pattern = '{{.*?}}'
+    _type = "jinja"
+    _delimiter = "{{}}"
+    _regex_pattern = "{{.*?}}"
     _regex_parser = re.compile(_regex_pattern)
 
     _regex_ctx_ref_pattern = r'[][a-zA-Z0-9_\'"\.()]*'
@@ -64,37 +64,35 @@ class JinjaEvaluator(expr_base.Evaluator):
     _regex_ctx_pattern = r'\bctx\([\'"]?{0}[\'"]?\)\.?{0}'.format(_regex_ctx_ref_pattern)
     _regex_ctx_var_parser = re.compile(_regex_ctx_pattern)
 
-    _regex_var = r'[a-zA-Z0-9_-]+'
+    _regex_var = r"[a-zA-Z0-9_-]+"
     _regex_var_extracts = [
-        r'(?<=\bctx\(\)\.)({})\b(?!\()\.?'.format(_regex_var),              # extract x in ctx().x
-        r'(?:\bctx\(({})\))'.format(_regex_var),                            # extract x in ctx(x)
-        r'(?:\bctx\(\'({})\'\))'.format(_regex_var),                        # extract x in ctx('x')
-        r'(?:\bctx\("({})"\))'.format(_regex_var)                           # extract x in ctx("x")
+        r"(?<=\bctx\(\)\.)({})\b(?!\()\.?".format(_regex_var),  # extract x in ctx().x
+        r"(?:\bctx\(({})\))".format(_regex_var),  # extract x in ctx(x)
+        r"(?:\bctx\(\'({})\'\))".format(_regex_var),  # extract x in ctx('x')
+        r'(?:\bctx\("({})"\))'.format(_regex_var),  # extract x in ctx("x")
     ]
 
-    _block_delimiter = '{%}'
-    _regex_block_pattern = '{%.*?%}'
+    _block_delimiter = "{%}"
+    _regex_block_pattern = "{%.*?%}"
     _regex_block_parser = re.compile(_regex_block_pattern)
 
-    _regex_raw_block_pattern = '{% raw %}.*?{% endraw %}'
+    _regex_raw_block_pattern = "{% raw %}.*?{% endraw %}"
     _regex_raw_block_parser = re.compile(_regex_raw_block_pattern)
 
     _jinja_env = jinja2.Environment(
-        undefined=jinja2.StrictUndefined,
-        trim_blocks=True,
-        lstrip_blocks=True
+        undefined=jinja2.StrictUndefined, trim_blocks=True, lstrip_blocks=True
     )
 
     _custom_functions = register_functions(_jinja_env)
 
     @classmethod
     def contextualize(cls, data):
-        ctx = {'__vars': data}
+        ctx = {"__vars": data}
 
         if isinstance(data, dict):
-            ctx['__state'] = ctx['__vars'].get('__state')
-            ctx['__current_task'] = ctx['__vars'].get('__current_task')
-            ctx['__current_item'] = ctx['__vars'].get('__current_item')
+            ctx["__state"] = ctx["__vars"].get("__state")
+            ctx["__current_task"] = ctx["__vars"].get("__current_task")
+            ctx["__current_item"] = ctx["__vars"].get("__current_item")
 
         for name, func in six.iteritems(cls._custom_functions):
             ctx[name] = functools.partial(func, ctx) if expr_base.func_has_ctx_arg(func) else func
@@ -119,7 +117,7 @@ class JinjaEvaluator(expr_base.Evaluator):
     @classmethod
     def validate(cls, text):
         if not isinstance(text, six.string_types):
-            raise ValueError('Text to be evaluated is not typeof string.')
+            raise ValueError("Text to be evaluated is not typeof string.")
 
         errors = []
 
@@ -132,14 +130,12 @@ class JinjaEvaluator(expr_base.Evaluator):
         # Validate individual inline expressions.
         for expr in cls._regex_parser.findall(text):
             # Skip expression if it has already been validated and erred.
-            if list(filter(lambda x: x['expression'] == expr, errors)):
+            if list(filter(lambda x: x["expression"] == expr, errors)):
                 continue
 
             try:
                 parser = jinja2.parser.Parser(
-                    cls._jinja_env.overlay(),
-                    cls.strip_delimiter(expr),
-                    state='variable'
+                    cls._jinja_env.overlay(), cls.strip_delimiter(expr), state="variable"
                 )
 
                 parser.parse_expression()
@@ -153,7 +149,7 @@ class JinjaEvaluator(expr_base.Evaluator):
         exprs = cls._regex_parser.findall(text)
         block_exprs = cls._regex_block_parser.findall(text)
         ctx = cls.contextualize(data)
-        opts = {'undefined_to_none': False}
+        opts = {"undefined_to_none": False}
 
         try:
             # If there is a Jinja block expression in the text, then process the whole text.
@@ -204,16 +200,16 @@ class JinjaEvaluator(expr_base.Evaluator):
     @classmethod
     def evaluate(cls, text, data=None):
         if not isinstance(text, six.string_types):
-            raise ValueError('Text to be evaluated is not typeof string.')
+            raise ValueError("Text to be evaluated is not typeof string.")
 
         if data and not isinstance(data, dict):
-            raise ValueError('Provided data is not typeof dict.')
+            raise ValueError("Provided data is not typeof dict.")
 
         # Remove raw blocks from the expression.
         raw_blocks = cls._regex_raw_block_parser.findall(text)
 
         for i in range(0, len(raw_blocks)):
-            text = text.replace(raw_blocks[i], '{%s}' % str(i))
+            text = text.replace(raw_blocks[i], "{%s}" % str(i))
 
         # Recursively evaluate the expression.
         output = cls._evaluate_and_expand(text, data=data)
@@ -223,13 +219,13 @@ class JinjaEvaluator(expr_base.Evaluator):
 
             if exprs:
                 raise JinjaEvaluationException(
-                    'There are unresolved variables: %s' % ', '.join(exprs)
+                    "There are unresolved variables: %s" % ", ".join(exprs)
                 )
 
         if isinstance(output, six.string_types) and raw_blocks:
             # Put raw blocks back into the expression.
             for i in range(0, len(raw_blocks)):
-                output = output.replace('{%s}' % str(i), raw_blocks[i])  # pylint: disable=E1101
+                output = output.replace("{%s}" % str(i), raw_blocks[i])  # pylint: disable=E1101
 
             # Evaluate the raw blocks.
             ctx = cls.contextualize(data)
@@ -240,7 +236,7 @@ class JinjaEvaluator(expr_base.Evaluator):
     @classmethod
     def extract_vars(cls, text):
         if not isinstance(text, six.string_types):
-            raise ValueError('Text to be evaluated is not typeof string.')
+            raise ValueError("Text to be evaluated is not typeof string.")
 
         results = [
             cls._regex_ctx_var_parser.findall(expr.strip(cls._delimiter).strip())

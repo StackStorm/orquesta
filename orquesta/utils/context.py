@@ -22,32 +22,29 @@ LOG = logging.getLogger(__name__)
 
 def set_current_task(context, task):
     if context and not isinstance(context, dict):
-        raise TypeError('The context is not type of dict.')
+        raise TypeError("The context is not type of dict.")
 
     if not task:
-        raise ValueError('The task is not set.')
+        raise ValueError("The task is not set.")
 
     if not isinstance(task, dict):
-        raise TypeError('The task is not type of dict.')
+        raise TypeError("The task is not type of dict.")
 
     ctx = json_util.deepcopy(context) if context else dict()
 
-    ctx['__current_task'] = {
-        'id': task.get('id'),
-        'route': task.get('route')
-    }
+    ctx["__current_task"] = {"id": task.get("id"), "route": task.get("route")}
 
-    if 'result' in task:
-        ctx['__current_task']['result'] = task.get('result')
+    if "result" in task:
+        ctx["__current_task"]["result"] = task.get("result")
 
     return ctx
 
 
 def set_current_item(context, item):
     if context and not isinstance(context, dict):
-        raise TypeError('The context is not type of dict.')
+        raise TypeError("The context is not type of dict.")
 
     ctx = json_util.deepcopy(context) if context else dict()
-    ctx['__current_item'] = item
+    ctx["__current_item"] = item
 
     return ctx

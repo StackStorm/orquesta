@@ -20,15 +20,9 @@ import yaml
 
 LOG = logging.getLogger(__name__)
 
-FIXTURE_TYPES = [
-    'workflows'
-]
+FIXTURE_TYPES = ["workflows"]
 
-FIXTURE_EXTS = {
-    '.json': json.load,
-    '.yml': yaml.safe_load,
-    '.yaml': yaml.safe_load
-}
+FIXTURE_EXTS = {".json": json.load, ".yml": yaml.safe_load, ".yaml": yaml.safe_load}
 
 
 def get_fixtures_base_path():
@@ -36,19 +30,19 @@ def get_fixtures_base_path():
 
 
 def get_workflow_fixtures_base_path():
-    return os.path.join(get_fixtures_base_path(), 'workflows')
+    return os.path.join(get_fixtures_base_path(), "workflows")
 
 
 def get_fixture_content(fixture_file_name, fixture_type, raw=False):
     if fixture_type not in FIXTURE_TYPES:
-        raise Exception('Unsupported fixture type of %s' % fixture_type)
+        raise Exception("Unsupported fixture type of %s" % fixture_type)
 
     fixture_type_path = os.path.join(get_fixtures_base_path(), fixture_type)
     file_path = os.path.join(fixture_type_path, fixture_file_name)
     file_name, file_ext = os.path.splitext(file_path)
 
     if file_ext not in FIXTURE_EXTS.keys():
-        raise Exception('Unsupported fixture file ext type of %s.' % file_ext)
+        raise Exception("Unsupported fixture file ext type of %s." % file_ext)
 
-    with open(file_path, 'r') as fd:
+    with open(file_path, "r") as fd:
         return FIXTURE_EXTS[file_ext](fd) if not raw else fd.read()

@@ -42,7 +42,7 @@ def check_module_only(logical_line, physical_line, filename, noqa):
         return
 
     def check_is_module(mod, search_path=sys.path):
-        mod = mod.replace('(', '')  # Ignore parentheses
+        mod = mod.replace("(", "")  # Ignore parentheses
 
         for finder in sys.meta_path:
             if finder.find_module(mod) is not None:
@@ -51,8 +51,8 @@ def check_module_only(logical_line, physical_line, filename, noqa):
         try:
             mod_name = mod
 
-            while '.' in mod_name:
-                pack_name, _sep, mod_name = mod_name.partition('.')
+            while "." in mod_name:
+                pack_name, _sep, mod_name = mod_name.partition(".")
                 f, p, d = imp.find_module(pack_name, search_path)
                 search_path = [p]
 
@@ -60,8 +60,8 @@ def check_module_only(logical_line, physical_line, filename, noqa):
         except ImportError:
             try:
                 # Handle namespace modules
-                if '.' in mod:
-                    pack_name, mod_name = mod.rsplit('.', 1)
+                if "." in mod:
+                    pack_name, mod_name = mod.rsplit(".", 1)
                     __import__(pack_name, fromlist=[mod_name])
                 else:
                     __import__(mod)
@@ -84,7 +84,7 @@ def check_module_only(logical_line, physical_line, filename, noqa):
                 if mod in sys.modules:
                     return True
                 else:
-                    pack_name, _sep, mod_name = mod.rpartition('.')
+                    pack_name, _sep, mod_name = mod.rpartition(".")
                     if pack_name in sys.modules:
                         _mod = getattr(sys.modules[pack_name], mod_name, None)
                         return inspect.ismodule(_mod)
@@ -100,7 +100,11 @@ def check_module_only(logical_line, physical_line, filename, noqa):
 
     parts = logical_line.split()
 
-    if (len(parts) > 3 and parts[0] == 'from' and parts[1] != '__future__'
-            and not core.is_import_exception(parts[1])
-            and not is_module('.'.join([parts[1], parts[3]]))):
-        yield 0, 'O101 import must be module only'
+    if (
+        len(parts) > 3
+        and parts[0] == "from"
+        and parts[1] != "__future__"
+        and not core.is_import_exception(parts[1])
+        and not is_module(".".join([parts[1], parts[3]]))
+    ):
+        yield 0, "O101 import must be module only"

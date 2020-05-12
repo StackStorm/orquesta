@@ -17,126 +17,81 @@ from orquesta.utils import jsonify as json_util
 
 
 MOCK_LIST_DATA = {
-    'vms': [
-        {
-            'name': 'vmweb1',
-            'region': 'us-east',
-            'role': 'web'
-        },
-        {
-            'name': 'vmdb1',
-            'region': 'us-east',
-            'role': 'db'
-        },
-        {
-            'name': 'vmweb2',
-            'region': 'us-west',
-            'role': 'web'
-        },
-        {
-            'name': 'vmdb2',
-            'region': 'us-west',
-            'role': 'db'
-        }
+    "vms": [
+        {"name": "vmweb1", "region": "us-east", "role": "web"},
+        {"name": "vmdb1", "region": "us-east", "role": "db"},
+        {"name": "vmweb2", "region": "us-west", "role": "web"},
+        {"name": "vmdb2", "region": "us-west", "role": "db"},
     ]
 }
 
 MOCK_DICT_DATA = {
-    'vms': {
-        'vmdb1': {
-            'region': 'us-east',
-            'role': 'db',
-            'name': 'vmdb1'
-        },
-        'vmdb2': {
-            'region': 'us-west',
-            'role': 'db',
-            'name': 'vmdb2'
-        },
-        'vmweb1': {
-            'region': 'us-east',
-            'role': 'web',
-            'name': 'vmweb1'
-        },
-        'vmweb2': {
-            'region': 'us-west',
-            'role': 'web',
-            'name': 'vmweb2'
-        }
+    "vms": {
+        "vmdb1": {"region": "us-east", "role": "db", "name": "vmdb1"},
+        "vmdb2": {"region": "us-west", "role": "db", "name": "vmdb2"},
+        "vmweb1": {"region": "us-east", "role": "web", "name": "vmweb1"},
+        "vmweb2": {"region": "us-west", "role": "web", "name": "vmweb2"},
     }
 }
 
 
 class YAQLContextQueryTest(test_base.ExpressionEvaluatorTest):
-
     @classmethod
     def setUpClass(cls):
-        cls.language = 'yaql'
+        cls.language = "yaql"
         super(YAQLContextQueryTest, cls).setUpClass()
 
     def test_ctx_list_query(self):
-        expected_result = [i['name'] for i in MOCK_LIST_DATA['vms']]
+        expected_result = [i["name"] for i in MOCK_LIST_DATA["vms"]]
 
-        expr = '<% ctx(vms).select($.name) %>'
+        expr = "<% ctx(vms).select($.name) %>"
         self.assertListEqual([], self.evaluator.validate(expr))
         self.assertListEqual(self.evaluator.evaluate(expr, MOCK_LIST_DATA), expected_result)
 
-        expr = '<% ctx().vms.select($.name) %>'
+        expr = "<% ctx().vms.select($.name) %>"
         self.assertListEqual([], self.evaluator.validate(expr))
         self.assertListEqual(self.evaluator.evaluate(expr, MOCK_LIST_DATA), expected_result)
 
     def test_ctx_list_indexing(self):
-        expected_result = {
-            'name': 'vmweb1',
-            'region': 'us-east',
-            'role': 'web'
-        }
+        expected_result = {"name": "vmweb1", "region": "us-east", "role": "web"}
 
-        expr = '<% ctx(vms)[0] %>'
+        expr = "<% ctx(vms)[0] %>"
         self.assertListEqual([], self.evaluator.validate(expr))
         self.assertDictEqual(self.evaluator.evaluate(expr, MOCK_LIST_DATA), expected_result)
 
-        expr = '<% ctx().vms[0] %>'
+        expr = "<% ctx().vms[0] %>"
         self.assertListEqual([], self.evaluator.validate(expr))
         self.assertDictEqual(self.evaluator.evaluate(expr, MOCK_LIST_DATA), expected_result)
 
     def test_ctx_list_to_dict_transform(self):
         expected_result = json_util.deepcopy(MOCK_DICT_DATA)
 
-        expr = '<% dict(vms=>dict(ctx(vms).select([$.name, $]))) %>'
+        expr = "<% dict(vms=>dict(ctx(vms).select([$.name, $]))) %>"
         self.assertListEqual([], self.evaluator.validate(expr))
         self.assertDictEqual(self.evaluator.evaluate(expr, MOCK_LIST_DATA), expected_result)
 
-        expr = '<% dict(vms=>dict(ctx().vms.select([$.name, $]))) %>'
+        expr = "<% dict(vms=>dict(ctx().vms.select([$.name, $]))) %>"
         self.assertListEqual([], self.evaluator.validate(expr))
         self.assertDictEqual(self.evaluator.evaluate(expr, MOCK_LIST_DATA), expected_result)
 
     def test_ctx_dict_get(self):
-        expected_result = {
-            'name': 'vmweb1',
-            'region': 'us-east',
-            'role': 'web'
-        }
+        expected_result = {"name": "vmweb1", "region": "us-east", "role": "web"}
 
-        expr = '<% ctx(vms).get(vmweb1) %>'
+        expr = "<% ctx(vms).get(vmweb1) %>"
         self.assertListEqual([], self.evaluator.validate(expr))
         self.assertDictEqual(self.evaluator.evaluate(expr, MOCK_DICT_DATA), expected_result)
 
-        expr = '<% ctx().vms.get(vmweb1) %>'
+        expr = "<% ctx().vms.get(vmweb1) %>"
         self.assertListEqual([], self.evaluator.validate(expr))
         self.assertDictEqual(self.evaluator.evaluate(expr, MOCK_DICT_DATA), expected_result)
 
     def test_ctx_dict_indexing(self):
-        expected_result = {
-            'name': 'vmweb1',
-            'region': 'us-east',
-            'role': 'web'
-        }
+        expected_result = {"name": "vmweb1", "region": "us-east", "role": "web"}
 
-        expr = '<% ctx(vms)[vmweb1] %>'
+        expr = "<% ctx(vms)[vmweb1] %>"
         self.assertListEqual([], self.evaluator.validate(expr))
         self.assertDictEqual(self.evaluator.evaluate(expr, MOCK_DICT_DATA), expected_result)
 
-        expr = '<% ctx().vms[vmweb1] %>'
+        expr = "<% ctx().vms[vmweb1] %>"
         self.assertListEqual([], self.evaluator.validate(expr))
         self.assertDictEqual(self.evaluator.evaluate(expr, MOCK_DICT_DATA), expected_result)

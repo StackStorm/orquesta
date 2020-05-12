@@ -19,29 +19,28 @@ from orquesta import conducting
 from orquesta import statuses
 
 MOCK_WORKFLOW_STATE = {
-    'contexts': [],
-    'routes': [],
-    'sequence': [],
-    'staged': [],
-    'status': statuses.UNSET,
-    'tasks': {}
+    "contexts": [],
+    "routes": [],
+    "sequence": [],
+    "staged": [],
+    "status": statuses.UNSET,
+    "tasks": {},
 }
 
 
 class WorkflowStateTest(unittest.TestCase):
-
     def test_get_tasks(self):
         data = copy.deepcopy(MOCK_WORKFLOW_STATE)
 
         task_sequence = [
-            {'id': 'task1', 'route': 0},
-            {'id': 'task2', 'route': 0},
-            {'id': 'task3', 'route': 0},
-            {'id': 'task4', 'route': 0},
-            {'id': 'task5', 'route': 0}
+            {"id": "task1", "route": 0},
+            {"id": "task2", "route": 0},
+            {"id": "task3", "route": 0},
+            {"id": "task4", "route": 0},
+            {"id": "task5", "route": 0},
         ]
 
-        data['sequence'] = copy.deepcopy(task_sequence)
+        data["sequence"] = copy.deepcopy(task_sequence)
         state = conducting.WorkflowState.deserialize(data)
 
         actual_task_sequence = state.get_tasks(last_occurrence=False)
@@ -52,23 +51,23 @@ class WorkflowStateTest(unittest.TestCase):
         data = copy.deepcopy(MOCK_WORKFLOW_STATE)
 
         task_sequence = [
-            {'id': 'task1', 'route': 0},
-            {'id': 'task2', 'route': 0},
-            {'id': 'task2', 'route': 1},
-            {'id': 'task2', 'route': 2},
-            {'id': 'task3', 'route': 0}
+            {"id": "task1", "route": 0},
+            {"id": "task2", "route": 0},
+            {"id": "task2", "route": 1},
+            {"id": "task2", "route": 2},
+            {"id": "task3", "route": 0},
         ]
 
-        data['sequence'] = copy.deepcopy(task_sequence)
+        data["sequence"] = copy.deepcopy(task_sequence)
         state = conducting.WorkflowState.deserialize(data)
 
         expected_task_sequence = [
-            (1, {'id': 'task2', 'route': 0}),
-            (2, {'id': 'task2', 'route': 1}),
-            (3, {'id': 'task2', 'route': 2})
+            (1, {"id": "task2", "route": 0}),
+            (2, {"id": "task2", "route": 1}),
+            (3, {"id": "task2", "route": 2}),
         ]
 
-        actual_task_sequence = state.get_tasks(task_id='task2', last_occurrence=False)
+        actual_task_sequence = state.get_tasks(task_id="task2", last_occurrence=False)
 
         self.assertListEqual(actual_task_sequence, expected_task_sequence)
 
@@ -76,30 +75,28 @@ class WorkflowStateTest(unittest.TestCase):
         data = copy.deepcopy(MOCK_WORKFLOW_STATE)
 
         task_sequence = [
-            {'id': 'task1', 'route': 0},
-            {'id': 'task2', 'route': 0},
-            {'id': 'task2', 'route': 0},
-            {'id': 'task2', 'route': 1},
-            {'id': 'task3', 'route': 0}
+            {"id": "task1", "route": 0},
+            {"id": "task2", "route": 0},
+            {"id": "task2", "route": 0},
+            {"id": "task2", "route": 1},
+            {"id": "task3", "route": 0},
         ]
 
-        data['sequence'] = copy.deepcopy(task_sequence)
+        data["sequence"] = copy.deepcopy(task_sequence)
         state = conducting.WorkflowState.deserialize(data)
 
         expected_task_sequence = [
-            (1, {'id': 'task2', 'route': 0}),
-            (2, {'id': 'task2', 'route': 0})
+            (1, {"id": "task2", "route": 0}),
+            (2, {"id": "task2", "route": 0}),
         ]
 
-        actual_task_sequence = state.get_tasks(task_id='task2', route=0, last_occurrence=False)
+        actual_task_sequence = state.get_tasks(task_id="task2", route=0, last_occurrence=False)
 
         self.assertListEqual(actual_task_sequence, expected_task_sequence)
 
-        expected_task_sequence = [
-            (3, {'id': 'task2', 'route': 1})
-        ]
+        expected_task_sequence = [(3, {"id": "task2", "route": 1})]
 
-        actual_task_sequence = state.get_tasks(task_id='task2', route=1, last_occurrence=False)
+        actual_task_sequence = state.get_tasks(task_id="task2", route=1, last_occurrence=False)
 
         self.assertListEqual(actual_task_sequence, expected_task_sequence)
 
@@ -107,18 +104,18 @@ class WorkflowStateTest(unittest.TestCase):
         data = copy.deepcopy(MOCK_WORKFLOW_STATE)
 
         task_sequence = [
-            {'id': 'task1', 'route': 0, 'status': 'succeeded'},
-            {'id': 'task2', 'route': 0, 'status': 'failed'},
-            {'id': 'task2', 'route': 0, 'status': 'succeeded'},
-            {'id': 'task3', 'route': 0, 'status': 'running'}
+            {"id": "task1", "route": 0, "status": "succeeded"},
+            {"id": "task2", "route": 0, "status": "failed"},
+            {"id": "task2", "route": 0, "status": "succeeded"},
+            {"id": "task3", "route": 0, "status": "running"},
         ]
 
-        data['sequence'] = copy.deepcopy(task_sequence)
+        data["sequence"] = copy.deepcopy(task_sequence)
         state = conducting.WorkflowState.deserialize(data)
 
         expected_task_sequence = [
-            (0, {'id': 'task1', 'route': 0, 'status': 'succeeded'}),
-            (2, {'id': 'task2', 'route': 0, 'status': 'succeeded'})
+            (0, {"id": "task1", "route": 0, "status": "succeeded"}),
+            (2, {"id": "task2", "route": 0, "status": "succeeded"}),
         ]
 
         actual_task_sequence = state.get_tasks_by_status(statuses.SUCCEEDED, last_occurrence=False)
@@ -129,17 +126,17 @@ class WorkflowStateTest(unittest.TestCase):
         data = copy.deepcopy(MOCK_WORKFLOW_STATE)
 
         task_sequence = [
-            {'id': 'task1', 'route': 0, 'status': 'succeeded'},
-            {'id': 'task2', 'route': 0, 'status': 'succeeded', 'term': True},
-            {'id': 'task3', 'route': 0, 'status': 'succeeded', 'term': True}
+            {"id": "task1", "route": 0, "status": "succeeded"},
+            {"id": "task2", "route": 0, "status": "succeeded", "term": True},
+            {"id": "task3", "route": 0, "status": "succeeded", "term": True},
         ]
 
-        data['sequence'] = copy.deepcopy(task_sequence)
+        data["sequence"] = copy.deepcopy(task_sequence)
         state = conducting.WorkflowState.deserialize(data)
 
         expected_task_sequence = [
-            (1, {'id': 'task2', 'route': 0, 'status': 'succeeded', 'term': True}),
-            (2, {'id': 'task3', 'route': 0, 'status': 'succeeded', 'term': True})
+            (1, {"id": "task2", "route": 0, "status": "succeeded", "term": True}),
+            (2, {"id": "task3", "route": 0, "status": "succeeded", "term": True}),
         ]
 
         actual_task_sequence = state.get_terminal_tasks()
@@ -150,36 +147,30 @@ class WorkflowStateTest(unittest.TestCase):
         data = copy.deepcopy(MOCK_WORKFLOW_STATE)
 
         task_sequence = [
-            {'id': 'task1', 'route': 0},
-            {'id': 'task1', 'route': 0},
-            {'id': 'task2', 'route': 0},
-            {'id': 'task3', 'route': 0},
-            {'id': 'task3', 'route': 0},
-            {'id': 'task3', 'route': 0},
-            {'id': 'task4', 'route': 0},
-            {'id': 'task5', 'route': 0}
+            {"id": "task1", "route": 0},
+            {"id": "task1", "route": 0},
+            {"id": "task2", "route": 0},
+            {"id": "task3", "route": 0},
+            {"id": "task3", "route": 0},
+            {"id": "task3", "route": 0},
+            {"id": "task4", "route": 0},
+            {"id": "task5", "route": 0},
         ]
 
-        data['sequence'] = copy.deepcopy(task_sequence)
+        data["sequence"] = copy.deepcopy(task_sequence)
 
-        task_map = {
-            'task1__r0': 1,
-            'task2__r0': 2,
-            'task3__r0': 5,
-            'task4__r0': 6,
-            'task5__r0': 7
-        }
+        task_map = {"task1__r0": 1, "task2__r0": 2, "task3__r0": 5, "task4__r0": 6, "task5__r0": 7}
 
-        data['tasks'] = copy.deepcopy(task_map)
+        data["tasks"] = copy.deepcopy(task_map)
 
         state = conducting.WorkflowState.deserialize(data)
 
         expected_task_sequence = [
-            (1, {'id': 'task1', 'route': 0}),
-            (2, {'id': 'task2', 'route': 0}),
-            (5, {'id': 'task3', 'route': 0}),
-            (6, {'id': 'task4', 'route': 0}),
-            (7, {'id': 'task5', 'route': 0})
+            (1, {"id": "task1", "route": 0}),
+            (2, {"id": "task2", "route": 0}),
+            (5, {"id": "task3", "route": 0}),
+            (6, {"id": "task4", "route": 0}),
+            (7, {"id": "task5", "route": 0}),
         ]
 
         actual_task_sequence = state.get_tasks(last_occurrence=True)
@@ -190,33 +181,28 @@ class WorkflowStateTest(unittest.TestCase):
         data = copy.deepcopy(MOCK_WORKFLOW_STATE)
 
         task_sequence = [
-            {'id': 'task1', 'route': 0},
-            {'id': 'task2', 'route': 0},
-            {'id': 'task2', 'route': 0},
-            {'id': 'task2', 'route': 1},
-            {'id': 'task2', 'route': 1},
-            {'id': 'task3', 'route': 0}
+            {"id": "task1", "route": 0},
+            {"id": "task2", "route": 0},
+            {"id": "task2", "route": 0},
+            {"id": "task2", "route": 1},
+            {"id": "task2", "route": 1},
+            {"id": "task3", "route": 0},
         ]
 
-        data['sequence'] = copy.deepcopy(task_sequence)
+        data["sequence"] = copy.deepcopy(task_sequence)
 
-        task_map = {
-            'task1__r0': 0,
-            'task2__r0': 2,
-            'task2__r1': 4,
-            'task3__r0': 5
-        }
+        task_map = {"task1__r0": 0, "task2__r0": 2, "task2__r1": 4, "task3__r0": 5}
 
-        data['tasks'] = copy.deepcopy(task_map)
+        data["tasks"] = copy.deepcopy(task_map)
 
         state = conducting.WorkflowState.deserialize(data)
 
         expected_task_sequence = [
-            (2, {'id': 'task2', 'route': 0}),
-            (4, {'id': 'task2', 'route': 1})
+            (2, {"id": "task2", "route": 0}),
+            (4, {"id": "task2", "route": 1}),
         ]
 
-        actual_task_sequence = state.get_tasks(task_id='task2', last_occurrence=True)
+        actual_task_sequence = state.get_tasks(task_id="task2", last_occurrence=True)
 
         self.assertListEqual(actual_task_sequence, expected_task_sequence)
 
@@ -224,40 +210,31 @@ class WorkflowStateTest(unittest.TestCase):
         data = copy.deepcopy(MOCK_WORKFLOW_STATE)
 
         task_sequence = [
-            {'id': 'task1', 'route': 0},
-            {'id': 'task2', 'route': 0},
-            {'id': 'task2', 'route': 0},
-            {'id': 'task2', 'route': 1},
-            {'id': 'task2', 'route': 1},
-            {'id': 'task3', 'route': 0}
+            {"id": "task1", "route": 0},
+            {"id": "task2", "route": 0},
+            {"id": "task2", "route": 0},
+            {"id": "task2", "route": 1},
+            {"id": "task2", "route": 1},
+            {"id": "task3", "route": 0},
         ]
 
-        data['sequence'] = copy.deepcopy(task_sequence)
+        data["sequence"] = copy.deepcopy(task_sequence)
 
-        task_map = {
-            'task1__r0': 0,
-            'task2__r0': 2,
-            'task2__r1': 4,
-            'task3__r0': 5
-        }
+        task_map = {"task1__r0": 0, "task2__r0": 2, "task2__r1": 4, "task3__r0": 5}
 
-        data['tasks'] = copy.deepcopy(task_map)
+        data["tasks"] = copy.deepcopy(task_map)
 
         state = conducting.WorkflowState.deserialize(data)
 
-        expected_task_sequence = [
-            (2, {'id': 'task2', 'route': 0})
-        ]
+        expected_task_sequence = [(2, {"id": "task2", "route": 0})]
 
-        actual_task_sequence = state.get_tasks(task_id='task2', route=0, last_occurrence=True)
+        actual_task_sequence = state.get_tasks(task_id="task2", route=0, last_occurrence=True)
 
         self.assertListEqual(actual_task_sequence, expected_task_sequence)
 
-        expected_task_sequence = [
-            (4, {'id': 'task2', 'route': 1})
-        ]
+        expected_task_sequence = [(4, {"id": "task2", "route": 1})]
 
-        actual_task_sequence = state.get_tasks(task_id='task2', route=1, last_occurrence=True)
+        actual_task_sequence = state.get_tasks(task_id="task2", route=1, last_occurrence=True)
 
         self.assertListEqual(actual_task_sequence, expected_task_sequence)
 
@@ -265,27 +242,23 @@ class WorkflowStateTest(unittest.TestCase):
         data = copy.deepcopy(MOCK_WORKFLOW_STATE)
 
         task_sequence = [
-            {'id': 'task1', 'route': 0, 'status': 'succeeded'},
-            {'id': 'task2', 'route': 0, 'status': 'succeeded'},
-            {'id': 'task2', 'route': 0, 'status': 'succeeded'},
-            {'id': 'task3', 'route': 0, 'status': 'running'}
+            {"id": "task1", "route": 0, "status": "succeeded"},
+            {"id": "task2", "route": 0, "status": "succeeded"},
+            {"id": "task2", "route": 0, "status": "succeeded"},
+            {"id": "task3", "route": 0, "status": "running"},
         ]
 
-        data['sequence'] = copy.deepcopy(task_sequence)
+        data["sequence"] = copy.deepcopy(task_sequence)
 
-        task_map = {
-            'task1__r0': 0,
-            'task2__r0': 2,
-            'task3__r0': 3
-        }
+        task_map = {"task1__r0": 0, "task2__r0": 2, "task3__r0": 3}
 
-        data['tasks'] = copy.deepcopy(task_map)
+        data["tasks"] = copy.deepcopy(task_map)
 
         state = conducting.WorkflowState.deserialize(data)
 
         expected_task_sequence = [
-            (0, {'id': 'task1', 'route': 0, 'status': 'succeeded'}),
-            (2, {'id': 'task2', 'route': 0, 'status': 'succeeded'})
+            (0, {"id": "task1", "route": 0, "status": "succeeded"}),
+            (2, {"id": "task2", "route": 0, "status": "succeeded"}),
         ]
 
         actual_task_sequence = state.get_tasks_by_status(statuses.SUCCEEDED, last_occurrence=True)

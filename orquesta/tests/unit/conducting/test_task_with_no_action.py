@@ -19,7 +19,6 @@ from orquesta.tests.unit import base as test_base
 
 
 class WorkflowConductorExtendedTaskTest(test_base.WorkflowConductorTest):
-
     def test_init_task_with_no_action(self):
         wf_def = """
         version: 1.0
@@ -38,14 +37,14 @@ class WorkflowConductorExtendedTaskTest(test_base.WorkflowConductorTest):
         conductor.request_workflow_status(statuses.RUNNING)
 
         # Process task1.
-        task_name = 'task1'
+        task_name = "task1"
         expected_task_ctx = {}
         self.assert_next_task(conductor, task_name, expected_task_ctx)
         self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
 
         # Process task2.
-        task_name = 'task2'
-        expected_task_ctx = {'xyz': 123}
+        task_name = "task2"
+        expected_task_ctx = {"xyz": 123}
         self.assert_next_task(conductor, task_name, expected_task_ctx)
         self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
 
@@ -73,19 +72,19 @@ class WorkflowConductorExtendedTaskTest(test_base.WorkflowConductorTest):
         conductor.request_workflow_status(statuses.RUNNING)
 
         # Process task1.
-        task_name = 'task1'
+        task_name = "task1"
         expected_task_ctx = {}
         self.assert_next_task(conductor, task_name, expected_task_ctx)
         self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
 
         # Process task2.
-        task_name = 'task2'
+        task_name = "task2"
         self.assert_next_task(conductor, task_name, expected_task_ctx)
         self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
 
         # Process task3.
-        task_name = 'task3'
-        expected_task_ctx = {'xyz': 123}
+        task_name = "task3"
+        expected_task_ctx = {"xyz": 123}
         self.assert_next_task(conductor, task_name, expected_task_ctx)
         self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
 

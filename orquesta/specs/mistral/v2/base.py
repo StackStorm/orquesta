@@ -21,53 +21,41 @@ LOG = logging.getLogger(__name__)
 
 
 class Spec(spec_base.Spec):
-    _catalog = 'mistral'
+    _catalog = "mistral"
 
-    _version = '2.0'
+    _version = "2.0"
 
     _meta_schema = {
-        'type': 'object',
-        'properties': {
-            'version': {
-                'enum': [_version, float(_version)]
-            }
-        }
+        "type": "object",
+        "properties": {"version": {"enum": [_version, float(_version)]}},
     }
 
     def get_spec_path(self, prop_name, parent=None):
         if parent:
-            return parent.get('spec_path') + '.' + prop_name
+            return parent.get("spec_path") + "." + prop_name
         elif not parent and self.name:
-            return self.name + '.' + prop_name
+            return self.name + "." + prop_name
         else:
             return prop_name
 
 
 class MappingSpec(spec_base.MappingSpec):
-    _catalog = 'mistral'
+    _catalog = "mistral"
 
-    _version = '2.0'
+    _version = "2.0"
 
     _meta_schema = {
-        'type': 'object',
-        'properties': {
-            'version': {
-                'enum': [_version, float(_version)]
-            }
-        }
+        "type": "object",
+        "properties": {"version": {"enum": [_version, float(_version)]}},
     }
 
 
 class SequenceSpec(spec_base.SequenceSpec):
-    _catalog = 'mistral'
+    _catalog = "mistral"
 
-    _version = '2.0'
+    _version = "2.0"
 
     _meta_schema = {
-        'type': 'object',
-        'properties': {
-            'version': {
-                'enum': [_version, float(_version)]
-            }
-        }
+        "type": "object",
+        "properties": {"version": {"enum": [_version, float(_version)]}},
     }

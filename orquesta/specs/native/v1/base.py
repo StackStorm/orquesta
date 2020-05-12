@@ -21,45 +21,33 @@ LOG = logging.getLogger(__name__)
 
 
 class Spec(spec_base.Spec):
-    _catalog = 'native'
+    _catalog = "native"
 
-    _version = '1.0'
+    _version = "1.0"
 
     _meta_schema = {
-        'type': 'object',
-        'properties': {
-            'version': {
-                'enum': [_version, float(_version)]
-            }
-        }
+        "type": "object",
+        "properties": {"version": {"enum": [_version, float(_version)]}},
     }
 
 
 class MappingSpec(spec_base.MappingSpec):
-    _catalog = 'native'
+    _catalog = "native"
 
-    _version = '1.0'
+    _version = "1.0"
 
     _meta_schema = {
-        'type': 'object',
-        'properties': {
-            'version': {
-                'enum': [_version, float(_version)]
-            }
-        }
+        "type": "object",
+        "properties": {"version": {"enum": [_version, float(_version)]}},
     }
 
 
 class SequenceSpec(spec_base.SequenceSpec):
-    _catalog = 'native'
+    _catalog = "native"
 
-    _version = '1.0'
+    _version = "1.0"
 
     _meta_schema = {
-        'type': 'object',
-        'properties': {
-            'version': {
-                'enum': [_version, float(_version)]
-            }
-        }
+        "type": "object",
+        "properties": {"version": {"enum": [_version, float(_version)]}},
     }

@@ -20,7 +20,6 @@ from orquesta.tests.unit import base as test_base
 
 
 class WorkflowConductorEvalTaskRetryTest(test_base.WorkflowConductorTest):
-
     def test_no_task_retry(self):
         wf_def = """
         version: 1.0
@@ -43,7 +42,7 @@ class WorkflowConductorEvalTaskRetryTest(test_base.WorkflowConductorTest):
         conductor.request_workflow_status(statuses.RUNNING)
 
         # Forward task1 from running to failed.
-        task_id = 'task1'
+        task_id = "task1"
         route = 0
         ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
         conductor.update_task_state(task_id, route, ac_ex_event)
@@ -83,7 +82,7 @@ class WorkflowConductorEvalTaskRetryTest(test_base.WorkflowConductorTest):
         conductor.request_workflow_status(statuses.RUNNING)
 
         # Forward task1 from running to failed.
-        task_id = 'task1'
+        task_id = "task1"
         route = 0
         ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
         conductor.update_task_state(task_id, route, ac_ex_event)
@@ -92,7 +91,7 @@ class WorkflowConductorEvalTaskRetryTest(test_base.WorkflowConductorTest):
 
         # Get task state for task1.
         task_state_entry = conductor.get_task_state_entry(task_id, route)
-        task_state_entry['retry']['tally'] = 3
+        task_state_entry["retry"]["tally"] = 3
 
         # Set context for task1.
         current_task_ctx = conductor.make_task_context(task_state_entry, task_result=None)
@@ -124,7 +123,7 @@ class WorkflowConductorEvalTaskRetryTest(test_base.WorkflowConductorTest):
         conductor.request_workflow_status(statuses.RUNNING)
 
         # Forward task1 from running to failed.
-        task_id = 'task1'
+        task_id = "task1"
         route = 0
         ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
         conductor.update_task_state(task_id, route, ac_ex_event)
@@ -135,7 +134,7 @@ class WorkflowConductorEvalTaskRetryTest(test_base.WorkflowConductorTest):
         task_state_entry = conductor.get_task_state_entry(task_id, route)
 
         # Mock the task status.
-        task_state_entry['status'] = statuses.FAILED
+        task_state_entry["status"] = statuses.FAILED
 
         # Set context for task1.
         current_task_ctx = conductor.make_task_context(task_state_entry, task_result=None)
@@ -167,7 +166,7 @@ class WorkflowConductorEvalTaskRetryTest(test_base.WorkflowConductorTest):
         conductor.request_workflow_status(statuses.RUNNING)
 
         # Forward task1 from running to succeeded.
-        task_id = 'task1'
+        task_id = "task1"
         route = 0
         ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
         conductor.update_task_state(task_id, route, ac_ex_event)
@@ -208,9 +207,9 @@ class WorkflowConductorEvalTaskRetryTest(test_base.WorkflowConductorTest):
         conductor.request_workflow_status(statuses.RUNNING)
 
         # Forward task1 from running to succeeded.
-        task_id = 'task1'
+        task_id = "task1"
         route = 0
-        task_result = {'status_code': 400}
+        task_result = {"status_code": 400}
         ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
         conductor.update_task_state(task_id, route, ac_ex_event)
         ac_ex_event = events.ActionExecutionEvent(statuses.SUCCEEDED, result=task_result)
@@ -250,9 +249,9 @@ class WorkflowConductorEvalTaskRetryTest(test_base.WorkflowConductorTest):
         conductor.request_workflow_status(statuses.RUNNING)
 
         # Forward task1 from running to succeeded.
-        task_id = 'task1'
+        task_id = "task1"
         route = 0
-        task_result = {'status_code': 200}
+        task_result = {"status_code": 200}
         ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
         conductor.update_task_state(task_id, route, ac_ex_event)
         ac_ex_event = events.ActionExecutionEvent(statuses.SUCCEEDED, result=task_result)

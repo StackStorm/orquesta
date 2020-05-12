@@ -19,53 +19,52 @@ from orquesta.utils import jsonify as json_util
 
 
 class ContextUtilTest(unittest.TestCase):
-
     def test_set_current_task(self):
-        context = {'var1': 'foobar'}
-        task = {'id': 't1', 'route': 0}
+        context = {"var1": "foobar"}
+        task = {"id": "t1", "route": 0}
 
         context = ctx_util.set_current_task(context, task)
         expected_context = dict(
-            [('__current_task', json_util.deepcopy(task))] + list(context.items())
+            [("__current_task", json_util.deepcopy(task))] + list(context.items())
         )
 
         self.assertDictEqual(context, expected_context)
 
     def test_set_current_task_with_result(self):
-        context = {'var1': 'foobar'}
-        task = {'id': 't1', 'route': 0, 'result': 'foobar'}
+        context = {"var1": "foobar"}
+        task = {"id": "t1", "route": 0, "result": "foobar"}
 
         context = ctx_util.set_current_task(context, task)
         expected_context = dict(
-            [('__current_task', json_util.deepcopy(task))] + list(context.items())
+            [("__current_task", json_util.deepcopy(task))] + list(context.items())
         )
 
         self.assertDictEqual(context, expected_context)
 
     def test_set_current_task_nonetype_context(self):
-        task = {'id': 't1', 'route': 0}
+        task = {"id": "t1", "route": 0}
 
         context = ctx_util.set_current_task(None, task)
-        expected_context = {'__current_task': json_util.deepcopy(task)}
+        expected_context = {"__current_task": json_util.deepcopy(task)}
 
         self.assertDictEqual(context, expected_context)
 
     def test_set_current_task_empty_context(self):
-        task = {'id': 't1', 'route': 0}
+        task = {"id": "t1", "route": 0}
 
         context = ctx_util.set_current_task(dict(), task)
-        expected_context = {'__current_task': json_util.deepcopy(task)}
+        expected_context = {"__current_task": json_util.deepcopy(task)}
 
         self.assertDictEqual(context, expected_context)
 
     def test_set_current_task_empty_task(self):
-        context = {'var1': 'foobar'}
+        context = {"var1": "foobar"}
 
         self.assertRaises(ValueError, ctx_util.set_current_task, context, dict())
 
     def test_set_current_task_bad_types(self):
-        task = {'id': 't1', 'route': 0}
+        task = {"id": "t1", "route": 0}
 
-        self.assertRaises(TypeError, ctx_util.set_current_task, 'foobar', task)
+        self.assertRaises(TypeError, ctx_util.set_current_task, "foobar", task)
 
-        self.assertRaises(TypeError, ctx_util.set_current_task, dict(), 'foobar')
+        self.assertRaises(TypeError, ctx_util.set_current_task, dict(), "foobar")

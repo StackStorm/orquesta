@@ -23,7 +23,6 @@ from orquesta import statuses
 
 
 class WorkflowStateMachineTest(unittest.TestCase):
-
     def _prep_conductor(self, status=None):
         wf_def = """
         version: 1.0
@@ -55,52 +54,46 @@ class WorkflowStateMachineTest(unittest.TestCase):
 
     def test_bad_event_type(self):
         conductor = self._prep_conductor(statuses.RUNNING)
-        tk_ex_event = events.ExecutionEvent('foobar', statuses.RUNNING)
-        setattr(tk_ex_event, 'task_id', 'task1')
+        tk_ex_event = events.ExecutionEvent("foobar", statuses.RUNNING)
+        setattr(tk_ex_event, "task_id", "task1")
 
         self.assertRaises(
             exc.InvalidEventType,
             machines.WorkflowStateMachine.process_event,
             conductor.workflow_state,
-            tk_ex_event
+            tk_ex_event,
         )
 
     def test_bad_event_name(self):
         conductor = self._prep_conductor(statuses.RUNNING)
-        tk_ex_event = events.TaskExecutionEvent('task1', 0, statuses.RUNNING)
-        setattr(tk_ex_event, 'name', 'foobar')
+        tk_ex_event = events.TaskExecutionEvent("task1", 0, statuses.RUNNING)
+        setattr(tk_ex_event, "name", "foobar")
 
         self.assertRaises(
             exc.InvalidEvent,
             machines.WorkflowStateMachine.process_event,
             conductor.workflow_state,
-            tk_ex_event
+            tk_ex_event,
         )
 
     def test_bad_event_status(self):
-        self.assertRaises(
-            exc.InvalidStatus,
-            events.TaskExecutionEvent,
-            'task1',
-            0,
-            'foobar'
-        )
+        self.assertRaises(exc.InvalidStatus, events.TaskExecutionEvent, "task1", 0, "foobar")
 
     def test_bad_current_workflow_status(self):
         conductor = self._prep_conductor()
         conductor.workflow_state.status = statuses.ABANDONED
-        tk_ex_event = events.TaskExecutionEvent('task1', 0, statuses.RUNNING)
+        tk_ex_event = events.TaskExecutionEvent("task1", 0, statuses.RUNNING)
 
         self.assertRaises(
             exc.InvalidWorkflowStatusTransition,
             machines.WorkflowStateMachine.process_event,
             conductor.workflow_state,
-            tk_ex_event
+            tk_ex_event,
         )
 
     def test_bad_current_workflow_status_to_event_mapping(self):
         conductor = self._prep_conductor(statuses.REQUESTED)
-        tk_ex_event = events.TaskExecutionEvent('task1', 0, statuses.RUNNING)
+        tk_ex_event = events.TaskExecutionEvent("task1", 0, statuses.RUNNING)
 
         # If transition is not supported, then workflow status will not change.
         machines.WorkflowStateMachine.process_event(conductor.workflow_state, tk_ex_event)
@@ -109,33 +102,32 @@ class WorkflowStateMachineTest(unittest.TestCase):
     def test_workflow_status_transition(self):
         conductor = self._prep_conductor(statuses.RUNNING)
 
-        tk_ex_event = events.TaskExecutionEvent('task1', 0, statuses.RUNNING)
+        tk_ex_event = events.TaskExecutionEvent("task1", 0, statuses.RUNNING)
         machines.WorkflowStateMachine.process_event(conductor.workflow_state, tk_ex_event)
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
 
-        tk_ex_event = events.TaskExecutionEvent('task1', 0, statuses.PAUSED)
+        tk_ex_event = events.TaskExecutionEvent("task1", 0, statuses.PAUSED)
         machines.WorkflowStateMachine.process_event(conductor.workflow_state, tk_ex_event)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
 
 
 class FailedStateTransitionTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
         super(FailedStateTransitionTest, cls).setUpClass()
-        statuses.ALL_STATUSES.append('mock')
+        statuses.ALL_STATUSES.append("mock")
 
     @classmethod
     def tearDownClass(cls):
-        statuses.ALL_STATUSES.remove('mock')
+        statuses.ALL_STATUSES.remove("mock")
         super(FailedStateTransitionTest, cls).tearDownClass()
 
     def test_invalid_old_status(self):
         self.assertRaises(
             exc.InvalidStatus,
             machines.WorkflowStateMachine.is_transition_valid,
-            'foobar',
-            statuses.REQUESTED
+            "foobar",
+            statuses.REQUESTED,
         )
 
     def test_invalid_new_status(self):
@@ -143,15 +135,14 @@ class FailedStateTransitionTest(unittest.TestCase):
             exc.InvalidStatus,
             machines.WorkflowStateMachine.is_transition_valid,
             statuses.UNSET,
-            'foobar'
+            "foobar",
         )
 
     def test_original_status_not_in_transition_map(self):
-        self.assertFalse(machines.WorkflowStateMachine.is_transition_valid('mock', None))
+        self.assertFalse(machines.WorkflowStateMachine.is_transition_valid("mock", None))
 
 
 class StateTransitionTest(unittest.TestCase):
-
     def test_null_statuses(self):
         is_transition_valid = machines.WorkflowStateMachine.is_transition_valid
         self.assertTrue(is_transition_valid(None, None))
@@ -167,5 +158,5 @@ class StateTransitionTest(unittest.TestCase):
         ]
 
         for x, y in cases:
-            expected = (x == y or y in machines.WORKFLOW_STATE_MACHINE_DATA[x].values())
+            expected = x == y or y in machines.WORKFLOW_STATE_MACHINE_DATA[x].values()
             self.assertEqual(machines.WorkflowStateMachine.is_transition_valid(x, y), expected)

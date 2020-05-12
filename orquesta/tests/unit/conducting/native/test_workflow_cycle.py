@@ -17,21 +17,20 @@ from orquesta.tests.unit.conducting.native import base
 
 
 class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
-
     def test_cycle(self):
-        wf_name = 'cycle'
+        wf_name = "cycle"
 
         expected_task_seq = [
-            'prep',
-            'task1',
-            'task2',
-            'task3',
-            'task1',
-            'task2',
-            'task3',
-            'task1',
-            'task2',
-            'task3'
+            "prep",
+            "task1",
+            "task2",
+            "task3",
+            "task1",
+            "task2",
+            "task3",
+            "task1",
+            "task2",
+            "task3",
         ]
 
         self.assert_spec_inspection(wf_name)
@@ -39,28 +38,28 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         self.assert_conducting_sequences(wf_name, expected_task_seq)
 
     def test_cycles(self):
-        wf_name = 'cycles'
+        wf_name = "cycles"
 
         expected_task_seq = [
-            'prep',
-            'task1',
-            'task2',
-            'task3',
-            'task4',
-            'task2',
-            'task5',
-            'task1',
-            'task2',
-            'task3',
-            'task4',
-            'task2',
-            'task5',
-            'task1',
-            'task2',
-            'task3',
-            'task4',
-            'task2',
-            'task5'
+            "prep",
+            "task1",
+            "task2",
+            "task3",
+            "task4",
+            "task2",
+            "task5",
+            "task1",
+            "task2",
+            "task3",
+            "task4",
+            "task2",
+            "task5",
+            "task1",
+            "task2",
+            "task3",
+            "task4",
+            "task2",
+            "task5",
         ]
 
         self.assert_spec_inspection(wf_name)
@@ -68,24 +67,17 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         self.assert_conducting_sequences(wf_name, expected_task_seq)
 
     def test_rollback_retry(self):
-        wf_name = 'rollback-retry'
+        wf_name = "rollback-retry"
 
-        expected_task_seq = [
-            'init',
-            'check',
-            'create',
-            'rollback',
-            'check',
-            'delete'
-        ]
+        expected_task_seq = ["init", "check", "create", "rollback", "check", "delete"]
 
         mock_statuses = [
-            statuses.SUCCEEDED,   # init
-            statuses.FAILED,      # check
-            statuses.SUCCEEDED,   # create
-            statuses.SUCCEEDED,   # rollback
-            statuses.SUCCEEDED,   # check
-            statuses.SUCCEEDED    # delete
+            statuses.SUCCEEDED,  # init
+            statuses.FAILED,  # check
+            statuses.SUCCEEDED,  # create
+            statuses.SUCCEEDED,  # rollback
+            statuses.SUCCEEDED,  # check
+            statuses.SUCCEEDED,  # delete
         ]
 
         self.assert_spec_inspection(wf_name)
@@ -93,32 +85,32 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         self.assert_conducting_sequences(wf_name, expected_task_seq, mock_statuses=mock_statuses)
 
     def test_cycle_and_fork(self):
-        wf_name = 'cycle-fork'
+        wf_name = "cycle-fork"
 
         expected_task_seq = [
-            'init',
-            'query',
-            'decide_cheer',
-            'decide_work',
-            'cheer',
-            'notify_work',
-            'toil',
-            'query',
-            'decide_cheer',
-            'decide_work'
+            "init",
+            "query",
+            "decide_cheer",
+            "decide_work",
+            "cheer",
+            "notify_work",
+            "toil",
+            "query",
+            "decide_cheer",
+            "decide_work",
         ]
 
         mock_results = [
-            None,   # init
-            True,   # query
-            None,   # decide_cheer
-            None,   # decide_work
-            None,   # cheer
-            None,   # notify_work
-            None,   # toil
+            None,  # init
+            True,  # query
+            None,  # decide_cheer
+            None,  # decide_work
+            None,  # cheer
+            None,  # notify_work
+            None,  # toil
             False,  # query
-            None,   # decide_cheer
-            None,   # decide_work
+            None,  # decide_cheer
+            None,  # decide_work
         ]
 
         self.assert_spec_inspection(wf_name)

@@ -22,16 +22,16 @@ from orquesta.utils import dictionary as dict_util
 
 
 def get_schema_type(s):
-    return (s or {}).get('type')
+    return (s or {}).get("type")
 
 
 def check_schema_mergeable(s):
     schema_type = get_schema_type(s)
 
-    if s and schema_type not in ['array', 'object']:
+    if s and schema_type not in ["array", "object"]:
         raise exc.SchemaIncompatibleError(
-            'Merge operation is only supported for schema of type array '
-            'and object. The given schema is type %s.' % str(schema_type)
+            "Merge operation is only supported for schema of type array "
+            "and object. The given schema is type %s." % str(schema_type)
         )
 
 
@@ -41,15 +41,15 @@ def check_schemas_compatible(s1, s2):
 
     if s1_type != s2_type:
         raise exc.SchemaIncompatibleError(
-            'Merge requires both types of schema to be the same. '
-            'The schema types are %s and %s.' % (s1_type, s2_type)
+            "Merge requires both types of schema to be the same. "
+            "The schema types are %s and %s." % (s1_type, s2_type)
         )
 
     return s1_type
 
 
 def merge_schema(s1, s2, overwrite=True):
-    blank_schema_templates = [{'type': 'object'}, {'type': 'array'}]
+    blank_schema_templates = [{"type": "object"}, {"type": "array"}]
 
     if s1 and s1 not in blank_schema_templates and not s2:
         return copy.deepcopy(s1)
@@ -84,91 +84,86 @@ def merge_schema(s1, s2, overwrite=True):
 
 
 def merge_object_schema(s1, s2, overwrite=True):
-    schema = {'type': 'object'}
+    schema = {"type": "object"}
 
     properties = dict_util.merge_dicts(
-        copy.deepcopy(s1.get('properties', {})),
-        copy.deepcopy(s2.get('properties', {})),
-        overwrite=overwrite
+        copy.deepcopy(s1.get("properties", {})),
+        copy.deepcopy(s2.get("properties", {})),
+        overwrite=overwrite,
     )
 
     if properties:
-        schema['properties'] = properties
+        schema["properties"] = properties
 
     required = list(
-        set(copy.deepcopy(s1.get('required', []))).union(
-            set(copy.deepcopy(s2.get('required', []))))
+        set(copy.deepcopy(s1.get("required", []))).union(set(copy.deepcopy(s2.get("required", []))))
     )
 
     if required:
-        schema['required'] = sorted(required)
+        schema["required"] = sorted(required)
 
-    additional = (
-        s1.get('additionalProperties', True)
-        and s2.get('additionalProperties', True)
-    )
+    additional = s1.get("additionalProperties", True) and s2.get("additionalProperties", True)
 
     if not additional:
-        schema['additionalProperties'] = additional
+        schema["additionalProperties"] = additional
 
     pattern_properties = dict_util.merge_dicts(
-        copy.deepcopy(s1.get('patternProperties', {})),
-        copy.deepcopy(s2.get('patternProperties', {})),
-        overwrite=overwrite
+        copy.deepcopy(s1.get("patternProperties", {})),
+        copy.deepcopy(s2.get("patternProperties", {})),
+        overwrite=overwrite,
     )
 
     if pattern_properties:
-        schema['patternProperties'] = pattern_properties
+        schema["patternProperties"] = pattern_properties
 
     min_properties = (
-        s1.get('minProperties', 0) if not overwrite else
-        max(s1.get('minProperties', 0), s2.get('minProperties', 0))
+        s1.get("minProperties", 0)
+        if not overwrite
+        else max(s1.get("minProperties", 0), s2.get("minProperties", 0))
     )
 
     if min_properties > 0:
-        schema['minProperties'] = min_properties
+        schema["minProperties"] = min_properties
 
     max_properties = (
-        s1.get('maxProperties', 0) if not overwrite else
-        min(s1.get('maxProperties', 0), s2.get('maxProperties', 0))
+        s1.get("maxProperties", 0)
+        if not overwrite
+        else min(s1.get("maxProperties", 0), s2.get("maxProperties", 0))
     )
 
     if max_properties > 0:
-        schema['maxProperties'] = max_properties
+        schema["maxProperties"] = max_properties
 
     return schema
 
 
 def merge_array_schema(s1, s2, overwrite=True):
-    schema = {'type': 'array'}
+    schema = {"type": "array"}
 
     def process_schema_property(name, default):
         return s2.get(name, default) if overwrite else s1.get(name, default)
 
-    items = process_schema_property('items', [])
+    items = process_schema_property("items", [])
 
     if items:
-        schema['items'] = items
+        schema["items"] = items
 
-    unique_items = process_schema_property('uniqueItems', False)
+    unique_items = process_schema_property("uniqueItems", False)
 
     if unique_items:
-        schema['uniqueItems'] = unique_items
+        schema["uniqueItems"] = unique_items
 
-    min_items = process_schema_property('minItems', 0)
+    min_items = process_schema_property("minItems", 0)
 
     if min_items > 0:
-        schema['minItems'] = min_items
+        schema["minItems"] = min_items
 
-    max_items = process_schema_property('maxItems', 0)
+    max_items = process_schema_property("maxItems", 0)
 
     if max_items > 0:
-        schema['maxItems'] = max_items
+        schema["maxItems"] = max_items
 
     return schema
 
 
-SCHEMA_MERGE_FUNCTIONS = {
-    'object': merge_object_schema,
-    'array': merge_array_schema
-}
+SCHEMA_MERGE_FUNCTIONS = {"object": merge_object_schema, "array": merge_array_schema}

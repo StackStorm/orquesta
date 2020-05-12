@@ -19,7 +19,6 @@ from orquesta.tests.unit import base as test_base
 
 
 class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
-
     def test_get_task_status_at_various_locations(self):
         wf_def = """
         version: 1.0
@@ -43,8 +42,8 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
 
         expected_errors = []
         expected_output = {
-            'task_status_at_publish': 'succeeded',
-            'task_status_at_output': 'succeeded'
+            "task_status_at_publish": "succeeded",
+            "task_status_at_output": "succeeded",
         }
 
         spec = native_specs.WorkflowSpec(wf_def)
@@ -57,16 +56,16 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
         self.assertListEqual(conductor.errors, expected_errors)
 
         # Complete task1.
-        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, "task1", [statuses.RUNNING, statuses.SUCCEEDED])
 
         # Get next tasks and ensure task_status return expected result in task rendering.
         task2_ex_req = conductor.get_next_tasks()[0]
-        self.assertEqual(task2_ex_req['id'], 'task2')
-        self.assertEqual(task2_ex_req['actions'][0]['action'], 'core.echo')
-        self.assertEqual(task2_ex_req['actions'][0]['input']['message'], statuses.SUCCEEDED)
+        self.assertEqual(task2_ex_req["id"], "task2")
+        self.assertEqual(task2_ex_req["actions"][0]["action"], "core.echo")
+        self.assertEqual(task2_ex_req["actions"][0]["input"]["message"], statuses.SUCCEEDED)
 
         # Complete task2.
-        self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, "task2", [statuses.RUNNING, statuses.SUCCEEDED])
 
         # Render workflow output and check workflow status and output.
         conductor.render_workflow_output()
@@ -103,9 +102,9 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
 
         expected_errors = []
         expected_output = {
-            'task1_status': 'succeeded',
-            'task2_status': 'succeeded',
-            'task3_status': 'succeeded'
+            "task1_status": "succeeded",
+            "task2_status": "succeeded",
+            "task3_status": "succeeded",
         }
 
         spec = native_specs.WorkflowSpec(wf_def)
@@ -119,10 +118,10 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
 
         # Complete tasks
         status_changes = [statuses.RUNNING, statuses.SUCCEEDED]
-        self.forward_task_statuses(conductor, 'task1', status_changes)
-        self.forward_task_statuses(conductor, 'task2', status_changes)
-        self.forward_task_statuses(conductor, 'task3', status_changes, route=1)
-        self.forward_task_statuses(conductor, 'task3', status_changes, route=2)
+        self.forward_task_statuses(conductor, "task1", status_changes)
+        self.forward_task_statuses(conductor, "task2", status_changes)
+        self.forward_task_statuses(conductor, "task3", status_changes, route=1)
+        self.forward_task_statuses(conductor, "task3", status_changes, route=2)
 
         # Render workflow output and check workflow status and output.
         conductor.render_workflow_output()
@@ -165,9 +164,9 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
 
         expected_errors = []
         expected_output = {
-            'task1_status': 'succeeded',
-            'task2_status': 'succeeded',
-            'task3_status': 'succeeded'
+            "task1_status": "succeeded",
+            "task2_status": "succeeded",
+            "task3_status": "succeeded",
         }
 
         spec = native_specs.WorkflowSpec(wf_def)
@@ -181,9 +180,9 @@ class WorkflowConductorContextTest(test_base.WorkflowConductorTest):
 
         # Complete tasks
         status_changes = [statuses.RUNNING, statuses.SUCCEEDED]
-        self.forward_task_statuses(conductor, 'task1', status_changes)
-        self.forward_task_statuses(conductor, 'task2', status_changes, route=1)
-        self.forward_task_statuses(conductor, 'task3', status_changes, route=2)
+        self.forward_task_statuses(conductor, "task1", status_changes)
+        self.forward_task_statuses(conductor, "task2", status_changes, route=1)
+        self.forward_task_statuses(conductor, "task3", status_changes, route=2)
 
         # Render workflow output and check workflow status and output.
         conductor.render_workflow_output()

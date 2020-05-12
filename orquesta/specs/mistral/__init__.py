@@ -29,5 +29,5 @@ __all__ = [
     deserialize.__name__,
     WorkflowSpec.__name__,
     TaskDefaultsSpec.__name__,
-    TaskSpec.__name__
+    TaskSpec.__name__,
 ]

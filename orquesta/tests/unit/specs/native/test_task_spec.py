@@ -19,7 +19,6 @@ from orquesta.tests.unit.specs.native import base as test_base
 
 
 class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
-
     def test_delay_bad_syntax(self):
         wf_def = """
             version: 1.0
@@ -31,14 +30,13 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
         """
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': 'True is not valid under any of the given schemas',
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.delay.oneOf'
+                    "message": "True is not valid under any of the given schemas",
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$." "properties.delay.oneOf"
                     ),
-                    'spec_path': 'tasks.task1.delay'
+                    "spec_path": "tasks.task1.delay",
                 }
             ]
         }
@@ -61,7 +59,7 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
-        task1 = wf_spec.tasks['task1']
+        task1 = wf_spec.tasks["task1"]
 
         self.assertEqual(task1.delay, 100)
 
@@ -81,9 +79,9 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
-        task1 = wf_spec.tasks['task1']
+        task1 = wf_spec.tasks["task1"]
 
-        self.assertEqual(task1.delay, '<% ctx().delay %>')
+        self.assertEqual(task1.delay, "<% ctx().delay %>")
 
     def test_delay_with_bad_vars(self):
         wf_def = """
@@ -96,13 +94,13 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
         """
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().delay %>',
-                    'message': 'Variable "delay" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.delay',
-                    'spec_path': 'tasks.task1.delay'
+                    "type": "yaql",
+                    "expression": "<% ctx().delay %>",
+                    "message": 'Variable "delay" is referenced before assignment.',
+                    "schema_path": "properties.tasks.patternProperties.^\\w+$.properties.delay",
+                    "spec_path": "tasks.task1.delay",
                 }
             ]
         }
@@ -123,17 +121,16 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
         """
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': (
-                        "'foobar' does not match '%s'" %
-                        native_specs.ItemizedSpec._items_regex
+                    "message": (
+                        "'foobar' does not match '%s'" % native_specs.ItemizedSpec._items_regex
                     ),
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.with.properties.items.pattern'
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.with.properties.items.pattern"
                     ),
-                    'spec_path': 'tasks.task1.with.items'
+                    "spec_path": "tasks.task1.with.items",
                 }
             ]
         }
@@ -153,17 +150,16 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
         """
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': (
-                        "'foobar' does not match '%s'" %
-                        native_specs.ItemizedSpec._items_regex
+                    "message": (
+                        "'foobar' does not match '%s'" % native_specs.ItemizedSpec._items_regex
                     ),
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.with.properties.items.pattern'
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.with.properties.items.pattern"
                     ),
-                    'spec_path': 'tasks.task1.with.items'
+                    "spec_path": "tasks.task1.with.items",
                 }
             ]
         }
@@ -188,29 +184,29 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
         """
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': (
+                    "message": (
                         "'foo; bar in <%% zip(list(1, 2), list(a, b)) %%>' "
                         "does not match '%s'" % native_specs.ItemizedSpec._items_regex
                     ),
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.with.properties.items.pattern'
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.with.properties.items.pattern"
                     ),
-                    'spec_path': 'tasks.task1.with.items'
+                    "spec_path": "tasks.task1.with.items",
                 },
                 {
-                    'message': (
+                    "message": (
                         "'foo bar in <%% zip(list(1, 2), list(a, b)) %%>' "
                         "does not match '%s'" % native_specs.ItemizedSpec._items_regex
                     ),
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.with.properties.items.pattern'
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.with.properties.items.pattern"
                     ),
-                    'spec_path': 'tasks.task2.with.items'
-                }
+                    "spec_path": "tasks.task2.with.items",
+                },
             ]
         }
 
@@ -232,29 +228,29 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
         """
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': (
+                    "message": (
                         "'foo; bar in <%% zip(list(1, 2), list(a, b)) %%>' "
                         "does not match '%s'" % native_specs.ItemizedSpec._items_regex
                     ),
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.with.properties.items.pattern'
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.with.properties.items.pattern"
                     ),
-                    'spec_path': 'tasks.task1.with.items'
+                    "spec_path": "tasks.task1.with.items",
                 },
                 {
-                    'message': (
+                    "message": (
                         "'foo bar in <%% zip(list(1, 2), list(a, b)) %%>' "
                         "does not match '%s'" % native_specs.ItemizedSpec._items_regex
                     ),
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.with.properties.items.pattern'
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.with.properties.items.pattern"
                     ),
-                    'spec_path': 'tasks.task2.with.items'
-                }
+                    "spec_path": "tasks.task2.with.items",
+                },
             ]
         }
 
@@ -294,22 +290,22 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
-        expected_items = '<% ctx(xs) %>'
-        t1_with_attr = getattr(wf_spec.tasks['task1'], 'with')
+        expected_items = "<% ctx(xs) %>"
+        t1_with_attr = getattr(wf_spec.tasks["task1"], "with")
         self.assertEqual(t1_with_attr.items, expected_items)
 
         expected_items = "{{ ctx('xs') }}"
-        t2_with_attr = getattr(wf_spec.tasks['task2'], 'with')
+        t2_with_attr = getattr(wf_spec.tasks["task2"], "with")
         self.assertEqual(t2_with_attr.items, expected_items)
 
-        expected_items = '<% ctx(xs) %>'
-        expected_concurrency = '<% ctx(batch_size) %>'
-        t3_with_attr = getattr(wf_spec.tasks['task3'], 'with')
+        expected_items = "<% ctx(xs) %>"
+        expected_concurrency = "<% ctx(batch_size) %>"
+        t3_with_attr = getattr(wf_spec.tasks["task3"], "with")
         self.assertEqual(t3_with_attr.items, expected_items)
         self.assertEqual(t3_with_attr.concurrency, expected_concurrency)
 
         expected_items = "{{ ctx('xs') }}"
-        t4_with_attr = getattr(wf_spec.tasks['task4'], 'with')
+        t4_with_attr = getattr(wf_spec.tasks["task4"], "with")
         self.assertEqual(t4_with_attr.items, expected_items)
 
     def test_with_one_list_and_var_expansion(self):
@@ -344,22 +340,22 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
-        expected_items = 'x in <% ctx(xs) %>'
-        t1_with_attr = getattr(wf_spec.tasks['task1'], 'with')
+        expected_items = "x in <% ctx(xs) %>"
+        t1_with_attr = getattr(wf_spec.tasks["task1"], "with")
         self.assertEqual(t1_with_attr.items, expected_items)
 
         expected_items = "x in {{ ctx('xs') }}"
-        t2_with_attr = getattr(wf_spec.tasks['task2'], 'with')
+        t2_with_attr = getattr(wf_spec.tasks["task2"], "with")
         self.assertEqual(t2_with_attr.items, expected_items)
 
-        expected_items = 'x in <% ctx(xs) %>'
-        expected_concurrency = '<% ctx(batch_size) %>'
-        t3_with_attr = getattr(wf_spec.tasks['task3'], 'with')
+        expected_items = "x in <% ctx(xs) %>"
+        expected_concurrency = "<% ctx(batch_size) %>"
+        t3_with_attr = getattr(wf_spec.tasks["task3"], "with")
         self.assertEqual(t3_with_attr.items, expected_items)
         self.assertEqual(t3_with_attr.concurrency, expected_concurrency)
 
         expected_items = "x in {{ ctx('xs') }}"
-        t4_with_attr = getattr(wf_spec.tasks['task4'], 'with')
+        t4_with_attr = getattr(wf_spec.tasks["task4"], "with")
         self.assertEqual(t4_with_attr.items, expected_items)
 
     def test_with_two_lists(self):
@@ -393,20 +389,20 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
-        expected_items = 'x, y in <% zip(ctx(xs), ctx(ys)) %>'
-        t1_with_attr = getattr(wf_spec.tasks['task1'], 'with')
+        expected_items = "x, y in <% zip(ctx(xs), ctx(ys)) %>"
+        t1_with_attr = getattr(wf_spec.tasks["task1"], "with")
         self.assertEqual(t1_with_attr.items, expected_items)
 
         expected_items = "x, y in {{ zip(ctx('xs'), ctx('ys')) }}"
-        t2_with_attr = getattr(wf_spec.tasks['task2'], 'with')
+        t2_with_attr = getattr(wf_spec.tasks["task2"], "with")
         self.assertEqual(t2_with_attr.items, expected_items)
 
-        expected_items = 'x, y in <% zip(ctx(xs), ctx(ys)) %>'
-        t3_with_attr = getattr(wf_spec.tasks['task3'], 'with')
+        expected_items = "x, y in <% zip(ctx(xs), ctx(ys)) %>"
+        t3_with_attr = getattr(wf_spec.tasks["task3"], "with")
         self.assertEqual(t3_with_attr.items, expected_items)
 
         expected_items = "x, y in {{ zip(ctx('xs'), ctx('ys')) }}"
-        t4_with_attr = getattr(wf_spec.tasks['task4'], 'with')
+        t4_with_attr = getattr(wf_spec.tasks["task4"], "with")
         self.assertEqual(t4_with_attr.items, expected_items)
 
     def test_with_many_lists(self):
@@ -441,20 +437,20 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
 
         self.assertDictEqual(wf_spec.inspect(), {})
 
-        expected_items = 'x, y, z in <% zip(ctx(xs), ctx(ys), ctx(zs)) %>'
-        t1_with_attr = getattr(wf_spec.tasks['task1'], 'with')
+        expected_items = "x, y, z in <% zip(ctx(xs), ctx(ys), ctx(zs)) %>"
+        t1_with_attr = getattr(wf_spec.tasks["task1"], "with")
         self.assertEqual(t1_with_attr.items, expected_items)
 
         expected_items = "x, y, z in {{ zip(ctx('xs'), ctx('ys'), ctx('zs')) }}"
-        t2_with_attr = getattr(wf_spec.tasks['task2'], 'with')
+        t2_with_attr = getattr(wf_spec.tasks["task2"], "with")
         self.assertEqual(t2_with_attr.items, expected_items)
 
-        expected_items = 'x, y, z in <% zip(ctx(xs), ctx(ys), ctx(zs)) %>'
-        t3_with_attr = getattr(wf_spec.tasks['task3'], 'with')
+        expected_items = "x, y, z in <% zip(ctx(xs), ctx(ys), ctx(zs)) %>"
+        t3_with_attr = getattr(wf_spec.tasks["task3"], "with")
         self.assertEqual(t3_with_attr.items, expected_items)
 
         expected_items = "x, y, z in {{ zip(ctx('xs'), ctx('ys'), ctx('zs')) }}"
-        t4_with_attr = getattr(wf_spec.tasks['task4'], 'with')
+        t4_with_attr = getattr(wf_spec.tasks["task4"], "with")
         self.assertEqual(t4_with_attr.items, expected_items)
 
     def test_with_various_spacing(self):
@@ -516,22 +512,22 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
         self.assertDictEqual(wf_spec.inspect(), {})
 
         expected_items = {
-            'task1': ' <% ctx(xs) %> ',
-            'task2': '  <% ctx(xs) %>  ',
-            'task3': ' x in <% ctx(xs) %> ',
-            'task4': '  x in <% ctx(xs) %>  ',
-            'task5': 'x  in  <% ctx(xs) %>',
-            'task6': 'x,y in <% zip(ctx(xs), ctx(ys)) %>',
-            'task7': 'x,  y in <% zip(ctx(xs), ctx(ys)) %>',
-            'task8': ' x in <% ctx(xs) %> ',
-            'task9': '  x in <% ctx(xs) %>  ',
-            'task10': 'x  in  <% ctx(xs) %>',
-            'task11': 'x,y in <% zip(ctx(xs), ctx(ys)) %>',
-            'task12': 'x,  y in <% zip(ctx(xs), ctx(ys)) %>'
+            "task1": " <% ctx(xs) %> ",
+            "task2": "  <% ctx(xs) %>  ",
+            "task3": " x in <% ctx(xs) %> ",
+            "task4": "  x in <% ctx(xs) %>  ",
+            "task5": "x  in  <% ctx(xs) %>",
+            "task6": "x,y in <% zip(ctx(xs), ctx(ys)) %>",
+            "task7": "x,  y in <% zip(ctx(xs), ctx(ys)) %>",
+            "task8": " x in <% ctx(xs) %> ",
+            "task9": "  x in <% ctx(xs) %>  ",
+            "task10": "x  in  <% ctx(xs) %>",
+            "task11": "x,y in <% zip(ctx(xs), ctx(ys)) %>",
+            "task12": "x,  y in <% zip(ctx(xs), ctx(ys)) %>",
         }
 
         for task_name, items_expr in six.iteritems(expected_items):
-            tk_with_attr = getattr(wf_spec.tasks[task_name], 'with')
+            tk_with_attr = getattr(wf_spec.tasks[task_name], "with")
             self.assertEqual(tk_with_attr.items, items_expr)
 
     def test_with_items_bad_vars(self):
@@ -547,27 +543,27 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
         """
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx(size) %>',
-                    'message': 'Variable "size" is referenced before assignment.',
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.with.properties.concurrency'
+                    "type": "yaql",
+                    "expression": "<% ctx(size) %>",
+                    "message": 'Variable "size" is referenced before assignment.',
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.with.properties.concurrency"
                     ),
-                    'spec_path': 'tasks.task1.with.concurrency'
+                    "spec_path": "tasks.task1.with.concurrency",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': 'x in <% ctx(xs) %>',
-                    'message': 'Variable "xs" is referenced before assignment.',
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.with.properties.items'
+                    "type": "yaql",
+                    "expression": "x in <% ctx(xs) %>",
+                    "message": 'Variable "xs" is referenced before assignment.',
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.with.properties.items"
                     ),
-                    'spec_path': 'tasks.task1.with.items'
-                }
+                    "spec_path": "tasks.task1.with.items",
+                },
             ]
         }
 
@@ -586,16 +582,16 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
         """
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': 'x in <% ctx(xs) %>',
-                    'message': 'Variable "xs" is referenced before assignment.',
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.with.properties.items'
+                    "type": "yaql",
+                    "expression": "x in <% ctx(xs) %>",
+                    "message": 'Variable "xs" is referenced before assignment.',
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.with.properties.items"
                     ),
-                    'spec_path': 'tasks.task1.with.items'
+                    "spec_path": "tasks.task1.with.items",
                 }
             ]
         }
@@ -629,14 +625,13 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
         """
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': "'count' is a required property",
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.retry.required'
+                    "message": "'count' is a required property",
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$." "properties.retry.required"
                     ),
-                    'spec_path': 'tasks.task1.retry'
+                    "spec_path": "tasks.task1.retry",
                 }
             ]
         }
@@ -662,31 +657,31 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
         """
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': "['abc'] is not valid under any of the given schemas",
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.retry.properties.count.oneOf'
+                    "message": "['abc'] is not valid under any of the given schemas",
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.retry.properties.count.oneOf"
                     ),
-                    'spec_path': 'tasks.task1.retry.count'
+                    "spec_path": "tasks.task1.retry.count",
                 },
                 {
-                    'message': 'True is not valid under any of the given schemas',
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.retry.properties.delay.oneOf'
+                    "message": "True is not valid under any of the given schemas",
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.retry.properties.delay.oneOf"
                     ),
-                    'spec_path': 'tasks.task1.retry.delay'
+                    "spec_path": "tasks.task1.retry.delay",
                 },
                 {
-                    'message': "1 is not of type 'string'",
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.retry.properties.when.type'
+                    "message": "1 is not of type 'string'",
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.retry.properties.when.type"
                     ),
-                    'spec_path': 'tasks.task1.retry.when'
-                }
+                    "spec_path": "tasks.task1.retry.when",
+                },
             ]
         }
 

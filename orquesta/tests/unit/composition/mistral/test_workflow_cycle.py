@@ -16,341 +16,232 @@ from orquesta.tests.unit.composition.mistral import base
 
 
 class CyclicWorkflowComposerTest(base.MistralWorkflowComposerTest):
-
     def test_cycle(self):
-        wf_name = 'cycle'
+        wf_name = "cycle"
 
         expected_wf_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'prep'
-                },
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                }
+            "directed": True,
+            "graph": {},
+            "nodes": [{"id": "prep"}, {"id": "task1"}, {"id": "task2"}, {"id": "task3"}],
+            "adjacency": [
+                [
+                    {
+                        "id": "task1",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("prep", condition="on-success"),
+                    }
+                ],
+                [
+                    {
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
+                    }
+                ],
+                [
+                    {
+                        "id": "task3",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task2", condition="on-success"),
+                    }
+                ],
+                [
+                    {
+                        "id": "task1",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr(
+                            "task3", condition="on-success", expr="<% ctx().count < 2 %>"
+                        ),
+                    }
+                ],
             ],
-            'adjacency': [
-                [
-                    {
-                        'id': 'task1',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'prep',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task2',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task1',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task3',
-                            condition='on-success',
-                            expr="<% ctx().count < 2 %>"
-                        )
-                    }
-                ]
-            ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'prep'
-                },
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                }
+            "directed": True,
+            "graph": {},
+            "nodes": [{"id": "prep"}, {"id": "task1"}, {"id": "task2"}, {"id": "task3"}],
+            "adjacency": [
+                [
+                    {
+                        "id": "task1",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("prep", condition="on-success"),
+                    }
+                ],
+                [
+                    {
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
+                    }
+                ],
+                [
+                    {
+                        "id": "task3",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task2", condition="on-success"),
+                    }
+                ],
+                [
+                    {
+                        "id": "task1",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr(
+                            "task3", condition="on-success", expr="<% ctx().count < 2 %>"
+                        ),
+                    }
+                ],
             ],
-            'adjacency': [
-                [
-                    {
-                        'id': 'task1',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'prep',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task2',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task1',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task3',
-                            condition='on-success',
-                            expr="<% ctx().count < 2 %>"
-                        )
-                    }
-                ]
-            ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
 
     def test_cycles(self):
-        wf_name = 'cycles'
+        wf_name = "cycles"
 
         expected_wf_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'prep'
-                },
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                },
-                {
-                    'id': 'task4'
-                },
-                {
-                    'id': 'task5'
-                }
+            "directed": True,
+            "graph": {},
+            "nodes": [
+                {"id": "prep"},
+                {"id": "task1"},
+                {"id": "task2"},
+                {"id": "task3"},
+                {"id": "task4"},
+                {"id": "task5"},
             ],
-            'adjacency': [
+            "adjacency": [
                 [
                     {
-                        'id': 'task1',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'prep',
-                            condition='on-success'
-                        )
+                        "id": "task1",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("prep", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task2',
-                            condition='on-success',
-                            expr='<% not ctx().proceed %>'
-                        )
+                        "id": "task3",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr(
+                            "task2", condition="on-success", expr="<% not ctx().proceed %>"
+                        ),
                     },
                     {
-                        'id': 'task5',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task2',
-                            condition='on-success',
-                            expr='<% ctx().proceed %>'
-                        )
+                        "id": "task5",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr(
+                            "task2", condition="on-success", expr="<% ctx().proceed %>"
+                        ),
+                    },
+                ],
+                [
+                    {
+                        "id": "task4",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task3", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task3',
-                            condition='on-success'
-                        )
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task4", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task4',
-                            condition='on-success'
-                        )
+                        "id": "task1",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr(
+                            "task5", condition="on-success", expr="<% ctx().count < 2 %>"
+                        ),
                     }
                 ],
-                [
-                    {
-                        'id': 'task1',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task5',
-                            condition='on-success',
-                            expr="<% ctx().count < 2 %>"
-                        )
-                    }
-                ]
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'prep'
-                },
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                },
-                {
-                    'id': 'task4'
-                },
-                {
-                    'id': 'task5'
-                }
+            "directed": True,
+            "graph": {},
+            "nodes": [
+                {"id": "prep"},
+                {"id": "task1"},
+                {"id": "task2"},
+                {"id": "task3"},
+                {"id": "task4"},
+                {"id": "task5"},
             ],
-            'adjacency': [
+            "adjacency": [
                 [
                     {
-                        'id': 'task1',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'prep',
-                            condition='on-success'
-                        )
+                        "id": "task1",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("prep", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task2',
-                            condition='on-success',
-                            expr='<% not ctx().proceed %>'
-                        )
+                        "id": "task3",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr(
+                            "task2", condition="on-success", expr="<% not ctx().proceed %>"
+                        ),
                     },
                     {
-                        'id': 'task5',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task2',
-                            condition='on-success',
-                            expr='<% ctx().proceed %>'
-                        )
+                        "id": "task5",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr(
+                            "task2", condition="on-success", expr="<% ctx().proceed %>"
+                        ),
+                    },
+                ],
+                [
+                    {
+                        "id": "task4",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task3", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task3',
-                            condition='on-success'
-                        )
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task4", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task4',
-                            condition='on-success'
-                        )
+                        "id": "task1",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr(
+                            "task5", condition="on-success", expr="<% ctx().count < 2 %>"
+                        ),
                     }
                 ],
-                [
-                    {
-                        'id': 'task1',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task5',
-                            condition='on-success',
-                            expr="<% ctx().count < 2 %>"
-                        )
-                    }
-                ]
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)

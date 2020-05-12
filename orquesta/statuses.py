@@ -12,22 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-REQUESTED = 'requested'
-SCHEDULED = 'scheduled'
-DELAYED = 'delayed'
-RUNNING = 'running'
-PENDING = 'pending'
-PAUSING = 'pausing'
-PAUSED = 'paused'
-RESUMING = 'resuming'
-SUCCEEDED = 'succeeded'
-FAILED = 'failed'
-EXPIRED = 'timeout'
-ABANDONED = 'abandoned'
-RETRYING = 'retrying'
-CANCELING = 'canceling'
-CANCELED = 'canceled'
-UNSET = 'null'
+REQUESTED = "requested"
+SCHEDULED = "scheduled"
+DELAYED = "delayed"
+RUNNING = "running"
+PENDING = "pending"
+PAUSING = "pausing"
+PAUSED = "paused"
+RESUMING = "resuming"
+SUCCEEDED = "succeeded"
+FAILED = "failed"
+EXPIRED = "timeout"
+ABANDONED = "abandoned"
+RETRYING = "retrying"
+CANCELING = "canceling"
+CANCELED = "canceled"
+UNSET = "null"
 
 
 ALL_STATUSES = [
@@ -46,60 +46,23 @@ ALL_STATUSES = [
     RETRYING,
     CANCELING,
     CANCELED,
-    UNSET
+    UNSET,
 ]
 
-STARTING_STATUSES = [
-    REQUESTED,
-    SCHEDULED,
-    DELAYED,
-    RUNNING,
-    PENDING
-]
+STARTING_STATUSES = [REQUESTED, SCHEDULED, DELAYED, RUNNING, PENDING]
 
-RUNNING_STATUSES = [
-    REQUESTED,
-    SCHEDULED,
-    DELAYED,
-    RUNNING,
-    RESUMING,
-    RETRYING
-]
+RUNNING_STATUSES = [REQUESTED, SCHEDULED, DELAYED, RUNNING, RESUMING, RETRYING]
 
-ACTIVE_STATUSES = [
-    REQUESTED,
-    SCHEDULED,
-    DELAYED,
-    RUNNING,
-    RESUMING,
-    PAUSING,
-    CANCELING
-]
+ACTIVE_STATUSES = [REQUESTED, SCHEDULED, DELAYED, RUNNING, RESUMING, PAUSING, CANCELING]
 
-PAUSE_STATUSES = [
-    PAUSING,
-    PAUSED
-]
+PAUSE_STATUSES = [PAUSING, PAUSED]
 
-CANCEL_STATUSES = [
-    CANCELING,
-    CANCELED
-]
+CANCEL_STATUSES = [CANCELING, CANCELED]
 
-ABENDED_STATUSES = [
-    FAILED,
-    EXPIRED,
-    ABANDONED
-]
+ABENDED_STATUSES = [FAILED, EXPIRED, ABANDONED]
 
-COMPLETED_STATUSES = [
-    SUCCEEDED,
-    FAILED,
-    EXPIRED,
-    ABANDONED,
-    CANCELED
-]
+COMPLETED_STATUSES = [SUCCEEDED, FAILED, EXPIRED, ABANDONED, CANCELED]
 
 
 def is_valid(status):
-    return (status is None or status in ALL_STATUSES)
+    return status is None or status in ALL_STATUSES

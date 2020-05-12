@@ -30,7 +30,6 @@ LOG = logging.getLogger(__name__)
 
 @six.add_metaclass(abc.ABCMeta)
 class WorkflowGraph(object):
-
     def __init__(self, graph=None):
         # self._graph is the graph model for the workflow. The tracking of workflow and task
         # progress and state is separate from the graph model. There are use cases where tasks
@@ -40,9 +39,8 @@ class WorkflowGraph(object):
     def serialize(self):
         data = json_graph.adjacency_data(self._graph)
 
-        data['adjacency'] = [
-            sorted(outbounds, key=lambda x: x['id'])
-            for outbounds in data['adjacency']
+        data["adjacency"] = [
+            sorted(outbounds, key=lambda x: x["id"]) for outbounds in data["adjacency"]
         ]
 
         return data
@@ -55,11 +53,12 @@ class WorkflowGraph(object):
     @staticmethod
     def get_root_nodes(graph):
         nodes = [
-            {'id': n, 'name': graph.node[n].get('name', n)}
-            for n, d in graph.in_degree().items() if d == 0
+            {"id": n, "name": graph.node[n].get("name", n)}
+            for n, d in graph.in_degree().items()
+            if d == 0
         ]
 
-        return sorted(nodes, key=lambda x: x['id'])
+        return sorted(nodes, key=lambda x: x["id"])
 
     @property
     def roots(self):
@@ -80,7 +79,7 @@ class WorkflowGraph(object):
         if not self.has_task(task_id):
             raise exc.InvalidTask(task_id)
 
-        task = {'id': task_id}
+        task = {"id": task_id}
         task.update(json_util.deepcopy(self._graph.node[task_id]))
 
         return task
@@ -89,7 +88,7 @@ class WorkflowGraph(object):
         return dict_util.merge_dicts(
             {n: None for n in self._graph.nodes()},
             nx.get_node_attributes(self._graph, attribute),
-            overwrite=True
+            overwrite=True,
         )
 
     def add_task(self, task_id, **kwargs):
@@ -108,7 +107,7 @@ class WorkflowGraph(object):
     def has_transition(self, source, destination, **kwargs):
         edges = filter(
             lambda e: e[0] == source and e[1] == destination,
-            self._graph.edges(data=True, keys=True)  # pylint: disable=unexpected-keyword-arg
+            self._graph.edges(data=True, keys=True),  # pylint: disable=unexpected-keyword-arg
         )
 
         for attr, value in six.iteritems(kwargs):
@@ -120,12 +119,12 @@ class WorkflowGraph(object):
         if key is not None:
             edges = filter(
                 lambda e: e[0] == source and e[1] == destination and e[2] == key,
-                self._graph.edges(data=True, keys=True)  # pylint: disable=unexpected-keyword-arg
+                self._graph.edges(data=True, keys=True),  # pylint: disable=unexpected-keyword-arg
             )
         else:
             edges = filter(
                 lambda e: e[0] == source and e[1] == destination,
-                self._graph.edges(data=True, keys=True)  # pylint: disable=unexpected-keyword-arg
+                self._graph.edges(data=True, keys=True),  # pylint: disable=unexpected-keyword-arg
             )
 
             for attr, value in six.iteritems(kwargs):
@@ -168,35 +167,33 @@ class WorkflowGraph(object):
 
     def get_next_transitions(self, task_id):
         return sorted(
-            [e for e in self._graph.out_edges([task_id], data=True, keys=True)],
-            key=lambda x: x[1]
+            [e for e in self._graph.out_edges([task_id], data=True, keys=True)], key=lambda x: x[1]
         )
 
     def get_prev_transitions(self, task_id):
         return sorted(
-            [e for e in self._graph.in_edges([task_id], data=True, keys=True)],
-            key=lambda x: x[1]
+            [e for e in self._graph.in_edges([task_id], data=True, keys=True)], key=lambda x: x[1]
         )
 
     def get_barriers(self):
         return {
-            x[0]: x[1] for x in filter(lambda x: x[1].get('barrier'), self._graph.nodes(data=True))
+            x[0]: x[1] for x in filter(lambda x: x[1].get("barrier"), self._graph.nodes(data=True))
         }
 
-    def set_barrier(self, task_id, value='*'):
+    def set_barrier(self, task_id, value="*"):
         self.update_task(task_id, barrier=value)
 
     def get_barrier(self, task_id):
-        return self.get_task(task_id).get('barrier')
+        return self.get_task(task_id).get("barrier")
 
     def has_barrier(self, task_id):
         b = self.get_barrier(task_id)
 
-        return (b is not None and b != '')
+        return b is not None and b != ""
 
     def get_cycles(self):
         return [
-            {'tasks': sorted(c), 'route': nx.find_cycle(self._graph, c)}
+            {"tasks": sorted(c), "route": nx.find_cycle(self._graph, c)}
             for c in nx.simple_cycles(self._graph)
         ]
 
@@ -206,17 +203,17 @@ class WorkflowGraph(object):
     def is_cycle_closed(self, cycle):
         # A cycle is closed, for a lack of better term, if there is no task
         # transition to any task that is not a member of the cycle.
-        for task_id in cycle['tasks']:
+        for task_id in cycle["tasks"]:
             for transition in self.get_next_transitions(task_id):
-                if transition[1] not in cycle['tasks']:
+                if transition[1] not in cycle["tasks"]:
                     return False
 
         return True
 
     def get_task_retry_spec(self, task_id):
-        return self.get_task(task_id).get('retry')
+        return self.get_task(task_id).get("retry")
 
     def task_has_retry(self, task_id):
         r = self.get_task_retry_spec(task_id)
 
-        return (r is not None and isinstance(r, dict) and 'count' in r)
+        return r is not None and isinstance(r, dict) and "count" in r

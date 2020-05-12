@@ -16,10 +16,9 @@ from orquesta.tests.unit import base as test_base
 
 
 class MistralWorkflowComposerTest(test_base.WorkflowComposerTest):
-
     @classmethod
     def setUpClass(cls):
-        cls.spec_module_name = 'mistral'
+        cls.spec_module_name = "mistral"
         super(MistralWorkflowComposerTest, cls).setUpClass()
 
     def compose_seq_expr(self, name, *args, **kwargs):

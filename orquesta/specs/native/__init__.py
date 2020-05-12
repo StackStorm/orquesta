@@ -34,5 +34,5 @@ __all__ = [
     TaskMappingSpec.__name__,
     TaskSpec.__name__,
     TaskTransitionSequenceSpec.__name__,
-    TaskTransitionSpec.__name__
+    TaskTransitionSpec.__name__,
 ]

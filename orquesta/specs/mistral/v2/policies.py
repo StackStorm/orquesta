@@ -33,28 +33,28 @@ TARGET_SCHEMA = spec_types.NONEMPTY_STRING
 
 class RetrySpec(mistral_v2_spec_base.Spec):
     _schema = {
-        'type': 'object',
-        'properties': {
-            'count': spec_types.STRING_OR_POSITIVE_INTEGER,
-            'break-on': spec_types.NONEMPTY_STRING,
-            'continue-on': spec_types.NONEMPTY_STRING,
-            'delay': spec_types.STRING_OR_POSITIVE_INTEGER
+        "type": "object",
+        "properties": {
+            "count": spec_types.STRING_OR_POSITIVE_INTEGER,
+            "break-on": spec_types.NONEMPTY_STRING,
+            "continue-on": spec_types.NONEMPTY_STRING,
+            "delay": spec_types.STRING_OR_POSITIVE_INTEGER,
         },
-        'required': ['delay', 'count'],
-        'additionalProperties': False
+        "required": ["delay", "count"],
+        "additionalProperties": False,
     }
 
 
 class PoliciesSpec(mistral_v2_spec_base.Spec):
     _schema = {
-        'type': 'object',
-        'properties': {
-            'retry': RetrySpec,
-            'wait-before': WAIT_BEFORE_SCHEMA,
-            'wait-after': WAIT_AFTER_SCHEMA,
-            'timeout': TIMEOUT_SCHEMA,
-            'pause-before': PAUSE_BEFORE_SCHEMA,
-            'concurrency': CONCURRENCY_SCHEMA,
+        "type": "object",
+        "properties": {
+            "retry": RetrySpec,
+            "wait-before": WAIT_BEFORE_SCHEMA,
+            "wait-after": WAIT_AFTER_SCHEMA,
+            "timeout": TIMEOUT_SCHEMA,
+            "pause-before": PAUSE_BEFORE_SCHEMA,
+            "concurrency": CONCURRENCY_SCHEMA,
         },
-        'additionalProperties': False
+        "additionalProperties": False,
     }

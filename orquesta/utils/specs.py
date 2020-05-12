@@ -24,20 +24,20 @@ LOG = logging.getLogger(__name__)
 
 def instantiate(spec_type, definition):
     if not definition:
-        raise ValueError('Workflow definition is empty.')
+        raise ValueError("Workflow definition is empty.")
 
     if isinstance(definition, six.string_types):
         definition = yaml.safe_load(definition)
 
     if not isinstance(definition, dict):
-        raise ValueError('Unable to convert workflow definition into dict.')
+        raise ValueError("Unable to convert workflow definition into dict.")
 
     spec_module = spec_loader.get_spec_module(spec_type)
 
-    version = definition.pop('version', None)
+    version = definition.pop("version", None)
 
     if not version:
-        raise ValueError('Version of the workflow definition is not provided.')
+        raise ValueError("Version of the workflow definition is not provided.")
 
     spec_version = spec_module.VERSION
 
@@ -45,13 +45,13 @@ def instantiate(spec_type, definition):
         raise ValueError('Workflow definition is not the supported version "%s".', spec_version)
 
     if not definition.keys():
-        raise ValueError('Workflow definition contains no workflow.')
+        raise ValueError("Workflow definition contains no workflow.")
 
     return spec_module.instantiate(definition)
 
 
 def deserialize(data):
-    spec_type = data.get('catalog')
+    spec_type = data.get("catalog")
     spec_module = spec_loader.get_spec_module(spec_type)
 
     return spec_module.deserialize(data)

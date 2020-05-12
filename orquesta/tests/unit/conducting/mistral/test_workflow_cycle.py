@@ -16,48 +16,47 @@ from orquesta.tests.unit.conducting.mistral import base
 
 
 class CyclicWorkflowConductorTest(base.MistralWorkflowConductorTest):
-
     def test_cycle(self):
-        wf_name = 'cycle'
+        wf_name = "cycle"
 
         expected_task_seq = [
-            'prep',
-            'task1',
-            'task2',
-            'task3',
-            'task1',
-            'task2',
-            'task3',
-            'task1',
-            'task2',
-            'task3'
+            "prep",
+            "task1",
+            "task2",
+            "task3",
+            "task1",
+            "task2",
+            "task3",
+            "task1",
+            "task2",
+            "task3",
         ]
 
         self.assert_conducting_sequences(wf_name, expected_task_seq)
 
     def test_cycles(self):
-        wf_name = 'cycles'
+        wf_name = "cycles"
 
         expected_task_seq = [
-            'prep',
-            'task1',
-            'task2',
-            'task3',
-            'task4',
-            'task2',
-            'task5',
-            'task1',
-            'task2',
-            'task3',
-            'task4',
-            'task2',
-            'task5',
-            'task1',
-            'task2',
-            'task3',
-            'task4',
-            'task2',
-            'task5'
+            "prep",
+            "task1",
+            "task2",
+            "task3",
+            "task4",
+            "task2",
+            "task5",
+            "task1",
+            "task2",
+            "task3",
+            "task4",
+            "task2",
+            "task5",
+            "task1",
+            "task2",
+            "task3",
+            "task4",
+            "task2",
+            "task5",
         ]
 
         self.assert_conducting_sequences(wf_name, expected_task_seq)

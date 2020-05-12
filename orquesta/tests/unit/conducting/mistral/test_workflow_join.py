@@ -17,137 +17,102 @@ from orquesta.tests.unit.conducting.mistral import base
 
 
 class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
-
     def test_join(self):
-        wf_name = 'join'
+        wf_name = "join"
 
-        expected_task_seq = [
-            'task1',
-            'task2',
-            'task4',
-            'task3',
-            'task5',
-            'task6',
-            'task7'
-        ]
+        expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task7"]
 
         self.assert_conducting_sequences(wf_name, expected_task_seq)
 
     def test_join_count(self):
-        wf_name = 'join-count'
+        wf_name = "join-count"
 
         # Mock error at task6
-        expected_task_seq = [
-            'task1',
-            'task2',
-            'task4',
-            'task6',
-            'task3',
-            'task5',
-            'task8'
-        ]
+        expected_task_seq = ["task1", "task2", "task4", "task6", "task3", "task5", "task8"]
 
         mock_statuses = [
-            statuses.SUCCEEDED,   # task1
-            statuses.SUCCEEDED,   # task2
-            statuses.SUCCEEDED,   # task4
-            statuses.RUNNING,     # task6
-            statuses.SUCCEEDED,   # task3
-            statuses.SUCCEEDED,   # task5
-            statuses.SUCCEEDED    # task8
+            statuses.SUCCEEDED,  # task1
+            statuses.SUCCEEDED,  # task2
+            statuses.SUCCEEDED,  # task4
+            statuses.RUNNING,  # task6
+            statuses.SUCCEEDED,  # task3
+            statuses.SUCCEEDED,  # task5
+            statuses.SUCCEEDED,  # task8
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
             mock_statuses=mock_statuses,
-            expected_workflow_status=statuses.RUNNING
+            expected_workflow_status=statuses.RUNNING,
         )
 
         # Mock error at task7
-        expected_task_seq = [
-            'task1',
-            'task2',
-            'task4',
-            'task6',
-            'task3',
-            'task5',
-            'task7',
-            'task8'
-        ]
+        expected_task_seq = ["task1", "task2", "task4", "task6", "task3", "task5", "task7", "task8"]
 
         mock_statuses = [
-            statuses.SUCCEEDED,   # task1
-            statuses.SUCCEEDED,   # task2
-            statuses.SUCCEEDED,   # task4
-            statuses.SUCCEEDED,   # task6
-            statuses.SUCCEEDED,   # task3
-            statuses.SUCCEEDED,   # task5
-            statuses.RUNNING,     # task7
-            statuses.SUCCEEDED    # task8
+            statuses.SUCCEEDED,  # task1
+            statuses.SUCCEEDED,  # task2
+            statuses.SUCCEEDED,  # task4
+            statuses.SUCCEEDED,  # task6
+            statuses.SUCCEEDED,  # task3
+            statuses.SUCCEEDED,  # task5
+            statuses.RUNNING,  # task7
+            statuses.SUCCEEDED,  # task8
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
             mock_statuses=mock_statuses,
-            expected_workflow_status=statuses.RUNNING
+            expected_workflow_status=statuses.RUNNING,
         )
 
     def test_join_count_with_branch_error(self):
-        wf_name = 'join-count'
+        wf_name = "join-count"
 
         # Mock error at task6. The conductor runs breadth first
         # and so task3 and task5 has not started.
-        expected_task_seq = [
-            'task1',
-            'task2',
-            'task4',
-            'task6'
-        ]
+        expected_task_seq = ["task1", "task2", "task4", "task6"]
 
         mock_statuses = [
-            statuses.SUCCEEDED,   # task1
-            statuses.SUCCEEDED,   # task2
-            statuses.SUCCEEDED,   # task4
-            statuses.FAILED       # task6
+            statuses.SUCCEEDED,  # task1
+            statuses.SUCCEEDED,  # task2
+            statuses.SUCCEEDED,  # task4
+            statuses.FAILED,  # task6
         ]
 
         self.assert_conducting_sequences(
             wf_name,
             expected_task_seq,
             mock_statuses=mock_statuses,
-            expected_workflow_status=statuses.FAILED
+            expected_workflow_status=statuses.FAILED,
         )
 
         # Mock error at task7, note that task3 and task5 have
         # already satisfied the task8 join requirements.
         expected_task_seq = [
-            'task1',
-            'task2',
-            'task4',
-            'task6',
-            'task3',
-            'task5',
-            'task7',
-            'task8',
-            'task9'
+            "task1",
+            "task2",
+            "task4",
+            "task6",
+            "task3",
+            "task5",
+            "task7",
+            "task8",
+            "task9",
         ]
 
         mock_statuses = [
-            statuses.SUCCEEDED,   # task1
-            statuses.SUCCEEDED,   # task2
-            statuses.SUCCEEDED,   # task4
-            statuses.SUCCEEDED,   # task6
-            statuses.SUCCEEDED,   # task3
-            statuses.SUCCEEDED,   # task5
-            statuses.FAILED,      # task7
-            statuses.SUCCEEDED,   # task8
-            statuses.SUCCEEDED    # task9
+            statuses.SUCCEEDED,  # task1
+            statuses.SUCCEEDED,  # task2
+            statuses.SUCCEEDED,  # task4
+            statuses.SUCCEEDED,  # task6
+            statuses.SUCCEEDED,  # task3
+            statuses.SUCCEEDED,  # task5
+            statuses.FAILED,  # task7
+            statuses.SUCCEEDED,  # task8
+            statuses.SUCCEEDED,  # task9
         ]
 
-        self.assert_conducting_sequences(
-            wf_name,
-            expected_task_seq,
-            mock_statuses=mock_statuses
-        )
+        self.assert_conducting_sequences(wf_name, expected_task_seq, mock_statuses=mock_statuses)

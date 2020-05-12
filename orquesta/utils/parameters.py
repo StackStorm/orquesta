@@ -19,14 +19,14 @@ import six
 from orquesta.expressions import base as expr_base
 
 
-REGEX_VALUE_IN_BRACKETS = r'\[.*\]\s*'
-REGEX_VALUE_IN_QUOTES = r'\"[^\"]*\"\s*'
+REGEX_VALUE_IN_BRACKETS = r"\[.*\]\s*"
+REGEX_VALUE_IN_QUOTES = r"\"[^\"]*\"\s*"
 REGEX_VALUE_IN_APOSTROPHES = r"'[^']*'\s*"
-REGEX_FLOATING_NUMBER = r'[-]?\d*\.\d+'
-REGEX_INTEGER = r'[-]?\d+'
-REGEX_TRUE = r'(?i)true'
-REGEX_FALSE = r'(?i)false'
-REGEX_NULL = r'null'
+REGEX_FLOATING_NUMBER = r"[-]?\d*\.\d+"
+REGEX_INTEGER = r"[-]?\d+"
+REGEX_TRUE = r"(?i)true"
+REGEX_FALSE = r"(?i)false"
+REGEX_NULL = r"null"
 
 # REGEX_FLOATING_NUMBER must go before REGEX_INTEGER
 REGEX_INLINE_PARAM_VARIATIONS = [
@@ -37,14 +37,14 @@ REGEX_INLINE_PARAM_VARIATIONS = [
     REGEX_INTEGER,
     REGEX_TRUE,
     REGEX_FALSE,
-    REGEX_NULL
+    REGEX_NULL,
 ]
 
 REGEX_INLINE_PARAM_VARIATIONS.extend(
     [e._regex_pattern for e in expr_base.get_evaluators().values()]
 )
 
-REGEX_INLINE_PARAMS = r'([\w]+)=(%s)' % '|'.join(REGEX_INLINE_PARAM_VARIATIONS)
+REGEX_INLINE_PARAMS = r"([\w]+)=(%s)" % "|".join(REGEX_INLINE_PARAM_VARIATIONS)
 
 
 def parse_inline_params(s, preserve_order=True):
@@ -58,23 +58,24 @@ def parse_inline_params(s, preserve_order=True):
         # Remove leading and trailing whitespaces.
         v = v.strip()
 
-        quotes_in_param = bool(re.findall(REGEX_VALUE_IN_QUOTES, v)
-                               or re.findall(REGEX_VALUE_IN_APOSTROPHES, v))
+        quotes_in_param = bool(
+            re.findall(REGEX_VALUE_IN_QUOTES, v) or re.findall(REGEX_VALUE_IN_APOSTROPHES, v)
+        )
 
         # Remove leading and trailing double quotes.
-        v = re.sub('^"', '', v)
-        v = re.sub('"$', '', v)
+        v = re.sub('^"', "", v)
+        v = re.sub('"$', "", v)
 
         # Remove leading and trailing single quotes.
-        v = re.sub("^'", '', v)
-        v = re.sub("'$", '', v)
+        v = re.sub("^'", "", v)
+        v = re.sub("'$", "", v)
 
         quotes_in_string = False
         if v != "":
             # Check if param is a JSON string becuse it can be handled by json.loads()
-            curly_brace_in_param = v[0] == '{' and v[-1] == '}'
+            curly_brace_in_param = v[0] == "{" and v[-1] == "}"
             quotes_in_string = quotes_in_param and not curly_brace_in_param
-        is_bool_value = v.lower() == 'true' or v.lower() == 'false'
+        is_bool_value = v.lower() == "true" or v.lower() == "false"
 
         # Load string into dictionary.
         try:

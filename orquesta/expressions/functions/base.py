@@ -25,8 +25,7 @@ def load():
         _EXP_FUNC_CATALOG = {}
 
         mgr = extension.ExtensionManager(
-            namespace='orquesta.expressions.functions',
-            invoke_on_load=False
+            namespace="orquesta.expressions.functions", invoke_on_load=False
         )
 
         for name in mgr.names():

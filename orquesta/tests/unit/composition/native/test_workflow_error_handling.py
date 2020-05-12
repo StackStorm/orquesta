@@ -16,316 +16,131 @@ from orquesta.tests.unit.composition.native import base
 
 
 class ErrorHandlingWorkflowComposerTest(base.OrchestraWorkflowComposerTest):
-
     def test_error_handling_continue(self):
-        wf_name = 'error-handling-continue'
+        wf_name = "error-handling-continue"
 
         expected_wf_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'continue',
-                    'splits': ['continue']
-                }
-            ],
-            'adjacency': [
+            "directed": True,
+            "graph": {},
+            "nodes": [{"id": "task1"}, {"id": "task2"}, {"id": "continue", "splits": ["continue"]}],
+            "adjacency": [
                 [
-                    {
-                        'id': 'continue',
-                        'key': 0,
-                        'ref': 1,
-                        'criteria': ['<% failed() %>']
-                    },
-                    {
-                        'id': 'task2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
+                    {"id": "continue", "key": 0, "ref": 1, "criteria": ["<% failed() %>"]},
+                    {"id": "task2", "key": 0, "ref": 0, "criteria": ["<% succeeded() %>"]},
                 ],
-                [
-                    {
-                        'id': 'continue',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                []
+                [{"id": "continue", "key": 0, "ref": 0, "criteria": ["<% succeeded() %>"]}],
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'continue',
-                    'splits': ['continue']
-                }
-            ],
-            'adjacency': [
+            "directed": True,
+            "graph": {},
+            "nodes": [{"id": "task1"}, {"id": "task2"}, {"id": "continue", "splits": ["continue"]}],
+            "adjacency": [
                 [
-                    {
-                        'id': 'continue',
-                        'key': 0,
-                        'ref': 1,
-                        'criteria': ['<% failed() %>']
-                    },
-                    {
-                        'id': 'task2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
+                    {"id": "continue", "key": 0, "ref": 1, "criteria": ["<% failed() %>"]},
+                    {"id": "task2", "key": 0, "ref": 0, "criteria": ["<% succeeded() %>"]},
                 ],
-                [
-                    {
-                        'id': 'continue',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                []
+                [{"id": "continue", "key": 0, "ref": 0, "criteria": ["<% succeeded() %>"]}],
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
 
     def test_error_handling_noop(self):
-        wf_name = 'error-handling-noop'
+        wf_name = "error-handling-noop"
 
         expected_wf_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'continue'
-                },
-                {
-                    'id': 'noop'
-                }
-            ],
-            'adjacency': [
+            "directed": True,
+            "graph": {},
+            "nodes": [{"id": "task1"}, {"id": "task2"}, {"id": "continue"}, {"id": "noop"}],
+            "adjacency": [
                 [
-                    {
-                        'id': 'noop',
-                        'key': 0,
-                        'ref': 1,
-                        'criteria': ['<% failed() %>']
-                    },
-                    {
-                        'id': 'task2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
+                    {"id": "noop", "key": 0, "ref": 1, "criteria": ["<% failed() %>"]},
+                    {"id": "task2", "key": 0, "ref": 0, "criteria": ["<% succeeded() %>"]},
                 ],
-                [
-                    {
-                        'id': 'continue',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
+                [{"id": "continue", "key": 0, "ref": 0, "criteria": ["<% succeeded() %>"]}],
                 [],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'continue'
-                },
-                {
-                    'id': 'noop'
-                }
-            ],
-            'adjacency': [
+            "directed": True,
+            "graph": {},
+            "nodes": [{"id": "task1"}, {"id": "task2"}, {"id": "continue"}, {"id": "noop"}],
+            "adjacency": [
                 [
-                    {
-                        'id': 'noop',
-                        'key': 0,
-                        'ref': 1,
-                        'criteria': ['<% failed() %>']
-                    },
-                    {
-                        'id': 'task2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
+                    {"id": "noop", "key": 0, "ref": 1, "criteria": ["<% failed() %>"]},
+                    {"id": "task2", "key": 0, "ref": 0, "criteria": ["<% succeeded() %>"]},
                 ],
-                [
-                    {
-                        'id': 'continue',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
+                [{"id": "continue", "key": 0, "ref": 0, "criteria": ["<% succeeded() %>"]}],
                 [],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
 
     def test_error_handling_fail(self):
-        wf_name = 'error-handling-fail'
+        wf_name = "error-handling-fail"
 
         expected_wf_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                },
-                {
-                    'id': 'continue'
-                },
-                {
-                    'id': 'fail'
-                }
+            "directed": True,
+            "graph": {},
+            "nodes": [
+                {"id": "task1"},
+                {"id": "task2"},
+                {"id": "task3"},
+                {"id": "continue"},
+                {"id": "fail"},
             ],
-            'adjacency': [
+            "adjacency": [
                 [
-                    {
-                        'id': 'task2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task3',
-                        'key': 0,
-                        'ref': 1,
-                        'criteria': ['<% failed() %>']
-                    }
+                    {"id": "task2", "key": 0, "ref": 0, "criteria": ["<% succeeded() %>"]},
+                    {"id": "task3", "key": 0, "ref": 1, "criteria": ["<% failed() %>"]},
                 ],
-                [
-                    {
-                        'id': 'continue',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'fail',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
+                [{"id": "continue", "key": 0, "ref": 0, "criteria": ["<% succeeded() %>"]}],
+                [{"id": "fail", "key": 0, "ref": 0, "criteria": ["<% succeeded() %>"]}],
                 [],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                },
-                {
-                    'id': 'continue'
-                },
-                {
-                    'id': 'fail'
-                }
+            "directed": True,
+            "graph": {},
+            "nodes": [
+                {"id": "task1"},
+                {"id": "task2"},
+                {"id": "task3"},
+                {"id": "continue"},
+                {"id": "fail"},
             ],
-            'adjacency': [
+            "adjacency": [
                 [
-                    {
-                        'id': 'task2',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    },
-                    {
-                        'id': 'task3',
-                        'key': 0,
-                        'ref': 1,
-                        'criteria': ['<% failed() %>']
-                    }
+                    {"id": "task2", "key": 0, "ref": 0, "criteria": ["<% succeeded() %>"]},
+                    {"id": "task3", "key": 0, "ref": 1, "criteria": ["<% failed() %>"]},
                 ],
-                [
-                    {
-                        'id': 'continue',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
-                [
-                    {
-                        'id': 'fail',
-                        'key': 0,
-                        'ref': 0,
-                        'criteria': ['<% succeeded() %>']
-                    }
-                ],
+                [{"id": "continue", "key": 0, "ref": 0, "criteria": ["<% succeeded() %>"]}],
+                [{"id": "fail", "key": 0, "ref": 0, "criteria": ["<% succeeded() %>"]}],
                 [],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)

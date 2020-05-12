@@ -19,17 +19,12 @@ from orquesta.tests.unit.specs import base as test_specs
 
 
 class SpecTest(unittest.TestCase):
-
     def setUp(self):
         super(SpecTest, self).setUp()
         self.maxDiff = None
 
     def test_spec_init_arg_bad_yaml(self):
-        self.assertRaises(
-            ValueError,
-            test_specs.MockSpec,
-            'foobar'
-        )
+        self.assertRaises(ValueError, test_specs.MockSpec, "foobar")
 
     def test_spec_init_yaml(self):
         spec = """
@@ -57,23 +52,20 @@ class SpecTest(unittest.TestCase):
         spec_dict = yaml.safe_load(spec)
 
         self.assertDictEqual(spec_obj.spec, spec_dict)
-        self.assertEqual(spec_obj.name, spec_dict['name'])
-        self.assertEqual(spec_obj.version, spec_dict['version'])
-        self.assertEqual(spec_obj.description, spec_dict['description'])
+        self.assertEqual(spec_obj.name, spec_dict["name"])
+        self.assertEqual(spec_obj.version, spec_dict["version"])
+        self.assertEqual(spec_obj.description, spec_dict["description"])
 
-        self.assertEqual(spec_obj.attr1, spec_dict['attr1'])
-        self.assertDictEqual(spec_obj.attr2, spec_dict['attr2'])
-        self.assertListEqual(spec_obj.attr3, spec_dict['attr3'])
+        self.assertEqual(spec_obj.attr1, spec_dict["attr1"])
+        self.assertDictEqual(spec_obj.attr2, spec_dict["attr2"])
+        self.assertListEqual(spec_obj.attr3, spec_dict["attr3"])
 
         self.assertIsInstance(spec_obj.attr5, test_specs.MockJointSpec)
         self.assertIsInstance(spec_obj.attr5.attr1, test_specs.MockLeafSpec)
 
-        self.assertEqual(
-            spec_obj.attr5.attr1.attr1,
-            spec_dict['attr5']['attr1']['attr1']
-        )
+        self.assertEqual(spec_obj.attr5.attr1.attr1, spec_dict["attr5"]["attr1"]["attr1"])
 
-        self.assertRaises(AttributeError, getattr, spec_obj, 'attr9')
+        self.assertRaises(AttributeError, getattr, spec_obj, "attr9")
 
     def test_spec_valid_yaml(self):
         spec = """

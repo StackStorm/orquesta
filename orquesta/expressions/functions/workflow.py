@@ -21,15 +21,15 @@ from orquesta import statuses
 
 def _get_current_task(context):
     if not context:
-        raise exc.ExpressionEvaluationException('The context is not set.')
+        raise exc.ExpressionEvaluationException("The context is not set.")
 
     try:
-        current_task = context['__current_task'] or {}
+        current_task = context["__current_task"] or {}
     except KeyError:
         current_task = {}
 
     if not current_task:
-        raise exc.ExpressionEvaluationException('The current task is not set in the context.')
+        raise exc.ExpressionEvaluationException("The current task is not set in the context.")
 
     return current_task
 
@@ -40,17 +40,17 @@ def task_status_(context, task_id, route=None):
 
     if route is None:
         try:
-            current_task = context['__current_task'] or {}
-            route = current_task['route']
+            current_task = context["__current_task"] or {}
+            route = current_task["route"]
         except KeyError:
             route = 0
 
     try:
-        workflow_state = context['__state'] or {}
+        workflow_state = context["__state"] or {}
     except KeyError:
         workflow_state = {}
 
-    task_state_pointers = workflow_state.get('tasks') or {}
+    task_state_pointers = workflow_state.get("tasks") or {}
     task_state_entry_uid = constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route))
     task_state_entry_idx = task_state_pointers.get(task_state_entry_uid)
 
@@ -58,9 +58,9 @@ def task_status_(context, task_id, route=None):
     # use an earlier route before the split to find the specific task.
     if task_state_entry_idx is None:
         if route > 0:
-            current_route_details = workflow_state['routes'][route]
+            current_route_details = workflow_state["routes"][route]
             # Reverse the list because we want to start with the next longest route.
-            for idx, prev_route_details in enumerate(reversed(workflow_state['routes'][:route])):
+            for idx, prev_route_details in enumerate(reversed(workflow_state["routes"][:route])):
                 if len(set(prev_route_details) - set(current_route_details)) == 0:
                     # The index is from a reversed list so need to calculate
                     # the index of the item in the list before the reverse.
@@ -69,56 +69,56 @@ def task_status_(context, task_id, route=None):
 
         return statuses.UNSET
 
-    task_seqs = workflow_state.get('sequence') or []
+    task_seqs = workflow_state.get("sequence") or []
     task_state_entry = task_seqs[task_state_entry_idx]
 
     if task_state_entry is None:
         return statuses.UNSET
 
-    return task_state_entry.get('status', statuses.UNSET)
+    return task_state_entry.get("status", statuses.UNSET)
 
 
 def succeeded_(context):
     current_task = _get_current_task(context)
-    task_id = current_task['id']
-    route = current_task['route']
+    task_id = current_task["id"]
+    route = current_task["route"]
 
-    return (task_status_(context, task_id, route=route) == statuses.SUCCEEDED)
+    return task_status_(context, task_id, route=route) == statuses.SUCCEEDED
 
 
 def failed_(context):
     current_task = _get_current_task(context)
-    task_id = current_task['id']
-    route = current_task['route']
+    task_id = current_task["id"]
+    route = current_task["route"]
 
-    return (task_status_(context, task_id, route=route) == statuses.FAILED)
+    return task_status_(context, task_id, route=route) == statuses.FAILED
 
 
 def completed_(context):
     current_task = _get_current_task(context)
-    task_id = current_task['id']
-    route = current_task['route']
+    task_id = current_task["id"]
+    route = current_task["route"]
 
-    return (task_status_(context, task_id, route=route) in statuses.COMPLETED_STATUSES)
+    return task_status_(context, task_id, route=route) in statuses.COMPLETED_STATUSES
 
 
 def result_(context):
     current_task = _get_current_task(context)
 
-    return current_task.get('result')
+    return current_task.get("result")
 
 
 def item_(context, key=None):
     if not context:
-        raise exc.ExpressionEvaluationException('The context is not set.')
+        raise exc.ExpressionEvaluationException("The context is not set.")
 
-    current_item = context['__current_item']
+    current_item = context["__current_item"]
 
     if not key:
         return current_item
 
     if not isinstance(current_item, collections.Mapping):
-        raise exc.ExpressionEvaluationException('Item is not type of collections.Mapping.')
+        raise exc.ExpressionEvaluationException("Item is not type of collections.Mapping.")
 
     if key not in current_item:
         raise exc.ExpressionEvaluationException('Item does not have key "%s".' % key)

@@ -16,4 +16,4 @@ from orquesta.tests.unit import base as test_base
 
 
 class MistralWorkflowSpecTest(test_base.WorkflowSpecTest):
-    spec_module_name = 'mistral'
+    spec_module_name = "mistral"

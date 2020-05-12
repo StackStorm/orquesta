@@ -25,18 +25,18 @@ import dateutil.parser
 LOG = logging.getLogger(__name__)
 
 
-ISO8601_FORMAT = r'%Y-%m-%dT%H:%M:%S'
-ISO8601_FORMAT_USEC = ISO8601_FORMAT + r'.%f'
-ISO8601_REGEX = r'\d{4}\-\d{2}\-\d{2}(\s|T)\d{2}:\d{2}:\d{2}(\.\d{3,6})'
-ISO8601_REGEX_NAIVE = r'^%s$' % ISO8601_REGEX
-ISO8601_REGEX_UTC = r'^%s?(Z|\+00|\+0000|\+00:00)$' % ISO8601_REGEX
-ISO8601_REGEX_TZ = r'^%s?(Z|\+\d{2}|\+\d{4}|\+\d{2}:\d{2})$' % ISO8601_REGEX
+ISO8601_FORMAT = r"%Y-%m-%dT%H:%M:%S"
+ISO8601_FORMAT_USEC = ISO8601_FORMAT + r".%f"
+ISO8601_REGEX = r"\d{4}\-\d{2}\-\d{2}(\s|T)\d{2}:\d{2}:\d{2}(\.\d{3,6})"
+ISO8601_REGEX_NAIVE = r"^%s$" % ISO8601_REGEX
+ISO8601_REGEX_UTC = r"^%s?(Z|\+00|\+0000|\+00:00)$" % ISO8601_REGEX
+ISO8601_REGEX_TZ = r"^%s?(Z|\+\d{2}|\+\d{4}|\+\d{2}:\d{2})$" % ISO8601_REGEX
 
 
 def valid(v):
     is_dt_obj = isinstance(v, datetime.datetime)
-    is_dt_str = (isinstance(v, six.string_types) and re.match(ISO8601_REGEX_NAIVE, v))
-    is_dt_str_tz = (isinstance(v, six.string_types) and re.match(ISO8601_REGEX_TZ, v))
+    is_dt_str = isinstance(v, six.string_types) and re.match(ISO8601_REGEX_NAIVE, v)
+    is_dt_str_tz = isinstance(v, six.string_types) and re.match(ISO8601_REGEX_TZ, v)
 
     return is_dt_obj or is_dt_str or is_dt_str_tz
 
@@ -48,11 +48,11 @@ def format(dt, usec=True, offset=True):
     fmt = ISO8601_FORMAT_USEC if usec else ISO8601_FORMAT
 
     if offset:
-        ost = dt.strftime('%z')
-        ost = (ost[:3] + ':' + ost[3:]) if ost else '+00:00'
+        ost = dt.strftime("%z")
+        ost = (ost[:3] + ":" + ost[3:]) if ost else "+00:00"
     else:
-        tz = dt.tzinfo.tzname(dt) if dt.tzinfo else 'UTC'
-        ost = 'Z' if tz == 'UTC' else tz
+        tz = dt.tzinfo.tzname(dt) if dt.tzinfo else "UTC"
+        ost = "Z" if tz == "UTC" else tz
 
     return dt.strftime(fmt) + ost
 

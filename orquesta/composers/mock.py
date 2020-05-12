@@ -28,7 +28,7 @@ class WorkflowComposer(comp_base.WorkflowComposer):
     @classmethod
     def compose(cls, spec):
         if not cls.wf_spec_type:
-            raise TypeError('Undefined spec type for composer.')
+            raise TypeError("Undefined spec type for composer.")
 
         if not isinstance(spec, cls.wf_spec_type):
             raise TypeError('Unsupported spec type "%s".' % str(type(spec)))

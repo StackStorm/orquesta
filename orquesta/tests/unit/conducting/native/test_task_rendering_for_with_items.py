@@ -19,7 +19,6 @@ from orquesta.tests.unit import base as test_base
 
 
 class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTest):
-
     def test_bad_item_key(self):
         wf_def = """
         version: 1.0
@@ -39,13 +38,13 @@ class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTes
 
         expected_errors = [
             {
-                'type': 'error',
-                'message': (
-                    'YaqlEvaluationException: Unable to evaluate expression \'<% item(y) %>\'. '
+                "type": "error",
+                "message": (
+                    "YaqlEvaluationException: Unable to evaluate expression '<% item(y) %>'. "
                     'ExpressionEvaluationException: Item does not have key "y".'
                 ),
-                'task_id': 'task1',
-                'route': 0
+                "task_id": "task1",
+                "route": 0,
             }
         ]
 
@@ -79,13 +78,13 @@ class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTes
 
         expected_errors = [
             {
-                'type': 'error',
-                'message': (
-                    'YaqlEvaluationException: Unable to evaluate expression \'<% item(x) %>\'. '
-                    'ExpressionEvaluationException: Item is not type of collections.Mapping.'
+                "type": "error",
+                "message": (
+                    "YaqlEvaluationException: Unable to evaluate expression '<% item(x) %>'. "
+                    "ExpressionEvaluationException: Item is not type of collections.Mapping."
                 ),
-                'task_id': 'task1',
-                'route': 0
+                "task_id": "task1",
+                "route": 0,
             }
         ]
 
@@ -115,10 +114,10 @@ class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTes
 
         expected_errors = [
             {
-                'type': 'error',
-                'message': 'TypeError: The value of "<% ctx(xs) %>" is not type of list.',
-                'task_id': 'task1',
-                'route': 0
+                "type": "error",
+                "message": 'TypeError: The value of "<% ctx(xs) %>" is not type of list.',
+                "task_id": "task1",
+                "route": 0,
             }
         ]
 
@@ -157,15 +156,15 @@ class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTes
         conductor.request_workflow_status(statuses.RUNNING)
 
         task_route = 0
-        next_task_name = 'task1'
-        next_task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        next_task_name = "task1"
+        next_task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
 
         next_task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         expected_task = self.format_task_item(
@@ -174,8 +173,8 @@ class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTes
             next_task_ctx,
             next_task_spec,
             actions=next_task_action_specs,
-            items_count=len(next_task_ctx['xs']),
-            items_concurrency=None
+            items_count=len(next_task_ctx["xs"]),
+            items_concurrency=None,
         )
 
         expected_tasks = [expected_task]
@@ -211,20 +210,18 @@ class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTes
 
         # Process start task.
         task_route = 0
-        next_task_name = 'task1'
-        next_task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        next_task_name = "task1"
+        next_task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
 
-        next_task_action_specs = [
-            {'action': 'core.noop', 'input': None}
-        ]
+        next_task_action_specs = [{"action": "core.noop", "input": None}]
 
         expected_task = self.format_task_item(
             next_task_name,
             task_route,
             next_task_ctx,
             next_task_spec,
-            actions=next_task_action_specs
+            actions=next_task_action_specs,
         )
 
         expected_tasks = [expected_task]
@@ -235,15 +232,15 @@ class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTes
         self.forward_task_statuses(conductor, next_task_name, status_changes)
 
         # Process next task.
-        next_task_name = 'task2'
-        next_task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        next_task_name = "task2"
+        next_task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
 
         next_task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         expected_task = self.format_task_item(
@@ -252,8 +249,8 @@ class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTes
             next_task_ctx,
             next_task_spec,
             actions=next_task_action_specs,
-            items_count=len(next_task_ctx['xs']),
-            items_concurrency=None
+            items_count=len(next_task_ctx["xs"]),
+            items_concurrency=None,
         )
 
         expected_tasks = [expected_task]
@@ -284,15 +281,15 @@ class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTes
         conductor.request_workflow_status(statuses.RUNNING)
 
         task_route = 0
-        next_task_name = 'task1'
-        next_task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        next_task_name = "task1"
+        next_task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
 
         next_task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         expected_task = self.format_task_item(
@@ -301,8 +298,8 @@ class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTes
             next_task_ctx,
             next_task_spec,
             actions=next_task_action_specs,
-            items_count=len(next_task_ctx['xs']),
-            items_concurrency=None
+            items_count=len(next_task_ctx["xs"]),
+            items_concurrency=None,
         )
 
         expected_tasks = [expected_task]
@@ -333,15 +330,15 @@ class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTes
         conductor.request_workflow_status(statuses.RUNNING)
 
         task_route = 0
-        next_task_name = 'task1'
-        next_task_ctx = {'domains': ['fee', 'fi', 'fo', 'fum']}
+        next_task_name = "task1"
+        next_task_ctx = {"domains": ["fee", "fi", "fo", "fum"]}
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
 
         next_task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         expected_task = self.format_task_item(
@@ -350,8 +347,8 @@ class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTes
             next_task_ctx,
             next_task_spec,
             actions=next_task_action_specs,
-            items_count=len(next_task_ctx['domains']),
-            items_concurrency=None
+            items_count=len(next_task_ctx["domains"]),
+            items_concurrency=None,
         )
 
         expected_tasks = [expected_task]
@@ -385,14 +382,14 @@ class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTes
         conductor.request_workflow_status(statuses.RUNNING)
 
         task_route = 0
-        next_task_name = 'task1'
-        next_task_ctx = {'xs': ['foo', 'fu', 'marco'], 'ys': ['bar', 'bar', 'polo']}
+        next_task_name = "task1"
+        next_task_ctx = {"xs": ["foo", "fu", "marco"], "ys": ["bar", "bar", "polo"]}
         next_task_spec = conductor.spec.tasks.get_task(next_task_name)
 
         next_task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'foobar'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fubar'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'marcopolo'}, 'item_id': 2},
+            {"action": "core.echo", "input": {"message": "foobar"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fubar"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "marcopolo"}, "item_id": 2},
         ]
 
         expected_task = self.format_task_item(
@@ -401,8 +398,8 @@ class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTes
             next_task_ctx,
             next_task_spec,
             actions=next_task_action_specs,
-            items_count=len(next_task_ctx['xs']),
-            items_concurrency=None
+            items_count=len(next_task_ctx["xs"]),
+            items_concurrency=None,
         )
 
         expected_tasks = [expected_task]

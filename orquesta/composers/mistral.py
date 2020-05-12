@@ -24,9 +24,9 @@ from orquesta import statuses
 LOG = logging.getLogger(__name__)
 
 TASK_TRANSITION_MAP = {
-    'on-success': [statuses.SUCCEEDED],
-    'on-error': statuses.ABENDED_STATUSES,
-    'on-complete': statuses.COMPLETED_STATUSES
+    "on-success": [statuses.SUCCEEDED],
+    "on-error": statuses.ABENDED_STATUSES,
+    "on-complete": statuses.COMPLETED_STATUSES,
 }
 
 
@@ -36,7 +36,7 @@ class WorkflowComposer(comp_base.WorkflowComposer):
     @classmethod
     def compose(cls, spec):
         if not cls.wf_spec_type:
-            raise TypeError('Undefined spec type for composer.')
+            raise TypeError("Undefined spec type for composer.")
 
         if not isinstance(spec, cls.wf_spec_type):
             raise TypeError('Unsupported spec type "%s".' % str(type(spec)))
@@ -47,14 +47,15 @@ class WorkflowComposer(comp_base.WorkflowComposer):
     def _compose_transition_criteria(cls, task_name, *args, **kwargs):
         criteria = []
 
-        condition = kwargs.get('condition')
-        expr = kwargs.get('expr')
+        condition = kwargs.get("condition")
+        expr = kwargs.get("expr")
 
-        task_status_criterion = (
-            'task_status(%s) in %s' % (task_name, str(TASK_TRANSITION_MAP[condition]))
+        task_status_criterion = "task_status(%s) in %s" % (
+            task_name,
+            str(TASK_TRANSITION_MAP[condition]),
         )
 
-        criteria.append('<% ' + task_status_criterion + ' %>')
+        criteria.append("<% " + task_status_criterion + " %>")
 
         if expr:
             criteria.append(expr)
@@ -64,7 +65,7 @@ class WorkflowComposer(comp_base.WorkflowComposer):
     @classmethod
     def _compose_wf_graph(cls, wf_spec):
         if not isinstance(wf_spec, cls.wf_spec_type):
-            raise TypeError('Workflow spec is not typeof %s.' % cls.wf_spec_type.__name__)
+            raise TypeError("Workflow spec is not typeof %s." % cls.wf_spec_type.__name__)
 
         q = queue.Queue()
         wf_graph = graphing.WorkflowGraph()
@@ -79,7 +80,7 @@ class WorkflowComposer(comp_base.WorkflowComposer):
 
             if wf_spec.tasks.is_join_task(task_name):
                 task_spec = wf_spec.tasks[task_name]
-                barrier = '*' if task_spec.join == 'all' else task_spec.join
+                barrier = "*" if task_spec.join == "all" else task_spec.join
                 wf_graph.set_barrier(task_name, value=barrier)
 
             # Determine if the task is a split task and if it is in a cycle. If the task is a
@@ -93,8 +94,9 @@ class WorkflowComposer(comp_base.WorkflowComposer):
             next_tasks = wf_spec.tasks.get_next_tasks(task_name)
 
             for next_task_name, expr, condition in next_tasks:
-                if (not wf_graph.has_task(next_task_name)
-                        or not wf_spec.tasks.in_cycle(next_task_name)):
+                if not wf_graph.has_task(next_task_name) or not wf_spec.tasks.in_cycle(
+                    next_task_name
+                ):
                     q.put((next_task_name, list(splits)))
 
                 crta = cls._compose_transition_criteria(task_name, condition=condition, expr=expr)
@@ -103,16 +105,9 @@ class WorkflowComposer(comp_base.WorkflowComposer):
                 # Use existing transition if present otherwise create new transition.
                 if seqs:
                     wf_graph.update_transition(
-                        task_name,
-                        next_task_name,
-                        key=seqs[0][2],
-                        criteria=crta
+                        task_name, next_task_name, key=seqs[0][2], criteria=crta
                     )
                 else:
-                    wf_graph.add_transition(
-                        task_name,
-                        next_task_name,
-                        criteria=crta
-                    )
+                    wf_graph.add_transition(task_name, next_task_name, criteria=crta)
 
         return wf_graph

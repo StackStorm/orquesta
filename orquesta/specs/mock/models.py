@@ -22,7 +22,7 @@ LOG = logging.getLogger(__name__)
 
 def instantiate(definition):
     if len(definition.keys()) > 1:
-        raise ValueError('Workflow definition contains more than one workflow.')
+        raise ValueError("Workflow definition contains more than one workflow.")
 
     wf_name, wf_spec = list(definition.items())[0]
 
@@ -34,4 +34,4 @@ def deserialize(data):
 
 
 class WorkflowSpec(spec_base.Spec):
-    _catalog = 'mock'
+    _catalog = "mock"

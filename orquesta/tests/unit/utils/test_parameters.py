@@ -18,63 +18,57 @@ from orquesta.utils import parameters as args_util
 
 
 class InlineParametersTest(unittest.TestCase):
-
     def test_parse_basic(self):
         tests = [
-            ('x=null', {'x': None}),
-            ('x=123', {'x': 123}),
-            ('x=-123', {'x': -123}),
-            ('x=0.123', {'x': 0.123}),
-            ('x=-0.123', {'x': -0.123}),
-            ('x=true', {'x': True}),
-            ('x=false', {'x': False}),
-            ('x="abc"', {'x': 'abc'}),
-            ("x='abc'", {'x': 'abc'})
+            ("x=null", {"x": None}),
+            ("x=123", {"x": 123}),
+            ("x=-123", {"x": -123}),
+            ("x=0.123", {"x": 0.123}),
+            ("x=-0.123", {"x": -0.123}),
+            ("x=true", {"x": True}),
+            ("x=false", {"x": False}),
+            ('x="abc"', {"x": "abc"}),
+            ("x='abc'", {"x": "abc"}),
         ]
 
         for s, d in tests:
             self.assertDictEqual(args_util.parse_inline_params(s)[0], d)
 
     def test_parse_dictionary(self):
-        tests = [
-            ('x=\'{\"a\": 1}\'', {'x': {'a': 1}})
-        ]
+        tests = [("x='{\"a\": 1}'", {"x": {"a": 1}})]
 
         for s, d in tests:
             self.assertDictEqual(args_util.parse_inline_params(s)[0], d)
 
     def test_parse_expression(self):
-        tests = [
-            ('x=<% $.abc %>', {'x': '<% $.abc %>'}),
-            ('x={{ _.abc }}', {'x': '{{ _.abc }}'})
-        ]
+        tests = [("x=<% $.abc %>", {"x": "<% $.abc %>"}), ("x={{ _.abc }}", {"x": "{{ _.abc }}"})]
 
         for s, d in tests:
             self.assertDictEqual(args_util.parse_inline_params(s)[0], d)
 
     def test_parse_multiple(self):
         tests = [
-            ('x="abc" y="def"', [{'x': 'abc'}, {'y': 'def'}]),
-            ('y="def" x="abc"', [{'y': 'def'}, {'x': 'abc'}]),
-            ('x="abc", y="def"', [{'x': 'abc'}, {'y': 'def'}]),
-            ('y="def", x="abc"', [{'y': 'def'}, {'x': 'abc'}]),
-            ('x="abc"; y="def"', [{'x': 'abc'}, {'y': 'def'}]),
-            ('y="def"; x="abc"', [{'y': 'def'}, {'x': 'abc'}])
+            ('x="abc" y="def"', [{"x": "abc"}, {"y": "def"}]),
+            ('y="def" x="abc"', [{"y": "def"}, {"x": "abc"}]),
+            ('x="abc", y="def"', [{"x": "abc"}, {"y": "def"}]),
+            ('y="def", x="abc"', [{"y": "def"}, {"x": "abc"}]),
+            ('x="abc"; y="def"', [{"x": "abc"}, {"y": "def"}]),
+            ('y="def"; x="abc"', [{"y": "def"}, {"x": "abc"}]),
         ]
 
         for s, d in tests:
             self.assertListEqual(args_util.parse_inline_params(s), d)
 
     def test_parse_combination(self):
-        s = 'i=123 j="abc" k=true x=<% $.abc %> y={{ _.abc }} z=\'{\"a\": 1}\''
+        s = 'i=123 j="abc" k=true x=<% $.abc %> y={{ _.abc }} z=\'{"a": 1}\''
 
         d = [
-            {'i': 123},
-            {'j': 'abc'},
-            {'k': True},
-            {'x': '<% $.abc %>'},
-            {'y': '{{ _.abc }}'},
-            {'z': {'a': 1}}
+            {"i": 123},
+            {"j": "abc"},
+            {"k": True},
+            {"x": "<% $.abc %>"},
+            {"y": "{{ _.abc }}"},
+            {"z": {"a": 1}},
         ]
 
         self.assertListEqual(args_util.parse_inline_params(s), d)
@@ -87,12 +81,12 @@ class InlineParametersTest(unittest.TestCase):
 
     def test_parse_bool_input(self):
         tests = [
-            ('x=true', [{'x': True}]),
-            ('y=True', [{'y': True}]),
-            ('c=TRUE', [{'c': True}]),
-            ('x=false', [{'x': False}]),
-            ('y=False', [{'y': False}]),
-            ('c=FALSE', [{'c': False}])
+            ("x=true", [{"x": True}]),
+            ("y=True", [{"y": True}]),
+            ("c=TRUE", [{"c": True}]),
+            ("x=false", [{"x": False}]),
+            ("y=False", [{"y": False}]),
+            ("c=FALSE", [{"c": False}]),
         ]
 
         for s, d in tests:
@@ -100,18 +94,18 @@ class InlineParametersTest(unittest.TestCase):
 
     def test_parse_string_in_quotes_input(self):
         tests = [
-            ('x="true"', [{'x': "true"}]),
-            ('y="True"', [{'y': "True"}]),
-            ('c="TRUE"', [{'c': "TRUE"}]),
-            ('d="123"', [{'d': '123'}]),
-            ('e="abcde"', [{'e': 'abcde'}]),
-            ('f=""', [{'f': ''}]),
-            ("x='false'", [{'x': 'false'}]),
-            ("y='False'", [{'y': 'False'}]),
-            ("c='FALSE'", [{'c': 'FALSE'}]),
-            ("d='123'", [{'d': '123'}]),
-            ("e='abcde'", [{'e': 'abcde'}]),
-            ("f=''", [{'f': ''}])
+            ('x="true"', [{"x": "true"}]),
+            ('y="True"', [{"y": "True"}]),
+            ('c="TRUE"', [{"c": "TRUE"}]),
+            ('d="123"', [{"d": "123"}]),
+            ('e="abcde"', [{"e": "abcde"}]),
+            ('f=""', [{"f": ""}]),
+            ("x='false'", [{"x": "false"}]),
+            ("y='False'", [{"y": "False"}]),
+            ("c='FALSE'", [{"c": "FALSE"}]),
+            ("d='123'", [{"d": "123"}]),
+            ("e='abcde'", [{"e": "abcde"}]),
+            ("f=''", [{"f": ""}]),
         ]
 
         for s, d in tests:
@@ -121,4 +115,4 @@ class InlineParametersTest(unittest.TestCase):
         self.assertListEqual(args_util.parse_inline_params(123), [])
         self.assertListEqual(args_util.parse_inline_params(True), [])
         self.assertListEqual(args_util.parse_inline_params([1, 2, 3]), [])
-        self.assertListEqual(args_util.parse_inline_params({'a': 123}), [])
+        self.assertListEqual(args_util.parse_inline_params({"a": 123}), [])

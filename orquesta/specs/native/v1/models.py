@@ -43,178 +43,133 @@ def deserialize(data):
 
 class TaskTransitionSpec(native_v1_specs.Spec):
     _schema = {
-        'type': 'object',
-        'properties': {
-            'when': spec_types.NONEMPTY_STRING,
-            'publish': {
-                'oneOf': [
-                    spec_types.NONEMPTY_STRING,
-                    spec_types.UNIQUE_ONE_KEY_DICT_LIST
-                ]
-            },
-            'do': {
-                'oneOf': [
-                    spec_types.NONEMPTY_STRING,
-                    spec_types.UNIQUE_STRING_LIST
-                ]
-            }
+        "type": "object",
+        "properties": {
+            "when": spec_types.NONEMPTY_STRING,
+            "publish": {"oneOf": [spec_types.NONEMPTY_STRING, spec_types.UNIQUE_ONE_KEY_DICT_LIST]},
+            "do": {"oneOf": [spec_types.NONEMPTY_STRING, spec_types.UNIQUE_STRING_LIST]},
         },
-        'additionalProperties': False
+        "additionalProperties": False,
     }
 
-    _context_evaluation_sequence = [
-        'when',
-        'publish',
-        'do'
-    ]
+    _context_evaluation_sequence = ["when", "publish", "do"]
 
-    _context_inputs = [
-        'publish'
-    ]
+    _context_inputs = ["publish"]
 
     def __init__(self, *args, **kwargs):
         super(TaskTransitionSpec, self).__init__(*args, **kwargs)
 
-        publish_spec = getattr(self, 'publish', None)
+        publish_spec = getattr(self, "publish", None)
 
         if publish_spec and isinstance(publish_spec, six.string_types):
             self.publish = args_util.parse_inline_params(publish_spec or str())
 
-        do_spec = getattr(self, 'do', None)
+        do_spec = getattr(self, "do", None)
 
         if not do_spec:
-            self.do = 'continue'
+            self.do = "continue"
 
 
 class TaskTransitionSequenceSpec(native_v1_specs.SequenceSpec):
-    _schema = {
-        'type': 'array',
-        'items': TaskTransitionSpec
-    }
+    _schema = {"type": "array", "items": TaskTransitionSpec}
 
 
 class ItemizedSpec(native_v1_specs.Spec):
     _items_regex = (
         # Regular expression in the form "x, y, z, ... in <expression>"
         # or "x in <expression>" with optional space(s) on both end.
-        r'^(\s+)?({expr})(\s+)?$|^(\s+)?((\w+,\s?|\s+)+)?(\w+)\s+in\s+({expr})(\s+)?$'.format(
-            expr='|'.join(expr_base.get_statement_regexes().values())
+        r"^(\s+)?({expr})(\s+)?$|^(\s+)?((\w+,\s?|\s+)+)?(\w+)\s+in\s+({expr})(\s+)?$".format(
+            expr="|".join(expr_base.get_statement_regexes().values())
         )
     )
 
     _schema = {
-        'type': 'object',
-        'properties': {
-            'items': {
-                'type': 'string',
-                'minLength': 1,
-                'pattern': _items_regex
-            },
-            'concurrency': spec_types.STRING_OR_POSITIVE_INTEGER
+        "type": "object",
+        "properties": {
+            "items": {"type": "string", "minLength": 1, "pattern": _items_regex},
+            "concurrency": spec_types.STRING_OR_POSITIVE_INTEGER,
         },
-        'additionalProperties': False
+        "additionalProperties": False,
     }
 
-    _context_evaluation_sequence = [
-        'items',
-        'concurrency'
-    ]
+    _context_evaluation_sequence = ["items", "concurrency"]
 
 
 class TaskRetrySpec(native_v1_specs.Spec):
     _schema = {
-        'type': 'object',
-        'properties': {
-            'when': spec_types.NONEMPTY_STRING,
+        "type": "object",
+        "properties": {
+            "when": spec_types.NONEMPTY_STRING,
             # The number of times to retry.
             # 0 = do not retry
             # n = max number of times to retry
-            'count': spec_types.STRING_OR_POSITIVE_INTEGER,
-            'delay': spec_types.STRING_OR_POSITIVE_INTEGER
+            "count": spec_types.STRING_OR_POSITIVE_INTEGER,
+            "delay": spec_types.STRING_OR_POSITIVE_INTEGER,
         },
-        'required': ['count'],
-        'additionalProperties': False,
+        "required": ["count"],
+        "additionalProperties": False,
     }
 
-    _context_evaluation_sequence = [
-        'when',
-        'count',
-        'delay'
-    ]
+    _context_evaluation_sequence = ["when", "count", "delay"]
 
 
 class TaskSpec(native_v1_specs.Spec):
     _schema = {
-        'type': 'object',
-        'properties': {
-            'delay': spec_types.STRING_OR_POSITIVE_INTEGER,
-            'join': {
-                'oneOf': [
-                    {'enum': ['all']},
-                    spec_types.POSITIVE_INTEGER
-                ]
-            },
-            'with': ItemizedSpec,
-            'action': spec_types.NONEMPTY_STRING,
-            'input': {
-                'oneOf': [
-                    spec_types.NONEMPTY_STRING,
-                    spec_types.NONEMPTY_DICT,
-                ]
-            },
-            'retry': TaskRetrySpec,
-            'next': TaskTransitionSequenceSpec,
+        "type": "object",
+        "properties": {
+            "delay": spec_types.STRING_OR_POSITIVE_INTEGER,
+            "join": {"oneOf": [{"enum": ["all"]}, spec_types.POSITIVE_INTEGER]},
+            "with": ItemizedSpec,
+            "action": spec_types.NONEMPTY_STRING,
+            "input": {"oneOf": [spec_types.NONEMPTY_STRING, spec_types.NONEMPTY_DICT]},
+            "retry": TaskRetrySpec,
+            "next": TaskTransitionSequenceSpec,
         },
-        'additionalProperties': False
+        "additionalProperties": False,
     }
 
-    _context_evaluation_sequence = [
-        'delay',
-        'with',
-        'action',
-        'input',
-        'next'
-    ]
+    _context_evaluation_sequence = ["delay", "with", "action", "input", "next"]
 
     def __init__(self, *args, **kwargs):
         super(TaskSpec, self).__init__(*args, **kwargs)
 
-        action_spec = getattr(self, 'action', str())
+        action_spec = getattr(self, "action", str())
         input_spec = args_util.parse_inline_params(action_spec, preserve_order=False)
 
         if input_spec:
-            self.action = action_spec[:action_spec.index(' ')]
+            self.action = action_spec[: action_spec.index(" ")]
             self.input = input_spec
 
     def has_items(self):
-        return hasattr(self, 'with') and getattr(self, 'with', None) is not None
+        return hasattr(self, "with") and getattr(self, "with", None) is not None
 
     def get_items_spec(self):
-        return getattr(self, 'with', None)
+        return getattr(self, "with", None)
 
     def has_join(self):
-        return hasattr(self, 'join') and self.join
+        return hasattr(self, "join") and self.join
 
     def has_retry(self):
-        return hasattr(self, 'retry') and self.retry
+        return hasattr(self, "retry") and self.retry
 
     def render(self, in_ctx):
         action_specs = []
 
         if not self.has_items():
             action_spec = {
-                'action': expr_base.evaluate(self.action, in_ctx),
-                'input': expr_base.evaluate(getattr(self, 'input', {}), in_ctx)
+                "action": expr_base.evaluate(self.action, in_ctx),
+                "input": expr_base.evaluate(getattr(self, "input", {}), in_ctx),
             }
 
             action_specs.append(action_spec)
         else:
             items_spec = self.get_items_spec()
 
-            items_expr = (
-                items_spec.items.strip() if ' in ' not in items_spec.items
-                else items_spec.items[items_spec.items.index(' in ') + 4:].strip()
-            )
+            if " in " not in items_spec.items:
+                items_expr = items_spec.items.strip()
+            else:
+                start_idx = items_spec.items.index(" in ") + 4
+                items_expr = items_spec.items[start_idx:].strip()
 
             items = expr_base.evaluate(items_expr, in_ctx)
 
@@ -222,8 +177,9 @@ class TaskSpec(native_v1_specs.Spec):
                 raise TypeError('The value of "%s" is not type of list.' % items_expr)
 
             item_keys = (
-                None if ' in ' not in items_spec.items
-                else items_spec.items[:items_spec.items.index(' in ')].replace(' ', '').split(',')
+                None
+                if " in " not in items_spec.items
+                else items_spec.items[: items_spec.items.index(" in ")].replace(" ", "").split(",")
             )
 
             for idx, item in enumerate(items):
@@ -235,9 +191,9 @@ class TaskSpec(native_v1_specs.Spec):
                 item_ctx_value = ctx_util.set_current_item(in_ctx, item)
 
                 action_spec = {
-                    'action': expr_base.evaluate(self.action, item_ctx_value),
-                    'input': expr_base.evaluate(getattr(self, 'input', {}), item_ctx_value),
-                    'item_id': idx
+                    "action": expr_base.evaluate(self.action, item_ctx_value),
+                    "input": expr_base.evaluate(getattr(self, "input", {}), item_ctx_value),
+                    "item_id": idx,
                 }
 
                 action_specs.append(action_spec)
@@ -249,12 +205,12 @@ class TaskSpec(native_v1_specs.Spec):
         new_ctx = {}
         errors = []
 
-        task_transition_specs = getattr(self, 'next') or []
-        task_transition_spec = task_transition_specs[task_transition_meta[3]['ref']]
-        next_task_names = getattr(task_transition_spec, 'do') or []
+        task_transition_specs = getattr(self, "next") or []
+        task_transition_spec = task_transition_specs[task_transition_meta[3]["ref"]]
+        next_task_names = getattr(task_transition_spec, "do") or []
 
         if next_task_name in next_task_names:
-            for task_publish_spec in (getattr(task_transition_spec, 'publish') or {}):
+            for task_publish_spec in getattr(task_transition_spec, "publish") or {}:
                 var_name = list(task_publish_spec.items())[0][0]
                 default_var_value = list(task_publish_spec.items())[0][1]
 
@@ -268,20 +224,14 @@ class TaskSpec(native_v1_specs.Spec):
         out_ctx = dict_util.merge_dicts(in_ctx, new_ctx, overwrite=True)
 
         for key in list(out_ctx.keys()):
-            if key.startswith('__'):
+            if key.startswith("__"):
                 out_ctx.pop(key)
 
         return out_ctx, new_ctx, errors
 
 
 class TaskMappingSpec(native_v1_specs.MappingSpec):
-    _schema = {
-        'type': 'object',
-        'minProperties': 1,
-        'patternProperties': {
-            r'^\w+$': TaskSpec
-        }
-    }
+    _schema = {"type": "object", "minProperties": 1, "patternProperties": {r"^\w+$": TaskSpec}}
 
     def has_task(self, task_name):
         if task_name in RESERVED_TASK_NAMES:
@@ -291,7 +241,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
 
     def get_task(self, task_name):
         if task_name in RESERVED_TASK_NAMES:
-            return TaskSpec({'name': task_name})
+            return TaskSpec({"name": task_name})
 
         return self[task_name]
 
@@ -300,14 +250,14 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
 
         next_tasks = []
 
-        task_transitions = getattr(task_spec, 'next') or []
+        task_transitions = getattr(task_spec, "next") or []
 
         for task_transition_item_idx, task_transition in enumerate(task_transitions):
-            condition = getattr(task_transition, 'when') or None
-            next_task_names = getattr(task_transition, 'do') or []
+            condition = getattr(task_transition, "when") or None
+            next_task_names = getattr(task_transition, "do") or []
 
             if isinstance(next_task_names, six.string_types):
-                next_task_names = [x.strip() for x in next_task_names.split(',')]
+                next_task_names = [x.strip() for x in next_task_names.split(",")]
 
             for next_task_name in next_task_names:
                 next_tasks.append((next_task_name, condition, task_transition_item_idx))
@@ -336,13 +286,10 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
     def is_join_task(self, task_name):
         task_spec = self.get_task(task_name)
 
-        return getattr(task_spec, 'join', None) is not None
+        return getattr(task_spec, "join", None) is not None
 
     def is_split_task(self, task_name):
-        return (
-            not self.is_join_task(task_name)
-            and len(self.get_prev_tasks(task_name)) > 1
-        )
+        return not self.is_join_task(task_name) and len(self.get_prev_tasks(task_name)) > 1
 
     def in_cycle(self, task_name):
         traversed = []
@@ -384,10 +331,10 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         # Identify with items task with no action defined.
         for task_name, task_spec in six.iteritems(self):
             if task_spec.has_items() and not task_spec.action:
-                message = 'The action property is required for with items task.'
-                spec_path = parent.get('spec_path') + '.' + task_name
-                schema_path = parent.get('schema_path') + '.patternProperties.^\\w+$'
-                entry = {'message': message, 'spec_path': spec_path, 'schema_path': schema_path}
+                message = "The action property is required for with items task."
+                spec_path = parent.get("spec_path") + "." + task_name
+                schema_path = parent.get("schema_path") + ".patternProperties.^\\w+$"
+                entry = {"message": message, "spec_path": spec_path, "schema_path": schema_path}
                 result.append(entry)
 
         return result
@@ -399,9 +346,9 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         for task_name, task_spec in six.iteritems(self):
             if task_name in RESERVED_TASK_NAMES:
                 message = 'The task name "%s" is reserved with special function.' % task_name
-                spec_path = parent.get('spec_path') + '.' + task_name
-                schema_path = parent.get('schema_path') + '.patternProperties.^\\w+$'
-                entry = {'message': message, 'spec_path': spec_path, 'schema_path': schema_path}
+                spec_path = parent.get("spec_path") + "." + task_name
+                schema_path = parent.get("schema_path") + ".patternProperties.^\\w+$"
+                entry = {"message": message, "spec_path": spec_path, "schema_path": schema_path}
                 result.append(entry)
 
         return result
@@ -423,16 +370,16 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
             # The get_next_tasks function is not used here because it doesn't
             # provide the specific info required to identify spec/schema paths.
             task_spec = self.get_task(task_name)
-            task_transition_specs = getattr(task_spec, 'next') or []
-            spec_path = parent.get('spec_path') + '.' + task_name
-            schema_path = parent.get('schema_path') + '.patternProperties.^\\w+$'
+            task_transition_specs = getattr(task_spec, "next") or []
+            spec_path = parent.get("spec_path") + "." + task_name
+            schema_path = parent.get("schema_path") + ".patternProperties.^\\w+$"
 
             for i in range(0, len(task_transition_specs)):
                 task_transition_spec = task_transition_specs[i]
-                next_task_names = getattr(task_transition_spec, 'do') or []
+                next_task_names = getattr(task_transition_spec, "do") or []
 
                 if isinstance(next_task_names, six.string_types):
-                    next_task_names = [x.strip() for x in next_task_names.split(',')]
+                    next_task_names = [x.strip() for x in next_task_names.split(",")]
 
                 for next_task_name in next_task_names:
                     # If the next task has already been traversed, then skip.
@@ -444,9 +391,9 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                             q.put(next_task_name)
                     else:
                         entry = {
-                            'message': 'The task "%s" is not defined.' % next_task_name,
-                            'spec_path': spec_path + '.next[' + str(i) + '].do',
-                            'schema_path': schema_path + '.properties.next.items.properties.do'
+                            "message": 'The task "%s" is not defined.' % next_task_name,
+                            "spec_path": spec_path + ".next[" + str(i) + "].do",
+                            "schema_path": schema_path + ".properties.next.items.properties.do",
                         }
 
                         result.append(entry)
@@ -477,18 +424,18 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
 
             if task_name not in staging:
                 staging[task_name] = {
-                    'spec_path': parent.get('spec_path') + '.' + task_name,
-                    'schema_path': parent.get('schema_path') + '.patternProperties.^\\w+$',
-                    'join': self.is_join_task(task_name),
-                    'splits': [],
-                    'prev': []
+                    "spec_path": parent.get("spec_path") + "." + task_name,
+                    "schema_path": parent.get("schema_path") + ".patternProperties.^\\w+$",
+                    "join": self.is_join_task(task_name),
+                    "splits": [],
+                    "prev": [],
                 }
 
-            staging[task_name]['splits'] = list(set(staging[task_name]['splits']) | set(splits))
+            staging[task_name]["splits"] = list(set(staging[task_name]["splits"]) | set(splits))
 
             if prev_task_name:
-                inbounds = list(set(staging[task_name]['prev']) | set([prev_task_name]))
-                staging[task_name]['prev'] = inbounds
+                inbounds = list(set(staging[task_name]["prev"]) | set([prev_task_name]))
+                staging[task_name]["prev"] = inbounds
 
             next_tasks = self.get_next_tasks(task_name)
 
@@ -498,25 +445,25 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
 
         # Use the prepped data to identify tasks that are not reachable.
         for task_name, meta in six.iteritems(staging):
-            if not meta['join']:
-                meta['reachable'] = True
+            if not meta["join"]:
+                meta["reachable"] = True
                 continue
 
-            for prev_task_name in meta['prev']:
-                meta['reachable'] = (meta['splits'] == staging[prev_task_name]['splits'])
+            for prev_task_name in meta["prev"]:
+                meta["reachable"] = meta["splits"] == staging[prev_task_name]["splits"]
 
-                if not meta['reachable']:
+                if not meta["reachable"]:
                     msg = (
                         'The join task "%s" is unreachable. A join task is determined to be '
-                        'unreachable if there are nested forks from multi-referenced tasks '
-                        'that join on the said task. This is ambiguous to the workflow engine '
-                        'because it does not know at which level should the join occurs.'
+                        "unreachable if there are nested forks from multi-referenced tasks "
+                        "that join on the said task. This is ambiguous to the workflow engine "
+                        "because it does not know at which level should the join occurs."
                     )
 
                     entry = {
-                        'message': msg % task_name,
-                        'spec_path': meta['spec_path'],
-                        'schema_path': meta['schema_path']
+                        "message": msg % task_name,
+                        "spec_path": meta["spec_path"],
+                        "schema_path": meta["schema_path"],
                     }
 
                     result.append(entry)
@@ -537,7 +484,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         ctxs = {}
         errors = []
         traversed = []
-        parent_ctx = parent.get('ctx', []) if parent else []
+        parent_ctx = parent.get("ctx", []) if parent else []
         rolling_ctx = list(set(parent_ctx))
         q = queue.Queue()
 
@@ -553,14 +500,10 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
 
             task_spec = self.get_task(task_name)
 
-            spec_path = parent.get('spec_path') + '.' + task_name
-            schema_path = parent.get('schema_path') + '.patternProperties.^\\w+$'
+            spec_path = parent.get("spec_path") + "." + task_name
+            schema_path = parent.get("schema_path") + ".patternProperties.^\\w+$"
 
-            task_parent = {
-                'ctx': task_ctx,
-                'spec_path': spec_path,
-                'schema_path': schema_path
-            }
+            task_parent = {"ctx": task_ctx, "spec_path": spec_path, "schema_path": schema_path}
 
             result = task_spec.inspect_context(parent=task_parent)
             errors.extend(result[0])
@@ -569,18 +512,18 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
 
             # Identify the next set of tasks and related transition specs.
             transitions = []
-            task_transition_specs = getattr(task_spec, 'next') or []
+            task_transition_specs = getattr(task_spec, "next") or []
 
             for i in range(0, len(task_transition_specs)):
                 task_transition_spec = task_transition_specs[i]
-                next_task_names = getattr(task_transition_spec, 'do') or []
+                next_task_names = getattr(task_transition_spec, "do") or []
 
                 if not next_task_names:
                     transitions.append((None, task_transition_spec, str(i)))
                     continue
 
                 if isinstance(next_task_names, six.string_types):
-                    next_task_names = [x.strip() for x in next_task_names.split(',')]
+                    next_task_names = [x.strip() for x in next_task_names.split(",")]
 
                 for next_task_name in next_task_names:
                     entry = (next_task_name, task_transition_spec, str(i))
@@ -592,18 +535,20 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                 seq_num = entry[2]
 
                 parent_ctx = {
-                    'ctx': task_ctx,
-                    'spec_path': spec_path + '.next[' + seq_num + ']',
-                    'schema_path': schema_path + '.properties.next.items'
+                    "ctx": task_ctx,
+                    "spec_path": spec_path + ".next[" + seq_num + "]",
+                    "schema_path": schema_path + ".properties.next.items",
                 }
 
                 result = task_transition_spec.inspect_context(parent_ctx)
                 errors.extend(result[0])
                 branch_ctx = list(set(task_ctx + result[1]))
 
-                if (not next_task_name
-                        or next_task_name in traversed
-                        or not self.has_task(next_task_name)):
+                if (
+                    not next_task_name
+                    or next_task_name in traversed
+                    or not self.has_task(next_task_name)
+                ):
                     continue
 
                 next_task_spec = self.get_task(next_task_name)
@@ -620,33 +565,24 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
 
 class WorkflowSpec(native_v1_specs.Spec):
     _schema = {
-        'type': 'object',
-        'properties': {
-            'vars': spec_types.UNIQUE_ONE_KEY_DICT_LIST,
-            'input': spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
-            'output': spec_types.UNIQUE_ONE_KEY_DICT_LIST,
-            'tasks': TaskMappingSpec
+        "type": "object",
+        "properties": {
+            "vars": spec_types.UNIQUE_ONE_KEY_DICT_LIST,
+            "input": spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+            "output": spec_types.UNIQUE_ONE_KEY_DICT_LIST,
+            "tasks": TaskMappingSpec,
         },
-        'required': ['tasks'],
-        'additionalProperties': False
+        "required": ["tasks"],
+        "additionalProperties": False,
     }
 
-    _context_evaluation_sequence = [
-        'input',
-        'vars',
-        'tasks',
-        'output'
-    ]
+    _context_evaluation_sequence = ["input", "vars", "tasks", "output"]
 
-    _context_inputs = [
-        'input',
-        'vars',
-        'output'
-    ]
+    _context_inputs = ["input", "vars", "output"]
 
     def __init__(self, spec, name=None, member=False):
         if not spec:
-            raise ValueError('The spec cannot be type of None.')
+            raise ValueError("The spec cannot be type of None.")
 
         spec = (
             yaml.safe_load(spec)
@@ -655,10 +591,10 @@ class WorkflowSpec(native_v1_specs.Spec):
         )
 
         # Resolve shorthand inline with items.
-        if 'tasks' in spec and isinstance(spec['tasks'], dict) and spec['tasks']:
-            for task_name, task_spec in six.iteritems(spec['tasks']):
-                if 'with' in task_spec and isinstance(task_spec['with'], six.string_types):
-                    task_spec['with'] = {'items': task_spec['with']}
+        if "tasks" in spec and isinstance(spec["tasks"], dict) and spec["tasks"]:
+            for task_name, task_spec in six.iteritems(spec["tasks"]):
+                if "with" in task_spec and isinstance(task_spec["with"], six.string_types):
+                    task_spec["with"] = {"items": task_spec["with"]}
 
         super(WorkflowSpec, self).__init__(spec, name=name, member=member)
 
@@ -666,7 +602,7 @@ class WorkflowSpec(native_v1_specs.Spec):
         rolling_ctx = json_util.deepcopy(in_ctx) if in_ctx else {}
         errors = []
 
-        for input_spec in (getattr(self, 'input') or []):
+        for input_spec in getattr(self, "input") or []:
             if isinstance(input_spec, dict):
                 input_name = list(input_spec.items())[0][0]
                 default_input_value = list(input_spec.items())[0][1]
@@ -689,7 +625,7 @@ class WorkflowSpec(native_v1_specs.Spec):
         rendered_vars = {}
         errors = []
 
-        for var_spec in (getattr(self, 'vars') or []):
+        for var_spec in getattr(self, "vars") or []:
             var_name = list(var_spec.items())[0][0]
             default_var_value = list(var_spec.items())[0][1]
 
@@ -703,7 +639,7 @@ class WorkflowSpec(native_v1_specs.Spec):
         return rendered_vars, errors
 
     def render_output(self, in_ctx):
-        output_specs = getattr(self, 'output') or []
+        output_specs = getattr(self, "output") or []
         rolling_ctx = json_util.deepcopy(in_ctx)
         rendered_outputs = {}
         errors = []

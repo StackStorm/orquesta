@@ -22,20 +22,16 @@ from orquesta.tests.unit import base as test_base
 
 
 class WorkflowConductorStressTest(test_base.WorkflowConductorTest):
-
     def _prep_wf_def(self, num_tasks):
-        wf_def = {
-            'input': ['data'],
-            'tasks': {}
-        }
+        wf_def = {"input": ["data"], "tasks": {}}
 
         for i in range(1, num_tasks):
-            task_name = 't' + str(i)
-            next_task_name = 't' + str(i + 1)
-            wf_def['tasks'][task_name] = {'action': 'core.noop', 'next': [{'do': next_task_name}]}
+            task_name = "t" + str(i)
+            next_task_name = "t" + str(i + 1)
+            wf_def["tasks"][task_name] = {"action": "core.noop", "next": [{"do": next_task_name}]}
 
-        task_name = 't' + str(num_tasks)
-        wf_def['tasks'][task_name] = {'action': 'core.noop'}
+        task_name = "t" + str(num_tasks)
+        wf_def["tasks"][task_name] = {"action": "core.noop"}
 
         return wf_def
 
@@ -44,8 +40,8 @@ class WorkflowConductorStressTest(test_base.WorkflowConductorTest):
         spec = native_specs.WorkflowSpec(wf_def)
 
         kwargs = {
-            'context': context if context is not None else None,
-            'inputs': inputs if inputs is not None else None
+            "context": context if context is not None else None,
+            "inputs": inputs if inputs is not None else None,
         }
 
         conductor = conducting.WorkflowConductor(spec, **kwargs)
@@ -61,7 +57,7 @@ class WorkflowConductorStressTest(test_base.WorkflowConductorTest):
         conductor = self._prep_conductor(num_tasks, status=statuses.RUNNING)
 
         for i in range(1, num_tasks + 1):
-            task_name = 't' + str(i)
+            task_name = "t" + str(i)
             self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
 
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
@@ -73,14 +69,13 @@ class WorkflowConductorStressTest(test_base.WorkflowConductorTest):
 
     def test_serialization_function_of_data_size(self):
         data_length = 1000000
-        data = ''.join(random.choice(string.ascii_lowercase) for _ in range(data_length))
+        data = "".join(random.choice(string.ascii_lowercase) for _ in range(data_length))
         self.assertEqual(len(data), data_length)
-        conductor = self._prep_conductor(1, inputs={'data': data}, status=statuses.RUNNING)
+        conductor = self._prep_conductor(1, inputs={"data": data}, status=statuses.RUNNING)
         conductor.deserialize(conductor.serialize())
 
 
 class WorkflowConductorWithItemsStressTest(test_base.WorkflowConductorWithItemsTest):
-
     def test_runtime_function_of_items_list_size(self):
         wf_def = """
         version: 1.0
@@ -110,12 +105,12 @@ class WorkflowConductorWithItemsStressTest(test_base.WorkflowConductorWithItemsT
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': [str(i) for i in range(0, num_items)]}
+        task_name = "task1"
+        task_ctx = {"xs": [str(i) for i in range(0, num_items)]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': i}, 'item_id': int(i)}
-            for i in task_ctx['xs']
+            {"action": "core.echo", "input": {"message": i}, "item_id": int(i)}
+            for i in task_ctx["xs"]
         ]
 
         mock_ac_ex_statuses = [statuses.SUCCEEDED] * num_items
@@ -127,11 +122,11 @@ class WorkflowConductorWithItemsStressTest(test_base.WorkflowConductorWithItemsT
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is removed from staging.
@@ -142,5 +137,5 @@ class WorkflowConductorWithItemsStressTest(test_base.WorkflowConductorWithItemsT
 
         # Assert the workflow output is correct.
         conductor.render_workflow_output()
-        expected_output = {'items': task_ctx['xs']}
+        expected_output = {"items": task_ctx["xs"]}
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)

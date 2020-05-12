@@ -16,61 +16,60 @@ from orquesta.tests.unit import base as test_base
 
 
 class JinjaFacadeValidationTest(test_base.ExpressionFacadeEvaluatorTest):
-
     def test_basic_validate(self):
         self.assertListEqual([], self.validate(None))
-        self.assertListEqual([], self.validate('{{ 1 }}'))
-        self.assertListEqual([], self.validate('{{ abc }}'))
-        self.assertListEqual([], self.validate('{{ 1 + 2 }}'))
-        self.assertListEqual([], self.validate('{{ ctx().foo }}'))
+        self.assertListEqual([], self.validate("{{ 1 }}"))
+        self.assertListEqual([], self.validate("{{ abc }}"))
+        self.assertListEqual([], self.validate("{{ 1 + 2 }}"))
+        self.assertListEqual([], self.validate("{{ ctx().foo }}"))
         self.assertListEqual([], self.validate('{{ ctx("foo") }}'))
         self.assertListEqual([], self.validate('{{ ctx().a1 + ctx("a2") }}'))
 
     def test_parse_error(self):
-        expr = '{{ {{ ctx().foo }} }}'
+        expr = "{{ {{ ctx().foo }} }}"
         errors = self.validate(expr)
 
         self.assertEqual(2, len(errors))
-        self.assertIn('expected token \':\', got \'}\'', errors[0]['message'])
-        self.assertIn('unexpected end of template', errors[1]['message'])
+        self.assertIn("expected token ':', got '}'", errors[0]["message"])
+        self.assertIn("unexpected end of template", errors[1]["message"])
 
     def test_multiple_errors(self):
-        expr = '{{ 1 +/ 2 }} and {{ * }}'
+        expr = "{{ 1 +/ 2 }} and {{ * }}"
         errors = self.validate(expr)
 
         self.assertEqual(3, len(errors))
-        self.assertIn('unexpected', errors[0]['message'])
-        self.assertIn('unexpected', errors[1]['message'])
-        self.assertIn('unexpected', errors[2]['message'])
+        self.assertIn("unexpected", errors[0]["message"])
+        self.assertIn("unexpected", errors[1]["message"])
+        self.assertIn("unexpected", errors[2]["message"])
 
     def test_block_error(self):
-        expr = '{% for i in ctx().x %}{{ i }}{% foobar %}'
+        expr = "{% for i in ctx().x %}{{ i }}{% foobar %}"
         errors = self.validate(expr)
 
         self.assertEqual(1, len(errors))
-        self.assertIn('unknown tag', errors[0]['message'])
+        self.assertIn("unknown tag", errors[0]["message"])
 
     def test_missing_braces_error(self):
-        expr = '{% for i in ctx().x %}{{ i }}{{ foobar %}'
+        expr = "{% for i in ctx().x %}{{ i }}{{ foobar %}"
         errors = self.validate(expr)
 
         self.assertEqual(1, len(errors))
-        self.assertIn('unexpected \'}\'', errors[0]['message'])
+        self.assertIn("unexpected '}'", errors[0]["message"])
 
     def test_list_validate(self):
         self.assertListEqual([], self.validate([]))
 
-        target = ['{{ 1 }}', 'xyz', 123, True]
+        target = ["{{ 1 }}", "xyz", 123, True]
         self.assertListEqual([], self.validate(target))
 
-        target = ['{{ 1 }}', ['{{ a }}', 'x']]
+        target = ["{{ 1 }}", ["{{ a }}", "x"]]
         self.assertListEqual([], self.validate(target))
 
-        target = ['{{ 1 }}', ['{{ a }}', 'x'], {'k1': '{{ 3 }}'}]
+        target = ["{{ 1 }}", ["{{ a }}", "x"], {"k1": "{{ 3 }}"}]
         self.assertListEqual([], self.validate(target))
 
     def test_list_multiple_errors(self):
-        target = ['{{ 1 +/ 2 }}', ['{{ {{ ctx().foo }}'], {'k1': '{{ * }}'}]
+        target = ["{{ 1 +/ 2 }}", ["{{ {{ ctx().foo }}"], {"k1": "{{ * }}"}]
         result = self.validate(target)
         self.assertEqual(3, len(result))
 
@@ -78,32 +77,32 @@ class JinjaFacadeValidationTest(test_base.ExpressionFacadeEvaluatorTest):
         self.assertListEqual([], self.validate({}))
 
         target = {
-            'k1': '{{ 1 }}',
-            'k2': 'foobar',
-            '{{ k3 }}': 789,
-            'k4': ['{{ abc }}', 'xyz', 123, False, {'k': 'v'}],
-            'depth-1': {
-                'depth-1-1': {
-                    'depth-1-1-2': '{{ ctx().a1 + ctx("a2") }}',
-                    'depth-1-1-3': ['{{ ctx().foobar }}', 'xyz']
+            "k1": "{{ 1 }}",
+            "k2": "foobar",
+            "{{ k3 }}": 789,
+            "k4": ["{{ abc }}", "xyz", 123, False, {"k": "v"}],
+            "depth-1": {
+                "depth-1-1": {
+                    "depth-1-1-2": '{{ ctx().a1 + ctx("a2") }}',
+                    "depth-1-1-3": ["{{ ctx().foobar }}", "xyz"],
                 }
-            }
+            },
         }
 
         self.assertListEqual([], self.validate(target))
 
     def test_dict_multiple_errors(self):
         target = {
-            'k1': '{{ 1 +/ 2 }}',
-            'k2': 'foobar',
-            '{{ {{ ctx().foo }}': 789,
-            'k4': ['{{ abc }}', 'xyz', 123, False, {'k': 'v'}],
-            'depth-1': {
-                'depth-1-1': {
-                    'depth-1-1-2': '{{ 3 +/ 4 }}',
-                    'depth-1-1-3': ['{{ ctx().foobar }}', '{{ * }}']
+            "k1": "{{ 1 +/ 2 }}",
+            "k2": "foobar",
+            "{{ {{ ctx().foo }}": 789,
+            "k4": ["{{ abc }}", "xyz", 123, False, {"k": "v"}],
+            "depth-1": {
+                "depth-1-1": {
+                    "depth-1-1-2": "{{ 3 +/ 4 }}",
+                    "depth-1-1-3": ["{{ ctx().foobar }}", "{{ * }}"],
                 }
-            }
+            },
         }
 
         result = self.validate(target)
