@@ -40,7 +40,7 @@ clean:
 
 .PHONY: venv
 venv:
-	test -d $(VENV_DIR) || virtualenv -p $(PY3) --no-site-packages $(VENV_DIR)
+	test -d $(VENV_DIR) || virtualenv -p $(PY3) $(VENV_DIR)
 
 .PHONY: reqs
 reqs: venv
