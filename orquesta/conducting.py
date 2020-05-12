@@ -442,15 +442,15 @@ class WorkflowConductor(object):
         updated_status = self.get_workflow_status()
 
         # Ignore if workflow hasn't changed from paused to pausing.
-        if (status == statuses.PAUSED and
-                current_status == statuses.PAUSING and
-                updated_status == statuses.PAUSING):
+        if (status == statuses.PAUSED
+                and current_status == statuses.PAUSING
+                and updated_status == statuses.PAUSING):
             return
 
         # Ignore if workflow hasn't changed from canceled to canceling.
-        if (status == statuses.CANCELED and
-                current_status == statuses.CANCELING and
-                updated_status == statuses.CANCELING):
+        if (status == statuses.CANCELED
+                and current_status == statuses.CANCELING
+                and updated_status == statuses.CANCELING):
             return
 
         # Otherwise, if status has not changed as expected, then raise exception.
@@ -541,8 +541,8 @@ class WorkflowConductor(object):
             )
 
             satisfied = (
-                prev_task_transition_id in prev_task_state_entry['next'] and
-                prev_task_state_entry['next'][prev_task_transition_id]
+                prev_task_transition_id in prev_task_state_entry['next']
+                and prev_task_state_entry['next'][prev_task_transition_id]
             )
 
             if not bool(inbound_evaluation[prev_transition[0]]):
@@ -557,8 +557,8 @@ class WorkflowConductor(object):
         # active task(s) or staged task(s) that is ready,  then this means that the
         # workflow is still active and it is possible that not all inbound branch(es)
         # and subsequent task(s) have run.
-        if (None in inbound_evaluation.values() and
-                (self.workflow_state.has_active_tasks or self.workflow_state.has_staged_tasks)):
+        if (None in inbound_evaluation.values()
+                and (self.workflow_state.has_active_tasks or self.workflow_state.has_staged_tasks)):
             return constants.INBOUND_CRITERIA_WIP
 
         # If reached here, then the requirement is not satisified.
@@ -642,8 +642,8 @@ class WorkflowConductor(object):
         else:
             task_state_entry = self.get_task_state_entry(task_id, route)
 
-            if (not task_state_entry or
-                    task_state_entry.get('status') not in statuses.COMPLETED_STATUSES):
+            if (not task_state_entry
+                    or task_state_entry.get('status') not in statuses.COMPLETED_STATUSES):
                 return []
 
             outbounds = self.graph.get_next_transitions(task_id)
@@ -771,8 +771,8 @@ class WorkflowConductor(object):
         in_ctx = self.get_task_context(in_ctx_idxs)
 
         # Evaluate the retry delay value.
-        if ('delay' in task_state_entry['retry'] and
-                isinstance(task_state_entry['retry']['delay'], six.string_types)):
+        if ('delay' in task_state_entry['retry']
+                and isinstance(task_state_entry['retry']['delay'], six.string_types)):
             delay_value = expr_base.evaluate(task_state_entry['retry']['delay'], in_ctx)
 
             if not isinstance(delay_value, int):
@@ -781,8 +781,8 @@ class WorkflowConductor(object):
             task_state_entry['retry']['delay'] = delay_value
 
         # Evaluate the retry count value.
-        if ('count' in task_state_entry['retry'] and
-                isinstance(task_state_entry['retry']['count'], six.string_types)):
+        if ('count' in task_state_entry['retry']
+                and isinstance(task_state_entry['retry']['count'], six.string_types)):
             count_value = expr_base.evaluate(task_state_entry['retry']['count'], in_ctx)
 
             if not isinstance(count_value, int):
@@ -857,8 +857,8 @@ class WorkflowConductor(object):
         # misses forks that extends from the cycle. The check here assumes that the
         # last task entry is already completed and the new task status is one of the
         # starting statuses, then there is high likelihood that this is a cycle.
-        if (task_state_entry.get('status') in statuses.COMPLETED_STATUSES and
-                event.status and event.status in statuses.STARTING_STATUSES):
+        if (task_state_entry.get('status') in statuses.COMPLETED_STATUSES
+                and event.status and event.status in statuses.STARTING_STATUSES):
             task_state_entry = self.add_task_state(
                 task_id,
                 staged_task['route'],
@@ -924,8 +924,8 @@ class WorkflowConductor(object):
             # the state machine has determined the status for the task execution. If the task
             # is completed, get the task result and context which is required to evaluate the
             # the condition if a retry for the task is required.
-            if (self.get_workflow_status() in statuses.ACTIVE_STATUSES and
-                    self._evaluate_task_retry(task_state_entry, current_ctx)):
+            if (self.get_workflow_status() in statuses.ACTIVE_STATUSES
+                    and self._evaluate_task_retry(task_state_entry, current_ctx)):
                 return self.update_task_state(task_id, route, events.TaskRetryEvent())
 
         # Evaluate task transitions if task is completed and status change is not processed.
@@ -1030,8 +1030,8 @@ class WorkflowConductor(object):
                     # Check if inbound criteria are met. Must use the original route
                     # to identify the inbound task transitions.
                     staged_next_task['ready'] = (
-                        self.get_inbound_criteria_status(next_task_id, route) ==
-                        constants.INBOUND_CRITERIA_SATISFIED
+                        self.get_inbound_criteria_status(next_task_id, route)
+                        == constants.INBOUND_CRITERIA_SATISFIED
                     )
 
                     # Put the next task in the engine event queue if it is an engine command.
@@ -1155,8 +1155,8 @@ class WorkflowConductor(object):
         for t in self.graph.get_next_transitions(task_id):
             task_transition_id = constants.TASK_STATE_TRANSITION_FORMAT % (t[1], str(t[2]))
 
-            if (task_transition_id in task_state_entry['next'] and
-                    task_state_entry['next'][task_transition_id]):
+            if (task_transition_id in task_state_entry['next']
+                    and task_state_entry['next'][task_transition_id]):
                 contexts[task_transition_id] = self.get_task_initial_context(t[1], route)
 
         return contexts

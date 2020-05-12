@@ -41,9 +41,9 @@ class CommonFunctionTest(unittest.TestCase):
         self.assertListEqual(funcs.zip_(None), [])
 
     def test_zip_single(self):
-        l = [1, 2, 3, 4, 5]
+        test_list = [1, 2, 3, 4, 5]
 
-        self.assertListEqual(funcs.zip_(l), l)
+        self.assertListEqual(funcs.zip_(test_list), test_list)
 
     def test_zip_double(self):
         l1 = [1, 2, 3, 4, 5]

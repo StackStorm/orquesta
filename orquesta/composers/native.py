@@ -86,8 +86,8 @@ class WorkflowComposer(comp_base.WorkflowComposer):
                     wf_graph.update_task(task_name, retry=retry_spec)
                     continue
 
-                if (not wf_graph.has_task(next_task_name) or
-                        not wf_spec.tasks.in_cycle(next_task_name)):
+                if (not wf_graph.has_task(next_task_name)
+                        or not wf_spec.tasks.in_cycle(next_task_name)):
                     q.put((next_task_name, list(splits)))
 
                 crta = [condition] if condition else []

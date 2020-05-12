@@ -67,7 +67,7 @@ class MockMappingSpec(MockBaseMappingSpec):
     _schema = {
         'type': 'object',
         'patternProperties': {
-            '^\w+$': MockJointSpec
+            r'^\w+$': MockJointSpec
         }
     }
 

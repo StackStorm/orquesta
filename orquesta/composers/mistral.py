@@ -93,8 +93,8 @@ class WorkflowComposer(comp_base.WorkflowComposer):
             next_tasks = wf_spec.tasks.get_next_tasks(task_name)
 
             for next_task_name, expr, condition in next_tasks:
-                if (not wf_graph.has_task(next_task_name) or
-                        not wf_spec.tasks.in_cycle(next_task_name)):
+                if (not wf_graph.has_task(next_task_name)
+                        or not wf_spec.tasks.in_cycle(next_task_name)):
                     q.put((next_task_name, list(splits)))
 
                 crta = cls._compose_transition_criteria(task_name, condition=condition, expr=expr)

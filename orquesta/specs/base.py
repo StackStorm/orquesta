@@ -578,9 +578,6 @@ class MappingSpec(Spec):
     def __len__(self):
         return len(self.spec)
 
-    def __cmp__(self, spec):
-        return cmp(self.spec, spec) if isinstance(spec, dict) else cmp(self.spec, spec.spec)
-
     def __contains__(self, item):
         return item in self.spec
 
@@ -589,7 +586,7 @@ class MappingSpec(Spec):
             yield (key, getattr(self, key))
 
     def __unicode__(self):
-        return unicode(repr(self.spec))
+        return str_util.unicode(repr(self.spec))
 
     def copy(self):
         name = self.name if 'name' not in self.spec and hasattr(self, 'name') else None

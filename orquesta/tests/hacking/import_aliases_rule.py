@@ -60,10 +60,10 @@ def get_alias(logical_line):
 
     parts = logical_line.split()
 
-    if (len(parts) > 3 and
-            parts[0] == 'from' and
-            parts[1] != '__future__' and
-            not core.is_import_exception(parts[1])):
+    if (len(parts) > 3
+            and parts[0] == 'from'
+            and parts[1] != '__future__'
+            and not core.is_import_exception(parts[1])):
 
         # from path.to.module import module
         if len(parts) == 4:

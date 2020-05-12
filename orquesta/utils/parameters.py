@@ -19,14 +19,14 @@ import six
 from orquesta.expressions import base as expr_base
 
 
-REGEX_VALUE_IN_BRACKETS = '\[.*\]\s*'
-REGEX_VALUE_IN_QUOTES = '\"[^\"]*\"\s*'
-REGEX_VALUE_IN_APOSTROPHES = "'[^']*'\s*"
-REGEX_FLOATING_NUMBER = '[-]?\d*\.\d+'
-REGEX_INTEGER = '[-]?\d+'
-REGEX_TRUE = '(?i)true'
-REGEX_FALSE = '(?i)false'
-REGEX_NULL = 'null'
+REGEX_VALUE_IN_BRACKETS = r'\[.*\]\s*'
+REGEX_VALUE_IN_QUOTES = r'\"[^\"]*\"\s*'
+REGEX_VALUE_IN_APOSTROPHES = r"'[^']*'\s*"
+REGEX_FLOATING_NUMBER = r'[-]?\d*\.\d+'
+REGEX_INTEGER = r'[-]?\d+'
+REGEX_TRUE = r'(?i)true'
+REGEX_FALSE = r'(?i)false'
+REGEX_NULL = r'null'
 
 # REGEX_FLOATING_NUMBER must go before REGEX_INTEGER
 REGEX_INLINE_PARAM_VARIATIONS = [
@@ -44,7 +44,7 @@ REGEX_INLINE_PARAM_VARIATIONS.extend(
     [e._regex_pattern for e in expr_base.get_evaluators().values()]
 )
 
-REGEX_INLINE_PARAMS = '([\w]+)=(%s)' % '|'.join(REGEX_INLINE_PARAM_VARIATIONS)
+REGEX_INLINE_PARAMS = r'([\w]+)=(%s)' % '|'.join(REGEX_INLINE_PARAM_VARIATIONS)
 
 
 def parse_inline_params(s, preserve_order=True):
@@ -58,8 +58,8 @@ def parse_inline_params(s, preserve_order=True):
         # Remove leading and trailing whitespaces.
         v = v.strip()
 
-        quotes_in_param = bool(re.findall(REGEX_VALUE_IN_QUOTES, v) or
-                               re.findall(REGEX_VALUE_IN_APOSTROPHES, v))
+        quotes_in_param = bool(re.findall(REGEX_VALUE_IN_QUOTES, v)
+                               or re.findall(REGEX_VALUE_IN_APOSTROPHES, v))
 
         # Remove leading and trailing double quotes.
         v = re.sub('^"', '', v)

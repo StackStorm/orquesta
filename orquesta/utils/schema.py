@@ -104,8 +104,8 @@ def merge_object_schema(s1, s2, overwrite=True):
         schema['required'] = sorted(required)
 
     additional = (
-        s1.get('additionalProperties', True) and
-        s2.get('additionalProperties', True)
+        s1.get('additionalProperties', True)
+        and s2.get('additionalProperties', True)
     )
 
     if not additional:

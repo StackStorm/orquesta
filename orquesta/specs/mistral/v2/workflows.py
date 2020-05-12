@@ -120,7 +120,7 @@ class WorkbookSpec(mistral_spec_base.Spec):
                 'type': 'object',
                 'minProperties': 1,
                 'patternProperties': {
-                    '^(?!version)\w+$': WorkflowSpec
+                    r'^(?!version)\w+$': WorkflowSpec
                 }
             }
         },

@@ -358,11 +358,11 @@ class WorkflowGraphTest(test_base.WorkflowGraphTest):
         wf_graph = self._prep_graph()
 
         self.assertFalse(
-            len(wf_graph.get_prev_transitions('task5')) > 1 and
-            not wf_graph.has_barrier('task5')
+            len(wf_graph.get_prev_transitions('task5')) > 1
+            and not wf_graph.has_barrier('task5')
         )
 
         self.assertTrue(
-            len(wf_graph.get_prev_transitions('task9')) > 1 and
-            not wf_graph.has_barrier('task9')
+            len(wf_graph.get_prev_transitions('task9')) > 1
+            and not wf_graph.has_barrier('task9')
         )

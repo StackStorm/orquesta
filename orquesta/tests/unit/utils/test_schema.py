@@ -205,8 +205,8 @@ class SchemaUtilsTest(unittest.TestCase):
         s2 = {
             'type': 'object',
             'patternProperties': {
-                '^version$': {'type': 'number'},
-                '^(?!version)\w+$': {'type': 'string'}
+                r'^version$': {'type': 'number'},
+                r'^(?!version)\w+$': {'type': 'string'}
             },
             'minProperties': 1,
             'maxProperties': 100
@@ -215,8 +215,8 @@ class SchemaUtilsTest(unittest.TestCase):
         expected = {
             'type': 'object',
             'patternProperties': {
-                '^version$': {'type': 'number'},
-                '^(?!version)\w+$': {'type': 'string'}
+                r'^version$': {'type': 'number'},
+                r'^(?!version)\w+$': {'type': 'string'}
             },
             'minProperties': 1,
             'maxProperties': 10
@@ -237,8 +237,8 @@ class SchemaUtilsTest(unittest.TestCase):
         s2 = {
             'type': 'object',
             'patternProperties': {
-                '^version$': {'type': 'number'},
-                '^(?!version)\w+$': {'type': 'string'}
+                r'^version$': {'type': 'number'},
+                r'^(?!version)\w+$': {'type': 'string'}
             },
             'minProperties': 0,
             'maxProperties': 10
@@ -247,8 +247,8 @@ class SchemaUtilsTest(unittest.TestCase):
         expected = {
             'type': 'object',
             'patternProperties': {
-                '^version$': {'type': 'integer'},
-                '^(?!version)\w+$': {'type': 'string'}
+                r'^version$': {'type': 'integer'},
+                r'^(?!version)\w+$': {'type': 'string'}
             },
             'minProperties': 1,
             'maxProperties': 100

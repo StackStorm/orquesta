@@ -97,7 +97,7 @@ class ItemizedSpec(native_v1_specs.Spec):
     _items_regex = (
         # Regular expression in the form "x, y, z, ... in <expression>"
         # or "x in <expression>" with optional space(s) on both end.
-        '^(\s+)?({expr})(\s+)?$|^(\s+)?((\w+,\s?|\s+)+)?(\w+)\s+in\s+({expr})(\s+)?$'.format(
+        r'^(\s+)?({expr})(\s+)?$|^(\s+)?((\w+,\s?|\s+)+)?(\w+)\s+in\s+({expr})(\s+)?$'.format(
             expr='|'.join(expr_base.get_statement_regexes().values())
         )
     )
@@ -279,7 +279,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         'type': 'object',
         'minProperties': 1,
         'patternProperties': {
-            '^\w+$': TaskSpec
+            r'^\w+$': TaskSpec
         }
     }
 
@@ -340,8 +340,8 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
 
     def is_split_task(self, task_name):
         return (
-            not self.is_join_task(task_name) and
-            len(self.get_prev_tasks(task_name)) > 1
+            not self.is_join_task(task_name)
+            and len(self.get_prev_tasks(task_name)) > 1
         )
 
     def in_cycle(self, task_name):
@@ -601,9 +601,9 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                 errors.extend(result[0])
                 branch_ctx = list(set(task_ctx + result[1]))
 
-                if (not next_task_name or
-                        next_task_name in traversed or
-                        not self.has_task(next_task_name)):
+                if (not next_task_name
+                        or next_task_name in traversed
+                        or not self.has_task(next_task_name)):
                     continue
 
                 next_task_spec = self.get_task(next_task_name)

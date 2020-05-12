@@ -100,7 +100,7 @@ def check_module_only(logical_line, physical_line, filename, noqa):
 
     parts = logical_line.split()
 
-    if (len(parts) > 3 and parts[0] == 'from' and parts[1] != '__future__' and
-            not core.is_import_exception(parts[1]) and
-            not is_module('.'.join([parts[1], parts[3]]))):
+    if (len(parts) > 3 and parts[0] == 'from' and parts[1] != '__future__'
+            and not core.is_import_exception(parts[1])
+            and not is_module('.'.join([parts[1], parts[3]]))):
         yield 0, 'O101 import must be module only'

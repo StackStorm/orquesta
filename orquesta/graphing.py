@@ -108,7 +108,7 @@ class WorkflowGraph(object):
     def has_transition(self, source, destination, **kwargs):
         edges = filter(
             lambda e: e[0] == source and e[1] == destination,
-            self._graph.edges(data=True, keys=True)
+            self._graph.edges(data=True, keys=True)  # pylint: disable=unexpected-keyword-arg
         )
 
         for attr, value in six.iteritems(kwargs):
@@ -120,12 +120,12 @@ class WorkflowGraph(object):
         if key is not None:
             edges = filter(
                 lambda e: e[0] == source and e[1] == destination and e[2] == key,
-                self._graph.edges(data=True, keys=True)
+                self._graph.edges(data=True, keys=True)  # pylint: disable=unexpected-keyword-arg
             )
         else:
             edges = filter(
                 lambda e: e[0] == source and e[1] == destination,
-                self._graph.edges(data=True, keys=True)
+                self._graph.edges(data=True, keys=True)  # pylint: disable=unexpected-keyword-arg
             )
 
             for attr, value in six.iteritems(kwargs):

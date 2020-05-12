@@ -694,8 +694,8 @@ class WorkflowStateMachine(object):
         if old_status not in WORKFLOW_STATE_MACHINE_DATA.keys():
             return False
 
-        if (old_status == new_status or
-                new_status in WORKFLOW_STATE_MACHINE_DATA[old_status].values()):
+        if (old_status == new_status
+                or new_status in WORKFLOW_STATE_MACHINE_DATA[old_status].values()):
             return True
 
         return False
@@ -725,8 +725,8 @@ class WorkflowStateMachine(object):
         # it needs to be paused or canceled. Cancelation has precedence over other
         # status, follow by pause, running, then completion.
 
-        if (not task_event.startswith(events.TASK_SUCCEEDED) and
-                not task_event.startswith(events.TASK_REMEDIATED)):
+        if (not task_event.startswith(events.TASK_SUCCEEDED)
+                and not task_event.startswith(events.TASK_REMEDIATED)):
             return task_event
 
         if workflow_state.has_canceling_tasks or workflow_state.has_canceled_tasks:
@@ -798,11 +798,11 @@ class WorkflowStateMachine(object):
             workflow_event += '_workflow_active' if has_active_tasks else '_workflow_dormant'
 
         # If the workflow is paused and on resume, check whether it is already completed.
-        if (workflow_state.status == statuses.PAUSED and
-                wf_ex_event.status in [statuses.RUNNING, statuses.RESUMING] and
-                not workflow_state.has_active_tasks and
-                not workflow_state.has_staged_tasks and
-                not workflow_state.has_paused_tasks):
+        if (workflow_state.status == statuses.PAUSED
+                and wf_ex_event.status in [statuses.RUNNING, statuses.RESUMING]
+                and not workflow_state.has_active_tasks
+                and not workflow_state.has_staged_tasks
+                and not workflow_state.has_paused_tasks):
             workflow_event += '_workflow_completed'
 
         return workflow_event

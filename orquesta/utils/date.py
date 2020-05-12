@@ -25,12 +25,12 @@ import dateutil.parser
 LOG = logging.getLogger(__name__)
 
 
-ISO8601_FORMAT = '%Y-%m-%dT%H:%M:%S'
-ISO8601_FORMAT_USEC = ISO8601_FORMAT + '.%f'
-ISO8601_REGEX = '\d{4}\-\d{2}\-\d{2}(\s|T)\d{2}:\d{2}:\d{2}(\.\d{3,6})'
-ISO8601_REGEX_NAIVE = '^%s$' % ISO8601_REGEX
-ISO8601_REGEX_UTC = '^%s?(Z|\+00|\+0000|\+00:00)$' % ISO8601_REGEX
-ISO8601_REGEX_TZ = '^%s?(Z|\+\d{2}|\+\d{4}|\+\d{2}:\d{2})$' % ISO8601_REGEX
+ISO8601_FORMAT = r'%Y-%m-%dT%H:%M:%S'
+ISO8601_FORMAT_USEC = ISO8601_FORMAT + r'.%f'
+ISO8601_REGEX = r'\d{4}\-\d{2}\-\d{2}(\s|T)\d{2}:\d{2}:\d{2}(\.\d{3,6})'
+ISO8601_REGEX_NAIVE = r'^%s$' % ISO8601_REGEX
+ISO8601_REGEX_UTC = r'^%s?(Z|\+00|\+0000|\+00:00)$' % ISO8601_REGEX
+ISO8601_REGEX_TZ = r'^%s?(Z|\+\d{2}|\+\d{4}|\+\d{2}:\d{2})$' % ISO8601_REGEX
 
 
 def valid(v):

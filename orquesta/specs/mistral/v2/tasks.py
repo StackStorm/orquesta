@@ -162,7 +162,7 @@ class TaskSpec(mistral_spec_base.Spec):
 
     def finalize_context(self, next_task_name, task_transition_meta, in_ctx):
         criteria = task_transition_meta[3].get('criteria') or []
-        expected_criteria_pattern = "<\% task_status\(\w+\) in \['succeeded'\] \%>"
+        expected_criteria_pattern = r"<\% task_status\(\w+\) in \['succeeded'\] \%>"
         new_ctx = {}
         errors = []
 
@@ -193,7 +193,7 @@ class TaskMappingSpec(mistral_spec_base.MappingSpec):
         'type': 'object',
         'minProperties': 1,
         'patternProperties': {
-            '^\w+$': TaskSpec
+            r'^\w+$': TaskSpec
         }
     }
 
@@ -254,8 +254,8 @@ class TaskMappingSpec(mistral_spec_base.MappingSpec):
 
     def is_split_task(self, task_name):
         return (
-            not self.is_join_task(task_name) and
-            len(self.get_prev_tasks(task_name)) > 1
+            not self.is_join_task(task_name)
+            and len(self.get_prev_tasks(task_name)) > 1
         )
 
     def in_cycle(self, task_name):

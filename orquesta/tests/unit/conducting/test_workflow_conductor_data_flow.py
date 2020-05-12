@@ -20,6 +20,7 @@ from orquesta import conducting
 from orquesta.specs import native as native_specs
 from orquesta import statuses
 from orquesta.tests.unit import base as test_base
+from orquesta.utils import strings as str_util
 import yaql.language.utils as yaql_utils
 
 
@@ -155,7 +156,14 @@ class WorkflowConductorDataFlowTest(test_base.WorkflowConductorTest):
         self._assert_data_flow(inputs, expected_output)
 
     def assert_unicode_data_flow(self, input_value):
-        inputs = {u'a1': unicode(input_value, 'utf8') if six.PY2 else input_value}
+        inputs = {
+            u'a1': (
+                str_util.unicode(input_value, encoding_type='utf-8', force=True)
+                if six.PY2
+                else input_value
+            )
+        }
+
         expected_output = {u'a5': inputs['a1'], u'b5': inputs['a1']}
 
         self._assert_data_flow(inputs, expected_output)
