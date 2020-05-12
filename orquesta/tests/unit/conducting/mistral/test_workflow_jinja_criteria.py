@@ -16,42 +16,20 @@ from orquesta.tests.unit.conducting.mistral import base
 
 
 class JinjaCriteriaConductorTest(base.MistralWorkflowConductorTest):
-
     def test_decision_tree_with_jinja_expr(self):
-        wf_name = 'decision-jinja'
+        wf_name = "decision-jinja"
 
         # Test branch "a"
-        expected_task_seq = [
-            't1',
-            'a'
-        ]
+        expected_task_seq = ["t1", "a"]
 
-        self.assert_conducting_sequences(
-            wf_name,
-            expected_task_seq,
-            inputs={'which': 'a'}
-        )
+        self.assert_conducting_sequences(wf_name, expected_task_seq, inputs={"which": "a"})
 
         # Test branch "b"
-        expected_task_seq = [
-            't1',
-            'b'
-        ]
+        expected_task_seq = ["t1", "b"]
 
-        self.assert_conducting_sequences(
-            wf_name,
-            expected_task_seq,
-            inputs={'which': 'b'}
-        )
+        self.assert_conducting_sequences(wf_name, expected_task_seq, inputs={"which": "b"})
 
         # Test branch "c"
-        expected_task_seq = [
-            't1',
-            'c'
-        ]
+        expected_task_seq = ["t1", "c"]
 
-        self.assert_conducting_sequences(
-            wf_name,
-            expected_task_seq,
-            inputs={'which': 'c'}
-        )
+        self.assert_conducting_sequences(wf_name, expected_task_seq, inputs={"which": "c"})

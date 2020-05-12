@@ -16,846 +16,527 @@ from orquesta.tests.unit.composition.mistral import base
 
 
 class SplitWorkflowComposerTest(base.MistralWorkflowComposerTest):
-
     def test_split(self):
-        wf_name = 'split'
+        wf_name = "split"
 
         expected_wf_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                },
-                {
-                    'id': 'task4',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task5',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task6',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task7',
-                    'barrier': '*',
-                    'splits': ['task4']
-                }
+            "directed": True,
+            "graph": {},
+            "nodes": [
+                {"id": "task1"},
+                {"id": "task2"},
+                {"id": "task3"},
+                {"id": "task4", "splits": ["task4"]},
+                {"id": "task5", "splits": ["task4"]},
+                {"id": "task6", "splits": ["task4"]},
+                {"id": "task7", "barrier": "*", "splits": ["task4"]},
             ],
-            'adjacency': [
+            "adjacency": [
                 [
                     {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
                     },
                     {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task3",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
+                    },
+                ],
+                [
+                    {
+                        "id": "task4",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task2", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task2',
-                            condition='on-success'
-                        )
+                        "id": "task4",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task3", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task3',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task4',
-                            condition='on-success'
-                        )
+                        "id": "task5",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task4", condition="on-success"),
                     },
                     {
-                        'id': 'task6',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task4',
-                            condition='on-success'
-                        )
+                        "id": "task6",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task4", condition="on-success"),
+                    },
+                ],
+                [
+                    {
+                        "id": "task7",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task5", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task7',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task5',
-                            condition='on-success'
-                        )
+                        "id": "task7",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task6", condition="on-success"),
                     }
                 ],
-                [
-                    {
-                        'id': 'task7',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task6',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                },
-                {
-                    'id': 'task4',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task5',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task6',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task7',
-                    'barrier': '*',
-                    'splits': ['task4']
-                }
+            "directed": True,
+            "graph": {},
+            "nodes": [
+                {"id": "task1"},
+                {"id": "task2"},
+                {"id": "task3"},
+                {"id": "task4", "splits": ["task4"]},
+                {"id": "task5", "splits": ["task4"]},
+                {"id": "task6", "splits": ["task4"]},
+                {"id": "task7", "barrier": "*", "splits": ["task4"]},
             ],
-            'adjacency': [
+            "adjacency": [
                 [
                     {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
                     },
                     {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task3",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
+                    },
+                ],
+                [
+                    {
+                        "id": "task4",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task2", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task2',
-                            condition='on-success'
-                        )
+                        "id": "task4",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task3", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task3',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task4',
-                            condition='on-success'
-                        )
+                        "id": "task5",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task4", condition="on-success"),
                     },
                     {
-                        'id': 'task6',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task4',
-                            condition='on-success'
-                        )
+                        "id": "task6",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task4", condition="on-success"),
+                    },
+                ],
+                [
+                    {
+                        "id": "task7",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task5", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task7',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task5',
-                            condition='on-success'
-                        )
+                        "id": "task7",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task6", condition="on-success"),
                     }
                 ],
-                [
-                    {
-                        'id': 'task7',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task6',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
 
     def test_splits(self):
-        wf_name = 'splits'
+        wf_name = "splits"
 
         expected_wf_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                },
-                {
-                    'id': 'task4',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task5',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task6',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task7',
-                    'barrier': '*',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task8',
-                    'splits': ['task4', 'task8']
-                }
+            "directed": True,
+            "graph": {},
+            "nodes": [
+                {"id": "task1"},
+                {"id": "task2"},
+                {"id": "task3"},
+                {"id": "task4", "splits": ["task4"]},
+                {"id": "task5", "splits": ["task4"]},
+                {"id": "task6", "splits": ["task4"]},
+                {"id": "task7", "barrier": "*", "splits": ["task4"]},
+                {"id": "task8", "splits": ["task4", "task8"]},
             ],
-            'adjacency': [
+            "adjacency": [
                 [
                     {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
                     },
                     {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task3",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
                     },
                     {
-                        'id': 'task8',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task8",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
+                    },
+                ],
+                [
+                    {
+                        "id": "task4",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task2", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task2',
-                            condition='on-success'
-                        )
+                        "id": "task4",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task3", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task3',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task4',
-                            condition='on-success'
-                        )
+                        "id": "task5",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task4", condition="on-success"),
                     },
                     {
-                        'id': 'task6',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task4',
-                            condition='on-success'
-                        )
+                        "id": "task6",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task4", condition="on-success"),
+                    },
+                ],
+                [
+                    {
+                        "id": "task7",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task5", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task7',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task5',
-                            condition='on-success'
-                        )
+                        "id": "task7",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task6", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task7',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task6',
-                            condition='on-success'
-                        )
+                        "id": "task8",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task7", condition="on-success"),
                     }
                 ],
-                [
-                    {
-                        'id': 'task8',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task7',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                },
-                {
-                    'id': 'task4',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task5',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task6',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task7',
-                    'barrier': '*',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task8',
-                    'splits': ['task4', 'task8']
-                }
+            "directed": True,
+            "graph": {},
+            "nodes": [
+                {"id": "task1"},
+                {"id": "task2"},
+                {"id": "task3"},
+                {"id": "task4", "splits": ["task4"]},
+                {"id": "task5", "splits": ["task4"]},
+                {"id": "task6", "splits": ["task4"]},
+                {"id": "task7", "barrier": "*", "splits": ["task4"]},
+                {"id": "task8", "splits": ["task4", "task8"]},
             ],
-            'adjacency': [
+            "adjacency": [
                 [
                     {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
                     },
                     {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task3",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
                     },
                     {
-                        'id': 'task8',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task8",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
+                    },
+                ],
+                [
+                    {
+                        "id": "task4",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task2", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task2',
-                            condition='on-success'
-                        )
+                        "id": "task4",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task3", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task3',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task4',
-                            condition='on-success'
-                        )
+                        "id": "task5",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task4", condition="on-success"),
                     },
                     {
-                        'id': 'task6',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task4',
-                            condition='on-success'
-                        )
+                        "id": "task6",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task4", condition="on-success"),
+                    },
+                ],
+                [
+                    {
+                        "id": "task7",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task5", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task7',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task5',
-                            condition='on-success'
-                        )
+                        "id": "task7",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task6", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task7',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task6',
-                            condition='on-success'
-                        )
+                        "id": "task8",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task7", condition="on-success"),
                     }
                 ],
-                [
-                    {
-                        'id': 'task8',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task7',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
 
     def test_nested_splits(self):
-        wf_name = 'splits-nested'
+        wf_name = "splits-nested"
 
         expected_wf_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                },
-                {
-                    'id': 'task4',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task5',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task6',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task7',
-                    'splits': ['task4', 'task7']
-                },
-                {
-                    'id': 'task8',
-                    'splits': ['task4', 'task7']
-                },
-                {
-                    'id': 'task9',
-                    'splits': ['task4', 'task7']
-                },
-                {
-                    'id': 'task10',
-                    'barrier': '*',
-                    'splits': ['task4', 'task7']
-                }
+            "directed": True,
+            "graph": {},
+            "nodes": [
+                {"id": "task1"},
+                {"id": "task2"},
+                {"id": "task3"},
+                {"id": "task4", "splits": ["task4"]},
+                {"id": "task5", "splits": ["task4"]},
+                {"id": "task6", "splits": ["task4"]},
+                {"id": "task7", "splits": ["task4", "task7"]},
+                {"id": "task8", "splits": ["task4", "task7"]},
+                {"id": "task9", "splits": ["task4", "task7"]},
+                {"id": "task10", "barrier": "*", "splits": ["task4", "task7"]},
             ],
-            'adjacency': [
+            "adjacency": [
                 [
                     {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
                     },
                     {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task3",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
+                    },
+                ],
+                [
+                    {
+                        "id": "task4",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task2", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task2',
-                            condition='on-success'
-                        )
+                        "id": "task4",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task3", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task3',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task4',
-                            condition='on-success'
-                        )
+                        "id": "task5",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task4", condition="on-success"),
                     },
                     {
-                        'id': 'task6',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task4',
-                            condition='on-success'
-                        )
+                        "id": "task6",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task4", condition="on-success"),
+                    },
+                ],
+                [
+                    {
+                        "id": "task7",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task5", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task7',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task5',
-                            condition='on-success'
-                        )
+                        "id": "task7",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task6", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task7',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task6',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task7',
-                            condition='on-success'
-                        )
+                        "id": "task8",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task7", condition="on-success"),
                     },
                     {
-                        'id': 'task9',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task7',
-                            condition='on-success'
-                        )
+                        "id": "task9",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task7", condition="on-success"),
+                    },
+                ],
+                [
+                    {
+                        "id": "task10",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task8", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task10',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task8',
-                            condition='on-success'
-                        )
+                        "id": "task10",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task9", condition="on-success"),
                     }
                 ],
-                [
-                    {
-                        'id': 'task10',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task9',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                },
-                {
-                    'id': 'task4',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task5',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task6',
-                    'splits': ['task4']
-                },
-                {
-                    'id': 'task7',
-                    'splits': ['task4', 'task7']
-                },
-                {
-                    'id': 'task8',
-                    'splits': ['task4', 'task7']
-                },
-                {
-                    'id': 'task9',
-                    'splits': ['task4', 'task7']
-                },
-                {
-                    'id': 'task10',
-                    'barrier': '*',
-                    'splits': ['task4', 'task7']
-                }
+            "directed": True,
+            "graph": {},
+            "nodes": [
+                {"id": "task1"},
+                {"id": "task2"},
+                {"id": "task3"},
+                {"id": "task4", "splits": ["task4"]},
+                {"id": "task5", "splits": ["task4"]},
+                {"id": "task6", "splits": ["task4"]},
+                {"id": "task7", "splits": ["task4", "task7"]},
+                {"id": "task8", "splits": ["task4", "task7"]},
+                {"id": "task9", "splits": ["task4", "task7"]},
+                {"id": "task10", "barrier": "*", "splits": ["task4", "task7"]},
             ],
-            'adjacency': [
+            "adjacency": [
                 [
                     {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
                     },
                     {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task3",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
+                    },
+                ],
+                [
+                    {
+                        "id": "task4",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task2", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task2',
-                            condition='on-success'
-                        )
+                        "id": "task4",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task3", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task3',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task5',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task4',
-                            condition='on-success'
-                        )
+                        "id": "task5",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task4", condition="on-success"),
                     },
                     {
-                        'id': 'task6',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task4',
-                            condition='on-success'
-                        )
+                        "id": "task6",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task4", condition="on-success"),
+                    },
+                ],
+                [
+                    {
+                        "id": "task7",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task5", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task7',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task5',
-                            condition='on-success'
-                        )
+                        "id": "task7",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task6", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task7',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task6',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                [
-                    {
-                        'id': 'task8',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task7',
-                            condition='on-success'
-                        )
+                        "id": "task8",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task7", condition="on-success"),
                     },
                     {
-                        'id': 'task9',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task7',
-                            condition='on-success'
-                        )
+                        "id": "task9",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task7", condition="on-success"),
+                    },
+                ],
+                [
+                    {
+                        "id": "task10",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task8", condition="on-success"),
                     }
                 ],
                 [
                     {
-                        'id': 'task10',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task8',
-                            condition='on-success'
-                        )
+                        "id": "task10",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task9", condition="on-success"),
                     }
                 ],
-                [
-                    {
-                        'id': 'task10',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task9',
-                            condition='on-success'
-                        )
-                    }
-                ],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)

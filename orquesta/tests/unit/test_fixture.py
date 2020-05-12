@@ -18,23 +18,17 @@ from orquesta.tests.fixtures import loader as fixture_loader
 
 
 class FixtureTest(unittest.TestCase):
-
     def test_fixture_loader(self):
-        expected = {
-            'version': 1.0,
-            'basic': {
-                'tasks': [{'task1': 'foobar'}]
-            }
-        }
+        expected = {"version": 1.0, "basic": {"tasks": [{"task1": "foobar"}]}}
 
-        content = fixture_loader.get_fixture_content('mock/basic.yaml', 'workflows')
+        content = fixture_loader.get_fixture_content("mock/basic.yaml", "workflows")
 
         self.assertIsInstance(content, dict)
         self.assertDictEqual(content, expected)
 
     def test_fixture_fixture_loader_raw(self):
         expected = "version: 1.0\nbasic:\n  tasks:\n    - task1: foobar\n"
-        content = fixture_loader.get_fixture_content('mock/basic.yaml', 'workflows', raw=True)
+        content = fixture_loader.get_fixture_content("mock/basic.yaml", "workflows", raw=True)
 
         self.assertIsInstance(content, str)
         self.assertEqual(content, expected)

@@ -16,7 +16,6 @@ from orquesta import constants
 
 
 class TaskRerunRequest(object):
-
     def __init__(self, task_id, route, reset_items=False):
         self.task_id = task_id
         self.route = route

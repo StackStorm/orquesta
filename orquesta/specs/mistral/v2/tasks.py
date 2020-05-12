@@ -30,130 +30,104 @@ LOG = logging.getLogger(__name__)
 
 
 ON_CLAUSE_SCHEMA = {
-    'oneOf': [
-        spec_types.NONEMPTY_STRING,
-        spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST
-    ]
+    "oneOf": [spec_types.NONEMPTY_STRING, spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST]
 }
 
 
 class TaskDefaultsSpec(mistral_spec_base.Spec):
     _schema = {
-        'type': 'object',
-        'properties': {
-            'concurrency': policy_models.CONCURRENCY_SCHEMA,
-            'keep-result': policy_models.KEEP_RESULT_SCHEMA,
-            'retry': policy_models.RetrySpec,
-            'safe-rerun': policy_models.SAFE_RERUN_SCHEMA,
-            'wait-before': policy_models.WAIT_BEFORE_SCHEMA,
-            'wait-after': policy_models.WAIT_AFTER_SCHEMA,
-            'pause-before': policy_models.PAUSE_BEFORE_SCHEMA,
-            'target': policy_models.TARGET_SCHEMA,
-            'timeout': policy_models.TIMEOUT_SCHEMA,
-            'on-complete': ON_CLAUSE_SCHEMA,
-            'on-success': ON_CLAUSE_SCHEMA,
-            'on-error': ON_CLAUSE_SCHEMA
+        "type": "object",
+        "properties": {
+            "concurrency": policy_models.CONCURRENCY_SCHEMA,
+            "keep-result": policy_models.KEEP_RESULT_SCHEMA,
+            "retry": policy_models.RetrySpec,
+            "safe-rerun": policy_models.SAFE_RERUN_SCHEMA,
+            "wait-before": policy_models.WAIT_BEFORE_SCHEMA,
+            "wait-after": policy_models.WAIT_AFTER_SCHEMA,
+            "pause-before": policy_models.PAUSE_BEFORE_SCHEMA,
+            "target": policy_models.TARGET_SCHEMA,
+            "timeout": policy_models.TIMEOUT_SCHEMA,
+            "on-complete": ON_CLAUSE_SCHEMA,
+            "on-success": ON_CLAUSE_SCHEMA,
+            "on-error": ON_CLAUSE_SCHEMA,
         },
-        'additionalProperties': False
+        "additionalProperties": False,
     }
 
 
 class TaskSpec(mistral_spec_base.Spec):
     _schema = {
-        'type': 'object',
-        'properties': {
-            'join': {
-                'oneOf': [
-                    {'enum': ['all']},
-                    spec_types.POSITIVE_INTEGER
-                ]
-            },
-            'with-items': {
-                'oneOf': [
-                    spec_types.NONEMPTY_STRING,
-                    spec_types.UNIQUE_STRING_LIST
-                ]
-            },
-            'concurrency': policy_models.CONCURRENCY_SCHEMA,
-            'action': spec_types.NONEMPTY_STRING,
-            'workflow': spec_types.NONEMPTY_STRING,
-            'input': spec_types.NONEMPTY_DICT,
-            'publish': spec_types.NONEMPTY_DICT,
-            'publish-on-error': spec_types.NONEMPTY_DICT,
-            'keep-result': policy_models.KEEP_RESULT_SCHEMA,
-            'retry': policy_models.RetrySpec,
-            'safe-rerun': policy_models.SAFE_RERUN_SCHEMA,
-            'wait-before': policy_models.WAIT_BEFORE_SCHEMA,
-            'wait-after': policy_models.WAIT_AFTER_SCHEMA,
-            'pause-before': policy_models.PAUSE_BEFORE_SCHEMA,
-            'target': policy_models.TARGET_SCHEMA,
-            'timeout': policy_models.TIMEOUT_SCHEMA,
-            'on-complete': ON_CLAUSE_SCHEMA,
-            'on-success': ON_CLAUSE_SCHEMA,
-            'on-error': ON_CLAUSE_SCHEMA
+        "type": "object",
+        "properties": {
+            "join": {"oneOf": [{"enum": ["all"]}, spec_types.POSITIVE_INTEGER]},
+            "with-items": {"oneOf": [spec_types.NONEMPTY_STRING, spec_types.UNIQUE_STRING_LIST]},
+            "concurrency": policy_models.CONCURRENCY_SCHEMA,
+            "action": spec_types.NONEMPTY_STRING,
+            "workflow": spec_types.NONEMPTY_STRING,
+            "input": spec_types.NONEMPTY_DICT,
+            "publish": spec_types.NONEMPTY_DICT,
+            "publish-on-error": spec_types.NONEMPTY_DICT,
+            "keep-result": policy_models.KEEP_RESULT_SCHEMA,
+            "retry": policy_models.RetrySpec,
+            "safe-rerun": policy_models.SAFE_RERUN_SCHEMA,
+            "wait-before": policy_models.WAIT_BEFORE_SCHEMA,
+            "wait-after": policy_models.WAIT_AFTER_SCHEMA,
+            "pause-before": policy_models.PAUSE_BEFORE_SCHEMA,
+            "target": policy_models.TARGET_SCHEMA,
+            "timeout": policy_models.TIMEOUT_SCHEMA,
+            "on-complete": ON_CLAUSE_SCHEMA,
+            "on-success": ON_CLAUSE_SCHEMA,
+            "on-error": ON_CLAUSE_SCHEMA,
         },
-        'additionalProperties': False,
-        'anyOf': [
+        "additionalProperties": False,
+        "anyOf": [
+            {"not": {"type": "object", "required": ["action", "workflow"]}},
             {
-                'not': {
-                    'type': 'object',
-                    'required': ['action', 'workflow']
-                },
-            },
-            {
-                'oneOf': [
-                    {
-                        'type': 'object',
-                        'required': ['action']
-                    },
-                    {
-                        'type': 'object',
-                        'required': ['workflow']
-                    }
+                "oneOf": [
+                    {"type": "object", "required": ["action"]},
+                    {"type": "object", "required": ["workflow"]},
                 ]
-            }
-        ]
+            },
+        ],
     }
 
     _context_evaluation_sequence = [
-        'join',
-        'with-items',
-        'concurrency',
-        'action',
-        'workflow',
-        'input',
-        'publish',
-        'publish-on-error',
-        'on-complete',
-        'on-success',
-        'on-error'
+        "join",
+        "with-items",
+        "concurrency",
+        "action",
+        "workflow",
+        "input",
+        "publish",
+        "publish-on-error",
+        "on-complete",
+        "on-success",
+        "on-error",
     ]
 
-    _context_inputs = [
-        'publish'
-    ]
+    _context_inputs = ["publish"]
 
     def has_items(self):
-        return hasattr(self, 'with-items') and getattr(self, 'with-items', None) is not None
+        return hasattr(self, "with-items") and getattr(self, "with-items", None) is not None
 
     def get_items_spec(self):
-        return getattr(self, 'with-items', None)
+        return getattr(self, "with-items", None)
 
     def has_join(self):
-        return hasattr(self, 'join') and self.join
+        return hasattr(self, "join") and self.join
 
     def has_retry(self):
-        return hasattr(self, 'retry') and self.retry
+        return hasattr(self, "retry") and self.retry
 
     def render(self, in_ctx):
         action_specs = []
 
         if self.has_items():
-            raise NotImplementedError('Task with items is not implemented.')
+            raise NotImplementedError("Task with items is not implemented.")
 
         action_spec = {
-            'action': expr_base.evaluate(self.action, in_ctx),
-            'input': expr_base.evaluate(getattr(self, 'input', {}), in_ctx)
+            "action": expr_base.evaluate(self.action, in_ctx),
+            "input": expr_base.evaluate(getattr(self, "input", {}), in_ctx),
         }
 
         action_specs.append(action_spec)
@@ -161,15 +135,15 @@ class TaskSpec(mistral_spec_base.Spec):
         return self, action_specs
 
     def finalize_context(self, next_task_name, task_transition_meta, in_ctx):
-        criteria = task_transition_meta[3].get('criteria') or []
-        expected_criteria_pattern = "<\% task_status\(\w+\) in \['succeeded'\] \%>"
+        criteria = task_transition_meta[3].get("criteria") or []
+        expected_criteria_pattern = r"<\% task_status\(\w+\) in \['succeeded'\] \%>"
         new_ctx = {}
         errors = []
 
         if not re.match(expected_criteria_pattern, criteria[0]):
             return in_ctx, new_ctx, errors
 
-        task_publish_spec = getattr(self, 'publish') or {}
+        task_publish_spec = getattr(self, "publish") or {}
 
         try:
             new_ctx = {
@@ -182,34 +156,24 @@ class TaskSpec(mistral_spec_base.Spec):
         out_ctx = dict_util.merge_dicts(in_ctx, new_ctx, overwrite=True)
 
         for key in list(out_ctx.keys()):
-            if key.startswith('__'):
+            if key.startswith("__"):
                 out_ctx.pop(key)
 
         return out_ctx, new_ctx, errors
 
 
 class TaskMappingSpec(mistral_spec_base.MappingSpec):
-    _schema = {
-        'type': 'object',
-        'minProperties': 1,
-        'patternProperties': {
-            '^\w+$': TaskSpec
-        }
-    }
+    _schema = {"type": "object", "minProperties": 1, "patternProperties": {r"^\w+$": TaskSpec}}
 
     def get_task(self, task_name):
         return self[task_name]
 
     def get_next_tasks(self, task_name, *args, **kwargs):
         task_spec = self.get_task(task_name)
-        conditions = kwargs.get('conditions')
+        conditions = kwargs.get("conditions")
 
         if not conditions:
-            conditions = [
-                'on-complete',
-                'on-error',
-                'on-success'
-            ]
+            conditions = ["on-complete", "on-error", "on-success"]
 
         next_tasks = []
 
@@ -227,14 +191,12 @@ class TaskMappingSpec(mistral_spec_base.MappingSpec):
 
     def get_prev_tasks(self, task_name, *args, **kwargs):
         prev_tasks = []
-        conditions = kwargs.get('conditions')
+        conditions = kwargs.get("conditions")
 
         for name, task_spec in six.iteritems(self):
             for next_task in self.get_next_tasks(name, conditions=conditions):
                 if task_name == next_task[0]:
-                    prev_tasks.append(
-                        (name, next_task[1], next_task[2])
-                    )
+                    prev_tasks.append((name, next_task[1], next_task[2]))
 
         return sorted(prev_tasks, key=lambda x: x[0])
 
@@ -253,10 +215,7 @@ class TaskMappingSpec(mistral_spec_base.MappingSpec):
         return task_spec.join is not None
 
     def is_split_task(self, task_name):
-        return (
-            not self.is_join_task(task_name) and
-            len(self.get_prev_tasks(task_name)) > 1
-        )
+        return not self.is_join_task(task_name) and len(self.get_prev_tasks(task_name)) > 1
 
     def in_cycle(self, task_name):
         traversed = []
@@ -295,7 +254,7 @@ class TaskMappingSpec(mistral_spec_base.MappingSpec):
     def inspect_context(self, parent=None):
         ctxs = {}
         errors = []
-        parent_ctx = parent.get('ctx', []) if parent else []
+        parent_ctx = parent.get("ctx", []) if parent else []
         rolling_ctx = list(set(parent_ctx))
         q = queue.Queue()
 
@@ -310,16 +269,10 @@ class TaskMappingSpec(mistral_spec_base.MappingSpec):
 
             task_spec = self.get_task(task_name)
 
-            spec_path = parent.get('spec_path') + '.' + task_name
-            schema_path = (
-                parent.get('schema_path') + '.' + 'properties.' + task_name
-            )
+            spec_path = parent.get("spec_path") + "." + task_name
+            schema_path = parent.get("schema_path") + "." + "properties." + task_name
 
-            task_parent = {
-                'ctx': task_ctx,
-                'spec_path': spec_path,
-                'schema_path': schema_path
-            }
+            task_parent = {"ctx": task_ctx, "spec_path": spec_path, "schema_path": schema_path}
 
             result = task_spec.inspect_context(parent=task_parent)
             errors.extend(result[0])

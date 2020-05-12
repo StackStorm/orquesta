@@ -19,7 +19,6 @@ from orquesta.tests.unit import base as test_base
 
 
 class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithItemsTest):
-
     def test_pause_item_list_processed(self):
         wf_def = """
         version: 1.0
@@ -51,35 +50,35 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         mock_ac_ex_statuses = [
             statuses.SUCCEEDED,
             statuses.PAUSED,
             statuses.SUCCEEDED,
-            statuses.SUCCEEDED
+            statuses.SUCCEEDED,
         ]
 
         expected_task_statuses = [
             statuses.RUNNING,
             statuses.PAUSING,
             statuses.PAUSING,
-            statuses.PAUSED
+            statuses.PAUSED,
         ]
 
         expected_workflow_statuses = [
             statuses.RUNNING,
             statuses.RUNNING,
             statuses.RUNNING,
-            statuses.PAUSED
+            statuses.PAUSED,
         ]
 
         self.assert_task_items(
@@ -87,11 +86,11 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is not removed from staging.
@@ -131,14 +130,14 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         mock_ac_ex_statuses = [statuses.SUCCEEDED, statuses.PAUSED, statuses.SUCCEEDED]
@@ -150,11 +149,11 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is not removed from staging.
@@ -194,35 +193,35 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         mock_ac_ex_statuses = [
             statuses.SUCCEEDED,
             statuses.PAUSED,
             statuses.SUCCEEDED,
-            statuses.SUCCEEDED
+            statuses.SUCCEEDED,
         ]
 
         expected_task_statuses = [
             statuses.RUNNING,
             statuses.PAUSING,
             statuses.PAUSING,
-            statuses.PAUSED
+            statuses.PAUSED,
         ]
 
         expected_workflow_statuses = [
             statuses.RUNNING,
             statuses.RUNNING,
             statuses.RUNNING,
-            statuses.PAUSED
+            statuses.PAUSED,
         ]
 
         self.assert_task_items(
@@ -230,11 +229,11 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is not removed from staging.
@@ -247,30 +246,26 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
         self.forward_task_item_statuses(conductor, task_name, 1, [statuses.RUNNING])
 
         # Assert the task and workflow is running.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.RUNNING)
 
         staged_task = conductor.workflow_state.get_staged_task(task_name, task_route)
         self.assertIsNotNone(staged_task)
-        self.assertIn('items', staged_task)
-        self.assertEqual(staged_task['items'][1]['status'], statuses.RUNNING)
+        self.assertIn("items", staged_task)
+        self.assertEqual(staged_task["items"][1]["status"], statuses.RUNNING)
 
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
 
         # Complete the resumed action execution.
         self.forward_task_item_statuses(
-            conductor,
-            task_name,
-            1,
-            [statuses.SUCCEEDED],
-            result=task_ctx['xs'][1]
+            conductor, task_name, 1, [statuses.SUCCEEDED], result=task_ctx["xs"][1]
         )
 
         # Assert the task is removed from staging.
         self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the task and workflow succeeded.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
@@ -305,14 +300,14 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         # Verify the set of action executions.
@@ -322,7 +317,7 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
             task_ctx,
             conductor.spec.tasks.get_task(task_name),
             actions=task_action_specs,
-            items_count=len(task_ctx['xs'])
+            items_count=len(task_ctx["xs"]),
         )
 
         expected_tasks = [expected_task]
@@ -330,28 +325,28 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
         self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # Set the items to running status.
-        for i in range(0, len(task_ctx['xs'])):
+        for i in range(0, len(task_ctx["xs"])):
             self.forward_task_item_statuses(conductor, task_name, i, [statuses.RUNNING])
 
         # Assert that the task is running.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.RUNNING)
 
         # Pause the workflow.
         conductor.request_workflow_status(statuses.PAUSING)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSING)
 
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.PAUSING)
 
         # Complete the items.
-        for i in range(0, len(task_ctx['xs'])):
-            result = task_ctx['xs'][i]
+        for i in range(0, len(task_ctx["xs"])):
+            result = task_ctx["xs"][i]
             status_changes = [statuses.SUCCEEDED]
             self.forward_task_item_statuses(conductor, task_name, i, status_changes, result=result)
 
         # Assert the task and workflow are completed.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
 
@@ -390,14 +385,14 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         # Verify the set of action executions.
@@ -407,7 +402,7 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
             task_ctx,
             conductor.spec.tasks.get_task(task_name),
             actions=task_action_specs,
-            items_count=len(task_ctx['xs'])
+            items_count=len(task_ctx["xs"]),
         )
 
         expected_tasks = [expected_task]
@@ -415,28 +410,28 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
         self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # Set the items to running status.
-        for i in range(0, len(task_ctx['xs'])):
+        for i in range(0, len(task_ctx["xs"])):
             self.forward_task_item_statuses(conductor, task_name, i, [statuses.RUNNING])
 
         # Assert that the task is running.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.RUNNING)
 
         # Pause the workflow.
         conductor.request_workflow_status(statuses.PAUSED)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSING)
 
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.PAUSING)
 
         # Complete the items.
-        for i in range(0, len(task_ctx['xs'])):
-            result = task_ctx['xs'][i]
+        for i in range(0, len(task_ctx["xs"])):
+            result = task_ctx["xs"][i]
             status_changes = [statuses.SUCCEEDED]
             self.forward_task_item_statuses(conductor, task_name, i, status_changes, result=result)
 
         # Assert the task and workflow are completed.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
 
@@ -479,14 +474,14 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         mock_ac_ex_statuses = [statuses.SUCCEEDED] * 2
@@ -498,12 +493,12 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
             expected_workflow_statuses,
-            concurrency=concurrency
+            concurrency=concurrency,
         )
 
         # Assert the task is not removed from staging.
@@ -516,7 +511,7 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
         conductor.request_workflow_status(statuses.PAUSING)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
 
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.PAUSED)
 
         # Resume the workflow.
@@ -530,8 +525,8 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
             task_ctx,
             conductor.spec.tasks.get_task(task_name),
             actions=task_action_specs[concurrency:],
-            items_count=len(task_ctx['xs']),
-            items_concurrency=concurrency
+            items_count=len(task_ctx["xs"]),
+            items_concurrency=concurrency,
         )
 
         expected_tasks = [expected_task]
@@ -539,22 +534,22 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
         self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # Set the items to running status.
-        for i in range(0 + concurrency, len(task_ctx['xs'])):
+        for i in range(0 + concurrency, len(task_ctx["xs"])):
             self.forward_task_item_statuses(conductor, task_name, i, [statuses.RUNNING])
 
         # Assert that the task is running.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.RUNNING)
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
 
         # Complete the items.
-        for i in range(0 + concurrency, len(task_ctx['xs'])):
-            result = task_ctx['xs'][i]
+        for i in range(0 + concurrency, len(task_ctx["xs"])):
+            result = task_ctx["xs"][i]
             status_changes = [statuses.SUCCEEDED]
             self.forward_task_item_statuses(conductor, task_name, i, status_changes, result=result)
 
         # Assert the task and workflow are completed.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
@@ -593,14 +588,14 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         mock_ac_ex_statuses = [statuses.SUCCEEDED] * 2
@@ -612,12 +607,12 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
             expected_workflow_statuses,
-            concurrency=concurrency
+            concurrency=concurrency,
         )
 
         # Assert the task is not removed from staging.
@@ -630,7 +625,7 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
         conductor.request_workflow_status(statuses.PAUSED)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
 
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.PAUSED)
 
         # Resume the workflow.
@@ -644,8 +639,8 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
             task_ctx,
             conductor.spec.tasks.get_task(task_name),
             actions=task_action_specs[concurrency:],
-            items_count=len(task_ctx['xs']),
-            items_concurrency=concurrency
+            items_count=len(task_ctx["xs"]),
+            items_concurrency=concurrency,
         )
 
         expected_tasks = [expected_task]
@@ -653,22 +648,22 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
         self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # Set the items to running status.
-        for i in range(0 + concurrency, len(task_ctx['xs'])):
+        for i in range(0 + concurrency, len(task_ctx["xs"])):
             self.forward_task_item_statuses(conductor, task_name, i, [statuses.RUNNING])
 
         # Assert that the task is running.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.RUNNING)
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
 
         # Complete the items.
-        for i in range(0 + concurrency, len(task_ctx['xs'])):
-            result = task_ctx['xs'][i]
+        for i in range(0 + concurrency, len(task_ctx["xs"])):
+            result = task_ctx["xs"][i]
             status_changes = [statuses.SUCCEEDED]
             self.forward_task_item_statuses(conductor, task_name, i, status_changes, result=result)
 
         # Assert the task and workflow are completed.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
@@ -707,14 +702,14 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         # Verify the first set of action executions.
@@ -724,8 +719,8 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
             task_ctx,
             conductor.spec.tasks.get_task(task_name),
             actions=task_action_specs[0:concurrency],
-            items_count=len(task_ctx['xs']),
-            items_concurrency=concurrency
+            items_count=len(task_ctx["xs"]),
+            items_concurrency=concurrency,
         )
 
         expected_tasks = [expected_task]
@@ -737,24 +732,24 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
             self.forward_task_item_statuses(conductor, task_name, i, [statuses.RUNNING])
 
         # Assert that the task is running.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.RUNNING)
 
         # Pause the workflow.
         conductor.request_workflow_status(statuses.PAUSING)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSING)
 
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.PAUSING)
 
         # Complete the items.
         for i in range(0, concurrency):
-            result = task_ctx['xs'][i]
+            result = task_ctx["xs"][i]
             status_changes = [statuses.SUCCEEDED]
             self.forward_task_item_statuses(conductor, task_name, i, status_changes, result=result)
 
         # Assert the task and workflow are paused.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.PAUSED)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)
 
@@ -769,8 +764,8 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
             task_ctx,
             conductor.spec.tasks.get_task(task_name),
             actions=task_action_specs[concurrency:],
-            items_count=len(task_ctx['xs']),
-            items_concurrency=concurrency
+            items_count=len(task_ctx["xs"]),
+            items_concurrency=concurrency,
         )
 
         expected_tasks = [expected_task]
@@ -778,22 +773,22 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
         self.assert_task_list(conductor, actual_tasks, expected_tasks)
 
         # Set the items to running status.
-        for i in range(0 + concurrency, len(task_ctx['xs'])):
+        for i in range(0 + concurrency, len(task_ctx["xs"])):
             self.forward_task_item_statuses(conductor, task_name, i, [statuses.RUNNING])
 
         # Assert that the task is running.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.RUNNING)
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
 
         # Complete the items.
-        for i in range(0 + concurrency, len(task_ctx['xs'])):
-            result = task_ctx['xs'][i]
+        for i in range(0 + concurrency, len(task_ctx["xs"])):
+            result = task_ctx["xs"][i]
             status_changes = [statuses.SUCCEEDED]
             self.forward_task_item_statuses(conductor, task_name, i, status_changes, result=result)
 
         # Assert the task and workflow are completed.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
@@ -828,35 +823,35 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         mock_ac_ex_statuses = [
             statuses.SUCCEEDED,
             statuses.PENDING,
             statuses.SUCCEEDED,
-            statuses.SUCCEEDED
+            statuses.SUCCEEDED,
         ]
 
         expected_task_statuses = [
             statuses.RUNNING,
             statuses.PAUSING,
             statuses.PAUSING,
-            statuses.PAUSED
+            statuses.PAUSED,
         ]
 
         expected_workflow_statuses = [
             statuses.RUNNING,
             statuses.RUNNING,
             statuses.RUNNING,
-            statuses.PAUSED
+            statuses.PAUSED,
         ]
 
         self.assert_task_items(
@@ -864,11 +859,11 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is not removed from staging.
@@ -908,35 +903,35 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         mock_ac_ex_statuses = [
             statuses.SUCCEEDED,
             statuses.PENDING,
             statuses.SUCCEEDED,
-            statuses.SUCCEEDED
+            statuses.SUCCEEDED,
         ]
 
         expected_task_statuses = [
             statuses.RUNNING,
             statuses.PAUSING,
             statuses.PAUSING,
-            statuses.PAUSED
+            statuses.PAUSED,
         ]
 
         expected_workflow_statuses = [
             statuses.RUNNING,
             statuses.RUNNING,
             statuses.RUNNING,
-            statuses.PAUSED
+            statuses.PAUSED,
         ]
 
         self.assert_task_items(
@@ -944,11 +939,11 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is not removed from staging.
@@ -961,28 +956,24 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
         self.forward_task_item_statuses(conductor, task_name, 1, [statuses.RUNNING])
 
         # Assert the task and workflow is running.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.RUNNING)
 
         staged_task = conductor.workflow_state.get_staged_task(task_name, task_route)
-        self.assertEqual(staged_task['items'][1]['status'], statuses.RUNNING)
+        self.assertEqual(staged_task["items"][1]["status"], statuses.RUNNING)
 
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
 
         # Complete the resumed action execution.
         self.forward_task_item_statuses(
-            conductor,
-            task_name,
-            1,
-            [statuses.SUCCEEDED],
-            result=task_ctx['xs'][1]
+            conductor, task_name, 1, [statuses.SUCCEEDED], result=task_ctx["xs"][1]
         )
 
         # Assert the task is removed from staging.
         self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the task and workflow succeeded.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.SUCCEEDED)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
@@ -1017,35 +1008,35 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         mock_ac_ex_statuses = [
             statuses.SUCCEEDED,
             statuses.PAUSED,
             statuses.PAUSED,
-            statuses.SUCCEEDED
+            statuses.SUCCEEDED,
         ]
 
         expected_task_statuses = [
             statuses.RUNNING,
             statuses.PAUSING,
             statuses.PAUSING,
-            statuses.PAUSED
+            statuses.PAUSED,
         ]
 
         expected_workflow_statuses = [
             statuses.RUNNING,
             statuses.RUNNING,
             statuses.RUNNING,
-            statuses.PAUSED
+            statuses.PAUSED,
         ]
 
         self.assert_task_items(
@@ -1053,11 +1044,11 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is not removed from staging.
@@ -1070,27 +1061,23 @@ class WorkflowConductorWithItemsPauseResumeTest(test_base.WorkflowConductorWithI
         self.forward_task_item_statuses(conductor, task_name, 1, [statuses.RUNNING])
 
         # Assert the task and workflow is running.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.RUNNING)
 
         staged_task = conductor.workflow_state.get_staged_task(task_name, task_route)
-        self.assertEqual(staged_task['items'][1]['status'], statuses.RUNNING)
+        self.assertEqual(staged_task["items"][1]["status"], statuses.RUNNING)
 
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
 
         # Complete the resumed action execution.
         self.forward_task_item_statuses(
-            conductor,
-            task_name,
-            1,
-            [statuses.SUCCEEDED],
-            result=task_ctx['xs'][1]
+            conductor, task_name, 1, [statuses.SUCCEEDED], result=task_ctx["xs"][1]
         )
 
         # Assert the task is removed from staging.
         self.assertIsNotNone(conductor.workflow_state.get_staged_task(task_name, task_route))
 
         # Assert the task and workflow is paused.
-        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)['status']
+        actual_task_status = conductor.workflow_state.get_task(task_name, task_route)["status"]
         self.assertEqual(actual_task_status, statuses.PAUSED)
         self.assertEqual(conductor.get_workflow_status(), statuses.PAUSED)

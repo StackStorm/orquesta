@@ -18,61 +18,53 @@ from orquesta.tests.unit.conducting.native import base
 
 
 class ErrorHandlingWorkflowStatusTest(base.OrchestraWorkflowConductorTest):
-
     def __init__(self, *args, **kwargs):
         super(ErrorHandlingWorkflowStatusTest, self).__init__(*args, **kwargs)
-        self.wf_name = 'error-handling'
+        self.wf_name = "error-handling"
 
     def assert_workflow_status(self, mock_flow_entries, expected_wf_statuses, conductor=None):
         return super(ErrorHandlingWorkflowStatusTest, self).assert_workflow_status(
-            self.wf_name,
-            mock_flow_entries,
-            expected_wf_statuses,
-            conductor=conductor
+            self.wf_name, mock_flow_entries, expected_wf_statuses, conductor=conductor
         )
 
     def test_success(self):
         mock_flow_entries = [
-            {'id': 'task1', 'name': 'task1', 'status': statuses.RUNNING},
-            {'id': 'task1', 'name': 'task1', 'status': statuses.SUCCEEDED},
-            {'id': 'task2', 'name': 'task2', 'status': statuses.RUNNING},
-            {'id': 'task2', 'name': 'task2', 'status': statuses.SUCCEEDED}
+            {"id": "task1", "name": "task1", "status": statuses.RUNNING},
+            {"id": "task1", "name": "task1", "status": statuses.SUCCEEDED},
+            {"id": "task2", "name": "task2", "status": statuses.RUNNING},
+            {"id": "task2", "name": "task2", "status": statuses.SUCCEEDED},
         ]
 
         expected_wf_statuses = [
             statuses.RUNNING,
             statuses.RUNNING,
             statuses.RUNNING,
-            statuses.SUCCEEDED
+            statuses.SUCCEEDED,
         ]
 
         self.assert_workflow_status(mock_flow_entries, expected_wf_statuses)
 
     def test_remediation(self):
         mock_flow_entries = [
-            {'id': 'task1', 'name': 'task1', 'status': statuses.RUNNING},
-            {'id': 'task1', 'name': 'task1', 'status': statuses.FAILED},
-            {'id': 'task3', 'name': 'task3', 'status': statuses.RUNNING},
-            {'id': 'task3', 'name': 'task3', 'status': statuses.SUCCEEDED}
+            {"id": "task1", "name": "task1", "status": statuses.RUNNING},
+            {"id": "task1", "name": "task1", "status": statuses.FAILED},
+            {"id": "task3", "name": "task3", "status": statuses.RUNNING},
+            {"id": "task3", "name": "task3", "status": statuses.SUCCEEDED},
         ]
 
         expected_wf_statuses = [
             statuses.RUNNING,
             statuses.RUNNING,
             statuses.RUNNING,
-            statuses.SUCCEEDED
+            statuses.SUCCEEDED,
         ]
 
         self.assert_workflow_status(mock_flow_entries, expected_wf_statuses)
 
     def test_workflow_pausing_then_task_remediated(self):
-        mock_flow_entries = [
-            {'id': 'task1', 'name': 'task1', 'status': statuses.RUNNING}
-        ]
+        mock_flow_entries = [{"id": "task1", "name": "task1", "status": statuses.RUNNING}]
 
-        expected_wf_statuses = [
-            statuses.RUNNING
-        ]
+        expected_wf_statuses = [statuses.RUNNING]
 
         # Assert statuses and then save the conductor for later.
         conductor = self.assert_workflow_status(mock_flow_entries, expected_wf_statuses)
@@ -80,25 +72,17 @@ class ErrorHandlingWorkflowStatusTest(base.OrchestraWorkflowConductorTest):
         # Pause the workflow and assert the remaining statuses.
         conductor.request_workflow_status(statuses.PAUSING)
 
-        mock_flow_entries = [
-            {'id': 'task1', 'name': 'task1', 'status': statuses.FAILED}
-        ]
+        mock_flow_entries = [{"id": "task1", "name": "task1", "status": statuses.FAILED}]
 
-        expected_wf_statuses = [
-            statuses.PAUSED
-        ]
+        expected_wf_statuses = [statuses.PAUSED]
 
         # Assert the remaining statuses using the previous conductor.
         self.assert_workflow_status(mock_flow_entries, expected_wf_statuses, conductor=conductor)
 
     def test_workflow_pausing_and_resuming_then_task_remediated(self):
-        mock_flow_entries = [
-            {'id': 'task1', 'name': 'task1', 'status': statuses.RUNNING}
-        ]
+        mock_flow_entries = [{"id": "task1", "name": "task1", "status": statuses.RUNNING}]
 
-        expected_wf_statuses = [
-            statuses.RUNNING
-        ]
+        expected_wf_statuses = [statuses.RUNNING]
 
         # Assert statuses and then save the conductor for later.
         conductor = self.assert_workflow_status(mock_flow_entries, expected_wf_statuses)
@@ -107,25 +91,17 @@ class ErrorHandlingWorkflowStatusTest(base.OrchestraWorkflowConductorTest):
         conductor.request_workflow_status(statuses.PAUSING)
         conductor.request_workflow_status(statuses.RESUMING)
 
-        mock_flow_entries = [
-            {'id': 'task1', 'name': 'task1', 'status': statuses.FAILED}
-        ]
+        mock_flow_entries = [{"id": "task1", "name": "task1", "status": statuses.FAILED}]
 
-        expected_wf_statuses = [
-            statuses.RUNNING
-        ]
+        expected_wf_statuses = [statuses.RUNNING]
 
         # Assert the remaining statuses using the previous conductor.
         self.assert_workflow_status(mock_flow_entries, expected_wf_statuses, conductor=conductor)
 
     def test_workflow_canceling_then_task_remediated(self):
-        mock_flow_entries = [
-            {'id': 'task1', 'name': 'task1', 'status': statuses.RUNNING}
-        ]
+        mock_flow_entries = [{"id": "task1", "name": "task1", "status": statuses.RUNNING}]
 
-        expected_wf_statuses = [
-            statuses.RUNNING
-        ]
+        expected_wf_statuses = [statuses.RUNNING]
 
         # Assert statuses and then save the conductor for later.
         conductor = self.assert_workflow_status(mock_flow_entries, expected_wf_statuses)
@@ -133,13 +109,9 @@ class ErrorHandlingWorkflowStatusTest(base.OrchestraWorkflowConductorTest):
         # Cancel the workflow and assert the remaining statuses.
         conductor.request_workflow_status(statuses.CANCELING)
 
-        mock_flow_entries = [
-            {'id': 'task1', 'name': 'task1', 'status': statuses.FAILED}
-        ]
+        mock_flow_entries = [{"id": "task1", "name": "task1", "status": statuses.FAILED}]
 
-        expected_wf_statuses = [
-            statuses.CANCELED
-        ]
+        expected_wf_statuses = [statuses.CANCELED]
 
         # Assert the remaining statuses using the previous conductor.
         self.assert_workflow_status(mock_flow_entries, expected_wf_statuses, conductor=conductor)

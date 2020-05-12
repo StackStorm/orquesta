@@ -18,47 +18,43 @@ from orquesta.utils import plugin as plugin_util
 
 
 class YAQLValidationTest(test_base.ExpressionEvaluatorTest):
-
     @classmethod
     def setUpClass(cls):
-        cls.language = 'yaql'
+        cls.language = "yaql"
         super(YAQLValidationTest, cls).setUpClass()
 
     def test_get_evaluator(self):
         self.assertEqual(
-            plugin_util.get_module(
-                'orquesta.expressions.evaluators',
-                self.language
-            ),
-            yaql_expr.YAQLEvaluator
+            plugin_util.get_module("orquesta.expressions.evaluators", self.language),
+            yaql_expr.YAQLEvaluator,
         )
 
     def test_basic_validate(self):
-        self.assertListEqual([], self.evaluator.validate('<% 1 %>'))
-        self.assertListEqual([], self.evaluator.validate('<% abc %>'))
-        self.assertListEqual([], self.evaluator.validate('<% 1 + 2 %>'))
-        self.assertListEqual([], self.evaluator.validate('<% ctx().foo %>'))
-        self.assertListEqual([], self.evaluator.validate('<% ctx(foo) %>'))
-        self.assertListEqual([], self.evaluator.validate('<% ctx().a1 + ctx(a2) %>'))
+        self.assertListEqual([], self.evaluator.validate("<% 1 %>"))
+        self.assertListEqual([], self.evaluator.validate("<% abc %>"))
+        self.assertListEqual([], self.evaluator.validate("<% 1 + 2 %>"))
+        self.assertListEqual([], self.evaluator.validate("<% ctx().foo %>"))
+        self.assertListEqual([], self.evaluator.validate("<% ctx(foo) %>"))
+        self.assertListEqual([], self.evaluator.validate("<% ctx().a1 + ctx(a2) %>"))
 
     def test_parse_error(self):
-        expr = '<% <% ctx().foo %> %>'
+        expr = "<% <% ctx().foo %> %>"
         errors = self.evaluator.validate(expr)
 
         self.assertEqual(1, len(errors))
-        self.assertIn('Parse error', errors[0]['message'])
+        self.assertIn("Parse error", errors[0]["message"])
 
     def test_lexical_error(self):
         expr = '<% {"a": 123} %>'
         errors = self.evaluator.validate(expr)
 
         self.assertEqual(1, len(errors))
-        self.assertIn('Lexical error', errors[0]['message'])
+        self.assertIn("Lexical error", errors[0]["message"])
 
     def test_multiple_errors(self):
         expr = '<% 1 +/ 2 %> and <% {"a": 123} %>'
         errors = self.evaluator.validate(expr)
 
         self.assertEqual(2, len(errors))
-        self.assertIn('Parse error', errors[0]['message'])
-        self.assertIn('Lexical error', errors[1]['message'])
+        self.assertIn("Parse error", errors[0]["message"])
+        self.assertIn("Lexical error", errors[1]["message"])

@@ -29,7 +29,7 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.WORKFLOW_SCHEDULED: statuses.SCHEDULED,
         events.WORKFLOW_DELAYED: statuses.DELAYED,
         events.WORKFLOW_RUNNING: statuses.RUNNING,
-        events.WORKFLOW_FAILED: statuses.FAILED
+        events.WORKFLOW_FAILED: statuses.FAILED,
     },
     statuses.REQUESTED: {
         events.WORKFLOW_SCHEDULED: statuses.SCHEDULED,
@@ -39,7 +39,7 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.WORKFLOW_PAUSED_WORKFLOW_DORMANT: statuses.PAUSED,
         events.WORKFLOW_CANCELING_WORKFLOW_DORMANT: statuses.CANCELED,
         events.WORKFLOW_CANCELED_WORKFLOW_DORMANT: statuses.CANCELED,
-        events.WORKFLOW_FAILED: statuses.FAILED
+        events.WORKFLOW_FAILED: statuses.FAILED,
     },
     statuses.SCHEDULED: {
         events.WORKFLOW_DELAYED: statuses.DELAYED,
@@ -48,7 +48,7 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.WORKFLOW_PAUSED_WORKFLOW_DORMANT: statuses.PAUSED,
         events.WORKFLOW_CANCELING_WORKFLOW_DORMANT: statuses.CANCELED,
         events.WORKFLOW_CANCELED_WORKFLOW_DORMANT: statuses.CANCELED,
-        events.WORKFLOW_FAILED: statuses.FAILED
+        events.WORKFLOW_FAILED: statuses.FAILED,
     },
     statuses.DELAYED: {
         events.WORKFLOW_SCHEDULED: statuses.SCHEDULED,
@@ -57,7 +57,7 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.WORKFLOW_PAUSED_WORKFLOW_DORMANT: statuses.PAUSED,
         events.WORKFLOW_CANCELING_WORKFLOW_DORMANT: statuses.CANCELED,
         events.WORKFLOW_CANCELED_WORKFLOW_DORMANT: statuses.CANCELED,
-        events.WORKFLOW_FAILED: statuses.FAILED
+        events.WORKFLOW_FAILED: statuses.FAILED,
     },
     statuses.RUNNING: {
         events.WORKFLOW_PAUSING_WORKFLOW_ACTIVE: statuses.PAUSING,
@@ -101,7 +101,7 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.TASK_REMEDIATED_WORKFLOW_DORMANT_CANCELED: statuses.CANCELED,
         events.TASK_CANCELING: statuses.CANCELING,
         events.TASK_CANCELED_WORKFLOW_ACTIVE: statuses.CANCELING,
-        events.TASK_CANCELED_WORKFLOW_DORMANT: statuses.CANCELED
+        events.TASK_CANCELED_WORKFLOW_DORMANT: statuses.CANCELED,
     },
     statuses.PAUSING: {
         events.WORKFLOW_PAUSING_WORKFLOW_ACTIVE: statuses.PAUSING,
@@ -141,7 +141,7 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.TASK_CANCELED_WORKFLOW_ACTIVE: statuses.CANCELING,
         events.TASK_CANCELED_WORKFLOW_DORMANT: statuses.CANCELED,
         events.TASK_RETRYING_WORKFLOW_ACTIVE: statuses.PAUSING,
-        events.TASK_RETRYING_WORKFLOW_DORMANT: statuses.PAUSED
+        events.TASK_RETRYING_WORKFLOW_DORMANT: statuses.PAUSED,
     },
     statuses.PAUSED: {
         events.WORKFLOW_RUNNING: statuses.RUNNING,
@@ -152,7 +152,7 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.WORKFLOW_CANCELED_WORKFLOW_DORMANT: statuses.CANCELED,
         events.WORKFLOW_FAILED: statuses.FAILED,
         events.TASK_RUNNING: statuses.RUNNING,
-        events.TASK_RESUMING: statuses.RUNNING
+        events.TASK_RESUMING: statuses.RUNNING,
     },
     statuses.RESUMING: {
         events.WORKFLOW_PAUSING_WORKFLOW_ACTIVE: statuses.PAUSING,
@@ -184,7 +184,7 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.TASK_REMEDIATED_WORKFLOW_DORMANT_CANCELED: statuses.CANCELED,
         events.TASK_CANCELING: statuses.CANCELING,
         events.TASK_CANCELED_WORKFLOW_ACTIVE: statuses.CANCELING,
-        events.TASK_CANCELED_WORKFLOW_DORMANT: statuses.CANCELED
+        events.TASK_CANCELED_WORKFLOW_DORMANT: statuses.CANCELED,
     },
     statuses.CANCELING: {
         events.WORKFLOW_CANCELING_WORKFLOW_ACTIVE: statuses.CANCELING,
@@ -213,17 +213,15 @@ WORKFLOW_STATE_MACHINE_DATA = {
         events.TASK_CANCELED_WORKFLOW_ACTIVE: statuses.CANCELING,
         events.TASK_CANCELED_WORKFLOW_DORMANT: statuses.CANCELED,
         events.TASK_RETRYING_WORKFLOW_ACTIVE: statuses.CANCELING,
-        events.TASK_RETRYING_WORKFLOW_DORMANT: statuses.CANCELED
+        events.TASK_RETRYING_WORKFLOW_DORMANT: statuses.CANCELED,
     },
-    statuses.CANCELED: {
-    },
+    statuses.CANCELED: {},
     statuses.SUCCEEDED: {
         # Workflow status can transition from succeeded to failed in  cases
         # where there is exception while rendering workflow output.
         events.WORKFLOW_FAILED: statuses.FAILED
     },
-    statuses.FAILED: {
-    }
+    statuses.FAILED: {},
 }
 
 
@@ -236,7 +234,7 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_PENDING: statuses.PENDING,
         events.TASK_CONTINUE_REQUESTED: statuses.SUCCEEDED,
         events.TASK_NOOP_REQUESTED: statuses.SUCCEEDED,
-        events.TASK_FAIL_REQUESTED: statuses.FAILED
+        events.TASK_FAIL_REQUESTED: statuses.FAILED,
     },
     statuses.REQUESTED: {
         events.ACTION_SCHEDULED: statuses.SCHEDULED,
@@ -249,7 +247,7 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_CANCELED: statuses.CANCELED,
         events.ACTION_FAILED: statuses.FAILED,
         events.ACTION_EXPIRED: statuses.EXPIRED,
-        events.ACTION_ABANDONED: statuses.ABANDONED
+        events.ACTION_ABANDONED: statuses.ABANDONED,
     },
     statuses.SCHEDULED: {
         events.ACTION_DELAYED: statuses.DELAYED,
@@ -261,7 +259,7 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_CANCELED: statuses.CANCELED,
         events.ACTION_FAILED: statuses.FAILED,
         events.ACTION_EXPIRED: statuses.EXPIRED,
-        events.ACTION_ABANDONED: statuses.ABANDONED
+        events.ACTION_ABANDONED: statuses.ABANDONED,
     },
     statuses.DELAYED: {
         events.ACTION_SCHEDULED: statuses.SCHEDULED,
@@ -273,7 +271,7 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_CANCELED: statuses.CANCELED,
         events.ACTION_FAILED: statuses.FAILED,
         events.ACTION_EXPIRED: statuses.EXPIRED,
-        events.ACTION_ABANDONED: statuses.ABANDONED
+        events.ACTION_ABANDONED: statuses.ABANDONED,
     },
     statuses.RUNNING: {
         events.ACTION_RUNNING: statuses.RUNNING,
@@ -332,14 +330,14 @@ TASK_STATE_MACHINE_DATA = {
         events.WORKFLOW_CANCELING_TASK_ACTIVE_ITEMS_INCOMPLETE: statuses.CANCELING,
         events.WORKFLOW_CANCELING_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.CANCELED,
         events.WORKFLOW_CANCELED_TASK_ACTIVE_ITEMS_INCOMPLETE: statuses.CANCELING,
-        events.WORKFLOW_CANCELED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.CANCELED
+        events.WORKFLOW_CANCELED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.CANCELED,
     },
     statuses.PENDING: {
         events.ACTION_CANCELED: statuses.CANCELED,
         events.ACTION_FAILED: statuses.FAILED,
         events.ACTION_EXPIRED: statuses.FAILED,
         events.ACTION_ABANDONED: statuses.FAILED,
-        events.ACTION_SUCCEEDED: statuses.SUCCEEDED
+        events.ACTION_SUCCEEDED: statuses.SUCCEEDED,
     },
     statuses.PAUSING: {
         events.ACTION_PENDING_TASK_DORMANT_ITEMS_PAUSED: statuses.PAUSED,
@@ -383,7 +381,7 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_CANCELED: statuses.CANCELED,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_FAILED: statuses.FAILED,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.PAUSED,
-        events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_COMPLETED: statuses.SUCCEEDED
+        events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_COMPLETED: statuses.SUCCEEDED,
     },
     statuses.PAUSED: {
         events.ACTION_RUNNING: statuses.RUNNING,
@@ -401,7 +399,7 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_CANCELING: statuses.CANCELING,
         events.ACTION_CANCELED: statuses.CANCELED,
         events.WORKFLOW_CANCELING: statuses.CANCELED,
-        events.WORKFLOW_CANCELED: statuses.CANCELED
+        events.WORKFLOW_CANCELED: statuses.CANCELED,
     },
     statuses.CANCELING: {
         events.ACTION_PENDING_TASK_DORMANT_ITEMS_PAUSED: statuses.CANCELED,
@@ -443,28 +441,22 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_CANCELED: statuses.CANCELED,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_FAILED: statuses.CANCELED,
         events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.CANCELED,
-        events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_COMPLETED: statuses.SUCCEEDED
+        events.ACTION_SUCCEEDED_TASK_DORMANT_ITEMS_COMPLETED: statuses.SUCCEEDED,
     },
-    statuses.CANCELED: {
-    },
-    statuses.SUCCEEDED: {
-        events.TASK_RETRY_REQUESTED: statuses.RETRYING
-    },
-    statuses.FAILED: {
-        events.TASK_RETRY_REQUESTED: statuses.RETRYING
-    }
+    statuses.CANCELED: {},
+    statuses.SUCCEEDED: {events.TASK_RETRY_REQUESTED: statuses.RETRYING},
+    statuses.FAILED: {events.TASK_RETRY_REQUESTED: statuses.RETRYING},
 }
 
 
 class TaskStateMachine(object):
-
     @classmethod
     def is_transition_valid(cls, old_status, new_status):
         if old_status is None:
-            old_status = 'null'
+            old_status = "null"
 
         if new_status is None:
-            new_status = 'null'
+            new_status = "null"
 
         if not statuses.is_valid(old_status):
             raise exc.InvalidStatus(old_status)
@@ -492,14 +484,11 @@ class TaskStateMachine(object):
 
         # Append additional task context to the event.
         event_name = cls.add_context_to_action_event(
-            workflow_state,
-            task_state['id'],
-            task_state['route'],
-            ac_ex_event
+            workflow_state, task_state["id"], task_state["route"], ac_ex_event
         )
 
         # Identify current task status.
-        current_task_status = task_state.get('status', statuses.UNSET)
+        current_task_status = task_state.get("status", statuses.UNSET)
 
         if current_task_status is None:
             current_task_status = statuses.UNSET
@@ -517,7 +506,7 @@ class TaskStateMachine(object):
         new_task_status = TASK_STATE_MACHINE_DATA[current_task_status][event_name]
 
         # Assign new status to the task flow entry.
-        task_state['status'] = new_task_status
+        task_state["status"] = new_task_status
 
     @classmethod
     def add_context_to_task_item_event(cls, workflow_state, task_id, task_route, ac_ex_event):
@@ -531,15 +520,15 @@ class TaskStateMachine(object):
             statuses.FAILED,
             statuses.EXPIRED,
             statuses.ABANDONED,
-            statuses.CANCELED
+            statuses.CANCELED,
         ]
 
         if ac_ex_event.status in requirements:
             # Make a copy of the items and remove current item under evaluation.
             staged_task = workflow_state.get_staged_task(task_id, task_route)
-            items = json_util.deepcopy(staged_task['items'])
+            items = json_util.deepcopy(staged_task["items"])
             del items[ac_ex_event.item_id]
-            items_status = [item.get('status', statuses.UNSET) for item in items]
+            items_status = [item.get("status", statuses.UNSET) for item in items]
 
             # Assess various situations.
             active = list(filter(lambda x: x in statuses.ACTIVE_STATUSES, items_status))
@@ -549,23 +538,23 @@ class TaskStateMachine(object):
             failed = list(filter(lambda x: x in statuses.ABENDED_STATUSES, items_status))
 
             # Attach info on whether task is still active or dormant.
-            action_event += '_task_active' if active else '_task_dormant'
+            action_event += "_task_active" if active else "_task_dormant"
 
             # Attach info on whether there are paused execution on the items and return.
             if not active and paused:
-                return action_event + '_items_paused'
+                return action_event + "_items_paused"
 
             # Attach info on whether there are canceled execution on the items and return.
             if not active and canceled:
-                return action_event + '_items_canceled'
+                return action_event + "_items_canceled"
 
             # Attach info on whether there are failed execution on the items and return.
             if not active and failed:
-                return action_event + '_items_failed'
+                return action_event + "_items_failed"
 
             # If items are not paused, canceled, or failed, then attach info on whether
             # there are items that are not in one of the completed statuses.
-            return action_event + ('_items_incomplete' if incomplete else '_items_completed')
+            return action_event + ("_items_incomplete" if incomplete else "_items_completed")
 
         return action_event
 
@@ -577,14 +566,11 @@ class TaskStateMachine(object):
 
         # Append additional task context to the event.
         event_name = cls.add_context_to_task_item_event(
-            workflow_state,
-            task_state['id'],
-            task_state['route'],
-            ac_ex_event
+            workflow_state, task_state["id"], task_state["route"], ac_ex_event
         )
 
         # Identify current task status.
-        current_task_status = task_state.get('status', statuses.UNSET)
+        current_task_status = task_state.get("status", statuses.UNSET)
 
         if current_task_status is None:
             current_task_status = statuses.UNSET
@@ -602,7 +588,7 @@ class TaskStateMachine(object):
         new_task_status = TASK_STATE_MACHINE_DATA[current_task_status][event_name]
 
         # Assign new status to the task flow entry.
-        task_state['status'] = new_task_status
+        task_state["status"] = new_task_status
 
     @classmethod
     def add_context_to_workflow_event(cls, workflow_state, task_id, task_route, wf_ex_event):
@@ -610,12 +596,12 @@ class TaskStateMachine(object):
         requirements = statuses.PAUSE_STATUSES + statuses.CANCEL_STATUSES
         staged_task = workflow_state.get_staged_task(task_id, task_route)
 
-        if wf_ex_event.status in requirements and staged_task and 'items' in staged_task:
-            items_status = [item.get('status', statuses.UNSET) for item in staged_task['items']]
+        if wf_ex_event.status in requirements and staged_task and "items" in staged_task:
+            items_status = [item.get("status", statuses.UNSET) for item in staged_task["items"]]
             active = list(filter(lambda x: x in statuses.ACTIVE_STATUSES, items_status))
             incomplete = list(filter(lambda x: x not in statuses.COMPLETED_STATUSES, items_status))
-            workflow_event += '_task_active' if active else '_task_dormant'
-            workflow_event += '_items_incomplete' if incomplete else '_items_completed'
+            workflow_event += "_task_active" if active else "_task_dormant"
+            workflow_event += "_items_incomplete" if incomplete else "_items_completed"
 
         return workflow_event
 
@@ -627,14 +613,11 @@ class TaskStateMachine(object):
 
         # Append additional task context to the event.
         event_name = cls.add_context_to_workflow_event(
-            workflow_state,
-            task_state['id'],
-            task_state['route'],
-            wf_ex_event
+            workflow_state, task_state["id"], task_state["route"], wf_ex_event
         )
 
         # Identify current task status.
-        current_task_status = task_state.get('status', statuses.UNSET)
+        current_task_status = task_state.get("status", statuses.UNSET)
 
         if current_task_status is None:
             current_task_status = statuses.UNSET
@@ -652,7 +635,7 @@ class TaskStateMachine(object):
         new_task_status = TASK_STATE_MACHINE_DATA[current_task_status][event_name]
 
         # Assign new status to the task flow entry.
-        task_state['status'] = new_task_status
+        task_state["status"] = new_task_status
 
     @classmethod
     def process_event(cls, workflow_state, task_state, event):
@@ -676,14 +659,13 @@ class TaskStateMachine(object):
 
 
 class WorkflowStateMachine(object):
-
     @classmethod
     def is_transition_valid(cls, old_status, new_status):
         if old_status is None:
-            old_status = 'null'
+            old_status = "null"
 
         if new_status is None:
-            new_status = 'null'
+            new_status = "null"
 
         if not statuses.is_valid(old_status):
             raise exc.InvalidStatus(old_status)
@@ -694,8 +676,10 @@ class WorkflowStateMachine(object):
         if old_status not in WORKFLOW_STATE_MACHINE_DATA.keys():
             return False
 
-        if (old_status == new_status or
-                new_status in WORKFLOW_STATE_MACHINE_DATA[old_status].values()):
+        if (
+            old_status == new_status
+            or new_status in WORKFLOW_STATE_MACHINE_DATA[old_status].values()
+        ):
             return True
 
         return False
@@ -704,8 +688,8 @@ class WorkflowStateMachine(object):
     def add_context_to_task_event(cls, workflow_state, tk_ex_event):
         # Identify current workflow status.
         task_event = tk_ex_event.name
-        task_id = getattr(tk_ex_event, 'task_id', None)
-        task_route = getattr(tk_ex_event, 'route', None)
+        task_id = getattr(tk_ex_event, "task_id", None)
+        task_route = getattr(tk_ex_event, "route", None)
         has_next_tasks = workflow_state.has_next_tasks(task_id, task_route)
         has_active_tasks = workflow_state.has_active_tasks
 
@@ -718,27 +702,28 @@ class WorkflowStateMachine(object):
         # For example, if the workflow is being canceled and there are other active
         # tasks, the workflow should be set to canceling.
         if task_event in events.TASK_CONDITIONAL_EVENTS:
-            task_event += '_workflow_active' if has_active_tasks else '_workflow_dormant'
+            task_event += "_workflow_active" if has_active_tasks else "_workflow_dormant"
 
         # When a task succeeded, additional information need to be included in the
         # event to determine whether the workflow is still running, completed, or
         # it needs to be paused or canceled. Cancelation has precedence over other
         # status, follow by pause, running, then completion.
 
-        if (not task_event.startswith(events.TASK_SUCCEEDED) and
-                not task_event.startswith(events.TASK_REMEDIATED)):
+        if not task_event.startswith(events.TASK_SUCCEEDED) and not task_event.startswith(
+            events.TASK_REMEDIATED
+        ):
             return task_event
 
         if workflow_state.has_canceling_tasks or workflow_state.has_canceled_tasks:
-            return task_event + '_canceled'
+            return task_event + "_canceled"
 
         if workflow_state.has_pausing_tasks or workflow_state.has_paused_tasks:
-            return task_event + '_paused'
+            return task_event + "_paused"
 
         if workflow_state.has_staged_tasks or has_next_tasks:
-            return task_event + '_incomplete'
+            return task_event + "_incomplete"
 
-        return task_event + '_completed'
+        return task_event + "_completed"
 
     @classmethod
     def process_task_event(cls, workflow_state, tk_ex_event):
@@ -781,8 +766,8 @@ class WorkflowStateMachine(object):
                 workflow_state.status = statuses.FAILED
 
                 for entry in unreachable_barriers:
-                    e = exc.UnreachableJoinError(entry['id'], entry['route'])
-                    workflow_state.conductor.log_error(e, task_id=entry['id'], route=entry['route'])
+                    e = exc.UnreachableJoinError(entry["id"], entry["route"])
+                    workflow_state.conductor.log_error(e, task_id=entry["id"], route=entry["route"])
 
     @classmethod
     def add_context_to_workflow_event(cls, workflow_state, wf_ex_event):
@@ -795,15 +780,17 @@ class WorkflowStateMachine(object):
         # For example, if the workflow is being canceled and there are other active
         # tasks, the workflow should be set to canceling.
         if wf_ex_event.status in statuses.PAUSE_STATUSES + statuses.CANCEL_STATUSES:
-            workflow_event += '_workflow_active' if has_active_tasks else '_workflow_dormant'
+            workflow_event += "_workflow_active" if has_active_tasks else "_workflow_dormant"
 
         # If the workflow is paused and on resume, check whether it is already completed.
-        if (workflow_state.status == statuses.PAUSED and
-                wf_ex_event.status in [statuses.RUNNING, statuses.RESUMING] and
-                not workflow_state.has_active_tasks and
-                not workflow_state.has_staged_tasks and
-                not workflow_state.has_paused_tasks):
-            workflow_event += '_workflow_completed'
+        if (
+            workflow_state.status == statuses.PAUSED
+            and wf_ex_event.status in [statuses.RUNNING, statuses.RESUMING]
+            and not workflow_state.has_active_tasks
+            and not workflow_state.has_staged_tasks
+            and not workflow_state.has_paused_tasks
+        ):
+            workflow_event += "_workflow_completed"
 
         return workflow_event
 

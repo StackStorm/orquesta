@@ -21,8 +21,4 @@ deserialize = mock_models.deserialize
 instantiate = mock_models.instantiate
 WorkflowSpec = mock_models.WorkflowSpec
 
-__all__ = [
-    instantiate.__name__,
-    deserialize.__name__,
-    WorkflowSpec.__name__
-]
+__all__ = [instantiate.__name__, deserialize.__name__, WorkflowSpec.__name__]

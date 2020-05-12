@@ -28,10 +28,10 @@ LOG = logging.getLogger(__name__)
 
 
 def instantiate(definition):
-    definition.pop('version', None)
+    definition.pop("version", None)
 
     if len(definition.keys()) > 1:
-        raise ValueError('Workflow definition contains more than one workflow.')
+        raise ValueError("Workflow definition contains more than one workflow.")
 
     wf_name, wf_spec = list(definition.items())[0]
 
@@ -44,34 +44,26 @@ def deserialize(data):
 
 class WorkflowSpec(mistral_spec_base.Spec):
     _schema = {
-        'type': 'object',
-        'properties': {
-            'type': mistral_spec_types.WORKFLOW_TYPE,
-            'vars': spec_types.NONEMPTY_DICT,
-            'input': spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
-            'output': spec_types.NONEMPTY_DICT,
-            'output-on-error': spec_types.NONEMPTY_DICT,
-            'task-defaults': task_models.TaskDefaultsSpec,
-            'tasks': task_models.TaskMappingSpec
+        "type": "object",
+        "properties": {
+            "type": mistral_spec_types.WORKFLOW_TYPE,
+            "vars": spec_types.NONEMPTY_DICT,
+            "input": spec_types.UNIQUE_STRING_OR_ONE_KEY_DICT_LIST,
+            "output": spec_types.NONEMPTY_DICT,
+            "output-on-error": spec_types.NONEMPTY_DICT,
+            "task-defaults": task_models.TaskDefaultsSpec,
+            "tasks": task_models.TaskMappingSpec,
         },
-        'required': ['tasks'],
-        'additionalProperties': False
+        "required": ["tasks"],
+        "additionalProperties": False,
     }
 
-    _context_evaluation_sequence = [
-        'input',
-        'vars',
-        'tasks',
-        'output'
-    ]
+    _context_evaluation_sequence = ["input", "vars", "tasks", "output"]
 
-    _context_inputs = [
-        'input',
-        'vars'
-    ]
+    _context_inputs = ["input", "vars"]
 
     def render_input(self, runtime_inputs, in_ctx=None):
-        input_specs = getattr(self, 'input') or []
+        input_specs = getattr(self, "input") or []
         default_inputs = dict([list(i.items())[0] for i in input_specs if isinstance(i, dict)])
         merged_inputs = dict_util.merge_dicts(default_inputs, runtime_inputs, True)
         rendered_inputs = {}
@@ -85,7 +77,7 @@ class WorkflowSpec(mistral_spec_base.Spec):
         return rendered_inputs, errors
 
     def render_vars(self, in_ctx):
-        vars_specs = getattr(self, 'vars') or {}
+        vars_specs = getattr(self, "vars") or {}
         rendered_vars = {}
         errors = []
 
@@ -97,7 +89,7 @@ class WorkflowSpec(mistral_spec_base.Spec):
         return rendered_vars, errors
 
     def render_output(self, in_ctx):
-        output_specs = getattr(self, 'output') or {}
+        output_specs = getattr(self, "output") or {}
         rendered_outputs = {}
         errors = []
 
@@ -114,15 +106,13 @@ class WorkflowSpec(mistral_spec_base.Spec):
 
 class WorkbookSpec(mistral_spec_base.Spec):
     _schema = {
-        'type': 'object',
-        'properties': {
-            'workflows': {
-                'type': 'object',
-                'minProperties': 1,
-                'patternProperties': {
-                    '^(?!version)\w+$': WorkflowSpec
-                }
+        "type": "object",
+        "properties": {
+            "workflows": {
+                "type": "object",
+                "minProperties": 1,
+                "patternProperties": {r"^(?!version)\w+$": WorkflowSpec},
             }
         },
-        'additionalProperties': False
+        "additionalProperties": False,
     }

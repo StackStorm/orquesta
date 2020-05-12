@@ -29,7 +29,7 @@ class WorkflowComposer(comp_base.WorkflowComposer):
     @classmethod
     def compose(cls, spec):
         if not cls.wf_spec_type:
-            raise TypeError('Undefined spec type for composer.')
+            raise TypeError("Undefined spec type for composer.")
 
         if not isinstance(spec, cls.wf_spec_type):
             raise TypeError('Unsupported spec type "%s".' % str(type(spec)))
@@ -39,7 +39,7 @@ class WorkflowComposer(comp_base.WorkflowComposer):
     @classmethod
     def _compose_wf_graph(cls, wf_spec):
         if not isinstance(wf_spec, cls.wf_spec_type):
-            raise TypeError('Workflow spec is not typeof %s.' % cls.wf_spec_type.__name__)
+            raise TypeError("Workflow spec is not typeof %s." % cls.wf_spec_type.__name__)
 
         q = queue.Queue()
         wf_graph = graphing.WorkflowGraph()
@@ -54,7 +54,7 @@ class WorkflowComposer(comp_base.WorkflowComposer):
 
             if wf_spec.tasks.is_join_task(task_name):
                 task_spec = wf_spec.tasks[task_name]
-                barrier = '*' if task_spec.join == 'all' else task_spec.join
+                barrier = "*" if task_spec.join == "all" else task_spec.join
                 wf_graph.set_barrier(task_name, value=barrier)
 
             # Determine if the task is a split task and if it is in a cycle. If the task is a
@@ -70,9 +70,9 @@ class WorkflowComposer(comp_base.WorkflowComposer):
 
             if task_spec.has_retry():
                 retry_spec = {
-                    'when': getattr(task_spec.retry, 'when', None),
-                    'count': getattr(task_spec.retry, 'count', None),
-                    'delay': getattr(task_spec.retry, 'delay', None)
+                    "when": getattr(task_spec.retry, "when", None),
+                    "count": getattr(task_spec.retry, "count", None),
+                    "delay": getattr(task_spec.retry, "delay", None),
                 }
 
                 wf_graph.update_task(task_name, retry=retry_spec)
@@ -81,22 +81,20 @@ class WorkflowComposer(comp_base.WorkflowComposer):
             next_tasks = wf_spec.tasks.get_next_tasks(task_name)
 
             for next_task_name, condition, task_transition_item_idx in next_tasks:
-                if next_task_name == 'retry':
-                    retry_spec = {'when': condition or '<% completed() %>', 'count': 3}
+                if next_task_name == "retry":
+                    retry_spec = {"when": condition or "<% completed() %>", "count": 3}
                     wf_graph.update_task(task_name, retry=retry_spec)
                     continue
 
-                if (not wf_graph.has_task(next_task_name) or
-                        not wf_spec.tasks.in_cycle(next_task_name)):
+                if not wf_graph.has_task(next_task_name) or not wf_spec.tasks.in_cycle(
+                    next_task_name
+                ):
                     q.put((next_task_name, list(splits)))
 
                 crta = [condition] if condition else []
 
                 seqs = wf_graph.has_transition(
-                    task_name,
-                    next_task_name,
-                    criteria=crta,
-                    ref=task_transition_item_idx
+                    task_name, next_task_name, criteria=crta, ref=task_transition_item_idx
                 )
 
                 # Use existing transition if present otherwise create new transition.
@@ -106,14 +104,11 @@ class WorkflowComposer(comp_base.WorkflowComposer):
                         next_task_name,
                         key=seqs[0][2],
                         criteria=crta,
-                        ref=task_transition_item_idx
+                        ref=task_transition_item_idx,
                     )
                 else:
                     wf_graph.add_transition(
-                        task_name,
-                        next_task_name,
-                        criteria=crta,
-                        ref=task_transition_item_idx
+                        task_name, next_task_name, criteria=crta, ref=task_transition_item_idx
                     )
 
         return wf_graph

@@ -17,7 +17,6 @@ from orquesta.tests.unit.composition.mistral import base as mistral_comp_test_ba
 
 
 class MistralWorkflowConductorTest(
-    mistral_comp_test_base.MistralWorkflowComposerTest,
-    test_base.WorkflowConductorTest
+    mistral_comp_test_base.MistralWorkflowComposerTest, test_base.WorkflowConductorTest
 ):
     pass

@@ -18,7 +18,6 @@ from orquesta.tests.unit.specs.mistral import base as test_base
 
 
 class TaskSpecTest(test_base.MistralWorkflowSpecTest):
-
     def test_simplest_task(self):
         wf_def = """
             version: '2.0'
@@ -30,7 +29,7 @@ class TaskSpecTest(test_base.MistralWorkflowSpecTest):
                         action: std.noop
         """
 
-        task_spec = self.instantiate(wf_def).tasks.get_task('task1')
+        task_spec = self.instantiate(wf_def).tasks.get_task("task1")
 
         self.assertIsInstance(task_spec, task_models.TaskSpec)
         self.assertIsNone(task_spec.has_retry())
@@ -49,7 +48,7 @@ class TaskSpecTest(test_base.MistralWorkflowSpecTest):
                             count: 10
         """
 
-        task_spec = self.instantiate(wf_def).tasks.get_task('task1')
+        task_spec = self.instantiate(wf_def).tasks.get_task("task1")
         task_retry = task_spec.has_retry()
 
         self.assertIsInstance(task_retry, policy_models.RetrySpec)

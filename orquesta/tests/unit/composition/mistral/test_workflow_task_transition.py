@@ -16,292 +16,181 @@ from orquesta.tests.unit.composition.mistral import base
 
 
 class TaskTransitionWorkflowComposerTest(base.MistralWorkflowComposerTest):
-
     def test_on_error(self):
-        wf_name = 'task-on-error'
+        wf_name = "task-on-error"
 
         expected_wf_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                }
-            ],
-            'adjacency': [
+            "directed": True,
+            "graph": {},
+            "nodes": [{"id": "task1"}, {"id": "task2"}, {"id": "task3"}],
+            "adjacency": [
                 [
                     {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
                     },
                     {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-error'
-                        )
-                    }
+                        "id": "task3",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-error"),
+                    },
                 ],
                 [],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                }
-            ],
-            'adjacency': [
+            "directed": True,
+            "graph": {},
+            "nodes": [{"id": "task1"}, {"id": "task2"}, {"id": "task3"}],
+            "adjacency": [
                 [
                     {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
                     },
                     {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-error'
-                        )
-                    }
+                        "id": "task3",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-error"),
+                    },
                 ],
                 [],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
 
     def test_on_complete(self):
-        wf_name = 'task-on-complete'
+        wf_name = "task-on-complete"
 
         expected_wf_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                },
-                {
-                    'id': 'task4'
-                }
-            ],
-            'adjacency': [
+            "directed": True,
+            "graph": {},
+            "nodes": [{"id": "task1"}, {"id": "task2"}, {"id": "task3"}, {"id": "task4"}],
+            "adjacency": [
                 [
                     {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
                     },
                     {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-error'
-                        )
+                        "id": "task3",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-error"),
                     },
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-complete'
-                        )
-                    }
+                        "id": "task4",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-complete"),
+                    },
                 ],
                 [],
                 [],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2'
-                },
-                {
-                    'id': 'task3'
-                },
-                {
-                    'id': 'task4'
-                }
-            ],
-            'adjacency': [
+            "directed": True,
+            "graph": {},
+            "nodes": [{"id": "task1"}, {"id": "task2"}, {"id": "task3"}, {"id": "task4"}],
+            "adjacency": [
                 [
                     {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
                     },
                     {
-                        'id': 'task3',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-error'
-                        )
+                        "id": "task3",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-error"),
                     },
                     {
-                        'id': 'task4',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-complete'
-                        )
-                    }
+                        "id": "task4",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-complete"),
+                    },
                 ],
                 [],
                 [],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)
 
     def test_task_transitions_split(self):
-        wf_name = 'task-transitions-split'
+        wf_name = "task-transitions-split"
 
         expected_wf_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2',
-                    'splits': ['task2']
-                }
-            ],
-            'adjacency': [
+            "directed": True,
+            "graph": {},
+            "nodes": [{"id": "task1"}, {"id": "task2", "splits": ["task2"]}],
+            "adjacency": [
                 [
                     {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-complete'
-                        )
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-complete"),
                     },
                     {
-                        'id': 'task2',
-                        'key': 1,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-error'
-                        )
+                        "id": "task2",
+                        "key": 1,
+                        "criteria": self.compose_seq_expr("task1", condition="on-error"),
                     },
                     {
-                        'id': 'task2',
-                        'key': 2,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
-                    }
+                        "id": "task2",
+                        "key": 2,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
+                    },
                 ],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_graph(wf_name, expected_wf_graph)
 
         expected_wf_ex_graph = {
-            'directed': True,
-            'graph': {},
-            'nodes': [
-                {
-                    'id': 'task1'
-                },
-                {
-                    'id': 'task2',
-                    'splits': ['task2']
-                }
-            ],
-            'adjacency': [
+            "directed": True,
+            "graph": {},
+            "nodes": [{"id": "task1"}, {"id": "task2", "splits": ["task2"]}],
+            "adjacency": [
                 [
                     {
-                        'id': 'task2',
-                        'key': 0,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-complete'
-                        )
+                        "id": "task2",
+                        "key": 0,
+                        "criteria": self.compose_seq_expr("task1", condition="on-complete"),
                     },
                     {
-                        'id': 'task2',
-                        'key': 1,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-error'
-                        )
+                        "id": "task2",
+                        "key": 1,
+                        "criteria": self.compose_seq_expr("task1", condition="on-error"),
                     },
                     {
-                        'id': 'task2',
-                        'key': 2,
-                        'criteria': self.compose_seq_expr(
-                            'task1',
-                            condition='on-success'
-                        )
-                    }
+                        "id": "task2",
+                        "key": 2,
+                        "criteria": self.compose_seq_expr("task1", condition="on-success"),
+                    },
                 ],
-                []
+                [],
             ],
-            'multigraph': True
+            "multigraph": True,
         }
 
         self.assert_compose_to_wf_ex_graph(wf_name, expected_wf_ex_graph)

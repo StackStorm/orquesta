@@ -12,6 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-WORKFLOW_TYPE = {
-    "enum": ["reverse", "direct"]
-}
+WORKFLOW_TYPE = {"enum": ["reverse", "direct"]}

@@ -21,24 +21,20 @@ from orquesta.expressions import yql as yaql_expr
 
 
 class ExpressionEvaluatorTest(unittest.TestCase):
-
     def test_mix_types(self):
-        expr = '<% ctx().foo %> and {{ ctx().foo }}'
+        expr = "<% ctx().foo %> and {{ ctx().foo }}"
 
         expected_errors = [
             {
-                'type': None,
-                'expression': expr,
-                'message': 'Expression with multiple types is not supported.'
+                "type": None,
+                "expression": expr,
+                "message": "Expression with multiple types is not supported.",
             }
         ]
 
         result = expr_base.validate(expr)
 
-        self.assertListEqual(
-            expected_errors,
-            result.get('errors', [])
-        )
+        self.assertListEqual(expected_errors, result.get("errors", []))
 
     def test_inspect_function_has_context_argument(self):
         self.assertTrue(expr_base.func_has_ctx_arg(core_funcs.ctx_))
@@ -46,14 +42,14 @@ class ExpressionEvaluatorTest(unittest.TestCase):
 
     def test_get_statement_regexes(self):
         expected_data = {
-            'jinja': jinja_expr.JinjaEvaluator.get_statement_regex(),
-            'yaql': yaql_expr.YAQLEvaluator.get_statement_regex()
+            "jinja": jinja_expr.JinjaEvaluator.get_statement_regex(),
+            "yaql": yaql_expr.YAQLEvaluator.get_statement_regex(),
         }
 
         self.assertDictEqual(expr_base.get_statement_regexes(), expected_data)
 
     def test_has_expressions(self):
-        self.assertTrue(expr_base.has_expressions('<% ctx().foo %> and {{ ctx().foo }}'))
-        self.assertTrue(expr_base.has_expressions('foo <% ctx().foo %> bar'))
-        self.assertTrue(expr_base.has_expressions('foo {{ ctx().foo }} bar'))
-        self.assertFalse(expr_base.has_expressions('foobar'))
+        self.assertTrue(expr_base.has_expressions("<% ctx().foo %> and {{ ctx().foo }}"))
+        self.assertTrue(expr_base.has_expressions("foo <% ctx().foo %> bar"))
+        self.assertTrue(expr_base.has_expressions("foo {{ ctx().foo }} bar"))
+        self.assertFalse(expr_base.has_expressions("foobar"))

@@ -16,7 +16,6 @@ from orquesta.tests.unit.specs.native import base as test_base
 
 
 class WorkflowSpecVarsValidationTest(test_base.OrchestraWorkflowSpecTest):
-
     def test_bad_vars_in_input(self):
         wf_def = """
             version: 1.0
@@ -31,13 +30,13 @@ class WorkflowSpecVarsValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().a %>',
-                    'message': 'Variable "a" is referenced before assignment.',
-                    'schema_path': 'properties.input',
-                    'spec_path': 'input[0]'
+                    "type": "yaql",
+                    "expression": "<% ctx().a %>",
+                    "message": 'Variable "a" is referenced before assignment.',
+                    "schema_path": "properties.input",
+                    "spec_path": "input[0]",
                 }
             ]
         }
@@ -78,28 +77,28 @@ class WorkflowSpecVarsValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().a %>',
-                    'message': 'Variable "a" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'vars[0]'
+                    "type": "yaql",
+                    "expression": "<% ctx().a %>",
+                    "message": 'Variable "a" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "vars[0]",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().x + ctx().y + ctx().z %>',
-                    'message': 'Variable "x" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'vars[1]'
+                    "type": "yaql",
+                    "expression": "<% ctx().x + ctx().y + ctx().z %>",
+                    "message": 'Variable "x" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "vars[1]",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().x + ctx().y + ctx().z %>',
-                    'message': 'Variable "z" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'vars[1]'
-                }
+                    "type": "yaql",
+                    "expression": "<% ctx().x + ctx().y + ctx().z %>",
+                    "message": 'Variable "z" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "vars[1]",
+                },
             ]
         }
 
@@ -122,28 +121,28 @@ class WorkflowSpecVarsValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'jinja',
-                    'expression': '{{ ctx().a }}',
-                    'message': 'Variable "a" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'vars[0]'
+                    "type": "jinja",
+                    "expression": "{{ ctx().a }}",
+                    "message": 'Variable "a" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "vars[0]",
                 },
                 {
-                    'type': 'jinja',
-                    'expression': '{{ ctx().x + ctx().y + ctx().z }}',
-                    'message': 'Variable "x" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'vars[1]'
+                    "type": "jinja",
+                    "expression": "{{ ctx().x + ctx().y + ctx().z }}",
+                    "message": 'Variable "x" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "vars[1]",
                 },
                 {
-                    'type': 'jinja',
-                    'expression': '{{ ctx().x + ctx().y + ctx().z }}',
-                    'message': 'Variable "z" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'vars[1]'
-                }
+                    "type": "jinja",
+                    "expression": "{{ ctx().x + ctx().y + ctx().z }}",
+                    "message": 'Variable "z" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "vars[1]",
+                },
             ]
         }
 
@@ -166,28 +165,28 @@ class WorkflowSpecVarsValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'jinja',
-                    'expression': '{{ ctx().a }}',
-                    'message': 'Variable "a" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'vars[0]'
+                    "type": "jinja",
+                    "expression": "{{ ctx().a }}",
+                    "message": 'Variable "a" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "vars[0]",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().x + ctx().y + ctx().z %>',
-                    'message': 'Variable "x" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'vars[1]'
+                    "type": "yaql",
+                    "expression": "<% ctx().x + ctx().y + ctx().z %>",
+                    "message": 'Variable "x" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "vars[1]",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().x + ctx().y + ctx().z %>',
-                    'message': 'Variable "z" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'vars[1]'
-                }
+                    "type": "yaql",
+                    "expression": "<% ctx().x + ctx().y + ctx().z %>",
+                    "message": 'Variable "z" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "vars[1]",
+                },
             ]
         }
 
@@ -236,13 +235,13 @@ class WorkflowSpecVarsValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().foo %>',
-                    'message': 'Variable "foo" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
-                    'spec_path': 'tasks.task2.input'
+                    "type": "yaql",
+                    "expression": "<% ctx().foo %>",
+                    "message": 'Variable "foo" is referenced before assignment.',
+                    "schema_path": "properties.tasks.patternProperties.^\\w+$.properties.input",
+                    "spec_path": "tasks.task2.input",
                 }
             ]
         }
@@ -280,21 +279,21 @@ class WorkflowSpecVarsValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().foo + ctx().bar %>',
-                    'message': 'Variable "bar" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
-                    'spec_path': 'tasks.task2.input'
+                    "type": "yaql",
+                    "expression": "<% ctx().foo + ctx().bar %>",
+                    "message": 'Variable "bar" is referenced before assignment.',
+                    "schema_path": "properties.tasks.patternProperties.^\\w+$.properties.input",
+                    "spec_path": "tasks.task2.input",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().foo + ctx().bar %>',
-                    'message': 'Variable "foo" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
-                    'spec_path': 'tasks.task3.input'
-                }
+                    "type": "yaql",
+                    "expression": "<% ctx().foo + ctx().bar %>",
+                    "message": 'Variable "foo" is referenced before assignment.',
+                    "schema_path": "properties.tasks.patternProperties.^\\w+$.properties.input",
+                    "spec_path": "tasks.task3.input",
+                },
             ]
         }
 
@@ -336,21 +335,21 @@ class WorkflowSpecVarsValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().foo + ctx().bar %>',
-                    'message': 'Variable "bar" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
-                    'spec_path': 'tasks.task2.input'
+                    "type": "yaql",
+                    "expression": "<% ctx().foo + ctx().bar %>",
+                    "message": 'Variable "bar" is referenced before assignment.',
+                    "schema_path": "properties.tasks.patternProperties.^\\w+$.properties.input",
+                    "spec_path": "tasks.task2.input",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().foo + ctx().bar %>',
-                    'message': 'Variable "foo" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
-                    'spec_path': 'tasks.task4.input'
-                }
+                    "type": "yaql",
+                    "expression": "<% ctx().foo + ctx().bar %>",
+                    "message": 'Variable "foo" is referenced before assignment.',
+                    "schema_path": "properties.tasks.patternProperties.^\\w+$.properties.input",
+                    "spec_path": "tasks.task4.input",
+                },
             ]
         }
 
@@ -402,28 +401,28 @@ class WorkflowSpecVarsValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().foo + ctx().bar %>',
-                    'message': 'Variable "bar" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
-                    'spec_path': 'tasks.task2.input'
+                    "type": "yaql",
+                    "expression": "<% ctx().foo + ctx().bar %>",
+                    "message": 'Variable "bar" is referenced before assignment.',
+                    "schema_path": "properties.tasks.patternProperties.^\\w+$.properties.input",
+                    "spec_path": "tasks.task2.input",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().foo + ctx().bar %>',
-                    'message': 'Variable "foo" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
-                    'spec_path': 'tasks.task4.input'
+                    "type": "yaql",
+                    "expression": "<% ctx().foo + ctx().bar %>",
+                    "message": 'Variable "foo" is referenced before assignment.',
+                    "schema_path": "properties.tasks.patternProperties.^\\w+$.properties.input",
+                    "spec_path": "tasks.task4.input",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().foo %>',
-                    'message': 'Variable "foo" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
-                    'spec_path': 'tasks.task5.input'
-                }
+                    "type": "yaql",
+                    "expression": "<% ctx().foo %>",
+                    "message": 'Variable "foo" is referenced before assignment.',
+                    "schema_path": "properties.tasks.patternProperties.^\\w+$.properties.input",
+                    "spec_path": "tasks.task5.input",
+                },
             ]
         }
 
@@ -505,34 +504,34 @@ class WorkflowSpecVarsValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().fu + ctx().bar %>',
-                    'message': 'Variable "fu" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
-                    'spec_path': 'tasks.task3.input'
+                    "type": "yaql",
+                    "expression": "<% ctx().fu + ctx().bar %>",
+                    "message": 'Variable "fu" is referenced before assignment.',
+                    "schema_path": "properties.tasks.patternProperties.^\\w+$.properties.input",
+                    "spec_path": "tasks.task3.input",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().fu + ctx().bar %>',
-                    'message': 'Variable "fu" is referenced before assignment.',
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.properties.'
-                        'next.items.properties.publish'
+                    "type": "yaql",
+                    "expression": "<% ctx().fu + ctx().bar %>",
+                    "message": 'Variable "fu" is referenced before assignment.',
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$.properties."
+                        "next.items.properties.publish"
                     ),
-                    'spec_path': 'tasks.task2.next[0].publish[0]'
+                    "spec_path": "tasks.task2.next[0].publish[0]",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().fu + ctx().bar %>',
-                    'message': 'Variable "fu" is referenced before assignment.',
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.properties.'
-                        'next.items.properties.publish'
+                    "type": "yaql",
+                    "expression": "<% ctx().fu + ctx().bar %>",
+                    "message": 'Variable "fu" is referenced before assignment.',
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$.properties."
+                        "next.items.properties.publish"
                     ),
-                    'spec_path': 'tasks.task3.next[0].publish[0]'
-                }
+                    "spec_path": "tasks.task3.next[0].publish[0]",
+                },
             ]
         }
 
@@ -561,13 +560,13 @@ class WorkflowSpecVarsValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().fu + ctx().bar %>',
-                    'message': 'Variable "fu" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input',
-                    'spec_path': 'tasks.task3.input'
+                    "type": "yaql",
+                    "expression": "<% ctx().fu + ctx().bar %>",
+                    "message": 'Variable "fu" is referenced before assignment.',
+                    "schema_path": "properties.tasks.patternProperties.^\\w+$.properties.input",
+                    "spec_path": "tasks.task3.input",
                 }
             ]
         }
@@ -617,13 +616,13 @@ class WorkflowSpecVarsValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().a %>',
-                    'message': 'Variable "a" is referenced before assignment.',
-                    'schema_path': 'properties.output',
-                    'spec_path': 'output[0]'
+                    "type": "yaql",
+                    "expression": "<% ctx().a %>",
+                    "message": 'Variable "a" is referenced before assignment.',
+                    "schema_path": "properties.output",
+                    "spec_path": "output[0]",
                 }
             ]
         }

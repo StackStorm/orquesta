@@ -17,15 +17,15 @@ import six
 
 def format_error(expr_type, expr, exc, spec_path=None, schema_path=None):
     error = {
-        'type': expr_type,
-        'expression': expr,
-        'message': exc if isinstance(exc, six.string_types) else str(getattr(exc, 'message', exc))
+        "type": expr_type,
+        "expression": expr,
+        "message": exc if isinstance(exc, six.string_types) else str(getattr(exc, "message", exc)),
     }
 
     if spec_path:
-        error['spec_path'] = spec_path
+        error["spec_path"] = spec_path
 
     if schema_path:
-        error['schema_path'] = schema_path
+        error["schema_path"] = schema_path
 
     return error

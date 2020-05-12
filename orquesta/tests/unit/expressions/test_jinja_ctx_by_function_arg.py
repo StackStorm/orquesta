@@ -16,96 +16,74 @@ from orquesta.tests.unit import base as test_base
 
 
 class JinjaVariableExtractionTest(test_base.ExpressionEvaluatorTest):
-
     @classmethod
     def setUpClass(cls):
-        cls.language = 'jinja'
+        cls.language = "jinja"
         super(JinjaVariableExtractionTest, cls).setUpClass()
 
     def test_empty_extraction(self):
-        expr = '{{ just_text and $not_a_var and notctx(foo) and notctx("bar") and notctx(\'fu\') }}'
+        expr = "{{ just_text and $not_a_var and notctx(foo) and notctx(\"bar\") and notctx('fu') }}"
 
         self.assertListEqual([], self.evaluator.extract_vars(expr))
 
     def test_single_var_extraction(self):
-        expr = '{{ ctx(foobar)  }}'
+        expr = "{{ ctx(foobar)  }}"
 
-        expected_vars = [
-            'ctx(foobar)'
-        ]
+        expected_vars = ["ctx(foobar)"]
 
         self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
 
     def test_single_var_extraction_with_single_quotes(self):
-        expr = '{{ ctx(\'foobar\')  }}'
+        expr = "{{ ctx('foobar')  }}"
 
-        expected_vars = [
-            'ctx(\'foobar\')'
-        ]
+        expected_vars = ["ctx('foobar')"]
 
         self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
 
     def test_single_var_extraction_with_double_quotes(self):
         expr = '{{ ctx("foobar")  }}'
 
-        expected_vars = [
-            'ctx("foobar")'
-        ]
+        expected_vars = ['ctx("foobar")']
 
         self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
 
     def test_single_dotted_var_extraction(self):
-        expr = '{{ ctx(foo).bar  }}'
+        expr = "{{ ctx(foo).bar  }}"
 
-        expected_vars = [
-            'ctx(foo).bar'
-        ]
+        expected_vars = ["ctx(foo).bar"]
 
         self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
 
     def test_single_indexing_var_extraction(self):
-        expr = '{{ ctx(foo)[0]  }}'
+        expr = "{{ ctx(foo)[0]  }}"
 
-        expected_vars = [
-            'ctx(foo)[0]'
-        ]
+        expected_vars = ["ctx(foo)[0]"]
 
         self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
 
     def test_single_functional_var_extraction(self):
-        expr = '{{ ctx(foo).get(bar)  }}'
+        expr = "{{ ctx(foo).get(bar)  }}"
 
-        expected_vars = [
-            'ctx(foo).get(bar)'
-        ]
+        expected_vars = ["ctx(foo).get(bar)"]
 
         self.assertListEqual(expected_vars, self.evaluator.extract_vars(expr))
 
     def test_multiple_vars_extraction(self):
-        expr = '{{ctx(fubar) ctx(foobar) ctx(foo).get(bar) ctx(fu).bar ctx(foobaz).bar[0]  }}'
+        expr = "{{ctx(fubar) ctx(foobar) ctx(foo).get(bar) ctx(fu).bar ctx(foobaz).bar[0]  }}"
 
         expected_vars = [
-            'ctx(foobar)',
-            'ctx(foobaz).bar[0]',
-            'ctx(foo).get(bar)',
-            'ctx(fubar)',
-            'ctx(fu).bar'
+            "ctx(foobar)",
+            "ctx(foobaz).bar[0]",
+            "ctx(foo).get(bar)",
+            "ctx(fubar)",
+            "ctx(fu).bar",
         ]
 
-        self.assertListEqual(
-            sorted(expected_vars),
-            sorted(self.evaluator.extract_vars(expr))
-        )
+        self.assertListEqual(sorted(expected_vars), sorted(self.evaluator.extract_vars(expr)))
 
     def test_multiple_interleaved_vars_extraction(self):
-        expr = '{{ Why the ctx(foobar) are you so ctx(fu).bar serious? }}'
+        expr = "{{ Why the ctx(foobar) are you so ctx(fu).bar serious? }}"
 
-        expected_vars = [
-            'ctx(foobar)',
-            'ctx(fu).bar'
-        ]
+        expected_vars = ["ctx(foobar)", "ctx(fu).bar"]
 
-        self.assertListEqual(
-            expected_vars,
-            sorted(self.evaluator.extract_vars(expr))
-        )
+        self.assertListEqual(expected_vars, sorted(self.evaluator.extract_vars(expr)))

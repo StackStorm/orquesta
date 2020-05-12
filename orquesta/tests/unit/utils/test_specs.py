@@ -20,13 +20,12 @@ from orquesta.utils import specs as spec_util
 
 
 class SpecsUtilTest(test_base.WorkflowSpecTest):
-
     def setUp(self):
         super(SpecsUtilTest, self).setUp()
         self.spec_module = spec_loader.get_spec_module(self.spec_module_name)
 
     def test_convert_wf_def_dict_to_spec(self):
-        wf_name = 'basic'
+        wf_name = "basic"
         wf_def = self.get_wf_def(wf_name)
 
         self.assertIsInstance(wf_def, dict)
@@ -38,7 +37,7 @@ class SpecsUtilTest(test_base.WorkflowSpecTest):
         self.assertDictEqual(wf_def[wf_name], wf_spec.spec)
 
     def test_convert_wf_def_yaml_to_spec(self):
-        wf_name = 'basic'
+        wf_name = "basic"
         wf_def = self.get_wf_def(wf_name, raw=True)
 
         self.assertIsInstance(wf_def, str)
@@ -50,57 +49,32 @@ class SpecsUtilTest(test_base.WorkflowSpecTest):
         self.assertDictEqual(yaml.safe_load(wf_def)[wf_name], wf_spec.spec)
 
     def test_bad_wf_def_none(self):
-        self.assertRaises(
-            ValueError,
-            spec_util.instantiate,
-            self.spec_module_name,
-            None
-        )
+        self.assertRaises(ValueError, spec_util.instantiate, self.spec_module_name, None)
 
     def test_bad_wf_def_empty(self):
-        self.assertRaises(
-            ValueError,
-            spec_util.instantiate,
-            self.spec_module_name,
-            dict()
-        )
+        self.assertRaises(ValueError, spec_util.instantiate, self.spec_module_name, dict())
 
     def test_bad_wf_def_not_yaml(self):
-        self.assertRaises(
-            ValueError,
-            spec_util.instantiate,
-            self.spec_module_name,
-            'foobar'
-        )
+        self.assertRaises(ValueError, spec_util.instantiate, self.spec_module_name, "foobar")
 
     def test_bad_wf_def_without_version(self):
-        wf_name = 'basic'
+        wf_name = "basic"
         wf_def = self.get_wf_def(wf_name)
-        wf_def.pop('version')
+        wf_def.pop("version")
 
-        self.assertIsNone(wf_def.get('version'))
+        self.assertIsNone(wf_def.get("version"))
 
-        self.assertRaises(
-            ValueError,
-            spec_util.instantiate,
-            self.spec_module_name,
-            wf_def
-        )
+        self.assertRaises(ValueError, spec_util.instantiate, self.spec_module_name, wf_def)
 
     def test_bad_wf_def_unsupported_version(self):
-        wf_name = 'basic'
+        wf_name = "basic"
         wf_def = self.get_wf_def(wf_name)
-        wf_def['version'] = 99.0
+        wf_def["version"] = 99.0
 
-        self.assertRaises(
-            ValueError,
-            spec_util.instantiate,
-            self.spec_module_name,
-            wf_def
-        )
+        self.assertRaises(ValueError, spec_util.instantiate, self.spec_module_name, wf_def)
 
     def test_deserialize(self):
-        wf_name = 'basic'
+        wf_name = "basic"
         wf_def = self.get_wf_def(wf_name)
         wf_spec_1 = spec_util.instantiate(self.spec_module_name, wf_def)
         wf_spec_2 = spec_util.deserialize(wf_spec_1.serialize())

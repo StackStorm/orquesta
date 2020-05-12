@@ -21,22 +21,21 @@ from orquesta.utils import strings as str_util
 
 
 class StringsTest(unittest.TestCase):
-
     def test_unescape(self):
-        self.assertEqual(str_util.unescape('foobar'), 'foobar')
-        self.assertEqual(str_util.unescape('\\\\foobar'), '\\foobar')
+        self.assertEqual(str_util.unescape("foobar"), "foobar")
+        self.assertEqual(str_util.unescape("\\\\foobar"), "\\foobar")
 
     def test_unicode(self):
         self.assertEqual(str_util.unicode(123), 123)
-        self.assertEqual(str_util.unicode('foobar'), 'foobar')
-        self.assertEqual(str_util.unicode(unicode('fubar') if six.PY2 else str('fubar')), 'fubar')
-        self.assertEqual(str_util.unicode('鐵甲奇俠'), '鐵甲奇俠')
-        self.assertEqual(str_util.unicode('\xe9\x90\xb5\xe7\x94\xb2'), '\xe9\x90\xb5\xe7\x94\xb2')
+        self.assertEqual(str_util.unicode("foobar"), "foobar")
+        self.assertEqual(str_util.unicode(u"fubar" if six.PY2 else str("fubar")), "fubar")
+        self.assertEqual(str_util.unicode("鐵甲奇俠"), "鐵甲奇俠")
+        self.assertEqual(str_util.unicode("\xe9\x90\xb5\xe7\x94\xb2"), "\xe9\x90\xb5\xe7\x94\xb2")
 
     def test_unicode_force(self):
-        self.assertEqual(str_util.unicode(123, force=True), '123')
-        self.assertEqual(str_util.unicode(123.45, force=True), '123.45')
-        self.assertEqual(str_util.unicode(True, force=True), 'True')
-        self.assertEqual(str_util.unicode(None, force=True), 'None')
-        self.assertEqual(str_util.unicode([1, 2, 3], force=True), '[1, 2, 3]')
-        self.assertEqual(str_util.unicode({'k': 'v'}, force=True), "{'k': 'v'}")
+        self.assertEqual(str_util.unicode(123, force=True), "123")
+        self.assertEqual(str_util.unicode(123.45, force=True), "123.45")
+        self.assertEqual(str_util.unicode(True, force=True), "True")
+        self.assertEqual(str_util.unicode(None, force=True), "None")
+        self.assertEqual(str_util.unicode([1, 2, 3], force=True), "[1, 2, 3]")
+        self.assertEqual(str_util.unicode({"k": "v"}, force=True), "{'k': 'v'}")

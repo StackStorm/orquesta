@@ -18,9 +18,8 @@ from orquesta.utils import plugin as plugin_util
 
 
 class WorkflowComposerTest(native_comp_test_base.OrchestraWorkflowComposerTest):
-
     def test_get_composer(self):
         self.assertEqual(
-            plugin_util.get_module('orquesta.composers', self.spec_module_name),
-            native_comp.WorkflowComposer
+            plugin_util.get_module("orquesta.composers", self.spec_module_name),
+            native_comp.WorkflowComposer,
         )

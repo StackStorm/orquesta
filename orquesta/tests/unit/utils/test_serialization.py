@@ -18,24 +18,21 @@ from orquesta.utils import date as date_util
 from orquesta.utils import jsonify as json_util
 
 
-MOCK_DATETIME_STR = '2015-01-01T12:00:01.000000+01:00'
+MOCK_DATETIME_STR = "2015-01-01T12:00:01.000000+01:00"
 
 MOCK_JSON = {
-    'k1': 'abc',
-    'k2': 123,
-    'k3': False,
-    'k4': MOCK_DATETIME_STR,
-    'k5': [1, 3, 5, 7, 9],
-    'k6': {'a': 1, 'b': 2, 'c': 3}
+    "k1": "abc",
+    "k2": 123,
+    "k3": False,
+    "k4": MOCK_DATETIME_STR,
+    "k5": [1, 3, 5, 7, 9],
+    "k6": {"a": 1, "b": 2, "c": 3},
 }
 
-MOCK_JSON_UNSERIALIZEABLE = {
-    'k1': object()
-}
+MOCK_JSON_UNSERIALIZEABLE = {"k1": object()}
 
 
 class FakeModel(object):
-
     def __init__(self, *args, **kwargs):
         self.k1 = None
         self.k2 = None
@@ -46,15 +43,14 @@ class FakeModel(object):
 
 
 class SerializationTest(unittest.TestCase):
-
     def test_serialize(self):
         obj = FakeModel()
-        obj.k1 = MOCK_JSON['k1']
-        obj.k2 = MOCK_JSON['k2']
-        obj.k3 = MOCK_JSON['k3']
-        obj.k4 = MOCK_JSON['k4']
-        obj.k5 = MOCK_JSON['k5']
-        obj.k6 = MOCK_JSON['k6']
+        obj.k1 = MOCK_JSON["k1"]
+        obj.k2 = MOCK_JSON["k2"]
+        obj.k3 = MOCK_JSON["k3"]
+        obj.k4 = MOCK_JSON["k4"]
+        obj.k5 = MOCK_JSON["k5"]
+        obj.k6 = MOCK_JSON["k6"]
 
         doc = json_util.serialize(obj)
 
@@ -62,7 +58,7 @@ class SerializationTest(unittest.TestCase):
 
     def test_serialize_unsupported_type(self):
         obj = FakeModel()
-        obj.k1 = MOCK_JSON_UNSERIALIZEABLE['k1']
+        obj.k1 = MOCK_JSON_UNSERIALIZEABLE["k1"]
 
         doc = json_util.serialize(obj)
 
@@ -71,12 +67,12 @@ class SerializationTest(unittest.TestCase):
     def test_deserialize(self):
         obj = json_util.deserialize(FakeModel, MOCK_JSON)
 
-        self.assertEqual(MOCK_JSON['k1'], obj.k1)
-        self.assertEqual(MOCK_JSON['k2'], obj.k2)
-        self.assertEqual(MOCK_JSON['k3'], obj.k3)
-        self.assertEqual(date_util.parse(MOCK_JSON['k4']), obj.k4)
-        self.assertListEqual(MOCK_JSON['k5'], obj.k5)
-        self.assertDictEqual(MOCK_JSON['k6'], obj.k6)
+        self.assertEqual(MOCK_JSON["k1"], obj.k1)
+        self.assertEqual(MOCK_JSON["k2"], obj.k2)
+        self.assertEqual(MOCK_JSON["k3"], obj.k3)
+        self.assertEqual(date_util.parse(MOCK_JSON["k4"]), obj.k4)
+        self.assertListEqual(MOCK_JSON["k5"], obj.k5)
+        self.assertDictEqual(MOCK_JSON["k6"], obj.k6)
 
     def test_deserialize_unsupported_type(self):
         obj = json_util.deserialize(FakeModel, MOCK_JSON_UNSERIALIZEABLE)

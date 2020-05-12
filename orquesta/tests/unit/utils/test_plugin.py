@@ -23,28 +23,18 @@ class FakePlugin(object):
 
 
 class PluginFactoryTest(unittest.TestCase):
-
     def test_get_instance(self):
-        self.assertIsInstance(
-            plugin_util.get_instance('orquesta.tests', 'fake'),
-            FakePlugin)
+        self.assertIsInstance(plugin_util.get_instance("orquesta.tests", "fake"), FakePlugin)
 
     def test_get_instance_failed(self):
         self.assertRaises(
-            exc.PluginFactoryError,
-            plugin_util.get_instance,
-            'orquesta.tests',
-            'foobar')
+            exc.PluginFactoryError, plugin_util.get_instance, "orquesta.tests", "foobar"
+        )
 
     def test_get_module(self):
-        self.assertEqual(
-            plugin_util.get_module('orquesta.tests', 'fake'),
-            FakePlugin
-        )
+        self.assertEqual(plugin_util.get_module("orquesta.tests", "fake"), FakePlugin)
 
     def test_get_module_failed(self):
         self.assertRaises(
-            exc.PluginFactoryError,
-            plugin_util.get_module,
-            'orquesta.tests',
-            'foobar')
+            exc.PluginFactoryError, plugin_util.get_module, "orquesta.tests", "foobar"
+        )

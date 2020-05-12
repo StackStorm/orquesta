@@ -18,56 +18,52 @@ from orquesta.utils import plugin as plugin_util
 
 
 class JinjaValidationTest(test_base.ExpressionEvaluatorTest):
-
     @classmethod
     def setUpClass(cls):
-        cls.language = 'jinja'
+        cls.language = "jinja"
         super(JinjaValidationTest, cls).setUpClass()
 
     def test_get_evaluator(self):
         self.assertEqual(
-            plugin_util.get_module(
-                'orquesta.expressions.evaluators',
-                self.language
-            ),
-            jinja_expr.JinjaEvaluator
+            plugin_util.get_module("orquesta.expressions.evaluators", self.language),
+            jinja_expr.JinjaEvaluator,
         )
 
     def test_basic_validate(self):
-        self.assertListEqual([], self.evaluator.validate('{{ 1 }}'))
-        self.assertListEqual([], self.evaluator.validate('{{ abc }}'))
-        self.assertListEqual([], self.evaluator.validate('{{ 1 + 2 }}'))
-        self.assertListEqual([], self.evaluator.validate('{{ ctx().foo }}'))
+        self.assertListEqual([], self.evaluator.validate("{{ 1 }}"))
+        self.assertListEqual([], self.evaluator.validate("{{ abc }}"))
+        self.assertListEqual([], self.evaluator.validate("{{ 1 + 2 }}"))
+        self.assertListEqual([], self.evaluator.validate("{{ ctx().foo }}"))
         self.assertListEqual([], self.evaluator.validate('{{ ctx("foo") }}'))
         self.assertListEqual([], self.evaluator.validate('{{ ctx().a1 + ctx("a2") }}'))
 
     def test_parse_error(self):
-        expr = '{{ {{ ctx().foo }} }}'
+        expr = "{{ {{ ctx().foo }} }}"
         errors = self.evaluator.validate(expr)
 
         self.assertEqual(2, len(errors))
-        self.assertIn('expected token \':\', got \'}\'', errors[0]['message'])
-        self.assertIn('unexpected end of template', errors[1]['message'])
+        self.assertIn("expected token ':', got '}'", errors[0]["message"])
+        self.assertIn("unexpected end of template", errors[1]["message"])
 
     def test_multiple_errors(self):
-        expr = '{{ 1 +/ 2 }} and {{ * }}'
+        expr = "{{ 1 +/ 2 }} and {{ * }}"
         errors = self.evaluator.validate(expr)
 
         self.assertEqual(3, len(errors))
-        self.assertIn('unexpected', errors[0]['message'])
-        self.assertIn('unexpected', errors[1]['message'])
-        self.assertIn('unexpected', errors[2]['message'])
+        self.assertIn("unexpected", errors[0]["message"])
+        self.assertIn("unexpected", errors[1]["message"])
+        self.assertIn("unexpected", errors[2]["message"])
 
     def test_block_error(self):
-        expr = '{% for i in ctx().x %}{{ i }}{% foobar %}'
+        expr = "{% for i in ctx().x %}{{ i }}{% foobar %}"
         errors = self.evaluator.validate(expr)
 
         self.assertEqual(1, len(errors))
-        self.assertIn('unknown tag', errors[0]['message'])
+        self.assertIn("unknown tag", errors[0]["message"])
 
     def test_missing_braces_error(self):
-        expr = '{% for i in ctx().x %}{{ i }}{{ foobar %}'
+        expr = "{% for i in ctx().x %}{{ i }}{{ foobar %}"
         errors = self.evaluator.validate(expr)
 
         self.assertEqual(1, len(errors))
-        self.assertIn('unexpected \'}\'', errors[0]['message'])
+        self.assertIn("unexpected '}'", errors[0]["message"])

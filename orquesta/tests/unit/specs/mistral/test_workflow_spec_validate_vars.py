@@ -16,7 +16,6 @@ from orquesta.tests.unit.specs.mistral import base as test_base
 
 
 class WorkflowSpecVarsValidationTest(test_base.MistralWorkflowSpecTest):
-
     def test_bad_vars_yaql(self):
         wf_def = """
             version: '2.0'
@@ -36,28 +35,28 @@ class WorkflowSpecVarsValidationTest(test_base.MistralWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().a %>',
-                    'message': 'Variable "a" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars'
+                    "type": "yaql",
+                    "expression": "<% ctx().a %>",
+                    "message": 'Variable "a" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "sequential.vars",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().x + ctx().y + ctx().z %>',
-                    'message': 'Variable "x" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars'
+                    "type": "yaql",
+                    "expression": "<% ctx().x + ctx().y + ctx().z %>",
+                    "message": 'Variable "x" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "sequential.vars",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().x + ctx().y + ctx().z %>',
-                    'message': 'Variable "z" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars'
-                }
+                    "type": "yaql",
+                    "expression": "<% ctx().x + ctx().y + ctx().z %>",
+                    "message": 'Variable "z" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "sequential.vars",
+                },
             ]
         }
 
@@ -82,28 +81,28 @@ class WorkflowSpecVarsValidationTest(test_base.MistralWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'jinja',
-                    'expression': '{{ ctx().a }}',
-                    'message': 'Variable "a" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars'
+                    "type": "jinja",
+                    "expression": "{{ ctx().a }}",
+                    "message": 'Variable "a" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "sequential.vars",
                 },
                 {
-                    'type': 'jinja',
-                    'expression': '{{ ctx().x + ctx().y + ctx().z }}',
-                    'message': 'Variable "x" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars'
+                    "type": "jinja",
+                    "expression": "{{ ctx().x + ctx().y + ctx().z }}",
+                    "message": 'Variable "x" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "sequential.vars",
                 },
                 {
-                    'type': 'jinja',
-                    'expression': '{{ ctx().x + ctx().y + ctx().z }}',
-                    'message': 'Variable "z" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars'
-                }
+                    "type": "jinja",
+                    "expression": "{{ ctx().x + ctx().y + ctx().z }}",
+                    "message": 'Variable "z" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "sequential.vars",
+                },
             ]
         }
 
@@ -128,28 +127,28 @@ class WorkflowSpecVarsValidationTest(test_base.MistralWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'jinja',
-                    'expression': '{{ ctx().a }}',
-                    'message': 'Variable "a" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars'
+                    "type": "jinja",
+                    "expression": "{{ ctx().a }}",
+                    "message": 'Variable "a" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "sequential.vars",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().x + ctx().y + ctx().z %>',
-                    'message': 'Variable "x" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars'
+                    "type": "yaql",
+                    "expression": "<% ctx().x + ctx().y + ctx().z %>",
+                    "message": 'Variable "x" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "sequential.vars",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().x + ctx().y + ctx().z %>',
-                    'message': 'Variable "z" is referenced before assignment.',
-                    'schema_path': 'properties.vars',
-                    'spec_path': 'sequential.vars'
-                }
+                    "type": "yaql",
+                    "expression": "<% ctx().x + ctx().y + ctx().z %>",
+                    "message": 'Variable "z" is referenced before assignment.',
+                    "schema_path": "properties.vars",
+                    "spec_path": "sequential.vars",
+                },
             ]
         }
 
@@ -179,13 +178,13 @@ class WorkflowSpecVarsValidationTest(test_base.MistralWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().foo %>',
-                    'message': 'Variable "foo" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.properties.task2.properties.input',
-                    'spec_path': 'sequential.tasks.task2.input'
+                    "type": "yaql",
+                    "expression": "<% ctx().foo %>",
+                    "message": 'Variable "foo" is referenced before assignment.',
+                    "schema_path": "properties.tasks.properties.task2.properties.input",
+                    "spec_path": "sequential.tasks.task2.input",
                 }
             ]
         }
@@ -231,21 +230,21 @@ class WorkflowSpecVarsValidationTest(test_base.MistralWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().foo + ctx().bar %>',
-                    'message': 'Variable "bar" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.properties.task2.properties.input',
-                    'spec_path': 'sequential.tasks.task2.input'
+                    "type": "yaql",
+                    "expression": "<% ctx().foo + ctx().bar %>",
+                    "message": 'Variable "bar" is referenced before assignment.',
+                    "schema_path": "properties.tasks.properties.task2.properties.input",
+                    "spec_path": "sequential.tasks.task2.input",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().foo + ctx().bar %>',
-                    'message': 'Variable "foo" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.properties.task4.properties.input',
-                    'spec_path': 'sequential.tasks.task4.input'
-                }
+                    "type": "yaql",
+                    "expression": "<% ctx().foo + ctx().bar %>",
+                    "message": 'Variable "foo" is referenced before assignment.',
+                    "schema_path": "properties.tasks.properties.task4.properties.input",
+                    "spec_path": "sequential.tasks.task4.input",
+                },
             ]
         }
 
@@ -299,28 +298,28 @@ class WorkflowSpecVarsValidationTest(test_base.MistralWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'context': [
+            "context": [
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().foo + ctx().bar %>',
-                    'message': 'Variable "bar" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.properties.task2.properties.input',
-                    'spec_path': 'sequential.tasks.task2.input'
+                    "type": "yaql",
+                    "expression": "<% ctx().foo + ctx().bar %>",
+                    "message": 'Variable "bar" is referenced before assignment.',
+                    "schema_path": "properties.tasks.properties.task2.properties.input",
+                    "spec_path": "sequential.tasks.task2.input",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().foo + ctx().bar %>',
-                    'message': 'Variable "foo" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.properties.task4.properties.input',
-                    'spec_path': 'sequential.tasks.task4.input'
+                    "type": "yaql",
+                    "expression": "<% ctx().foo + ctx().bar %>",
+                    "message": 'Variable "foo" is referenced before assignment.',
+                    "schema_path": "properties.tasks.properties.task4.properties.input",
+                    "spec_path": "sequential.tasks.task4.input",
                 },
                 {
-                    'type': 'yaql',
-                    'expression': '<% ctx().foo %>',
-                    'message': 'Variable "foo" is referenced before assignment.',
-                    'schema_path': 'properties.tasks.properties.task5.properties.input',
-                    'spec_path': 'sequential.tasks.task5.input'
-                }
+                    "type": "yaql",
+                    "expression": "<% ctx().foo %>",
+                    "message": 'Variable "foo" is referenced before assignment.',
+                    "schema_path": "properties.tasks.properties.task5.properties.input",
+                    "spec_path": "sequential.tasks.task5.input",
+                },
             ]
         }
 

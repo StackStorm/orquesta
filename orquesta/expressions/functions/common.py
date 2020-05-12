@@ -23,7 +23,7 @@ def json_(s):
         return s
 
     if not isinstance(s, six.string_types):
-        raise TypeError('Given object is not typeof string.')
+        raise TypeError("Given object is not typeof string.")
 
     return json.loads(s)
 
@@ -34,19 +34,19 @@ def zip_(*args, **kwargs):
     if len(args) == 1:
         return args[0]
 
-    pad_with = kwargs.pop('pad', None)
+    pad_with = kwargs.pop("pad", None)
 
     return list(six.moves.zip_longest(*args, fillvalue=pad_with))
 
 
 def ctx_(context, key=None):
     if key:
-        if key not in context['__vars']:
+        if key not in context["__vars"]:
             raise exc.VariableUndefinedError(key)
 
-        if key in context['__vars'] and key.startswith('__'):
+        if key in context["__vars"] and key.startswith("__"):
             raise exc.VariableInaccessibleError(key)
 
-        return context['__vars'][key]
+        return context["__vars"][key]
     else:
-        return {k: v for k, v in six.iteritems(context['__vars']) if not k.startswith('__')}
+        return {k: v for k, v in six.iteritems(context["__vars"]) if not k.startswith("__")}

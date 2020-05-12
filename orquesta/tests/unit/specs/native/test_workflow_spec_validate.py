@@ -16,7 +16,6 @@ from orquesta.tests.unit.specs.native import base as test_base
 
 
 class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
-
     def test_success(self):
         wf_def = """
             version: 1.0
@@ -123,14 +122,14 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': "['foobar'] is not of type 'string'",
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.next.items.properties.when.type'
+                    "message": "['foobar'] is not of type 'string'",
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.next.items.properties.when.type"
                     ),
-                    'spec_path': 'tasks.task1.next[0].when'
+                    "spec_path": "tasks.task1.next[0].when",
                 }
             ]
         }
@@ -155,14 +154,14 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': "['foobar'] is not valid under any of the given schemas",
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.next.items.properties.publish.oneOf'
+                    "message": "['foobar'] is not valid under any of the given schemas",
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.next.items.properties.publish.oneOf"
                     ),
-                    'spec_path': 'tasks.task1.next[0].publish'
+                    "spec_path": "tasks.task1.next[0].publish",
                 }
             ]
         }
@@ -186,14 +185,14 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': "{'task2': 'foobar'} is not valid under any of the given schemas",
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.next.items.properties.do.oneOf'
+                    "message": "{'task2': 'foobar'} is not valid under any of the given schemas",
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.next.items.properties.do.oneOf"
                     ),
-                    'spec_path': 'tasks.task1.next[0].do'
+                    "spec_path": "tasks.task1.next[0].do",
                 }
             ]
         }
@@ -209,11 +208,11 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': '\'tasks\' is a required property',
-                    'schema_path': 'required',
-                    'spec_path': None
+                    "message": "'tasks' is a required property",
+                    "schema_path": "required",
+                    "spec_path": None,
                 }
             ]
         }
@@ -230,11 +229,11 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'syntax': [
+            "syntax": [
                 {
-                    'message': '{} does not have enough properties',
-                    'schema_path': 'properties.tasks.minProperties',
-                    'spec_path': 'tasks'
+                    "message": "{} does not have enough properties",
+                    "schema_path": "properties.tasks.minProperties",
+                    "spec_path": "tasks",
                 }
             ]
         }
@@ -268,43 +267,42 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'expressions': [
+            "expressions": [
                 {
-                    'spec_path': 'tasks.task2.next[0].when',
-                    'expression': '<% <% succeeded() %>',
-                    'message': (
-                        'Parse error: unexpected \'<\' at position 0 of '
-                        'expression \'<% succeeded()\''
+                    "spec_path": "tasks.task2.next[0].when",
+                    "expression": "<% <% succeeded() %>",
+                    "message": (
+                        "Parse error: unexpected '<' at position 0 of "
+                        "expression '<% succeeded()'"
                     ),
-                    'type': 'yaql',
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.next.items.properties.when'
-                    )
+                    "type": "yaql",
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.next.items.properties.when"
+                    ),
                 }
             ],
-            'context': [
+            "context": [
                 {
-                    'spec_path': 'tasks.task1.input',
-                    'expression': '<% ctx().foobar %>',
-                    'message': 'Variable "foobar" is referenced before assignment.',
-                    'type': 'yaql',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$.properties.input'
+                    "spec_path": "tasks.task1.input",
+                    "expression": "<% ctx().foobar %>",
+                    "message": 'Variable "foobar" is referenced before assignment.',
+                    "type": "yaql",
+                    "schema_path": "properties.tasks.patternProperties.^\\w+$.properties.input",
                 }
             ],
-            'syntax': [
+            "syntax": [
                 {
-                    'spec_path': 'tasks.task2.input',
-                    'message': (
-                        '[{\'cmd\': \'echo <% ctx().macro %>\'}] is '
-                        'not valid under any of the given schemas'
+                    "spec_path": "tasks.task2.input",
+                    "message": (
+                        "[{'cmd': 'echo <% ctx().macro %>'}] is "
+                        "not valid under any of the given schemas"
                     ),
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.input.oneOf'
-                    )
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$." "properties.input.oneOf"
+                    ),
                 }
-            ]
+            ],
         }
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
@@ -323,14 +321,14 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'semantics': [
+            "semantics": [
                 {
-                    'message': 'The task "task2" is not defined.',
-                    'spec_path': 'tasks.task1.next[0].do',
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.next.items.properties.do'
-                    )
+                    "message": 'The task "task2" is not defined.',
+                    "spec_path": "tasks.task1.next[0].do",
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.next.items.properties.do"
+                    ),
                 }
             ]
         }
@@ -353,11 +351,11 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'semantics': [
+            "semantics": [
                 {
-                    'message': 'The task name "noop" is reserved with special function.',
-                    'spec_path': 'tasks.noop',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$'
+                    "message": 'The task name "noop" is reserved with special function.',
+                    "spec_path": "tasks.noop",
+                    "schema_path": "properties.tasks.patternProperties.^\\w+$",
                 }
             ]
         }
@@ -410,16 +408,16 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         expected_errors = {
-            'semantics': [
+            "semantics": [
                 {
-                    'message': (
+                    "message": (
                         'The join task "task5" is unreachable. A join task is determined to be '
-                        'unreachable if there are nested forks from multi-referenced tasks '
-                        'that join on the said task. This is ambiguous to the workflow engine '
-                        'because it does not know at which level should the join occurs.'
+                        "unreachable if there are nested forks from multi-referenced tasks "
+                        "that join on the said task. This is ambiguous to the workflow engine "
+                        "because it does not know at which level should the join occurs."
                     ),
-                    'spec_path': 'tasks.task5',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$'
+                    "spec_path": "tasks.task5",
+                    "schema_path": "properties.tasks.patternProperties.^\\w+$",
                 }
             ]
         }

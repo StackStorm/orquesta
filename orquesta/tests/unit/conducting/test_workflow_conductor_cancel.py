@@ -19,7 +19,6 @@ from orquesta.tests.unit import base as test_base
 
 
 class WorkflowConductorCancelTest(test_base.WorkflowConductorTest):
-
     def test_workflow_output(self):
         wf_def = """
         version: 1.0
@@ -33,10 +32,7 @@ class WorkflowConductorCancelTest(test_base.WorkflowConductorTest):
             action: core.noop
         """
 
-        expected_output = {
-            'x': 123,
-            'y': 123
-        }
+        expected_output = {"x": 123, "y": 123}
 
         expected_errors = []
 
@@ -46,11 +42,11 @@ class WorkflowConductorCancelTest(test_base.WorkflowConductorTest):
         # Run the workflow and keep it running.
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_status(statuses.RUNNING)
-        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
+        self.forward_task_statuses(conductor, "task1", [statuses.RUNNING])
 
         # Cancels the workflow and complete task1.
         conductor.request_workflow_status(statuses.CANCELING)
-        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, "task1", [statuses.SUCCEEDED])
 
         # Render workflow output and check workflow status and output.
         conductor.render_workflow_output()
@@ -72,19 +68,16 @@ class WorkflowConductorCancelTest(test_base.WorkflowConductorTest):
             action: core.noop
         """
 
-        expected_output = {
-            'x': 123,
-            'y': 123
-        }
+        expected_output = {"x": 123, "y": 123}
 
         expected_errors = [
             {
-                'type': 'error',
-                'message': (
-                    'YaqlEvaluationException: Unable to evaluate expression '
-                    '\'<% ctx().y.value %>\'. NoFunctionRegisteredException: '
+                "type": "error",
+                "message": (
+                    "YaqlEvaluationException: Unable to evaluate expression "
+                    "'<% ctx().y.value %>'. NoFunctionRegisteredException: "
                     'Unknown function "#property#value"'
-                )
+                ),
             }
         ]
 
@@ -94,11 +87,11 @@ class WorkflowConductorCancelTest(test_base.WorkflowConductorTest):
         # Run the workflow and keep it running.
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_status(statuses.RUNNING)
-        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
+        self.forward_task_statuses(conductor, "task1", [statuses.RUNNING])
 
         # Cancels the workflow and complete task1.
         conductor.request_workflow_status(statuses.CANCELING)
-        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, "task1", [statuses.SUCCEEDED])
 
         # Check workflow status is not changed to failed given the output error.
         conductor.render_workflow_output()
@@ -121,7 +114,7 @@ class WorkflowConductorCancelTest(test_base.WorkflowConductorTest):
         # Run the workflow and keep it running.
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_status(statuses.RUNNING)
-        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
+        self.forward_task_statuses(conductor, "task1", [statuses.RUNNING])
 
         # Cancels the workflow and complete task1.
         conductor.request_workflow_status(statuses.CANCELING)
@@ -134,5 +127,5 @@ class WorkflowConductorCancelTest(test_base.WorkflowConductorTest):
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELING)
 
         # Complete task1 and check workflow status.
-        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, "task1", [statuses.SUCCEEDED])
         self.assertEqual(conductor.get_workflow_status(), statuses.CANCELED)

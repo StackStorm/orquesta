@@ -21,7 +21,6 @@ from orquesta.utils import jsonify as json_util
 
 
 class WorkflowConductorExtendedTest(test_base.WorkflowConductorTest):
-
     def test_join(self):
         wf_def = """
         version: 1.0
@@ -65,36 +64,36 @@ class WorkflowConductorExtendedTest(test_base.WorkflowConductorTest):
         conductor.request_workflow_status(statuses.RUNNING)
 
         # Conduct task1 and task2 then check context and next tasks.
-        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
-        self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING])
+        self.forward_task_statuses(conductor, "task1", [statuses.RUNNING])
+        self.forward_task_statuses(conductor, "task2", [statuses.RUNNING])
         self.assert_next_task(conductor, has_next_task=False)
-        self.assertDictEqual(conductor.get_task_transition_contexts('task1', 0), {})
+        self.assertDictEqual(conductor.get_task_transition_contexts("task1", 0), {})
 
         # Succeed task1 and check context.
-        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
-        expected_task_ctx = {'var1': 'xyz'}
-        expected_txsn_ctx = {'task3__t0': expected_task_ctx}
-        self.assertDictEqual(conductor.get_task_transition_contexts('task1', 0), expected_txsn_ctx)
+        self.forward_task_statuses(conductor, "task1", [statuses.SUCCEEDED])
+        expected_task_ctx = {"var1": "xyz"}
+        expected_txsn_ctx = {"task3__t0": expected_task_ctx}
+        self.assertDictEqual(conductor.get_task_transition_contexts("task1", 0), expected_txsn_ctx)
         self.assert_next_task(conductor, has_next_task=False)
 
         # Conduct task2 and check next tasks and context.
-        self.forward_task_statuses(conductor, 'task2', [statuses.SUCCEEDED])
-        expected_task_ctx = {'var1': 'xyz', 'var2': 123}
-        expected_txsn_ctx = {'task3__t0': expected_task_ctx}
-        self.assertDictEqual(conductor.get_task_transition_contexts('task2', 0), expected_txsn_ctx)
-        self.assert_next_task(conductor, 'task3', expected_task_ctx)
+        self.forward_task_statuses(conductor, "task2", [statuses.SUCCEEDED])
+        expected_task_ctx = {"var1": "xyz", "var2": 123}
+        expected_txsn_ctx = {"task3__t0": expected_task_ctx}
+        self.assertDictEqual(conductor.get_task_transition_contexts("task2", 0), expected_txsn_ctx)
+        self.assert_next_task(conductor, "task3", expected_task_ctx)
 
         # Conduct task3 and check merged context.
-        self.forward_task_statuses(conductor, 'task3', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, "task3", [statuses.RUNNING, statuses.SUCCEEDED])
         expected_task_init_ctx = expected_task_ctx
-        self.assertDictEqual(conductor.get_task_initial_context('task3', 0), expected_task_init_ctx)
-        expected_task_ctx = dict_util.merge_dicts(expected_task_ctx, {'var3': True})
-        expected_txsn_ctx = {'task4__t0': expected_task_ctx}
-        self.assertDictEqual(conductor.get_task_transition_contexts('task3', 0), expected_txsn_ctx)
-        self.assert_next_task(conductor, 'task4', expected_task_ctx)
+        self.assertDictEqual(conductor.get_task_initial_context("task3", 0), expected_task_init_ctx)
+        expected_task_ctx = dict_util.merge_dicts(expected_task_ctx, {"var3": True})
+        expected_txsn_ctx = {"task4__t0": expected_task_ctx}
+        self.assertDictEqual(conductor.get_task_transition_contexts("task3", 0), expected_txsn_ctx)
+        self.assert_next_task(conductor, "task4", expected_task_ctx)
 
         # Conduct task4 and check final workflow status.
-        self.forward_task_statuses(conductor, 'task4', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, "task4", [statuses.RUNNING, statuses.SUCCEEDED])
         self.assert_next_task(conductor, has_next_task=False)
 
         # Check workflow status and context.
@@ -139,33 +138,33 @@ class WorkflowConductorExtendedTest(test_base.WorkflowConductorTest):
         conductor.request_workflow_status(statuses.RUNNING)
 
         # Conduct task1 and task2 then check context and next tasks.
-        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
-        self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING])
+        self.forward_task_statuses(conductor, "task1", [statuses.RUNNING])
+        self.forward_task_statuses(conductor, "task2", [statuses.RUNNING])
         self.assert_next_task(conductor, has_next_task=False)
-        self.assertDictEqual(conductor.get_task_transition_contexts('task1', 0), {})
+        self.assertDictEqual(conductor.get_task_transition_contexts("task1", 0), {})
 
         # Succeed task1 and check context.
-        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, "task1", [statuses.SUCCEEDED])
         expected_init_ctx = dict()
-        expected_txsn_ctx = {'task3__t0': expected_init_ctx}
-        self.assertDictEqual(conductor.get_task_transition_contexts('task1', 0), expected_txsn_ctx)
+        expected_txsn_ctx = {"task3__t0": expected_init_ctx}
+        self.assertDictEqual(conductor.get_task_transition_contexts("task1", 0), expected_txsn_ctx)
         self.assert_next_task(conductor, has_next_task=False)
 
         # Conduct task2 and check next tasks and context.
-        self.forward_task_statuses(conductor, 'task2', [statuses.SUCCEEDED])
-        expected_txsn_ctx = {'task3__t0': expected_init_ctx}
-        self.assertDictEqual(conductor.get_task_transition_contexts('task2', 0), expected_txsn_ctx)
-        self.assert_next_task(conductor, 'task3', expected_init_ctx)
+        self.forward_task_statuses(conductor, "task2", [statuses.SUCCEEDED])
+        expected_txsn_ctx = {"task3__t0": expected_init_ctx}
+        self.assertDictEqual(conductor.get_task_transition_contexts("task2", 0), expected_txsn_ctx)
+        self.assert_next_task(conductor, "task3", expected_init_ctx)
 
         # Conduct task3 and check merged context.
-        self.forward_task_statuses(conductor, 'task3', [statuses.RUNNING, statuses.SUCCEEDED])
-        self.assertDictEqual(conductor.get_task_initial_context('task3', 0), expected_init_ctx)
-        expected_txsn_ctx = {'task4__t0': expected_init_ctx}
-        self.assertDictEqual(conductor.get_task_transition_contexts('task3', 0), expected_txsn_ctx)
-        self.assert_next_task(conductor, 'task4', expected_init_ctx)
+        self.forward_task_statuses(conductor, "task3", [statuses.RUNNING, statuses.SUCCEEDED])
+        self.assertDictEqual(conductor.get_task_initial_context("task3", 0), expected_init_ctx)
+        expected_txsn_ctx = {"task4__t0": expected_init_ctx}
+        self.assertDictEqual(conductor.get_task_transition_contexts("task3", 0), expected_txsn_ctx)
+        self.assert_next_task(conductor, "task4", expected_init_ctx)
 
         # Conduct task4 and check final workflow status.
-        self.forward_task_statuses(conductor, 'task4', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, "task4", [statuses.RUNNING, statuses.SUCCEEDED])
         self.assert_next_task(conductor, has_next_task=False)
 
         # Check workflow status and context.
@@ -208,39 +207,39 @@ class WorkflowConductorExtendedTest(test_base.WorkflowConductorTest):
             action: core.noop
         """
 
-        inputs = {'var1': 'xyz'}
+        inputs = {"var1": "xyz"}
         spec = native_specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec, inputs=inputs)
         conductor.request_workflow_status(statuses.RUNNING)
 
         # Conduct task1 and task2 then check context and next tasks.
-        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
-        self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING])
+        self.forward_task_statuses(conductor, "task1", [statuses.RUNNING])
+        self.forward_task_statuses(conductor, "task2", [statuses.RUNNING])
         self.assert_next_task(conductor, has_next_task=False)
-        self.assertDictEqual(conductor.get_task_transition_contexts('task1', 0), {})
+        self.assertDictEqual(conductor.get_task_transition_contexts("task1", 0), {})
 
         # Succeed task1 and check context.
-        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, "task1", [statuses.SUCCEEDED])
         expected_task_ctx = json_util.deepcopy(inputs)
-        expected_txsn_ctx = {'task3__t0': expected_task_ctx}
-        self.assertDictEqual(conductor.get_task_transition_contexts('task1', 0), expected_txsn_ctx)
+        expected_txsn_ctx = {"task3__t0": expected_task_ctx}
+        self.assertDictEqual(conductor.get_task_transition_contexts("task1", 0), expected_txsn_ctx)
         self.assert_next_task(conductor, has_next_task=False)
 
         # Conduct task2 and check next tasks and context.
-        self.forward_task_statuses(conductor, 'task2', [statuses.SUCCEEDED])
-        expected_txsn_ctx = {'task3__t0': expected_task_ctx}
-        self.assertDictEqual(conductor.get_task_transition_contexts('task2', 0), expected_txsn_ctx)
-        self.assert_next_task(conductor, 'task3', expected_task_ctx)
+        self.forward_task_statuses(conductor, "task2", [statuses.SUCCEEDED])
+        expected_txsn_ctx = {"task3__t0": expected_task_ctx}
+        self.assertDictEqual(conductor.get_task_transition_contexts("task2", 0), expected_txsn_ctx)
+        self.assert_next_task(conductor, "task3", expected_task_ctx)
 
         # Conduct task3 and check merged context.
-        self.forward_task_statuses(conductor, 'task3', [statuses.RUNNING, statuses.SUCCEEDED])
-        self.assertDictEqual(conductor.get_task_initial_context('task3', 0), expected_task_ctx)
-        expected_txsn_ctx = {'task4__t0': expected_task_ctx}
-        self.assertDictEqual(conductor.get_task_transition_contexts('task3', 0), expected_txsn_ctx)
-        self.assert_next_task(conductor, 'task4', expected_task_ctx)
+        self.forward_task_statuses(conductor, "task3", [statuses.RUNNING, statuses.SUCCEEDED])
+        self.assertDictEqual(conductor.get_task_initial_context("task3", 0), expected_task_ctx)
+        expected_txsn_ctx = {"task4__t0": expected_task_ctx}
+        self.assertDictEqual(conductor.get_task_transition_contexts("task3", 0), expected_txsn_ctx)
+        self.assert_next_task(conductor, "task4", expected_task_ctx)
 
         # Conduct task4 and check final workflow status.
-        self.forward_task_statuses(conductor, 'task4', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, "task4", [statuses.RUNNING, statuses.SUCCEEDED])
         self.assert_next_task(conductor, has_next_task=False)
 
         # Check workflow status and context.
@@ -286,60 +285,57 @@ class WorkflowConductorExtendedTest(test_base.WorkflowConductorTest):
           - var2: <% ctx().var2 %>
         """
 
-        expected_output = {
-            'var1': 'xyz',
-            'var2': 123
-        }
+        expected_output = {"var1": "xyz", "var2": 123}
 
         spec = native_specs.WorkflowSpec(wf_def)
         conductor = conducting.WorkflowConductor(spec)
         conductor.request_workflow_status(statuses.RUNNING)
 
         # Conduct task1 and task3 and check context.
-        self.forward_task_statuses(conductor, 'task1', [statuses.RUNNING])
-        self.forward_task_statuses(conductor, 'task3', [statuses.RUNNING])
+        self.forward_task_statuses(conductor, "task1", [statuses.RUNNING])
+        self.forward_task_statuses(conductor, "task3", [statuses.RUNNING])
 
-        self.forward_task_statuses(conductor, 'task1', [statuses.SUCCEEDED])
-        expected_t1_ctx = {'var1': 'xyz', 'var2': 234}
-        expected_txsn_ctx = {'task2__t0': expected_t1_ctx}
-        self.assertDictEqual(conductor.get_task_transition_contexts('task1', 0), expected_txsn_ctx)
+        self.forward_task_statuses(conductor, "task1", [statuses.SUCCEEDED])
+        expected_t1_ctx = {"var1": "xyz", "var2": 234}
+        expected_txsn_ctx = {"task2__t0": expected_t1_ctx}
+        self.assertDictEqual(conductor.get_task_transition_contexts("task1", 0), expected_txsn_ctx)
 
-        task_ids = ['task2']
+        task_ids = ["task2"]
         task_ctxs = [expected_t1_ctx]
         task_routes = [0]
         self.assert_next_tasks(conductor, task_ids, task_ctxs, task_routes)
 
-        self.forward_task_statuses(conductor, 'task3', [statuses.SUCCEEDED])
-        expected_t3_ctx = {'var1': 'abc', 'var2': 123}
-        expected_txsn_ctx = {'task4__t0': expected_t3_ctx}
-        self.assertDictEqual(conductor.get_task_transition_contexts('task3', 0), expected_txsn_ctx)
+        self.forward_task_statuses(conductor, "task3", [statuses.SUCCEEDED])
+        expected_t3_ctx = {"var1": "abc", "var2": 123}
+        expected_txsn_ctx = {"task4__t0": expected_t3_ctx}
+        self.assertDictEqual(conductor.get_task_transition_contexts("task3", 0), expected_txsn_ctx)
 
-        task_ids = ['task2', 'task4']
+        task_ids = ["task2", "task4"]
         task_ctxs = [expected_t1_ctx, expected_t3_ctx]
         task_routes = [0] * 2
         self.assert_next_tasks(conductor, task_ids, task_ctxs, task_routes)
 
         # Conduct task2 and task4 and check context.
-        self.forward_task_statuses(conductor, 'task2', [statuses.RUNNING])
-        self.forward_task_statuses(conductor, 'task4', [statuses.RUNNING])
+        self.forward_task_statuses(conductor, "task2", [statuses.RUNNING])
+        self.forward_task_statuses(conductor, "task4", [statuses.RUNNING])
 
-        self.forward_task_statuses(conductor, 'task2', [statuses.SUCCEEDED])
-        self.assertDictEqual(conductor.get_task_transition_contexts('task2', 0), {})
+        self.forward_task_statuses(conductor, "task2", [statuses.SUCCEEDED])
+        self.assertDictEqual(conductor.get_task_transition_contexts("task2", 0), {})
         self.assert_next_task(conductor, has_next_task=False)
 
-        self.forward_task_statuses(conductor, 'task4', [statuses.SUCCEEDED])
-        self.assertDictEqual(conductor.get_task_transition_contexts('task4', 0), {})
+        self.forward_task_statuses(conductor, "task4", [statuses.SUCCEEDED])
+        self.assertDictEqual(conductor.get_task_transition_contexts("task4", 0), {})
         self.assert_next_task(conductor, has_next_task=False)
 
         # Check the list of terminal tasks.
         term_tasks = conductor.workflow_state.get_terminal_tasks()
-        actual_term_tasks = [t['id'] for i, t in term_tasks]
-        expected_term_tasks = ['task2', 'task4']
+        actual_term_tasks = [t["id"] for i, t in term_tasks]
+        expected_term_tasks = ["task2", "task4"]
         self.assertListEqual(actual_term_tasks, expected_term_tasks)
 
         # Render workflow output and check workflow status and context.
         conductor.render_workflow_output()
-        expected_term_ctx = {'var1': 'xyz', 'var2': 123}
+        expected_term_ctx = {"var1": "xyz", "var2": 123}
         self.assertDictEqual(conductor.get_workflow_terminal_context(), expected_term_ctx)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)

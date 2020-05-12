@@ -38,16 +38,16 @@ def merge_dicts(left, right, overwrite=True):
 
 def get_dict_value(obj, path, raise_key_error=False):
     item = obj
-    traversed = ''
+    traversed = ""
 
-    for key in path.split('.'):
+    for key in path.split("."):
         if not isinstance(item, dict) and traversed != path:
-            raise TypeError('Value of \'%s\' is not typeof dict.' % traversed)
+            raise TypeError("Value of '%s' is not typeof dict." % traversed)
 
-        traversed += '.' + key if len(traversed) > 0 else key
+        traversed += "." + key if len(traversed) > 0 else key
 
         if key not in item and raise_key_error:
-            raise KeyError('Key \'%s\' does not exist.' % traversed)
+            raise KeyError("Key '%s' does not exist." % traversed)
 
         item = item.get(key, None)
 
@@ -62,16 +62,16 @@ def set_dict_value(obj, path, value, raise_key_error=False, insert_null=True):
         return
 
     item = obj
-    traversed = ''
+    traversed = ""
 
-    for key in path.split('.'):
+    for key in path.split("."):
         if not isinstance(item, dict) and traversed != path:
-            raise TypeError('Value of \'%s\' is not typeof dict.' % traversed)
+            raise TypeError("Value of '%s' is not typeof dict." % traversed)
 
-        traversed += '.' + key if len(traversed) > 0 else key
+        traversed += "." + key if len(traversed) > 0 else key
 
         if key not in item and raise_key_error:
-            raise KeyError('Key \'%s\' does not exist.' % traversed)
+            raise KeyError("Key '%s' does not exist." % traversed)
 
         if traversed == path:
             item[key] = value

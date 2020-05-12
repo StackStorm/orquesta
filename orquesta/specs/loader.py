@@ -20,8 +20,8 @@ LOG = logging.getLogger(__name__)
 
 
 def get_specs_path():
-    return __name__[:__name__.rfind('.')]
+    return __name__[: __name__.rfind(".")]
 
 
 def get_spec_module(catalog):
-    return importlib.import_module(get_specs_path() + '.' + catalog)
+    return importlib.import_module(get_specs_path() + "." + catalog)

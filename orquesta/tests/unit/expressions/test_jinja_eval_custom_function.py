@@ -18,31 +18,23 @@ from orquesta.utils import plugin as plugin_util
 
 
 class JinjaEvaluationTest(test_base.ExpressionEvaluatorTest):
-
     @classmethod
     def setUpClass(cls):
-        cls.language = 'jinja'
+        cls.language = "jinja"
         super(JinjaEvaluationTest, cls).setUpClass()
 
     def test_get_evaluator(self):
-        e = plugin_util.get_module(
-            'orquesta.expressions.evaluators',
-            self.language
-        )
+        e = plugin_util.get_module("orquesta.expressions.evaluators", self.language)
 
         self.assertEqual(e, jinja_expr.JinjaEvaluator)
-        self.assertIn('json', e._custom_functions.keys())
+        self.assertIn("json", e._custom_functions.keys())
 
     def test_custom_function(self):
-        expr = '{{ json(\'{"a": 123}\') }}'
+        expr = "{{ json('{\"a\": 123}') }}"
 
-        self.assertDictEqual({'a': 123}, self.evaluator.evaluate(expr))
+        self.assertDictEqual({"a": 123}, self.evaluator.evaluate(expr))
 
     def test_custom_function_failure(self):
-        expr = '{{ json(int(123)) }}'
+        expr = "{{ json(int(123)) }}"
 
-        self.assertRaises(
-            jinja_expr.JinjaEvaluationException,
-            self.evaluator.evaluate,
-            expr
-        )
+        self.assertRaises(jinja_expr.JinjaEvaluationException, self.evaluator.evaluate, expr)

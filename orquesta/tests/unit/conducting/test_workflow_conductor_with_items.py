@@ -19,7 +19,6 @@ from orquesta.tests.unit import base as test_base
 
 
 class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
-
     def test_empty_items_list(self):
         wf_def = """
         version: 1.0
@@ -47,8 +46,8 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': []}
+        task_name = "task1"
+        task_ctx = {"xs": []}
         task_action_specs = []
 
         mock_ac_ex_statuses = []
@@ -60,11 +59,11 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is removed from staging.
@@ -75,7 +74,7 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Assert the workflow output is correct.
         conductor.render_workflow_output()
-        expected_output = {'items': []}
+        expected_output = {"items": []}
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
     def test_bad_with_items_syntax(self):
@@ -103,23 +102,23 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
         """
 
         expected_errors = {
-            'semantics': [
+            "semantics": [
                 {
-                    'message': 'The action property is required for with items task.',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$',
-                    'spec_path': 'tasks.task1'
+                    "message": "The action property is required for with items task.",
+                    "schema_path": "properties.tasks.patternProperties.^\\w+$",
+                    "spec_path": "tasks.task1",
                 }
             ],
-            'syntax': [
+            "syntax": [
                 {
-                    'message': 'Additional properties are not allowed (\'action\' was unexpected)',
-                    'schema_path': (
-                        'properties.tasks.patternProperties.^\\w+$.'
-                        'properties.with.additionalProperties'
+                    "message": "Additional properties are not allowed ('action' was unexpected)",
+                    "schema_path": (
+                        "properties.tasks.patternProperties.^\\w+$."
+                        "properties.with.additionalProperties"
                     ),
-                    'spec_path': 'tasks.task1.with'
+                    "spec_path": "tasks.task1.with",
                 }
-            ]
+            ],
         }
 
         spec = native_specs.WorkflowSpec(wf_def)
@@ -149,11 +148,11 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
         """
 
         expected_errors = {
-            'semantics': [
+            "semantics": [
                 {
-                    'message': 'The action property is required for with items task.',
-                    'schema_path': 'properties.tasks.patternProperties.^\\w+$',
-                    'spec_path': 'tasks.task1'
+                    "message": "The action property is required for with items task.",
+                    "schema_path": "properties.tasks.patternProperties.^\\w+$",
+                    "spec_path": "tasks.task1",
                 }
             ]
         }
@@ -192,14 +191,14 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         mock_ac_ex_statuses = [statuses.SUCCEEDED] * 4
@@ -211,11 +210,11 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is removed from staging.
@@ -226,7 +225,7 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Assert the workflow output is correct.
         conductor.render_workflow_output()
-        expected_output = {'items': task_ctx['xs']}
+        expected_output = {"items": task_ctx["xs"]}
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
     def test_basic_items_list_with_different_types(self):
@@ -269,13 +268,13 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
+        task_name = "task1"
 
         task_ctx = {
-            'xs': [
+            "xs": [
                 None,
-                '',
-                'foobar',
+                "",
+                "foobar",
                 0,
                 1,
                 123,
@@ -283,19 +282,19 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
                 False,
                 True,
                 {},
-                {'foobar': 'fubar'},
+                {"foobar": "fubar"},
                 [],
-                ['foobar', 'fubar']
+                ["foobar", "fubar"],
             ]
         }
 
         task_action_specs = []
-        for idx, item in enumerate(task_ctx['xs']):
+        for idx, item in enumerate(task_ctx["xs"]):
             task_action_specs.append(
-                {'action': 'core.echo', 'input': {'message': item}, 'item_id': idx}
+                {"action": "core.echo", "input": {"message": item}, "item_id": idx}
             )
 
-        items_count = len(task_ctx['xs'])
+        items_count = len(task_ctx["xs"])
         mock_ac_ex_statuses = [statuses.SUCCEEDED] * items_count
         expected_task_statuses = [statuses.RUNNING] * (items_count - 1) + [statuses.SUCCEEDED]
         expected_workflow_statuses = [statuses.RUNNING] * (items_count - 1) + [statuses.SUCCEEDED]
@@ -305,11 +304,11 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is removed from staging.
@@ -320,7 +319,7 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Assert the workflow output is correct.
         conductor.render_workflow_output()
-        expected_output = {'items': task_ctx['xs']}
+        expected_output = {"items": task_ctx["xs"]}
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
     def test_basic_items_list_with_concurrency(self):
@@ -359,14 +358,14 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum'], 'concurrency': 2}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"], "concurrency": 2}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         mock_ac_ex_statuses = [statuses.SUCCEEDED] * 4
@@ -378,12 +377,12 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
             expected_workflow_statuses,
-            concurrency=concurrency
+            concurrency=concurrency,
         )
 
         # Assert the task is removed from staging.
@@ -426,13 +425,13 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['foo', 'fu', 'marco'], 'ys': ['bar', 'bar', 'polo']}
+        task_name = "task1"
+        task_ctx = {"xs": ["foo", "fu", "marco"], "ys": ["bar", "bar", "polo"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'foobar'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fubar'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'marcopolo'}, 'item_id': 2},
+            {"action": "core.echo", "input": {"message": "foobar"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fubar"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "marcopolo"}, "item_id": 2},
         ]
 
         mock_ac_ex_statuses = [statuses.SUCCEEDED] * 3
@@ -444,11 +443,11 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             task_name,
             task_route,
             task_ctx,
-            [i[0] + i[1] for i in zip(task_ctx['xs'], task_ctx['ys'])],
+            [i[0] + i[1] for i in zip(task_ctx["xs"], task_ctx["ys"])],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is removed from staging.
@@ -459,7 +458,7 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Assert the workflow output is correct.
         conductor.render_workflow_output()
-        expected_output = {'items': ['foobar', 'fubar', 'marcopolo']}
+        expected_output = {"items": ["foobar", "fubar", "marcopolo"]}
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
     def test_multiple_items_list_with_different_types(self):
@@ -518,13 +517,13 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
+        task_name = "task1"
 
         task_ctx = {
-            'xs': [
+            "xs": [
                 None,
-                '',
-                'foobar',
+                "",
+                "foobar",
                 0,
                 1,
                 123,
@@ -532,14 +531,14 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
                 False,
                 True,
                 {},
-                {'foobar': 'fubar'},
+                {"foobar": "fubar"},
                 [],
-                ['foobar', 'fubar']
+                ["foobar", "fubar"],
             ],
-            'ys': [
+            "ys": [
                 None,
-                '',
-                'foobar',
+                "",
+                "foobar",
                 0,
                 1,
                 123,
@@ -547,19 +546,19 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
                 False,
                 True,
                 {},
-                {'foobar': 'fubar'},
+                {"foobar": "fubar"},
                 [],
-                ['foobar', 'fubar']
-            ]
+                ["foobar", "fubar"],
+            ],
         }
 
         task_action_specs = []
-        for idx, pair in enumerate(zip(task_ctx['xs'], task_ctx['ys'])):
+        for idx, pair in enumerate(zip(task_ctx["xs"], task_ctx["ys"])):
             task_action_specs.append(
-                {'action': 'core.foobar', 'input': {'x': pair[0], 'y': pair[1]}, 'item_id': idx}
+                {"action": "core.foobar", "input": {"x": pair[0], "y": pair[1]}, "item_id": idx}
             )
 
-        items_count = len(task_ctx['xs'])
+        items_count = len(task_ctx["xs"])
         mock_ac_ex_statuses = [statuses.SUCCEEDED] * items_count
         expected_task_statuses = [statuses.RUNNING] * (items_count - 1) + [statuses.SUCCEEDED]
         expected_workflow_statuses = [statuses.RUNNING] * (items_count - 1) + [statuses.SUCCEEDED]
@@ -569,11 +568,11 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             task_name,
             task_route,
             task_ctx,
-            list(zip(task_ctx['xs'], task_ctx['ys'])),
+            list(zip(task_ctx["xs"], task_ctx["ys"])),
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is removed from staging.
@@ -584,7 +583,7 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Assert the workflow output is correct.
         conductor.render_workflow_output()
-        expected_output = {'items': [[i, j] for i, j in zip(task_ctx['xs'], task_ctx['ys'])]}
+        expected_output = {"items": [[i, j] for i, j in zip(task_ctx["xs"], task_ctx["ys"])]}
         self.assertDictEqual(conductor.get_workflow_output(), expected_output)
 
     def test_multiple_items_list_with_concurrency(self):
@@ -619,13 +618,13 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['foo', 'fu', 'marco'], 'ys': ['bar', 'bar', 'polo']}
+        task_name = "task1"
+        task_ctx = {"xs": ["foo", "fu", "marco"], "ys": ["bar", "bar", "polo"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'foobar'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fubar'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'marcopolo'}, 'item_id': 2},
+            {"action": "core.echo", "input": {"message": "foobar"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fubar"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "marcopolo"}, "item_id": 2},
         ]
 
         mock_ac_ex_statuses = [statuses.SUCCEEDED] * 3
@@ -637,12 +636,12 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             task_name,
             task_route,
             task_ctx,
-            [i[0] + i[1] for i in zip(task_ctx['xs'], task_ctx['ys'])],
+            [i[0] + i[1] for i in zip(task_ctx["xs"], task_ctx["ys"])],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
             expected_workflow_statuses,
-            concurrency=concurrency
+            concurrency=concurrency,
         )
 
         # Assert the task is removed from staging.
@@ -673,11 +672,11 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
         ]
 
         mock_ac_ex_statuses = [statuses.FAILED]
@@ -689,11 +688,11 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is not removed from staging. This is intentional so the with items
@@ -728,14 +727,14 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         mock_ac_ex_statuses = [statuses.SUCCEEDED, statuses.FAILED]
@@ -747,11 +746,11 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is not removed from staging. This is intentional so the with items
@@ -786,14 +785,14 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         mock_ac_ex_statuses = [statuses.SUCCEEDED, statuses.FAILED, statuses.FAILED]
@@ -805,11 +804,11 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is not removed from staging. This is intentional so the with items
@@ -844,21 +843,21 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         mock_ac_ex_statuses = [
             statuses.SUCCEEDED,
             statuses.FAILED,
             statuses.SUCCEEDED,
-            statuses.SUCCEEDED
+            statuses.SUCCEEDED,
         ]
 
         expected_task_statuses = [statuses.RUNNING] * 3 + [statuses.FAILED]
@@ -870,11 +869,11 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is not removed from staging. This is intentional so the with items
@@ -913,14 +912,14 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         mock_ac_ex_statuses = [statuses.SUCCEEDED, statuses.FAILED]
@@ -932,12 +931,12 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
             expected_workflow_statuses,
-            concurrency=concurrency
+            concurrency=concurrency,
         )
 
         # Assert the task is not removed from staging. This is intentional so the with items
@@ -976,21 +975,21 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         mock_ac_ex_statuses = [
             statuses.SUCCEEDED,
             statuses.FAILED,
             statuses.SUCCEEDED,
-            statuses.SUCCEEDED
+            statuses.SUCCEEDED,
         ]
 
         expected_task_statuses = [statuses.RUNNING] * 3 + [statuses.FAILED]
@@ -1002,12 +1001,12 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
             expected_workflow_statuses,
-            concurrency=concurrency
+            concurrency=concurrency,
         )
 
         # Assert the task is not removed from staging. This is intentional so the with items
@@ -1047,18 +1046,18 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
         conductor.request_workflow_status(statuses.RUNNING)
 
         # Get pass the init task, required for bootstrapping self looping task..
-        self.forward_task_statuses(conductor, 'init', [statuses.RUNNING, statuses.SUCCEEDED])
+        self.forward_task_statuses(conductor, "init", [statuses.RUNNING, statuses.SUCCEEDED])
 
         # Mock the action execution for each item and assert expected task statuses.
         task_route = 0
-        task_name = 'task1'
-        task_ctx = {'xs': ['fee', 'fi', 'fo', 'fum']}
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
 
         task_action_specs = [
-            {'action': 'core.echo', 'input': {'message': 'fee'}, 'item_id': 0},
-            {'action': 'core.echo', 'input': {'message': 'fi'}, 'item_id': 1},
-            {'action': 'core.echo', 'input': {'message': 'fo'}, 'item_id': 2},
-            {'action': 'core.echo', 'input': {'message': 'fum'}, 'item_id': 3},
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
         ]
 
         mock_ac_ex_statuses = [statuses.SUCCEEDED, statuses.FAILED]
@@ -1070,17 +1069,17 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is reset in staging.
         staged_task = conductor.workflow_state.get_staged_task(task_name, task_route)
         self.assertIsNotNone(staged_task)
-        self.assertNotIn('items', staged_task)
+        self.assertNotIn("items", staged_task)
 
         # Assert the workflow is still running.
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
@@ -1095,11 +1094,11 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
             task_name,
             task_route,
             task_ctx,
-            task_ctx['xs'],
+            task_ctx["xs"],
             task_action_specs,
             mock_ac_ex_statuses,
             expected_task_statuses,
-            expected_workflow_statuses
+            expected_workflow_statuses,
         )
 
         # Assert the task is removed from staging.

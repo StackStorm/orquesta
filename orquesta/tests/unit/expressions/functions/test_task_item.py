@@ -19,30 +19,29 @@ from orquesta.expressions.functions import workflow as funcs
 
 
 class ItemFunctionTest(unittest.TestCase):
-
     def test_missing_current_item(self):
         self.assertRaises(exc.ExpressionEvaluationException, funcs.item_, {})
 
     def test_item_is_null(self):
-        context = {'__current_item': None}
+        context = {"__current_item": None}
         self.assertIsNone(funcs.item_(context))
 
     def test_item(self):
-        context = {'__current_item': 'foobar'}
-        self.assertEqual(funcs.item_(context), 'foobar')
+        context = {"__current_item": "foobar"}
+        self.assertEqual(funcs.item_(context), "foobar")
 
     def test_item_is_dict(self):
-        context = {'__current_item': {'foo': 'bar'}}
-        self.assertDictEqual(funcs.item_(context), {'foo': 'bar'})
+        context = {"__current_item": {"foo": "bar"}}
+        self.assertDictEqual(funcs.item_(context), {"foo": "bar"})
 
     def test_item_is_not_dict(self):
-        context = {'__current_item': 'foobar'}
-        self.assertRaises(exc.ExpressionEvaluationException, funcs.item_, context, key='foo')
+        context = {"__current_item": "foobar"}
+        self.assertRaises(exc.ExpressionEvaluationException, funcs.item_, context, key="foo")
 
     def test_item_key(self):
-        context = {'__current_item': {'foo': 'bar'}}
-        self.assertEqual(funcs.item_(context, key='foo'), 'bar')
+        context = {"__current_item": {"foo": "bar"}}
+        self.assertEqual(funcs.item_(context, key="foo"), "bar")
 
     def test_item_bad_key(self):
-        context = {'__current_item': {'foo': 'bar'}}
-        self.assertRaises(exc.ExpressionEvaluationException, funcs.item_, context, key='bar')
+        context = {"__current_item": {"foo": "bar"}}
+        self.assertRaises(exc.ExpressionEvaluationException, funcs.item_, context, key="bar")

@@ -16,16 +16,14 @@ from orquesta.tests.unit import base as test_base
 
 
 class OrchestraWorkflowConductorTest(test_base.WorkflowConductorTest):
-
     @classmethod
     def setUpClass(cls):
-        cls.spec_module_name = 'native'
+        cls.spec_module_name = "native"
         super(OrchestraWorkflowConductorTest, cls).setUpClass()
 
 
 class OrchestraWorkflowConductorRerunTest(test_base.WorkflowConductorRerunTest):
-
     @classmethod
     def setUpClass(cls):
-        cls.spec_module_name = 'native'
+        cls.spec_module_name = "native"
         super(OrchestraWorkflowConductorRerunTest, cls).setUpClass()

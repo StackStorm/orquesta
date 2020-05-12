@@ -1,10 +1,9 @@
-black
 coverage
-flake8<3.8.0,>=3.6.0
+flake8<2.7.0,>=2.6.0
 hacking
 mock>=1.0
 nose
 nosexcover
 pep8>=1.6.0,<1.7
-pylint>=2.5.2,<2.6
+pylint>=1.4.3,<1.5
 unittest2

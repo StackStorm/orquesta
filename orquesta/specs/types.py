@@ -12,35 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-NONEMPTY_STRING = {
-    "type": "string",
-    "minLength": 1
-}
+NONEMPTY_STRING = {"type": "string", "minLength": 1}
 
-UNIQUE_STRING_LIST = {
-    "type": "array",
-    "items": NONEMPTY_STRING,
-    "uniqueItems": True,
-    "minItems": 1
-}
+UNIQUE_STRING_LIST = {"type": "array", "items": NONEMPTY_STRING, "uniqueItems": True, "minItems": 1}
 
-POSITIVE_INTEGER = {
-    "type": "integer",
-    "minimum": 0
-}
+POSITIVE_INTEGER = {"type": "integer", "minimum": 0}
 
-POSITIVE_NUMBER = {
-    "type": "number",
-    "minimum": 0.0
-}
+POSITIVE_NUMBER = {"type": "number", "minimum": 0.0}
 
-VERSION = {
-    "anyOf": [
-        NONEMPTY_STRING,
-        POSITIVE_INTEGER,
-        POSITIVE_NUMBER
-    ]
-}
+VERSION = {"anyOf": [NONEMPTY_STRING, POSITIVE_INTEGER, POSITIVE_NUMBER]}
 
 ANY = {
     "anyOf": [
@@ -49,7 +29,7 @@ ANY = {
         {"type": "integer"},
         {"type": "number"},
         {"type": "object"},
-        {"type": "string"}
+        {"type": "string"},
     ]
 }
 
@@ -61,65 +41,41 @@ ANY_NULLABLE = {
         {"type": "integer"},
         {"type": "number"},
         {"type": "object"},
-        {"type": "string"}
+        {"type": "string"},
     ]
 }
 
 NONEMPTY_DICT = {
     "type": "object",
     "minProperties": 1,
-    "patternProperties": {
-        "^\w+$": ANY_NULLABLE
-    }
+    "patternProperties": {r"^\w+$": ANY_NULLABLE},
 }
 
 ONE_KEY_DICT = {
     "type": "object",
     "minProperties": 1,
     "maxProperties": 1,
-    "patternProperties": {
-        "^\w+$": ANY_NULLABLE
-    }
+    "patternProperties": {r"^\w+$": ANY_NULLABLE},
 }
 
-STRING_OR_POSITIVE_INTEGER = {
-    "oneOf": [
-        NONEMPTY_STRING,
-        POSITIVE_INTEGER
-    ]
-}
+STRING_OR_POSITIVE_INTEGER = {"oneOf": [NONEMPTY_STRING, POSITIVE_INTEGER]}
 
-STRING_OR_POSITIVE_NUMBER = {
-    "oneOf": [
-        NONEMPTY_STRING,
-        POSITIVE_NUMBER
-    ]
-}
+STRING_OR_POSITIVE_NUMBER = {"oneOf": [NONEMPTY_STRING, POSITIVE_NUMBER]}
 
-STRING_OR_BOOLEAN = {
-    "oneOf": [
-        NONEMPTY_STRING,
-        {"type": "boolean"}
-    ]
-}
+STRING_OR_BOOLEAN = {"oneOf": [NONEMPTY_STRING, {"type": "boolean"}]}
 
-STRING_OR_ONE_KEY_DICT = {
-    "oneOf": [
-        NONEMPTY_STRING,
-        ONE_KEY_DICT
-    ]
-}
+STRING_OR_ONE_KEY_DICT = {"oneOf": [NONEMPTY_STRING, ONE_KEY_DICT]}
 
 UNIQUE_STRING_OR_ONE_KEY_DICT_LIST = {
     "type": "array",
     "items": STRING_OR_ONE_KEY_DICT,
     "uniqueItems": True,
-    "minItems": 1
+    "minItems": 1,
 }
 
 UNIQUE_ONE_KEY_DICT_LIST = {
     "type": "array",
     "items": ONE_KEY_DICT,
     "uniqueItems": True,
-    "minItems": 1
+    "minItems": 1,
 }

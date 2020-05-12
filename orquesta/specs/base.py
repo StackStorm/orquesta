@@ -40,20 +40,18 @@ def isspec(value):
 class Spec(object):
     _catalog = None
 
-    _version = '1.0'
+    _version = "1.0"
 
-    _schema = {
-        'type': 'object'
-    }
+    _schema = {"type": "object"}
 
     _meta_schema = {
-        'type': 'object',
-        'properties': {
-            'name': spec_types.NONEMPTY_STRING,
-            'version': spec_types.VERSION,
-            'description': spec_types.NONEMPTY_STRING,
-            'tags': spec_types.UNIQUE_STRING_LIST
-        }
+        "type": "object",
+        "properties": {
+            "name": spec_types.NONEMPTY_STRING,
+            "version": spec_types.VERSION,
+            "description": spec_types.NONEMPTY_STRING,
+            "tags": spec_types.UNIQUE_STRING_LIST,
+        },
     }
 
     _schema_validator = None
@@ -70,21 +68,21 @@ class Spec(object):
     # is called which it is overridden here to access the spec dict.
     def __getattr__(self, name):
         # Retrieve from spec if attribute is a meta schema property.
-        if name in self._meta_schema.get('properties', {}):
+        if name in self._meta_schema.get("properties", {}):
             return self.spec.get(name)
 
-        if name.replace('_', '-') in self._meta_schema.get('properties', {}):
-            return self.spec.get(name.replace('_', '-'))
+        if name.replace("_", "-") in self._meta_schema.get("properties", {}):
+            return self.spec.get(name.replace("_", "-"))
 
         # Retrieve from spec if attribute is a schema property.
-        if name in self._schema.get('properties', {}):
+        if name in self._schema.get("properties", {}):
             return self.spec.get(name)
 
-        if name.replace('_', '-') in self._schema.get('properties', {}):
-            return self.spec.get(name.replace('_', '-'))
+        if name.replace("_", "-") in self._schema.get("properties", {}):
+            return self.spec.get(name.replace("_", "-"))
 
         # Retrieve from spec if attribute match a regex pattern in the schema.
-        for pattern in self._schema.get('patternProperties', {}).keys():
+        for pattern in self._schema.get("patternProperties", {}).keys():
             if re.match(pattern, name):
                 return self.spec.get(name)
 
@@ -97,7 +95,7 @@ class Spec(object):
         self._meta_schema = self.get_meta_schema()
 
         if not spec:
-            raise ValueError('The spec cannot be type of None.')
+            raise ValueError("The spec cannot be type of None.")
 
         self.spec = (
             yaml.safe_load(spec)
@@ -106,7 +104,7 @@ class Spec(object):
         )
 
         if not isinstance(self.spec, dict) and not isinstance(spec, list):
-            raise ValueError('The spec is not type of json or yaml.')
+            raise ValueError("The spec is not type of json or yaml.")
 
         if name:
             self.name = name
@@ -114,16 +112,13 @@ class Spec(object):
         self.member = member
 
         schema = (
-            self._schema if member else
-            schema_util.merge_schema(self.get_meta_schema(), self._schema)
+            self._schema
+            if member
+            else schema_util.merge_schema(self.get_meta_schema(), self._schema)
         )
 
         # Process attributes defined under properties in the schema.
-        property_specs = {
-            k: v for k, v
-            in six.iteritems(schema.get('properties', {}))
-            if isspec(v)
-        }
+        property_specs = {k: v for k, v in six.iteritems(schema.get("properties", {})) if isspec(v)}
 
         for name, spec_cls in six.iteritems(property_specs):
             if self.spec.get(name):
@@ -131,9 +126,7 @@ class Spec(object):
 
         # Process pattern properties (regex) defined in the schema.
         regex_property_specs = {
-            k: v for k, v
-            in six.iteritems(schema.get('patternProperties', {}))
-            if isspec(v)
+            k: v for k, v in six.iteritems(schema.get("patternProperties", {})) if isspec(v)
         }
 
         for pattern, spec_cls in six.iteritems(regex_property_specs):
@@ -145,29 +138,25 @@ class Spec(object):
         return self.deserialize(self.serialize())
 
     def serialize(self):
-        value = {
-            'catalog': self.get_catalog(),
-            'version': self.get_version(),
-            'spec': self.spec
-        }
+        value = {"catalog": self.get_catalog(), "version": self.get_version(), "spec": self.spec}
 
-        if hasattr(self, 'name') and self.name:
-            value['name'] = self.name
+        if hasattr(self, "name") and self.name:
+            value["name"] = self.name
 
-        if hasattr(self, 'member') and self.member:
-            value['member'] = self.member
+        if hasattr(self, "member") and self.member:
+            value["member"] = self.member
 
         return value
 
     @classmethod
     def deserialize(cls, data):
-        if data.get('catalog') != cls.get_catalog():
+        if data.get("catalog") != cls.get_catalog():
             raise ValueError('Serialized spec catalog does not match "%s".' % cls.get_catalog())
 
-        if data.get('version') != cls.get_version():
+        if data.get("version") != cls.get_version():
             raise ValueError('Serialized spec version does not match "%s".' % cls.get_version())
 
-        return cls(data['spec'], name=data.get('name'), member=data.get('member', False))
+        return cls(data["spec"], name=data.get("name"), member=data.get("member", False))
 
     @classmethod
     def get_catalog(cls):
@@ -197,7 +186,7 @@ class Spec(object):
         return schema_util.merge_schema(meta_schema, cls._meta_schema)
 
     @classmethod
-    def get_schema(cls, includes=['meta'], resolve_specs=True):
+    def get_schema(cls, includes=["meta"], resolve_specs=True):
         schema = {}
 
         bases = [b for b in cls.__bases__ if issubclass(b, Spec)]
@@ -208,7 +197,7 @@ class Spec(object):
 
         schema = schema_util.merge_schema(schema, cls._schema)
 
-        if includes and 'meta' in includes:
+        if includes and "meta" in includes:
             meta_schema = cls.get_meta_schema()
             schema = schema_util.merge_schema(schema, meta_schema)
 
@@ -216,74 +205,71 @@ class Spec(object):
             return schema
 
         # Resolve the schema for children specs under properties.
-        for k, v in six.iteritems(schema.get('properties', {})):
+        for k, v in six.iteritems(schema.get("properties", {})):
             if inspect.isclass(v) and issubclass(v, Spec):
-                schema['properties'][k] = v.get_schema(includes=None)
+                schema["properties"][k] = v.get_schema(includes=None)
 
         # Resolve the schema for children specs under patternProperties.
-        for k, v in six.iteritems(schema.get('patternProperties', {})):
+        for k, v in six.iteritems(schema.get("patternProperties", {})):
             if inspect.isclass(v) and issubclass(v, Spec):
-                schema['patternProperties'][k] = v.get_schema(includes=None)
+                schema["patternProperties"][k] = v.get_schema(includes=None)
 
         # Resolve the schema for children specs under items.
-        items_schema = schema.get('items', {})
+        items_schema = schema.get("items", {})
 
-        if (inspect.isclass(items_schema) and issubclass(items_schema, Spec)):
-            schema['items'] = items_schema.get_schema(includes=None)
+        if inspect.isclass(items_schema) and issubclass(items_schema, Spec):
+            schema["items"] = items_schema.get_schema(includes=None)
         elif isinstance(items_schema, dict):
-            for k, v in six.iteritems(items_schema.get('properties', {})):
+            for k, v in six.iteritems(items_schema.get("properties", {})):
                 if inspect.isclass(v) and issubclass(v, Spec):
-                    schema_properties = schema['items']['properties']
+                    schema_properties = schema["items"]["properties"]
                     schema_properties[k] = v.get_schema(includes=None)
 
         return schema
 
     def get_spec_path(self, prop_name, parent=None):
-        return (parent.get('spec_path') + '.' + prop_name).strip('.') if parent else prop_name
+        return (parent.get("spec_path") + "." + prop_name).strip(".") if parent else prop_name
 
     def get_schema_path(self, prop_name, parent=None):
         return (
-            (parent.get('schema_path') + '.' + 'properties.' + prop_name).strip('.')
-            if parent else 'properties.' + prop_name
+            (parent.get("schema_path") + "." + "properties." + prop_name).strip(".")
+            if parent
+            else "properties." + prop_name
         )
 
     def inspect(self, app_ctx=None, raise_exception=False):
         if app_ctx and not isinstance(app_ctx, dict):
-            raise TypeError('Application context is not type of dict.')
+            raise TypeError("Application context is not type of dict.")
 
         errors = {}
         app_ctx_metadata = None
 
         def sort_errors(e):
-            return (e['schema_path'], e['spec_path'])
+            return (e["schema_path"], e["spec_path"])
 
         syntax_errors = sorted(self.inspect_syntax(), key=sort_errors)
 
         if syntax_errors:
-            errors['syntax'] = syntax_errors
+            errors["syntax"] = syntax_errors
 
         semantic_errors = sorted(self.inspect_semantics(), key=sort_errors)
 
         if semantic_errors:
-            errors['semantics'] = semantic_errors
+            errors["semantics"] = semantic_errors
 
         expr_errors = sorted(self.inspect_expressions(), key=sort_errors)
 
         if expr_errors:
-            errors['expressions'] = expr_errors
+            errors["expressions"] = expr_errors
 
         if app_ctx:
-            app_ctx_metadata = {
-                'ctx': app_ctx.keys(),
-                'spec_path': '.',
-                'schema_path': '.'
-            }
+            app_ctx_metadata = {"ctx": app_ctx.keys(), "spec_path": ".", "schema_path": "."}
 
         ctx_errors, _ = self.inspect_context(parent=app_ctx_metadata)
         ctx_errors = sorted(ctx_errors, key=sort_errors)
 
         if ctx_errors:
-            errors['context'] = ctx_errors
+            errors["context"] = ctx_errors
 
         if errors and raise_exception:
             raise exc.WorkflowInspectionError(errors)
@@ -295,25 +281,23 @@ class Spec(object):
         validator = self.get_schema_validator()
 
         for e in validator.iter_errors(self.spec):
-            spec_path = ''
-            schema_path = ''
+            spec_path = ""
+            schema_path = ""
 
             for s in list(e.absolute_path):
                 spec_path += (
-                    '[' + str(s) + ']' if isinstance(s, int) else
-                    '.' + s if spec_path else s
+                    "[" + str(s) + "]" if isinstance(s, int) else "." + s if spec_path else s
                 )
 
             for s in list(e.absolute_schema_path):
                 schema_path += (
-                    '[' + str(s) + ']' if isinstance(s, int) else
-                    '.' + s if schema_path else s
+                    "[" + str(s) + "]" if isinstance(s, int) else "." + s if schema_path else s
                 )
 
             entry = {
-                'message': str_util.unescape(e.message),
-                'spec_path': spec_path or None,
-                'schema_path': schema_path or None
+                "message": str_util.unescape(e.message),
+                "spec_path": spec_path or None,
+                "schema_path": schema_path or None,
             }
 
             result.append(entry)
@@ -321,36 +305,36 @@ class Spec(object):
         return result
 
     def inspect_semantics(self, parent=None):
-        if parent and not parent.get('spec_path', None):
-            raise ValueError('Parent context is missing spec path.')
+        if parent and not parent.get("spec_path", None):
+            raise ValueError("Parent context is missing spec path.")
 
-        if parent and not parent.get('schema_path', None):
-            raise ValueError('Parent context is missing schema path.')
+        if parent and not parent.get("schema_path", None):
+            raise ValueError("Parent context is missing schema path.")
 
         errors = []
         properties = {}
         schema = self.get_schema(includes=None)
 
-        for prop_name, prop_type in six.iteritems(schema.get('properties', {})):
+        for prop_name, prop_type in six.iteritems(schema.get("properties", {})):
             properties[prop_name] = getattr(self, prop_name)
 
-        for prop_name_regex, prop_type in six.iteritems(schema.get('patternProperties', {})):
+        for prop_name_regex, prop_type in six.iteritems(schema.get("patternProperties", {})):
             for prop_name in [key for key in self.keys() if re.findall(prop_name_regex, key)]:
                 properties[prop_name] = getattr(self, prop_name)
 
         for prop_name, prop_value in six.iteritems(properties):
             spec_path = self.get_spec_path(prop_name, parent=parent)
             schema_path = self.get_schema_path(prop_name, parent=parent)
-            prop_parent = {'spec_path': spec_path, 'schema_path': schema_path}
+            prop_parent = {"spec_path": spec_path, "schema_path": schema_path}
 
             if isinstance(prop_value, SequenceSpec):
                 errors.extend(prop_value.inspect_semantics(parent=prop_parent))
 
                 for i in range(0, len(prop_value)):
                     item = prop_value[i]
-                    item_spec_path = spec_path + '[' + str(i) + ']'
-                    item_schema_path = schema_path + '.items'
-                    item_parent = {'spec_path': item_spec_path, 'schema_path': item_schema_path}
+                    item_spec_path = spec_path + "[" + str(i) + "]"
+                    item_schema_path = schema_path + ".items"
+                    item_parent = {"spec_path": item_spec_path, "schema_path": item_schema_path}
                     errors.extend(item.inspect_semantics(parent=item_parent))
 
                 continue
@@ -359,9 +343,9 @@ class Spec(object):
                 errors.extend(prop_value.inspect_semantics(parent=prop_parent))
 
                 for k, v in six.iteritems(prop_value):
-                    item_spec_path = spec_path + '.' + k
-                    item_schema_path = schema_path + '.patternProperties.^\\w+$'
-                    item_parent = {'spec_path': item_spec_path, 'schema_path': item_schema_path}
+                    item_spec_path = spec_path + "." + k
+                    item_schema_path = schema_path + ".patternProperties.^\\w+$"
+                    item_parent = {"spec_path": item_spec_path, "schema_path": item_schema_path}
                     errors.extend(v.inspect_semantics(parent=item_parent))
 
                 continue
@@ -373,20 +357,20 @@ class Spec(object):
         return errors
 
     def inspect_expressions(self, parent=None):
-        if parent and not parent.get('spec_path', None):
-            raise ValueError('Parent context is missing spec path.')
+        if parent and not parent.get("spec_path", None):
+            raise ValueError("Parent context is missing spec path.")
 
-        if parent and not parent.get('schema_path', None):
-            raise ValueError('Parent context is missing schema path.')
+        if parent and not parent.get("schema_path", None):
+            raise ValueError("Parent context is missing schema path.")
 
         errors = []
         properties = {}
         schema = self.get_schema(includes=None)
 
-        for prop_name, prop_type in six.iteritems(schema.get('properties', {})):
+        for prop_name, prop_type in six.iteritems(schema.get("properties", {})):
             properties[prop_name] = getattr(self, prop_name)
 
-        for prop_name_regex, prop_type in six.iteritems(schema.get('patternProperties', {})):
+        for prop_name_regex, prop_type in six.iteritems(schema.get("patternProperties", {})):
             for prop_name in [key for key in self.keys() if re.findall(prop_name_regex, key)]:
                 properties[prop_name] = getattr(self, prop_name)
 
@@ -397,60 +381,56 @@ class Spec(object):
             if isinstance(prop_value, SequenceSpec):
                 for i in range(0, len(prop_value)):
                     item = prop_value[i]
-                    item_spec_path = spec_path + '[' + str(i) + ']'
-                    item_schema_path = schema_path + '.items'
-                    item_parent = {'spec_path': item_spec_path, 'schema_path': item_schema_path}
+                    item_spec_path = spec_path + "[" + str(i) + "]"
+                    item_schema_path = schema_path + ".items"
+                    item_parent = {"spec_path": item_spec_path, "schema_path": item_schema_path}
                     errors.extend(item.inspect_expressions(parent=item_parent))
 
                 continue
 
             if isinstance(prop_value, MappingSpec):
                 for k, v in six.iteritems(prop_value):
-                    item_spec_path = spec_path + '.' + k
-                    item_schema_path = schema_path + '.patternProperties.^\\w+$'
-                    item_parent = {'spec_path': item_spec_path, 'schema_path': item_schema_path}
+                    item_spec_path = spec_path + "." + k
+                    item_schema_path = schema_path + ".patternProperties.^\\w+$"
+                    item_parent = {"spec_path": item_spec_path, "schema_path": item_schema_path}
                     errors.extend(v.inspect_expressions(parent=item_parent))
 
                 continue
 
             if isinstance(prop_value, Spec):
-                item_parent = {'spec_path': spec_path, 'schema_path': schema_path}
+                item_parent = {"spec_path": spec_path, "schema_path": schema_path}
                 errors.extend(prop_value.inspect_expressions(parent=item_parent))
                 continue
 
-            result = expr_base.validate(prop_value).get('errors', [])
+            result = expr_base.validate(prop_value).get("errors", [])
 
             for entry in result:
-                entry['spec_path'] = spec_path
-                entry['schema_path'] = schema_path
+                entry["spec_path"] = spec_path
+                entry["schema_path"] = schema_path
 
             errors += result
 
         return errors
 
     def inspect_context(self, parent=None):
-        if parent and not parent.get('spec_path', None):
-            raise ValueError('Parent context is missing spec path.')
+        if parent and not parent.get("spec_path", None):
+            raise ValueError("Parent context is missing spec path.")
 
-        if parent and not parent.get('schema_path', None):
-            raise ValueError('Parent context is missing schema path.')
+        if parent and not parent.get("schema_path", None):
+            raise ValueError("Parent context is missing schema path.")
 
         def decorate_ctx_var(variable, spec_path, schema_path):
             return {
-                'type': variable[0],
-                'expression': variable[1],
-                'name': variable[2],
-                'spec_path': spec_path,
-                'schema_path': schema_path
+                "type": variable[0],
+                "expression": variable[1],
+                "name": variable[2],
+                "spec_path": spec_path,
+                "schema_path": schema_path,
             }
 
         def decorate_ctx_var_error(var, msg):
             error = expr_util.format_error(
-                var['type'],
-                var['expression'],
-                msg,
-                var['spec_path'],
-                var['schema_path']
+                var["type"], var["expression"], msg, var["spec_path"], var["schema_path"]
             )
 
             return error
@@ -480,15 +460,15 @@ class Spec(object):
                 ctx_vars.append(decorate_ctx_var(var, spec_path, schema_path))
 
             for ctx_var in ctx_vars:
-                if ctx_var['name'].startswith('__'):
+                if ctx_var["name"].startswith("__"):
                     err_msg = (
                         'Variable "%s" that is prefixed with double underscores is considered '
-                        'a private variable and cannot be referenced.' % ctx_var['name']
+                        "a private variable and cannot be referenced." % ctx_var["name"]
                     )
                     errors.append(decorate_ctx_var_error(ctx_var, err_msg))
 
-                if ctx_var['name'] not in rolling_ctx:
-                    err_msg = 'Variable "%s" is referenced before assignment.' % ctx_var['name']
+                if ctx_var["name"] not in rolling_ctx:
+                    err_msg = 'Variable "%s" is referenced before assignment.' % ctx_var["name"]
                     errors.append(decorate_ctx_var_error(ctx_var, err_msg))
 
             if prop_name in self._context_inputs:
@@ -498,7 +478,7 @@ class Spec(object):
             return rolling_ctx, errors
 
         errors = []
-        parent_ctx = parent.get('ctx', []) if parent else []
+        parent_ctx = parent.get("ctx", []) if parent else []
         rolling_ctx = list(set(parent_ctx))
 
         for prop_name in self._context_evaluation_sequence:
@@ -513,9 +493,9 @@ class Spec(object):
             # Pass the inspection downstream if value is a spec.
             if isinstance(prop_value, Spec):
                 item_parent = {
-                    'ctx': rolling_ctx,
-                    'spec_path': spec_path,
-                    'schema_path': schema_path
+                    "ctx": rolling_ctx,
+                    "spec_path": spec_path,
+                    "schema_path": schema_path,
                 }
 
                 result = prop_value.inspect_context(parent=item_parent)
@@ -537,29 +517,23 @@ class Spec(object):
                     rolling_ctx, errors = inspect_ctx(
                         prop_name,
                         prop_value[i],
-                        spec_path + '[' + str(i) + ']',
+                        spec_path + "[" + str(i) + "]",
                         schema_path,
                         rolling_ctx,
-                        errors
+                        errors,
                     )
 
                 continue
 
             # Otherwise evaluate the value as is.
             rolling_ctx, errors = inspect_ctx(
-                prop_name,
-                prop_value,
-                spec_path,
-                schema_path,
-                rolling_ctx,
-                errors
+                prop_name, prop_value, spec_path, schema_path, rolling_ctx, errors
             )
 
-        return (sorted(errors, key=lambda x: x['spec_path']), rolling_ctx)
+        return (sorted(errors, key=lambda x: x["spec_path"]), rolling_ctx)
 
 
 class MappingSpec(Spec):
-
     def __setitem__(self, key, item):
         raise NotImplementedError()
 
@@ -578,9 +552,6 @@ class MappingSpec(Spec):
     def __len__(self):
         return len(self.spec)
 
-    def __cmp__(self, spec):
-        return cmp(self.spec, spec) if isinstance(spec, dict) else cmp(self.spec, spec.spec)
-
     def __contains__(self, item):
         return item in self.spec
 
@@ -589,10 +560,10 @@ class MappingSpec(Spec):
             yield (key, getattr(self, key))
 
     def __unicode__(self):
-        return unicode(repr(self.spec))
+        return str_util.unicode(repr(self.spec))
 
     def copy(self):
-        name = self.name if 'name' not in self.spec and hasattr(self, 'name') else None
+        name = self.name if "name" not in self.spec and hasattr(self, "name") else None
 
         return self.__class__(self.spec.copy(), name=name, member=self.member)
 
@@ -620,25 +591,25 @@ class MappingSpec(Spec):
 
 
 class SequenceSpec(Spec, collections.MutableSequence):
-
     def __init__(self, spec, name=None, member=False):
         super(SequenceSpec, self).__init__(spec, name=name, member=member)
 
         schema = (
-            self._schema if member else
-            schema_util.merge_schema(self.get_meta_schema(), self._schema)
+            self._schema
+            if member
+            else schema_util.merge_schema(self.get_meta_schema(), self._schema)
         )
 
-        if schema.get('type') != 'array':
-            raise exc.SchemaDefinitionError('The schema for SequenceSpec must be type of array.')
+        if schema.get("type") != "array":
+            raise exc.SchemaDefinitionError("The schema for SequenceSpec must be type of array.")
 
-        if not isspec(schema.get('items')):
-            raise exc.SchemaDefinitionError('The item type for the array must be type of Spec.')
+        if not isspec(schema.get("items")):
+            raise exc.SchemaDefinitionError("The item type for the array must be type of Spec.")
 
         if not isinstance(self.spec, list):
-            raise ValueError('The spec is not type of list.')
+            raise ValueError("The spec is not type of list.")
 
-        spec_cls = schema['items']
+        spec_cls = schema["items"]
         self._items = [spec_cls(item, member=True) for item in self.spec]
 
     def __len__(self):

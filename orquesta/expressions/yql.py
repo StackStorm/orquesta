@@ -50,9 +50,9 @@ class YaqlEvaluationException(exc.ExpressionEvaluationException):
 
 
 class YAQLEvaluator(expr_base.Evaluator):
-    _type = 'yaql'
-    _delimiter = '<%>'
-    _regex_pattern = '<%.*?%>'
+    _type = "yaql"
+    _delimiter = "<%>"
+    _regex_pattern = "<%.*?%>"
     _regex_parser = re.compile(_regex_pattern)
 
     _regex_ctx_ref_pattern = r'[][a-zA-Z0-9_\'"\.()]*'
@@ -65,12 +65,12 @@ class YAQLEvaluator(expr_base.Evaluator):
     _regex_ctx_pattern = r'\bctx\([\'"]?{0}[\'"]?\)\.?{0}'.format(_regex_ctx_ref_pattern)
     _regex_ctx_var_parser = re.compile(_regex_ctx_pattern)
 
-    _regex_var = r'[a-zA-Z0-9_-]+'
+    _regex_var = r"[a-zA-Z0-9_-]+"
     _regex_var_extracts = [
-        r'(?<=\bctx\(\)\.)({})\b(?!\()\.?'.format(_regex_var),              # extract x in ctx().x
-        r'(?:\bctx\(({})\))'.format(_regex_var),                            # extract x in ctx(x)
-        r'(?:\bctx\(\'({})\'\))'.format(_regex_var),                        # extract x in ctx('x')
-        r'(?:\bctx\("({})"\))'.format(_regex_var)                           # extract x in ctx("x")
+        r"(?<=\bctx\(\)\.)({})\b(?!\()\.?".format(_regex_var),  # extract x in ctx().x
+        r"(?:\bctx\(({})\))".format(_regex_var),  # extract x in ctx(x)
+        r"(?:\bctx\(\'({})\'\))".format(_regex_var),  # extract x in ctx('x')
+        r'(?:\bctx\("({})"\))'.format(_regex_var),  # extract x in ctx("x")
     ]
 
     _engine = yaql.language.factory.YaqlFactory().create()
@@ -85,13 +85,13 @@ class YAQLEvaluator(expr_base.Evaluator):
         # But some built-in Python type values (e.g. list and dict) don't have __hash__() method.
         # The convert_input_data method parses specified variable and convert it to hashable one.
         if isinstance(data, yaql_utils.SequenceType) or isinstance(data, yaql_utils.MappingType):
-            ctx['__vars'] = yaql_utils.convert_input_data(data)
+            ctx["__vars"] = yaql_utils.convert_input_data(data)
         else:
-            ctx['__vars'] = data or {}
+            ctx["__vars"] = data or {}
 
-        ctx['__state'] = ctx['__vars'].get('__state')
-        ctx['__current_task'] = ctx['__vars'].get('__current_task')
-        ctx['__current_item'] = ctx['__vars'].get('__current_item')
+        ctx["__state"] = ctx["__vars"].get("__state")
+        ctx["__current_task"] = ctx["__vars"].get("__current_task")
+        ctx["__current_item"] = ctx["__vars"].get("__current_item")
 
         return ctx
 
@@ -112,7 +112,7 @@ class YAQLEvaluator(expr_base.Evaluator):
     @classmethod
     def validate(cls, text):
         if not isinstance(text, six.string_types):
-            raise ValueError('Text to be evaluated is not typeof string.')
+            raise ValueError("Text to be evaluated is not typeof string.")
 
         errors = []
 
@@ -127,10 +127,10 @@ class YAQLEvaluator(expr_base.Evaluator):
     @classmethod
     def evaluate(cls, text, data=None):
         if not isinstance(text, six.string_types):
-            raise ValueError('Text to be evaluated is not typeof string.')
+            raise ValueError("Text to be evaluated is not typeof string.")
 
         if data and not isinstance(data, dict):
-            raise ValueError('Provided data is not typeof dict.')
+            raise ValueError("Provided data is not typeof dict.")
 
         output = str_util.unicode(text)
         exprs = cls._regex_parser.findall(text)
@@ -153,7 +153,7 @@ class YAQLEvaluator(expr_base.Evaluator):
                     output = str_util.unicode(result)
 
         except KeyError as e:
-            error = str(getattr(e, 'message', e)).strip("'")
+            error = str(getattr(e, "message", e)).strip("'")
             msg = "Unable to resolve key '%s' in expression '%s' from context."
             raise YaqlEvaluationException(msg % (error, expr))
         except (yaql_exc.YaqlException, ValueError, TypeError) as e:
@@ -168,7 +168,7 @@ class YAQLEvaluator(expr_base.Evaluator):
     @classmethod
     def extract_vars(cls, text):
         if not isinstance(text, six.string_types):
-            raise ValueError('Text to be evaluated is not typeof string.')
+            raise ValueError("Text to be evaluated is not typeof string.")
 
         results = [
             cls._regex_ctx_var_parser.findall(expr.strip(cls._delimiter).strip())
