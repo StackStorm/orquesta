@@ -55,6 +55,10 @@ reqs: venv
 schemas: reqs
 	$(VENV_DIR)/bin/python bin/orquesta-generate-schemas
 
+.PHONY: format
+format:
+	$(VENV_DIR)/bin/black orquesta
+
 .PHONY: check
 check:
 	tox
