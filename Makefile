@@ -77,7 +77,11 @@ livedocs: reqs
 package:
 	rm -rf $(PKGDISTDIR)
 	rm -rf $(PKGBUILDDIR)
-	$(PY3) setup.py sdist bdist_wheel
+	$(VENV_DIR)/bin/python setup.py sdist bdist_wheel
+
+.PHONY: publish
+publish: package
+	$(VENV_DIR)/bin/python -m twine upload dist/*
 
 .PHONY: all
 all: clean reqs schemas check package
