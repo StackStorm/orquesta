@@ -19,32 +19,44 @@ import inspect
 import json
 import os
 import six
+import sys
 
 from orquesta.specs import mistral
 from orquesta.specs import native
 
 
-workflow_models = {
-	'orquesta': native.WorkflowSpec,
-	'mistral': mistral.WorkflowSpec
-}
+workflow_models = {"orquesta": native.WorkflowSpec, "mistral": mistral.WorkflowSpec}
 
 
 def main():
-	scripts_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-	schemas_dir = scripts_dir + '/../docs/source/schemas'
+    diff = 0
+    scripts_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    schemas_dir = scripts_dir + "/../docs/source/schemas"
 
-	for name, model in six.iteritems(workflow_models):
-		schema_text = json.dumps(model.get_schema(), indent=4)
-		print('Generated schema for the "%s" model.' % name)
+    for name, model in six.iteritems(workflow_models):
+        new_schema_text = json.dumps(model.get_schema(), indent=4) + "\n"
+        print('Generated schema for the "%s" model.' % name)
 
-		schema_file = os.path.abspath(schemas_dir + '/' + name + '.json')
-		print('Schema will be written to "%s".' % schema_file)
+        schema_file = os.path.abspath(schemas_dir + "/" + name + ".json")
+        print('Schema will be written to "%s".' % schema_file)
 
-		with open(schema_file, 'w') as f:
-			f.write(schema_text)
-			f.write('\n')
+        if os.path.isfile(schema_file):
+            with open(schema_file, "r") as f:
+                old_schema_text = f.read()
+                if old_schema_text != new_schema_text:
+                    diff = 1
+
+        with open(schema_file, "w") as f:
+            f.write(new_schema_text)
+
+    if diff == 1:
+        print(
+            "ERROR: There are uncommitted changes to the schema files. "
+            "Please run `make schemas` and commit the changes."
+        )
+
+    sys.exit(diff)
 
 
-if __name__ == '__main__':
-	main()
+if __name__ == "__main__":
+    main()
