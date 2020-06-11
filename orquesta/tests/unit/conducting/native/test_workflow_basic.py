@@ -13,9 +13,11 @@
 # limitations under the License.
 
 from orquesta.tests.unit.conducting.native import base
+from orquesta import conduct_mock
+from orquesta.tests.unit.base import WorkflowComposerTest
 
 
-class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
+class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowComposerTest):
     def test_sequential(self):
         wf_name = "sequential"
 
@@ -30,14 +32,17 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_output = {"greeting": mock_results[2]}
 
         self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = conduct_mock.WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             inputs={"name": "Stanley"},
             mock_results=mock_results,
             expected_output=expected_output,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_parallel(self):
         wf_name = "parallel"

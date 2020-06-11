@@ -90,7 +90,16 @@ class Spec(object):
         return self.__getattribute__(name)
 
     def __init__(self, spec, name=None, member=False):
-        # Update the schema to include schema parts from parent classes.
+        """
+        :param spec: json
+        :param name: str
+        :param member: boolean 
+            if True then property_specs  and
+            regex_property_specs are calcuated using  
+            only self._schema
+            if False property_specs and regex_property_specs are combined from
+            self._schema and self._meta_schema
+        """
         self._schema = self.get_schema(includes=None, resolve_specs=False)
         self._meta_schema = self.get_meta_schema()
 
@@ -128,7 +137,7 @@ class Spec(object):
         regex_property_specs = {
             k: v for k, v in six.iteritems(schema.get("patternProperties", {})) if isspec(v)
         }
-
+        # regex_property_specs are member=True so they don't use meta_schema
         for pattern, spec_cls in six.iteritems(regex_property_specs):
             for name, value in six.iteritems(self.spec):
                 if re.match(pattern, name) and value:
