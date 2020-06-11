@@ -71,8 +71,7 @@ class Fixture(object):
                                           expected_term_tasks=expected_term_tasks)
         conductor.assert_conducting_sequences()
 
-
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser("Stackstorm Workflow Testing")
     parser.add_argument("--loglevel",
                         type=str,
@@ -91,3 +90,6 @@ if __name__ == "__main__":
     LOG.setLevel(numeric_level)
     fixture = Fixture.load_from_file(args.fixture)
     fixture.run_test()
+
+if __name__ == "__main__":
+    main()

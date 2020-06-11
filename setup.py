@@ -87,5 +87,8 @@ setup(
             "result = orquesta.expressions.functions.workflow:result_",
         ],
         "orquesta.tests": ["fake = orquesta.tests.unit.utils.test_plugin:FakePlugin"],
+        "console_scripts": [
+            "orquesta-test = orquesta.fixture_mock:main"
+        ]
     },
 )
