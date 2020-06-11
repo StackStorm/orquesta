@@ -33,7 +33,6 @@ class TaskSpecTest(unittest.TestCase):
         errors = fixture_spec.inspect()
         self.assertEqual(len(errors), 0)
 
-
     def test_missing_file(self):
         mock_fixture_def = """
                 version: 1.0
