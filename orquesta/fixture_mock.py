@@ -23,17 +23,23 @@ LOG = logging.getLogger(__name__)
 
 
 class Fixture(object):
-
     def __init__(self, spec):
         """Fixture for testing workflow
 
         :param spec: TestFileSpec
         """
         self.fixture_spec = spec
+        self.workflow_errors = []
         if not isinstance(spec, TestFileSpec):
             raise exc.IncorrectSpec
+        errors = self.fixture_spec.inspect()
+        if len(errors) > 0:
+            for error in errors:
+                self.workflow_errors.append(error)
+                LOG.error(error)
+            raise exc.FixtureMockSpecError
+
         self.workflow_spec = self.load_wf_spec(self.fixture_spec.file)
-        self.workflow_errors = []
 
     @classmethod
     def load_from_file(cls, filepath):
@@ -54,7 +60,7 @@ class Fixture(object):
                 for error in errors:
                     self.workflow_errors.append(error)
                     LOG.error(error)
-                raise exc.FixtureMockSpecError
+                raise exc.WorkflowSpecError
             return wf_spec
 
     def run_test(self):
@@ -74,31 +80,25 @@ class Fixture(object):
         expected_output = self.fixture_spec.expected_output
         expected_term_tasks = self.fixture_spec.expected_term_tasks
 
-        conductor = WorkflowConductorMock(self.workflow_spec,
-                                          expected_task_seq,
-                                          inputs=inputs,
-                                          expected_routes=expected_routes,
-                                          mock_statuses=mock_statuses,
-                                          mock_results=mock_results,
-                                          expected_workflow_status=expected_workflow_status,
-                                          expected_output=expected_output,
-                                          expected_term_tasks=expected_term_tasks)
+        conductor = WorkflowConductorMock(
+            self.workflow_spec,
+            expected_task_seq,
+            inputs=inputs,
+            expected_routes=expected_routes,
+            mock_statuses=mock_statuses,
+            mock_results=mock_results,
+            expected_workflow_status=expected_workflow_status,
+            expected_output=expected_output,
+            expected_term_tasks=expected_term_tasks,
+        )
         conductor.assert_conducting_sequences()
 
 
 def main():
 
     parser = argparse.ArgumentParser("Stackstorm Workflow Testing")
-    parser.add_argument("--loglevel",
-                        type=str,
-                        help="set logging level",
-                        default="info")
-    parser.add_argument("-f",
-                        "--fixture",
-                        type=str,
-                        help="fixture file path",
-                        required=True
-                        )
+    parser.add_argument("--loglevel", type=str, help="set logging level", default="info")
+    parser.add_argument("-f", "--fixture", type=str, help="fixture file path", required=True)
     args = parser.parse_args()
     numeric_level = getattr(logging, args.loglevel.upper(), None)
     if not isinstance(numeric_level, int):

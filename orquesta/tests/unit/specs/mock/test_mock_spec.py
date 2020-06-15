@@ -18,7 +18,6 @@ from orquesta.specs.mock.models import TestFileSpec
 
 
 class TaskSpecTest(unittest.TestCase):
-
     def test_spec(self):
         mock_fixture_def = """
                 version: 1.0

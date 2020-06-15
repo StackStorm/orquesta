@@ -20,7 +20,6 @@ from orquesta.tests.unit.conducting.native import base
 
 
 class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowComposerTest):
-
     def test_sequential(self):
         wf_name = "sequential"
 
@@ -48,7 +47,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
             expected_output=expected_output,
             expected_term_tasks=expected_term_tasks,
             expected_workflow_status=expected_workflow_status,
-            expected_routes=expected_routes
+            expected_routes=expected_routes,
         )
         # will throw
         mock.assert_conducting_sequences()
@@ -79,7 +78,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
             mock_results=mock_results,
             expected_workflow_status=expected_workflow_status,
             expected_output=expected_output,
-            expected_term_tasks=expected_term_tasks
+            expected_term_tasks=expected_term_tasks,
         )
         # will throw
         self.assertRaises(exc.TermsEquality, mock.assert_conducting_sequences)

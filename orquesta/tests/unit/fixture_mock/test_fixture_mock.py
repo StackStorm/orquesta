@@ -25,7 +25,6 @@ from orquesta.tests.unit.conducting.native import base
 
 
 class FixtureTest(base.OrchestraWorkflowConductorTest):
-
     @mock.patch("orquesta.fixture_mock.Fixture.load_wf_spec")
     def test_run_test_throw(self, load_wf_spec):
 

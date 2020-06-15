@@ -39,17 +39,18 @@ class WorkflowConductorMock(object):
 
     spec_module_name = "mock"
 
-    def __init__(self,
-                 wf_spec,
-                 expected_task_seq,
-                 expected_routes=None,
-                 inputs=None,
-                 mock_statuses=None,
-                 mock_results=None,
-                 expected_workflow_status=None,
-                 expected_output=None,
-                 expected_term_tasks=None,
-                 ):
+    def __init__(
+        self,
+        wf_spec,
+        expected_task_seq,
+        expected_routes=None,
+        inputs=None,
+        mock_statuses=None,
+        mock_results=None,
+        expected_workflow_status=None,
+        expected_output=None,
+        expected_term_tasks=None,
+    ):
 
         """accepts a workflow spec and different results to check
 
@@ -168,8 +169,8 @@ class WorkflowConductorMock(object):
 
         if self.expected_term_tasks:
             expected_term_tasks = [
-                (task, 0) if not isinstance(task, tuple) else
-                task for task in self.expected_term_tasks
+                (task, 0) if not isinstance(task, tuple) else task
+                for task in self.expected_term_tasks
             ]
 
             term_tasks = conductor.workflow_state.get_terminal_tasks()

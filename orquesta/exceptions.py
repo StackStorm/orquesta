@@ -21,6 +21,10 @@ class IncorrectSpec(Exception):
     pass
 
 
+class WorkflowSpecError(Exception):
+    pass
+
+
 class FixtureMockSpecError(Exception):
     pass
 
