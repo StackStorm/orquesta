@@ -30,12 +30,13 @@ class Fixture(object):
         """
         self.fixture_spec = spec
         self.workflow_errors = []
+        self.fixture_errors = []
         if not isinstance(spec, TestFileSpec):
             raise exc.IncorrectSpec
         errors = self.fixture_spec.inspect()
         if len(errors) > 0:
             for error in errors:
-                self.workflow_errors.append(error)
+                self.fixture_errors.append(error)
                 LOG.error(error)
             raise exc.FixtureMockSpecError
 
