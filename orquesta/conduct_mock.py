@@ -12,18 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 import json
+import logging
 import os
 import yaml
 
 from six.moves import queue
 
+from orquesta import conducting
 from orquesta import events
 from orquesta import exceptions as exc
 from orquesta.specs import loader as spec_loader
 from orquesta import statuses
-from orquesta import conducting
 
 
 LOG = logging.getLogger(__name__)
@@ -32,10 +32,13 @@ FIXTURE_EXTS = {".json": json.load, ".yml": yaml.safe_load, ".yaml": yaml.safe_l
 
 
 class WorkflowConductorMock(object):
+
+    """read fixture for workflow yaml, inputs, and what to check.
+
     """
-    read fixture for workflow yaml, inputs, and what to check.
-    """
+
     spec_module_name = "mock"
+
     def __init__(self,
                  wf_spec,
                  expected_task_seq,
@@ -47,8 +50,9 @@ class WorkflowConductorMock(object):
                  expected_output=None,
                  expected_term_tasks=None,
                  ):
-        """
-        accepts a workflow spec and different results to check
+
+        """accepts a workflow spec and different results to check
+
         :param wf_spec: WorkflowSpec, str
         :param expected_task_seq: list[str]
         :param expected_routes: list
@@ -58,7 +62,6 @@ class WorkflowConductorMock(object):
         :param expected_workflow_status: list
         :param expected_output:
         :param expected_term_tasks: list[str]
-
         """
 
         if isinstance(wf_spec, str):
@@ -94,7 +97,6 @@ class WorkflowConductorMock(object):
         if self.mock_results:
             for item in mock_results:
                 self.result_q.put(item)
-
 
     def assert_conducting_sequences(self):
         conductor = conducting.WorkflowConductor(self.wf_spec, inputs=self.inputs)
@@ -166,7 +168,8 @@ class WorkflowConductorMock(object):
 
         if self.expected_term_tasks:
             expected_term_tasks = [
-                (task, 0) if not isinstance(task, tuple) else task for task in self.expected_term_tasks
+                (task, 0) if not isinstance(task, tuple) else
+                task for task in self.expected_term_tasks
             ]
 
             term_tasks = conductor.workflow_state.get_terminal_tasks()
@@ -180,10 +183,13 @@ class WorkflowConductorMock(object):
 
     @staticmethod
     def get_fixture_content(file_path, raw=False):
-        """
+
+        """get fixture contents from file path
+
         :param file_path: str
         :param raw: boolean
         """
+
         file_name, file_ext = os.path.splitext(file_path)
 
         if file_ext not in FIXTURE_EXTS.keys():

@@ -1,19 +1,32 @@
-"""
-loads a test fixture and calls the workflow conductor
-"""
+# Copyright 2019 Extreme Networks, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import argparse
 import logging
-from orquesta.specs.mock.models import TestFileSpec
-from orquesta.specs.native.v1.models import WorkflowSpec
 from orquesta.conduct_mock import WorkflowConductorMock
 import orquesta.exceptions as exc
+from orquesta.specs.mock.models import TestFileSpec
+from orquesta.specs.native.v1.models import WorkflowSpec
 
 LOG = logging.getLogger(__name__)
+
 
 class Fixture(object):
 
     def __init__(self, spec):
-        """
+        """Fixture for testing workflow
+
         :param spec: TestFileSpec
         """
         self.fixture_spec = spec
@@ -29,8 +42,8 @@ class Fixture(object):
             return cls(fixture_spec)
 
     def load_wf_spec(self, input_file):
-        """
-        load a workflow spec from a file
+        """load a workflow spec from a file
+
         :param input_file: str
         """
         with open(input_file, "r") as f:
@@ -45,10 +58,11 @@ class Fixture(object):
             return wf_spec
 
     def run_test(self):
-        """
-        read fixture spec file
+        """read fixture spec file
+
         perform test of spec against all expected properties
-        returns list[str]
+
+        :return: list[str]
         """
         expected_task_seq = self.fixture_spec.expected_task_seq
         expected_output = self.fixture_spec.expected_output
@@ -71,7 +85,9 @@ class Fixture(object):
                                           expected_term_tasks=expected_term_tasks)
         conductor.assert_conducting_sequences()
 
+
 def main():
+
     parser = argparse.ArgumentParser("Stackstorm Workflow Testing")
     parser.add_argument("--loglevel",
                         type=str,
@@ -90,6 +106,7 @@ def main():
     LOG.setLevel(numeric_level)
     fixture = Fixture.load_from_file(args.fixture)
     fixture.run_test()
+
 
 if __name__ == "__main__":
     main()

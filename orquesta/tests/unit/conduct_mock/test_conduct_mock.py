@@ -12,13 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.tests.unit.conducting.native import base
 from orquesta import conduct_mock
-from orquesta.tests.unit.base import WorkflowComposerTest
 from orquesta import exceptions as exc
 from orquesta import statuses
+from orquesta.tests.unit.base import WorkflowComposerTest
+from orquesta.tests.unit.conducting.native import base
+
 
 class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowComposerTest):
+
     def test_sequential(self):
         wf_name = "sequential"
 
@@ -176,7 +178,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
             "Stanley, All your base are belong to us!",
         ]
 
-        expected_output = {"greeting": mock_results[2], "exception":True}
+        expected_output = {"greeting": mock_results[2], "exception": True}
 
         self.assert_spec_inspection(wf_name)
         wf_def = self.get_wf_def(wf_name)

@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.tests.unit.conducting.native import base
 from orquesta import conduct_mock
 from orquesta.tests.unit.base import WorkflowComposerTest
+from orquesta.tests.unit.conducting.native import base
 
 
 class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowComposerTest):

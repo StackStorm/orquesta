@@ -16,10 +16,9 @@ import unittest
 
 from orquesta.specs.mock.models import TestFileSpec
 
+
 class TaskSpecTest(unittest.TestCase):
-    """
-    test reading of spec from yaml
-    """
+
     def test_spec(self):
         mock_fixture_def = """
                 version: 1.0

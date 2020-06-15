@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+import re
+
 import collections
 import inspect
 import json
 import jsonschema
-import logging
-import re
 import six
 import yaml
 
@@ -90,12 +91,13 @@ class Spec(object):
         return self.__getattribute__(name)
 
     def __init__(self, spec, name=None, member=False):
-        """
+        """jsonSchema specifications
+
         :param spec: json
         :param name: str
-        :param member: boolean 
+        :param member: boolean
             if True then property_specs  and
-            regex_property_specs are calcuated using  
+            regex_property_specs are calcuated using
             only self._schema
             if False property_specs and regex_property_specs are combined from
             self._schema and self._meta_schema
