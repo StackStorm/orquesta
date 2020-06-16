@@ -107,6 +107,7 @@ def main():
     LOG.setLevel(numeric_level)
     fixture = Fixture.load_from_file(args.fixture)
     fixture.run_test()
+    print(args.fixture + " test successful")
 
 
 if __name__ == "__main__":
