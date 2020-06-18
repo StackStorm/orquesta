@@ -61,12 +61,12 @@ class TaskSpecTest(unittest.TestCase):
                         var2: 2
 
                 mock_statuses:
-                    - false
-                    - true
+                    - "succeeded"
+                    - "succeeded"
                 mock_results:
                     - false
                     - true
-                expected_workflow_status: false
+                expected_workflow_status: "succeeded"
                 expected_output:
                     output:
                         parm1: false
