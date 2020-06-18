@@ -46,9 +46,7 @@ class Fixture(object):
             else:
                 LOG.error(errors)
             raise exc.FixtureMockSpecError
-        self.full_workflow_path = os.path.join(
-            self.workflow_path, self.fixture_spec.file
-        )
+        self.full_workflow_path = os.path.join(self.workflow_path, self.fixture_spec.file)
         self.workflow_spec = self.load_wf_spec(self.full_workflow_path)
 
     @classmethod
@@ -104,15 +102,12 @@ class Fixture(object):
         )
         conductor.assert_conducting_sequences()
 
+
 def main():
 
     parser = argparse.ArgumentParser("Stackstorm Workflow Testing")
-    parser.add_argument(
-        "--loglevel", type=str, help="set logging level", default="info"
-    )
-    parser.add_argument(
-        "-f", "--fixture", type=str, help="fixture file ", required=True
-    )
+    parser.add_argument("--loglevel", type=str, help="set logging level", default="info")
+    parser.add_argument("-f", "--fixture", type=str, help="fixture file ", required=True)
     parser.add_argument(
         "-p", "--workflow_path", type=str, help="path to workflow file", required=True
     )
