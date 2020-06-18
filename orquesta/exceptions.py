@@ -163,6 +163,10 @@ class WorkflowTestException(Exception):
     pass
 
 
+class MockConductorError(WorkflowTestException):
+    pass
+
+
 class TaskEquality(WorkflowTestException):
     pass
 

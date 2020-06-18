@@ -114,7 +114,6 @@ class WorkflowConductorMock(object):
         while not self.run_q.empty():
             # Deserialize workflow conductor to mock async execution.
             conductor = conducting.WorkflowConductor.deserialize(wf_conducting_state)
-
             # Process all the tasks in the run queue.
             while not self.run_q.empty():
                 current_task = self.run_q.get()
@@ -131,7 +130,6 @@ class WorkflowConductorMock(object):
 
                 ac_ex_event = events.ActionExecutionEvent(status, result=result)
                 conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
-
             # Identify the next set of tasks.
             for next_task in conductor.get_next_tasks():
                 self.run_q.put(next_task)
@@ -148,7 +146,13 @@ class WorkflowConductorMock(object):
             for task_seq in self.expected_task_seq
         ]
 
+        if len(conductor.errors) > 0:
+            LOG.error(conductor.errors)
+            raise exc.MockConductorError
+
         if actual_task_seq != expected_task_seq:
+            LOG.error("Actual task Seq: %s", str(actual_task_seq))
+            LOG.error("Expected Task Seq: %s", str(expected_task_seq))
             raise exc.TaskEquality
 
         if conductor.workflow_state.routes != self.expected_routes:

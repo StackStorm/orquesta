@@ -14,6 +14,9 @@
 
 import argparse
 import logging
+import os
+from pprint import pformat
+
 from orquesta.conduct_mock import WorkflowConductorMock
 import orquesta.exceptions as exc
 from orquesta.specs.mock.models import TestFileSpec
@@ -23,30 +26,36 @@ LOG = logging.getLogger(__name__)
 
 
 class Fixture(object):
-    def __init__(self, spec):
+    def __init__(self, spec, workflow_path, pprint=False):
         """Fixture for testing workflow
 
         :param spec: TestFileSpec
+        :param workflow_spec: str - directory containing file named in
+        fixture
+        :param cmd: boolean - True to prettyprint errors
         """
+        self.workflow_path = workflow_path
         self.fixture_spec = spec
-        self.workflow_errors = []
-        self.fixture_errors = []
+        self.pprint = pprint
         if not isinstance(spec, TestFileSpec):
             raise exc.IncorrectSpec
         errors = self.fixture_spec.inspect()
         if len(errors) > 0:
-            for error in errors:
-                self.fixture_errors.append(error)
-                LOG.error(error)
+            if self.pprint:
+                LOG.error(pformat(errors))
+            else:
+                LOG.error(errors)
             raise exc.FixtureMockSpecError
-
-        self.workflow_spec = self.load_wf_spec(self.fixture_spec.file)
+        self.full_workflow_path = os.path.join(
+            self.workflow_path, self.fixture_spec.file
+        )
+        self.workflow_spec = self.load_wf_spec(self.full_workflow_path)
 
     @classmethod
-    def load_from_file(cls, filepath):
-        with open(filepath, "r") as f:
+    def load_from_file(cls, workflow_path, fixture_filename, pprint):
+        with open(fixture_filename, "r") as f:
             fixture_spec = TestFileSpec(f.read(), "")
-            return cls(fixture_spec)
+            return cls(fixture_spec, workflow_path, pprint)
 
     def load_wf_spec(self, input_file):
         """load a workflow spec from a file
@@ -58,9 +67,10 @@ class Fixture(object):
             wf_spec = WorkflowSpec(workflow_def, "native")
             errors = wf_spec.inspect()
             if len(errors) > 0:
-                for error in errors:
-                    self.workflow_errors.append(error)
-                    LOG.error(error)
+                if self.pprint:
+                    LOG.error(pformat(errors))
+                else:
+                    LOG.error(errors)
                 raise exc.WorkflowSpecError
             return wf_spec
 
@@ -94,18 +104,24 @@ class Fixture(object):
         )
         conductor.assert_conducting_sequences()
 
-
 def main():
 
     parser = argparse.ArgumentParser("Stackstorm Workflow Testing")
-    parser.add_argument("--loglevel", type=str, help="set logging level", default="info")
-    parser.add_argument("-f", "--fixture", type=str, help="fixture file path", required=True)
+    parser.add_argument(
+        "--loglevel", type=str, help="set logging level", default="info"
+    )
+    parser.add_argument(
+        "-f", "--fixture", type=str, help="fixture file ", required=True
+    )
+    parser.add_argument(
+        "-p", "--workflow_path", type=str, help="path to workflow file", required=True
+    )
     args = parser.parse_args()
     numeric_level = getattr(logging, args.loglevel.upper(), None)
     if not isinstance(numeric_level, int):
         raise ValueError("Invalid log level: %s" % args.loglevel)
-    LOG.setLevel(numeric_level)
-    fixture = Fixture.load_from_file(args.fixture)
+    logging.basicConfig(level=numeric_level)
+    fixture = Fixture.load_from_file(args.workflow_path, args.fixture, True)
     fixture.run_test()
     print(args.fixture + " test successful")
 

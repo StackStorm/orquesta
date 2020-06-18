@@ -44,7 +44,8 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
             - "exception"
         """
         spec = TestFileSpec(spec_yaml, "fixture")
-        fixture = Fixture(spec)
+        workflow_path = "/tmp"
+        fixture = Fixture(spec, workflow_path)
         self.assertRaises(exc.TaskEquality, fixture.run_test)
 
     @mock.patch("orquesta.fixture_mock.Fixture.load_wf_spec")
@@ -65,5 +66,6 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
             - "continue"
         """
         spec = TestFileSpec(spec_yaml, "fixture")
-        fixture = Fixture(spec)
+        workflow_path = "/tmp"
+        fixture = Fixture(spec, workflow_path)
         fixture.run_test()

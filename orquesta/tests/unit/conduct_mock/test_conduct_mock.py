@@ -44,6 +44,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
             expected_task_seq,
             inputs={"name": "Stanley"},
             mock_results=mock_results,
+            mock_statuses=["succeeded", "succeeded", "succeeded", "succeeded"],
             expected_output=expected_output,
             expected_term_tasks=expected_term_tasks,
             expected_workflow_status=expected_workflow_status,
