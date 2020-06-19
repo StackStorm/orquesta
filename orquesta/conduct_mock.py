@@ -55,14 +55,14 @@ class WorkflowConductorMock(object):
         """accepts a workflow spec and different results to check
 
         :param wf_spec: WorkflowSpec, str
-        :param expected_task_seq: list[str]
+        :param expected_task_seq: list
         :param expected_routes: list
         :param inputs: list
         :param mock_statuses: list
         :param mock_results: list
         :param expected_workflow_status: list
         :param expected_output:
-        :param expected_term_tasks: list[str]
+        :param expected_term_tasks: list
         """
 
         if isinstance(wf_spec, str):
@@ -138,11 +138,11 @@ class WorkflowConductorMock(object):
             wf_conducting_state = conductor.serialize()
 
         actual_task_seq = [
-            (entry["id"], entry["route"]) for entry in conductor.workflow_state.sequence
+            [entry["id"], entry["route"]] for entry in conductor.workflow_state.sequence
         ]
 
         expected_task_seq = [
-            task_seq if isinstance(task_seq, tuple) else (task_seq, 0)
+            list(task_seq) if isinstance(task_seq, tuple) else [task_seq, 0]
             for task_seq in self.expected_task_seq
         ]
 
