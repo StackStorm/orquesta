@@ -142,7 +142,9 @@ class WorkflowConductorMock(object):
         ]
 
         expected_task_seq = [
-            list(task_seq) if isinstance(task_seq, tuple) else [task_seq, 0]
+            list(task_seq)
+            if isinstance(task_seq, tuple) or isinstance(task_seq, list)
+            else [task_seq, 0]
             for task_seq in self.expected_task_seq
         ]
 

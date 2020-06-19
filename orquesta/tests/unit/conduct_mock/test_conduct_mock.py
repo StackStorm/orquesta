@@ -53,21 +53,19 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
         # will throw
         mock.assert_conducting_sequences()
 
-    def test_sequential_routes(self):
+    def test_sequential_routes_list(self):
+        """Yaml does not support python tuple
+
+        """
         wf_name = "sequential"
 
-        expected_task_seq = [("task1", 0), ("task2", 0), ("task3", 0), ("continue", 0)]
+        expected_task_seq = [["task1", 0], ["task2", 0], ["task3", 0], ["continue", 0]]
 
         mock_results = [
             "Stanley",
             "All your base are belong to us!",
             "Stanley, All your base are belong to us!",
         ]
-
-        expected_output = {"greeting": mock_results[2]}
-        expected_term_tasks = ["continue", "task3"]
-        expected_workflow_status = statuses.SUCCEEDED
-        expected_routes = [[]]
 
         self.assert_spec_inspection(wf_name)
         wf_def = self.get_wf_def(wf_name)
@@ -78,10 +76,6 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
             inputs={"name": "Stanley"},
             mock_results=mock_results,
             mock_statuses=["succeeded", "succeeded", "succeeded", "succeeded"],
-            expected_output=expected_output,
-            expected_term_tasks=expected_term_tasks,
-            expected_workflow_status=expected_workflow_status,
-            expected_routes=expected_routes,
         )
         # will throw
         mock.assert_conducting_sequences()
