@@ -147,15 +147,20 @@ class WorkflowConductorMock(object):
         ]
 
         if len(conductor.errors) > 0:
-            LOG.error(conductor.errors)
-            raise exc.MockConductorError
+            # fail in workflow. These are not syntax errors since those are
+            # checked via inpect
+            # do not raise exception here because the unit test could be testing
+            # for a failure condition itself.
+            LOG.info(conductor.errors)
 
         if actual_task_seq != expected_task_seq:
-            LOG.error("Actual task Seq: %s", str(actual_task_seq))
+            LOG.error("Actual task Seq  : %s", str(actual_task_seq))
             LOG.error("Expected Task Seq: %s", str(expected_task_seq))
             raise exc.TaskEquality
 
         if conductor.workflow_state.routes != self.expected_routes:
+            LOG.error("Actual routes  : %s", str(conductor.workflow_state.routes))
+            LOG.error("Expected routes: %s", str(self.expected_routes))
             raise exc.RouteEquality
 
         if conductor.get_workflow_status() in statuses.COMPLETED_STATUSES:
@@ -165,10 +170,14 @@ class WorkflowConductorMock(object):
             self.expected_workflow_status = statuses.SUCCEEDED
 
         if conductor.get_workflow_status() != self.expected_workflow_status:
+            LOG.error("Actual workflow status  : %s", conductor.get_workflow_status())
+            LOG.error("Expected workflow status: %s", str(self.expected_workflow_status))
             raise exc.StatusEquality
 
         if self.expected_output is not None:
             if conductor.get_workflow_output() != self.expected_output:
+                LOG.error("Actual workflow output  : %s", str(conductor.get_workflow_output()))
+                LOG.error("Expected workflow output: %s", str(self.expected_output))
                 raise exc.OutputEquality
 
         if self.expected_term_tasks:
@@ -182,6 +191,8 @@ class WorkflowConductorMock(object):
             expected_term_tasks = sorted(expected_term_tasks, key=lambda x: x[0])
             actual_term_tasks = sorted(actual_term_tasks, key=lambda x: x[0])
             if actual_term_tasks != expected_term_tasks:
+                LOG.error("Actual term tasks : %s", str(actual_term_tasks))
+                LOG.error("Expected term tasks: %s", str(expected_term_tasks))
                 raise exc.TermsEquality
 
         return conductor

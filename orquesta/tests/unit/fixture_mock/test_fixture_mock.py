@@ -25,6 +25,45 @@ from orquesta.tests.unit.conducting.native import base
 
 
 class FixtureTest(base.OrchestraWorkflowConductorTest):
+    def test_load_workflow_spec_throws(self):
+
+        wf = """
+                version: 1.0
+
+                description: A basic sequential workflow.
+
+                input:
+                  - name
+
+                vars:
+                  - greeting: null
+
+                output:
+                  - greeting: <% ctx().greeting %>
+
+                tasks:
+                  task1:
+                    action: core.echo message=<% ctx().name %>
+                    next:
+                      - when: <% succeeded() %>
+                        publish: greeting=<% ctx(st2).test %>
+        """
+        spec_yaml = """
+        file: "/tmp/test"
+        expected_task_seq:
+            - "task1"
+            - "task2"
+            - "task3"
+            - "continue"
+            - "exception"
+        """
+
+        mock_open = mock.mock_open(read_data=wf)
+        with mock.patch("builtins.open", mock_open):
+            spec = TestFileSpec(spec_yaml, "fixture")
+            workflow_path = "/tmp"
+            self.assertRaises(exc.WorkflowSpecError, Fixture, spec, workflow_path)
+
     @mock.patch("orquesta.fixture_mock.Fixture.load_wf_spec")
     def test_run_test_throw(self, load_wf_spec):
 

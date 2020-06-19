@@ -20,6 +20,39 @@ from orquesta.tests.unit.conducting.native import base
 
 
 class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowComposerTest):
+    def test_sequential_fail(self):
+        wf_name = "sequential_fail"
+
+        expected_task_seq = ["task1", "task2", "task3", "fail"]
+
+        mock_results = [
+            "Stanley",
+            "All your base are belong to us!",
+            "Stanley, All your base are belong to us!",
+        ]
+
+        expected_output = {"greeting": mock_results[2]}
+        expected_term_tasks = ["task3", "fail"]
+        expected_workflow_status = statuses.FAILED
+        expected_routes = [[]]
+
+        self.assert_spec_inspection(wf_name)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = conduct_mock.WorkflowConductorMock(
+            wf_spec,
+            expected_task_seq,
+            inputs={"name": "Stanley"},
+            mock_results=mock_results,
+            mock_statuses=["succeeded", "succeeded", "succeeded", "succeeded"],
+            expected_output=expected_output,
+            expected_term_tasks=expected_term_tasks,
+            expected_workflow_status=expected_workflow_status,
+            expected_routes=expected_routes,
+        )
+        # will throw
+        mock.assert_conducting_sequences()
+
     def test_sequential(self):
         wf_name = "sequential"
 
