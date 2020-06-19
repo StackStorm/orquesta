@@ -55,15 +55,7 @@ class TestFileSpec(MappingSpec):
         "properties": {
             "file": spec_types.NONEMPTY_STRING,
             "expected_task_seq": {"type": "array"},
-            "expected_routes": {
-                "type": "array",
-                "items": {
-                    "type": "array",
-                    "items": {"type": "integer"},
-                    "uniqueItems": True,
-                    "minItems": 1,
-                },
-            },
+            "expected_routes": {"type": "array", "items": {"type": "array"}},
             "inputs": {"type": "object"},
             "mock_statuses": {"type": "array", "items": {"type": "string"}},
             "mock_results": {"type": "array"},
