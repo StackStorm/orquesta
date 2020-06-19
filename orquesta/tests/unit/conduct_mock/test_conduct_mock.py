@@ -53,10 +53,10 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
         # will throw
         mock.assert_conducting_sequences()
 
-    def test_sequential(self):
+    def test_sequential_routes(self):
         wf_name = "sequential"
 
-        expected_task_seq = ["task1", "task2", "task3", "continue"]
+        expected_task_seq = [("task1", 0), ("task2", 0), ("task3", 0), ("continue", 0)]
 
         mock_results = [
             "Stanley",
