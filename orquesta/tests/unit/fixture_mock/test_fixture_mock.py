@@ -18,6 +18,8 @@ try:
 except ImportError:
     import mock
 
+import sys
+
 import orquesta.exceptions as exc
 from orquesta.fixture_mock import Fixture
 from orquesta.specs.mock.models import TestFileSpec
@@ -59,10 +61,16 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
         """
 
         mock_open = mock.mock_open(read_data=wf)
-        with mock.patch("builtins.open", mock_open):
-            spec = TestFileSpec(spec_yaml, "fixture")
-            workflow_path = "/tmp"
-            self.assertRaises(exc.WorkflowSpecError, Fixture, spec, workflow_path)
+        if sys.version_info[0] < 3:
+            with mock.patch("__builtin__.open", mock_open):
+                spec = TestFileSpec(spec_yaml, "fixture")
+                workflow_path = "/tmp"
+                self.assertRaises(exc.WorkflowSpecError, Fixture, spec, workflow_path)
+        else:
+            with mock.patch("builtins.open", mock_open):
+                spec = TestFileSpec(spec_yaml, "fixture")
+                workflow_path = "/tmp"
+                self.assertRaises(exc.WorkflowSpecError, Fixture, spec, workflow_path)
 
     @mock.patch("orquesta.fixture_mock.Fixture.load_wf_spec")
     def test_run_test_throw(self, load_wf_spec):
