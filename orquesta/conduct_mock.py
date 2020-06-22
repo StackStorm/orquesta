@@ -153,7 +153,7 @@ class WorkflowConductorMock(object):
             # checked via inpect
             # do not raise exception here because the unit test could be testing
             # for a failure condition itself.
-            LOG.info(conductor.errors)
+            LOG.error(conductor.errors)
 
         if actual_task_seq != expected_task_seq:
             LOG.error("Actual task Seq  : %s", str(actual_task_seq))

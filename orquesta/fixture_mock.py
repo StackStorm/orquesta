@@ -107,7 +107,12 @@ def main():
 
     parser = argparse.ArgumentParser("Stackstorm Workflow Testing")
     parser.add_argument("--loglevel", type=str, help="set logging level", default="info")
-    parser.add_argument("-f", "--fixture", type=str, help="fixture file ", required=True)
+
+    # mutualy exclusive group
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("-f", "--fixture", type=str, help="fixture file ")
+    group.add_argument("-d", "--fixture_dir", type=str, help="fixture directory")
+
     parser.add_argument(
         "-p", "--workflow_path", type=str, help="path to workflow file", required=True
     )
@@ -116,9 +121,40 @@ def main():
     if not isinstance(numeric_level, int):
         raise ValueError("Invalid log level: %s" % args.loglevel)
     logging.basicConfig(level=numeric_level)
-    fixture = Fixture.load_from_file(args.workflow_path, args.fixture, True)
-    fixture.run_test()
-    print(args.fixture + " test successful")
+    # single file fixture
+    if args.fixture is not None:
+        fixture = Fixture.load_from_file(args.workflow_path, args.fixture, True)
+        fixture.run_test()
+        print(args.workflow_path + "/" + fixture.fixture_spec.file + " test successful")
+    # directory of fixtures
+    LINE_DASH = 20
+    if args.fixture_dir is not None:
+        errors = []
+        root, dirs, files = next(os.walk(args.fixture_dir))
+        LOG.info("-" * LINE_DASH)
+        LOG.info("-" * LINE_DASH)
+        for filename in files:
+            full_path = os.path.join(root, filename)
+            try:
+                LOG.info("testing %s", filename)
+                fixture = Fixture.load_from_file(args.workflow_path, full_path, True)
+                fixture.run_test()
+                LOG.info("%s/%s test successful", args.workflow_path, fixture.fixture_spec.file)
+                LOG.info("-" * LINE_DASH)
+            except exc.OrquestaException as e:
+                LOG.error(pformat(e))
+                errors.append([filename, e])
+        if len(errors) > 0:
+            LOG.error("-" * LINE_DASH)
+            LOG.error("-" * LINE_DASH)
+            LOG.error("Errors Found during testing")
+            for e in errors:
+                LOG.error("-" * LINE_DASH)
+                LOG.error("fixture: %s", e[0])
+                LOG.error("exception: %s", pformat(e[1]))
+            raise exc.OrquestaFixtureTestError
+
+
 
 
 if __name__ == "__main__":

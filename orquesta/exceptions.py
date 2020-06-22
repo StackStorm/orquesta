@@ -16,132 +16,143 @@ import logging
 
 LOG = logging.getLogger(__name__)
 
-
-class IncorrectSpec(Exception):
+class OrquestaException(Exception):
     pass
 
 
-class WorkflowSpecError(Exception):
+class OrquestaFixtureTestError(OrquestaException):
     pass
 
 
-class FixtureMockSpecError(Exception):
+class SpecException(OrquestaException):
     pass
 
 
-class PluginFactoryError(Exception):
+class IncorrectSpec(SpecException):
     pass
 
 
-class ExpressionGrammarException(Exception):
+class WorkflowSpecError(SpecException):
     pass
 
 
-class ExpressionEvaluationException(Exception):
+class FixtureMockSpecError(OrquestaException):
     pass
 
 
-class VariableUndefinedError(Exception):
+class PluginFactoryError(OrquestaException):
+    pass
+
+
+class ExpressionGrammarException(OrquestaException):
+    pass
+
+
+class ExpressionEvaluationException(OrquestaException):
+    pass
+
+
+class VariableUndefinedError(OrquestaException):
     def __init__(self, var):
         message = 'The variable "%s" is undefined.' % var
         super(VariableUndefinedError, self).__init__(message)
 
 
-class VariableInaccessibleError(Exception):
+class VariableInaccessibleError(OrquestaException):
     def __init__(self, var):
         message = 'The variable "%s" is for internal use and inaccessible.' % var
         super(VariableInaccessibleError, self).__init__(message)
 
 
-class SchemaDefinitionError(Exception):
+class SchemaDefinitionError(OrquestaException):
     pass
 
 
-class SchemaIncompatibleError(Exception):
+class SchemaIncompatibleError(OrquestaException):
     pass
 
 
-class InvalidTask(Exception):
+class InvalidTask(OrquestaException):
     def __init__(self, task_id):
         message = 'Task "%s" does not exist.' % task_id
         super(InvalidTask, self).__init__(message)
 
 
-class InvalidTaskTransition(Exception):
+class InvalidTaskTransition(OrquestaException):
     def __init__(self, src, dest):
         message = 'Task transition from "%s" to "%s" does not exist.' % (src, dest)
         super(InvalidTaskTransition, self).__init__(message)
 
 
-class AmbiguousTaskTransition(Exception):
+class AmbiguousTaskTransition(OrquestaException):
     def __init__(self, src, dest):
         message = 'More than one task transitions found from "%s" to "%s".' % (src, dest)
-        Exception.__init__(self, message)
+        OrquestaException.__init__(self, message)
 
 
-class InvalidEventType(Exception):
+class InvalidEventType(OrquestaException):
     def __init__(self, type_name, event_name):
         message = 'Event type "%s" with event "%s" is not valid.' % (type_name, event_name)
-        Exception.__init__(self, message)
+        OrquestaException.__init__(self, message)
 
 
-class InvalidEvent(Exception):
+class InvalidEvent(OrquestaException):
     def __init__(self, value):
         message = 'Event "%s" is not valid.' % value
         super(InvalidEvent, self).__init__(message)
 
 
-class InvalidStatus(Exception):
+class InvalidStatus(OrquestaException):
     def __init__(self, value):
         message = 'Status "%s" is not valid.' % value
         super(InvalidStatus, self).__init__(message)
 
 
-class InvalidStatusTransition(Exception):
+class InvalidStatusTransition(OrquestaException):
     def __init__(self, old, new):
         message = 'Status transition from "%s" to "%s" is invalid.' % (old, new)
         super(InvalidStatusTransition, self).__init__(message)
 
 
-class InvalidTaskStatusTransition(Exception):
+class InvalidTaskStatusTransition(OrquestaException):
     def __init__(self, status, event):
         message = 'Unable to process event "%s" for task in "%s" status.' % (event, status)
         super(InvalidTaskStatusTransition, self).__init__(message)
 
 
-class InvalidWorkflowStatusTransition(Exception):
+class InvalidWorkflowStatusTransition(OrquestaException):
     def __init__(self, status, event):
         message = 'Unable to process event "%s" for workflow in "%s" status.' % (event, status)
         super(InvalidWorkflowStatusTransition, self).__init__(message)
 
 
-class InvalidTaskStateEntry(Exception):
+class InvalidTaskStateEntry(OrquestaException):
     def __init__(self, task_id):
         message = 'Task "%s" is not staged or has not started yet.' % task_id
         super(InvalidTaskStateEntry, self).__init__(message)
 
 
-class WorkflowInspectionError(Exception):
+class WorkflowInspectionError(OrquestaException):
     def __init__(self, errors):
         message = "Workflow definition failed inspection."
         super(WorkflowInspectionError, self).__init__(message, errors)
 
 
-class WorkflowContextError(Exception):
+class WorkflowContextError(OrquestaException):
     pass
 
 
-class WorkflowLogEntryError(Exception):
+class WorkflowLogEntryError(OrquestaException):
     pass
 
 
-class WorkflowIsActiveAndNotRerunableError(Exception):
+class WorkflowIsActiveAndNotRerunableError(OrquestaException):
     def __init__(self):
         message = "Unable to rerun workflow because it is not in a completed state."
         super(WorkflowIsActiveAndNotRerunableError, self).__init__(message)
 
 
-class InvalidTaskRerunRequest(Exception):
+class InvalidTaskRerunRequest(OrquestaException):
     def __init__(self, tasks):
         tasks_str = ""
 
@@ -153,13 +164,13 @@ class InvalidTaskRerunRequest(Exception):
         super(InvalidTaskRerunRequest, self).__init__(message % tasks_str)
 
 
-class UnreachableJoinError(Exception):
+class UnreachableJoinError(OrquestaException):
     def __init__(self, task_id, route):
         message = 'The join task|route "%s|%s" is partially satisfied but unreachable.'
         super(UnreachableJoinError, self).__init__(message % (task_id, route))
 
 
-class WorkflowTestException(Exception):
+class WorkflowTestException(OrquestaException):
     pass
 
 
