@@ -142,6 +142,7 @@ def main():
                 LOG.info("%s/%s test successful", args.workflow_path, fixture.fixture_spec.file)
                 LOG.info("-" * LINE_DASH)
             except exc.OrquestaException as e:
+                LOG.error("Error: ")
                 LOG.error(pformat(e))
                 errors.append([filename, e])
         if len(errors) > 0:
@@ -153,8 +154,6 @@ def main():
                 LOG.error("fixture: %s", e[0])
                 LOG.error("exception: %s", pformat(e[1]))
             raise exc.OrquestaFixtureTestError
-
-
 
 
 if __name__ == "__main__":
