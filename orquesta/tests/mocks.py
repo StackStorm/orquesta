@@ -12,18 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
 import json
 import logging
 import os
+from pprint import pformat
 import yaml
 
 from six.moves import queue
 
 from orquesta import conducting
 from orquesta import events
-from orquesta import exceptions as exc
 from orquesta.specs import loader as spec_loader
+from orquesta.specs.mock.models import TestFileSpec
+from orquesta.specs.native.v1.models import WorkflowSpec
 from orquesta import statuses
+from orquesta.tests import exceptions as exc
 
 
 LOG = logging.getLogger(__name__)
@@ -215,3 +219,140 @@ class WorkflowConductorMock(object):
 
         with open(file_path, "r") as fd:
             return FIXTURE_EXTS[file_ext](fd) if not raw else fd.read()
+
+
+class Fixture(object):
+    def __init__(self, spec, workflow_path, pprint=False):
+        """Fixture for testing workflow
+
+        :param spec: TestFileSpec
+        :param workflow_spec: str - directory containing file named in
+        fixture
+        :param cmd: boolean - True to prettyprint errors
+        """
+        self.workflow_path = workflow_path
+        self.fixture_spec = spec
+        self.pprint = pprint
+        if not isinstance(spec, TestFileSpec):
+            raise exc.IncorrectSpec
+        errors = self.fixture_spec.inspect()
+        if len(errors) > 0:
+            if self.pprint:
+                LOG.error(pformat(errors))
+            else:
+                LOG.error(errors)
+            raise exc.FixtureMockSpecError
+        self.full_workflow_path = os.path.join(self.workflow_path, self.fixture_spec.file)
+        self.workflow_spec = self.load_wf_spec(self.full_workflow_path)
+
+    @classmethod
+    def load_from_file(cls, workflow_path, fixture_filename, pprint):
+        with open(fixture_filename, "r") as f:
+            fixture_spec = TestFileSpec(f.read(), "")
+            return cls(fixture_spec, workflow_path, pprint)
+
+    def load_wf_spec(self, input_file):
+        """load a workflow spec from a file
+
+        :param input_file: str
+        """
+        with open(input_file, "r") as f:
+            workflow_def = f.read()
+            wf_spec = WorkflowSpec(workflow_def, "native")
+            errors = wf_spec.inspect()
+            if len(errors) > 0:
+                if self.pprint:
+                    LOG.error(pformat(errors))
+                else:
+                    LOG.error(errors)
+                raise exc.WorkflowSpecError
+            return wf_spec
+
+    def run_test(self):
+        """read fixture spec file
+
+        perform test of spec against all expected properties
+
+        :return: list[str]
+        """
+        expected_task_seq = self.fixture_spec.expected_task_seq
+        expected_output = self.fixture_spec.expected_output
+        inputs = self.fixture_spec.inputs
+        expected_routes = self.fixture_spec.expected_routes
+        mock_statuses = self.fixture_spec.mock_statuses
+        mock_results = self.fixture_spec.mock_results
+        expected_workflow_status = self.fixture_spec.expected_workflow_status
+        expected_output = self.fixture_spec.expected_output
+        expected_term_tasks = self.fixture_spec.expected_term_tasks
+
+        conductor = WorkflowConductorMock(
+            self.workflow_spec,
+            expected_task_seq,
+            inputs=inputs,
+            expected_routes=expected_routes,
+            mock_statuses=mock_statuses,
+            mock_results=mock_results,
+            expected_workflow_status=expected_workflow_status,
+            expected_output=expected_output,
+            expected_term_tasks=expected_term_tasks,
+        )
+        conductor.assert_conducting_sequences()
+
+
+def main():
+
+    parser = argparse.ArgumentParser("Stackstorm Workflow Testing")
+    parser.add_argument("--loglevel", type=str, help="set logging level", default="info")
+
+    # mutualy exclusive group
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("-f", "--fixture", type=str, help="fixture file ")
+    group.add_argument("-d", "--fixture_dir", type=str, help="fixture directory")
+
+    parser.add_argument(
+        "-p", "--workflow_path", type=str, help="path to workflow file", required=True
+    )
+    args = parser.parse_args()
+    numeric_level = getattr(logging, args.loglevel.upper(), None)
+    if not isinstance(numeric_level, int):
+        raise ValueError("Invalid log level: %s" % args.loglevel)
+    logging.basicConfig(level=numeric_level)
+    # single file fixture
+    if args.fixture is not None:
+        fixture = Fixture.load_from_file(args.workflow_path, args.fixture, True)
+        fixture.run_test()
+        print(args.workflow_path + "/" + fixture.fixture_spec.file + " test successful")
+    # directory of fixtures
+    LINE_DASH = 20
+    if args.fixture_dir is not None:
+        errors = []
+        root, dirs, files = next(os.walk(args.fixture_dir))
+        LOG.info("-" * LINE_DASH)
+        LOG.info("-" * LINE_DASH)
+        for filename in files:
+            full_path = os.path.join(root, filename)
+            try:
+                LOG.info("testing %s", filename)
+                fixture = Fixture.load_from_file(args.workflow_path, full_path, True)
+                fixture.run_test()
+                LOG.info(
+                    "%s/%s test successful", args.workflow_path, fixture.fixture_spec.file,
+                )
+                LOG.info("-" * LINE_DASH)
+            except exc.OrquestaException as e:
+                LOG.error("Error: ")
+                LOG.error(pformat(e))
+                errors.append([filename, e])
+        if len(errors) > 0:
+            LOG.error("-" * LINE_DASH)
+            LOG.error("-" * LINE_DASH)
+            LOG.error("Errors Found during testing")
+            for e in errors:
+                LOG.error("-" * LINE_DASH)
+                LOG.error("fixture: %s", e[0])
+                LOG.error("exception: %s", pformat(e[1]))
+            raise exc.OrquestaFixtureTestError
+
+
+if __name__ == "__main__":
+    main()

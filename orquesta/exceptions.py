@@ -21,26 +21,6 @@ class OrquestaException(Exception):
     pass
 
 
-class OrquestaFixtureTestError(OrquestaException):
-    pass
-
-
-class SpecException(OrquestaException):
-    pass
-
-
-class IncorrectSpec(SpecException):
-    pass
-
-
-class WorkflowSpecError(SpecException):
-    pass
-
-
-class FixtureMockSpecError(OrquestaException):
-    pass
-
-
 class PluginFactoryError(OrquestaException):
     pass
 
@@ -169,31 +149,3 @@ class UnreachableJoinError(OrquestaException):
     def __init__(self, task_id, route):
         message = 'The join task|route "%s|%s" is partially satisfied but unreachable.'
         super(UnreachableJoinError, self).__init__(message % (task_id, route))
-
-
-class WorkflowTestException(OrquestaException):
-    pass
-
-
-class MockConductorError(WorkflowTestException):
-    pass
-
-
-class TaskEquality(WorkflowTestException):
-    pass
-
-
-class RouteEquality(WorkflowTestException):
-    pass
-
-
-class StatusEquality(WorkflowTestException):
-    pass
-
-
-class OutputEquality(WorkflowTestException):
-    pass
-
-
-class TermsEquality(WorkflowTestException):
-    pass

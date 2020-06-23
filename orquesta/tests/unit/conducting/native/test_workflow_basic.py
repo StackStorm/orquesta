@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta import conduct_mock
+from orquesta.tests.mocks import WorkflowConductorMock
 from orquesta.tests.unit.base import WorkflowComposerTest
 from orquesta.tests.unit.conducting.native import base
 
@@ -34,7 +34,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
         self.assert_spec_inspection(wf_name)
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = conduct_mock.WorkflowConductorMock(
+        mock = WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             inputs={"name": "Stanley"},

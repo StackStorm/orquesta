@@ -20,9 +20,9 @@ except ImportError:
 
 import sys
 
-import orquesta.exceptions as exc
-from orquesta.fixture_mock import Fixture
 from orquesta.specs.mock.models import TestFileSpec
+import orquesta.tests.exceptions as exc
+from orquesta.tests.mocks import Fixture
 from orquesta.tests.unit.conducting.native import base
 
 
@@ -72,7 +72,7 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
                 workflow_path = "/tmp"
                 self.assertRaises(exc.WorkflowSpecError, Fixture, spec, workflow_path)
 
-    @mock.patch("orquesta.fixture_mock.Fixture.load_wf_spec")
+    @mock.patch("orquesta.tests.mocks.Fixture.load_wf_spec")
     def test_run_test_throw(self, load_wf_spec):
 
         wf_name = "sequential"
@@ -95,7 +95,7 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
         fixture = Fixture(spec, workflow_path)
         self.assertRaises(exc.TaskEquality, fixture.run_test)
 
-    @mock.patch("orquesta.fixture_mock.Fixture.load_wf_spec")
+    @mock.patch("orquesta.tests.mocks.Fixture.load_wf_spec")
     def test_run_test(self, load_wf_spec):
 
         wf_name = "sequential"

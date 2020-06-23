@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta import conduct_mock
-from orquesta import exceptions as exc
 from orquesta import statuses
+from orquesta.tests import exceptions as exc
+import orquesta.tests.mocks as conduct_mock
 from orquesta.tests.unit.base import WorkflowComposerTest
 from orquesta.tests.unit.conducting.native import base
 
