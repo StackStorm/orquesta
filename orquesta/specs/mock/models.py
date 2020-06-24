@@ -53,17 +53,27 @@ class TestFileSpec(MappingSpec):
     _schema = {
         "type": "object",
         "properties": {
-            "file": spec_types.NONEMPTY_STRING,
-            "expected_task_seq": {"type": "array"},
-            "expected_routes": {"type": "array", "items": {"type": "array"}},
+            "workflow": spec_types.NONEMPTY_STRING,
+            "routes": {"type": "array",
+                       "items":{"type":"array"}},
+            "task_sequence": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "task": {"type": "string"},
+                        "route": {"type": "integer"},
+                        "result": {"type": "object"},
+                        "status": {"type": "string"},
+                    },
+                },
+            },
             "inputs": {"type": "object"},
-            "mock_statuses": {"type": "array", "items": {"type": "string"}},
-            "mock_results": {"type": "array"},
             "expected_workflow_status": {"type": "string"},
             "expected_output": {"type": "object"},
             "expected_term_tasks": {"type": "array"},
         },
-        "required": ["file", "expected_task_seq"],
+        "required": ["workflow", "task_sequence"],
         "additionalProperties": False,
     }
 

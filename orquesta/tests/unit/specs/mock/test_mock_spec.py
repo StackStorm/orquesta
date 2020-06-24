@@ -22,10 +22,13 @@ class TaskSpecTest(unittest.TestCase):
         mock_fixture_def = """
                 version: 1.0
                 description: A fixture
-                file: "test.txt"
-                expected_task_seq:
-                    - "one"
-                    - "two"
+                workflow: "test.txt"
+                routes: [[]]
+                task_sequence:
+                    - one:
+                        route: 0
+                    - two:
+                        route: 0
             """
         fixture_spec = TestFileSpec(mock_fixture_def, "mock")
         errors = fixture_spec.inspect()
@@ -47,36 +50,25 @@ class TaskSpecTest(unittest.TestCase):
         mock_fixture_def = """
                 version: 1.0
                 description: A basic fixture
-                file: "test.txt"
-                expected_task_seq:
-                    - "one"
-                    - "two"
-                expected_routes:
-                    -
-                        - 0
-                        - 1
+                workflow: "test.yaml"
+                routes: [[]]
                 inputs:
-                    myinput:
-                        var1: 1
-                        var2: 2
-
-                mock_statuses:
-                    - "succeeded"
-                    - "succeeded"
-                mock_results:
-                    - false
-                    - true
+                  myinput:
+                    var1: 1
+                    var2: 2
                 expected_workflow_status: "succeeded"
                 expected_output:
-                    output:
-                        parm1: false
-                expected_term_tasks:
-                    -
-                        - one
-                        - 1
-                    -
-                        - one
-                        - 2
+                  output:
+                    parm1: false
+                task_sequence:
+                  - one:
+                      result: {"test":true}
+                      status: "succeeded"
+                      route: 0
+                  - two:
+                      result: {"test":true}
+                      status: "succeeded"
+                      route: 0
             """
         fixture_spec = TestFileSpec(mock_fixture_def, "mock")
         errors = fixture_spec.inspect()

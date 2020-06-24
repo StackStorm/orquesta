@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import argparse
+from itertools import chain
 import json
 import logging
 import os
@@ -242,8 +243,11 @@ class Fixture(object):
             else:
                 LOG.error(errors)
             raise exc.FixtureMockSpecError
-        self.full_workflow_path = os.path.join(self.workflow_path, self.fixture_spec.file)
+        self.full_workflow_path = os.path.join(self.workflow_path, self.fixture_spec.workflow)
         self.workflow_spec = self.load_wf_spec(self.full_workflow_path)
+        self.task_sequence = self._get_task_sequence()
+        self.mock_statuses = self._get_mock_statuses()
+        self.mock_results = self._get_mock_results()
 
     @classmethod
     def load_from_file(cls, workflow_path, fixture_filename, pprint):
@@ -268,6 +272,29 @@ class Fixture(object):
                 raise exc.WorkflowSpecError
             return wf_spec
 
+    def _get_mock_statuses(self):
+        """retrieve task statuses
+
+        """
+        return [value.get("status", "succeeded") for key, value in  chain.from_iterable([i.items() for i in
+            self.fixture_spec.task_sequence])]
+
+
+    def _get_task_sequence(self):
+        """retrieve task seq tuples from fixture
+
+        """
+        return [key for key, value in  chain.from_iterable([i.items() for i in
+            self.fixture_spec.task_sequence])]
+
+    def _get_mock_results(self):
+        """retrieve results from fixture
+
+        """
+        return [value.get("result", {}) for key, value in  chain.from_iterable([i.items() for i in
+            self.fixture_spec.task_sequence])]
+
+
     def run_test(self):
         """read fixture spec file
 
@@ -275,12 +302,12 @@ class Fixture(object):
 
         :return: list[str]
         """
-        expected_task_seq = self.fixture_spec.expected_task_seq
+        expected_task_seq = self.task_sequence
         expected_output = self.fixture_spec.expected_output
         inputs = self.fixture_spec.inputs
-        expected_routes = self.fixture_spec.expected_routes
-        mock_statuses = self.fixture_spec.mock_statuses
-        mock_results = self.fixture_spec.mock_results
+        expected_routes = self.fixture_spec.routes
+        mock_statuses = self.mock_statuses
+        mock_results = self.mock_results
         expected_workflow_status = self.fixture_spec.expected_workflow_status
         expected_output = self.fixture_spec.expected_output
         expected_term_tasks = self.fixture_spec.expected_term_tasks

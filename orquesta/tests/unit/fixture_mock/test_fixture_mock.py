@@ -51,15 +51,25 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
                         publish: greeting=<% ctx(st2).test %>
         """
         spec_yaml = """
-        file: "/tmp/test"
-        expected_task_seq:
-            - "task1"
-            - "task2"
-            - "task3"
-            - "continue"
-            - "exception"
+        workflow: "/tmp/test"
+        routes: [[]]
+        task_sequence:
+          - task1:
+              route: 0
+              status: "succeeded"
+          - task2:
+              route: 0
+              status: "succeeded"
+          - task3:
+              route: 0
+              status: "failed"
+          - continue:
+              route: 0
+              status: "succeeded"
+          - exception:
+              route: 0
+              status: "succeeded"
         """
-
         mock_open = mock.mock_open(read_data=wf)
         if sys.version_info[0] < 3:
             with mock.patch("__builtin__.open", mock_open):
@@ -82,14 +92,31 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
 
         load_wf_spec.return_value = wf_spec
         spec_yaml = """
-        file: "/tmp/test"
-        expected_task_seq:
-            - "task1"
-            - "task2"
-            - "task3"
-            - "continue"
-            - "exception"
+        workflow: "/tmp/test"
+        routes: [[]]
+        task_sequence:
+          - task1:
+              route: 0
+              status: "succeeded"
+              result: {}
+          - task2:
+              route: 0
+              status: "succeeded"
+              result: {}
+          - task3:
+              route: 0
+              status: "failed"
+              result: {}
+          - continue:
+              route: 0
+              status: "succeeded"
+              result: {}
+          - exception:
+              route: 0
+              status: "succeeded"
+              result: {}
         """
+
         spec = TestFileSpec(spec_yaml, "fixture")
         workflow_path = "/tmp"
         fixture = Fixture(spec, workflow_path)
@@ -105,13 +132,27 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
 
         load_wf_spec.return_value = wf_spec
         spec_yaml = """
-        file: "/tmp/test"
-        expected_task_seq:
-            - "task1"
-            - "task2"
-            - "task3"
-            - "continue"
+        workflow: "/tmp/test"
+        routes: [[]]
+        task_sequence:
+          - task1:
+              route: 0
+              status: "succeeded"
+              result: {"test":true}
+          - task2:
+              route: 0
+              status: "succeeded"
+              result: {"test":true}
+          - task3:
+              route: 0
+              status: "succeeded"
+              result: {"test":true}
+          - continue:
+              route: 0
+              status: "succeeded"
+              result: {"test":true}
         """
+
         spec = TestFileSpec(spec_yaml, "fixture")
         workflow_path = "/tmp"
         fixture = Fixture(spec, workflow_path)
