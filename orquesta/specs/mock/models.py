@@ -54,8 +54,7 @@ class TestFileSpec(MappingSpec):
         "type": "object",
         "properties": {
             "workflow": spec_types.NONEMPTY_STRING,
-            "routes": {"type": "array",
-                       "items":{"type":"array"}},
+            "routes": {"type": "array", "items": {"type": "array"}},
             "task_sequence": {
                 "type": "array",
                 "items": {

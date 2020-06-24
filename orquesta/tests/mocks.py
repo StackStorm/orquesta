@@ -276,24 +276,34 @@ class Fixture(object):
         """retrieve task statuses
 
         """
-        return [value.get("status", "succeeded") for key, value in  chain.from_iterable([i.items() for i in
-            self.fixture_spec.task_sequence])]
-
+        return [
+            value.get("status", "succeeded")
+            for key, value in chain.from_iterable(
+                [i.items() for i in self.fixture_spec.task_sequence]
+            )
+        ]
 
     def _get_task_sequence(self):
         """retrieve task seq tuples from fixture
 
         """
-        return [key for key, value in  chain.from_iterable([i.items() for i in
-            self.fixture_spec.task_sequence])]
+        return [
+            key
+            for key, value in chain.from_iterable(
+                [i.items() for i in self.fixture_spec.task_sequence]
+            )
+        ]
 
     def _get_mock_results(self):
         """retrieve results from fixture
 
         """
-        return [value.get("result", {}) for key, value in  chain.from_iterable([i.items() for i in
-            self.fixture_spec.task_sequence])]
-
+        return [
+            value.get("result", {})
+            for key, value in chain.from_iterable(
+                [i.items() for i in self.fixture_spec.task_sequence]
+            )
+        ]
 
     def run_test(self):
         """read fixture spec file
