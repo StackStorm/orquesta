@@ -27,6 +27,51 @@ from orquesta.tests.unit.conducting.native import base
 
 
 class FixtureTest(base.OrchestraWorkflowConductorTest):
+    def test_load_workflow_spec_results(self):
+
+        wf = """
+                version: 1.0
+                description: A basic sequential workflow.
+                tasks:
+                  task1:
+                    action: core.echo message=hello
+                    next:
+                      - when: <% succeeded() and result().result.output = 1 %>
+                        publish:
+                          - greeting: 1
+
+        """
+        spec_yaml = """
+        workflow: "/tmp/test"
+        routes: [[]]
+        task_sequence:
+          - task1:
+              route: 0
+              status: "succeeded"
+              result:
+                result:
+                  output: 1
+          - continue:
+              route: 0
+              status: succeeded
+        """
+        def do_run(spec_y):
+            spec = TestFileSpec(spec_y, "fixture")
+            workflow_path = "/tmp"
+            fixture = Fixture(spec, workflow_path)
+            import pdb
+            pdb.set_trace()
+            fixture.run_test()
+
+        mock_open = mock.mock_open(read_data=wf)
+        if sys.version_info[0] < 3:
+            with mock.patch("__builtin__.open", mock_open):
+                do_run(spec_yaml)
+        else:
+            with mock.patch("builtins.open", mock_open):
+                do_run(spec_yaml)
+
+
     def test_load_workflow_spec_throws(self):
 
         wf = """
@@ -129,7 +174,6 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
         self.assert_spec_inspection(wf_name)
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-
         load_wf_spec.return_value = wf_spec
         spec_yaml = """
         workflow: "/tmp/test"
