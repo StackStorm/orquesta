@@ -299,7 +299,7 @@ class Fixture(object):
 
         """
         return [
-            {"result":value.get("result", {})}
+            {"result": value.get("result", {})}
             for key, value in chain.from_iterable(
                 [i.items() for i in self.fixture_spec.task_sequence]
             )

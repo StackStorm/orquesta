@@ -53,6 +53,7 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
               route: 0
               status: succeeded
         """
+
         def do_run(spec_y):
             spec = TestFileSpec(spec_y, "fixture")
             workflow_path = "/tmp"
@@ -66,7 +67,6 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
         else:
             with mock.patch("builtins.open", mock_open):
                 do_run(spec_yaml)
-
 
     def test_load_workflow_spec_throws(self):
 

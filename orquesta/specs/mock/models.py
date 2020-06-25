@@ -63,17 +63,17 @@ class TestFileSpec(MappingSpec):
                     "additionalProperties": False,
                     "patternProperties": {
                         r"^\w+$": {
-                            "type":"object",
+                            "type": "object",
                             "properties": {
                                 "route": {"type": "integer"},
                                 "result": spec_types.ANY,
                                 "status": {"type": "string"},
                             },
                             "additionalProperties": False,
-                            "required":["status"]
+                            "required": ["status"],
                         }
-                    }
-                }
+                    },
+                },
             },
             "inputs": {"type": "object"},
             "expected_workflow_status": {"type": "string"},
