@@ -358,7 +358,7 @@ def main():
     if args.fixture is not None:
         fixture = Fixture.load_from_file(args.workflow_path, args.fixture, True)
         fixture.run_test()
-        print(args.workflow_path + "/" + fixture.fixture_spec.file + " test successful")
+        print(args.workflow_path + "/" + fixture.fixture_spec.workflow + " test successful")
     # directory of fixtures
     LINE_DASH = 20
     if args.fixture_dir is not None:
@@ -373,7 +373,7 @@ def main():
                 fixture = Fixture.load_from_file(args.workflow_path, full_path, True)
                 fixture.run_test()
                 LOG.info(
-                    "%s/%s test successful", args.workflow_path, fixture.fixture_spec.file,
+                    "%s/%s test successful", args.workflow_path, fixture.fixture_spec.workflow,
                 )
                 LOG.info("-" * LINE_DASH)
             except exc.OrquestaException as e:
