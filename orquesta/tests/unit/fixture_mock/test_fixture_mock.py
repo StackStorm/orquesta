@@ -48,9 +48,7 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
           - task1:
               route: 0
               status: "succeeded"
-              result:
-                result:
-                  output: 1
+              result: {"output": 1}
           - continue:
               route: 0
               status: succeeded
@@ -59,8 +57,6 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
             spec = TestFileSpec(spec_y, "fixture")
             workflow_path = "/tmp"
             fixture = Fixture(spec, workflow_path)
-            import pdb
-            pdb.set_trace()
             fixture.run_test()
 
         mock_open = mock.mock_open(read_data=wf)

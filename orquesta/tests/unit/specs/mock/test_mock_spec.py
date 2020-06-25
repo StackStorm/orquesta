@@ -26,9 +26,9 @@ class TaskSpecTest(unittest.TestCase):
                 routes: [[]]
                 task_sequence:
                     - one:
-                        route: 0
+                        status: "succeeded"
                     - two:
-                        route: 0
+                        status: "succeeded"
             """
         fixture_spec = TestFileSpec(mock_fixture_def, "mock")
         errors = fixture_spec.inspect()

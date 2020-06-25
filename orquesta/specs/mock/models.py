@@ -59,13 +59,21 @@ class TestFileSpec(MappingSpec):
                 "type": "array",
                 "items": {
                     "type": "object",
-                    "properties": {
-                        "task": {"type": "string"},
-                        "route": {"type": "integer"},
-                        "result": {"type": "object"},
-                        "status": {"type": "string"},
-                    },
-                },
+                    "minProperties": 1,
+                    "additionalProperties": False,
+                    "patternProperties": {
+                        r"^\w+$": {
+                            "type":"object",
+                            "properties": {
+                                "route": {"type": "integer"},
+                                "result": spec_types.ANY,
+                                "status": {"type": "string"},
+                            },
+                            "additionalProperties": False,
+                            "required":["status"]
+                        }
+                    }
+                }
             },
             "inputs": {"type": "object"},
             "expected_workflow_status": {"type": "string"},

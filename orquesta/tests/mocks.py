@@ -288,7 +288,7 @@ class Fixture(object):
 
         """
         return [
-            key
+            (key, value.get("route", 0))
             for key, value in chain.from_iterable(
                 [i.items() for i in self.fixture_spec.task_sequence]
             )
@@ -299,7 +299,7 @@ class Fixture(object):
 
         """
         return [
-            value.get("result", {})
+            {"result":value.get("result", {})}
             for key, value in chain.from_iterable(
                 [i.items() for i in self.fixture_spec.task_sequence]
             )
