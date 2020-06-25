@@ -48,7 +48,7 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
           - task1:
               route: 0
               status: "succeeded"
-              result: {"output": 1}
+              result: {"result":{"output": 1}}
           - continue:
               route: 0
               status: succeeded
@@ -178,19 +178,19 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
           - task1:
               route: 0
               status: "succeeded"
-              result: {"test":true}
+              result: {"result":{"test":true}}
           - task2:
               route: 0
               status: "succeeded"
-              result: {"test":true}
+              result: {"result":{"test":true}}
           - task3:
               route: 0
               status: "succeeded"
-              result: {"test":true}
+              result: {"result":{"test":true}}
           - continue:
               route: 0
               status: "succeeded"
-              result: {"test":true}
+              result: {"result":{"test":true}}
         """
 
         spec = TestFileSpec(spec_yaml, "fixture")
