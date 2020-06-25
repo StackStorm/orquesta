@@ -145,7 +145,7 @@ class WorkflowConductorMock(object):
         actual_task_seq = [
             [entry["id"], entry["route"]] for entry in conductor.workflow_state.sequence
         ]
-
+        LOG.debug(" routes: %s", str(conductor.workflow_state.routes))
         expected_task_seq = [
             list(task_seq)
             if isinstance(task_seq, tuple) or isinstance(task_seq, list)
