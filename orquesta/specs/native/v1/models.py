@@ -201,6 +201,11 @@ class TaskSpec(native_v1_specs.Spec):
         return self, action_specs
 
     def finalize_context(self, next_task_name, task_transition_meta, in_ctx):
+        """generate context
+        :param next_task_name: str
+        :param task_transition_meta: tuple(task:str, next_task:str, index:int, criteria:dict)
+        :param in_ctx: dict
+        """
         rolling_ctx = json_util.deepcopy(in_ctx)
         new_ctx = {}
         errors = []
@@ -216,6 +221,11 @@ class TaskSpec(native_v1_specs.Spec):
 
                 try:
                     rendered_var_value = expr_base.evaluate(default_var_value, rolling_ctx)
+                    LOG.debug("publish var: %s, task: %s, index: %s, value: %s",
+                            var_name,
+                            str(task_transition_meta[0]),
+                            str(task_transition_meta[2]),
+                            str(rendered_var_value))
                     rolling_ctx[var_name] = rendered_var_value
                     new_ctx[var_name] = rendered_var_value
                 except exc.ExpressionEvaluationException as e:
