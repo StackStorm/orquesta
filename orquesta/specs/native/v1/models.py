@@ -202,9 +202,11 @@ class TaskSpec(native_v1_specs.Spec):
 
     def finalize_context(self, next_task_name, task_transition_meta, in_ctx):
         """generate context
+
         :param next_task_name: str
         :param task_transition_meta: tuple(task:str, next_task:str, index:int, criteria:dict)
         :param in_ctx: dict
+
         """
         rolling_ctx = json_util.deepcopy(in_ctx)
         new_ctx = {}
@@ -221,11 +223,13 @@ class TaskSpec(native_v1_specs.Spec):
 
                 try:
                     rendered_var_value = expr_base.evaluate(default_var_value, rolling_ctx)
-                    LOG.debug("publish var: %s, task: %s, index: %s, value: %s",
-                            var_name,
-                            str(task_transition_meta[0]),
-                            str(task_transition_meta[2]),
-                            str(rendered_var_value))
+                    LOG.debug(
+                        "publish var: %s, task: %s, index: %s, value: %s",
+                        var_name,
+                        str(task_transition_meta[0]),
+                        str(task_transition_meta[2]),
+                        str(rendered_var_value),
+                    )
                     rolling_ctx[var_name] = rendered_var_value
                     new_ctx[var_name] = rendered_var_value
                 except exc.ExpressionEvaluationException as e:
@@ -241,7 +245,11 @@ class TaskSpec(native_v1_specs.Spec):
 
 
 class TaskMappingSpec(native_v1_specs.MappingSpec):
-    _schema = {"type": "object", "minProperties": 1, "patternProperties": {r"^\w+$": TaskSpec}}
+    _schema = {
+        "type": "object",
+        "minProperties": 1,
+        "patternProperties": {r"^\w+$": TaskSpec},
+    }
 
     def has_task(self, task_name):
         if task_name in RESERVED_TASK_NAMES:
@@ -344,7 +352,11 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                 message = "The action property is required for with items task."
                 spec_path = parent.get("spec_path") + "." + task_name
                 schema_path = parent.get("schema_path") + ".patternProperties.^\\w+$"
-                entry = {"message": message, "spec_path": spec_path, "schema_path": schema_path}
+                entry = {
+                    "message": message,
+                    "spec_path": spec_path,
+                    "schema_path": schema_path,
+                }
                 result.append(entry)
 
         return result
@@ -358,7 +370,11 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                 message = 'The task name "%s" is reserved with special function.' % task_name
                 spec_path = parent.get("spec_path") + "." + task_name
                 schema_path = parent.get("schema_path") + ".patternProperties.^\\w+$"
-                entry = {"message": message, "spec_path": spec_path, "schema_path": schema_path}
+                entry = {
+                    "message": message,
+                    "spec_path": spec_path,
+                    "schema_path": schema_path,
+                }
                 result.append(entry)
 
         return result
@@ -513,7 +529,11 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
             spec_path = parent.get("spec_path") + "." + task_name
             schema_path = parent.get("schema_path") + ".patternProperties.^\\w+$"
 
-            task_parent = {"ctx": task_ctx, "spec_path": spec_path, "schema_path": schema_path}
+            task_parent = {
+                "ctx": task_ctx,
+                "spec_path": spec_path,
+                "schema_path": schema_path,
+            }
 
             result = task_spec.inspect_context(parent=task_parent)
             errors.extend(result[0])
