@@ -226,9 +226,9 @@ class TaskSpec(native_v1_specs.Spec):
                     LOG.debug(
                         "publish var: %s, task: %s, index: %s, value: %s",
                         var_name,
-                        str(task_transition_meta[0]),
-                        str(task_transition_meta[2]),
-                        str(rendered_var_value),
+                        task_transition_meta[0],
+                        task_transition_meta[2],
+                        rendered_var_value,
                     )
                     rolling_ctx[var_name] = rendered_var_value
                     new_ctx[var_name] = rendered_var_value
