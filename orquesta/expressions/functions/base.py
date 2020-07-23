@@ -12,23 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import threading
+
 from stevedore import extension
 
 
 _EXP_FUNC_CATALOG = None
+_EXP_FUNC_CATALOG_LOCK = threading.Lock()
 
 
 def load():
     global _EXP_FUNC_CATALOG
+    global _EXP_FUNC_CATALOG_LOCK
 
-    if _EXP_FUNC_CATALOG is None:
-        _EXP_FUNC_CATALOG = {}
+    with _EXP_FUNC_CATALOG_LOCK:
+        if _EXP_FUNC_CATALOG is None:
+            _EXP_FUNC_CATALOG = {}
 
-        mgr = extension.ExtensionManager(
-            namespace="orquesta.expressions.functions", invoke_on_load=False
-        )
+            mgr = extension.ExtensionManager(
+                namespace="orquesta.expressions.functions", invoke_on_load=False
+            )
 
-        for name in mgr.names():
-            _EXP_FUNC_CATALOG[name] = mgr[name].plugin
+            for name in mgr.names():
+                _EXP_FUNC_CATALOG[name] = mgr[name].plugin
 
     return _EXP_FUNC_CATALOG
