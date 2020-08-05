@@ -1,6 +1,15 @@
 Changelog
 =========
 
+In Progress
+-----------
+
+Fixed
+~~~~~
+
+* Warn users when there is a loop and no start task identified. (bug fix)
+* Lock global variables during initialization to make them thread safe. (bug fix)
+
 1.1.1
 -----
 
