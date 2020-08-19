@@ -90,6 +90,6 @@ setup(
         "console_scripts": ["orquesta-test = orquesta.tests.mocks:main"],
     },
     scripts=[
-        'bin/orquests-test'
+        'bin/orquesta-test'
         ]
 )
