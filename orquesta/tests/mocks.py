@@ -134,11 +134,12 @@ class WorkflowConductorMock(object):
                 result = self.result_q.get() if not self.result_q.empty() else None
 
                 ac_ex_event = events.ActionExecutionEvent(status, result=result)
-                entry = conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
+                entry = conductor.update_task_state(
+                    current_task_id, current_task_route, ac_ex_event
+                )
                 LOG.debug("current task id: %s" % entry["id"])
                 LOG.debug("route: %s" % entry["route"])
-                LOG.debug("in context: %s" %
-                            conductor.get_task_context(entry["ctxs"]["in"]))
+                LOG.debug("in context: %s" % conductor.get_task_context(entry["ctxs"]["in"]))
                 for k, v in entry.get("ctxs", {}).get("out", {}).items():
                     LOG.debug("out %s: %s" % (k, conductor.get_task_context([v])))
 
@@ -364,7 +365,7 @@ def main():
     LOG.setLevel(numeric_level)
     handler = logging.StreamHandler()
     handler.setLevel(numeric_level)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     handler.setFormatter(formatter)
     LOG.addHandler(handler)
     # single file fixture
@@ -402,7 +403,3 @@ def main():
                 LOG.error("fixture: %s", e[0])
                 LOG.error("exception: %s", pformat(e[1]))
             raise exc.OrquestaFixtureTestError
-
-
-if __name__ == "__main__":
-    main()

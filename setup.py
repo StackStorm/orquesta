@@ -89,4 +89,7 @@ setup(
         "orquesta.tests": ["fake = orquesta.tests.unit.utils.test_plugin:FakePlugin"],
         "console_scripts": ["orquesta-test = orquesta.tests.mocks:main"],
     },
+    scripts=[
+        'bin/orquests-test'
+        ]
 )
