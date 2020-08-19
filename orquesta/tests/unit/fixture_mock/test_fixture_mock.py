@@ -22,7 +22,7 @@ import sys
 
 from orquesta.specs.mock.models import TestFileSpec
 import orquesta.tests.exceptions as exc
-from orquesta.tests.mocks import Fixture
+from orquesta.tests.mocks import WorkflowTestFixture
 from orquesta.tests.unit.conducting.native import base
 
 
@@ -57,7 +57,7 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
         def do_run(spec_y):
             spec = TestFileSpec(spec_y, "fixture")
             workflow_path = "/tmp"
-            fixture = Fixture(spec, workflow_path)
+            fixture = WorkflowTestFixture(spec, workflow_path)
             fixture.run_test()
 
         mock_open = mock.mock_open(read_data=wf)
@@ -116,14 +116,14 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
             with mock.patch("__builtin__.open", mock_open):
                 spec = TestFileSpec(spec_yaml, "fixture")
                 workflow_path = "/tmp"
-                self.assertRaises(exc.WorkflowSpecError, Fixture, spec, workflow_path)
+                self.assertRaises(exc.WorkflowSpecError, WorkflowTestFixture, spec, workflow_path)
         else:
             with mock.patch("builtins.open", mock_open):
                 spec = TestFileSpec(spec_yaml, "fixture")
                 workflow_path = "/tmp"
-                self.assertRaises(exc.WorkflowSpecError, Fixture, spec, workflow_path)
+                self.assertRaises(exc.WorkflowSpecError, WorkflowTestFixture, spec, workflow_path)
 
-    @mock.patch("orquesta.tests.mocks.Fixture.load_wf_spec")
+    @mock.patch("orquesta.tests.mocks.WorkflowTestFixture.load_wf_spec")
     def test_run_test_throw(self, load_wf_spec):
 
         wf_name = "sequential"
@@ -160,10 +160,10 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
 
         spec = TestFileSpec(spec_yaml, "fixture")
         workflow_path = "/tmp"
-        fixture = Fixture(spec, workflow_path)
-        self.assertRaises(exc.TaskEquality, fixture.run_test)
+        fixture = WorkflowTestFixture(spec, workflow_path)
+        self.assertRaises(exc.MockConductorTaskSequenceError, fixture.run_test)
 
-    @mock.patch("orquesta.tests.mocks.Fixture.load_wf_spec")
+    @mock.patch("orquesta.tests.mocks.WorkflowTestFixture.load_wf_spec")
     def test_run_test(self, load_wf_spec):
 
         wf_name = "sequential"
@@ -195,5 +195,5 @@ class FixtureTest(base.OrchestraWorkflowConductorTest):
 
         spec = TestFileSpec(spec_yaml, "fixture")
         workflow_path = "/tmp"
-        fixture = Fixture(spec, workflow_path)
+        fixture = WorkflowTestFixture(spec, workflow_path)
         fixture.run_test()

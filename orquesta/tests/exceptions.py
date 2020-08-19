@@ -44,21 +44,21 @@ class MockConductorError(WorkflowTestException):
     pass
 
 
-class TaskEquality(WorkflowTestException):
+class MockConductorTaskSequenceError(WorkflowTestException):
     pass
 
 
-class RouteEquality(WorkflowTestException):
+class MockConductorTaskRouteError(WorkflowTestException):
     pass
 
 
-class StatusEquality(WorkflowTestException):
+class MockConductorWorkflowStatusError(WorkflowTestException):
     pass
 
 
-class OutputEquality(WorkflowTestException):
+class MockConductorWorkflowOutputError(WorkflowTestException):
     pass
 
 
-class TermsEquality(WorkflowTestException):
+class MockConductorWorkflowTermsError(WorkflowTestException):
     pass

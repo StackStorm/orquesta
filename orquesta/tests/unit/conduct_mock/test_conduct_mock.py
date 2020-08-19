@@ -109,7 +109,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
             expected_term_tasks=expected_term_tasks,
         )
         # will throw
-        self.assertRaises(exc.TermsEquality, mock.assert_conducting_sequences)
+        self.assertRaises(exc.MockConductorWorkflowTermsError, mock.assert_conducting_sequences)
 
     def test_sequential_worfklowstatus_throws(self):
         wf_name = "sequential"
@@ -138,7 +138,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
             expected_output=expected_output,
         )
         # will throw
-        self.assertRaises(exc.StatusEquality, mock.assert_conducting_sequences)
+        self.assertRaises(exc.MockConductorWorkflowStatusError, mock.assert_conducting_sequences)
 
     def test_sequential_route_equality_throws(self):
         wf_name = "sequential"
@@ -166,7 +166,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
             expected_output=expected_output,
         )
         # will throw
-        self.assertRaises(exc.RouteEquality, mock.assert_conducting_sequences)
+        self.assertRaises(exc.MockConductorTaskRouteError, mock.assert_conducting_sequences)
 
     def test_sequential_task_equality_throws(self):
         wf_name = "sequential"
@@ -192,7 +192,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
             expected_output=expected_output,
         )
         # will throw
-        self.assertRaises(exc.TaskEquality, mock.assert_conducting_sequences)
+        self.assertRaises(exc.MockConductorTaskSequenceError, mock.assert_conducting_sequences)
 
     def test_sequential_task_output_throws(self):
         wf_name = "sequential"
@@ -218,4 +218,4 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
             expected_output=expected_output,
         )
         # will throw
-        self.assertRaises(exc.OutputEquality, mock.assert_conducting_sequences)
+        self.assertRaises(exc.MockConductorWorkflowOutputError, mock.assert_conducting_sequences)

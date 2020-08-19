@@ -223,13 +223,6 @@ class TaskSpec(native_v1_specs.Spec):
 
                 try:
                     rendered_var_value = expr_base.evaluate(default_var_value, rolling_ctx)
-                    LOG.debug(
-                        "publish var: %s, task: %s, index: %s, value: %s",
-                        var_name,
-                        task_transition_meta[0],
-                        task_transition_meta[2],
-                        rendered_var_value,
-                    )
                     rolling_ctx[var_name] = rendered_var_value
                     new_ctx[var_name] = rendered_var_value
                 except exc.ExpressionEvaluationException as e:

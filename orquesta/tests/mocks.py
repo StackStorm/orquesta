@@ -134,7 +134,14 @@ class WorkflowConductorMock(object):
                 result = self.result_q.get() if not self.result_q.empty() else None
 
                 ac_ex_event = events.ActionExecutionEvent(status, result=result)
-                conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
+                entry = conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
+                LOG.debug("current task id: %s" % entry["id"])
+                LOG.debug("route: %s" % entry["route"])
+                LOG.debug("in context: %s" %
+                            conductor.get_task_context(entry["ctxs"]["in"]))
+                for k, v in entry.get("ctxs", {}).get("out", {}).items():
+                    LOG.debug("out %s: %s" % (k, conductor.get_task_context([v])))
+
             # Identify the next set of tasks.
             for next_task in conductor.get_next_tasks():
                 self.run_q.put(next_task)
@@ -163,12 +170,12 @@ class WorkflowConductorMock(object):
         if actual_task_seq != expected_task_seq:
             LOG.error("Actual task Seq  : %s", str(actual_task_seq))
             LOG.error("Expected Task Seq: %s", str(expected_task_seq))
-            raise exc.TaskEquality
+            raise exc.MockConductorTaskSequenceError
 
         if conductor.workflow_state.routes != self.expected_routes:
             LOG.error("Actual routes  : %s", str(conductor.workflow_state.routes))
             LOG.error("Expected routes: %s", str(self.expected_routes))
-            raise exc.RouteEquality
+            raise exc.MockConductorTaskRouteError
 
         if conductor.get_workflow_status() in statuses.COMPLETED_STATUSES:
             conductor.render_workflow_output()
@@ -179,13 +186,13 @@ class WorkflowConductorMock(object):
         if conductor.get_workflow_status() != self.expected_workflow_status:
             LOG.error("Actual workflow status  : %s", conductor.get_workflow_status())
             LOG.error("Expected workflow status: %s", str(self.expected_workflow_status))
-            raise exc.StatusEquality
+            raise exc.MockConductorWorkflowStatusError
 
         if self.expected_output is not None:
             if conductor.get_workflow_output() != self.expected_output:
                 LOG.error("Actual workflow output  : %s", str(conductor.get_workflow_output()))
                 LOG.error("Expected workflow output: %s", str(self.expected_output))
-                raise exc.OutputEquality
+                raise exc.MockConductorWorkflowOutputError
 
         if self.expected_term_tasks:
             expected_term_tasks = [
@@ -200,7 +207,7 @@ class WorkflowConductorMock(object):
             if actual_term_tasks != expected_term_tasks:
                 LOG.error("Actual term tasks : %s", str(actual_term_tasks))
                 LOG.error("Expected term tasks: %s", str(expected_term_tasks))
-                raise exc.TermsEquality
+                raise exc.MockConductorWorkflowTermsError
 
         return conductor
 
@@ -222,7 +229,7 @@ class WorkflowConductorMock(object):
             return FIXTURE_EXTS[file_ext](fd) if not raw else fd.read()
 
 
-class Fixture(object):
+class WorkflowTestFixture(object):
     def __init__(self, spec, workflow_path, pprint=False):
         """Fixture for testing workflow
 
@@ -353,10 +360,16 @@ def main():
     numeric_level = getattr(logging, args.loglevel.upper(), None)
     if not isinstance(numeric_level, int):
         raise ValueError("Invalid log level: %s" % args.loglevel)
-    logging.basicConfig(level=numeric_level)
+
+    LOG.setLevel(numeric_level)
+    handler = logging.StreamHandler()
+    handler.setLevel(numeric_level)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    LOG.addHandler(handler)
     # single file fixture
     if args.fixture is not None:
-        fixture = Fixture.load_from_file(args.workflow_path, args.fixture, True)
+        fixture = WorkflowTestFixture.load_from_file(args.workflow_path, args.fixture, True)
         fixture.run_test()
         print(args.workflow_path + "/" + fixture.fixture_spec.workflow + " test successful")
     # directory of fixtures
@@ -370,7 +383,7 @@ def main():
             full_path = os.path.join(root, filename)
             try:
                 LOG.info("testing %s", filename)
-                fixture = Fixture.load_from_file(args.workflow_path, full_path, True)
+                fixture = WorkflowTestFixture.load_from_file(args.workflow_path, full_path, True)
                 fixture.run_test()
                 LOG.info(
                     "%s/%s test successful", args.workflow_path, fixture.fixture_spec.workflow,
