@@ -13,10 +13,14 @@
 # limitations under the License.
 
 from orquesta import statuses
+from orquesta.tests.mocks import WorkflowConductorMock
+from orquesta.tests.unit.base import WorkflowComposerTest
 from orquesta.tests.unit.conducting.native import base
 
 
-class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
+class TaskTransitionWorkflowConductorTest(
+    base.OrchestraWorkflowConductorTest, WorkflowComposerTest
+):
     def test_on_error(self):
         wf_name = "error-handling"
 
@@ -29,12 +33,16 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_term_tasks = ["task2"]
 
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
         # Mock task1 error
         expected_task_seq = ["task1", "task3"]
@@ -43,12 +51,14 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_term_tasks = ["task3"]
 
-        self.assert_conducting_sequences(
-            wf_name,
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_on_complete(self):
         wf_name = "task-on-complete"
@@ -65,13 +75,17 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task2
             statuses.SUCCEEDED,  # task4
         ]
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
 
-        self.assert_conducting_sequences(
-            wf_name,
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
         # Mock task1 error
         expected_task_seq = ["task1", "task3", "task4"]
@@ -84,12 +98,14 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_term_tasks = ["task3", "task4"]
 
-        self.assert_conducting_sequences(
-            wf_name,
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_task_transitions_split(self):
         wf_name = "task-transitions-split"
@@ -112,14 +128,18 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         ]
 
         expected_term_tasks = [("task2", 1), ("task2", 2)]
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
 
-        self.assert_conducting_sequences(
-            wf_name,
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
         # Mock task1 error
         expected_routes = [
@@ -138,10 +158,12 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_term_tasks = [("task2", 1), ("task2", 2)]
 
-        self.assert_conducting_sequences(
-            wf_name,
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        mock.assert_conducting_sequences()

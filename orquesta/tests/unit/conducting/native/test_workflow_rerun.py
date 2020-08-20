@@ -14,10 +14,12 @@
 
 from orquesta import requests
 from orquesta import statuses
+from orquesta.tests.mocks import WorkflowConductorMock
+from orquesta.tests.unit.base import WorkflowComposerTest
 from orquesta.tests.unit.conducting.native import base
 
 
-class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest):
+class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, WorkflowComposerTest):
     def test_fail_single_branch(self):
         wf_name = "parallel"
 
@@ -32,16 +34,17 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest):
         ]
 
         expected_term_tasks = ["task2", "task5"]
-
-        self.assert_spec_inspection(wf_name)
-
-        conductor = self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        conductor = mock.assert_conducting_sequences()
 
         # Rerun entire workflow and fail task2 again.
         expected_task_seq = ["task1", "task4", "task2", "task5", "task2", "task6"]
@@ -80,15 +83,18 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest):
 
         expected_term_tasks = ["task2", "task5"]
 
-        self.assert_spec_inspection(wf_name)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
 
-        conductor = self.assert_conducting_sequences(
-            wf_name,
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        conductor = mock.assert_conducting_sequences()
 
         # Rerun and complete workflow.
         expected_task_seq = ["task1", "task4", "task2", "task5", "task2", "task5", "task3", "task6"]
@@ -115,15 +121,18 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest):
 
         expected_term_tasks = ["task3", "task5"]
 
-        self.assert_spec_inspection(wf_name)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
 
-        conductor = self.assert_conducting_sequences(
-            wf_name,
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        conductor = mock.assert_conducting_sequences()
 
         # Rerun and complete workflow.
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task3", "task6", "task7"]
@@ -150,15 +159,18 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest):
 
         expected_term_tasks = ["task3", "task5"]
 
-        self.assert_spec_inspection(wf_name)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
 
-        conductor = self.assert_conducting_sequences(
-            wf_name,
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        conductor = mock.assert_conducting_sequences()
 
         # Rerun and complete workflow.
         expected_task_seq = [
@@ -196,15 +208,18 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest):
 
         expected_term_tasks = ["task6"]
 
-        self.assert_spec_inspection(wf_name)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
 
-        conductor = self.assert_conducting_sequences(
-            wf_name,
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        conductor = mock.assert_conducting_sequences()
 
         # Rerun and complete workflow.
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task6", "task7"]
@@ -233,15 +248,18 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest):
 
         expected_term_tasks = ["task3"]
 
-        self.assert_spec_inspection(wf_name)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
 
-        conductor = self.assert_conducting_sequences(
-            wf_name,
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        conductor = mock.assert_conducting_sequences()
 
         # Rerun and complete workflow.
         expected_task_seq = [
@@ -300,16 +318,20 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest):
 
         expected_term_tasks = [("task5", 2), ("task6", 1), ("task6", 2)]
 
-        self.assert_spec_inspection(wf_name)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
 
-        conductor = self.assert_conducting_sequences(
-            wf_name,
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
-            expected_workflow_status=statuses.FAILED,
             expected_routes=expected_routes,
+            expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
+
+        # will throw
+        conductor = mock.assert_conducting_sequences()
 
         # Rerun and complete workflow.
         expected_task_seq = [
@@ -372,16 +394,19 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest):
 
         expected_term_tasks = [("task5", 2), ("task6", 1), ("task6", 2)]
 
-        self.assert_spec_inspection(wf_name)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
 
-        conductor = self.assert_conducting_sequences(
-            wf_name,
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
-            expected_workflow_status=statuses.FAILED,
             expected_routes=expected_routes,
+            expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        conductor = mock.assert_conducting_sequences()
 
         # Rerun and complete workflow.
         expected_task_seq = [

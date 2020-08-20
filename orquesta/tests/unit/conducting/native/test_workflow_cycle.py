@@ -13,10 +13,12 @@
 # limitations under the License.
 
 from orquesta import statuses
+from orquesta.tests.mocks import WorkflowConductorMock
+from orquesta.tests.unit.base import WorkflowComposerTest
 from orquesta.tests.unit.conducting.native import base
 
 
-class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
+class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowComposerTest):
     def test_cycle(self):
         wf_name = "cycle"
 
@@ -33,9 +35,10 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "task3",
         ]
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
+        mock.assert_conducting_sequences()
 
     def test_cycles(self):
         wf_name = "cycles"
@@ -62,9 +65,10 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "task5",
         ]
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
+        mock.assert_conducting_sequences()
 
     def test_rollback_retry(self):
         wf_name = "rollback-retry"
@@ -79,10 +83,10 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # check
             statuses.SUCCEEDED,  # delete
         ]
-
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq, mock_statuses=mock_statuses)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock.assert_conducting_sequences()
 
     def test_cycle_and_fork(self):
         wf_name = "cycle-fork"
@@ -113,6 +117,7 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             None,  # decide_work
         ]
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq, mock_results=mock_results)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_results=mock_results)
+        mock.assert_conducting_sequences()

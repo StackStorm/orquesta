@@ -17,7 +17,10 @@
 import os
 import sys
 
-from setuptools import setup, find_packages
+from setuptools import (
+    setup,
+    find_packages,
+)
 
 
 PKG_ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -27,7 +30,9 @@ os.chdir(PKG_ROOT_DIR)
 
 def get_version_string():
     version = None
-    sys.path.insert(0, PKG_ROOT_DIR)
+    sys.path.insert(
+        0, PKG_ROOT_DIR,
+    )
     from orquesta import __version__
 
     version = __version__
@@ -87,9 +92,6 @@ setup(
             "result = orquesta.expressions.functions.workflow:result_",
         ],
         "orquesta.tests": ["fake = orquesta.tests.unit.utils.test_plugin:FakePlugin"],
-        "console_scripts": ["orquesta-test = orquesta.tests.mocks:main"],
     },
-    scripts=[
-        'bin/orquesta-test'
-        ]
+    scripts=["bin/orquesta-test"],
 )

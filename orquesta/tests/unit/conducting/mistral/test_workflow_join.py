@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from orquesta import statuses
+from orquesta.tests.mocks import WorkflowConductorMock
 from orquesta.tests.unit.conducting.mistral import base
 
 
@@ -21,8 +22,10 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
         wf_name = "join"
 
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task7"]
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
+        mock.assert_conducting_sequences()
 
     def test_join_count(self):
         wf_name = "join-count"
@@ -40,12 +43,16 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
             statuses.SUCCEEDED,  # task8
         ]
 
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_workflow_status=statuses.RUNNING,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
         # Mock error at task7
         expected_task_seq = ["task1", "task2", "task4", "task6", "task3", "task5", "task7", "task8"]
@@ -61,12 +68,14 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
             statuses.SUCCEEDED,  # task8
         ]
 
-        self.assert_conducting_sequences(
-            wf_name,
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_workflow_status=statuses.RUNNING,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_join_count_with_branch_error(self):
         wf_name = "join-count"
@@ -81,13 +90,16 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
             statuses.SUCCEEDED,  # task4
             statuses.FAILED,  # task6
         ]
-
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_workflow_status=statuses.FAILED,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
         # Mock error at task7, note that task3 and task5 have
         # already satisfied the task8 join requirements.
@@ -114,5 +126,6 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
             statuses.SUCCEEDED,  # task8
             statuses.SUCCEEDED,  # task9
         ]
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq, mock_statuses=mock_statuses)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses,)
+        # will throw
+        mock.assert_conducting_sequences()

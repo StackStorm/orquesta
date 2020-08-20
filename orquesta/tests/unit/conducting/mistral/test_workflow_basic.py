@@ -11,11 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+from orquesta.tests.mocks import WorkflowConductorMock
+from orquesta.tests.unit.base import WorkflowComposerTest
 from orquesta.tests.unit.conducting.mistral import base
 
 
-class BasicWorkflowConductorTest(base.MistralWorkflowConductorTest):
+class BasicWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComposerTest):
     def test_sequential(self):
         wf_name = "sequential"
 
@@ -28,43 +29,61 @@ class BasicWorkflowConductorTest(base.MistralWorkflowConductorTest):
         ]
 
         expected_output = {"greeting": mock_results[2]}
-
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             inputs={"name": "Stanley"},
             mock_results=mock_results,
             expected_output=expected_output,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_parallel(self):
         wf_name = "parallel"
 
         expected_task_seq = ["task1", "task4", "task2", "task5", "task3", "task6"]
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_branching(self):
         wf_name = "branching"
 
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_decision_tree(self):
         wf_name = "decision"
 
         # Test branch "a"
         expected_task_seq = ["t1", "a"]
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq, inputs={"which": "a"})
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq, inputs={"which": "a"})
+        # will throw
+        mock.assert_conducting_sequences()
 
         # Test branch "b"
         expected_task_seq = ["t1", "b"]
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq, inputs={"which": "b"})
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq, inputs={"which": "b"})
+        # will throw
+        mock.assert_conducting_sequences()
 
         # Test branch "c"
         expected_task_seq = ["t1", "c"]
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq, inputs={"which": "c"})
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq, inputs={"which": "c"})
+        # will throw
+        mock.assert_conducting_sequences()

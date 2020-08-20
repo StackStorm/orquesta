@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from orquesta.tests.mocks import WorkflowConductorMock
+from orquesta.tests.unit.base import WorkflowComposerTest
 from orquesta.tests.unit.conducting.mistral import base
 
 
-class SplitWorkflowConductorTest(base.MistralWorkflowConductorTest):
+class SplitWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComposerTest):
     def test_split(self):
         wf_name = "split"
 
@@ -39,9 +41,11 @@ class SplitWorkflowConductorTest(base.MistralWorkflowConductorTest):
             ("task7", 2),
         ]
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq, expected_routes)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq, expected_routes=expected_routes)
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_splits(self):
         wf_name = "splits"
@@ -72,9 +76,11 @@ class SplitWorkflowConductorTest(base.MistralWorkflowConductorTest):
             ("task8", 5),
         ]
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq, expected_routes)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq, expected_routes=expected_routes)
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_nested_splits(self):
         wf_name = "splits-nested"
@@ -117,6 +123,8 @@ class SplitWorkflowConductorTest(base.MistralWorkflowConductorTest):
             ("task10", 6),
         ]
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq, expected_routes)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq, expected_routes=expected_routes)
+        # will throw
+        mock.assert_conducting_sequences()

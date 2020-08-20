@@ -13,10 +13,12 @@
 # limitations under the License.
 
 from orquesta import statuses
+from orquesta.tests.mocks import WorkflowConductorMock
+from orquesta.tests.unit.base import WorkflowComposerTest
 from orquesta.tests.unit.conducting.native import base
 
 
-class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
+class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowComposerTest):
     def test_split(self):
         wf_name = "split"
 
@@ -42,14 +44,16 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_term_tasks = [("task7", 1), ("task7", 2)]
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_splits(self):
         wf_name = "splits"
@@ -82,14 +86,16 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_term_tasks = [("task8", 1), ("task8", 4), ("task8", 5)]
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_nested_splits(self):
         wf_name = "splits-nested"
@@ -134,14 +140,16 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_term_tasks = [("task10", 3), ("task10", 4), ("task10", 5), ("task10", 6)]
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_splits_mixed(self):
         wf_name = "splits-mixed"
@@ -169,12 +177,16 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         self.assert_spec_inspection(wf_name)
 
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_splits_mixed_alt_branch(self):
         wf_name = "splits-mixed"
@@ -211,15 +223,17 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_term_tasks = [("task5", 3), ("task5", 4)]
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
-            mock_statuses=mock_statuses,
             expected_routes=expected_routes,
+            mock_statuses=mock_statuses,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_splits_multiple_transition(self):
         wf_name = "splits-transition"
@@ -259,14 +273,16 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_term_tasks = [("task7", 3), ("task7", 4), ("task7", 5), ("task7", 6)]
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_very_many_splits(self):
         wf_name = "splits-very-many"
@@ -310,14 +326,16 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_term_tasks = [("notify", 1), ("notify", 8)]
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_very_many_splits_alt(self):
         wf_name = "splits-very-many"
@@ -413,13 +431,15 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_term_tasks = [("notify", 1), ("notify", 9)]
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             inputs=inputs,
-            mock_results=mock_results,
             expected_routes=expected_routes,
+            mock_results=mock_results,
             expected_term_tasks=expected_term_tasks,
         )
+        # will throw
+        mock.assert_conducting_sequences()

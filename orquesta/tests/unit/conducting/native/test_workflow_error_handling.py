@@ -13,10 +13,12 @@
 # limitations under the License.
 
 from orquesta import statuses
+from orquesta.tests.mocks import WorkflowConductorMock
+from orquesta.tests.unit.base import WorkflowComposerTest
 from orquesta.tests.unit.conducting.native import base
 
 
-class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
+class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest, WorkflowComposerTest):
     def test_error_log_fail(self):
         wf_name = "error-log-fail"
 
@@ -31,13 +33,17 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
 
         self.assert_spec_inspection(wf_name)
 
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             mock_results=mock_results,
             expected_workflow_status=statuses.FAILED,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_error_concurrent_log_fail(self):
         wf_name = "error-log-fail-concurrent"
@@ -48,15 +54,17 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
 
         mock_results = ["All your base are belong to us!"]  # task1
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             mock_results=mock_results,
             expected_workflow_status=statuses.FAILED,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_error_continue(self):
         wf_name = "error-handling-continue"
@@ -77,15 +85,17 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_output = {"message": "hooray!!!"}
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_routes=expected_routes,
             expected_output=expected_output,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
         # Run thru the failure path.
         expected_routes = [
@@ -99,16 +109,18 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_output = {"message": "$%#&@#$!!!"}
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(
-            wf_name,
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_routes=expected_routes,
             expected_workflow_status=statuses.FAILED,
             expected_output=expected_output,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_error_noop(self):
         wf_name = "error-handling-noop"
@@ -124,11 +136,16 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_output = {"message": "hooray!!!"}
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(
-            wf_name, expected_task_seq, mock_statuses=mock_statuses, expected_output=expected_output
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
+            expected_task_seq,
+            mock_statuses=mock_statuses,
+            expected_output=expected_output,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
         # Run thru the failure path.
         expected_task_seq = ["task1", "noop"]
@@ -137,11 +154,14 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_output = {"message": "$%#&@#$!!!"}
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(
-            wf_name, expected_task_seq, mock_statuses=mock_statuses, expected_output=expected_output
+        mock = WorkflowConductorMock(
+            wf_spec,
+            expected_task_seq,
+            mock_statuses=mock_statuses,
+            expected_output=expected_output,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_error_fail(self):
         wf_name = "error-handling-fail"
@@ -157,11 +177,16 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_output = {"message": "hooray!!!"}
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(
-            wf_name, expected_task_seq, mock_statuses=mock_statuses, expected_output=expected_output
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(
+            wf_spec,
+            expected_task_seq,
+            mock_statuses=mock_statuses,
+            expected_output=expected_output,
         )
+        # will throw
+        mock.assert_conducting_sequences()
 
         # Run thru the failure path.
         expected_task_seq = ["task1", "task3", "fail"]
@@ -174,12 +199,12 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
 
         expected_output = {"message": "$%#&@#$!!!"}
 
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(
-            wf_name,
+        mock = WorkflowConductorMock(
+            wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
             expected_workflow_status=statuses.FAILED,
             expected_output=expected_output,
         )
+        # will throw
+        mock.assert_conducting_sequences()

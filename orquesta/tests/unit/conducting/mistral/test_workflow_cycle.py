@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from orquesta.tests.mocks import WorkflowConductorMock
+from orquesta.tests.unit.base import WorkflowComposerTest
 from orquesta.tests.unit.conducting.mistral import base
 
 
-class CyclicWorkflowConductorTest(base.MistralWorkflowConductorTest):
+class CyclicWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComposerTest):
     def test_cycle(self):
         wf_name = "cycle"
 
@@ -32,7 +34,11 @@ class CyclicWorkflowConductorTest(base.MistralWorkflowConductorTest):
             "task3",
         ]
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
+        # will throw
+        mock.assert_conducting_sequences()
 
     def test_cycles(self):
         wf_name = "cycles"
@@ -59,4 +65,8 @@ class CyclicWorkflowConductorTest(base.MistralWorkflowConductorTest):
             "task5",
         ]
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
+        # will throw
+        mock.assert_conducting_sequences()

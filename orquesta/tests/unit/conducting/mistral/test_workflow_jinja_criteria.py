@@ -12,24 +12,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from orquesta.tests.mocks import WorkflowConductorMock
+from orquesta.tests.unit.base import WorkflowComposerTest
 from orquesta.tests.unit.conducting.mistral import base
 
 
-class JinjaCriteriaConductorTest(base.MistralWorkflowConductorTest):
+class JinjaCriteriaConductorTest(base.MistralWorkflowConductorTest, WorkflowComposerTest):
     def test_decision_tree_with_jinja_expr(self):
         wf_name = "decision-jinja"
 
         # Test branch "a"
         expected_task_seq = ["t1", "a"]
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq, inputs={"which": "a"})
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq, inputs={"which": "a"})
+        # will throw
+        mock.assert_conducting_sequences()
 
         # Test branch "b"
         expected_task_seq = ["t1", "b"]
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq, inputs={"which": "b"})
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq, inputs={"which": "b"})
+        # will throw
+        mock.assert_conducting_sequences()
 
         # Test branch "c"
         expected_task_seq = ["t1", "c"]
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq, inputs={"which": "c"})
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq, inputs={"which": "c"})
+        # will throw
+        mock.assert_conducting_sequences()

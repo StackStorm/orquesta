@@ -365,7 +365,7 @@ def main():
     LOG.setLevel(numeric_level)
     handler = logging.StreamHandler()
     handler.setLevel(numeric_level)
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
     handler.setFormatter(formatter)
     LOG.addHandler(handler)
     # single file fixture

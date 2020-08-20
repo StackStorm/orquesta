@@ -31,7 +31,6 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         expected_output = {"greeting": mock_results[2]}
 
-        self.assert_spec_inspection(wf_name)
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
         mock = WorkflowConductorMock(
@@ -49,35 +48,42 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         expected_task_seq = ["task1", "task4", "task2", "task5", "task3", "task6"]
 
-        self.assert_spec_inspection(wf_name)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq)
+        mock.assert_conducting_sequences()
 
     def test_branching(self):
         wf_name = "branching"
 
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
 
-        self.assert_spec_inspection(wf_name)
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
 
-        self.assert_conducting_sequences(wf_name, expected_task_seq)
+        mock.assert_conducting_sequences()
 
     def test_decision_tree(self):
         wf_name = "decision"
 
         # Test branch "a"
         expected_task_seq = ["t1", "a"]
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq, inputs={"which": "a"})
+        inputs = {"which": "a"}
+        wf_def = self.get_wf_def(wf_name)
+        wf_spec = self.spec_module.instantiate(wf_def)
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq, inputs=inputs)
+        mock.assert_conducting_sequences()
 
         # Test branch "b"
         expected_task_seq = ["t1", "b"]
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq, inputs={"which": "b"})
+        inputs = {"which": "b"}
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq, inputs=inputs)
+        mock.assert_conducting_sequences()
 
         # Test branch "c"
         expected_task_seq = ["t1", "c"]
-
-        self.assert_spec_inspection(wf_name)
-
-        self.assert_conducting_sequences(wf_name, expected_task_seq, inputs={"which": "c"})
+        inputs = {"which": "c"}
+        mock = WorkflowConductorMock(wf_spec, expected_task_seq, inputs=inputs)
+        mock.assert_conducting_sequences()
