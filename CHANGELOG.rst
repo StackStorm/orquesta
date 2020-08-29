@@ -9,6 +9,7 @@ Fixed
 
 * Warn users when there is a loop and no start task identified. (bug fix)
 * Lock global variables during initialization to make them thread safe. (bug fix)
+* Workflow stuck in running if one or more items failed in a with items task. (bug fix)
 
 1.1.1
 -----

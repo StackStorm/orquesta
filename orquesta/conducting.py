@@ -74,6 +74,9 @@ class WorkflowState(object):
 
         return instance
 
+    def has_task(self, task_id, route):
+        return constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route)) in self.tasks
+
     def get_task(self, task_id, route):
         return self.sequence[self.tasks[constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route))]]
 
@@ -178,7 +181,22 @@ class WorkflowState(object):
 
     @property
     def has_staged_tasks(self):
-        return len(self.get_staged_tasks()) > 0
+        staged_tasks = self.get_staged_tasks()
+
+        itemized_staged_tasks = [t for t in staged_tasks if "items" in t]
+
+        # If there is failure in a with-items task, the state of the with-items task
+        # is kept in staging to support manual task retry.
+        completed_itemized_staged_tasks = [
+            t
+            for t in itemized_staged_tasks
+            if (
+                self.has_task(t["id"], t["route"])
+                and self.get_task(t["id"], t["route"])["status"] in statuses.COMPLETED_STATUSES
+            )
+        ]
+
+        return len(staged_tasks) - len(completed_itemized_staged_tasks) > 0
 
     def add_staged_task(self, task_id, route, ctxs=None, prev=None, ready=True, retry=False):
         if not ctxs:
