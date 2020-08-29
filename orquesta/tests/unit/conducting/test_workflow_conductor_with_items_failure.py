@@ -447,3 +447,78 @@ class WorkflowConductorWithItemsFailureTest(test_base.WorkflowConductorWithItems
 
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+
+    def test_failed_all_items_with_task_remediation(self):
+        wf_def = """
+        version: 1.0
+        vars:
+          - xs:
+              - fee
+              - fi
+              - fo
+              - fum
+        tasks:
+          task1:
+            with: <% ctx(xs) %>
+            action: core.echo message=<% item() %>
+            next:
+              - when: <% succeeded() or failed() %>
+                do: task2
+          task2:
+            action: core.noop
+        """
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_status(statuses.RUNNING)
+
+        # Mock the action execution for each item and assert expected task statuses.
+        task_route = 0
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"]}
+
+        task_action_specs = [
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
+        ]
+
+        mock_ac_ex_statuses = [
+            statuses.FAILED,
+            statuses.FAILED,
+            statuses.FAILED,
+            statuses.FAILED,
+        ]
+
+        expected_task_statuses = [statuses.RUNNING] * 3 + [statuses.FAILED]
+
+        expected_workflow_statuses = [statuses.RUNNING] * 4
+
+        self.assert_task_items(
+            conductor,
+            task_name,
+            task_route,
+            task_ctx,
+            task_ctx["xs"],
+            task_action_specs,
+            mock_ac_ex_statuses,
+            expected_task_statuses,
+            expected_workflow_statuses,
+        )
+
+        current_task = conductor.get_next_tasks()[0]
+        current_task_id = current_task["id"]
+        current_task_route = current_task["route"]
+        ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
+        conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
+        ac_ex_event = events.ActionExecutionEvent(statuses.SUCCEEDED)
+        conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
+
+        # Assert there are only two tasks executed.
+        self.assertEqual(len(conductor.workflow_state.sequence), 2)
+
+        # Assert the workflow succeeded.
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
