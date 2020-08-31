@@ -67,7 +67,7 @@ class TestFileSpec(MappingSpec):
                             "properties": {
                                 "route": {"type": "integer"},
                                 "result": spec_types.ANY,
-                                "status": {"type": "string"},
+                                "status": {"anyOf": [{"type": "array"}, {"type": "string"}]},
                             },
                             "additionalProperties": False,
                             "required": ["status"],

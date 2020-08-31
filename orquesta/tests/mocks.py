@@ -124,24 +124,47 @@ class WorkflowConductorMock(object):
                 current_task = self.run_q.get()
                 current_task_id = current_task["id"]
                 current_task_route = current_task["route"]
+                # mock running
+                for action in current_task["actions"]:
+                    ac_ex_event = None
+                    if "item_id" not in action or action["item_id"] is None:
+                        ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
+                    else:
+                        msg = 'Mark task "%s", route "%s", item "%s" in conductor as running.'
+                        msg = msg % (task["id"], str(task["route"]), action["item_id"])
+                        LOG.debug(msg)
+                        ac_ex_event = events.TaskItemActionExecutionEvent(
+                            action["item_id"], statuses.RUNNING
+                        )
 
-                # Set task status to running.
-                ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
-                conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
+                    conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
 
                 # Mock completion of the task.
                 status = self.status_q.get() if not self.status_q.empty() else statuses.SUCCEEDED
                 result = self.result_q.get() if not self.result_q.empty() else None
+                for index, action in enumerate(current_task["actions"]):
+                    if "item_id" not in action or action["item_id"] is None:
+                        ac_ex_event = events.ActionExecutionEvent(status, result=result)
+                    else:
+                        result = [] if result is None else result
+                        if len(result) > 0:
+                            accumulated_result = [
+                                item.get("result") if item else None for item in result[: index + 1]
+                            ]
+                        else:
+                            accumulated_result = [None for i in range(index + 1)]
 
-                ac_ex_event = events.ActionExecutionEvent(status, result=result)
-                entry = conductor.update_task_state(
-                    current_task_id, current_task_route, ac_ex_event
-                )
-                LOG.debug("current task id: %s" % entry["id"])
-                LOG.debug("route: %s" % entry["route"])
-                LOG.debug("in context: %s" % conductor.get_task_context(entry["ctxs"]["in"]))
-                for k, v in entry.get("ctxs", {}).get("out", {}).items():
-                    LOG.debug("out %s: %s" % (k, conductor.get_task_context([v])))
+                        ac_ex_event = events.TaskItemActionExecutionEvent(
+                            action["item_id"], status[index], result=accumulated_result
+                        )
+                    entry = conductor.update_task_state(
+                        current_task_id, current_task_route, ac_ex_event
+                    )
+                    LOG.debug("current task id: %s" % entry["id"])
+                    LOG.debug("route: %s" % entry["route"])
+                    LOG.debug("in context: %s" % conductor.get_task_context(entry["ctxs"]["in"]))
+                    for k, v in entry.get("ctxs", {}).get("out", {}).items():
+                        LOG.debug("out %s: %s" % (k, conductor.get_task_context([v])))
 
             # Identify the next set of tasks.
             for next_task in conductor.get_next_tasks():

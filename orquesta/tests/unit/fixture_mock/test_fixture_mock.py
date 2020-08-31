@@ -27,6 +27,62 @@ from orquesta.tests.unit.conducting.native import base
 
 
 class FixtureTest(base.OrchestraWorkflowConductorTest):
+    def test_with_items(self):
+        wf = """
+version: 1.0
+
+description: A workflow for testing with items and concurrency.
+
+input:
+  - values
+
+tasks:
+  task1:
+    with:
+      items: <% ctx().values %>
+    action: core.local
+    input:
+      cmd: echo <% item() %>
+    next:
+      - when: <% succeeded() %>
+        do:
+          - task2
+
+  task2:
+    action: core.local
+    input:
+      cmd: "echo hello "
+
+        """
+        spec_yaml = """
+---
+  workflow: "samplewith.yaml"
+  inputs: {"values":["1","2","3"]}
+  routes: [[]]
+  task_sequence:
+    - task1:
+        route: 0
+        status: ["succeeded","succeeded","succeeded"]
+    - task2:
+        route: 0
+        status: "succeeded"
+
+        """
+
+        def do_run(spec_y):
+            spec = TestFileSpec(spec_y, "fixture")
+            workflow_path = "/tmp"
+            fixture = WorkflowTestFixture(spec, workflow_path)
+            fixture.run_test()
+
+        mock_open = mock.mock_open(read_data=wf)
+        if sys.version_info[0] < 3:
+            with mock.patch("__builtin__.open", mock_open):
+                do_run(spec_yaml)
+        else:
+            with mock.patch("builtins.open", mock_open):
+                do_run(spec_yaml)
+
     def test_load_workflow_spec_results(self):
 
         wf = """
