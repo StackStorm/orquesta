@@ -22,6 +22,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
     def test_split(self):
         wf_name = "split"
 
+        self.assert_spec_inspection(wf_name)
+
         expected_routes = [
             [],  # default from start
             ["task2__t0"],  # task1 -> task2 -> task4
@@ -57,6 +59,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
     def test_splits(self):
         wf_name = "splits"
+
+        self.assert_spec_inspection(wf_name)
 
         expected_routes = [
             [],  # default from start
@@ -99,6 +103,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
     def test_nested_splits(self):
         wf_name = "splits-nested"
+
+        self.assert_spec_inspection(wf_name)
 
         expected_routes = [
             [],  # default from start
@@ -154,6 +160,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
     def test_splits_mixed(self):
         wf_name = "splits-mixed"
 
+        self.assert_spec_inspection(wf_name)
+
         expected_routes = [
             [],
             ["task1__t0"],  # task1 -> task3
@@ -190,6 +198,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
     def test_splits_mixed_alt_branch(self):
         wf_name = "splits-mixed"
+
+        self.assert_spec_inspection(wf_name)
 
         expected_routes = [
             [],
@@ -237,6 +247,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
     def test_splits_multiple_transition(self):
         wf_name = "splits-transition"
+
+        self.assert_spec_inspection(wf_name)
 
         expected_routes = [
             [],
@@ -286,6 +298,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
     def test_very_many_splits(self):
         wf_name = "splits-very-many"
+
+        self.assert_spec_inspection(wf_name)
 
         expected_routes = [
             [],
@@ -339,6 +353,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
     def test_very_many_splits_alt(self):
         wf_name = "splits-very-many"
+
+        self.assert_spec_inspection(wf_name)
 
         inputs = {
             "fork1": True,

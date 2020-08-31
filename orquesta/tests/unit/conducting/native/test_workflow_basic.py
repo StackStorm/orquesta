@@ -31,6 +31,8 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         expected_output = {"greeting": mock_results[2]}
 
+        self.assert_spec_inspection(wf_name)
+
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
         mock = WorkflowConductorMock(
@@ -48,6 +50,8 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         expected_task_seq = ["task1", "task4", "task2", "task5", "task3", "task6"]
 
+        self.assert_spec_inspection(wf_name)
+
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
         mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
@@ -59,6 +63,8 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
 
+        self.assert_spec_inspection(wf_name)
+
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
         mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
@@ -67,6 +73,8 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
     def test_decision_tree(self):
         wf_name = "decision"
+
+        self.assert_spec_inspection(wf_name)
 
         # Test branch "a"
         expected_task_seq = ["t1", "a"]

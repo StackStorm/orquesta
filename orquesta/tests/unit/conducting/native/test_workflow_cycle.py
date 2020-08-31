@@ -22,6 +22,8 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowC
     def test_cycle(self):
         wf_name = "cycle"
 
+        self.assert_spec_inspection(wf_name)
+
         expected_task_seq = [
             "prep",
             "task1",
@@ -42,6 +44,8 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowC
 
     def test_cycles(self):
         wf_name = "cycles"
+
+        self.assert_spec_inspection(wf_name)
 
         expected_task_seq = [
             "prep",
@@ -73,6 +77,8 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowC
     def test_rollback_retry(self):
         wf_name = "rollback-retry"
 
+        self.assert_spec_inspection(wf_name)
+
         expected_task_seq = ["init", "check", "create", "rollback", "check", "delete"]
 
         mock_statuses = [
@@ -90,6 +96,8 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowC
 
     def test_cycle_and_fork(self):
         wf_name = "cycle-fork"
+
+        self.assert_spec_inspection(wf_name)
 
         expected_task_seq = [
             "init",

@@ -41,6 +41,8 @@ class SplitWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComp
             ("task7", 2),
         ]
 
+        self.assert_spec_inspection(wf_name)
+
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
         mock = WorkflowConductorMock(wf_spec, expected_task_seq, expected_routes=expected_routes)
@@ -75,6 +77,8 @@ class SplitWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComp
             ("task8", 4),
             ("task8", 5),
         ]
+
+        self.assert_spec_inspection(wf_name)
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
@@ -122,6 +126,8 @@ class SplitWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComp
             ("task10", 5),
             ("task10", 6),
         ]
+
+        self.assert_spec_inspection(wf_name)
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)

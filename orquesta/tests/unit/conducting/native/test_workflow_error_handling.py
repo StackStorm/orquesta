@@ -22,6 +22,8 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest, Wo
     def test_error_log_fail(self):
         wf_name = "error-log-fail"
 
+        self.assert_spec_inspection(wf_name)
+
         expected_task_seq = ["task1", "log", "fail"]
 
         mock_statuses = [statuses.FAILED, statuses.SUCCEEDED]  # task1  # log
@@ -48,6 +50,8 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest, Wo
     def test_error_concurrent_log_fail(self):
         wf_name = "error-log-fail-concurrent"
 
+        self.assert_spec_inspection(wf_name)
+
         expected_task_seq = ["task1", "fail", "log"]
 
         mock_statuses = [statuses.FAILED]  # task1
@@ -69,6 +73,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest, Wo
     def test_error_continue(self):
         wf_name = "error-handling-continue"
 
+        self.assert_spec_inspection(wf_name)
         # Run thru the success path.
         expected_routes = [
             [],  # default from start
@@ -125,6 +130,8 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest, Wo
     def test_error_noop(self):
         wf_name = "error-handling-noop"
 
+        self.assert_spec_inspection(wf_name)
+
         # Run thru the success path.
         expected_task_seq = ["task1", "task2", "continue"]
 
@@ -165,6 +172,8 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest, Wo
 
     def test_error_fail(self):
         wf_name = "error-handling-fail"
+
+        self.assert_spec_inspection(wf_name)
 
         # Run thru the success path.
         expected_task_seq = ["task1", "task2", "continue"]

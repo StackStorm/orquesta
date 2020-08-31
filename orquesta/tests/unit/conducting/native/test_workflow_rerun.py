@@ -23,6 +23,8 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, Workf
     def test_fail_single_branch(self):
         wf_name = "parallel"
 
+        self.assert_spec_inspection(wf_name)
+
         # Fail task2.
         expected_task_seq = ["task1", "task4", "task2", "task5"]
 
@@ -76,6 +78,8 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, Workf
     def test_fail_multiple_branches(self):
         wf_name = "parallel"
 
+        self.assert_spec_inspection(wf_name)
+
         # Fail task2 and task5.
         expected_task_seq = ["task1", "task4", "task2", "task5"]
 
@@ -107,6 +111,8 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, Workf
 
     def test_fail_single_before_join(self):
         wf_name = "join"
+
+        self.assert_spec_inspection(wf_name)
 
         # Fail task3 before join at task6.
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
@@ -145,6 +151,8 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, Workf
 
     def test_fail_multiple_before_join(self):
         wf_name = "join"
+
+        self.assert_spec_inspection(wf_name)
 
         # Fail task3 before join at task6.
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
@@ -194,6 +202,8 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, Workf
     def test_fail_at_join(self):
         wf_name = "join"
 
+        self.assert_spec_inspection(wf_name)
+
         # Fail task3 before join at task6.
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6"]
 
@@ -232,6 +242,8 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, Workf
 
     def test_fail_cycle(self):
         wf_name = "cycle"
+
+        self.assert_spec_inspection(wf_name)
 
         # Fail task3 which is part of the cycle task1->task2->task3->task1.
         expected_task_seq = ["prep", "task1", "task2", "task3", "task1", "task2", "task3"]
@@ -284,6 +296,8 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, Workf
 
     def test_fail_at_single_split(self):
         wf_name = "split"
+
+        self.assert_spec_inspection(wf_name)
 
         # Fail task5 at one of the split/fork.
         expected_routes = [
@@ -360,6 +374,8 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, Workf
 
     def test_fail_at_multiple_splits(self):
         wf_name = "split"
+
+        self.assert_spec_inspection(wf_name)
 
         # Fail task5 at one of the split/fork and task6 in another split/fork.
         expected_routes = [
