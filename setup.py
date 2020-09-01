@@ -31,7 +31,8 @@ os.chdir(PKG_ROOT_DIR)
 def get_version_string():
     version = None
     sys.path.insert(
-        0, PKG_ROOT_DIR,
+        0,
+        PKG_ROOT_DIR,
     )
     from orquesta import __version__
 
