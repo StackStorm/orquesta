@@ -54,7 +54,10 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
+        mock = WorkflowConductorMock(
+            wf_spec,
+            expected_task_seq,
+        )
 
         mock.assert_conducting_sequences()
 
@@ -67,7 +70,10 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
+        mock = WorkflowConductorMock(
+            wf_spec,
+            expected_task_seq,
+        )
 
         mock.assert_conducting_sequences()
 

@@ -39,7 +39,10 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowC
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
+        mock = WorkflowConductorMock(
+            wf_spec,
+            expected_task_seq,
+        )
         mock.assert_conducting_sequences()
 
     def test_cycles(self):
@@ -71,7 +74,10 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowC
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
+        mock = WorkflowConductorMock(
+            wf_spec,
+            expected_task_seq,
+        )
         mock.assert_conducting_sequences()
 
     def test_rollback_retry(self):

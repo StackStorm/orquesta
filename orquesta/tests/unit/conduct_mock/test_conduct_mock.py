@@ -54,9 +54,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
         mock.assert_conducting_sequences()
 
     def test_sequential_routes_list(self):
-        """Yaml does not support python tuple
-
-        """
+        """Yaml does not support python tuple"""
         wf_name = "sequential"
 
         expected_task_seq = [["task1", 0], ["task2", 0], ["task3", 0], ["continue", 0]]

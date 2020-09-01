@@ -24,7 +24,10 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task7"]
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
+        mock = WorkflowConductorMock(
+            wf_spec,
+            expected_task_seq,
+        )
         mock.assert_conducting_sequences()
 
     def test_join_count(self):
@@ -126,6 +129,10 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
             statuses.SUCCEEDED,  # task8
             statuses.SUCCEEDED,  # task9
         ]
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses,)
+        mock = WorkflowConductorMock(
+            wf_spec,
+            expected_task_seq,
+            mock_statuses=mock_statuses,
+        )
         # will throw
         mock.assert_conducting_sequences()

@@ -38,9 +38,7 @@ FIXTURE_EXTS = {".json": json.load, ".yml": yaml.safe_load, ".yaml": yaml.safe_l
 
 class WorkflowConductorMock(object):
 
-    """read fixture for workflow yaml, inputs, and what to check.
-
-    """
+    """read fixture for workflow yaml, inputs, and what to check."""
 
     spec_module_name = "mock"
 
@@ -304,9 +302,7 @@ class WorkflowTestFixture(object):
             return wf_spec
 
     def _get_mock_statuses(self):
-        """retrieve task statuses
-
-        """
+        """retrieve task statuses"""
         return [
             value.get("status", "succeeded")
             for key, value in chain.from_iterable(
@@ -315,9 +311,7 @@ class WorkflowTestFixture(object):
         ]
 
     def _get_task_sequence(self):
-        """retrieve task seq tuples from fixture
-
-        """
+        """retrieve task seq tuples from fixture"""
         return [
             (key, value.get("route", 0))
             for key, value in chain.from_iterable(
@@ -326,9 +320,7 @@ class WorkflowTestFixture(object):
         ]
 
     def _get_mock_results(self):
-        """retrieve results from fixture
-
-        """
+        """retrieve results from fixture"""
         return [
             value.get("result", {})
             for key, value in chain.from_iterable(
@@ -410,7 +402,9 @@ def main():
                 fixture = WorkflowTestFixture.load_from_file(args.workflow_path, full_path, True)
                 fixture.run_test()
                 LOG.info(
-                    "%s/%s test successful", args.workflow_path, fixture.fixture_spec.workflow,
+                    "%s/%s test successful",
+                    args.workflow_path,
+                    fixture.fixture_spec.workflow,
                 )
                 LOG.info("-" * LINE_DASH)
             except exc.OrquestaException as e:

@@ -47,7 +47,10 @@ class BasicWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComp
         expected_task_seq = ["task1", "task4", "task2", "task5", "task3", "task6"]
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
+        mock = WorkflowConductorMock(
+            wf_spec,
+            expected_task_seq,
+        )
         # will throw
         mock.assert_conducting_sequences()
 
@@ -57,7 +60,10 @@ class BasicWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComp
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq,)
+        mock = WorkflowConductorMock(
+            wf_spec,
+            expected_task_seq,
+        )
         # will throw
         mock.assert_conducting_sequences()
 
