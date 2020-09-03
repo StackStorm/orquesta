@@ -177,10 +177,10 @@ class WorkflowState(object):
         return unreachable_barriers
 
     def get_staged_tasks(self, filtered=True):
-        def query(x):
-            return x["ready"] is True and not x.get("completed", False)
+        if not filtered:
+            return self.staged
 
-        return list(filter(query, self.staged)) if filtered else self.staged
+        return [x for x in self.staged if x["ready"] and not x.get("completed", False)]
 
     @property
     def has_staged_tasks(self):
@@ -206,10 +206,7 @@ class WorkflowState(object):
         return entry
 
     def get_staged_task(self, task_id, route):
-        def query(x):
-            return x["id"] == task_id and x["route"] == route
-
-        staged_tasks = list(filter(query, self.staged))
+        staged_tasks = [x for x in self.staged if x["id"] == task_id and x["route"] == route]
 
         return staged_tasks[0] if staged_tasks else None
 
