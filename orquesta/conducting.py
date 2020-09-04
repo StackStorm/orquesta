@@ -67,12 +67,15 @@ class WorkflowState(object):
         instance.contexts = json_util.deepcopy(data.get("contexts", list()))
         instance.routes = json_util.deepcopy(data.get("routes", list()))
         instance.sequence = json_util.deepcopy(data.get("sequence", list()))
-        instance.staged = json_util.deepcopy(data.get("staged", dict()))
+        instance.staged = json_util.deepcopy(data.get("staged", list()))
         instance.status = data.get("status", statuses.UNSET)
         instance.tasks = json_util.deepcopy(data.get("tasks", dict()))
         instance.reruns = json_util.deepcopy(data.get("reruns", list()))
 
         return instance
+
+    def has_task(self, task_id, route):
+        return constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route)) in self.tasks
 
     def get_task(self, task_id, route):
         return self.sequence[self.tasks[constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route))]]
@@ -174,7 +177,10 @@ class WorkflowState(object):
         return unreachable_barriers
 
     def get_staged_tasks(self, filtered=True):
-        return list(filter(lambda x: x["ready"] is True, self.staged)) if filtered else self.staged
+        if not filtered:
+            return self.staged
+
+        return [x for x in self.staged if x["ready"] and not x.get("completed", False)]
 
     @property
     def has_staged_tasks(self):
@@ -200,10 +206,7 @@ class WorkflowState(object):
         return entry
 
     def get_staged_task(self, task_id, route):
-        def query(x):
-            return x["id"] == task_id and x["route"] == route
-
-        staged_tasks = list(filter(query, self.staged))
+        staged_tasks = [x for x in self.staged if x["id"] == task_id and x["route"] == route]
 
         return staged_tasks[0] if staged_tasks else None
 
@@ -909,10 +912,13 @@ class WorkflowConductor(object):
 
         # Get task result and set current context if task is completed.
         if new_task_status in statuses.COMPLETED_STATUSES:
-            # Remove task from staging if exists but keep entry
+            # Remove task from staging if exists but keep and flag entry
             # if task has items and failed for manual rerun.
             if not (task_spec.has_items() and new_task_status in statuses.ABENDED_STATUSES):
                 self.workflow_state.remove_staged_task(task_id, route)
+            else:
+                staged_task = self.workflow_state.get_staged_task(task_id, route)
+                staged_task["completed"] = True
 
             # Format task result depending on the type of task.
             task_result = self.make_task_result(task_spec, event)
@@ -1015,6 +1021,7 @@ class WorkflowConductor(object):
 
                         # Clear list of items for with items task.
                         staged_next_task.pop("items", None)
+                        staged_next_task.pop("completed", None)
                     else:
                         # Otherwise create a new entry in staging for the next task.
                         staged_next_task = self.workflow_state.add_staged_task(
@@ -1170,6 +1177,12 @@ class WorkflowConductor(object):
         # Reset terminal status for the rerunnable candidate.
         task.pop("term", None)
         task.pop("ignore", None)
+
+        # Reset staged task for the rerunnable candidate.
+        staged_task = self.workflow_state.get_staged_task(task_id, route)
+
+        if staged_task:
+            staged_task.pop("completed", None)
 
         # Reset the list of errors for the task.
         for e in [e for e in self.errors if e.get("task_id", None) == task_id]:
