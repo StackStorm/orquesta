@@ -82,7 +82,6 @@ tasks:
             with mock.patch("builtins.open", mock_open):
                 do_run(spec_yaml)
 
-
     def test_with_items_success(self):
         wf = """
 version: 1.0
@@ -310,6 +309,7 @@ tasks:
         workflow_path = "/tmp"
         fixture = WorkflowTestFixture(spec, workflow_path)
         fixture.run_test()
+
 
 if __name__ == "__main__":
     unittest.main()
