@@ -117,7 +117,7 @@ tasks:
   task_sequence:
     - task1:
         route: 0
-        result: [1, 2, 1]
+        result: [{"result":{"result":1}},{"result":{"result":2}},{"result":{"result":1}}]
         status: ["succeeded","succeeded","succeeded"]
     - task2:
         route: 0
