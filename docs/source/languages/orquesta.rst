@@ -101,6 +101,9 @@ transition will be represented as an outbound edge of the current task. When the
 specified in ``when`` of the transition is met, the next set of tasks under ``do`` will be invoked.
 If there are no more outbound edges identified, then the workflow execution is complete.
 
+Orquesta workflows are designed to fail fast. If a task fails which has no transition for that
+failure condition, then the workflow will stop as soon as any in-progress tasks are completed.
+
 Each task defines what **StackStorm** action to execute, the policies on action execution, and
 what happens after the task completes. All of the variables defined and published up to this point
 (aka context) are accessible to the task. At its simplest, the task executes the action and passes
