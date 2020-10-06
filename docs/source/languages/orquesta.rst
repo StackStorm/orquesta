@@ -103,6 +103,14 @@ If there are no more outbound edges identified, then the workflow execution is c
 
 Orquesta workflows are designed to fail fast. If a task fails which has no transition for that
 failure condition, then the workflow will stop as soon as any in-progress tasks are completed.
+This means that if there are multiple parallel branches and a task in one branch (without a failure
+transition) fails, then Orquesta will wait for all currently running tasks in
+the other branches
+to finish and then terminate the workflow. No other tasks will be queued or scheduled for that
+entire workflow no matter what branch they are executing on.
+
+.. note::
+  The fail fast design of Orquesta is different to Mistral workflows, therefore when migrating from Mistral to Orquesta a re-design may be required.
 
 Each task defines what **StackStorm** action to execute, the policies on action execution, and
 what happens after the task completes. All of the variables defined and published up to this point
