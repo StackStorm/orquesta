@@ -1,11 +1,20 @@
 Changelog
 =========
 
+Developing
+----------
+
+Fixed
+-----
+
+* Fix the custom flake8 extensions to check import statements. (bug fix)
+
 1.2.0
 -----
 
 Changed
 ~~~~~~~
+
 * Run pep8 and docs in tox with python3.
 * Use black https://pypi.org/project/black/ for code formatting.
 * Update tox to return error if there are uncommitted schema changes.
