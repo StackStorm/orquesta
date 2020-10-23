@@ -244,6 +244,9 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         "patternProperties": {r"^\w+$": TaskSpec},
     }
 
+    def has_tasks(self):
+        return len(self.keys()) > 0
+
     def has_task(self, task_name):
         if task_name in RESERVED_TASK_NAMES:
             return True
@@ -372,6 +375,23 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
 
         return result
 
+    def detect_start_tasks(self, parent=None):
+        result = []
+
+        if self.has_tasks() and not self.get_start_tasks():
+            entry = {
+                "message": (
+                    "Unable to identify any tasks to start the workflow. If the workflow has a "
+                    "loop, please add a task that serves as an entry point (or lead) into the loop."
+                ),
+                "spec_path": parent.get("spec_path"),
+                "schema_path": parent.get("schema_path"),
+            }
+
+            result.append(entry)
+
+        return result
+
     def detect_undefined_tasks(self, parent=None):
         # Identify the undefined task in task transitions.
         result = []
@@ -493,6 +513,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
 
     def inspect_semantics(self, parent=None):
         result = self.detect_reserved_names(parent=parent)
+        result.extend(self.detect_start_tasks(parent=parent))
         result.extend(self.detect_undefined_tasks(parent=parent))
         result.extend(self.detect_unreachable_tasks(parent=parent))
         result.extend(self.detect_actionless_with_items(parent=parent))

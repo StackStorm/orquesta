@@ -101,6 +101,22 @@ transition will be represented as an outbound edge of the current task. When the
 specified in ``when`` of the transition is met, the next set of tasks under ``do`` will be invoked.
 If there are no more outbound edges identified, then the workflow execution is complete.
 
+The Orquesta workflow engine is designed to fail fast and terminate the execution of the
+workflow when a task fails and no remediation for the failed task is defined. If the failed
+task has no transition for that failure condition, then the workflow will stop as soon as
+any in-progress tasks are completed. To be more specific, if there are multiple parallel branches
+and a task failed in one branch with no transition defined for the failure, then the workflow
+engine will wait for all currently running tasks in the other branches to finish and then
+terminate the workflow. No other tasks from any branches will be queued or scheduled after the
+workflow is terminated. This design allows users to quickly identify and address problems during
+runtime without waiting for the other tasks in other branches to complete. The users can
+quickly fix the problem and either rerun the workflow from the beginning or from where the
+workflow failed.
+
+.. note::
+  The fail fast design of Orquesta is different to Mistral workflows, therefore when migrating
+  from Mistral to Orquesta a re-design may be required.
+
 Each task defines what **StackStorm** action to execute, the policies on action execution, and
 what happens after the task completes. All of the variables defined and published up to this point
 (aka context) are accessible to the task. At its simplest, the task executes the action and passes

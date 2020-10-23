@@ -1,6 +1,32 @@
 Changelog
 =========
 
+Developing
+----------
+
+Fixed
+-----
+
+* Fix the custom flake8 extensions to check import statements. (bug fix)
+
+1.2.0
+-----
+
+Changed
+~~~~~~~
+
+* Run pep8 and docs in tox with python3.
+* Use black https://pypi.org/project/black/ for code formatting.
+* Update tox to return error if there are uncommitted schema changes.
+
+Fixed
+~~~~~
+
+* Warn users when there is a loop and no start task identified. (bug fix)
+* Lock global variables during initialization to make them thread safe. (bug fix)
+* Workflow stuck in running if one or more items failed in a with items task. (bug fix)
+* Fix use case where a failed with items task is run again if the task is in a cycle. (bug fix)
+
 1.1.1
 -----
 

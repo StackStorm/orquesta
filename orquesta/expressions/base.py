@@ -17,6 +17,7 @@ import inspect
 import logging
 import re
 import six
+import threading
 
 from stevedore import extension
 
@@ -27,6 +28,7 @@ from orquesta.utils import plugin as plugin_util
 LOG = logging.getLogger(__name__)
 
 _EXP_EVALUATORS = None
+_EXP_EVALUATORS_LOCK = threading.Lock()
 _EXP_EVALUATOR_NAMESPACE = "orquesta.expressions.evaluators"
 
 
@@ -73,14 +75,18 @@ def get_evaluator(language):
 
 def get_evaluators():
     global _EXP_EVALUATORS
+    global _EXP_EVALUATORS_LOCK
 
-    if _EXP_EVALUATORS is None:
-        _EXP_EVALUATORS = {}
+    with _EXP_EVALUATORS_LOCK:
+        if _EXP_EVALUATORS is None:
+            _EXP_EVALUATORS = {}
 
-        mgr = extension.ExtensionManager(namespace=_EXP_EVALUATOR_NAMESPACE, invoke_on_load=False)
+            mgr = extension.ExtensionManager(
+                namespace=_EXP_EVALUATOR_NAMESPACE, invoke_on_load=False
+            )
 
-        for name in mgr.names():
-            _EXP_EVALUATORS[name] = get_evaluator(name)
+            for name in mgr.names():
+                _EXP_EVALUATORS[name] = get_evaluator(name)
 
     return _EXP_EVALUATORS
 

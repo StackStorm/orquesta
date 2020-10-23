@@ -79,7 +79,7 @@ def get_alias(logical_line):
 
 
 @core.flake8ext
-def check_alias_naming(logical_line, physical_line, filename, noqa):
+def check_alias_naming(logical_line, filename, noqa):
     """Check import alias.
 
     To ensure code consistency, check if a module must use a specific alias.

@@ -423,3 +423,40 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
         }
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_unidentified_start_tasks(self):
+        wf_def = """
+            version: 1.0
+
+            description: A sample workflow with a single task loop.
+
+            input:
+              - count: 0
+
+            tasks:
+              task1:
+                action: core.noop
+                next:
+                  - when: <% ctx().count < 2 %>
+                    publish:
+                      - count: <% ctx().count + 1 %>
+                    do: task1
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        expected_errors = {
+            "semantics": [
+                {
+                    "message": (
+                        "Unable to identify any tasks to start the workflow. "
+                        "If the workflow has a loop, please add a task that "
+                        "serves as an entry point (or lead) into the loop."
+                    ),
+                    "spec_path": "tasks",
+                    "schema_path": "properties.tasks",
+                }
+            ]
+        }
+
+        self.assertDictEqual(wf_spec.inspect(), expected_errors)
