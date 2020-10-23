@@ -25,7 +25,7 @@ from six.moves import queue
 from orquesta import conducting
 from orquesta import events
 from orquesta.specs import loader as spec_loader
-from orquesta.specs.mock.models import TestFileSpec
+from orquesta.specs.mock.models import TestCaseSpec
 from orquesta.specs.native.v1.models import WorkflowSpec
 from orquesta import statuses
 from orquesta.tests import exceptions as exc
@@ -255,7 +255,7 @@ class WorkflowTestFixture(object):
     def __init__(self, spec, workflow_path, pprint=False):
         """Fixture for testing workflow
 
-        :param spec: TestFileSpec
+        :param spec: TestCaseSpec
         :param workflow_spec: str - directory containing file named in
         fixture
         :param cmd: boolean - True to prettyprint errors
@@ -263,7 +263,7 @@ class WorkflowTestFixture(object):
         self.workflow_path = workflow_path
         self.fixture_spec = spec
         self.pprint = pprint
-        if not isinstance(spec, TestFileSpec):
+        if not isinstance(spec, TestCaseSpec):
             raise exc.IncorrectSpec
         errors = self.fixture_spec.inspect()
         if len(errors) > 0:
@@ -281,7 +281,7 @@ class WorkflowTestFixture(object):
     @classmethod
     def load_from_file(cls, workflow_path, fixture_filename, pprint):
         with open(fixture_filename, "r") as f:
-            fixture_spec = TestFileSpec(f.read(), "")
+            fixture_spec = TestCaseSpec(f.read(), "")
             return cls(fixture_spec, workflow_path, pprint)
 
     def load_wf_spec(self, input_file):

@@ -21,7 +21,7 @@ except ImportError:
 import sys
 import unittest
 
-from orquesta.specs.mock.models import TestFileSpec
+from orquesta.specs.mock.models import TestCaseSpec
 import orquesta.tests.exceptions as exc
 from orquesta.tests.mocks import WorkflowTestFixture
 from orquesta.tests.unit.conducting.native import base
@@ -69,7 +69,7 @@ tasks:
         """
 
         def do_run(spec_y):
-            spec = TestFileSpec(spec_y, "fixture")
+            spec = TestCaseSpec(spec_y, "fixture")
             workflow_path = "/tmp"
             fixture = WorkflowTestFixture(spec, workflow_path)
             fixture.run_test()
@@ -126,7 +126,7 @@ tasks:
         """
 
         def do_run(spec_y):
-            spec = TestFileSpec(spec_y, "fixture")
+            spec = TestCaseSpec(spec_y, "fixture")
             workflow_path = "/tmp"
             fixture = WorkflowTestFixture(spec, workflow_path)
             fixture.run_test()
@@ -167,7 +167,7 @@ tasks:
         """
 
         def do_run(spec_y):
-            spec = TestFileSpec(spec_y, "fixture")
+            spec = TestCaseSpec(spec_y, "fixture")
             workflow_path = "/tmp"
             fixture = WorkflowTestFixture(spec, workflow_path)
             fixture.run_test()
@@ -226,12 +226,12 @@ tasks:
         mock_open = mock.mock_open(read_data=wf)
         if sys.version_info[0] < 3:
             with mock.patch("__builtin__.open", mock_open):
-                spec = TestFileSpec(spec_yaml, "fixture")
+                spec = TestCaseSpec(spec_yaml, "fixture")
                 workflow_path = "/tmp"
                 self.assertRaises(exc.WorkflowSpecError, WorkflowTestFixture, spec, workflow_path)
         else:
             with mock.patch("builtins.open", mock_open):
-                spec = TestFileSpec(spec_yaml, "fixture")
+                spec = TestCaseSpec(spec_yaml, "fixture")
                 workflow_path = "/tmp"
                 self.assertRaises(exc.WorkflowSpecError, WorkflowTestFixture, spec, workflow_path)
 
@@ -270,7 +270,7 @@ tasks:
               result: {}
         """
 
-        spec = TestFileSpec(spec_yaml, "fixture")
+        spec = TestCaseSpec(spec_yaml, "fixture")
         workflow_path = "/tmp"
         fixture = WorkflowTestFixture(spec, workflow_path)
         self.assertRaises(exc.MockConductorTaskSequenceError, fixture.run_test)
@@ -305,7 +305,7 @@ tasks:
               result: {"result":{"test":true}}
         """
 
-        spec = TestFileSpec(spec_yaml, "fixture")
+        spec = TestCaseSpec(spec_yaml, "fixture")
         workflow_path = "/tmp"
         fixture = WorkflowTestFixture(spec, workflow_path)
         fixture.run_test()

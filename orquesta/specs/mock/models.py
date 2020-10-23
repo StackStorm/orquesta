@@ -49,7 +49,7 @@ class MappingSpec(spec_base.MappingSpec):
     }
 
 
-class TestFileSpec(MappingSpec):
+class TestCaseSpec(MappingSpec):
     _schema = {
         "type": "object",
         "properties": {
@@ -83,6 +83,3 @@ class TestFileSpec(MappingSpec):
         "required": ["workflow", "task_sequence"],
         "additionalProperties": False,
     }
-
-    def __init__(self, spec, name=None, member=False):
-        super(TestFileSpec, self).__init__(spec, name=name, member=member)
