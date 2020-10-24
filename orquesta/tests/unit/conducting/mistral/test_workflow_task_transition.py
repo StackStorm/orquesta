@@ -13,12 +13,14 @@
 # limitations under the License.
 
 from orquesta import statuses
-from orquesta.tests.mocks import WorkflowConductorMock
-from orquesta.tests.unit.base import WorkflowComposerTest
+from orquesta.tests import mocks
+from orquesta.tests.unit import base as test_base
 from orquesta.tests.unit.conducting.mistral import base
 
 
-class TaskTransitionWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComposerTest):
+class TaskTransitionWorkflowConductorTest(
+    base.MistralWorkflowConductorTest, test_base.WorkflowComposerTest
+):
     def test_on_error(self):
         wf_name = "task-on-error"
 
@@ -30,7 +32,7 @@ class TaskTransitionWorkflowConductorTest(base.MistralWorkflowConductorTest, Wor
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
 
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         # will throw
         mock.assert_conducting_sequences()
 
@@ -39,7 +41,7 @@ class TaskTransitionWorkflowConductorTest(base.MistralWorkflowConductorTest, Wor
 
         mock_statuses = [statuses.FAILED, statuses.SUCCEEDED]  # task1  # task3
 
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         # will throw
         mock.assert_conducting_sequences()
 
@@ -58,7 +60,7 @@ class TaskTransitionWorkflowConductorTest(base.MistralWorkflowConductorTest, Wor
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
 
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         # will throw
         mock.assert_conducting_sequences()
 
@@ -71,7 +73,7 @@ class TaskTransitionWorkflowConductorTest(base.MistralWorkflowConductorTest, Wor
             statuses.SUCCEEDED,  # task4
         ]
 
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         # will throw
         mock.assert_conducting_sequences()
 
@@ -95,7 +97,7 @@ class TaskTransitionWorkflowConductorTest(base.MistralWorkflowConductorTest, Wor
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec, expected_task_seq, expected_routes=expected_routes, mock_statuses=mock_statuses
         )
         # will throw
@@ -116,7 +118,7 @@ class TaskTransitionWorkflowConductorTest(base.MistralWorkflowConductorTest, Wor
             statuses.SUCCEEDED,  # task2__2 on-error
         ]
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec, expected_task_seq, expected_routes=expected_routes, mock_statuses=mock_statuses
         )
         # will throw

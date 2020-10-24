@@ -14,12 +14,14 @@
 
 from orquesta import requests
 from orquesta import statuses
-from orquesta.tests.mocks import WorkflowConductorMock
-from orquesta.tests.unit.base import WorkflowComposerTest
+from orquesta.tests import mocks
+from orquesta.tests.unit import base as test_base
 from orquesta.tests.unit.conducting.native import base
 
 
-class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, WorkflowComposerTest):
+class WorkflowConductorRerunTest(
+    base.OrchestraWorkflowConductorRerunTest, test_base.WorkflowComposerTest
+):
     def test_fail_single_branch(self):
         wf_name = "parallel"
 
@@ -38,7 +40,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, Workf
         expected_term_tasks = ["task2", "task5"]
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -90,7 +92,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, Workf
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -130,7 +132,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, Workf
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -170,7 +172,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, Workf
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -221,7 +223,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, Workf
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -263,7 +265,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, Workf
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -335,7 +337,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, Workf
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -413,7 +415,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorRerunTest, Workf
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,

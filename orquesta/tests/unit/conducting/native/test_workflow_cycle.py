@@ -13,12 +13,14 @@
 # limitations under the License.
 
 from orquesta import statuses
-from orquesta.tests.mocks import WorkflowConductorMock
-from orquesta.tests.unit.base import WorkflowComposerTest
+from orquesta.tests import mocks
+from orquesta.tests.unit import base as test_base
 from orquesta.tests.unit.conducting.native import base
 
 
-class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowComposerTest):
+class CyclicWorkflowConductorTest(
+    base.OrchestraWorkflowConductorTest, test_base.WorkflowComposerTest
+):
     def test_cycle(self):
         wf_name = "cycle"
 
@@ -39,7 +41,7 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowC
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
         )
@@ -74,7 +76,7 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowC
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
         )
@@ -97,7 +99,7 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowC
         ]
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         mock.assert_conducting_sequences()
 
     def test_cycle_and_fork(self):
@@ -133,5 +135,5 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowC
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_results=mock_results)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_results=mock_results)
         mock.assert_conducting_sequences()

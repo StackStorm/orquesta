@@ -13,13 +13,15 @@
 # limitations under the License.
 
 from orquesta import statuses
-from orquesta.tests import exceptions as exc
-import orquesta.tests.mocks as conduct_mock
-from orquesta.tests.unit.base import WorkflowComposerTest
+from orquesta.tests import exceptions as test_exc
+from orquesta.tests import mocks
+from orquesta.tests.unit import base as test_base
 from orquesta.tests.unit.conducting.native import base
 
 
-class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowComposerTest):
+class BasicWorkflowConductorTest(
+    base.OrchestraWorkflowConductorTest, test_base.WorkflowComposerTest
+):
     def test_sequential_fail(self):
         wf_name = "sequential_fail"
 
@@ -39,7 +41,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
         self.assert_spec_inspection(wf_name)
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = conduct_mock.WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             inputs={"name": "Stanley"},
@@ -68,7 +70,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
         self.assert_spec_inspection(wf_name)
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = conduct_mock.WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             inputs={"name": "Stanley"},
@@ -97,7 +99,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
         self.assert_spec_inspection(wf_name)
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = conduct_mock.WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             inputs={"name": "Stanley"},
@@ -107,7 +109,9 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
             expected_term_tasks=expected_term_tasks,
         )
         # will throw
-        self.assertRaises(exc.MockConductorWorkflowTermsError, mock.assert_conducting_sequences)
+        self.assertRaises(
+            test_exc.MockConductorWorkflowTermsError, mock.assert_conducting_sequences
+        )
 
     def test_sequential_worfklowstatus_throws(self):
         wf_name = "sequential"
@@ -127,7 +131,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
         self.assert_spec_inspection(wf_name)
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = conduct_mock.WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             inputs={"name": "Stanley"},
@@ -136,7 +140,9 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
             expected_output=expected_output,
         )
         # will throw
-        self.assertRaises(exc.MockConductorWorkflowStatusError, mock.assert_conducting_sequences)
+        self.assertRaises(
+            test_exc.MockConductorWorkflowStatusError, mock.assert_conducting_sequences
+        )
 
     def test_sequential_route_equality_throws(self):
         wf_name = "sequential"
@@ -155,7 +161,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
         self.assert_spec_inspection(wf_name)
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = conduct_mock.WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             inputs={"name": "Stanley"},
@@ -164,7 +170,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
             expected_output=expected_output,
         )
         # will throw
-        self.assertRaises(exc.MockConductorTaskRouteError, mock.assert_conducting_sequences)
+        self.assertRaises(test_exc.MockConductorTaskRouteError, mock.assert_conducting_sequences)
 
     def test_sequential_task_equality_throws(self):
         wf_name = "sequential"
@@ -182,7 +188,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
         self.assert_spec_inspection(wf_name)
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = conduct_mock.WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             inputs={"name": "Stanley"},
@@ -190,7 +196,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
             expected_output=expected_output,
         )
         # will throw
-        self.assertRaises(exc.MockConductorTaskSequenceError, mock.assert_conducting_sequences)
+        self.assertRaises(test_exc.MockConductorTaskSequenceError, mock.assert_conducting_sequences)
 
     def test_sequential_task_output_throws(self):
         wf_name = "sequential"
@@ -208,7 +214,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
         self.assert_spec_inspection(wf_name)
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = conduct_mock.WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             inputs={"name": "Stanley"},
@@ -216,4 +222,6 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
             expected_output=expected_output,
         )
         # will throw
-        self.assertRaises(exc.MockConductorWorkflowOutputError, mock.assert_conducting_sequences)
+        self.assertRaises(
+            test_exc.MockConductorWorkflowOutputError, mock.assert_conducting_sequences
+        )

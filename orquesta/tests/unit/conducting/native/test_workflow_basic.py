@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.tests.mocks import WorkflowConductorMock
-from orquesta.tests.unit.base import WorkflowComposerTest
+from orquesta.tests import mocks
+from orquesta.tests.unit import base as test_base
 from orquesta.tests.unit.conducting.native import base
 
 
-class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowComposerTest):
+class BasicWorkflowConductorTest(
+    base.OrchestraWorkflowConductorTest, test_base.WorkflowComposerTest
+):
     def test_sequential(self):
         wf_name = "sequential"
 
@@ -35,7 +37,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             inputs={"name": "Stanley"},
@@ -54,7 +56,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
         )
@@ -70,7 +72,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
         )
@@ -87,17 +89,17 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
         inputs = {"which": "a"}
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, inputs=inputs)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, inputs=inputs)
         mock.assert_conducting_sequences()
 
         # Test branch "b"
         expected_task_seq = ["t1", "b"]
         inputs = {"which": "b"}
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, inputs=inputs)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, inputs=inputs)
         mock.assert_conducting_sequences()
 
         # Test branch "c"
         expected_task_seq = ["t1", "c"]
         inputs = {"which": "c"}
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, inputs=inputs)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, inputs=inputs)
         mock.assert_conducting_sequences()

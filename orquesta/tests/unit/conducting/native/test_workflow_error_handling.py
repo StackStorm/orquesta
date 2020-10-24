@@ -13,12 +13,14 @@
 # limitations under the License.
 
 from orquesta import statuses
-from orquesta.tests.mocks import WorkflowConductorMock
-from orquesta.tests.unit.base import WorkflowComposerTest
+from orquesta.tests import mocks
+from orquesta.tests.unit import base as test_base
 from orquesta.tests.unit.conducting.native import base
 
 
-class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest, WorkflowComposerTest):
+class WorkflowErrorHandlingConductorTest(
+    base.OrchestraWorkflowConductorTest, test_base.WorkflowComposerTest
+):
     def test_error_log_fail(self):
         wf_name = "error-log-fail"
 
@@ -37,7 +39,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest, Wo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -60,7 +62,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest, Wo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -92,7 +94,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest, Wo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -116,7 +118,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest, Wo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -145,7 +147,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest, Wo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -161,7 +163,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest, Wo
 
         expected_output = {"message": "$%#&@#$!!!"}
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -188,7 +190,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest, Wo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -208,7 +210,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest, Wo
 
         expected_output = {"message": "$%#&@#$!!!"}
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,

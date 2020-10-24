@@ -13,22 +13,23 @@
 # limitations under the License.
 
 import argparse
-from itertools import chain
+import itertools
 import json
 import logging
 import os
-from pprint import pformat
+import pprint
 import yaml
 
 from six.moves import queue
 
 from orquesta import conducting
 from orquesta import events
+from orquesta import exceptions as exc
 from orquesta.specs import loader as spec_loader
-from orquesta.specs.mock.models import TestCaseSpec
-from orquesta.specs.native.v1.models import WorkflowSpec
+from orquesta.specs.mock import models as mock_models
+from orquesta.specs.native.v1 import models as native_v1_models
 from orquesta import statuses
-from orquesta.tests import exceptions as exc
+from orquesta.tests import exceptions as test_exc
 
 
 LOG = logging.getLogger(__name__)
@@ -57,7 +58,7 @@ class WorkflowConductorMock(object):
 
         """accepts a workflow spec and different results to check
 
-        :param wf_spec: WorkflowSpec, str
+        :param wf_spec: native_v1_models.WorkflowSpec, str
         :param expected_task_seq: list
         :param expected_routes: list
         :param inputs: list
@@ -192,12 +193,12 @@ class WorkflowConductorMock(object):
         if actual_task_seq != expected_task_seq:
             LOG.error("Actual task Seq  : %s", str(actual_task_seq))
             LOG.error("Expected Task Seq: %s", str(expected_task_seq))
-            raise exc.MockConductorTaskSequenceError
+            raise test_exc.MockConductorTaskSequenceError
 
         if conductor.workflow_state.routes != self.expected_routes:
             LOG.error("Actual routes  : %s", str(conductor.workflow_state.routes))
             LOG.error("Expected routes: %s", str(self.expected_routes))
-            raise exc.MockConductorTaskRouteError
+            raise test_exc.MockConductorTaskRouteError
 
         if conductor.get_workflow_status() in statuses.COMPLETED_STATUSES:
             conductor.render_workflow_output()
@@ -208,13 +209,13 @@ class WorkflowConductorMock(object):
         if conductor.get_workflow_status() != self.expected_workflow_status:
             LOG.error("Actual workflow status  : %s", conductor.get_workflow_status())
             LOG.error("Expected workflow status: %s", str(self.expected_workflow_status))
-            raise exc.MockConductorWorkflowStatusError
+            raise test_exc.MockConductorWorkflowStatusError
 
         if self.expected_output is not None:
             if conductor.get_workflow_output() != self.expected_output:
                 LOG.error("Actual workflow output  : %s", str(conductor.get_workflow_output()))
                 LOG.error("Expected workflow output: %s", str(self.expected_output))
-                raise exc.MockConductorWorkflowOutputError
+                raise test_exc.MockConductorWorkflowOutputError
 
         if self.expected_term_tasks:
             expected_term_tasks = [
@@ -229,7 +230,7 @@ class WorkflowConductorMock(object):
             if actual_term_tasks != expected_term_tasks:
                 LOG.error("Actual term tasks : %s", str(actual_term_tasks))
                 LOG.error("Expected term tasks: %s", str(expected_term_tasks))
-                raise exc.MockConductorWorkflowTermsError
+                raise test_exc.MockConductorWorkflowTermsError
 
         return conductor
 
@@ -255,7 +256,7 @@ class WorkflowTestFixture(object):
     def __init__(self, spec, workflow_path, pprint=False):
         """Fixture for testing workflow
 
-        :param spec: TestCaseSpec
+        :param spec: mock_models.TestCaseSpec
         :param workflow_spec: str - directory containing file named in
         fixture
         :param cmd: boolean - True to prettyprint errors
@@ -263,15 +264,15 @@ class WorkflowTestFixture(object):
         self.workflow_path = workflow_path
         self.fixture_spec = spec
         self.pprint = pprint
-        if not isinstance(spec, TestCaseSpec):
-            raise exc.IncorrectSpec
+        if not isinstance(spec, mock_models.TestCaseSpec):
+            raise test_exc.IncorrectSpec
         errors = self.fixture_spec.inspect()
         if len(errors) > 0:
             if self.pprint:
-                LOG.error(pformat(errors))
+                LOG.error(pprint.pformat(errors))
             else:
                 LOG.error(errors)
-            raise exc.FixtureMockSpecError
+            raise test_exc.FixtureMockSpecError
         self.full_workflow_path = os.path.join(self.workflow_path, self.fixture_spec.workflow)
         self.workflow_spec = self.load_wf_spec(self.full_workflow_path)
         self.task_sequence = self._get_task_sequence()
@@ -281,7 +282,7 @@ class WorkflowTestFixture(object):
     @classmethod
     def load_from_file(cls, workflow_path, fixture_filename, pprint):
         with open(fixture_filename, "r") as f:
-            fixture_spec = TestCaseSpec(f.read(), "")
+            fixture_spec = mock_models.TestCaseSpec(f.read(), "")
             return cls(fixture_spec, workflow_path, pprint)
 
     def load_wf_spec(self, input_file):
@@ -291,21 +292,21 @@ class WorkflowTestFixture(object):
         """
         with open(input_file, "r") as f:
             workflow_def = f.read()
-            wf_spec = WorkflowSpec(workflow_def, "native")
+            wf_spec = native_v1_models.WorkflowSpec(workflow_def, "native")
             errors = wf_spec.inspect()
             if len(errors) > 0:
                 if self.pprint:
-                    LOG.error(pformat(errors))
+                    LOG.error(pprint.pformat(errors))
                 else:
                     LOG.error(errors)
-                raise exc.WorkflowSpecError
+                raise test_exc.WorkflowSpecError
             return wf_spec
 
     def _get_mock_statuses(self):
         """retrieve task statuses"""
         return [
             value.get("status", "succeeded")
-            for key, value in chain.from_iterable(
+            for key, value in itertools.chain.from_iterable(
                 [i.items() for i in self.fixture_spec.task_sequence]
             )
         ]
@@ -314,7 +315,7 @@ class WorkflowTestFixture(object):
         """retrieve task seq tuples from fixture"""
         return [
             (key, value.get("route", 0))
-            for key, value in chain.from_iterable(
+            for key, value in itertools.chain.from_iterable(
                 [i.items() for i in self.fixture_spec.task_sequence]
             )
         ]
@@ -323,7 +324,7 @@ class WorkflowTestFixture(object):
         """retrieve results from fixture"""
         return [
             value.get("result", {})
-            for key, value in chain.from_iterable(
+            for key, value in itertools.chain.from_iterable(
                 [i.items() for i in self.fixture_spec.task_sequence]
             )
         ]
@@ -409,7 +410,7 @@ def main():
                 LOG.info("-" * LINE_DASH)
             except exc.OrquestaException as e:
                 LOG.error("Error: ")
-                LOG.error(pformat(e))
+                LOG.error(pprint.pformat(e))
                 errors.append([filename, e])
         if len(errors) > 0:
             LOG.error("-" * LINE_DASH)
@@ -418,5 +419,5 @@ def main():
             for e in errors:
                 LOG.error("-" * LINE_DASH)
                 LOG.error("fixture: %s", e[0])
-                LOG.error("exception: %s", pformat(e[1]))
-            raise exc.OrquestaFixtureTestError
+                LOG.error("exception: %s", pprint.pformat(e[1]))
+            raise test_exc.OrquestaFixtureTestError

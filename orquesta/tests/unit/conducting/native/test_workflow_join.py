@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from orquesta import statuses
-from orquesta.tests.mocks import WorkflowConductorMock
+from orquesta.tests import mocks
 from orquesta.tests.unit.conducting.native import base
 
 
@@ -25,7 +25,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task7"]
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
         )
@@ -43,7 +43,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.FAILED,  # task5
         ]
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -61,7 +61,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.FAILED,  # task5
         ]
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -79,7 +79,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task5
         ]
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -106,7 +106,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task5
             statuses.SUCCEEDED,  # task8
         ]
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -136,7 +136,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task8
         ]
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -167,7 +167,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.FAILED,  # task7
             statuses.SUCCEEDED,  # task8
         ]
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -197,7 +197,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.FAILED,  # task5
             statuses.FAILED,  # task7
         ]
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -253,7 +253,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.FAILED,  # task7
         ]
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -322,7 +322,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec, expected_task_seq, mock_results=mock_results, expected_output=expected_output
         )
         mock.assert_conducting_sequences()
@@ -346,7 +346,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         ]
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         mock.assert_conducting_sequences()
 
         # First tasks before the join, task3, failed.
@@ -359,7 +359,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task6
             statuses.SUCCEEDED,  # task7
         ]
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         mock.assert_conducting_sequences()
 
         # Second tasks before the join, task5, failed.
@@ -375,7 +375,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         mock.assert_conducting_sequences()
 
         # Both tasks before the join, task3 and task5, failed.
@@ -388,7 +388,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task6
             statuses.SUCCEEDED,  # task7
         ]
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         mock.assert_conducting_sequences()
 
     def test_join_task_transition_on_failed(self):
@@ -409,7 +409,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         mock.assert_conducting_sequences()
 
         # First task before the join, task3, failed.
@@ -421,7 +421,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task5
         ]
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -457,7 +457,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.FAILED,  # task5
         ]
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -497,7 +497,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task7
         ]
 
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         mock.assert_conducting_sequences()
 
     def test_join_all_complex(self):
@@ -529,7 +529,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         ]
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         mock.assert_conducting_sequences()
 
         # Both branch 1 and 2 failed and triggering a different
@@ -544,7 +544,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task7
         ]
 
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         mock.assert_conducting_sequences()
 
         # One of the branches failed and the other succeeded. Each
@@ -559,7 +559,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task6
             statuses.SUCCEEDED,  # task7
         ]
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         mock.assert_conducting_sequences()
 
         # One of the branches succeeded and the other failed. Each
@@ -574,7 +574,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task6
             statuses.SUCCEEDED,  # task7
         ]
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         mock.assert_conducting_sequences()
 
         # Both branch 1 and 2 failed but trigger the set of task
@@ -588,7 +588,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task6
             statuses.SUCCEEDED,  # task7
         ]
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         mock.assert_conducting_sequences()
 
     def test_join_count_complex(self):
@@ -628,7 +628,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task9
         ]
 
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
         mock.assert_conducting_sequences()
 
         # One of three branches failed. Branch 3 failed.
@@ -654,7 +654,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task8
             statuses.SUCCEEDED,  # task9
         ]
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -685,7 +685,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task8
             statuses.SUCCEEDED,  # task9
         ]
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -716,7 +716,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task8
             statuses.SUCCEEDED,  # task9
         ]
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -724,7 +724,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         )
         mock.assert_conducting_sequences()
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -743,7 +743,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task3
         ]
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -762,7 +762,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task6
             statuses.SUCCEEDED,  # task7
         ]
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -782,7 +782,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             statuses.SUCCEEDED,  # task5
         ]
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,

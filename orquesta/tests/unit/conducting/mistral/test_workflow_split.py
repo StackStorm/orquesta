@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.tests.mocks import WorkflowConductorMock
-from orquesta.tests.unit.base import WorkflowComposerTest
+from orquesta.tests import mocks
+from orquesta.tests.unit import base as test_base
 from orquesta.tests.unit.conducting.mistral import base
 
 
-class SplitWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComposerTest):
+class SplitWorkflowConductorTest(base.MistralWorkflowConductorTest, test_base.WorkflowComposerTest):
     def test_split(self):
         wf_name = "split"
 
@@ -45,7 +45,9 @@ class SplitWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComp
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, expected_routes=expected_routes)
+        mock = mocks.WorkflowConductorMock(
+            wf_spec, expected_task_seq, expected_routes=expected_routes
+        )
         # will throw
         mock.assert_conducting_sequences()
 
@@ -82,7 +84,9 @@ class SplitWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComp
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, expected_routes=expected_routes)
+        mock = mocks.WorkflowConductorMock(
+            wf_spec, expected_task_seq, expected_routes=expected_routes
+        )
         # will throw
         mock.assert_conducting_sequences()
 
@@ -131,6 +135,8 @@ class SplitWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComp
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, expected_routes=expected_routes)
+        mock = mocks.WorkflowConductorMock(
+            wf_spec, expected_task_seq, expected_routes=expected_routes
+        )
         # will throw
         mock.assert_conducting_sequences()

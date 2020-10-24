@@ -13,10 +13,10 @@
 # limitations under the License.
 
 
-from orquesta.exceptions import OrquestaException
+from orquesta import exceptions as exc
 
 
-class SpecException(OrquestaException):
+class SpecException(exc.OrquestaException):
     pass
 
 
@@ -28,15 +28,15 @@ class WorkflowSpecError(SpecException):
     pass
 
 
-class FixtureMockSpecError(OrquestaException):
+class FixtureMockSpecError(exc.OrquestaException):
     pass
 
 
-class OrquestaFixtureTestError(OrquestaException):
+class OrquestaFixtureTestError(exc.OrquestaException):
     pass
 
 
-class WorkflowTestException(OrquestaException):
+class WorkflowTestException(exc.OrquestaException):
     pass
 
 

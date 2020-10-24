@@ -11,12 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from orquesta.tests.mocks import WorkflowConductorMock
-from orquesta.tests.unit.base import WorkflowComposerTest
+
+from orquesta.tests import mocks
+from orquesta.tests.unit import base as test_base
 from orquesta.tests.unit.conducting.mistral import base
 
 
-class BasicWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComposerTest):
+class BasicWorkflowConductorTest(base.MistralWorkflowConductorTest, test_base.WorkflowComposerTest):
     def test_sequential(self):
         wf_name = "sequential"
 
@@ -31,7 +32,7 @@ class BasicWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComp
         expected_output = {"greeting": mock_results[2]}
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             inputs={"name": "Stanley"},
@@ -47,7 +48,7 @@ class BasicWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComp
         expected_task_seq = ["task1", "task4", "task2", "task5", "task3", "task6"]
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
         )
@@ -60,7 +61,7 @@ class BasicWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComp
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
         )
@@ -74,7 +75,7 @@ class BasicWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComp
         expected_task_seq = ["t1", "a"]
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, inputs={"which": "a"})
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, inputs={"which": "a"})
         # will throw
         mock.assert_conducting_sequences()
 
@@ -82,7 +83,7 @@ class BasicWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComp
         expected_task_seq = ["t1", "b"]
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, inputs={"which": "b"})
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, inputs={"which": "b"})
         # will throw
         mock.assert_conducting_sequences()
 
@@ -90,6 +91,6 @@ class BasicWorkflowConductorTest(base.MistralWorkflowConductorTest, WorkflowComp
         expected_task_seq = ["t1", "c"]
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(wf_spec, expected_task_seq, inputs={"which": "c"})
+        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, inputs={"which": "c"})
         # will throw
         mock.assert_conducting_sequences()

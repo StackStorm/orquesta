@@ -12,18 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
+import mock
 import sys
 import unittest
 
-from orquesta.specs.mock.models import TestCaseSpec
-import orquesta.tests.exceptions as exc
-from orquesta.tests.mocks import WorkflowTestFixture
+from orquesta.specs.mock import models as mock_models
+from orquesta.tests import exceptions as test_exc
+from orquesta.tests import mocks as test_mock
 from orquesta.tests.unit.conducting.native import base
 
 
@@ -69,9 +64,9 @@ tasks:
         """
 
         def do_run(spec_y):
-            spec = TestCaseSpec(spec_y, "fixture")
+            spec = mock_models.TestCaseSpec(spec_y, "fixture")
             workflow_path = "/tmp"
-            fixture = WorkflowTestFixture(spec, workflow_path)
+            fixture = test_mock.WorkflowTestFixture(spec, workflow_path)
             fixture.run_test()
 
         mock_open = mock.mock_open(read_data=wf)
@@ -126,9 +121,9 @@ tasks:
         """
 
         def do_run(spec_y):
-            spec = TestCaseSpec(spec_y, "fixture")
+            spec = mock_models.TestCaseSpec(spec_y, "fixture")
             workflow_path = "/tmp"
-            fixture = WorkflowTestFixture(spec, workflow_path)
+            fixture = test_mock.WorkflowTestFixture(spec, workflow_path)
             fixture.run_test()
 
         mock_open = mock.mock_open(read_data=wf)
@@ -167,9 +162,9 @@ tasks:
         """
 
         def do_run(spec_y):
-            spec = TestCaseSpec(spec_y, "fixture")
+            spec = mock_models.TestCaseSpec(spec_y, "fixture")
             workflow_path = "/tmp"
-            fixture = WorkflowTestFixture(spec, workflow_path)
+            fixture = test_mock.WorkflowTestFixture(spec, workflow_path)
             fixture.run_test()
 
         mock_open = mock.mock_open(read_data=wf)
@@ -226,14 +221,18 @@ tasks:
         mock_open = mock.mock_open(read_data=wf)
         if sys.version_info[0] < 3:
             with mock.patch("__builtin__.open", mock_open):
-                spec = TestCaseSpec(spec_yaml, "fixture")
+                spec = mock_models.TestCaseSpec(spec_yaml, "fixture")
                 workflow_path = "/tmp"
-                self.assertRaises(exc.WorkflowSpecError, WorkflowTestFixture, spec, workflow_path)
+                self.assertRaises(
+                    test_exc.WorkflowSpecError, test_mock.WorkflowTestFixture, spec, workflow_path
+                )
         else:
             with mock.patch("builtins.open", mock_open):
-                spec = TestCaseSpec(spec_yaml, "fixture")
+                spec = mock_models.TestCaseSpec(spec_yaml, "fixture")
                 workflow_path = "/tmp"
-                self.assertRaises(exc.WorkflowSpecError, WorkflowTestFixture, spec, workflow_path)
+                self.assertRaises(
+                    test_exc.WorkflowSpecError, test_mock.WorkflowTestFixture, spec, workflow_path
+                )
 
     @mock.patch("orquesta.tests.mocks.WorkflowTestFixture.load_wf_spec")
     def test_run_test_throw(self, load_wf_spec):
@@ -270,10 +269,10 @@ tasks:
               result: {}
         """
 
-        spec = TestCaseSpec(spec_yaml, "fixture")
+        spec = mock_models.TestCaseSpec(spec_yaml, "fixture")
         workflow_path = "/tmp"
-        fixture = WorkflowTestFixture(spec, workflow_path)
-        self.assertRaises(exc.MockConductorTaskSequenceError, fixture.run_test)
+        fixture = test_mock.WorkflowTestFixture(spec, workflow_path)
+        self.assertRaises(test_exc.MockConductorTaskSequenceError, fixture.run_test)
 
     @mock.patch("orquesta.tests.mocks.WorkflowTestFixture.load_wf_spec")
     def test_run_test(self, load_wf_spec):
@@ -305,9 +304,9 @@ tasks:
               result: {"result":{"test":true}}
         """
 
-        spec = TestCaseSpec(spec_yaml, "fixture")
+        spec = mock_models.TestCaseSpec(spec_yaml, "fixture")
         workflow_path = "/tmp"
-        fixture = WorkflowTestFixture(spec, workflow_path)
+        fixture = test_mock.WorkflowTestFixture(spec, workflow_path)
         fixture.run_test()
 
 

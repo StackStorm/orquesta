@@ -14,7 +14,7 @@
 
 import unittest
 
-from orquesta.specs.mock.models import TestCaseSpec
+from orquesta.specs.mock import models as mock_models
 
 
 class TaskSpecTest(unittest.TestCase):
@@ -30,7 +30,7 @@ class TaskSpecTest(unittest.TestCase):
                     - two:
                         status: "succeeded"
             """
-        fixture_spec = TestCaseSpec(mock_fixture_def, "mock")
+        fixture_spec = mock_models.TestCaseSpec(mock_fixture_def, "mock")
         errors = fixture_spec.inspect()
         self.assertEqual(len(errors), 0)
 
@@ -42,7 +42,7 @@ class TaskSpecTest(unittest.TestCase):
                     - "one"
                     - "two"
             """
-        fixture_spec = TestCaseSpec(mock_fixture_def, "mock")
+        fixture_spec = mock_models.TestCaseSpec(mock_fixture_def, "mock")
         errors = fixture_spec.inspect()
         self.assertEqual(len(errors), 1)
 
@@ -70,6 +70,6 @@ class TaskSpecTest(unittest.TestCase):
                       status: "succeeded"
                       route: 0
             """
-        fixture_spec = TestCaseSpec(mock_fixture_def, "mock")
+        fixture_spec = mock_models.TestCaseSpec(mock_fixture_def, "mock")
         errors = fixture_spec.inspect()
         self.assertEqual(len(errors), 0)

@@ -13,12 +13,14 @@
 # limitations under the License.
 
 from orquesta import statuses
-from orquesta.tests.mocks import WorkflowConductorMock
-from orquesta.tests.unit.base import WorkflowComposerTest
+from orquesta.tests import mocks
+from orquesta.tests.unit import base as test_base
 from orquesta.tests.unit.conducting.native import base
 
 
-class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowComposerTest):
+class SplitWorkflowConductorTest(
+    base.OrchestraWorkflowConductorTest, test_base.WorkflowComposerTest
+):
     def test_split(self):
         wf_name = "split"
 
@@ -48,7 +50,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             expected_routes=expected_routes,
@@ -92,7 +94,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             expected_routes=expected_routes,
@@ -148,7 +150,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             expected_routes=expected_routes,
@@ -187,7 +189,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             expected_routes=expected_routes,
@@ -235,7 +237,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             expected_routes=expected_routes,
@@ -287,7 +289,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             expected_routes=expected_routes,
@@ -342,7 +344,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             expected_routes=expected_routes,
@@ -449,7 +451,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest, WorkflowCo
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             inputs=inputs,

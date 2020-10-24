@@ -13,13 +13,13 @@
 # limitations under the License.
 
 from orquesta import statuses
-from orquesta.tests.mocks import WorkflowConductorMock
-from orquesta.tests.unit.base import WorkflowComposerTest
+from orquesta.tests import mocks
+from orquesta.tests.unit import base as test_base
 from orquesta.tests.unit.conducting.native import base
 
 
 class TaskTransitionWorkflowConductorTest(
-    base.OrchestraWorkflowConductorTest, WorkflowComposerTest
+    base.OrchestraWorkflowConductorTest, test_base.WorkflowComposerTest
 ):
     def test_on_error(self):
         wf_name = "error-handling"
@@ -35,7 +35,7 @@ class TaskTransitionWorkflowConductorTest(
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -51,7 +51,7 @@ class TaskTransitionWorkflowConductorTest(
 
         expected_term_tasks = ["task3"]
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -78,7 +78,7 @@ class TaskTransitionWorkflowConductorTest(
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -98,7 +98,7 @@ class TaskTransitionWorkflowConductorTest(
 
         expected_term_tasks = ["task3", "task4"]
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -131,7 +131,7 @@ class TaskTransitionWorkflowConductorTest(
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -158,7 +158,7 @@ class TaskTransitionWorkflowConductorTest(
 
         expected_term_tasks = [("task2", 1), ("task2", 2)]
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,

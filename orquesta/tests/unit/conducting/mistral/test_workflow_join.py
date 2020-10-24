@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from orquesta import statuses
-from orquesta.tests.mocks import WorkflowConductorMock
+from orquesta.tests import mocks
 from orquesta.tests.unit.conducting.mistral import base
 
 
@@ -24,7 +24,7 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task7"]
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
         )
@@ -48,7 +48,7 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
 
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -71,7 +71,7 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
             statuses.SUCCEEDED,  # task8
         ]
 
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -95,7 +95,7 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
         ]
         wf_def = self.get_wf_def(wf_name)
         wf_spec = self.spec_module.instantiate(wf_def)
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
@@ -129,7 +129,7 @@ class JoinWorkflowConductorTest(base.MistralWorkflowConductorTest):
             statuses.SUCCEEDED,  # task8
             statuses.SUCCEEDED,  # task9
         ]
-        mock = WorkflowConductorMock(
+        mock = mocks.WorkflowConductorMock(
             wf_spec,
             expected_task_seq,
             mock_statuses=mock_statuses,
