@@ -8,6 +8,7 @@ Fixed
 -----
 
 * Fix the custom flake8 extensions to check import statements. (bug fix)
+* Fix the deprecation warning that flags are not at the start of the expression. (bug fix)
 
 1.2.0
 -----

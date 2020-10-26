@@ -24,8 +24,8 @@ REGEX_VALUE_IN_QUOTES = r"\"[^\"]*\"\s*"
 REGEX_VALUE_IN_APOSTROPHES = r"'[^']*'\s*"
 REGEX_FLOATING_NUMBER = r"[-]?\d*\.\d+"
 REGEX_INTEGER = r"[-]?\d+"
-REGEX_TRUE = r"(?i)true"
-REGEX_FALSE = r"(?i)false"
+REGEX_TRUE = r"(?i:true)" if six.PY3 else r"(?i)true"
+REGEX_FALSE = r"(?i:false)" if six.PY3 else r"(?i)false"
 REGEX_NULL = r"null"
 
 # REGEX_FLOATING_NUMBER must go before REGEX_INTEGER
