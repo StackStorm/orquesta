@@ -21,11 +21,10 @@ import os
 import six
 import sys
 
-from orquesta.specs import mistral
 from orquesta.specs import native
 
 
-workflow_models = {"orquesta": native.WorkflowSpec, "mistral": mistral.WorkflowSpec}
+workflow_models = {"orquesta": native.WorkflowSpec}
 
 
 def main():
