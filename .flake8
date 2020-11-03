@@ -1,5 +1,5 @@
 [flake8]
 max-line-length = 100
-enable-extensions = H203,H204,H205,H301,H303,H304
+enable-extensions = H203,H204,H205,H301,H303,H304,O101,O102
 ignore = E203,E402,W503
 exclude=*.egg/*

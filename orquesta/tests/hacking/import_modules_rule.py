@@ -24,6 +24,7 @@ MODULES_CACHE = dict((mod, True) for mod in tuple(sys.modules.keys()) + sys.buil
 
 
 @core.flake8ext
+@core.off_by_default
 def check_module_only(logical_line, filename, noqa):
     """Check imports.
 

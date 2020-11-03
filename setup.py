@@ -86,7 +86,9 @@ setup(
             "completed = orquesta.expressions.functions.workflow:completed_",
             "result = orquesta.expressions.functions.workflow:result_",
         ],
-        "orquesta.tests": ["fake = orquesta.tests.unit.utils.test_plugin:FakePlugin"],
+        "orquesta.tests": [
+            "fake = orquesta.tests.unit.utils.test_plugin:FakePlugin",
+        ],
         "flake8.extension": [
             "O101 = orquesta.tests.hacking.import_modules_rule:check_module_only",
             "O102 = orquesta.tests.hacking.import_aliases_rule:check_alias_naming",
