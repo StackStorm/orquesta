@@ -149,3 +149,7 @@ class UnreachableJoinError(OrquestaException):
     def __init__(self, task_id, route):
         message = 'The join task|route "%s|%s" is partially satisfied but unreachable.'
         super(UnreachableJoinError, self).__init__(message % (task_id, route))
+
+
+class WorkflowRehearsalError(OrquestaException):
+    pass

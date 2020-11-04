@@ -12,107 +12,85 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from orquesta import rehearsing
 from orquesta import statuses
-from orquesta.tests import mocks
-from orquesta.tests.unit import base as test_base
 from orquesta.tests.unit.conducting.native import base
 
 
-class TaskTransitionWorkflowConductorTest(
-    base.OrchestraWorkflowConductorTest, test_base.WorkflowComposerTest
-):
-    def test_on_error(self):
+class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
+    def test_no_error(self):
         wf_name = "error-handling"
 
-        self.assert_spec_inspection(wf_name)
-
-        # Mock task1 success
         expected_task_seq = ["task1", "task2"]
-
-        mock_statuses = [statuses.SUCCEEDED, statuses.SUCCEEDED]  # task1  # task2
 
         expected_term_tasks = ["task2"]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        mock.assert_conducting_sequences()
 
-        # Mock task1 error
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_on_error(self):
+        wf_name = "error-handling"
+
         expected_task_seq = ["task1", "task3"]
 
-        mock_statuses = [statuses.FAILED, statuses.SUCCEEDED]  # task1  # task3
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1", status=statuses.FAILED),
+        ]
 
         expected_term_tasks = ["task3"]
 
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        mock.assert_conducting_sequences()
 
-    def test_on_complete(self):
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_on_complete_from_succeeded_branch(self):
         wf_name = "task-on-complete"
 
-        self.assert_spec_inspection(wf_name)
-
-        # Mock task1 success
         expected_task_seq = ["task1", "task2", "task4"]
 
         expected_term_tasks = ["task2", "task4"]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-        ]
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        mock.assert_conducting_sequences()
 
-        # Mock task1 error
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_on_complete_from_failed_branch(self):
+        wf_name = "task-on-complete"
+
         expected_task_seq = ["task1", "task3", "task4"]
 
-        mock_statuses = [
-            statuses.FAILED,  # task1
-            statuses.SUCCEEDED,  # task3
-            statuses.SUCCEEDED,  # task4
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1", status=statuses.FAILED),
         ]
 
         expected_term_tasks = ["task3", "task4"]
 
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        mock.assert_conducting_sequences()
 
-    def test_task_transitions_split(self):
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_task_transitions_split_from_succeeded_branch(self):
         wf_name = "task-transitions-split"
 
-        self.assert_spec_inspection(wf_name)
-
-        # Mock task1 success
         expected_routes = [
             [],  # default from start
             ["task1__t0"],  # task1 -> task2 (when #1)
@@ -121,27 +99,20 @@ class TaskTransitionWorkflowConductorTest(
 
         expected_task_seq = [("task1", 0), ("task2", 1), ("task2", 2)]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1, 0
-            statuses.SUCCEEDED,  # task2, 1 on complete
-            statuses.SUCCEEDED,  # task2, 2 on success
-        ]
-
         expected_term_tasks = [("task2", 1), ("task2", 2)]
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
 
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        mock.assert_conducting_sequences()
 
-        # Mock task1 error
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_task_transitions_split_from_failed_branch(self):
+        wf_name = "task-transitions-split"
+
         expected_routes = [
             [],  # default from start
             ["task1__t0"],  # task1 -> task2 (when #1)
@@ -150,20 +121,18 @@ class TaskTransitionWorkflowConductorTest(
 
         expected_task_seq = [("task1", 0), ("task2", 1), ("task2", 2)]
 
-        mock_statuses = [
-            statuses.FAILED,  # task1, 0
-            statuses.SUCCEEDED,  # task2, 1 on complete
-            statuses.SUCCEEDED,  # task2, 2 on failure
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1", status=statuses.FAILED),
         ]
 
         expected_term_tasks = [("task2", 1), ("task2", 2)]
 
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()

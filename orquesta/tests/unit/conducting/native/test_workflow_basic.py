@@ -12,94 +12,78 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from orquesta.tests import mocks
-from orquesta.tests.unit import base as test_base
+from orquesta import rehearsing
 from orquesta.tests.unit.conducting.native import base
 
 
-class BasicWorkflowConductorTest(
-    base.OrchestraWorkflowConductorTest, test_base.WorkflowComposerTest
-):
+class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
     def test_sequential(self):
         wf_name = "sequential"
 
         expected_task_seq = ["task1", "task2", "task3", "continue"]
 
-        mock_results = [
-            "Stanley",
-            "All your base are belong to us!",
-            "Stanley, All your base are belong to us!",
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1", result="Stanley"),
+            rehearsing.MockActionExecution("task2", result="All your base are belong to us!"),
+            rehearsing.MockActionExecution(
+                "task3", result="Stanley, All your base are belong to us!"
+            ),
         ]
 
-        expected_output = {"greeting": mock_results[2]}
+        expected_output = {"greeting": mock_action_executions[2].result}
 
-        self.assert_spec_inspection(wf_name)
-
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
             inputs={"name": "Stanley"},
-            mock_results=mock_results,
+            mock_action_executions=mock_action_executions,
             expected_output=expected_output,
         )
-        # will throw
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_parallel(self):
         wf_name = "parallel"
 
         expected_task_seq = ["task1", "task4", "task2", "task5", "task3", "task6"]
 
-        self.assert_spec_inspection(wf_name)
-
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
         )
 
-        mock.assert_conducting_sequences()
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_branching(self):
         wf_name = "branching"
 
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
 
-        self.assert_spec_inspection(wf_name)
-
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
         )
 
-        mock.assert_conducting_sequences()
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_decision_tree(self):
         wf_name = "decision"
-
-        self.assert_spec_inspection(wf_name)
+        wf_spec = self.get_wf_def(wf_name)
 
         # Test branch "a"
         expected_task_seq = ["t1", "a"]
         inputs = {"which": "a"}
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, inputs=inputs)
-        mock.assert_conducting_sequences()
+        test = rehearsing.WorkflowTestCase(wf_spec, expected_task_seq, inputs=inputs)
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
         # Test branch "b"
         expected_task_seq = ["t1", "b"]
         inputs = {"which": "b"}
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, inputs=inputs)
-        mock.assert_conducting_sequences()
+        test = rehearsing.WorkflowTestCase(wf_spec, expected_task_seq, inputs=inputs)
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
         # Test branch "c"
         expected_task_seq = ["t1", "c"]
         inputs = {"which": "c"}
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, inputs=inputs)
-        mock.assert_conducting_sequences()
+        test = rehearsing.WorkflowTestCase(wf_spec, expected_task_seq, inputs=inputs)
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()

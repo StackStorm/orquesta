@@ -12,175 +12,181 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from orquesta import rehearsing
 from orquesta import requests
 from orquesta import statuses
-from orquesta.tests import mocks
-from orquesta.tests.unit import base as test_base
 from orquesta.tests.unit.conducting.native import base
 
 
-class WorkflowConductorRerunTest(
-    base.OrchestraWorkflowConductorRerunTest, test_base.WorkflowComposerTest
-):
+class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
     def test_fail_single_branch(self):
         wf_name = "parallel"
-
-        self.assert_spec_inspection(wf_name)
 
         # Fail task2.
         expected_task_seq = ["task1", "task4", "task2", "task5"]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.FAILED,
-            statuses.SUCCEEDED,
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task2", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task5"),
         ]
 
         expected_term_tasks = ["task2", "task5"]
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+
+        test1 = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        conductor = mock.assert_conducting_sequences()
+
+        rehearsal1 = rehearsing.WorkflowRehearsal(test1)
+        rehearsal1.assert_conducting_sequences()
 
         # Rerun entire workflow and fail task2 again.
         expected_task_seq = ["task1", "task4", "task2", "task5", "task2", "task6"]
 
-        mock_statuses = [statuses.FAILED, statuses.SUCCEEDED]
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task2", status=statuses.FAILED),
+        ]
 
         expected_term_tasks = ["task2", "task6"]
 
-        conductor = self.assert_rerun_failed_tasks(
-            conductor,
+        test2 = rehearsing.WorkflowRerunTestCase(
+            rehearsal1.conductor,
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
+
+        rehearsal2 = rehearsing.WorkflowRehearsal(test2)
+        rehearsal2.assert_conducting_sequences()
 
         # Rerun workflow from task2 only and complete the workflow.
         expected_task_seq = ["task1", "task4", "task2", "task5", "task2", "task6", "task2", "task3"]
 
         expected_term_tasks = ["task3", "task6"]
 
-        self.assert_rerun_failed_tasks(
-            conductor,
+        test3 = rehearsing.WorkflowRerunTestCase(
+            rehearsal2.conductor,
             expected_task_seq,
             rerun_tasks=[requests.TaskRerunRequest("task2", 0)],
             expected_term_tasks=expected_term_tasks,
         )
 
+        rehearsal3 = rehearsing.WorkflowRehearsal(test3)
+        rehearsal3.assert_conducting_sequences()
+
     def test_fail_multiple_branches(self):
         wf_name = "parallel"
-
-        self.assert_spec_inspection(wf_name)
 
         # Fail task2 and task5.
         expected_task_seq = ["task1", "task4", "task2", "task5"]
 
-        mock_statuses = [statuses.SUCCEEDED, statuses.SUCCEEDED, statuses.FAILED, statuses.FAILED]
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task2", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task5", status=statuses.FAILED),
+        ]
 
         expected_term_tasks = ["task2", "task5"]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test1 = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        conductor = mock.assert_conducting_sequences()
+
+        rehearsal1 = rehearsing.WorkflowRehearsal(test1)
+        rehearsal1.assert_conducting_sequences()
 
         # Rerun and complete workflow.
         expected_task_seq = ["task1", "task4", "task2", "task5", "task2", "task5", "task3", "task6"]
 
         expected_term_tasks = ["task3", "task6"]
 
-        self.assert_rerun_failed_tasks(
-            conductor, expected_task_seq, expected_term_tasks=expected_term_tasks
+        test2 = rehearsing.WorkflowRerunTestCase(
+            rehearsal1.conductor,
+            expected_task_seq,
+            expected_term_tasks=expected_term_tasks,
         )
+
+        rehearsal2 = rehearsing.WorkflowRehearsal(test2)
+        rehearsal2.assert_conducting_sequences()
 
     def test_fail_single_before_join(self):
         wf_name = "join"
 
-        self.assert_spec_inspection(wf_name)
-
         # Fail task3 before join at task6.
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.FAILED,
-            statuses.SUCCEEDED,
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task3", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task5"),
         ]
 
         expected_term_tasks = ["task3", "task5"]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test1 = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        conductor = mock.assert_conducting_sequences()
+
+        rehearsal1 = rehearsing.WorkflowRehearsal(test1)
+        rehearsal1.assert_conducting_sequences()
 
         # Rerun and complete workflow.
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task3", "task6", "task7"]
 
         expected_term_tasks = ["task7"]
 
-        self.assert_rerun_failed_tasks(
-            conductor, expected_task_seq, expected_term_tasks=expected_term_tasks
+        test2 = rehearsing.WorkflowRerunTestCase(
+            rehearsal1.conductor,
+            expected_task_seq,
+            expected_term_tasks=expected_term_tasks,
         )
+
+        rehearsal2 = rehearsing.WorkflowRehearsal(test2)
+        rehearsal2.assert_conducting_sequences()
 
     def test_fail_multiple_before_join(self):
         wf_name = "join"
 
-        self.assert_spec_inspection(wf_name)
-
         # Fail task3 before join at task6.
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.FAILED,
-            statuses.FAILED,
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task3", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task5", status=statuses.FAILED),
         ]
 
         expected_term_tasks = ["task3", "task5"]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test1 = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        conductor = mock.assert_conducting_sequences()
+
+        rehearsal1 = rehearsing.WorkflowRehearsal(test1)
+        rehearsal1.assert_conducting_sequences()
 
         # Rerun and complete workflow.
         expected_task_seq = [
@@ -197,9 +203,14 @@ class WorkflowConductorRerunTest(
 
         expected_term_tasks = ["task7"]
 
-        self.assert_rerun_failed_tasks(
-            conductor, expected_task_seq, expected_term_tasks=expected_term_tasks
+        test2 = rehearsing.WorkflowRerunTestCase(
+            rehearsal1.conductor,
+            expected_task_seq,
+            expected_term_tasks=expected_term_tasks,
         )
+
+        rehearsal2 = rehearsing.WorkflowRehearsal(test2)
+        rehearsal2.assert_conducting_sequences()
 
     def test_fail_at_join(self):
         wf_name = "join"
@@ -209,71 +220,70 @@ class WorkflowConductorRerunTest(
         # Fail task3 before join at task6.
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6"]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.FAILED,
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task3"),
+            rehearsing.MockActionExecution("task5"),
+            rehearsing.MockActionExecution("task6", status=statuses.FAILED),
         ]
 
         expected_term_tasks = ["task6"]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test1 = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        conductor = mock.assert_conducting_sequences()
+
+        rehearsal1 = rehearsing.WorkflowRehearsal(test1)
+        rehearsal1.assert_conducting_sequences()
 
         # Rerun and complete workflow.
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task6", "task7"]
 
         expected_term_tasks = ["task7"]
 
-        self.assert_rerun_failed_tasks(
-            conductor, expected_task_seq, expected_term_tasks=expected_term_tasks
+        test2 = rehearsing.WorkflowRerunTestCase(
+            rehearsal1.conductor,
+            expected_task_seq,
+            expected_term_tasks=expected_term_tasks,
         )
+
+        rehearsal2 = rehearsing.WorkflowRehearsal(test2)
+        rehearsal2.assert_conducting_sequences()
 
     def test_fail_cycle(self):
         wf_name = "cycle"
 
-        self.assert_spec_inspection(wf_name)
-
         # Fail task3 which is part of the cycle task1->task2->task3->task1.
         expected_task_seq = ["prep", "task1", "task2", "task3", "task1", "task2", "task3"]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.FAILED,
+        mock_action_executions = [
+            rehearsing.MockActionExecution("prep"),
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task3"),
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task3", status=statuses.FAILED),
         ]
 
         expected_term_tasks = ["task3"]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test1 = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        conductor = mock.assert_conducting_sequences()
+
+        rehearsal1 = rehearsing.WorkflowRehearsal(test1)
+        rehearsal1.assert_conducting_sequences()
 
         # Rerun and complete workflow.
         expected_task_seq = [
@@ -292,14 +302,17 @@ class WorkflowConductorRerunTest(
 
         expected_term_tasks = ["task3"]
 
-        self.assert_rerun_failed_tasks(
-            conductor, expected_task_seq, expected_term_tasks=expected_term_tasks
+        test2 = rehearsing.WorkflowRerunTestCase(
+            rehearsal1.conductor,
+            expected_task_seq,
+            expected_term_tasks=expected_term_tasks,
         )
+
+        rehearsal2 = rehearsing.WorkflowRehearsal(test2)
+        rehearsal2.assert_conducting_sequences()
 
     def test_fail_at_single_split(self):
         wf_name = "split"
-
-        self.assert_spec_inspection(wf_name)
 
         # Fail task5 at one of the split/fork.
         expected_routes = [
@@ -320,34 +333,31 @@ class WorkflowConductorRerunTest(
             ("task6", 2),
         ]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.FAILED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task3"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task5"),
+            rehearsing.MockActionExecution("task5", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task6"),
         ]
 
         expected_term_tasks = [("task5", 2), ("task6", 1), ("task6", 2)]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test1 = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_routes=expected_routes,
             expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
 
-        # will throw
-        conductor = mock.assert_conducting_sequences()
+        rehearsal1 = rehearsing.WorkflowRehearsal(test1)
+        rehearsal1.assert_conducting_sequences()
 
         # Rerun and complete workflow.
         expected_task_seq = [
@@ -367,17 +377,18 @@ class WorkflowConductorRerunTest(
 
         expected_term_tasks = [("task7", 1), ("task7", 2)]
 
-        self.assert_rerun_failed_tasks(
-            conductor,
+        test2 = rehearsing.WorkflowRerunTestCase(
+            rehearsal1.conductor,
             expected_task_seq,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
 
+        rehearsal2 = rehearsing.WorkflowRehearsal(test2)
+        rehearsal2.assert_conducting_sequences()
+
     def test_fail_at_multiple_splits(self):
         wf_name = "split"
-
-        self.assert_spec_inspection(wf_name)
 
         # Fail task5 at one of the split/fork and task6 in another split/fork.
         expected_routes = [
@@ -398,33 +409,31 @@ class WorkflowConductorRerunTest(
             ("task6", 2),
         ]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.SUCCEEDED,
-            statuses.FAILED,
-            statuses.FAILED,
-            statuses.SUCCEEDED,
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task3"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task5"),
+            rehearsing.MockActionExecution("task5", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task6", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task6"),
         ]
 
         expected_term_tasks = [("task5", 2), ("task6", 1), ("task6", 2)]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test1 = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_routes=expected_routes,
             expected_workflow_status=statuses.FAILED,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        conductor = mock.assert_conducting_sequences()
+
+        rehearsal1 = rehearsing.WorkflowRehearsal(test1)
+        rehearsal1.assert_conducting_sequences()
 
         # Rerun and complete workflow.
         expected_task_seq = [
@@ -445,9 +454,12 @@ class WorkflowConductorRerunTest(
 
         expected_term_tasks = [("task7", 1), ("task7", 2)]
 
-        self.assert_rerun_failed_tasks(
-            conductor,
+        test2 = rehearsing.WorkflowRerunTestCase(
+            rehearsal1.conductor,
             expected_task_seq,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
+
+        rehearsal2 = rehearsing.WorkflowRehearsal(test2)
+        rehearsal2.assert_conducting_sequences()

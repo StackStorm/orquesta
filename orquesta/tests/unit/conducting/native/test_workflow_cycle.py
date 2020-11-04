@@ -12,15 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from orquesta import rehearsing
 from orquesta import statuses
-from orquesta.tests import mocks
-from orquesta.tests.unit import base as test_base
 from orquesta.tests.unit.conducting.native import base
 
 
-class CyclicWorkflowConductorTest(
-    base.OrchestraWorkflowConductorTest, test_base.WorkflowComposerTest
-):
+class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
     def test_cycle(self):
         wf_name = "cycle"
 
@@ -39,13 +36,12 @@ class CyclicWorkflowConductorTest(
             "task3",
         ]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
         )
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_cycles(self):
         wf_name = "cycles"
@@ -74,33 +70,43 @@ class CyclicWorkflowConductorTest(
             "task5",
         ]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
         )
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_rollback_retry(self):
         wf_name = "rollback-retry"
 
         self.assert_spec_inspection(wf_name)
 
-        expected_task_seq = ["init", "check", "create", "rollback", "check", "delete"]
-
-        mock_statuses = [
-            statuses.SUCCEEDED,  # init
-            statuses.FAILED,  # check
-            statuses.SUCCEEDED,  # create
-            statuses.SUCCEEDED,  # rollback
-            statuses.SUCCEEDED,  # check
-            statuses.SUCCEEDED,  # delete
+        expected_task_seq = [
+            "init",
+            "check",
+            "create",
+            "rollback",
+            "check",
+            "delete",
         ]
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
-        mock.assert_conducting_sequences()
+
+        mock_action_executions = [
+            rehearsing.MockActionExecution("init"),
+            rehearsing.MockActionExecution("check", status=statuses.FAILED),
+            rehearsing.MockActionExecution("create"),
+            rehearsing.MockActionExecution("rollback"),
+            rehearsing.MockActionExecution("check"),
+            rehearsing.MockActionExecution("delete"),
+        ]
+
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+            mock_action_executions=mock_action_executions,
+        )
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_cycle_and_fork(self):
         wf_name = "cycle-fork"
@@ -120,20 +126,23 @@ class CyclicWorkflowConductorTest(
             "decide_work",
         ]
 
-        mock_results = [
-            None,  # init
-            True,  # query
-            None,  # decide_cheer
-            None,  # decide_work
-            None,  # cheer
-            None,  # notify_work
-            None,  # toil
-            False,  # query
-            None,  # decide_cheer
-            None,  # decide_work
+        mock_action_executions = [
+            rehearsing.MockActionExecution("init"),
+            rehearsing.MockActionExecution("query", result=True),
+            rehearsing.MockActionExecution("decide_cheer"),
+            rehearsing.MockActionExecution("decide_work"),
+            rehearsing.MockActionExecution("cheer"),
+            rehearsing.MockActionExecution("notify_work"),
+            rehearsing.MockActionExecution("toil"),
+            rehearsing.MockActionExecution("query", result=False),
+            rehearsing.MockActionExecution("decide_cheer"),
+            rehearsing.MockActionExecution("decide_work"),
         ]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_results=mock_results)
-        mock.assert_conducting_sequences()
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+            mock_action_executions=mock_action_executions,
+        )
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()

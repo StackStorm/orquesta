@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from orquesta import rehearsing
 from orquesta import statuses
-from orquesta.tests import mocks
 from orquesta.tests.unit.conducting.native import base
 
 
@@ -21,98 +21,115 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
     def test_join(self):
         wf_name = "join"
 
-        # Mock successful join.
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task7"]
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
         )
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_no_inbound(self):
+        wf_name = "join"
 
         # Both tasks before the join, task3 and task5, failed.
         # The criteria for the join task is not met.
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.FAILED,  # task3
-            statuses.FAILED,  # task5
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task3", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task5", status=statuses.FAILED),
         ]
 
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_workflow_status=statuses.FAILED,
         )
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_single_inbound_from_left(self):
+        wf_name = "join"
 
         # First task before the join, task3, failed.
         # The criteria for the join task is not met.
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.SUCCEEDED,  # task3
-            statuses.FAILED,  # task5
+        expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
+
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task3", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task5"),
         ]
 
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_workflow_status=statuses.FAILED,
         )
-        mock.assert_conducting_sequences()
 
-        # Second task before the join, task5, failed.
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_single_inbound_from_right(self):
+        wf_name = "join"
+
+        # First task before the join, task5, failed.
         # The criteria for the join task is not met.
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.FAILED,  # task3
-            statuses.SUCCEEDED,  # task5
+        expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
+
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task3"),
+            rehearsing.MockActionExecution("task5", status=statuses.FAILED),
         ]
 
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_workflow_status=statuses.FAILED,
         )
-        mock.assert_conducting_sequences()
 
-    def test_join_count(self):
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
+    def test_join_count_satisfied_with_branch_running(self):
         wf_name = "join-count"
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
 
         # Mock one of the branches is still running and
         # the join task is satisfied and completed.
         expected_task_seq = ["task1", "task2", "task4", "task6", "task3", "task5", "task8"]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.RUNNING,  # task6
-            statuses.SUCCEEDED,  # task3
-            statuses.SUCCEEDED,  # task5
-            statuses.SUCCEEDED,  # task8
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task6", status=statuses.RUNNING),
+            rehearsing.MockActionExecution("task3"),
+            rehearsing.MockActionExecution("task5"),
+            rehearsing.MockActionExecution("task8"),
         ]
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_workflow_status=statuses.RUNNING,
         )
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_count_satisfied_with_branch_error_1(self):
+        wf_name = "join-count"
 
         # Mock error at task6 of branch 3. The criteria for join task is met.
         expected_task_seq = [
@@ -126,25 +143,31 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "task8",
         ]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.FAILED,  # task6
-            statuses.SUCCEEDED,  # task3
-            statuses.SUCCEEDED,  # task5
-            statuses.SUCCEEDED,  # task8
+        expected_routes = [[], ["task6__t0"]]
+
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task6", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task3"),
+            rehearsing.MockActionExecution("task5"),
+            rehearsing.MockActionExecution("task8"),
         ]
 
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
-            expected_routes=[[], ["task6__t0"]],
+            mock_action_executions=mock_action_executions,
+            expected_routes=expected_routes,
         )
-        mock.assert_conducting_sequences()
 
-        # Mock error at task7 of branch 3. The criteria for join task is not met.
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_count_satisfied_with_branch_error_2(self):
+        wf_name = "join-count"
+
+        # Mock error at task7 of branch 3. The criteria for join task is met.
         expected_task_seq = [
             "task1",
             "task2",
@@ -157,23 +180,30 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "task8",
         ]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.SUCCEEDED,  # task6
-            statuses.SUCCEEDED,  # task3
-            statuses.SUCCEEDED,  # task5
-            statuses.FAILED,  # task7
-            statuses.SUCCEEDED,  # task8
+        expected_routes = [[], ["task7__t0"]]
+
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task3"),
+            rehearsing.MockActionExecution("task5"),
+            rehearsing.MockActionExecution("task7", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task8"),
         ]
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
-            expected_routes=[[], ["task7__t0"]],
+            mock_action_executions=mock_action_executions,
+            expected_routes=expected_routes,
         )
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_count_not_satisfied(self):
+        wf_name = "join-count"
 
         # Mock errors at branch 2 and 3. The criteria for join task is not met.
         expected_task_seq = [
@@ -188,23 +218,17 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             ("noop", 2),
         ]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.SUCCEEDED,  # task6
-            statuses.SUCCEEDED,  # task3
-            statuses.FAILED,  # task5
-            statuses.FAILED,  # task7
+        expected_routes = [[], ["task5__t0"], ["task7__t0"]]
+
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task3"),
+            rehearsing.MockActionExecution("task5", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task7", status=statuses.FAILED),
         ]
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
-            expected_task_seq,
-            mock_statuses=mock_statuses,
-            expected_routes=[[], ["task5__t0"], ["task7__t0"]],
-            expected_workflow_status=statuses.FAILED,
-        )
-        conductor = mock.assert_conducting_sequences()
 
         expected_errors = [
             {
@@ -228,7 +252,19 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             },
         ]
 
-        self.assertListEqual(conductor.errors, expected_errors)
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+            mock_action_executions=mock_action_executions,
+            expected_routes=expected_routes,
+            expected_workflow_status=statuses.FAILED,
+            expected_errors=expected_errors,
+        )
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_count_not_satisfied_no_inbound(self):
+        wf_name = "join-count"
 
         # Mock all branches failed. The criteria for join task is not met.
         expected_task_seq = [
@@ -243,24 +279,17 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             ("noop", 2),
         ]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.SUCCEEDED,  # task6
-            statuses.FAILED,  # task3
-            statuses.FAILED,  # task5
-            statuses.FAILED,  # task7
-        ]
+        expected_routes = [[], ["task5__t0"], ["task7__t0"]]
 
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
-            expected_task_seq,
-            mock_statuses=mock_statuses,
-            expected_routes=[[], ["task5__t0"], ["task7__t0"]],
-            expected_workflow_status=statuses.FAILED,
-        )
-        conductor = mock.assert_conducting_sequences()
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task3", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task5", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task7", status=statuses.FAILED),
+        ]
 
         expected_errors = [
             {
@@ -280,19 +309,19 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             },
         ]
 
-        self.assertListEqual(conductor.errors, expected_errors)
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+            mock_action_executions=mock_action_executions,
+            expected_routes=expected_routes,
+            expected_workflow_status=statuses.FAILED,
+            expected_errors=expected_errors,
+        )
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_join_context(self):
         wf_name = "join-context"
-
-        expected_output = {
-            "messages": [
-                "Fee fi fo fum",
-                "I smell the blood of an English man",
-                "Be alive, or be he dead",
-                "I'll grind his bones to make my bread",
-            ]
-        }
 
         expected_task_seq = [
             "task1",
@@ -307,127 +336,148 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "task10",
         ]
 
-        mock_results = [
-            None,  # task1
-            "Fee fi",  # task2
-            "I smell the blood of an English man",  # task4
-            None,  # task6
-            None,  # task8
-            "fo fum",  # task3
-            None,  # task5
-            "Be alive, or be he dead",  # task7
-            None,  # task9
-            None,  # task10
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2", result="Fee fi"),
+            rehearsing.MockActionExecution("task4", result="I smell the blood of an English man"),
+            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task8"),
+            rehearsing.MockActionExecution("task3", result="fo fum"),
+            rehearsing.MockActionExecution("task5"),
+            rehearsing.MockActionExecution("task7", result="Be alive, or be he dead"),
+            rehearsing.MockActionExecution("task9"),
+            rehearsing.MockActionExecution("task10"),
         ]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec, expected_task_seq, mock_results=mock_results, expected_output=expected_output
+        expected_output = {
+            "messages": [
+                "Fee fi fo fum",
+                "I smell the blood of an English man",
+                "Be alive, or be he dead",
+                "I'll grind his bones to make my bread",
+            ]
+        }
+
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+            mock_action_executions=mock_action_executions,
+            expected_output=expected_output,
         )
-        mock.assert_conducting_sequences()
 
-    def test_join_task_transition_on_completed(self):
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_task_transition_on_completed_both_branches_succeeded(self):
         wf_name = "join-on-complete"
-
-        self.assert_spec_inspection(wf_name)
 
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task7"]
 
         # The tasks before the join, task3 and task5, both succeeded.
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.SUCCEEDED,  # task3
-            statuses.SUCCEEDED,  # task5
-            statuses.SUCCEEDED,  # task6
-            statuses.SUCCEEDED,  # task7
-        ]
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
-        mock.assert_conducting_sequences()
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+        )
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_task_transition_on_completed_one_branch_failed(self):
+        wf_name = "join-on-complete"
+
+        expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task7"]
 
         # First tasks before the join, task3, failed.
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.FAILED,  # task3
-            statuses.SUCCEEDED,  # task5
-            statuses.SUCCEEDED,  # task6
-            statuses.SUCCEEDED,  # task7
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task3", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task5"),
+            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task7"),
         ]
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
-        mock.assert_conducting_sequences()
+
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+            mock_action_executions=mock_action_executions,
+        )
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_task_transition_on_completed_other_branch_failed(self):
+        wf_name = "join-on-complete"
+
+        expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task7"]
 
         # Second tasks before the join, task5, failed.
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.SUCCEEDED,  # task3
-            statuses.FAILED,  # task5
-            statuses.SUCCEEDED,  # task6
-            statuses.SUCCEEDED,  # task7
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task3"),
+            rehearsing.MockActionExecution("task5", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task7"),
         ]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
-        mock.assert_conducting_sequences()
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+            mock_action_executions=mock_action_executions,
+        )
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_task_transition_on_completed_both_branches_failed(self):
+        wf_name = "join-on-complete"
+
+        expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task7"]
 
         # Both tasks before the join, task3 and task5, failed.
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.FAILED,  # task3
-            statuses.FAILED,  # task5
-            statuses.SUCCEEDED,  # task6
-            statuses.SUCCEEDED,  # task7
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task3", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task5", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task7"),
         ]
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
-        mock.assert_conducting_sequences()
 
-    def test_join_task_transition_on_failed(self):
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+            mock_action_executions=mock_action_executions,
+        )
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_task_transition_on_failed_both_branches_succeeded(self):
         wf_name = "join-on-fail"
-
-        self.assert_spec_inspection(wf_name)
 
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
 
         # The tasks before the join, task3 and task5, both succeeded.
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.SUCCEEDED,  # task3
-            statuses.SUCCEEDED,  # task5
-        ]
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+        )
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
-        mock.assert_conducting_sequences()
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_task_transition_on_failed_one_branch_failed(self):
+        wf_name = "join-on-fail"
+
+        expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
 
         # First task before the join, task3, failed.
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.FAILED,  # task3
-            statuses.SUCCEEDED,  # task5
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task3", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task5"),
         ]
-
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
-            expected_task_seq,
-            mock_statuses=mock_statuses,
-            expected_workflow_status=statuses.FAILED,
-        )
-        conductor = mock.assert_conducting_sequences()
 
         expected_errors = [
             {
@@ -446,24 +496,29 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             },
         ]
 
-        self.assertListEqual(conductor.errors, expected_errors)
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+            mock_action_executions=mock_action_executions,
+            expected_workflow_status=statuses.FAILED,
+            expected_errors=expected_errors,
+        )
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_task_transition_on_failed_other_branch_failed(self):
+        wf_name = "join-on-fail"
+
+        expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
 
         # Second task before the join, task5, failed.
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.SUCCEEDED,  # task3
-            statuses.FAILED,  # task5
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task3"),
+            rehearsing.MockActionExecution("task5", status=statuses.FAILED),
         ]
-
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
-            expected_task_seq,
-            mock_statuses=mock_statuses,
-            expected_workflow_status=statuses.FAILED,
-        )
-        conductor = mock.assert_conducting_sequences()
 
         expected_errors = [
             {
@@ -482,25 +537,41 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             },
         ]
 
-        self.assertListEqual(conductor.errors, expected_errors)
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+            mock_action_executions=mock_action_executions,
+            expected_workflow_status=statuses.FAILED,
+            expected_errors=expected_errors,
+        )
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_task_transition_on_failed_both_branches_failed(self):
+        wf_name = "join-on-fail"
 
         # The tasks before the join, task3 and task5, both failed.
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task7"]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.FAILED,  # task3
-            statuses.FAILED,  # task5
-            statuses.SUCCEEDED,  # task6
-            statuses.SUCCEEDED,  # task7
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task3", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task5", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task7"),
         ]
 
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
-        mock.assert_conducting_sequences()
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+            mock_action_executions=mock_action_executions,
+        )
 
-    def test_join_all_complex(self):
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_all_complex_both_branches_succeeded(self):
         # In this workflow, both tasks task3 and task5 join all to task6. There
         # are multiple task transition with different criteria (succeeded,
         # failed, and completed) defined at each task. All the task transition
@@ -513,85 +584,94 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         # that inbound task is considered satisfied.
         wf_name = "join-all-complex"
 
-        self.assert_spec_inspection(wf_name)
-
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task7"]
 
         # Both branch 1 and 2 succeeded.
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.SUCCEEDED,  # task3
-            statuses.SUCCEEDED,  # task5
-            statuses.SUCCEEDED,  # task6
-            statuses.SUCCEEDED,  # task7
-        ]
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
-        mock.assert_conducting_sequences()
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+        )
 
-        # Both branch 1 and 2 failed and triggering a different
-        # set of task transition but will still join on task6.
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.FAILED,  # task3
-            statuses.FAILED,  # task5
-            statuses.SUCCEEDED,  # task6
-            statuses.SUCCEEDED,  # task7
-        ]
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
-        mock.assert_conducting_sequences()
+    def test_join_all_complex_one_branch_failed(self):
+        wf_name = "join-all-complex"
+
+        expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task7"]
 
         # One of the branches failed and the other succeeded. Each
         # of the task will trigger different criteria in the task
         # transition but will still join on task6.
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.FAILED,  # task3
-            statuses.SUCCEEDED,  # task5
-            statuses.SUCCEEDED,  # task6
-            statuses.SUCCEEDED,  # task7
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task3", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task5"),
+            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task7"),
         ]
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
-        mock.assert_conducting_sequences()
+
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+            mock_action_executions=mock_action_executions,
+        )
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_all_complex_other_branch_failed(self):
+        wf_name = "join-all-complex"
+
+        expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task7"]
 
         # One of the branches succeeded and the other failed. Each
         # of the task will trigger different criteria in the task
         # transition but will still join on task6.
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.SUCCEEDED,  # task3
-            statuses.FAILED,  # task5
-            statuses.SUCCEEDED,  # task6
-            statuses.SUCCEEDED,  # task7
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task3"),
+            rehearsing.MockActionExecution("task5", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task7"),
         ]
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
-        mock.assert_conducting_sequences()
 
-        # Both branch 1 and 2 failed but trigger the set of task
-        # transition that will pass on the failed criteria.
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.FAILED,  # task3
-            statuses.FAILED,  # task5
-            statuses.SUCCEEDED,  # task6
-            statuses.SUCCEEDED,  # task7
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+            mock_action_executions=mock_action_executions,
+        )
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_all_complex_both_branches_failed(self):
+        wf_name = "join-all-complex"
+
+        expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task7"]
+
+        # Both branch 1 and 2 failed and triggering a different
+        # set of task transition but will still join on task6.
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task3", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task5", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task7"),
         ]
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
-        mock.assert_conducting_sequences()
 
-    def test_join_count_complex(self):
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+            mock_action_executions=mock_action_executions,
+        )
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_count_complex_all_branches_succeeded(self):
         # In this workflow, the task task3, task5, and task7 join on task8.
         # There are multiple task transition with different criteria (succeeded,
         # failed, and completed) defined at each task. All the task transition
@@ -599,9 +679,6 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         # inbound task transition to pass criteria. This is now changed such
         # that the count is on the inbound task and not on task transition.
         wf_name = "join-count-complex"
-
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
 
         # All branches succeeded.
         expected_task_seq = [
@@ -616,20 +693,15 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "task9",
         ]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.SUCCEEDED,  # task6
-            statuses.SUCCEEDED,  # task3
-            statuses.SUCCEEDED,  # task5
-            statuses.SUCCEEDED,  # task7
-            statuses.SUCCEEDED,  # task8
-            statuses.SUCCEEDED,  # task9
-        ]
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+        )
 
-        mock = mocks.WorkflowConductorMock(wf_spec, expected_task_seq, mock_statuses=mock_statuses)
-        mock.assert_conducting_sequences()
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_count_complex_one_branch_failed(self):
+        wf_name = "join-count-complex"
 
         # One of three branches failed. Branch 3 failed.
         expected_task_seq = [
@@ -644,23 +716,30 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "task9",
         ]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.FAILED,  # task6
-            statuses.SUCCEEDED,  # task3
-            statuses.SUCCEEDED,  # task5
-            statuses.SUCCEEDED,  # task8
-            statuses.SUCCEEDED,  # task9
+        expected_routes = [[], ["task6__t0"]]
+
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task6", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task3"),
+            rehearsing.MockActionExecution("task5"),
+            rehearsing.MockActionExecution("task8"),
+            rehearsing.MockActionExecution("task9"),
         ]
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
-            expected_routes=[[], ["task6__t0"]],
+            mock_action_executions=mock_action_executions,
+            expected_routes=expected_routes,
         )
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_count_complex_other_branch_failed(self):
+        wf_name = "join-count-complex"
 
         # One of three branches failed. Branch 2 failed.
         expected_task_seq = [
@@ -675,23 +754,30 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "task9",
         ]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.FAILED,  # task4
-            statuses.SUCCEEDED,  # task6
-            statuses.SUCCEEDED,  # task3
-            statuses.SUCCEEDED,  # task7
-            statuses.SUCCEEDED,  # task8
-            statuses.SUCCEEDED,  # task9
+        expected_routes = [[], ["task4__t0"]]
+
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task3"),
+            rehearsing.MockActionExecution("task7"),
+            rehearsing.MockActionExecution("task8"),
+            rehearsing.MockActionExecution("task9"),
         ]
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
-            expected_routes=[[], ["task4__t0"]],
+            mock_action_executions=mock_action_executions,
+            expected_routes=expected_routes,
         )
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_count_complex_another_branch_failed(self):
+        wf_name = "join-count-complex"
 
         # One of three branches failed. Branch 1 failed.
         expected_task_seq = [
@@ -706,87 +792,102 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "task9",
         ]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.FAILED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.SUCCEEDED,  # task6
-            statuses.SUCCEEDED,  # task3
-            statuses.SUCCEEDED,  # task7
-            statuses.SUCCEEDED,  # task8
-            statuses.SUCCEEDED,  # task9
-        ]
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
-            expected_task_seq,
-            mock_statuses=mock_statuses,
-            expected_routes=[[], ["task2__t0"]],
-        )
-        mock.assert_conducting_sequences()
+        expected_routes = [[], ["task2__t0"]]
 
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task5"),
+            rehearsing.MockActionExecution("task7"),
+            rehearsing.MockActionExecution("task8"),
+            rehearsing.MockActionExecution("task9"),
+        ]
+
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
-            expected_routes=[[], ["task2__t0"]],
+            mock_action_executions=mock_action_executions,
+            expected_routes=expected_routes,
         )
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_count_complex_two_branches_failed(self):
+        wf_name = "join-count-complex"
 
         # Two of three branches failed. Branch 2 and 3 failed.
         expected_task_seq = ["task1", "task2", "task4", ("noop", 1), "task6", ("noop", 2), "task3"]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.FAILED,  # task4
-            statuses.FAILED,  # task6
-            statuses.SUCCEEDED,  # task3
+        expected_routes = [[], ["task4__t0"], ["task6__t0"]]
+
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task4", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task6", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task3"),
         ]
 
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
-            expected_routes=[[], ["task4__t0"], ["task6__t0"]],
+            mock_action_executions=mock_action_executions,
+            expected_routes=expected_routes,
             expected_workflow_status=statuses.FAILED,
         )
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_count_complex_other_two_branches_failed(self):
+        wf_name = "join-count-complex"
 
         # Two of three branches failed. Branch 1 and 2 failed.
         expected_task_seq = ["task1", "task2", ("noop", 1), "task4", ("noop", 2), "task6", "task7"]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.FAILED,  # task2
-            statuses.FAILED,  # task4
-            statuses.SUCCEEDED,  # task6
-            statuses.SUCCEEDED,  # task7
+        expected_routes = [[], ["task2__t0"], ["task4__t0"]]
+
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task4", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task7"),
         ]
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
-            expected_routes=[[], ["task2__t0"], ["task4__t0"]],
+            mock_action_executions=mock_action_executions,
+            expected_routes=expected_routes,
             expected_workflow_status=statuses.FAILED,
         )
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_join_count_complex_another_two_branches_failed(self):
+        wf_name = "join-count-complex"
 
         # Two of three branches failed. Branch 1 and 3 failed.
         expected_task_seq = ["task1", "task2", ("noop", 1), "task4", "task6", ("noop", 2), "task5"]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.FAILED,  # task2
-            statuses.SUCCEEDED,  # task4
-            statuses.FAILED,  # task6
-            statuses.SUCCEEDED,  # task5
+        expected_routes = [[], ["task2__t0"], ["task6__t0"]]
+
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task6", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task5"),
         ]
 
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
-            expected_routes=[[], ["task2__t0"], ["task6__t0"]],
+            mock_action_executions=mock_action_executions,
+            expected_routes=expected_routes,
             expected_workflow_status=statuses.FAILED,
         )
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()

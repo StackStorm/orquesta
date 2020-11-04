@@ -12,71 +12,56 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from orquesta import rehearsing
 from orquesta import statuses
-from orquesta.tests import mocks
-from orquesta.tests.unit import base as test_base
 from orquesta.tests.unit.conducting.native import base
 
 
-class WorkflowErrorHandlingConductorTest(
-    base.OrchestraWorkflowConductorTest, test_base.WorkflowComposerTest
-):
+class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
     def test_error_log_fail(self):
         wf_name = "error-log-fail"
 
-        self.assert_spec_inspection(wf_name)
-
         expected_task_seq = ["task1", "log", "fail"]
 
-        mock_statuses = [statuses.FAILED, statuses.SUCCEEDED]  # task1  # log
+        mock_result = "All your base are belong to us!"
 
-        mock_results = [
-            "All your base are belong to us!",  # task1
-            "All your base are belong to us!",  # log
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1", status=statuses.FAILED, result=mock_result),
+            rehearsing.MockActionExecution("log", result=mock_result),
         ]
 
-        self.assert_spec_inspection(wf_name)
-
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
-            mock_results=mock_results,
+            mock_action_executions=mock_action_executions,
             expected_workflow_status=statuses.FAILED,
         )
-        # will throw
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_error_concurrent_log_fail(self):
         wf_name = "error-log-fail-concurrent"
 
-        self.assert_spec_inspection(wf_name)
-
         expected_task_seq = ["task1", "fail", "log"]
 
-        mock_statuses = [statuses.FAILED]  # task1
+        mock_result = "All your base are belong to us!"
 
-        mock_results = ["All your base are belong to us!"]  # task1
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1", status=statuses.FAILED, result=mock_result),
+        ]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
-            mock_results=mock_results,
+            mock_action_executions=mock_action_executions,
             expected_workflow_status=statuses.FAILED,
         )
-        # will throw
-        mock.assert_conducting_sequences()
 
-    def test_error_continue(self):
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_error_continue_success_path(self):
         wf_name = "error-handling-continue"
 
-        self.assert_spec_inspection(wf_name)
-        # Run thru the success path.
         expected_routes = [
             [],  # default from start
             ["task2__t0"],  # task1 -> task2 -> continue
@@ -84,27 +69,20 @@ class WorkflowErrorHandlingConductorTest(
 
         expected_task_seq = ["task1", "task2", ("continue", 1)]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # continue
-        ]
-
         expected_output = {"message": "hooray!!!"}
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
             expected_routes=expected_routes,
             expected_output=expected_output,
         )
-        # will throw
-        mock.assert_conducting_sequences()
 
-        # Run thru the failure path.
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_error_continue_failure_path(self):
+        wf_name = "error-handling-continue"
+
         expected_routes = [
             [],  # default from start
             ["task1__t0"],  # task1 -> continue
@@ -112,110 +90,90 @@ class WorkflowErrorHandlingConductorTest(
 
         expected_task_seq = ["task1", ("continue", 1)]
 
-        mock_statuses = [statuses.FAILED, statuses.SUCCEEDED]  # task1  # continue
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1", status=statuses.FAILED),
+        ]
 
         expected_output = {"message": "$%#&@#$!!!"}
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_routes=expected_routes,
             expected_workflow_status=statuses.FAILED,
             expected_output=expected_output,
         )
-        # will throw
-        mock.assert_conducting_sequences()
 
-    def test_error_noop(self):
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_error_noop_success_path(self):
         wf_name = "error-handling-noop"
 
-        self.assert_spec_inspection(wf_name)
-
-        # Run thru the success path.
         expected_task_seq = ["task1", "task2", "continue"]
-
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # continue
-        ]
 
         expected_output = {"message": "hooray!!!"}
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
             expected_output=expected_output,
         )
-        # will throw
-        mock.assert_conducting_sequences()
 
-        # Run thru the failure path.
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_error_noop_failure_path(self):
+        wf_name = "error-handling-noop"
+
         expected_task_seq = ["task1", "noop"]
 
-        mock_statuses = [statuses.FAILED, statuses.SUCCEEDED]  # task1  # noop
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1", status=statuses.FAILED),
+        ]
 
         expected_output = {"message": "$%#&@#$!!!"}
 
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
+            mock_action_executions=mock_action_executions,
             expected_output=expected_output,
         )
-        # will throw
-        mock.assert_conducting_sequences()
 
-    def test_error_fail(self):
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_error_fail_success_path(self):
         wf_name = "error-handling-fail"
 
-        self.assert_spec_inspection(wf_name)
-
-        # Run thru the success path.
         expected_task_seq = ["task1", "task2", "continue"]
-
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1
-            statuses.SUCCEEDED,  # task2
-            statuses.SUCCEEDED,  # continue
-        ]
 
         expected_output = {"message": "hooray!!!"}
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
             expected_output=expected_output,
         )
-        # will throw
-        mock.assert_conducting_sequences()
 
-        # Run thru the failure path.
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
+    def test_error_fail_failure_path(self):
+        wf_name = "error-handling-fail"
+
         expected_task_seq = ["task1", "task3", "fail"]
 
-        mock_statuses = [
-            statuses.FAILED,  # task1
-            statuses.SUCCEEDED,  # task3
-            statuses.FAILED,  # fail
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1", status=statuses.FAILED),
         ]
 
         expected_output = {"message": "$%#&@#$!!!"}
 
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
-            mock_statuses=mock_statuses,
-            expected_workflow_status=statuses.FAILED,
+            mock_action_executions=mock_action_executions,
             expected_output=expected_output,
+            expected_workflow_status=statuses.FAILED,
         )
-        # will throw
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()

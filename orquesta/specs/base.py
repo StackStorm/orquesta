@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-import re
-
 import collections
 import inspect
 import json
 import jsonschema
+import logging
+import re
 import six
 import yaml
 

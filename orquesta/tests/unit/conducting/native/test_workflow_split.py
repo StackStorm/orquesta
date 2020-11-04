@@ -12,19 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from orquesta import rehearsing
 from orquesta import statuses
-from orquesta.tests import mocks
-from orquesta.tests.unit import base as test_base
 from orquesta.tests.unit.conducting.native import base
 
 
-class SplitWorkflowConductorTest(
-    base.OrchestraWorkflowConductorTest, test_base.WorkflowComposerTest
-):
+class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
     def test_split(self):
         wf_name = "split"
-
-        self.assert_spec_inspection(wf_name)
 
         expected_routes = [
             [],  # default from start
@@ -48,21 +43,17 @@ class SplitWorkflowConductorTest(
 
         expected_term_tasks = [("task7", 1), ("task7", 2)]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_splits(self):
         wf_name = "splits"
-
-        self.assert_spec_inspection(wf_name)
 
         expected_routes = [
             [],  # default from start
@@ -92,21 +83,17 @@ class SplitWorkflowConductorTest(
 
         expected_term_tasks = [("task8", 1), ("task8", 4), ("task8", 5)]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_nested_splits(self):
         wf_name = "splits-nested"
-
-        self.assert_spec_inspection(wf_name)
 
         expected_routes = [
             [],  # default from start
@@ -148,21 +135,17 @@ class SplitWorkflowConductorTest(
 
         expected_term_tasks = [("task10", 3), ("task10", 4), ("task10", 5), ("task10", 6)]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_splits_mixed(self):
         wf_name = "splits-mixed"
-
-        self.assert_spec_inspection(wf_name)
 
         expected_routes = [
             [],
@@ -185,23 +168,17 @@ class SplitWorkflowConductorTest(
 
         expected_term_tasks = [("task5", 3), ("task5", 4)]
 
-        self.assert_spec_inspection(wf_name)
-
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_splits_mixed_alt_branch(self):
         wf_name = "splits-mixed"
-
-        self.assert_spec_inspection(wf_name)
 
         expected_routes = [
             [],
@@ -222,35 +199,31 @@ class SplitWorkflowConductorTest(
             ("task5", 4),
         ]
 
-        mock_statuses = [
-            statuses.SUCCEEDED,  # task1, 0
-            statuses.SUCCEEDED,  # task2, 0
-            statuses.SUCCEEDED,  # task3, 1
-            statuses.FAILED,  # task3, 2
-            statuses.SUCCEEDED,  # task4, 3
-            statuses.SUCCEEDED,  # task4, 4
-            statuses.SUCCEEDED,  # task5, 3
-            statuses.SUCCEEDED,  # task5, 4
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1"),  # task1, 0
+            rehearsing.MockActionExecution("task2"),  # task2, 0
+            rehearsing.MockActionExecution("task3"),  # task3, 1
+            rehearsing.MockActionExecution("task3", status=statuses.FAILED),  # task3, 2
+            rehearsing.MockActionExecution("task4"),  # task4, 3
+            rehearsing.MockActionExecution("task4"),  # task4, 4
+            rehearsing.MockActionExecution("task5"),  # task5, 3
+            rehearsing.MockActionExecution("task5"),  # task5, 4
         ]
 
         expected_term_tasks = [("task5", 3), ("task5", 4)]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
+            mock_action_executions=mock_action_executions,
             expected_routes=expected_routes,
-            mock_statuses=mock_statuses,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_splits_multiple_transition(self):
         wf_name = "splits-transition"
-
-        self.assert_spec_inspection(wf_name)
 
         expected_routes = [
             [],
@@ -287,21 +260,17 @@ class SplitWorkflowConductorTest(
 
         expected_term_tasks = [("task7", 3), ("task7", 4), ("task7", 5), ("task7", 6)]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_very_many_splits(self):
         wf_name = "splits-very-many"
-
-        self.assert_spec_inspection(wf_name)
 
         expected_routes = [
             [],
@@ -342,21 +311,17 @@ class SplitWorkflowConductorTest(
 
         expected_term_tasks = [("notify", 1), ("notify", 8)]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
             expected_routes=expected_routes,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_very_many_splits_alt(self):
         wf_name = "splits-very-many"
-
-        self.assert_spec_inspection(wf_name)
 
         inputs = {
             "fork1": True,
@@ -368,29 +333,28 @@ class SplitWorkflowConductorTest(
             "fork7": True,
             "fork8": True,
         }
-
-        mock_results = [
-            None,  # init
-            None,  # notify
-            None,  # task1
-            None,  # task2
-            None,  # task3
-            None,  # task4
-            None,  # task5
-            None,  # task6
-            None,  # task8
-            None,  # task9
-            None,  # task11
-            None,  # task12
-            None,  # task13
-            None,  # task14
-            False,  # task16 (try #1)
-            True,  # task16 (try #2)
-            None,  # task17
-            False,  # task18 (try #1)
-            True,  # task18 (try #2)
-            None,  # task19
-            None,  # notify
+        mock_action_executions = [
+            rehearsing.MockActionExecution("init"),
+            rehearsing.MockActionExecution("notify"),
+            rehearsing.MockActionExecution("task1"),
+            rehearsing.MockActionExecution("task2"),
+            rehearsing.MockActionExecution("task3"),
+            rehearsing.MockActionExecution("task4"),
+            rehearsing.MockActionExecution("task5"),
+            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task8"),
+            rehearsing.MockActionExecution("task9"),
+            rehearsing.MockActionExecution("task11"),
+            rehearsing.MockActionExecution("task12"),
+            rehearsing.MockActionExecution("task13"),
+            rehearsing.MockActionExecution("task14"),
+            rehearsing.MockActionExecution("task16", result=False),
+            rehearsing.MockActionExecution("task16", result=True),
+            rehearsing.MockActionExecution("task17"),
+            rehearsing.MockActionExecution("task18", result=False),
+            rehearsing.MockActionExecution("task18", result=True),
+            rehearsing.MockActionExecution("task19"),
+            rehearsing.MockActionExecution("notify"),
         ]
 
         expected_routes = [
@@ -449,15 +413,13 @@ class SplitWorkflowConductorTest(
 
         expected_term_tasks = [("notify", 1), ("notify", 9)]
 
-        wf_def = self.get_wf_def(wf_name)
-        wf_spec = self.spec_module.instantiate(wf_def)
-        mock = mocks.WorkflowConductorMock(
-            wf_spec,
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
             expected_task_seq,
             inputs=inputs,
+            mock_action_executions=mock_action_executions,
             expected_routes=expected_routes,
-            mock_results=mock_results,
             expected_term_tasks=expected_term_tasks,
         )
-        # will throw
-        mock.assert_conducting_sequences()
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
