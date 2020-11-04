@@ -80,6 +80,7 @@ def get_alias(logical_line):
 
 
 @core.flake8ext
+@core.off_by_default
 def check_alias_naming(logical_line, filename, noqa):
     """Check import alias.
 

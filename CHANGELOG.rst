@@ -4,10 +4,18 @@ Changelog
 Developing
 ----------
 
+Changed
+~~~~~~~
+
+* Remove mistral fixtures because they were used as ref to support multiple specs. Mistral is
+  deprecated in StackStorm and there's no intention to support it here. A mistral to orquesta
+  workflow conversion tool is available at https://github.com/StackStorm/orquestaconvert.
+
 Fixed
------
+~~~~~
 
 * Fix the custom flake8 extensions to check import statements. (bug fix)
+* Fix the deprecation warning that flags are not at the start of the expression. (bug fix)
 
 1.2.0
 -----
