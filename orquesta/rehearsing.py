@@ -21,14 +21,55 @@ from orquesta import statuses
 
 
 class MockActionExecution(object):
-    def __init__(self, task_id, status=statuses.SUCCEEDED, result=None, item_id=None):
+    def __init__(
+        self,
+        task_id,
+        status=statuses.SUCCEEDED,
+        result=None,
+        item_id=None,
+        seq_id=None,
+        num_iter=1,
+        iter_idx=0,
+    ):
         self.task_id = task_id
         self.status = status
         self.result = result
         self.item_id = item_id
+        self.seq_id = seq_id
+        self.num_iter = num_iter
+        self.iter_idx = iter_idx
+        self.iter_pos = iter_idx - 1
+
+        if self.iter_idx < 0:
+            raise exc.WorkflowRehearsalError(
+                "The zero based value of iter_idx for MockActionExecution "
+                "must be greater than or equal to zero."
+            )
+
+        if self.num_iter < 1:
+            raise exc.WorkflowRehearsalError(
+                "The value of num_iter for MockActionExecution must be greater than zero."
+            )
 
 
-class WorkflowTestCase(object):
+class WorkflowTestCaseMixin(object):
+    def get_mock_action_execution(self, task_id, item_id=None, seq_id=None):
+        ac_exs = [
+            x
+            for x in self.mock_action_executions
+            if x.task_id == task_id and x.iter_pos < x.iter_idx + x.num_iter - 1
+        ]
+
+        if ac_exs and seq_id is not None:
+            ac_exs = [x for x in ac_exs if x.seq_id == seq_id]
+
+        if ac_exs and item_id is not None:
+            ac_exs = [x for x in ac_exs if x.item_id == item_id]
+
+        return ac_exs[0] if len(ac_exs) > 0 else None
+
+
+class WorkflowTestCase(WorkflowTestCaseMixin):
     def __init__(
         self,
         wf_def,
@@ -71,7 +112,7 @@ class WorkflowTestCase(object):
             self.expected_workflow_status = statuses.SUCCEEDED
 
 
-class WorkflowRerunTestCase(object):
+class WorkflowRerunTestCase(WorkflowTestCaseMixin):
     def __init__(
         self,
         conductor,
@@ -164,7 +205,6 @@ class WorkflowRehearsal(unittest.TestCase):
 
     def assert_conducting_sequences(self):
         run_q = queue.Queue()
-        ac_ex_q = queue.Queue()
         items_task_accum_result = {}
 
         # Inspect workflow spec and check for errors.
@@ -182,10 +222,6 @@ class WorkflowRehearsal(unittest.TestCase):
             # Request workflow rerun and assert workflow status is running.
             self.conductor.request_workflow_rerun(task_requests=self.session.rerun_tasks)
             self.assertEqual(self.conductor.get_workflow_status(), statuses.RESUMING)
-
-        # Prepare the mock action execution(s) for the task(s).
-        for mock_ac_ex in self.session.mock_action_executions:
-            ac_ex_q.put(mock_ac_ex)
 
         # Get start tasks and being conducting workflow.
         for task in self.conductor.get_next_tasks():
@@ -211,9 +247,19 @@ class WorkflowRehearsal(unittest.TestCase):
                 self.conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
 
                 # Mock completion of the task and apply mock action execution if given.
-                ac_ex = (
-                    ac_ex_q.get() if not ac_ex_q.empty() else MockActionExecution(current_task_id)
+                current_seq_id = len(self.conductor.workflow_state.sequence)
+
+                ac_ex = self.session.get_mock_action_execution(
+                    current_task_id, seq_id=current_seq_id
                 )
+
+                if not ac_ex:
+                    ac_ex = self.session.get_mock_action_execution(current_task_id)
+
+                if not ac_ex:
+                    ac_ex = MockActionExecution(current_task_id)
+                else:
+                    ac_ex.iter_pos += 1
 
                 if not current_task_spec.has_items():
                     ac_ex_event = events.ActionExecutionEvent(ac_ex.status, result=ac_ex.result)
@@ -222,6 +268,9 @@ class WorkflowRehearsal(unittest.TestCase):
                         items_task_accum_result[current_task_id] = []
 
                     len_accum_result = len(items_task_accum_result[current_task_id])
+
+                    if ac_ex.item_id is None:
+                        ac_ex.item_id = len_accum_result
 
                     if ac_ex.item_id > len_accum_result - 1:
                         placeholders = [None] * (ac_ex.item_id - len_accum_result + 1)

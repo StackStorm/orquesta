@@ -38,9 +38,6 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
             rehearsing.MockActionExecution("task3", status=statuses.FAILED),
             rehearsing.MockActionExecution("task5", status=statuses.FAILED),
         ]
@@ -62,11 +59,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
             rehearsing.MockActionExecution("task3", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task5"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -86,10 +79,6 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
-            rehearsing.MockActionExecution("task3"),
             rehearsing.MockActionExecution("task5", status=statuses.FAILED),
         ]
 
@@ -110,13 +99,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_task_seq = ["task1", "task2", "task4", "task6", "task3", "task5", "task8"]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
             rehearsing.MockActionExecution("task6", status=statuses.RUNNING),
-            rehearsing.MockActionExecution("task3"),
-            rehearsing.MockActionExecution("task5"),
-            rehearsing.MockActionExecution("task8"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -146,13 +129,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_routes = [[], ["task6__t0"]]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
             rehearsing.MockActionExecution("task6", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task3"),
-            rehearsing.MockActionExecution("task5"),
-            rehearsing.MockActionExecution("task8"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -183,14 +160,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_routes = [[], ["task7__t0"]]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
-            rehearsing.MockActionExecution("task6"),
-            rehearsing.MockActionExecution("task3"),
-            rehearsing.MockActionExecution("task5"),
             rehearsing.MockActionExecution("task7", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task8"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -221,11 +191,6 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_routes = [[], ["task5__t0"], ["task7__t0"]]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
-            rehearsing.MockActionExecution("task6"),
-            rehearsing.MockActionExecution("task3"),
             rehearsing.MockActionExecution("task5", status=statuses.FAILED),
             rehearsing.MockActionExecution("task7", status=statuses.FAILED),
         ]
@@ -282,10 +247,6 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_routes = [[], ["task5__t0"], ["task7__t0"]]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
-            rehearsing.MockActionExecution("task6"),
             rehearsing.MockActionExecution("task3", status=statuses.FAILED),
             rehearsing.MockActionExecution("task5", status=statuses.FAILED),
             rehearsing.MockActionExecution("task7", status=statuses.FAILED),
@@ -337,16 +298,10 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         ]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
             rehearsing.MockActionExecution("task2", result="Fee fi"),
             rehearsing.MockActionExecution("task4", result="I smell the blood of an English man"),
-            rehearsing.MockActionExecution("task6"),
-            rehearsing.MockActionExecution("task8"),
             rehearsing.MockActionExecution("task3", result="fo fum"),
-            rehearsing.MockActionExecution("task5"),
             rehearsing.MockActionExecution("task7", result="Be alive, or be he dead"),
-            rehearsing.MockActionExecution("task9"),
-            rehearsing.MockActionExecution("task10"),
         ]
 
         expected_output = {
@@ -387,13 +342,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         # First tasks before the join, task3, failed.
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
             rehearsing.MockActionExecution("task3", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task5"),
-            rehearsing.MockActionExecution("task6"),
-            rehearsing.MockActionExecution("task7"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -411,13 +360,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         # Second tasks before the join, task5, failed.
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
-            rehearsing.MockActionExecution("task3"),
             rehearsing.MockActionExecution("task5", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task6"),
-            rehearsing.MockActionExecution("task7"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -435,13 +378,8 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         # Both tasks before the join, task3 and task5, failed.
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
             rehearsing.MockActionExecution("task3", status=statuses.FAILED),
             rehearsing.MockActionExecution("task5", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task6"),
-            rehearsing.MockActionExecution("task7"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -472,11 +410,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         # First task before the join, task3, failed.
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
             rehearsing.MockActionExecution("task3", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task5"),
         ]
 
         expected_errors = [
@@ -513,10 +447,6 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         # Second task before the join, task5, failed.
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
-            rehearsing.MockActionExecution("task3"),
             rehearsing.MockActionExecution("task5", status=statuses.FAILED),
         ]
 
@@ -554,13 +484,8 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_task_seq = ["task1", "task2", "task4", "task3", "task5", "task6", "task7"]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
             rehearsing.MockActionExecution("task3", status=statuses.FAILED),
             rehearsing.MockActionExecution("task5", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task6"),
-            rehearsing.MockActionExecution("task7"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -603,13 +528,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         # of the task will trigger different criteria in the task
         # transition but will still join on task6.
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
             rehearsing.MockActionExecution("task3", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task5"),
-            rehearsing.MockActionExecution("task6"),
-            rehearsing.MockActionExecution("task7"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -629,13 +548,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         # of the task will trigger different criteria in the task
         # transition but will still join on task6.
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
-            rehearsing.MockActionExecution("task3"),
             rehearsing.MockActionExecution("task5", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task6"),
-            rehearsing.MockActionExecution("task7"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -654,13 +567,8 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         # Both branch 1 and 2 failed and triggering a different
         # set of task transition but will still join on task6.
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
             rehearsing.MockActionExecution("task3", status=statuses.FAILED),
             rehearsing.MockActionExecution("task5", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task6"),
-            rehearsing.MockActionExecution("task7"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -719,14 +627,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_routes = [[], ["task6__t0"]]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task4"),
             rehearsing.MockActionExecution("task6", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task3"),
-            rehearsing.MockActionExecution("task5"),
-            rehearsing.MockActionExecution("task8"),
-            rehearsing.MockActionExecution("task9"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -757,14 +658,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_routes = [[], ["task4__t0"]]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
             rehearsing.MockActionExecution("task4", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task6"),
-            rehearsing.MockActionExecution("task3"),
-            rehearsing.MockActionExecution("task7"),
-            rehearsing.MockActionExecution("task8"),
-            rehearsing.MockActionExecution("task9"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -795,14 +689,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_routes = [[], ["task2__t0"]]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
             rehearsing.MockActionExecution("task2", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task4"),
-            rehearsing.MockActionExecution("task6"),
-            rehearsing.MockActionExecution("task5"),
-            rehearsing.MockActionExecution("task7"),
-            rehearsing.MockActionExecution("task8"),
-            rehearsing.MockActionExecution("task9"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -823,11 +710,8 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_routes = [[], ["task4__t0"], ["task6__t0"]]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
             rehearsing.MockActionExecution("task4", status=statuses.FAILED),
             rehearsing.MockActionExecution("task6", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task3"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -849,11 +733,8 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_routes = [[], ["task2__t0"], ["task4__t0"]]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
             rehearsing.MockActionExecution("task2", status=statuses.FAILED),
             rehearsing.MockActionExecution("task4", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task6"),
-            rehearsing.MockActionExecution("task7"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -875,11 +756,8 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         expected_routes = [[], ["task2__t0"], ["task6__t0"]]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),
             rehearsing.MockActionExecution("task2", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task4"),
             rehearsing.MockActionExecution("task6", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task5"),
         ]
 
         test = rehearsing.WorkflowTestCase(

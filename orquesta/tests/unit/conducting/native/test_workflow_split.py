@@ -200,14 +200,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         ]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task1"),  # task1, 0
-            rehearsing.MockActionExecution("task2"),  # task2, 0
             rehearsing.MockActionExecution("task3"),  # task3, 1
             rehearsing.MockActionExecution("task3", status=statuses.FAILED),  # task3, 2
-            rehearsing.MockActionExecution("task4"),  # task4, 3
-            rehearsing.MockActionExecution("task4"),  # task4, 4
-            rehearsing.MockActionExecution("task5"),  # task5, 3
-            rehearsing.MockActionExecution("task5"),  # task5, 4
         ]
 
         expected_term_tasks = [("task5", 3), ("task5", 4)]
@@ -334,27 +328,10 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "fork8": True,
         }
         mock_action_executions = [
-            rehearsing.MockActionExecution("init"),
-            rehearsing.MockActionExecution("notify"),
-            rehearsing.MockActionExecution("task1"),
-            rehearsing.MockActionExecution("task2"),
-            rehearsing.MockActionExecution("task3"),
-            rehearsing.MockActionExecution("task4"),
-            rehearsing.MockActionExecution("task5"),
-            rehearsing.MockActionExecution("task6"),
-            rehearsing.MockActionExecution("task8"),
-            rehearsing.MockActionExecution("task9"),
-            rehearsing.MockActionExecution("task11"),
-            rehearsing.MockActionExecution("task12"),
-            rehearsing.MockActionExecution("task13"),
-            rehearsing.MockActionExecution("task14"),
             rehearsing.MockActionExecution("task16", result=False),
             rehearsing.MockActionExecution("task16", result=True),
-            rehearsing.MockActionExecution("task17"),
             rehearsing.MockActionExecution("task18", result=False),
             rehearsing.MockActionExecution("task18", result=True),
-            rehearsing.MockActionExecution("task19"),
-            rehearsing.MockActionExecution("notify"),
         ]
 
         expected_routes = [

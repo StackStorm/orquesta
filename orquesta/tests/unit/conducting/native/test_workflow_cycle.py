@@ -86,12 +86,7 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         ]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("init"),
             rehearsing.MockActionExecution("check", status=statuses.FAILED),
-            rehearsing.MockActionExecution("create"),
-            rehearsing.MockActionExecution("rollback"),
-            rehearsing.MockActionExecution("check"),
-            rehearsing.MockActionExecution("delete"),
         ]
 
         test = rehearsing.WorkflowTestCase(
@@ -119,16 +114,8 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         ]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("init"),
-            rehearsing.MockActionExecution("query", result=True),
-            rehearsing.MockActionExecution("decide_cheer"),
-            rehearsing.MockActionExecution("decide_work"),
-            rehearsing.MockActionExecution("cheer"),
-            rehearsing.MockActionExecution("notify_work"),
-            rehearsing.MockActionExecution("toil"),
-            rehearsing.MockActionExecution("query", result=False),
-            rehearsing.MockActionExecution("decide_cheer"),
-            rehearsing.MockActionExecution("decide_work"),
+            rehearsing.MockActionExecution("query", seq_id=1, result=True),
+            rehearsing.MockActionExecution("query", seq_id=7, result=False),
         ]
 
         test = rehearsing.WorkflowTestCase(
