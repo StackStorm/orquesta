@@ -15,7 +15,6 @@
 import logging
 
 from orquesta.specs import base as spec_base
-from orquesta.specs import types as spec_types
 
 
 LOG = logging.getLogger(__name__)
@@ -36,50 +35,3 @@ def deserialize(data):
 
 class WorkflowSpec(spec_base.Spec):
     _catalog = "mock"
-
-
-class MappingSpec(spec_base.MappingSpec):
-    _catalog = "mock"
-
-    _version = "1.0"
-
-    _meta_schema = {
-        "type": "object",
-        "properties": {"version": {"enum": [_version, float(_version)]}},
-    }
-
-
-class TestCaseSpec(MappingSpec):
-    _schema = {
-        "type": "object",
-        "properties": {
-            "workflow": spec_types.NONEMPTY_STRING,
-            "routes": {"type": "array", "items": {"type": "array"}},
-            "task_sequence": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "minProperties": 1,
-                    "additionalProperties": False,
-                    "patternProperties": {
-                        r"^\w+$": {
-                            "type": "object",
-                            "properties": {
-                                "route": {"type": "integer"},
-                                "result": spec_types.ANY,
-                                "status": {"anyOf": [{"type": "array"}, {"type": "string"}]},
-                            },
-                            "additionalProperties": False,
-                            "required": ["status"],
-                        }
-                    },
-                },
-            },
-            "inputs": {"type": "object"},
-            "expected_workflow_status": {"type": "string"},
-            "expected_output": {"type": "object"},
-            "expected_term_tasks": {"type": "array"},
-        },
-        "required": ["workflow", "task_sequence"],
-        "additionalProperties": False,
-    }

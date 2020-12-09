@@ -201,13 +201,6 @@ class TaskSpec(native_v1_specs.Spec):
         return self, action_specs
 
     def finalize_context(self, next_task_name, task_transition_meta, in_ctx):
-        """generate context
-
-        :param next_task_name: str
-        :param task_transition_meta: tuple(task:str, next_task:str, index:int, criteria:dict)
-        :param in_ctx: dict
-
-        """
         rolling_ctx = json_util.deepcopy(in_ctx)
         new_ctx = {}
         errors = []
@@ -238,11 +231,7 @@ class TaskSpec(native_v1_specs.Spec):
 
 
 class TaskMappingSpec(native_v1_specs.MappingSpec):
-    _schema = {
-        "type": "object",
-        "minProperties": 1,
-        "patternProperties": {r"^\w+$": TaskSpec},
-    }
+    _schema = {"type": "object", "minProperties": 1, "patternProperties": {r"^\w+$": TaskSpec}}
 
     def has_tasks(self):
         return len(self.keys()) > 0
@@ -366,11 +355,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                 message = 'The task name "%s" is reserved with special function.' % task_name
                 spec_path = parent.get("spec_path") + "." + task_name
                 schema_path = parent.get("schema_path") + ".patternProperties.^\\w+$"
-                entry = {
-                    "message": message,
-                    "spec_path": spec_path,
-                    "schema_path": schema_path,
-                }
+                entry = {"message": message, "spec_path": spec_path, "schema_path": schema_path}
                 result.append(entry)
 
         return result
@@ -542,12 +527,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
 
             spec_path = parent.get("spec_path") + "." + task_name
             schema_path = parent.get("schema_path") + ".patternProperties.^\\w+$"
-
-            task_parent = {
-                "ctx": task_ctx,
-                "spec_path": spec_path,
-                "schema_path": schema_path,
-            }
+            task_parent = {"ctx": task_ctx, "spec_path": spec_path, "schema_path": schema_path}
 
             result = task_spec.inspect_context(parent=task_parent)
             errors.extend(result[0])

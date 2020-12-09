@@ -17,10 +17,7 @@
 import os
 import sys
 
-from setuptools import (
-    setup,
-    find_packages,
-)
+from setuptools import setup, find_packages
 
 
 PKG_ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -30,10 +27,7 @@ os.chdir(PKG_ROOT_DIR)
 
 def get_version_string():
     version = None
-    sys.path.insert(
-        0,
-        PKG_ROOT_DIR,
-    )
+    sys.path.insert(0, PKG_ROOT_DIR)
     from orquesta import __version__
 
     version = __version__
@@ -100,5 +94,4 @@ setup(
             "O102 = orquesta.tests.hacking.import_aliases_rule:check_alias_naming",
         ],
     },
-    scripts=["bin/orquesta-test"],
 )
