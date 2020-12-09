@@ -66,6 +66,9 @@ class WorkflowTestCaseMixin(object):
         if ac_exs and item_id is not None:
             ac_exs = [x for x in ac_exs if x.item_id == item_id]
 
+        if len(ac_exs) > 0 and ac_exs[0].seq_id is not None and seq_id is None:
+            return None
+
         return ac_exs[0] if len(ac_exs) > 0 else None
 
 
@@ -247,7 +250,7 @@ class WorkflowRehearsal(unittest.TestCase):
                 self.conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
 
                 # Mock completion of the task and apply mock action execution if given.
-                current_seq_id = len(self.conductor.workflow_state.sequence)
+                current_seq_id = len(self.conductor.workflow_state.sequence) - 1
 
                 ac_ex = self.session.get_mock_action_execution(
                     current_task_id, seq_id=current_seq_id

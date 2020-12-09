@@ -246,8 +246,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         expected_task_seq = ["prep", "task1", "task2", "task3", "task1", "task2", "task3"]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task3"),
-            rehearsing.MockActionExecution("task3", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task3", seq_id=6, status=statuses.FAILED),
         ]
 
         expected_term_tasks = ["task3"]
@@ -312,8 +311,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         ]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task5"),
-            rehearsing.MockActionExecution("task5", status=statuses.FAILED),
+            rehearsing.MockActionExecution("task5", seq_id=6, status=statuses.FAILED),
         ]
 
         expected_term_tasks = [("task5", 2), ("task6", 1), ("task6", 2)]
@@ -381,10 +379,8 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         ]
 
         mock_action_executions = [
-            rehearsing.MockActionExecution("task5"),
-            rehearsing.MockActionExecution("task5", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task6", status=statuses.FAILED),
-            rehearsing.MockActionExecution("task6"),
+            rehearsing.MockActionExecution("task5", seq_id=6, status=statuses.FAILED),
+            rehearsing.MockActionExecution("task6", seq_id=7, status=statuses.FAILED),
         ]
 
         expected_term_tasks = [("task5", 2), ("task6", 1), ("task6", 2)]

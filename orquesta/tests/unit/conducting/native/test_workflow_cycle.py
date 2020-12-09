@@ -73,6 +73,29 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
 
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
+    def test_cycle_retry(self):
+        wf_name = "cycle-retry"
+
+        expected_task_seq = [
+            "init",
+            "task1",
+            "task1",
+            "task1",
+            "task2",
+        ]
+
+        mock_action_executions = [
+            rehearsing.MockActionExecution("task1", num_iter=2, status=statuses.FAILED),
+        ]
+
+        test = rehearsing.WorkflowTestCase(
+            self.get_wf_def(wf_name),
+            expected_task_seq,
+            mock_action_executions=mock_action_executions,
+        )
+
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+
     def test_rollback_retry(self):
         wf_name = "rollback-retry"
 
