@@ -31,8 +31,8 @@ class WithItemsWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "expected_output": {"items": ["fee", "fi", "fo", "fum"]},
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()
 
     def test_items_list_with_error(self):
         test_spec = {
@@ -44,11 +44,10 @@ class WithItemsWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
                 {"task_id": "task1", "result": "fo", "item_id": 2, "status": statuses.FAILED},
             ],
             "expected_workflow_status": statuses.FAILED,
-            "expected_output": None,
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()
 
     def test_items_list_with_error_and_remediation(self):
         test_spec = {
@@ -62,8 +61,8 @@ class WithItemsWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "expected_output": {"items": ["fee", "fi", None]},
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()
 
     def test_parallel_items_tasks(self):
         test_spec = {
@@ -99,9 +98,8 @@ class WithItemsWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
                 {"task_id": "task1", "result": None, "item_id": 2, "status": statuses.FAILED},
                 {"task_id": "task2", "result": "fum", "item_id": 2},
             ],
-            "expected_output": None,
             "expected_workflow_status": statuses.FAILED,
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()

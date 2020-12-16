@@ -42,8 +42,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "expected_term_tasks": ["task7__r1", "task7__r2"],
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()
 
     def test_splits(self):
         test_spec = {
@@ -75,8 +75,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "expected_term_tasks": ["task8__r1", "task8__r4", "task8__r5"],
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()
 
     def test_nested_splits(self):
         test_spec = {
@@ -120,8 +120,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "expected_term_tasks": ["task10__r3", "task10__r4", "task10__r5", "task10__r6"],
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()
 
     def test_splits_mixed(self):
         test_spec = {
@@ -146,8 +146,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "expected_term_tasks": ["task5__r3", "task5__r4"],
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()
 
     def test_splits_mixed_alt_branch(self):
         test_spec = {
@@ -176,8 +176,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "expected_term_tasks": ["task5__r3", "task5__r4"],
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()
 
     def test_splits_multiple_transition(self):
         test_spec = {
@@ -216,8 +216,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "expected_term_tasks": ["task7__r3", "task7__r4", "task7__r5", "task7__r6"],
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()
 
     def test_very_many_splits(self):
         test_spec = {
@@ -260,8 +260,8 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "expected_term_tasks": ["notify__r1", "notify__r8"],
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()
 
     def test_very_many_splits_alt(self):
         test_spec = {
@@ -337,5 +337,5 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "expected_term_tasks": ["notify__r1", "notify__r9"],
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()

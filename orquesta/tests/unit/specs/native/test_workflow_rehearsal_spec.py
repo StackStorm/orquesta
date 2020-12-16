@@ -31,45 +31,45 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
         self.assertIsNone(ac_ex.result)
         self.assertEqual(ac_ex.iter_pos, -1)
 
-    def test_load_test_case_dict_minimal(self):
-        test_case_spec = {
+    def test_load_test_spec_dict_minimal(self):
+        test_spec = {
             "workflow": self.get_wf_file_path("sequential"),
             "expected_task_sequence": ["task1", "task2", "task3", "continue"],
         }
 
-        test_case = rehearsing.load_test_case(test_case_spec)
+        rehearsal = rehearsing.load_test_spec(test_spec)
 
-        self.assertIsInstance(test_case, rehearsing.WorkflowTestCase)
-        self.assertEqual(test_case.workflow, test_case_spec["workflow"])
+        self.assertIsInstance(rehearsal.session, rehearsing.WorkflowTestCase)
+        self.assertEqual(rehearsal.session.workflow, test_spec["workflow"])
 
         self.assertListEqual(
-            test_case.expected_task_sequence, test_case_spec["expected_task_sequence"]
+            rehearsal.session.expected_task_sequence, test_spec["expected_task_sequence"]
         )
 
-        self.assertTrue(test_case.wf_def.startswith("version"))
-        self.assertDictEqual(test_case.inputs, {})
-        self.assertDictEqual(test_case.expected_inspection_errors, {})
-        self.assertListEqual(test_case.expected_routes, [[]])
-        self.assertListEqual(test_case.mock_action_executions, [])
-        self.assertEqual(test_case.expected_workflow_status, statuses.SUCCEEDED)
-        self.assertIsNone(test_case.expected_term_tasks)
-        self.assertIsNone(test_case.expected_errors)
-        self.assertIsNone(test_case.expected_output)
+        self.assertTrue(rehearsal.session.wf_def.startswith("version"))
+        self.assertDictEqual(rehearsal.session.inputs, {})
+        self.assertDictEqual(rehearsal.session.expected_inspection_errors, {})
+        self.assertListEqual(rehearsal.session.expected_routes, [[]])
+        self.assertListEqual(rehearsal.session.mock_action_executions, [])
+        self.assertEqual(rehearsal.session.expected_workflow_status, statuses.SUCCEEDED)
+        self.assertIsNone(rehearsal.session.expected_term_tasks)
+        self.assertIsNone(rehearsal.session.expected_errors)
+        self.assertIsNone(rehearsal.session.expected_output)
 
-    def test_load_test_case_dict_with_mock_action_executions(self):
-        test_case_spec = {
+    def test_load_test_spec_dict_with_mock_action_executions(self):
+        test_spec = {
             "workflow": self.get_wf_file_path("sequential"),
             "expected_task_sequence": ["task1", "task2", "task3", "continue"],
             "mock_action_executions": [{"task_id": "task1"}, {"task_id": "task2"}],
         }
 
-        test_case = rehearsing.load_test_case(test_case_spec)
+        rehearsal = rehearsing.load_test_spec(test_spec)
 
-        self.assertEqual(len(test_case.mock_action_executions), 2)
-        self.assertEqual(test_case.mock_action_executions[0].task_id, "task1")
-        self.assertEqual(test_case.mock_action_executions[1].task_id, "task2")
+        self.assertEqual(len(rehearsal.session.mock_action_executions), 2)
+        self.assertEqual(rehearsal.session.mock_action_executions[0].task_id, "task1")
+        self.assertEqual(rehearsal.session.mock_action_executions[1].task_id, "task2")
 
-        for ac_ex in test_case.mock_action_executions:
+        for ac_ex in rehearsal.session.mock_action_executions:
             self.assertIsInstance(ac_ex, rehearsing.MockActionExecution)
             self.assertEqual(ac_ex.route, 0)
             self.assertIsNone(ac_ex.seq_id)
@@ -79,8 +79,8 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
             self.assertEqual(ac_ex.status, statuses.SUCCEEDED)
             self.assertIsNone(ac_ex.result)
 
-    def test_load_test_case_dict_with_expected_inspection_errors(self):
-        test_case_spec = {
+    def test_load_test_spec_dict_with_expected_inspection_errors(self):
+        test_spec = {
             "workflow": self.get_wf_file_path("sequential"),
             "expected_task_sequence": ["task1", "task2", "task3", "continue"],
             "expected_inspection_errors": {
@@ -109,25 +109,25 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
             },
         }
 
-        test_case = rehearsing.load_test_case(test_case_spec)
+        rehearsal = rehearsing.load_test_spec(test_spec)
 
-        self.assertEqual(len(test_case.expected_inspection_errors.syntax), 1)
-        syntax_error = test_case.expected_inspection_errors.syntax[0]
+        self.assertEqual(len(rehearsal.session.expected_inspection_errors.syntax), 1)
+        syntax_error = rehearsal.session.expected_inspection_errors.syntax[0]
         self.assertIsNone(syntax_error.type)
         self.assertIsNone(syntax_error.expression)
         self.assertEqual(syntax_error.message, "['foobar'] is not of type 'string'")
         self.assertEqual(syntax_error.spec_path, "tasks.task1.next[0].when")
         self.assertIn("properties.tasks.patternProperties", syntax_error.schema_path)
 
-        self.assertEqual(len(test_case.expected_inspection_errors.context), 1)
-        context_error = test_case.expected_inspection_errors.context[0]
+        self.assertEqual(len(rehearsal.session.expected_inspection_errors.context), 1)
+        context_error = rehearsal.session.expected_inspection_errors.context[0]
         self.assertEqual(context_error.type, "yaql")
         self.assertEqual(context_error.expression, '<% ctx("__xyz") %>')
         self.assertEqual(context_error.schema_path, "properties.output")
         self.assertIn('Variable "__xyz"', context_error.message)
 
-    def test_load_test_case_dict_with_expected_errors(self):
-        test_case_spec = {
+    def test_load_test_spec_dict_with_expected_errors(self):
+        test_spec = {
             "workflow": self.get_wf_file_path("sequential"),
             "expected_task_sequence": ["task1", "task2"],
             "mock_action_executions": [{"task_id": "task2", "status": statuses.FAILED}],
@@ -137,28 +137,30 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
             ],
         }
 
-        test_case = rehearsing.load_test_case(test_case_spec)
+        rehearsal = rehearsing.load_test_spec(test_spec)
 
-        self.assertEqual(len(test_case.mock_action_executions), 1)
-        self.assertEqual(test_case.mock_action_executions[0].task_id, "task2")
+        self.assertEqual(len(rehearsal.session.mock_action_executions), 1)
+        self.assertEqual(rehearsal.session.mock_action_executions[0].task_id, "task2")
 
-        self.assertEqual(len(test_case.expected_errors), 2)
-        self.assertEqual(test_case.expected_errors[0].type, "error")
-        self.assertEqual(test_case.expected_errors[0].message, "Unknown exception at task2.")
-        self.assertIsNone(test_case.expected_errors[0].task_id)
-        self.assertIsNone(test_case.expected_errors[0].route)
-        self.assertIsNone(test_case.expected_errors[0].task_transition_id)
-        self.assertIsNone(test_case.expected_errors[0].result)
-        self.assertIsNone(test_case.expected_errors[0].data)
-        self.assertEqual(test_case.expected_errors[1].type, "error")
-        self.assertEqual(test_case.expected_errors[1].message, "Stuff happens.")
-        self.assertEqual(test_case.expected_errors[1].task_id, "task2")
-        self.assertIsNone(test_case.expected_errors[1].route)
-        self.assertIsNone(test_case.expected_errors[1].task_transition_id)
-        self.assertIsNone(test_case.expected_errors[1].result)
-        self.assertIsNone(test_case.expected_errors[1].data)
+        self.assertEqual(len(rehearsal.session.expected_errors), 2)
+        self.assertEqual(rehearsal.session.expected_errors[0].type, "error")
+        self.assertEqual(
+            rehearsal.session.expected_errors[0].message, "Unknown exception at task2."
+        )
+        self.assertIsNone(rehearsal.session.expected_errors[0].task_id)
+        self.assertIsNone(rehearsal.session.expected_errors[0].route)
+        self.assertIsNone(rehearsal.session.expected_errors[0].task_transition_id)
+        self.assertIsNone(rehearsal.session.expected_errors[0].result)
+        self.assertIsNone(rehearsal.session.expected_errors[0].data)
+        self.assertEqual(rehearsal.session.expected_errors[1].type, "error")
+        self.assertEqual(rehearsal.session.expected_errors[1].message, "Stuff happens.")
+        self.assertEqual(rehearsal.session.expected_errors[1].task_id, "task2")
+        self.assertIsNone(rehearsal.session.expected_errors[1].route)
+        self.assertIsNone(rehearsal.session.expected_errors[1].task_transition_id)
+        self.assertIsNone(rehearsal.session.expected_errors[1].result)
+        self.assertIsNone(rehearsal.session.expected_errors[1].data)
 
-    def test_load_rerun_test_case_dict_minimal(self):
+    def test_load_rerun_test_spec_dict_minimal(self):
         workflow_state = {
             "spec": {
                 "catalog": "native",
@@ -253,29 +255,29 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
             "output": {"greeting": "Stanley"},
         }
 
-        test_case_spec = {
+        test_spec = {
             "workflow_state": workflow_state,
             "rerun_tasks": [{"task_id": "task2"}],
             "expected_task_sequence": ["task1", "task2", "task3", "continue"],
         }
 
-        test_case = rehearsing.load_test_case(test_case_spec)
+        rehearsal = rehearsing.load_test_spec(test_spec)
 
-        self.assertIsInstance(test_case, rehearsing.WorkflowRerunTestCase)
-        self.assertIsInstance(test_case.conductor, conducting.WorkflowConductor)
-        self.assertEqual(len(test_case.rerun_tasks), 1)
-        self.assertEqual(test_case.rerun_tasks[0].task_id, "task2")
-        self.assertEqual(test_case.rerun_tasks[0].route, 0)
-        self.assertEqual(test_case.rerun_tasks[0].reset_items, False)
+        self.assertIsInstance(rehearsal.session, rehearsing.WorkflowRerunTestCase)
+        self.assertIsInstance(rehearsal.session.conductor, conducting.WorkflowConductor)
+        self.assertEqual(len(rehearsal.session.rerun_tasks), 1)
+        self.assertEqual(rehearsal.session.rerun_tasks[0].task_id, "task2")
+        self.assertEqual(rehearsal.session.rerun_tasks[0].route, 0)
+        self.assertEqual(rehearsal.session.rerun_tasks[0].reset_items, False)
 
         self.assertListEqual(
-            test_case.expected_task_sequence, test_case_spec["expected_task_sequence"]
+            rehearsal.session.expected_task_sequence, test_spec["expected_task_sequence"]
         )
 
-        self.assertDictEqual(test_case.expected_inspection_errors, {})
-        self.assertListEqual(test_case.expected_routes, [[]])
-        self.assertListEqual(test_case.mock_action_executions, [])
-        self.assertEqual(test_case.expected_workflow_status, statuses.SUCCEEDED)
-        self.assertIsNone(test_case.expected_term_tasks)
-        self.assertIsNone(test_case.expected_errors)
-        self.assertIsNone(test_case.expected_output)
+        self.assertDictEqual(rehearsal.session.expected_inspection_errors, {})
+        self.assertListEqual(rehearsal.session.expected_routes, [[]])
+        self.assertListEqual(rehearsal.session.mock_action_executions, [])
+        self.assertEqual(rehearsal.session.expected_workflow_status, statuses.SUCCEEDED)
+        self.assertIsNone(rehearsal.session.expected_term_tasks)
+        self.assertIsNone(rehearsal.session.expected_errors)
+        self.assertIsNone(rehearsal.session.expected_output)

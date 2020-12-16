@@ -30,8 +30,8 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "expected_output": {"greeting": "Stanley, All your base are belong to us!"},
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()
 
     def test_parallel(self):
         test_spec = {
@@ -39,8 +39,8 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "expected_task_sequence": ["task1", "task4", "task2", "task5", "task3", "task6"],
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()
 
     def test_branching(self):
         test_spec = {
@@ -48,8 +48,8 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "expected_task_sequence": ["task1", "task2", "task4", "task3", "task5"],
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()
 
     def test_decision_tree(self):
         # Test branch "a"
@@ -59,8 +59,8 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "expected_task_sequence": ["t1", "a"],
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()
 
         # Test branch "b"
         test_spec = {
@@ -69,8 +69,8 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "expected_task_sequence": ["t1", "b"],
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()
 
         # Test branch "c"
         test_spec = {
@@ -79,5 +79,5 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
             "expected_task_sequence": ["t1", "c"],
         }
 
-        test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsal = rehearsing.load_test_spec(test_spec)
+        rehearsal.assert_conducting_sequences()

@@ -28,7 +28,7 @@ from orquesta.specs import types as spec_types
 from orquesta import statuses
 
 
-def load_test_case(fixture):
+def load_test_spec(fixture):
     if not fixture:
         raise ValueError("Workflow test case is empty.")
 
@@ -38,9 +38,13 @@ def load_test_case(fixture):
     if not isinstance(fixture, dict):
         raise ValueError("Unable to convert workflow test case into dict.")
 
-    return (
+    test_spec = (
         WorkflowRerunTestCase(fixture) if "workflow_state" in fixture else WorkflowTestCase(fixture)
     )
+
+    test_spec.inspect(raise_exception=True)
+
+    return WorkflowRehearsal(test_spec)
 
 
 class MockInspectionError(native_v1_specs.Spec):
@@ -109,10 +113,10 @@ class MockActionExecution(native_v1_specs.Spec):
             "iter_id": {"type": "integer", "minimum": 0, "default": 0},
             "num_iter": {"type": "integer", "minimum": 0, "default": 1},
             "status": spec_types.WORKFLOW_STATUSES,
-            "result": spec_types.ANY,
+            "result": spec_types.ANY_NULLABLE,
         },
         "additionalProperties": False,
-        "required": ["task_id", "status"],
+        "required": ["task_id"],
     }
 
     def __init__(self, *args, **kwargs):
@@ -201,7 +205,7 @@ class WorkflowRerunTestCase(native_v1_specs.Spec, WorkflowTestCaseMixin):
             "expected_errors": MockWorkflowErrorSequenceSpec,
             "expected_output": {"type": "object"},
         },
-        "required": ["workflow", "expected_task_sequence"],
+        "required": ["workflow_state", "expected_task_sequence"],
         "additionalProperties": False,
     }
 
