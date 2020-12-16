@@ -68,7 +68,7 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
                 ["task1__t0"],  # task1 -> task2 (when #1)
                 ["task1__t2"],  # task1 -> task2 (when #3)
             ],
-            "expected_task_sequence": [("task1", 0), ("task2", 1), ("task2", 2)],
+            "expected_task_sequence": ["task1__r0", "task2__r1", "task2__r2"],
             "expected_term_tasks": [("task2", 1), ("task2", 2)],
         }
 
@@ -83,7 +83,7 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
                 ["task1__t0"],  # task1 -> task2 (when #1)
                 ["task1__t1"],  # task1 -> task2 (when #2)
             ],
-            "expected_task_sequence": [("task1", 0), ("task2", 1), ("task2", 2)],
+            "expected_task_sequence": ["task1__r0", "task2__r1", "task2__r2"],
             "mock_action_executions": [{"task_id": "task1", "status": statuses.FAILED}],
             "expected_term_tasks": [("task2", 1), ("task2", 2)],
         }

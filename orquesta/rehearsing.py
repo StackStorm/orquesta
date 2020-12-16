@@ -18,6 +18,7 @@ import yaml
 from six.moves import queue
 
 from orquesta import conducting
+from orquesta import constants
 from orquesta import events
 from orquesta import exceptions as exc
 from orquesta import requests
@@ -155,7 +156,7 @@ class WorkflowTestCase(native_v1_specs.Spec, WorkflowTestCaseMixin):
             "inputs": {"type": "object", "default": {}},
             "expected_inspection_errors": MockInspectionErrors,
             "expected_routes": {"type": "array", "items": {"type": "array"}, "default": [[]]},
-            "expected_task_sequence": {"type": "array"},
+            "expected_task_sequence": {"type": "array", "items": spec_types.NONEMPTY_STRING},
             "mock_action_executions": MockActionExecutionSequenceSpec,
             "expected_term_tasks": {"type": "array", "items": spec_types.NONEMPTY_STRING},
             "expected_workflow_status": spec_types.WORKFLOW_STATUSES,
@@ -193,7 +194,7 @@ class WorkflowRerunTestCase(native_v1_specs.Spec, WorkflowTestCaseMixin):
             "rerun_tasks": requests.TaskRerunRequestSequenceSpec,
             "expected_inspection_errors": MockInspectionErrors,
             "expected_routes": {"type": "array", "items": {"type": "array"}, "default": [[]]},
-            "expected_task_sequence": {"type": "array"},
+            "expected_task_sequence": {"type": "array", "items": spec_types.NONEMPTY_STRING},
             "mock_action_executions": MockActionExecutionSequenceSpec,
             "expected_term_tasks": {"type": "array", "items": spec_types.NONEMPTY_STRING},
             "expected_workflow_status": spec_types.WORKFLOW_STATUSES,
@@ -360,12 +361,13 @@ class WorkflowRehearsal(unittest.TestCase):
             wf_conducting_state = self.conductor.serialize()
 
         actual_task_seq = [
-            (entry["id"], entry["route"]) for entry in self.conductor.workflow_state.sequence
+            constants.TASK_STATE_ROUTE_FORMAT % (entry["id"], str(entry["route"]))
+            for entry in self.conductor.workflow_state.sequence
         ]
 
         expected_task_seq = [
-            task_seq if isinstance(task_seq, tuple) else (task_seq, 0)
-            for task_seq in self.session.expected_task_sequence
+            task_id if "__r" in task_id else constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(0))
+            for task_id in self.session.expected_task_sequence
         ]
 
         self.assertListEqual(actual_task_seq, expected_task_seq)

@@ -52,7 +52,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
     def test_error_continue_success_path(self):
         test_spec = {
             "workflow": self.get_wf_file_path("error-handling-continue"),
-            "expected_task_sequence": ["task1", "task2", ("continue", 1)],
+            "expected_task_sequence": ["task1", "task2", "continue__r1"],
             "expected_routes": [
                 [],  # default from start
                 ["task2__t0"],  # task1 -> task2 -> continue
@@ -66,7 +66,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
     def test_error_continue_failure_path(self):
         test_spec = {
             "workflow": self.get_wf_file_path("error-handling-continue"),
-            "expected_task_sequence": ["task1", ("continue", 1)],
+            "expected_task_sequence": ["task1", "continue__r1"],
             "expected_routes": [
                 [],  # default from start
                 ["task1__t0"],  # task1 -> continue
