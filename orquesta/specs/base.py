@@ -62,6 +62,18 @@ class Spec(object):
     # Put the name of the spec properties that are inputs for the context.
     _context_inputs = []
 
+    def getattr_default(self, name, meta=False):
+        properties = (
+            self._meta_schema.get("properties", {}) if meta else self._schema.get("properties", {})
+        )
+
+        attr = properties.get(name, {})
+
+        if inspect.isclass(attr) and issubclass(attr, Spec):
+            return attr._schema.get("default", None)
+
+        return attr.get("default", None)
+
     # Override __getattr__ so we can dynamically map class attributes to spec properties.
     # Per documentation, __getattr__ is called by __getattribute__ on AttributeError. In
     # this case, the attribute does not physically exist on the class and so __getattr__
@@ -69,17 +81,17 @@ class Spec(object):
     def __getattr__(self, name):
         # Retrieve from spec if attribute is a meta schema property.
         if name in self._meta_schema.get("properties", {}):
-            return self.spec.get(name)
+            return self.spec.get(name, self.getattr_default(name, meta=True))
 
         if name.replace("_", "-") in self._meta_schema.get("properties", {}):
-            return self.spec.get(name.replace("_", "-"))
+            return self.spec.get(name.replace("_", "-"), self.getattr_default(name, meta=True))
 
         # Retrieve from spec if attribute is a schema property.
         if name in self._schema.get("properties", {}):
-            return self.spec.get(name)
+            return self.spec.get(name, self.getattr_default(name))
 
         if name.replace("_", "-") in self._schema.get("properties", {}):
-            return self.spec.get(name.replace("_", "-"))
+            return self.spec.get(name.replace("_", "-"), self.getattr_default(name))
 
         # Retrieve from spec if attribute match a regex pattern in the schema.
         for pattern in self._schema.get("patternProperties", {}).keys():

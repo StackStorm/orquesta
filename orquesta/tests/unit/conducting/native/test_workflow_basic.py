@@ -18,72 +18,66 @@ from orquesta.tests.unit.conducting.native import base
 
 class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
     def test_sequential(self):
-        wf_name = "sequential"
+        test_spec = {
+            "workflow": self.get_wf_file_path("sequential"),
+            "inputs": {"name": "Stanley"},
+            "expected_task_sequence": ["task1", "task2", "task3", "continue"],
+            "mock_action_executions": [
+                {"task_id": "task1", "result": "Stanley"},
+                {"task_id": "task2", "result": "All your base are belong to us!"},
+                {"task_id": "task3", "result": "Stanley, All your base are belong to us!"},
+            ],
+            "expected_output": {"greeting": "Stanley, All your base are belong to us!"},
+        }
 
-        expected_task_seq = ["task1", "task2", "task3", "continue"]
-
-        mock_action_executions = [
-            rehearsing.MockActionExecution("task1", result="Stanley"),
-            rehearsing.MockActionExecution("task2", result="All your base are belong to us!"),
-            rehearsing.MockActionExecution(
-                "task3", result="Stanley, All your base are belong to us!"
-            ),
-        ]
-
-        expected_output = {"greeting": mock_action_executions[2].result}
-
-        test = rehearsing.WorkflowTestCase(
-            self.get_wf_def(wf_name),
-            expected_task_seq,
-            inputs={"name": "Stanley"},
-            mock_action_executions=mock_action_executions,
-            expected_output=expected_output,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_parallel(self):
-        wf_name = "parallel"
+        test_spec = {
+            "workflow": self.get_wf_file_path("parallel"),
+            "expected_task_sequence": ["task1", "task4", "task2", "task5", "task3", "task6"],
+        }
 
-        expected_task_seq = ["task1", "task4", "task2", "task5", "task3", "task6"]
-
-        test = rehearsing.WorkflowTestCase(
-            self.get_wf_def(wf_name),
-            expected_task_seq,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_branching(self):
-        wf_name = "branching"
+        test_spec = {
+            "workflow": self.get_wf_file_path("branching"),
+            "expected_task_sequence": ["task1", "task2", "task4", "task3", "task5"],
+        }
 
-        expected_task_seq = ["task1", "task2", "task4", "task3", "task5"]
-
-        test = rehearsing.WorkflowTestCase(
-            self.get_wf_def(wf_name),
-            expected_task_seq,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_decision_tree(self):
-        wf_name = "decision"
-        wf_spec = self.get_wf_def(wf_name)
-
         # Test branch "a"
-        expected_task_seq = ["t1", "a"]
-        inputs = {"which": "a"}
-        test = rehearsing.WorkflowTestCase(wf_spec, expected_task_seq, inputs=inputs)
+        test_spec = {
+            "workflow": self.get_wf_file_path("decision"),
+            "inputs": {"which": "a"},
+            "expected_task_sequence": ["t1", "a"],
+        }
+
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
         # Test branch "b"
-        expected_task_seq = ["t1", "b"]
-        inputs = {"which": "b"}
-        test = rehearsing.WorkflowTestCase(wf_spec, expected_task_seq, inputs=inputs)
+        test_spec = {
+            "workflow": self.get_wf_file_path("decision"),
+            "inputs": {"which": "b"},
+            "expected_task_sequence": ["t1", "b"],
+        }
+
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
         # Test branch "c"
-        expected_task_seq = ["t1", "c"]
-        inputs = {"which": "c"}
-        test = rehearsing.WorkflowTestCase(wf_spec, expected_task_seq, inputs=inputs)
+        test_spec = {
+            "workflow": self.get_wf_file_path("decision"),
+            "inputs": {"which": "c"},
+            "expected_task_sequence": ["t1", "c"],
+        }
+
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()

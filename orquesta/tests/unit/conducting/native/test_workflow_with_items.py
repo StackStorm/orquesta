@@ -19,251 +19,89 @@ from orquesta.tests.unit.conducting.native import base
 
 class WithItemsWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
     def test_basic_items_list(self):
-        wf_def = """
-        version: 1.0
-        vars:
-          - xs:
-              - fee
-              - fi
-              - fo
-              - fum
-        tasks:
-          task1:
-            with: <% ctx(xs) %>
-            action: core.echo message=<% item() %>
-            next:
-              - when: <% succeeded() %>
-                publish: items=<% result() %>
-                do: task2
-          task2:
-            action: core.noop
-        output:
-          - items: <% ctx(items) %>
-        """
+        test_spec = {
+            "workflow": self.get_wf_file_path("with-items-transition"),
+            "expected_task_sequence": ["task1", "task2"],
+            "mock_action_executions": [
+                {"task_id": "task1", "result": "fee", "item_id": 0},
+                {"task_id": "task1", "result": "fi", "item_id": 1},
+                {"task_id": "task1", "result": "fo", "item_id": 2},
+                {"task_id": "task1", "result": "fum", "item_id": 3},
+            ],
+            "expected_output": {"items": ["fee", "fi", "fo", "fum"]},
+        }
 
-        expected_task_seq = ["task1", "task2"]
-
-        mock_action_executions = [
-            rehearsing.MockActionExecution("task1", result="fee", item_id=0),
-            rehearsing.MockActionExecution("task1", result="fi", item_id=1),
-            rehearsing.MockActionExecution("task1", result="fo", item_id=2),
-            rehearsing.MockActionExecution("task1", result="fum", item_id=3),
-        ]
-
-        expected_output = {"items": ["fee", "fi", "fo", "fum"]}
-
-        test = rehearsing.WorkflowTestCase(
-            wf_def,
-            expected_task_seq,
-            mock_action_executions=mock_action_executions,
-            expected_output=expected_output,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_items_list_with_error(self):
-        wf_def = """
-        version: 1.0
-        vars:
-          - xs:
-              - fee
-              - fi
-              - fo
-              - fum
-        tasks:
-          task1:
-            with: <% ctx(xs) %>
-            action: core.echo message=<% item() %>
-            next:
-              - when: <% succeeded() %>
-                publish: items=<% result() %>
-                do: task2
-          task2:
-            action: core.noop
-        output:
-          - items: <% ctx(items) %>
-        """
+        test_spec = {
+            "workflow": self.get_wf_file_path("with-items-transition"),
+            "expected_task_sequence": ["task1"],
+            "mock_action_executions": [
+                {"task_id": "task1", "result": "fee", "item_id": 0},
+                {"task_id": "task1", "result": "fi", "item_id": 1},
+                {"task_id": "task1", "result": "fo", "item_id": 2, "status": statuses.FAILED},
+            ],
+            "expected_workflow_status": statuses.FAILED,
+            "expected_output": None,
+        }
 
-        expected_task_seq = ["task1"]
-
-        mock_action_executions = [
-            rehearsing.MockActionExecution("task1", result="fee", item_id=0),
-            rehearsing.MockActionExecution("task1", result="fi", item_id=1),
-            rehearsing.MockActionExecution("task1", result="fo", item_id=2, status=statuses.FAILED),
-        ]
-
-        expected_output = None
-
-        test = rehearsing.WorkflowTestCase(
-            wf_def,
-            expected_task_seq,
-            mock_action_executions=mock_action_executions,
-            expected_workflow_status=statuses.FAILED,
-            expected_output=expected_output,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_items_list_with_error_and_remediation(self):
-        wf_def = """
-        version: 1.0
-        vars:
-          - xs:
-              - fee
-              - fi
-              - fo
-              - fum
-        tasks:
-          task1:
-            with: <% ctx(xs) %>
-            action: core.echo message=<% item() %>
-            next:
-              - when: <% failed() %>
-                publish: items=<% result() %>
-                do: task2
-          task2:
-            action: core.noop
-        output:
-          - items: <% ctx(items) %>
-        """
+        test_spec = {
+            "workflow": self.get_wf_file_path("with-items-remediate"),
+            "expected_task_sequence": ["task1", "task2"],
+            "mock_action_executions": [
+                {"task_id": "task1", "result": "fee", "item_id": 0},
+                {"task_id": "task1", "result": "fi", "item_id": 1},
+                {"task_id": "task1", "result": None, "item_id": 2, "status": statuses.FAILED},
+            ],
+            "expected_output": {"items": ["fee", "fi", None]},
+        }
 
-        expected_task_seq = ["task1", "task2"]
-
-        mock_action_executions = [
-            rehearsing.MockActionExecution("task1", result="fee", item_id=0),
-            rehearsing.MockActionExecution("task1", result="fi", item_id=1),
-            rehearsing.MockActionExecution("task1", result=None, item_id=2, status=statuses.FAILED),
-        ]
-
-        expected_output = {"items": ["fee", "fi", None]}
-
-        test = rehearsing.WorkflowTestCase(
-            wf_def,
-            expected_task_seq,
-            mock_action_executions=mock_action_executions,
-            expected_workflow_status=statuses.SUCCEEDED,
-            expected_output=expected_output,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_parallel_items_tasks(self):
-        wf_def = """
-        version: 1.0
-        vars:
-          - xs:
-              - fee
-              - fi
-              - fo
-              - fum
-          - ys:
-              - fie
-              - foh
-              - fum
-        tasks:
-          task1:
-            with: <% ctx(xs) %>
-            action: core.echo message=<% item() %>
-            next:
-              - when: <% succeeded() %>
-                publish: t1_items=<% result() %>
-                do: task3
-          task2:
-            with: <% ctx(ys) %>
-            action: core.echo message=<% item() %>
-            next:
-              - when: <% succeeded() %>
-                publish: t2_items=<% result() %>
-                do: task3
-          task3:
-            join: all
-            action: core.noop
-        output:
-          - t1_items: <% ctx(t1_items) %>
-          - t2_items: <% ctx(t2_items) %>
-        """
-
-        expected_task_seq = ["task1", "task2", "task3"]
-
-        mock_action_executions = [
-            rehearsing.MockActionExecution("task1", result="fee", item_id=0),
-            rehearsing.MockActionExecution("task2", result="fie", item_id=0),
-            rehearsing.MockActionExecution("task1", result="fi", item_id=1),
-            rehearsing.MockActionExecution("task2", result="foh", item_id=1),
-            rehearsing.MockActionExecution("task1", result="fo", item_id=2),
-            rehearsing.MockActionExecution("task2", result="fum", item_id=2),
-            rehearsing.MockActionExecution("task1", result="fum", item_id=3),
-        ]
-
-        expected_output = {
-            "t1_items": ["fee", "fi", "fo", "fum"],
-            "t2_items": ["fie", "foh", "fum"],
+        test_spec = {
+            "workflow": self.get_wf_file_path("with-items-parallel"),
+            "expected_task_sequence": ["task1", "task2", "task3"],
+            "mock_action_executions": [
+                {"task_id": "task1", "result": "fee", "item_id": 0},
+                {"task_id": "task2", "result": "fie", "item_id": 0},
+                {"task_id": "task1", "result": "fi", "item_id": 1},
+                {"task_id": "task2", "result": "foh", "item_id": 1},
+                {"task_id": "task1", "result": "fo", "item_id": 2},
+                {"task_id": "task2", "result": "fum", "item_id": 2},
+                {"task_id": "task1", "result": "fum", "item_id": 3},
+            ],
+            "expected_output": {
+                "t1_items": ["fee", "fi", "fo", "fum"],
+                "t2_items": ["fie", "foh", "fum"],
+            },
         }
 
-        test = rehearsing.WorkflowTestCase(
-            wf_def,
-            expected_task_seq,
-            mock_action_executions=mock_action_executions,
-            expected_output=expected_output,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_parallel_items_tasks_with_error(self):
-        wf_def = """
-        version: 1.0
-        vars:
-          - xs:
-              - fee
-              - fi
-              - fo
-              - fum
-          - ys:
-              - fie
-              - foh
-              - fum
-        tasks:
-          task1:
-            with: <% ctx(xs) %>
-            action: core.echo message=<% item() %>
-            next:
-              - when: <% succeeded() %>
-                publish: t1_items=<% result() %>
-                do: task3
-          task2:
-            with: <% ctx(ys) %>
-            action: core.echo message=<% item() %>
-            next:
-              - when: <% succeeded() %>
-                publish: t2_items=<% result() %>
-                do: task3
-          task3:
-            join: all
-            action: core.noop
-        output:
-          - t1_items: <% ctx(t1_items) %>
-          - t2_items: <% ctx(t2_items) %>
-        """
+        test_spec = {
+            "workflow": self.get_wf_file_path("with-items-parallel"),
+            "expected_task_sequence": ["task1", "task2"],
+            "mock_action_executions": [
+                {"task_id": "task1", "result": "fee", "item_id": 0},
+                {"task_id": "task2", "result": "fie", "item_id": 0},
+                {"task_id": "task1", "result": "fi", "item_id": 1},
+                {"task_id": "task2", "result": "foh", "item_id": 1},
+                {"task_id": "task1", "result": None, "item_id": 2, "status": statuses.FAILED},
+                {"task_id": "task2", "result": "fum", "item_id": 2},
+            ],
+            "expected_output": None,
+            "expected_workflow_status": statuses.FAILED,
+        }
 
-        expected_task_seq = ["task1", "task2"]
-
-        mock_action_executions = [
-            rehearsing.MockActionExecution("task1", result="fee", item_id=0),
-            rehearsing.MockActionExecution("task2", result="fie", item_id=0),
-            rehearsing.MockActionExecution("task1", result="fi", item_id=1),
-            rehearsing.MockActionExecution("task2", result="foh", item_id=1),
-            rehearsing.MockActionExecution("task1", result=None, item_id=2, status=statuses.FAILED),
-            rehearsing.MockActionExecution("task2", result="fum", item_id=2),
-        ]
-
-        expected_output = None
-
-        test = rehearsing.WorkflowTestCase(
-            wf_def,
-            expected_task_seq,
-            mock_action_executions=mock_action_executions,
-            expected_workflow_status=statuses.FAILED,
-            expected_output=expected_output,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()

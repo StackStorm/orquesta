@@ -1,0 +1,19 @@
+version: 1.0
+vars:
+  - xs:
+      - fee
+      - fi
+      - fo
+      - fum
+tasks:
+  task1:
+    with: <% ctx(xs) %>
+    action: core.echo message=<% item() %>
+    next:
+      - when: <% succeeded() %>
+        publish: items=<% result() %>
+        do: task2
+  task2:
+    action: core.noop
+output:
+  - items: <% ctx(items) %>

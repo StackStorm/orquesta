@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from orquesta import statuses
+
+
 NONEMPTY_STRING = {"type": "string", "minLength": 1}
 
 UNIQUE_STRING_LIST = {"type": "array", "items": NONEMPTY_STRING, "uniqueItems": True, "minItems": 1}
@@ -79,3 +82,5 @@ UNIQUE_ONE_KEY_DICT_LIST = {
     "uniqueItems": True,
     "minItems": 1,
 }
+
+WORKFLOW_STATUSES = {"type": "string", "enum": statuses.ALL_STATUSES}

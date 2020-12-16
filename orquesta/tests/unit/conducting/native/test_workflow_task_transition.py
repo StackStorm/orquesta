@@ -19,120 +19,74 @@ from orquesta.tests.unit.conducting.native import base
 
 class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
     def test_no_error(self):
-        wf_name = "error-handling"
+        test_spec = {
+            "workflow": self.get_wf_file_path("error-handling"),
+            "expected_task_sequence": ["task1", "task2"],
+            "expected_term_tasks": ["task2"],
+        }
 
-        expected_task_seq = ["task1", "task2"]
-
-        expected_term_tasks = ["task2"]
-
-        test = rehearsing.WorkflowTestCase(
-            self.get_wf_def(wf_name),
-            expected_task_seq,
-            expected_term_tasks=expected_term_tasks,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_on_error(self):
-        wf_name = "error-handling"
+        test_spec = {
+            "workflow": self.get_wf_file_path("error-handling"),
+            "expected_task_sequence": ["task1", "task3"],
+            "mock_action_executions": [{"task_id": "task1", "status": statuses.FAILED}],
+            "expected_term_tasks": ["task3"],
+        }
 
-        expected_task_seq = ["task1", "task3"]
-
-        mock_action_executions = [
-            rehearsing.MockActionExecution("task1", status=statuses.FAILED),
-        ]
-
-        expected_term_tasks = ["task3"]
-
-        test = rehearsing.WorkflowTestCase(
-            self.get_wf_def(wf_name),
-            expected_task_seq,
-            mock_action_executions=mock_action_executions,
-            expected_term_tasks=expected_term_tasks,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_on_complete_from_succeeded_branch(self):
-        wf_name = "task-on-complete"
+        test_spec = {
+            "workflow": self.get_wf_file_path("task-on-complete"),
+            "expected_task_sequence": ["task1", "task2", "task4"],
+            "expected_term_tasks": ["task2", "task4"],
+        }
 
-        expected_task_seq = ["task1", "task2", "task4"]
-
-        expected_term_tasks = ["task2", "task4"]
-
-        test = rehearsing.WorkflowTestCase(
-            self.get_wf_def(wf_name),
-            expected_task_seq,
-            expected_term_tasks=expected_term_tasks,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_on_complete_from_failed_branch(self):
-        wf_name = "task-on-complete"
+        test_spec = {
+            "workflow": self.get_wf_file_path("task-on-complete"),
+            "expected_task_sequence": ["task1", "task3", "task4"],
+            "mock_action_executions": [{"task_id": "task1", "status": statuses.FAILED}],
+            "expected_term_tasks": ["task3", "task4"],
+        }
 
-        expected_task_seq = ["task1", "task3", "task4"]
-
-        mock_action_executions = [
-            rehearsing.MockActionExecution("task1", status=statuses.FAILED),
-        ]
-
-        expected_term_tasks = ["task3", "task4"]
-
-        test = rehearsing.WorkflowTestCase(
-            self.get_wf_def(wf_name),
-            expected_task_seq,
-            mock_action_executions=mock_action_executions,
-            expected_term_tasks=expected_term_tasks,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_task_transitions_split_from_succeeded_branch(self):
-        wf_name = "task-transitions-split"
+        test_spec = {
+            "workflow": self.get_wf_file_path("task-transitions-split"),
+            "expected_routes": [
+                [],  # default from start
+                ["task1__t0"],  # task1 -> task2 (when #1)
+                ["task1__t2"],  # task1 -> task2 (when #3)
+            ],
+            "expected_task_sequence": [("task1", 0), ("task2", 1), ("task2", 2)],
+            "expected_term_tasks": [("task2", 1), ("task2", 2)],
+        }
 
-        expected_routes = [
-            [],  # default from start
-            ["task1__t0"],  # task1 -> task2 (when #1)
-            ["task1__t2"],  # task1 -> task2 (when #3)
-        ]
-
-        expected_task_seq = [("task1", 0), ("task2", 1), ("task2", 2)]
-
-        expected_term_tasks = [("task2", 1), ("task2", 2)]
-
-        test = rehearsing.WorkflowTestCase(
-            self.get_wf_def(wf_name),
-            expected_task_seq,
-            expected_routes=expected_routes,
-            expected_term_tasks=expected_term_tasks,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_task_transitions_split_from_failed_branch(self):
-        wf_name = "task-transitions-split"
+        test_spec = {
+            "workflow": self.get_wf_file_path("task-transitions-split"),
+            "expected_routes": [
+                [],  # default from start
+                ["task1__t0"],  # task1 -> task2 (when #1)
+                ["task1__t1"],  # task1 -> task2 (when #2)
+            ],
+            "expected_task_sequence": [("task1", 0), ("task2", 1), ("task2", 2)],
+            "mock_action_executions": [{"task_id": "task1", "status": statuses.FAILED}],
+            "expected_term_tasks": [("task2", 1), ("task2", 2)],
+        }
 
-        expected_routes = [
-            [],  # default from start
-            ["task1__t0"],  # task1 -> task2 (when #1)
-            ["task1__t1"],  # task1 -> task2 (when #2)
-        ]
-
-        expected_task_seq = [("task1", 0), ("task2", 1), ("task2", 2)]
-
-        mock_action_executions = [
-            rehearsing.MockActionExecution("task1", status=statuses.FAILED),
-        ]
-
-        expected_term_tasks = [("task2", 1), ("task2", 2)]
-
-        test = rehearsing.WorkflowTestCase(
-            self.get_wf_def(wf_name),
-            expected_task_seq,
-            mock_action_executions=mock_action_executions,
-            expected_routes=expected_routes,
-            expected_term_tasks=expected_term_tasks,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()

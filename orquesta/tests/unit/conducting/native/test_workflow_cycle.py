@@ -19,132 +19,111 @@ from orquesta.tests.unit.conducting.native import base
 
 class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
     def test_cycle(self):
-        wf_name = "cycle"
+        test_spec = {
+            "workflow": self.get_wf_file_path("cycle"),
+            "expected_task_sequence": [
+                "prep",
+                "task1",
+                "task2",
+                "task3",
+                "task1",
+                "task2",
+                "task3",
+                "task1",
+                "task2",
+                "task3",
+            ],
+        }
 
-        expected_task_seq = [
-            "prep",
-            "task1",
-            "task2",
-            "task3",
-            "task1",
-            "task2",
-            "task3",
-            "task1",
-            "task2",
-            "task3",
-        ]
-
-        test = rehearsing.WorkflowTestCase(
-            self.get_wf_def(wf_name),
-            expected_task_seq,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_cycles(self):
-        wf_name = "cycles"
+        test_spec = {
+            "workflow": self.get_wf_file_path("cycles"),
+            "expected_task_sequence": [
+                "prep",
+                "task1",
+                "task2",
+                "task3",
+                "task4",
+                "task2",
+                "task5",
+                "task1",
+                "task2",
+                "task3",
+                "task4",
+                "task2",
+                "task5",
+                "task1",
+                "task2",
+                "task3",
+                "task4",
+                "task2",
+                "task5",
+            ],
+        }
 
-        expected_task_seq = [
-            "prep",
-            "task1",
-            "task2",
-            "task3",
-            "task4",
-            "task2",
-            "task5",
-            "task1",
-            "task2",
-            "task3",
-            "task4",
-            "task2",
-            "task5",
-            "task1",
-            "task2",
-            "task3",
-            "task4",
-            "task2",
-            "task5",
-        ]
-
-        test = rehearsing.WorkflowTestCase(
-            self.get_wf_def(wf_name),
-            expected_task_seq,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_cycle_retry(self):
-        wf_name = "cycle-retry"
+        test_spec = {
+            "workflow": self.get_wf_file_path("cycle-retry"),
+            "expected_task_sequence": [
+                "init",
+                "task1",
+                "task1",
+                "task1",
+                "task2",
+            ],
+            "mock_action_executions": [
+                {"task_id": "task1", "num_iter": 2, "status": statuses.FAILED},
+            ],
+        }
 
-        expected_task_seq = [
-            "init",
-            "task1",
-            "task1",
-            "task1",
-            "task2",
-        ]
-
-        mock_action_executions = [
-            rehearsing.MockActionExecution("task1", num_iter=2, status=statuses.FAILED),
-        ]
-
-        test = rehearsing.WorkflowTestCase(
-            self.get_wf_def(wf_name),
-            expected_task_seq,
-            mock_action_executions=mock_action_executions,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_rollback_retry(self):
-        wf_name = "rollback-retry"
+        test_spec = {
+            "workflow": self.get_wf_file_path("rollback-retry"),
+            "expected_task_sequence": [
+                "init",
+                "check",
+                "create",
+                "rollback",
+                "check",
+                "delete",
+            ],
+            "mock_action_executions": [
+                {"task_id": "check", "status": statuses.FAILED},
+            ],
+        }
 
-        expected_task_seq = [
-            "init",
-            "check",
-            "create",
-            "rollback",
-            "check",
-            "delete",
-        ]
-
-        mock_action_executions = [
-            rehearsing.MockActionExecution("check", status=statuses.FAILED),
-        ]
-
-        test = rehearsing.WorkflowTestCase(
-            self.get_wf_def(wf_name),
-            expected_task_seq,
-            mock_action_executions=mock_action_executions,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
 
     def test_cycle_and_fork(self):
-        wf_name = "cycle-fork"
+        test_spec = {
+            "workflow": self.get_wf_file_path("cycle-fork"),
+            "expected_task_sequence": [
+                "init",
+                "query",
+                "decide_cheer",
+                "decide_work",
+                "cheer",
+                "notify_work",
+                "toil",
+                "query",
+                "decide_cheer",
+                "decide_work",
+            ],
+            "mock_action_executions": [
+                {"task_id": "query", "seq_id": 1, "result": True},
+                {"task_id": "query", "seq_id": 7, "result": False},
+            ],
+        }
 
-        expected_task_seq = [
-            "init",
-            "query",
-            "decide_cheer",
-            "decide_work",
-            "cheer",
-            "notify_work",
-            "toil",
-            "query",
-            "decide_cheer",
-            "decide_work",
-        ]
-
-        mock_action_executions = [
-            rehearsing.MockActionExecution("query", seq_id=1, result=True),
-            rehearsing.MockActionExecution("query", seq_id=7, result=False),
-        ]
-
-        test = rehearsing.WorkflowTestCase(
-            self.get_wf_def(wf_name),
-            expected_task_seq,
-            mock_action_executions=mock_action_executions,
-        )
-
+        test = rehearsing.WorkflowTestCase(test_spec)
         rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()

@@ -14,6 +14,7 @@
 
 import abc
 import copy
+import os
 import six
 import unittest
 
@@ -79,6 +80,12 @@ class WorkflowSpecTest(unittest.TestCase):
 
     def get_fixture_path(self, wf_name):
         return self.spec_module_name + "/" + wf_name + ".yaml"
+
+    def get_wf_file_path(self, wf_name):
+        return os.path.join(
+            fixture_loader.get_workflow_fixtures_base_path(),
+            self.get_fixture_path(wf_name),
+        )
 
     def get_wf_def(self, wf_name, raw=False):
         return fixture_loader.get_fixture_content(

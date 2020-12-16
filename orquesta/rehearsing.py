@@ -10,46 +10,121 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from six.moves import queue
+import os
+import six
 import unittest
+import yaml
+
+from six.moves import queue
 
 from orquesta import conducting
 from orquesta import events
 from orquesta import exceptions as exc
+from orquesta import requests
 from orquesta.specs import loader as spec_loader
+from orquesta.specs.native.v1 import base as native_v1_specs
+from orquesta.specs import types as spec_types
 from orquesta import statuses
 
 
-class MockActionExecution(object):
-    def __init__(
-        self,
-        task_id,
-        status=statuses.SUCCEEDED,
-        result=None,
-        item_id=None,
-        seq_id=None,
-        num_iter=1,
-        iter_idx=0,
-    ):
-        self.task_id = task_id
-        self.status = status
-        self.result = result
-        self.item_id = item_id
-        self.seq_id = seq_id
-        self.num_iter = num_iter
-        self.iter_idx = iter_idx
-        self.iter_pos = iter_idx - 1
+def load_test_case(fixture):
+    if not fixture:
+        raise ValueError("Workflow test case is empty.")
 
-        if self.iter_idx < 0:
-            raise exc.WorkflowRehearsalError(
-                "The zero based value of iter_idx for MockActionExecution "
-                "must be greater than or equal to zero."
-            )
+    if isinstance(fixture, six.string_types):
+        fixture = yaml.safe_load(fixture)
 
-        if self.num_iter < 1:
-            raise exc.WorkflowRehearsalError(
-                "The value of num_iter for MockActionExecution must be greater than zero."
-            )
+    if not isinstance(fixture, dict):
+        raise ValueError("Unable to convert workflow test case into dict.")
+
+    return (
+        WorkflowRerunTestCase(fixture) if "workflow_state" in fixture else WorkflowTestCase(fixture)
+    )
+
+
+class MockInspectionError(native_v1_specs.Spec):
+    _schema = {
+        "type": "object",
+        "properties": {
+            "type": spec_types.NONEMPTY_STRING,
+            "expression": spec_types.NONEMPTY_STRING,
+            "message": spec_types.NONEMPTY_STRING,
+            "schema_path": spec_types.NONEMPTY_STRING,
+            "spec_path": spec_types.NONEMPTY_STRING,
+        },
+        "additionalProperties": False,
+        "required": ["message"],
+    }
+
+
+class MockInspectionErrorSequenceSpec(native_v1_specs.SequenceSpec):
+    _schema = {"type": "array", "items": MockInspectionError}
+
+
+class MockInspectionErrors(native_v1_specs.Spec):
+    _schema = {
+        "type": "object",
+        "properties": {
+            "syntax": MockInspectionErrorSequenceSpec,
+            "semantics": MockInspectionErrorSequenceSpec,
+            "expressions": MockInspectionErrorSequenceSpec,
+            "context": MockInspectionErrorSequenceSpec,
+            "contents": MockInspectionErrorSequenceSpec,
+        },
+        "additionalProperties": False,
+        "default": {},
+    }
+
+
+class MockWorkflowError(native_v1_specs.Spec):
+    _schema = {
+        "type": "object",
+        "properties": {
+            "type": spec_types.NONEMPTY_STRING,
+            "message": spec_types.NONEMPTY_STRING,
+            "task_id": spec_types.NONEMPTY_STRING,
+            "route": {"type": "integer", "minimum": 0},
+            "task_transition_id": spec_types.NONEMPTY_STRING,
+            "result": spec_types.ANY,
+            "data": {"type": "object"},
+        },
+        "additionalProperties": False,
+        "required": ["type", "message"],
+    }
+
+
+class MockWorkflowErrorSequenceSpec(native_v1_specs.SequenceSpec):
+    _schema = {"type": "array", "items": MockWorkflowError}
+
+
+class MockActionExecution(native_v1_specs.Spec):
+    _schema = {
+        "type": "object",
+        "properties": {
+            "task_id": spec_types.NONEMPTY_STRING,
+            "route": {"type": "integer", "minimum": 0, "default": 0},
+            "seq_id": spec_types.POSITIVE_INTEGER,
+            "item_id": spec_types.POSITIVE_INTEGER,
+            "iter_id": {"type": "integer", "minimum": 0, "default": 0},
+            "num_iter": {"type": "integer", "minimum": 0, "default": 1},
+            "status": spec_types.WORKFLOW_STATUSES,
+            "result": spec_types.ANY,
+        },
+        "additionalProperties": False,
+        "required": ["task_id", "status"],
+    }
+
+    def __init__(self, *args, **kwargs):
+        super(MockActionExecution, self).__init__(*args, **kwargs)
+
+        if not getattr(self, "status", None):
+            self.status = statuses.SUCCEEDED
+
+        self.iter_pos = self.iter_id - 1
+
+
+class MockActionExecutionSequenceSpec(native_v1_specs.SequenceSpec):
+    _schema = {"type": "array", "items": MockActionExecution, "default": []}
 
 
 class WorkflowTestCaseMixin(object):
@@ -57,7 +132,7 @@ class WorkflowTestCaseMixin(object):
         ac_exs = [
             x
             for x in self.mock_action_executions
-            if x.task_id == task_id and x.iter_pos < x.iter_idx + x.num_iter - 1
+            if x.task_id == task_id and x.iter_pos < x.iter_id + x.num_iter - 1
         ]
 
         if ac_exs and seq_id is not None:
@@ -72,84 +147,72 @@ class WorkflowTestCaseMixin(object):
         return ac_exs[0] if len(ac_exs) > 0 else None
 
 
-class WorkflowTestCase(WorkflowTestCaseMixin):
-    def __init__(
-        self,
-        wf_def,
-        expected_task_seq,
-        inputs=None,
-        spec_module_name="native",
-        mock_action_executions=None,
-        expected_inspection_errors=None,
-        expected_routes=None,
-        expected_workflow_status=None,
-        expected_errors=None,
-        expected_output=None,
-        expected_term_tasks=None,
-    ):
-        self.wf_def = wf_def
-        self.expected_task_seq = expected_task_seq
-        self.inputs = inputs
-        self.spec_module_name = spec_module_name
-        self.mock_action_executions = mock_action_executions
-        self.expected_inspection_errors = expected_inspection_errors
-        self.expected_routes = expected_routes
-        self.expected_workflow_status = expected_workflow_status
-        self.expected_errors = expected_errors
-        self.expected_output = expected_output
-        self.expected_term_tasks = expected_term_tasks
+class WorkflowTestCase(native_v1_specs.Spec, WorkflowTestCaseMixin):
+    _schema = {
+        "type": "object",
+        "properties": {
+            "workflow": spec_types.NONEMPTY_STRING,
+            "inputs": {"type": "object", "default": {}},
+            "expected_inspection_errors": MockInspectionErrors,
+            "expected_routes": {"type": "array", "items": {"type": "array"}, "default": [[]]},
+            "expected_task_sequence": {"type": "array"},
+            "mock_action_executions": MockActionExecutionSequenceSpec,
+            "expected_term_tasks": {"type": "array", "items": spec_types.NONEMPTY_STRING},
+            "expected_workflow_status": spec_types.WORKFLOW_STATUSES,
+            "expected_errors": MockWorkflowErrorSequenceSpec,
+            "expected_output": {"type": "object"},
+        },
+        "required": ["workflow", "expected_task_sequence"],
+        "additionalProperties": False,
+    }
 
-        if not self.mock_action_executions:
-            self.mock_action_executions = []
+    def __init__(self, spec, name=None, member=False):
+        if not spec:
+            raise ValueError("The workflow test case cannot be empty.")
 
-        if not self.expected_inspection_errors:
-            self.expected_inspection_errors = {}
+        super(WorkflowTestCase, self).__init__(spec, name=name, member=member)
 
-        if not self.expected_routes:
-            self.expected_routes = [[]]
+        self.spec_module_name = "native"
 
-        if self.inputs is None:
-            self.inputs = {}
+        if not os.path.isfile(self.workflow):
+            error_message = 'Unable to open worklfow definition at "%s"' % self.workflow
+            raise exc.WorkflowRehearsalError(error_message)
 
-        if self.expected_workflow_status is None:
+        with open(self.workflow, "r") as f:
+            self.wf_def = f.read()
+
+        if not getattr(self, "expected_workflow_status", None):
             self.expected_workflow_status = statuses.SUCCEEDED
 
 
-class WorkflowRerunTestCase(WorkflowTestCaseMixin):
-    def __init__(
-        self,
-        conductor,
-        expected_task_seq,
-        rerun_tasks=None,
-        mock_action_executions=None,
-        expected_inspection_errors=None,
-        expected_routes=None,
-        expected_workflow_status=None,
-        expected_errors=None,
-        expected_output=None,
-        expected_term_tasks=None,
-    ):
-        self.conductor = conductor
-        self.expected_task_seq = expected_task_seq
-        self.rerun_tasks = rerun_tasks
-        self.mock_action_executions = mock_action_executions
-        self.expected_inspection_errors = expected_inspection_errors
-        self.expected_routes = expected_routes
-        self.expected_workflow_status = expected_workflow_status
-        self.expected_errors = expected_errors
-        self.expected_output = expected_output
-        self.expected_term_tasks = expected_term_tasks
+class WorkflowRerunTestCase(native_v1_specs.Spec, WorkflowTestCaseMixin):
+    _schema = {
+        "type": "object",
+        "properties": {
+            "workflow_state": {"type": "object"},
+            "rerun_tasks": requests.TaskRerunRequestSequenceSpec,
+            "expected_inspection_errors": MockInspectionErrors,
+            "expected_routes": {"type": "array", "items": {"type": "array"}, "default": [[]]},
+            "expected_task_sequence": {"type": "array"},
+            "mock_action_executions": MockActionExecutionSequenceSpec,
+            "expected_term_tasks": {"type": "array", "items": spec_types.NONEMPTY_STRING},
+            "expected_workflow_status": spec_types.WORKFLOW_STATUSES,
+            "expected_errors": MockWorkflowErrorSequenceSpec,
+            "expected_output": {"type": "object"},
+        },
+        "required": ["workflow", "expected_task_sequence"],
+        "additionalProperties": False,
+    }
 
-        if not self.mock_action_executions:
-            self.mock_action_executions = []
+    def __init__(self, spec, name=None, member=False):
+        if not spec:
+            raise ValueError("The workflow rerun test case cannot be empty.")
 
-        if not self.expected_inspection_errors:
-            self.expected_inspection_errors = {}
+        super(WorkflowRerunTestCase, self).__init__(spec, name=name, member=member)
 
-        if not self.expected_routes:
-            self.expected_routes = [[]]
+        self.conductor = conducting.WorkflowConductor.deserialize(self.workflow_state)
 
-        if self.expected_workflow_status is None:
+        if not getattr(self, "expected_workflow_status", None):
             self.expected_workflow_status = statuses.SUCCEEDED
 
 
@@ -168,18 +231,17 @@ class WorkflowRehearsal(unittest.TestCase):
             )
 
         self.session = session
+        self.inspection_errors = {}
         self.rerun = False
 
         if isinstance(session, WorkflowTestCase):
             self.spec_module = spec_loader.get_spec_module(session.spec_module_name)
             self.wf_spec = self.spec_module.instantiate(self.session.wf_def)
-            self.inspection_errors = {}
             self.conductor = None
         elif isinstance(session, WorkflowRerunTestCase):
             self.conductor = self.session.conductor
             self.spec_module = self.conductor.spec_module
             self.wf_spec = self.conductor.spec
-            self.inspection_errors = {}
             self.rerun = True
 
         for mock_ac_ex in self.session.mock_action_executions:
@@ -260,7 +322,7 @@ class WorkflowRehearsal(unittest.TestCase):
                     ac_ex = self.session.get_mock_action_execution(current_task_id)
 
                 if not ac_ex:
-                    ac_ex = MockActionExecution(current_task_id)
+                    ac_ex = MockActionExecution({"task_id": current_task_id})
                 else:
                     ac_ex.iter_pos += 1
 
@@ -303,7 +365,7 @@ class WorkflowRehearsal(unittest.TestCase):
 
         expected_task_seq = [
             task_seq if isinstance(task_seq, tuple) else (task_seq, 0)
-            for task_seq in self.session.expected_task_seq
+            for task_seq in self.session.expected_task_sequence
         ]
 
         self.assertListEqual(actual_task_seq, expected_task_seq)
@@ -317,12 +379,12 @@ class WorkflowRehearsal(unittest.TestCase):
         )
 
         if self.session.expected_errors is not None:
-            self.assertListEqual(self.conductor.errors, self.session.expected_errors)
+            self.assertListEqual(self.conductor.errors, self.session.expected_errors.spec)
 
         if self.session.expected_output is not None:
             self.assertDictEqual(self.conductor.get_workflow_output(), self.session.expected_output)
 
-        if self.session.expected_term_tasks:
+        if self.session.expected_term_tasks is not None:
             expected_term_tasks = [
                 (task, 0) if not isinstance(task, tuple) else task
                 for task in self.session.expected_term_tasks
