@@ -36,7 +36,7 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_cycles(self):
         test_spec = {
@@ -65,7 +65,7 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_cycle_retry(self):
         test_spec = {
@@ -83,7 +83,7 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_rollback_retry(self):
         test_spec = {
@@ -102,7 +102,7 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_cycle_and_fork(self):
         test_spec = {
@@ -126,4 +126,4 @@ class CyclicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()

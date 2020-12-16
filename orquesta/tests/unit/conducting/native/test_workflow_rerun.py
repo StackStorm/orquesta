@@ -33,7 +33,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
 
         rehearsal1 = rehearsing.load_test_spec(test_spec)
         self.assertIsInstance(rehearsal1.session, rehearsing.WorkflowTestCase)
-        rehearsal1.assert_conducting_sequences()
+        rehearsal1.assert_conducting_sequence()
 
         test_spec = {
             "workflow_state": rehearsal1.conductor.serialize(),
@@ -49,7 +49,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
 
         rehearsal2 = rehearsing.load_test_spec(test_spec)
         self.assertIsInstance(rehearsal2.session, rehearsing.WorkflowRerunTestCase)
-        rehearsal2.assert_conducting_sequences()
+        rehearsal2.assert_conducting_sequence()
 
     def test_fail_single_branch(self):
         # Initial run of workflow and failure at task2.
@@ -62,7 +62,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal1 = rehearsing.load_test_spec(test_spec)
-        rehearsal1.assert_conducting_sequences()
+        rehearsal1.assert_conducting_sequence()
 
         # Rerun entire workflow and fail task2 again.
         test_spec = {
@@ -74,7 +74,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal2 = rehearsing.load_test_spec(test_spec)
-        rehearsal2.assert_conducting_sequences()
+        rehearsal2.assert_conducting_sequence()
 
         # Rerun workflow from task2 only and complete the workflow.
         test_spec = {
@@ -94,7 +94,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal3 = rehearsing.load_test_spec(test_spec)
-        rehearsal3.assert_conducting_sequences()
+        rehearsal3.assert_conducting_sequence()
 
     def test_fail_multiple_branches(self):
         # Initial run of workflow and failure at task2 and task5.
@@ -110,7 +110,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal1 = rehearsing.load_test_spec(test_spec)
-        rehearsal1.assert_conducting_sequences()
+        rehearsal1.assert_conducting_sequence()
 
         # Rerun and complete workflow.
         test_spec = {
@@ -129,7 +129,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal2 = rehearsing.load_test_spec(test_spec)
-        rehearsal2.assert_conducting_sequences()
+        rehearsal2.assert_conducting_sequence()
 
     def test_fail_single_before_join(self):
         # Initial run of workflow.
@@ -143,7 +143,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal1 = rehearsing.load_test_spec(test_spec)
-        rehearsal1.assert_conducting_sequences()
+        rehearsal1.assert_conducting_sequence()
 
         # Rerun and complete workflow.
         test_spec = {
@@ -162,7 +162,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal2 = rehearsing.load_test_spec(test_spec)
-        rehearsal2.assert_conducting_sequences()
+        rehearsal2.assert_conducting_sequence()
 
     def test_fail_multiple_before_join(self):
         # Initial run of workflow.
@@ -179,7 +179,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal1 = rehearsing.load_test_spec(test_spec)
-        rehearsal1.assert_conducting_sequences()
+        rehearsal1.assert_conducting_sequence()
 
         # Rerun and complete workflow.
         test_spec = {
@@ -199,7 +199,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal2 = rehearsing.load_test_spec(test_spec)
-        rehearsal2.assert_conducting_sequences()
+        rehearsal2.assert_conducting_sequence()
 
     def test_fail_at_join(self):
         # Initial run of workflow.
@@ -213,7 +213,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal1 = rehearsing.load_test_spec(test_spec)
-        rehearsal1.assert_conducting_sequences()
+        rehearsal1.assert_conducting_sequence()
 
         # Rerun and complete workflow.
         test_spec = {
@@ -232,7 +232,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal2 = rehearsing.load_test_spec(test_spec)
-        rehearsal2.assert_conducting_sequences()
+        rehearsal2.assert_conducting_sequence()
 
     def test_fail_cycle(self):
         # Initial run of workflow.
@@ -256,7 +256,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal1 = rehearsing.load_test_spec(test_spec)
-        rehearsal1.assert_conducting_sequences()
+        rehearsal1.assert_conducting_sequence()
 
         # Rerun and complete workflow.
         test_spec = {
@@ -278,7 +278,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal2 = rehearsing.load_test_spec(test_spec)
-        rehearsal2.assert_conducting_sequences()
+        rehearsal2.assert_conducting_sequence()
 
     def test_fail_at_single_split(self):
         # Initial run of workflow.
@@ -309,7 +309,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal1 = rehearsing.load_test_spec(test_spec)
-        rehearsal1.assert_conducting_sequences()
+        rehearsal1.assert_conducting_sequence()
 
         # Rerun and complete workflow.
         test_spec = {
@@ -337,7 +337,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal2 = rehearsing.load_test_spec(test_spec)
-        rehearsal2.assert_conducting_sequences()
+        rehearsal2.assert_conducting_sequence()
 
     def test_fail_at_multiple_splits(self):
         # Initial run of workflow.
@@ -369,7 +369,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal1 = rehearsing.load_test_spec(test_spec)
-        rehearsal1.assert_conducting_sequences()
+        rehearsal1.assert_conducting_sequence()
 
         # Rerun and complete workflow.
         test_spec = {
@@ -398,4 +398,4 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal2 = rehearsing.load_test_spec(test_spec)
-        rehearsal2.assert_conducting_sequences()
+        rehearsal2.assert_conducting_sequence()

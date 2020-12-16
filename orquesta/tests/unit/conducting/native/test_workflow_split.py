@@ -43,7 +43,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_splits(self):
         test_spec = {
@@ -76,7 +76,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_nested_splits(self):
         test_spec = {
@@ -121,7 +121,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_splits_mixed(self):
         test_spec = {
@@ -147,7 +147,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_splits_mixed_alt_branch(self):
         test_spec = {
@@ -177,7 +177,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_splits_multiple_transition(self):
         test_spec = {
@@ -217,7 +217,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_very_many_splits(self):
         test_spec = {
@@ -261,7 +261,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_very_many_splits_alt(self):
         test_spec = {
@@ -338,4 +338,4 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()

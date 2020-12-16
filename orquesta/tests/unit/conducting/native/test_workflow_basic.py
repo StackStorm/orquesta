@@ -31,7 +31,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_parallel(self):
         test_spec = {
@@ -40,7 +40,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_branching(self):
         test_spec = {
@@ -49,7 +49,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_decision_tree(self):
         # Test branch "a"
@@ -60,7 +60,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
         # Test branch "b"
         test_spec = {
@@ -70,7 +70,7 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
         # Test branch "c"
         test_spec = {
@@ -80,4 +80,4 @@ class BasicWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()

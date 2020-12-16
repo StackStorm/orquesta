@@ -32,7 +32,7 @@ class WithItemsWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_items_list_with_error(self):
         test_spec = {
@@ -47,7 +47,7 @@ class WithItemsWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_items_list_with_error_and_remediation(self):
         test_spec = {
@@ -62,7 +62,7 @@ class WithItemsWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_parallel_items_tasks(self):
         test_spec = {
@@ -84,7 +84,7 @@ class WithItemsWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         test = rehearsing.WorkflowTestCase(test_spec)
-        rehearsing.WorkflowRehearsal(test).assert_conducting_sequences()
+        rehearsing.WorkflowRehearsal(test).assert_conducting_sequence()
 
     def test_parallel_items_tasks_with_error(self):
         test_spec = {
@@ -102,4 +102,4 @@ class WithItemsWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()

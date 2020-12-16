@@ -26,7 +26,7 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_on_error(self):
         test_spec = {
@@ -37,7 +37,7 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_on_complete_from_succeeded_branch(self):
         test_spec = {
@@ -47,7 +47,7 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_on_complete_from_failed_branch(self):
         test_spec = {
@@ -58,7 +58,7 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_task_transitions_split_from_succeeded_branch(self):
         test_spec = {
@@ -73,7 +73,7 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_task_transitions_split_from_failed_branch(self):
         test_spec = {
@@ -89,4 +89,4 @@ class TaskTransitionWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()

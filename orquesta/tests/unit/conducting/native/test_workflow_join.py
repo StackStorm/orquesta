@@ -33,7 +33,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_no_inbound(self):
         test_spec = {
@@ -49,7 +49,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_single_inbound_from_left(self):
         test_spec = {
@@ -64,7 +64,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_single_inbound_from_right(self):
         test_spec = {
@@ -79,7 +79,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_count_satisfied_with_branch_running(self):
         test_spec = {
@@ -102,7 +102,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_count_satisfied_with_branch_error_1(self):
         test_spec = {
@@ -125,7 +125,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_count_satisfied_with_branch_error_2(self):
         test_spec = {
@@ -149,7 +149,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_count_not_satisfied(self):
         test_spec = {
@@ -196,7 +196,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_count_not_satisfied_no_inbound(self):
         test_spec = {
@@ -240,7 +240,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_context(self):
         test_spec = {
@@ -274,7 +274,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_task_transition_on_completed_both_branches_succeeded(self):
         test_spec = {
@@ -292,7 +292,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_task_transition_on_completed_one_branch_failed(self):
         test_spec = {
@@ -313,7 +313,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_task_transition_on_completed_other_branch_failed(self):
         test_spec = {
@@ -334,7 +334,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_task_transition_on_completed_both_branches_failed(self):
         test_spec = {
@@ -356,7 +356,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_task_transition_on_failed_both_branches_succeeded(self):
         test_spec = {
@@ -365,7 +365,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_task_transition_on_failed_one_branch_failed(self):
         test_spec = {
@@ -395,7 +395,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_task_transition_on_failed_other_branch_failed(self):
         test_spec = {
@@ -425,7 +425,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_task_transition_on_failed_both_branches_failed(self):
         test_spec = {
@@ -447,7 +447,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_all_complex_both_branches_succeeded(self):
         # In this workflow, both tasks task3 and task5 join all to task6. There
@@ -474,7 +474,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_all_complex_one_branch_failed(self):
         test_spec = {
@@ -497,7 +497,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_all_complex_other_branch_failed(self):
         test_spec = {
@@ -520,7 +520,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_all_complex_both_branches_failed(self):
         test_spec = {
@@ -543,7 +543,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_count_complex_all_branches_succeeded(self):
         # In this workflow, the task task3, task5, and task7 join on task8.
@@ -569,7 +569,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_count_complex_one_branch_failed(self):
         test_spec = {
@@ -593,7 +593,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_count_complex_other_branch_failed(self):
         test_spec = {
@@ -617,7 +617,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_count_complex_another_branch_failed(self):
         test_spec = {
@@ -641,7 +641,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_count_complex_two_branches_failed(self):
         test_spec = {
@@ -665,7 +665,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_count_complex_other_two_branches_failed(self):
         test_spec = {
@@ -689,7 +689,7 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_join_count_complex_another_two_branches_failed(self):
         test_spec = {
@@ -713,4 +713,4 @@ class JoinWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()

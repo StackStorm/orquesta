@@ -32,7 +32,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_error_concurrent_log_fail(self):
         mock_result = "All your base are belong to us!"
@@ -47,7 +47,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_error_continue_success_path(self):
         test_spec = {
@@ -61,7 +61,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_error_continue_failure_path(self):
         test_spec = {
@@ -79,7 +79,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_error_noop_success_path(self):
         test_spec = {
@@ -89,7 +89,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_error_noop_failure_path(self):
         test_spec = {
@@ -102,7 +102,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_error_fail_success_path(self):
         test_spec = {
@@ -112,7 +112,7 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()
 
     def test_error_fail_failure_path(self):
         test_spec = {
@@ -126,4 +126,4 @@ class WorkflowErrorHandlingConductorTest(base.OrchestraWorkflowConductorTest):
         }
 
         rehearsal = rehearsing.load_test_spec(test_spec)
-        rehearsal.assert_conducting_sequences()
+        rehearsal.assert_conducting_sequence()

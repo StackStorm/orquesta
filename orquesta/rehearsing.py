@@ -273,7 +273,7 @@ class WorkflowRehearsal(unittest.TestCase):
         self.inspection_errors = self.wf_spec.inspect()
         self.assertDictEqual(self.inspection_errors, self.session.expected_inspection_errors)
 
-    def assert_conducting_sequences(self):
+    def assert_conducting_sequence(self):
         run_q = queue.Queue()
         items_task_accum_result = {}
 
