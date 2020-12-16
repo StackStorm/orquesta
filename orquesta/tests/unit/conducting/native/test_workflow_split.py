@@ -39,7 +39,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
                 "task7__r1",
                 "task7__r2",
             ],
-            "expected_term_tasks": [("task7", 1), ("task7", 2)],
+            "expected_term_tasks": ["task7__r1", "task7__r2"],
         }
 
         test = rehearsing.WorkflowTestCase(test_spec)
@@ -72,7 +72,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
                 "task8__r4",
                 "task8__r5",
             ],
-            "expected_term_tasks": [("task8", 1), ("task8", 4), ("task8", 5)],
+            "expected_term_tasks": ["task8__r1", "task8__r4", "task8__r5"],
         }
 
         test = rehearsing.WorkflowTestCase(test_spec)
@@ -117,7 +117,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
                 "task10__r5",
                 "task10__r6",
             ],
-            "expected_term_tasks": [("task10", 3), ("task10", 4), ("task10", 5), ("task10", 6)],
+            "expected_term_tasks": ["task10__r3", "task10__r4", "task10__r5", "task10__r6"],
         }
 
         test = rehearsing.WorkflowTestCase(test_spec)
@@ -143,7 +143,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
                 "task5__r3",
                 "task5__r4",
             ],
-            "expected_term_tasks": [("task5", 3), ("task5", 4)],
+            "expected_term_tasks": ["task5__r3", "task5__r4"],
         }
 
         test = rehearsing.WorkflowTestCase(test_spec)
@@ -173,7 +173,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
                 {"task_id": "task3"},  # task3, 1
                 {"task_id": "task3", "status": statuses.FAILED},  # task3, 2
             ],
-            "expected_term_tasks": [("task5", 3), ("task5", 4)],
+            "expected_term_tasks": ["task5__r3", "task5__r4"],
         }
 
         test = rehearsing.WorkflowTestCase(test_spec)
@@ -213,7 +213,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
                 "task7__r5",
                 "task7__r6",
             ],
-            "expected_term_tasks": [("task7", 3), ("task7", 4), ("task7", 5), ("task7", 6)],
+            "expected_term_tasks": ["task7__r3", "task7__r4", "task7__r5", "task7__r6"],
         }
 
         test = rehearsing.WorkflowTestCase(test_spec)
@@ -257,7 +257,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
                 "task17__r7",
                 "notify__r8",
             ],
-            "expected_term_tasks": [("notify", 1), ("notify", 8)],
+            "expected_term_tasks": ["notify__r1", "notify__r8"],
         }
 
         test = rehearsing.WorkflowTestCase(test_spec)
@@ -334,7 +334,7 @@ class SplitWorkflowConductorTest(base.OrchestraWorkflowConductorTest):
                 "task19__r8",
                 "notify__r9",
             ],
-            "expected_term_tasks": [("notify", 1), ("notify", 9)],
+            "expected_term_tasks": ["notify__r1", "notify__r9"],
         }
 
         test = rehearsing.WorkflowTestCase(test_spec)

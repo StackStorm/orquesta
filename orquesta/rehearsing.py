@@ -387,13 +387,16 @@ class WorkflowRehearsal(unittest.TestCase):
             self.assertDictEqual(self.conductor.get_workflow_output(), self.session.expected_output)
 
         if self.session.expected_term_tasks is not None:
-            expected_term_tasks = [
-                (task, 0) if not isinstance(task, tuple) else task
-                for task in self.session.expected_term_tasks
+            actual_term_tasks = [
+                constants.TASK_STATE_ROUTE_FORMAT % (t["id"], str(t["route"]))
+                for i, t in self.conductor.workflow_state.get_terminal_tasks()
             ]
 
-            term_tasks = self.conductor.workflow_state.get_terminal_tasks()
-            actual_term_tasks = [(t["id"], t["route"]) for i, t in term_tasks]
-            expected_term_tasks = sorted(expected_term_tasks, key=lambda x: x[0])
-            actual_term_tasks = sorted(actual_term_tasks, key=lambda x: x[0])
-            self.assertListEqual(actual_term_tasks, expected_term_tasks)
+            expected_term_tasks = [
+                task_id
+                if "__r" in task_id
+                else constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(0))
+                for task_id in self.session.expected_term_tasks
+            ]
+
+            self.assertListEqual(sorted(actual_term_tasks), sorted(expected_term_tasks))

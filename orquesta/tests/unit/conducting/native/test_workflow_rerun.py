@@ -321,7 +321,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
             "mock_action_executions": [
                 {"task_id": "task5", "seq_id": 6, "status": statuses.FAILED},
             ],
-            "expected_term_tasks": [("task5", 2), ("task6", 1), ("task6", 2)],
+            "expected_term_tasks": ["task5__r2", "task6__r1", "task6__r2"],
             "expected_workflow_status": statuses.FAILED,
         }
 
@@ -351,7 +351,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
                 "task7__r1",
                 "task7__r2",
             ],
-            "expected_term_tasks": [("task7", 1), ("task7", 2)],
+            "expected_term_tasks": ["task7__r1", "task7__r2"],
         }
 
         test2 = rehearsing.load_test_case(test_spec)
@@ -383,7 +383,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
                 {"task_id": "task5", "seq_id": 6, "status": statuses.FAILED},
                 {"task_id": "task6", "seq_id": 7, "status": statuses.FAILED},
             ],
-            "expected_term_tasks": [("task5", 2), ("task6", 1), ("task6", 2)],
+            "expected_term_tasks": ["task5__r2", "task6__r1", "task6__r2"],
             "expected_workflow_status": statuses.FAILED,
         }
 
@@ -414,7 +414,7 @@ class WorkflowConductorRerunTest(base.OrchestraWorkflowConductorTest):
                 "task7__r1",
                 "task7__r2",
             ],
-            "expected_term_tasks": [("task7", 1), ("task7", 2)],
+            "expected_term_tasks": ["task7__r1", "task7__r2"],
         }
 
         test2 = rehearsing.load_test_case(test_spec)
