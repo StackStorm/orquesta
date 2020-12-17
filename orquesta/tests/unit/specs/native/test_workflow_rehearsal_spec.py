@@ -10,7 +10,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import six
+import tempfile
+
 from orquesta import conducting
+from orquesta import exceptions as exc
 from orquesta import rehearsing
 from orquesta import statuses
 from orquesta.tests.unit.specs.native import base as test_base
@@ -30,6 +35,17 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
         self.assertEqual(ac_ex.status, statuses.SUCCEEDED)
         self.assertIsNone(ac_ex.result)
         self.assertEqual(ac_ex.iter_pos, -1)
+
+    def test_init_test_spec(self):
+        test_spec = {
+            "workflow": self.get_wf_file_path("sequential"),
+            "expected_task_sequence": ["task1", "task2", "task3", "continue"],
+        }
+
+        test_case = rehearsing.WorkflowTestCase(test_spec)
+
+        self.assertIsInstance(test_case, rehearsing.WorkflowTestCase)
+        self.assertEqual(test_case.workflow, test_spec["workflow"])
 
     def test_load_test_spec_dict_minimal(self):
         test_spec = {
@@ -78,6 +94,25 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
             self.assertEqual(ac_ex.num_iter, 1)
             self.assertEqual(ac_ex.status, statuses.SUCCEEDED)
             self.assertIsNone(ac_ex.result)
+
+    def test_init_test_spec_with_mock_action_execution_result_path(self):
+        fd, path = tempfile.mkstemp()
+
+        with os.fdopen(fd, "w") as tmp:
+            tmp.write("foobar")
+
+        test_spec = {
+            "workflow": self.get_wf_file_path("sequential"),
+            "expected_task_sequence": ["task1", "task2", "task3", "continue"],
+            "mock_action_executions": [{"task_id": "task1", "result_path": path}],
+        }
+
+        rehearsal = rehearsing.load_test_spec(test_spec)
+
+        self.assertEqual(len(rehearsal.session.mock_action_executions), 1)
+        self.assertEqual(rehearsal.session.mock_action_executions[0].task_id, "task1")
+        self.assertEqual(rehearsal.session.mock_action_executions[0].result, "foobar")
+        self.assertEqual(rehearsal.session.mock_action_executions[0].result_path, path)
 
     def test_load_test_spec_dict_with_expected_inspection_errors(self):
         test_spec = {
@@ -159,6 +194,112 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
         self.assertIsNone(rehearsal.session.expected_errors[1].task_transition_id)
         self.assertIsNone(rehearsal.session.expected_errors[1].result)
         self.assertIsNone(rehearsal.session.expected_errors[1].data)
+
+    def test_init_rerun_test_spec(self):
+        workflow_state = {
+            "spec": {
+                "catalog": "native",
+                "version": "1.0",
+                "spec": {
+                    "version": 1.0,
+                    "description": "A basic sequential workflow.",
+                    "input": ["name"],
+                    "vars": [{"greeting": None}],
+                    "output": [{"greeting": "<% ctx().greeting %>"}],
+                    "tasks": {
+                        "task1": {
+                            "action": "core.echo message=<% ctx().name %>",
+                            "next": [
+                                {
+                                    "when": "<% succeeded() %>",
+                                    "publish": "greeting=<% result() %>",
+                                    "do": "task2",
+                                }
+                            ],
+                        },
+                        "task2": {
+                            "action": "core.echo",
+                            "input": {"message": "All your base are belong to us!"},
+                            "next": [
+                                {
+                                    "when": "<% succeeded() %>",
+                                    "publish": [
+                                        {"greeting": '<% ctx("greeting") %>, <% result() %>'}
+                                    ],
+                                    "do": ["task3"],
+                                }
+                            ],
+                        },
+                        "task3": {
+                            "action": "core.echo message=<% ctx('greeting') %>",
+                            "next": [
+                                {"when": "<% succeeded() %>", "publish": "greeting=<% result() %>"}
+                            ],
+                        },
+                    },
+                },
+            },
+            "graph": {
+                "directed": True,
+                "multigraph": True,
+                "graph": [],
+                "nodes": [{"id": "task1"}, {"id": "task2"}, {"id": "task3"}, {"id": "continue"}],
+                "adjacency": [
+                    [{"criteria": ["<% succeeded() %>"], "ref": 0, "id": "task2", "key": 0}],
+                    [{"criteria": ["<% succeeded() %>"], "ref": 0, "id": "task3", "key": 0}],
+                    [{"criteria": ["<% succeeded() %>"], "ref": 0, "id": "continue", "key": 0}],
+                    [],
+                ],
+            },
+            "input": {"name": "Stanley"},
+            "context": {},
+            "state": {
+                "contexts": [{"name": "Stanley", "greeting": None}, {"greeting": "Stanley"}],
+                "routes": [[]],
+                "sequence": [
+                    {
+                        "id": "task1",
+                        "route": 0,
+                        "ctxs": {"in": [0], "out": {"task2__t0": 1}},
+                        "prev": {},
+                        "next": {"task2__t0": True},
+                        "status": "succeeded",
+                    },
+                    {
+                        "id": "task2",
+                        "route": 0,
+                        "ctxs": {"in": [0, 1]},
+                        "prev": {"task1__t0": 0},
+                        "next": {"task3__t0": False},
+                        "status": "failed",
+                        "term": True,
+                    },
+                ],
+                "staged": [],
+                "status": "failed",
+                "tasks": {"task1__r0": 0, "task2__r0": 1},
+            },
+            "log": [],
+            "errors": [
+                {
+                    "type": "error",
+                    "message": "Execution failed. See result for details.",
+                    "task_id": "task2",
+                }
+            ],
+            "output": {"greeting": "Stanley"},
+        }
+
+        test_spec = {
+            "workflow_state": workflow_state,
+            "rerun_tasks": [{"task_id": "task2"}],
+            "expected_task_sequence": ["task1", "task2", "task3", "continue"],
+        }
+
+        test_case = rehearsing.WorkflowRerunTestCase(test_spec)
+
+        self.assertIsInstance(test_case, rehearsing.WorkflowRerunTestCase)
+        self.assertIsInstance(test_case.conductor, conducting.WorkflowConductor)
 
     def test_load_rerun_test_spec_dict_minimal(self):
         workflow_state = {
@@ -281,3 +422,61 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
         self.assertIsNone(rehearsal.session.expected_term_tasks)
         self.assertIsNone(rehearsal.session.expected_errors)
         self.assertIsNone(rehearsal.session.expected_output)
+
+    def test_init_test_spec_null_type(self):
+        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+
+        assertRaisesRegex(
+            exc.WorkflowRehearsalError,
+            "The session object is not provided.",
+            rehearsing.WorkflowRehearsal,
+            None,
+        )
+
+    def test_init_test_spec_bad_type(self):
+        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+
+        assertRaisesRegex(
+            exc.WorkflowRehearsalError,
+            "The session object is not type of WorkflowTestCase or WorkflowRerunTestCase.",
+            rehearsing.WorkflowRehearsal,
+            object(),
+        )
+
+    def test_init_test_spec_bad_item_execution(self):
+        test_spec = {
+            "workflow": self.get_wf_file_path("with-items"),
+            "expected_task_sequence": ["task1"],
+            "mock_action_executions": [
+                {"task_id": "task1", "result": "Picard, resistance is futile!"},
+            ],
+        }
+
+        test_case = rehearsing.WorkflowTestCase(test_spec)
+
+        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+
+        assertRaisesRegex(
+            exc.WorkflowRehearsalError,
+            'Mock action execution for with items task "task1" is misssing "item_id".',
+            rehearsing.WorkflowRehearsal,
+            test_case,
+        )
+
+    def test_init_test_spec_bad_result_path(self):
+        test_spec = {
+            "workflow": self.get_wf_file_path("sequential"),
+            "expected_task_sequence": ["task1", "task2", "task3", "continue"],
+            "mock_action_executions": [{"task_id": "task1", "result_path": "/path/does/not/exist"}],
+        }
+
+        test_case = rehearsing.WorkflowTestCase(test_spec)
+
+        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+
+        assertRaisesRegex(
+            exc.WorkflowRehearsalError,
+            'The result path "/path/does/not/exist" for the mock action execution does not exist.',
+            rehearsing.WorkflowRehearsal,
+            test_case,
+        )

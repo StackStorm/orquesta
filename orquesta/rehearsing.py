@@ -114,6 +114,7 @@ class MockActionExecution(native_v1_specs.Spec):
             "num_iter": {"type": "integer", "minimum": 0, "default": 1},
             "status": spec_types.WORKFLOW_STATUSES,
             "result": spec_types.ANY_NULLABLE,
+            "result_path": spec_types.NONEMPTY_STRING,
         },
         "additionalProperties": False,
         "required": ["task_id"],
@@ -258,6 +259,14 @@ class WorkflowRehearsal(unittest.TestCase):
             if task_spec.has_items() and mock_ac_ex.item_id is None:
                 msg = 'Mock action execution for with items task "%s" is misssing "item_id".'
                 raise exc.WorkflowRehearsalError(msg % mock_ac_ex.task_id)
+
+            if mock_ac_ex.result_path:
+                if not os.path.isfile(mock_ac_ex.result_path):
+                    msg = 'The result path "%s" for the mock action execution does not exist.'
+                    raise exc.WorkflowRehearsalError(msg % mock_ac_ex.result_path)
+                else:
+                    with open(mock_ac_ex.result_path) as f:
+                        mock_ac_ex.result = f.read()
 
     def runTest(self):
         """Override runTest
