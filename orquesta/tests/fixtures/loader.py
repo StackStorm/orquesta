@@ -33,6 +33,10 @@ def get_workflow_fixtures_base_path():
     return os.path.join(get_fixtures_base_path(), "workflows")
 
 
+def get_rehearsal_fixtures_base_path():
+    return os.path.join(get_fixtures_base_path(), "rehearsals")
+
+
 def get_fixture_content(fixture_file_name, fixture_type, raw=False):
     if fixture_type not in FIXTURE_TYPES:
         raise Exception("Unsupported fixture type of %s" % fixture_type)

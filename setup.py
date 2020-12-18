@@ -94,4 +94,8 @@ setup(
             "O102 = orquesta.tests.hacking.import_aliases_rule:check_alias_naming",
         ],
     },
+    scripts=[
+        "bin/orquesta-generate-schemas",
+        "bin/orquesta-rehearse",
+    ],
 )

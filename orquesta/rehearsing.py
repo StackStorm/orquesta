@@ -29,15 +29,36 @@ from orquesta import statuses
 from orquesta.tests.fixtures import loader as fixture_loader
 
 
-def load_test_spec(fixture):
-    if not fixture:
-        raise ValueError("Workflow test case is empty.")
+def load_test_spec(fixture=None, fixture_path=None, base_path=None):
+    if not fixture and not fixture_path:
+        raise ValueError("Workflow test spec is not provided.")
 
-    if isinstance(fixture, six.string_types):
+    if fixture and fixture_path:
+        raise ValueError(
+            "Ambiguous workflow test spec provided. Both fixture and fixture_path are given."
+        )
+
+    if base_path and not os.path.isdir(base_path):
+        raise ValueError('The base path "%s" does not exist.' % base_path)
+
+    if fixture and isinstance(fixture, six.string_types):
         fixture = yaml.safe_load(fixture)
+
+    if fixture_path:
+        fixture_path = "%s/%s" % (base_path, fixture_path) if base_path else fixture_path
+        with open(fixture_path, "r") as f:
+            fixture = yaml.safe_load(f)
 
     if not isinstance(fixture, dict):
         raise ValueError("Unable to convert workflow test case into dict.")
+
+    if base_path:
+        if "workflow" in fixture and not fixture["workflow"].startswith("/"):
+            fixture["workflow"] = "%s/%s" % (base_path, fixture["workflow"])
+
+        for ac_ex in fixture.get("mock_action_executions", []):
+            if "result_path" in ac_ex and not ac_ex["result_path"].startswith("/"):
+                ac_ex["result_path"] = "%s/%s" % (base_path, ac_ex["result_path"])
 
     test_spec = (
         WorkflowRerunTestCase(fixture) if "workflow_state" in fixture else WorkflowTestCase(fixture)

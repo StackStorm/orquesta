@@ -11,6 +11,7 @@
 # limitations under the License.
 
 import os
+import shutil
 import six
 import tempfile
 
@@ -46,6 +47,35 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
 
         self.assertIsInstance(test_case, rehearsing.WorkflowTestCase)
         self.assertEqual(test_case.workflow, test_spec["workflow"])
+
+    def test_load_test_spec_yaml_minimal(self):
+        test_spec = """---
+        workflow: %s
+        expected_task_sequence:
+          - task1
+          - task2
+          - task3
+          - continue
+        """
+
+        rehearsal = rehearsing.load_test_spec(test_spec % self.get_wf_file_path("sequential"))
+
+        self.assertIsInstance(rehearsal.session, rehearsing.WorkflowTestCase)
+        self.assertEqual(rehearsal.session.workflow, self.get_wf_file_path("sequential"))
+
+        self.assertListEqual(
+            rehearsal.session.expected_task_sequence, ["task1", "task2", "task3", "continue"]
+        )
+
+        self.assertTrue(rehearsal.session.wf_def.startswith("version"))
+        self.assertDictEqual(rehearsal.session.inputs, {})
+        self.assertDictEqual(rehearsal.session.expected_inspection_errors, {})
+        self.assertListEqual(rehearsal.session.expected_routes, [[]])
+        self.assertListEqual(rehearsal.session.mock_action_executions, [])
+        self.assertEqual(rehearsal.session.expected_workflow_status, statuses.SUCCEEDED)
+        self.assertIsNone(rehearsal.session.expected_term_tasks)
+        self.assertIsNone(rehearsal.session.expected_errors)
+        self.assertIsNone(rehearsal.session.expected_output)
 
     def test_load_test_spec_dict_minimal(self):
         test_spec = {
@@ -171,6 +201,32 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
         rehearsal = rehearsing.load_test_spec(test_spec)
 
         self.assertTrue(path.lower().endswith(".yml"))
+        self.assertEqual(len(rehearsal.session.mock_action_executions), 1)
+        self.assertEqual(rehearsal.session.mock_action_executions[0].task_id, "task1")
+        self.assertDictEqual(rehearsal.session.mock_action_executions[0].result, {"foo": "bar"})
+        self.assertEqual(rehearsal.session.mock_action_executions[0].result_path, path)
+
+    def test_init_test_spec_with_base_path(self):
+        shutil.copy(self.get_wf_file_path("sequential"), "/tmp/sequential.yaml")
+
+        fd, path = tempfile.mkstemp(suffix=".json")
+
+        with os.fdopen(fd, "w") as tmp:
+            tmp.write('{"foo": "bar"}\n')
+
+        test_spec = {
+            "workflow": "sequential.yaml",
+            "expected_task_sequence": ["task1", "task2", "task3", "continue"],
+            "mock_action_executions": [
+                {"task_id": "task1", "result_path": path[path.rfind("/") + 1 :]}
+            ],
+        }
+
+        rehearsal = rehearsing.load_test_spec(test_spec, base_path="/tmp")
+
+        self.assertIsInstance(rehearsal.session, rehearsing.WorkflowTestCase)
+        self.assertEqual(rehearsal.session.workflow, "/tmp/sequential.yaml")
+        self.assertTrue(rehearsal.session.wf_def.startswith("version"))
         self.assertEqual(len(rehearsal.session.mock_action_executions), 1)
         self.assertEqual(rehearsal.session.mock_action_executions[0].task_id, "task1")
         self.assertDictEqual(rehearsal.session.mock_action_executions[0].result, {"foo": "bar"})
