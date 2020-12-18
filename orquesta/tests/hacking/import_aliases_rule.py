@@ -40,7 +40,6 @@ REQS = {
     "orquesta.specs.native.v1.models": "native_v1_models",
     "orquesta.specs.types": "spec_types",
     "orquesta.statuses": None,
-    "orquesta.tests.exceptions": "test_exc",
     "orquesta.tests.fixtures.loader": "fixture_loader",
     "orquesta.tests.unit.base": "test_base",
     "orquesta.tests.unit.specs.base": "test_specs",
