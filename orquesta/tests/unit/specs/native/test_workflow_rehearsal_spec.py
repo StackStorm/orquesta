@@ -95,7 +95,7 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
             self.assertEqual(ac_ex.status, statuses.SUCCEEDED)
             self.assertIsNone(ac_ex.result)
 
-    def test_init_test_spec_with_mock_action_execution_result_path(self):
+    def test_init_test_spec_with_mock_action_execution_text_result_path(self):
         fd, path = tempfile.mkstemp()
 
         with os.fdopen(fd, "w") as tmp:
@@ -112,6 +112,68 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
         self.assertEqual(len(rehearsal.session.mock_action_executions), 1)
         self.assertEqual(rehearsal.session.mock_action_executions[0].task_id, "task1")
         self.assertEqual(rehearsal.session.mock_action_executions[0].result, "foobar")
+        self.assertEqual(rehearsal.session.mock_action_executions[0].result_path, path)
+
+    def test_init_test_spec_with_mock_action_execution_json_result_path(self):
+        fd, path = tempfile.mkstemp(suffix=".json")
+
+        with os.fdopen(fd, "w") as tmp:
+            tmp.write('{"foo": "bar"}\n')
+
+        test_spec = {
+            "workflow": self.get_wf_file_path("sequential"),
+            "expected_task_sequence": ["task1", "task2", "task3", "continue"],
+            "mock_action_executions": [{"task_id": "task1", "result_path": path}],
+        }
+
+        rehearsal = rehearsing.load_test_spec(test_spec)
+
+        self.assertTrue(path.lower().endswith(".json"))
+        self.assertEqual(len(rehearsal.session.mock_action_executions), 1)
+        self.assertEqual(rehearsal.session.mock_action_executions[0].task_id, "task1")
+        self.assertDictEqual(rehearsal.session.mock_action_executions[0].result, {"foo": "bar"})
+        self.assertEqual(rehearsal.session.mock_action_executions[0].result_path, path)
+
+    def test_init_test_spec_with_mock_action_execution_yaml_result_path(self):
+        fd, path = tempfile.mkstemp(suffix=".yaml")
+
+        with os.fdopen(fd, "w") as tmp:
+            tmp.write("---\n")
+            tmp.write("foo: bar\n")
+
+        test_spec = {
+            "workflow": self.get_wf_file_path("sequential"),
+            "expected_task_sequence": ["task1", "task2", "task3", "continue"],
+            "mock_action_executions": [{"task_id": "task1", "result_path": path}],
+        }
+
+        rehearsal = rehearsing.load_test_spec(test_spec)
+
+        self.assertTrue(path.lower().endswith(".yaml"))
+        self.assertEqual(len(rehearsal.session.mock_action_executions), 1)
+        self.assertEqual(rehearsal.session.mock_action_executions[0].task_id, "task1")
+        self.assertDictEqual(rehearsal.session.mock_action_executions[0].result, {"foo": "bar"})
+        self.assertEqual(rehearsal.session.mock_action_executions[0].result_path, path)
+
+    def test_init_test_spec_with_mock_action_execution_yml_result_path(self):
+        fd, path = tempfile.mkstemp(suffix=".yml")
+
+        with os.fdopen(fd, "w") as tmp:
+            tmp.write("---\n")
+            tmp.write("foo: bar\n")
+
+        test_spec = {
+            "workflow": self.get_wf_file_path("sequential"),
+            "expected_task_sequence": ["task1", "task2", "task3", "continue"],
+            "mock_action_executions": [{"task_id": "task1", "result_path": path}],
+        }
+
+        rehearsal = rehearsing.load_test_spec(test_spec)
+
+        self.assertTrue(path.lower().endswith(".yml"))
+        self.assertEqual(len(rehearsal.session.mock_action_executions), 1)
+        self.assertEqual(rehearsal.session.mock_action_executions[0].task_id, "task1")
+        self.assertDictEqual(rehearsal.session.mock_action_executions[0].result, {"foo": "bar"})
         self.assertEqual(rehearsal.session.mock_action_executions[0].result_path, path)
 
     def test_load_test_spec_dict_with_expected_inspection_errors(self):

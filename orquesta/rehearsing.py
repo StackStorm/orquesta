@@ -26,6 +26,7 @@ from orquesta.specs import loader as spec_loader
 from orquesta.specs.native.v1 import base as native_v1_specs
 from orquesta.specs import types as spec_types
 from orquesta import statuses
+from orquesta.tests.fixtures import loader as fixture_loader
 
 
 def load_test_spec(fixture):
@@ -260,13 +261,21 @@ class WorkflowRehearsal(unittest.TestCase):
                 msg = 'Mock action execution for with items task "%s" is misssing "item_id".'
                 raise exc.WorkflowRehearsalError(msg % mock_ac_ex.task_id)
 
-            if mock_ac_ex.result_path:
-                if not os.path.isfile(mock_ac_ex.result_path):
-                    msg = 'The result path "%s" for the mock action execution does not exist.'
-                    raise exc.WorkflowRehearsalError(msg % mock_ac_ex.result_path)
-                else:
-                    with open(mock_ac_ex.result_path) as f:
-                        mock_ac_ex.result = f.read()
+            if not mock_ac_ex.result_path:
+                continue
+
+            if not os.path.isfile(mock_ac_ex.result_path):
+                msg = 'The result path "%s" for the mock action execution does not exist.'
+                raise exc.WorkflowRehearsalError(msg % mock_ac_ex.result_path)
+
+            name, ext = os.path.splitext(mock_ac_ex.result_path)
+
+            with open(mock_ac_ex.result_path) as f:
+                mock_ac_ex.result = (
+                    fixture_loader.FIXTURE_EXTS[ext](f)
+                    if ext in fixture_loader.FIXTURE_EXTS
+                    else f.read()
+                )
 
     def runTest(self):
         """Override runTest
