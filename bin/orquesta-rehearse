@@ -15,13 +15,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+import logging.config
 import sys
 
-from orquesta.commands import rehearsal
+LOGGING_CONFIG = {
+    'version': 1,
+    'loggers': {
+        'orquesta': {
+            'level': 'NOTSET',
+            'handlers': ['console_handler'],
+        },
+    },
+    'handlers': {
+        'console_handler': {
+            'level': 'DEBUG',
+            'formatter': 'console_formatter',
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://sys.stdout',
+        },
+    },
+    'formatters': {
+        'console_formatter': {
+            'format': '%(asctime)s - %(levelname)s - %(message)s'
+        },
+    },
+}
+
+logging.config.dictConfig(LOGGING_CONFIG)
+LOG = logging.getLogger('orquesta')
+
 
 if __name__ == "__main__":
     try:
+        from orquesta.commands import rehearsal
         rehearsal.rehearse()
     except Exception as e:
-        print("ERROR: %s" % str(e))
+        LOG.error(str(e))
         sys.exit(1)

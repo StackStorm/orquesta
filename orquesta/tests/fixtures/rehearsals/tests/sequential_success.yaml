@@ -1,5 +1,5 @@
 ---
-workflow: ./workflows/sequential.yaml
+workflow: workflows/sequential.yaml
 inputs:
   name: Stanley
 expected_task_sequence:

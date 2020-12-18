@@ -26,7 +26,9 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
         "parse_args",
         mock.MagicMock(
             return_value=argparse.Namespace(
-                base_path="/path/does/not/exist", test_spec="tests/sequential_success.yaml"
+                base_path="/path/does/not/exist",
+                test_spec="tests/sequential_success.yaml",
+                debug=False,
             )
         ),
     )
@@ -46,6 +48,7 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
             return_value=argparse.Namespace(
                 base_path=fixture_loader.get_rehearsal_fixtures_base_path(),
                 test_spec="tests/foobar.yaml",
+                debug=False,
             )
         ),
     )
@@ -67,6 +70,7 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
             return_value=argparse.Namespace(
                 base_path=fixture_loader.get_rehearsal_fixtures_base_path(),
                 test_spec="tests/sequential_success.yaml",
+                debug=False,
             )
         ),
     )
@@ -80,6 +84,7 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
             return_value=argparse.Namespace(
                 base_path=fixture_loader.get_rehearsal_fixtures_base_path(),
                 test_spec="tests/sequential_failure.yaml",
+                debug=False,
             )
         ),
     )
@@ -88,6 +93,6 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
 
         assertRaisesRegex(
             AssertionError,
-            "^Lists differ",
+            "The lists of task execution sequence do not match.",
             rehearsal.rehearse,
         )

@@ -10,6 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import os
 import six
 import unittest
@@ -27,6 +28,8 @@ from orquesta.specs.native.v1 import base as native_v1_specs
 from orquesta.specs import types as spec_types
 from orquesta import statuses
 from orquesta.tests.fixtures import loader as fixture_loader
+
+LOG = logging.getLogger(__name__)
 
 
 def load_test_spec(fixture=None, fixture_path=None, base_path=None):
@@ -313,6 +316,9 @@ class WorkflowRehearsal(unittest.TestCase):
         self.assertDictEqual(self.inspection_errors, self.session.expected_inspection_errors)
 
     def assert_conducting_sequence(self):
+        if isinstance(self.session, WorkflowTestCase):
+            LOG.info('Start test for workflow "%s".', self.session.workflow)
+
         run_q = queue.Queue()
         items_task_accum_result = {}
 
@@ -350,8 +356,13 @@ class WorkflowRehearsal(unittest.TestCase):
                 current_task_id = current_task["id"]
                 current_task_route = current_task["route"]
                 current_task_spec = self.wf_spec.tasks.get_task(current_task_id)
+                current_fq_task_id = constants.TASK_STATE_ROUTE_FORMAT % (
+                    current_task_id,
+                    str(current_task_route),
+                )
 
                 # Set task status to running.
+                LOG.debug('Task "%s" is set to "%s".', current_fq_task_id, statuses.RUNNING)
                 ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
                 self.conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
 
@@ -372,6 +383,12 @@ class WorkflowRehearsal(unittest.TestCase):
 
                 if not current_task_spec.has_items():
                     ac_ex_event = events.ActionExecutionEvent(ac_ex.status, result=ac_ex.result)
+
+                    LOG.debug(
+                        'Applying action execution with "%s" status to task "%s".',
+                        ac_ex.status,
+                        current_fq_task_id,
+                    )
                 else:
                     if current_task_id not in items_task_accum_result:
                         items_task_accum_result[current_task_id] = []
@@ -394,14 +411,50 @@ class WorkflowRehearsal(unittest.TestCase):
                         accumulated_result=items_task_accum_result[current_task_id],
                     )
 
+                    LOG.debug(
+                        'Applying action execution with "%s" status to item "%s" of task "%s".',
+                        ac_ex.status,
+                        str(ac_ex.item_id),
+                        current_fq_task_id,
+                    )
+
                 self.conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
+
+                current_task_state = self.conductor.workflow_state.get_task(
+                    current_task_id,
+                    current_task_route,
+                )
+
+                LOG.debug(
+                    'Task "%s" is set to "%s".',
+                    current_fq_task_id,
+                    current_task_state.get("status", "unknown"),
+                )
 
             # Identify the next set of tasks.
             for next_task in self.conductor.get_next_tasks():
+                next_fq_task_id = constants.TASK_STATE_ROUTE_FORMAT % (
+                    next_task["id"],
+                    str(next_task["route"]),
+                )
+                LOG.debug('Task "%s" is identified to run next.', next_fq_task_id)
                 run_q.put(next_task)
 
             # Serialize workflow execution graph to mock async execution.
             wf_conducting_state = self.conductor.serialize()
+
+        if self.conductor.get_workflow_status() in statuses.COMPLETED_STATUSES:
+            self.conductor.render_workflow_output()
+
+        LOG.debug('The workflow completed with status "%s".', self.conductor.get_workflow_status())
+        LOG.debug('The workflow output with "%s".', str(self.conductor.get_workflow_output()))
+
+        if not self.conductor.errors:
+            LOG.debug("The workflow completed with no errors.")
+        else:
+            LOG.debug('The workflow completed with errors. "%s"', str(self.conductor.errors))
+
+        LOG.debug("Comparing with expected task execution sequence.")
 
         actual_task_seq = [
             constants.TASK_STATE_ROUTE_FORMAT % (entry["id"], str(entry["route"]))
@@ -413,23 +466,47 @@ class WorkflowRehearsal(unittest.TestCase):
             for task_id in self.session.expected_task_sequence
         ]
 
-        self.assertListEqual(actual_task_seq, expected_task_seq)
-        self.assertListEqual(self.conductor.workflow_state.routes, self.session.expected_routes)
+        self.assertListEqual(
+            actual_task_seq,
+            expected_task_seq,
+            "The lists of task execution sequence do not match.",
+        )
 
-        if self.conductor.get_workflow_status() in statuses.COMPLETED_STATUSES:
-            self.conductor.render_workflow_output()
+        LOG.debug("Comparing with expected workflow route(s).")
+
+        self.assertListEqual(
+            self.conductor.workflow_state.routes,
+            self.session.expected_routes,
+            "The lists of workflow routes do not match.",
+        )
+
+        LOG.debug("Comparing with expected workflow status.")
 
         self.assertEqual(
-            self.conductor.get_workflow_status(), self.session.expected_workflow_status
+            self.conductor.get_workflow_status(),
+            self.session.expected_workflow_status,
+            "The workflow statuses do not match.",
         )
 
         if self.session.expected_errors is not None:
-            self.assertListEqual(self.conductor.errors, self.session.expected_errors.spec)
+            LOG.debug("Comparing with expected workflow execution error(s).")
+            self.assertListEqual(
+                self.conductor.errors,
+                self.session.expected_errors.spec,
+                "The lists of workflow errors do not match.",
+            )
 
         if self.session.expected_output is not None:
-            self.assertDictEqual(self.conductor.get_workflow_output(), self.session.expected_output)
+            LOG.debug("Comparing with expected workflow output.")
+            self.assertDictEqual(
+                self.conductor.get_workflow_output(),
+                self.session.expected_output,
+                "The workflow outputs do not match.",
+            )
 
         if self.session.expected_term_tasks is not None:
+            LOG.debug("Comparing with expected terminating task(s).")
+
             actual_term_tasks = [
                 constants.TASK_STATE_ROUTE_FORMAT % (t["id"], str(t["route"]))
                 for i, t in self.conductor.workflow_state.get_terminal_tasks()
@@ -442,4 +519,8 @@ class WorkflowRehearsal(unittest.TestCase):
                 for task_id in self.session.expected_term_tasks
             ]
 
-            self.assertListEqual(sorted(actual_term_tasks), sorted(expected_term_tasks))
+            self.assertListEqual(
+                sorted(actual_term_tasks),
+                sorted(expected_term_tasks),
+                "The lists of terminating tasks do not match.",
+            )

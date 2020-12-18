@@ -11,10 +11,14 @@
 # limitations under the License.
 
 import argparse
+import logging
 import os
 
 from orquesta import exceptions as exc
 from orquesta import rehearsing
+
+
+LOG = logging.getLogger(__name__)
 
 
 def rehearse():
@@ -36,7 +40,19 @@ def rehearse():
         help="The path to the test spec (relative from base path) to run the test.",
     )
 
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        help="Set the log level to debug.",
+    )
+
     args = parser.parse_args()
+
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+    else:
+        logging.getLogger().setLevel(logging.INFO)
 
     if not os.path.isdir(args.base_path):
         raise exc.WorkflowRehearsalError('The base path "%s" does not exist.' % args.base_path)
@@ -47,7 +63,7 @@ def rehearse():
         raise exc.WorkflowRehearsalError('The test spec "%s" does not exist.' % fixture_path)
 
     rehearsal = rehearsing.load_test_spec(fixture_path=args.test_spec, base_path=args.base_path)
-    print('The test spec "%s" is successfully loaded and no error is found.' % fixture_path)
+    LOG.info('The test spec "%s" is successfully loaded.' % fixture_path)
 
     rehearsal.assert_conducting_sequence()
-    print("Completed running test and the workflow execution matches the test spec.")
+    LOG.info("Completed running test and the workflow execution matches the test spec.")
