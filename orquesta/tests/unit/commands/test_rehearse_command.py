@@ -28,6 +28,7 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
             return_value=argparse.Namespace(
                 base_path="/path/does/not/exist",
                 test_spec="tests/sequential_success.yaml",
+                test_spec_dir=None,
                 debug=False,
             )
         ),
@@ -48,6 +49,7 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
             return_value=argparse.Namespace(
                 base_path=fixture_loader.get_rehearsal_fixtures_base_path(),
                 test_spec="tests/foobar.yaml",
+                test_spec_dir=None,
                 debug=False,
             )
         ),
@@ -70,6 +72,7 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
             return_value=argparse.Namespace(
                 base_path=fixture_loader.get_rehearsal_fixtures_base_path(),
                 test_spec="tests/sequential_success.yaml",
+                test_spec_dir=None,
                 debug=False,
             )
         ),
@@ -84,6 +87,7 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
             return_value=argparse.Namespace(
                 base_path=fixture_loader.get_rehearsal_fixtures_base_path(),
                 test_spec="tests/sequential_failure.yaml",
+                test_spec_dir=None,
                 debug=False,
             )
         ),
@@ -94,5 +98,51 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
         assertRaisesRegex(
             AssertionError,
             "The lists of task execution sequence do not match.",
+            rehearsal.rehearse,
+        )
+
+    @mock.patch.object(
+        argparse.ArgumentParser,
+        "parse_args",
+        mock.MagicMock(
+            return_value=argparse.Namespace(
+                base_path=fixture_loader.get_rehearsal_fixtures_base_path(),
+                test_spec=None,
+                test_spec_dir="foobar",
+                debug=False,
+            )
+        ),
+    )
+    def test_rehearse_bad_test_spec_dir(self):
+        test_spec_dir = "%s/foobar" % fixture_loader.get_rehearsal_fixtures_base_path()
+
+        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+
+        assertRaisesRegex(
+            exc.WorkflowRehearsalError,
+            'The test spec directory "%s" does not exist.' % test_spec_dir,
+            rehearsal.rehearse,
+        )
+
+    @mock.patch.object(
+        argparse.ArgumentParser,
+        "parse_args",
+        mock.MagicMock(
+            return_value=argparse.Namespace(
+                base_path=fixture_loader.get_rehearsal_fixtures_base_path(),
+                test_spec=None,
+                test_spec_dir="tests",
+                debug=False,
+            )
+        ),
+    )
+    def test_rehearse_multiple(self):
+        # The assert raise is correct here because the given test spec directory
+        # has a test spec that will fail.
+        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+
+        assertRaisesRegex(
+            exc.WorkflowRehearsalError,
+            "There are errors processing test specs. Please review details above.",
             rehearsal.rehearse,
         )

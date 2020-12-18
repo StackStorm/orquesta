@@ -21,6 +21,19 @@ from orquesta import rehearsing
 LOG = logging.getLogger(__name__)
 
 
+def process(base_path, test_spec):
+    fixture_path = "%s/%s" % (base_path, test_spec)
+
+    if not os.path.isfile(fixture_path):
+        raise exc.WorkflowRehearsalError('The test spec "%s" does not exist.' % fixture_path)
+
+    rehearsal = rehearsing.load_test_spec(fixture_path=test_spec, base_path=base_path)
+    LOG.info('The test spec "%s" is successfully loaded.' % fixture_path)
+
+    rehearsal.assert_conducting_sequence()
+    LOG.info("Completed running test and the workflow execution matches the test spec.")
+
+
 def rehearse():
     parser = argparse.ArgumentParser("A utility for testing orquesta workflows.")
 
@@ -32,16 +45,24 @@ def rehearse():
         help="The base path where the workflow definition, tests, and files are located.",
     )
 
-    parser.add_argument(
-        "-t",
+    # Set up mutually exclusive group for test spec file or directory.
+    test_spec_group = parser.add_mutually_exclusive_group(required=True)
+
+    test_spec_group.add_argument(
+        "-f",
         "--test-spec",
         type=str,
-        required=True,
         help="The path to the test spec (relative from base path) to run the test.",
     )
 
-    parser.add_argument(
+    test_spec_group.add_argument(
         "-d",
+        "--test-spec-dir",
+        type=str,
+        help="The path to the test spec directory (relative from base path) to run multiple tests.",
+    )
+
+    parser.add_argument(
         "--debug",
         action="store_true",
         help="Set the log level to debug.",
@@ -57,13 +78,35 @@ def rehearse():
     if not os.path.isdir(args.base_path):
         raise exc.WorkflowRehearsalError('The base path "%s" does not exist.' % args.base_path)
 
-    fixture_path = "%s/%s" % (args.base_path, args.test_spec)
+    if not args.test_spec_dir:
+        process(args.base_path, args.test_spec)
+    else:
+        errors = False
+        fixture_dir = "%s/%s" % (args.base_path, args.test_spec_dir)
 
-    if not os.path.isfile(fixture_path):
-        raise exc.WorkflowRehearsalError('The test spec "%s" does not exist.' % fixture_path)
+        if not os.path.isdir(fixture_dir):
+            raise exc.WorkflowRehearsalError(
+                'The test spec directory "%s" does not exist.' % fixture_dir
+            )
 
-    rehearsal = rehearsing.load_test_spec(fixture_path=args.test_spec, base_path=args.base_path)
-    LOG.info('The test spec "%s" is successfully loaded.' % fixture_path)
+        LOG.info('Using the test spec directory "%s".', fixture_dir)
 
-    rehearsal.assert_conducting_sequence()
-    LOG.info("Completed running test and the workflow execution matches the test spec.")
+        test_specs = [
+            "%s/%s" % (args.test_spec_dir, entry)
+            for entry in os.listdir(fixture_dir)
+            if os.path.isfile("%s/%s" % (fixture_dir, entry))
+        ]
+
+        LOG.info("Identified the following test specs in the directory: %s", ", ".join(test_specs))
+
+        for test_spec in test_specs:
+            try:
+                process(args.base_path, test_spec)
+            except Exception as e:
+                LOG.error(str(e))
+                errors = True
+
+        if errors:
+            raise exc.WorkflowRehearsalError(
+                "There are errors processing test specs. Please review details above."
+            )
