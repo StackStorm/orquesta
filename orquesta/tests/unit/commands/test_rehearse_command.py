@@ -96,8 +96,8 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
         assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
 
         assertRaisesRegex(
-            AssertionError,
-            "The lists of task execution sequence do not match.",
+            exc.WorkflowRehearsalError,
+            "^The actual task sequence .* does not match expected .*",
             rehearsal.rehearse,
         )
 

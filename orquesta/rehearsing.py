@@ -461,54 +461,68 @@ class WorkflowRehearsal(unittest.TestCase):
             for entry in self.conductor.workflow_state.sequence
         ]
 
+        actual_task_seq_user_friendly = [
+            constants.TASK_STATE_ROUTE_FORMAT % (entry["id"], str(entry["route"]))
+            if entry["route"] > 0
+            else entry["id"]
+            for entry in self.conductor.workflow_state.sequence
+        ]
+
         expected_task_seq = [
             task_id if "__r" in task_id else constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(0))
             for task_id in self.session.expected_task_sequence
         ]
 
-        self.assertListEqual(
-            actual_task_seq,
-            expected_task_seq,
-            "The lists of task execution sequence do not match.",
-        )
+        if actual_task_seq != expected_task_seq:
+            raise exc.WorkflowRehearsalError(
+                "The actual task sequence %s does not match expected %s."
+                % (str(actual_task_seq_user_friendly), str(self.session.expected_task_sequence))
+            )
 
         LOG.debug("Comparing with expected workflow route(s).")
 
-        self.assertListEqual(
-            self.conductor.workflow_state.routes,
-            self.session.expected_routes,
-            "The lists of workflow routes do not match.",
-        )
+        if self.conductor.workflow_state.routes != self.session.expected_routes:
+            raise exc.WorkflowRehearsalError(
+                "The actual routes %s does not match expected %s."
+                % (str(self.conductor.workflow_state.routes), str(self.session.expected_routes))
+            )
 
         LOG.debug("Comparing with expected workflow status.")
 
-        self.assertEqual(
-            self.conductor.get_workflow_status(),
-            self.session.expected_workflow_status,
-            "The workflow statuses do not match.",
-        )
+        if self.conductor.get_workflow_status() != self.session.expected_workflow_status:
+            raise exc.WorkflowRehearsalError(
+                'The actual workflow status "%s" does not match expected "%s".'
+                % (self.conductor.get_workflow_status(), self.session.expected_workflow_status)
+            )
 
         if self.session.expected_errors is not None:
             LOG.debug("Comparing with expected workflow execution error(s).")
-            self.assertListEqual(
-                self.conductor.errors,
-                self.session.expected_errors.spec,
-                "The lists of workflow errors do not match.",
-            )
+            if self.conductor.errors != self.session.expected_errors.spec:
+                raise exc.WorkflowRehearsalError(
+                    "The actual workflow errors %s does not match expected %s."
+                    % (str(self.conductor.errors), str(self.session.expected_errors.spec))
+                )
 
         if self.session.expected_output is not None:
             LOG.debug("Comparing with expected workflow output.")
-            self.assertDictEqual(
-                self.conductor.get_workflow_output(),
-                self.session.expected_output,
-                "The workflow outputs do not match.",
-            )
+            if self.conductor.get_workflow_output() != self.session.expected_output:
+                raise exc.WorkflowRehearsalError(
+                    "The actual workflow output %s does not match expected %s."
+                    % (str(self.conductor.get_workflow_output()), str(self.session.expected_output))
+                )
 
         if self.session.expected_term_tasks is not None:
-            LOG.debug("Comparing with expected terminating task(s).")
+            LOG.debug("Comparing with expected terminal task(s).")
 
             actual_term_tasks = [
                 constants.TASK_STATE_ROUTE_FORMAT % (t["id"], str(t["route"]))
+                for i, t in self.conductor.workflow_state.get_terminal_tasks()
+            ]
+
+            actual_term_tasks_user_friendly = [
+                constants.TASK_STATE_ROUTE_FORMAT % (t["id"], str(t["route"]))
+                if t["route"] > 0
+                else t["id"]
                 for i, t in self.conductor.workflow_state.get_terminal_tasks()
             ]
 
@@ -519,8 +533,11 @@ class WorkflowRehearsal(unittest.TestCase):
                 for task_id in self.session.expected_term_tasks
             ]
 
-            self.assertListEqual(
-                sorted(actual_term_tasks),
-                sorted(expected_term_tasks),
-                "The lists of terminating tasks do not match.",
-            )
+            if sorted(actual_term_tasks) != sorted(expected_term_tasks):
+                raise exc.WorkflowRehearsalError(
+                    "The actual terminal tasks %s does not match expected %s."
+                    % (
+                        str(sorted(actual_term_tasks_user_friendly)),
+                        str(sorted(self.session.expected_term_tasks)),
+                    )
+                )
