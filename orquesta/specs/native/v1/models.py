@@ -1,3 +1,4 @@
+# Copyright 2021 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -337,7 +338,11 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                 message = "The action property is required for with items task."
                 spec_path = parent.get("spec_path") + "." + task_name
                 schema_path = parent.get("schema_path") + ".patternProperties.^\\w+$"
-                entry = {"message": message, "spec_path": spec_path, "schema_path": schema_path}
+                entry = {
+                    "message": message,
+                    "spec_path": spec_path,
+                    "schema_path": schema_path,
+                }
                 result.append(entry)
 
         return result
@@ -523,7 +528,6 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
 
             spec_path = parent.get("spec_path") + "." + task_name
             schema_path = parent.get("schema_path") + ".patternProperties.^\\w+$"
-
             task_parent = {"ctx": task_ctx, "spec_path": spec_path, "schema_path": schema_path}
 
             result = task_spec.inspect_context(parent=task_parent)

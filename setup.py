@@ -1,5 +1,6 @@
 #!/usr/bin/env python2.7
-
+#
+# Copyright 2021 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -94,4 +95,8 @@ setup(
             "O102 = orquesta.tests.hacking.import_aliases_rule:check_alias_naming",
         ],
     },
+    scripts=[
+        "bin/orquesta-generate-schemas",
+        "bin/orquesta-rehearse",
+    ],
 )

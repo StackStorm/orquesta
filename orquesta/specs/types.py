@@ -1,3 +1,4 @@
+# Copyright 2021 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +12,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+from orquesta import statuses
+
 
 NONEMPTY_STRING = {"type": "string", "minLength": 1}
 
@@ -79,3 +83,5 @@ UNIQUE_ONE_KEY_DICT_LIST = {
     "uniqueItems": True,
     "minItems": 1,
 }
+
+WORKFLOW_STATUSES = {"type": "string", "enum": statuses.ALL_STATUSES}

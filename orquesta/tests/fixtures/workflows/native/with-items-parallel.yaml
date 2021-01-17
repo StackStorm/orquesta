@@ -1,0 +1,32 @@
+version: 1.0
+vars:
+  - xs:
+      - fee
+      - fi
+      - fo
+      - fum
+  - ys:
+      - fie
+      - foh
+      - fum
+tasks:
+  task1:
+    with: <% ctx(xs) %>
+    action: core.echo message=<% item() %>
+    next:
+      - when: <% succeeded() %>
+        publish: t1_items=<% result() %>
+        do: task3
+  task2:
+    with: <% ctx(ys) %>
+    action: core.echo message=<% item() %>
+    next:
+      - when: <% succeeded() %>
+        publish: t2_items=<% result() %>
+        do: task3
+  task3:
+    join: all
+    action: core.noop
+output:
+  - t1_items: <% ctx(t1_items) %>
+  - t2_items: <% ctx(t2_items) %>

@@ -1,3 +1,4 @@
+# Copyright 2021 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,6 +32,10 @@ def get_fixtures_base_path():
 
 def get_workflow_fixtures_base_path():
     return os.path.join(get_fixtures_base_path(), "workflows")
+
+
+def get_rehearsal_fixtures_base_path():
+    return os.path.join(get_fixtures_base_path(), "rehearsals")
 
 
 def get_fixture_content(fixture_file_name, fixture_type, raw=False):
