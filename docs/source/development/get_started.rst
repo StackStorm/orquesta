@@ -16,14 +16,12 @@ Let's get started by walking thru the project structure and its contents.
     |-- docs
     |-- orquesta
     |   |-- composers           # Plugins for composing a workflow spec into a graph.
-    |   |   |-- mistral.py      # The plugin for the Mistral workflow definiton.
     |   |   |-- native.py       # The plugin for the Orquesta workflow definition.
     |   |-- expressions         # Plugins for expressions used in the workflow definition.
     |   |   |-- functions       # Plugins for custom functions used in the expressions.
     |   |   |-- jinja.py        # The plugin to evaluate Jinja expressions.
     |   |   |-- yql.py          # The plugin to evaluate YAQL expressions.
     |   |-- specs               # Plugins for the workflow language specs.
-    |   |   |-- mistral         # Models for the Mistral workflow language.
     |   |   |-- native          # Models for the Orquesta workflow language.
     |   |   |-- types.py        # Base class types used in spec modeling.
     |   |-- tests
