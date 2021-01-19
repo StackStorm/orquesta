@@ -90,10 +90,12 @@ setup(
         "orquesta.tests": [
             "fake = orquesta.tests.unit.utils.test_plugin:FakePlugin",
         ],
-        "flake8.extension": [
-            "O101 = orquesta.tests.hacking.import_modules_rule:check_module_only",
-            "O102 = orquesta.tests.hacking.import_aliases_rule:check_alias_naming",
-        ],
+        # TODO: Find alternative way to run these checks. Adding extensions here
+        # affect downstream applications.
+        # "flake8.extension": [
+        #     "O101 = orquesta.tests.hacking.import_modules_rule:check_module_only",
+        #     "O102 = orquesta.tests.hacking.import_aliases_rule:check_alias_naming",
+        # ],
     },
     scripts=[
         "bin/orquesta-generate-schemas",

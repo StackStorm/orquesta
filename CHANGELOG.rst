@@ -1,8 +1,14 @@
 Changelog
 =========
 
-Developing
-----------
+1.3.0
+-----
+
+Added
+~~~~~
+
+* Implement the orquesta-rehearse command to run unit tests for workflow. (new feature, beta)
+  Contributed by AJ (guzzijones)
 
 Changed
 ~~~~~~~
