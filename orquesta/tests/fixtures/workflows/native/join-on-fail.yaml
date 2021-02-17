@@ -1,6 +1,6 @@
 version: 1.0
 
-description: A basic workflow that demonstrate branching and join on complete.
+description: A basic workflow that demonstrate branching and join on fail.
 
 tasks:
   task1:

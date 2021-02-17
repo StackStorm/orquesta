@@ -1,6 +1,19 @@
 Changelog
 =========
 
+Developing
+----------
+
+Changed
+~~~~~~~
+
+* Migrate from Travis to Github Actions. (improvement)
+
+Fixed
+~~~~~
+
+* Fix unreachable join when an inbound task fails as defined in the task transition. (bug fix)
+
 1.3.0
 -----
 

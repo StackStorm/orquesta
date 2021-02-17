@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import logging
 import os
 import six
@@ -322,6 +323,7 @@ class WorkflowRehearsal(unittest.TestCase):
             LOG.info('Start test for workflow "%s".', self.session.workflow)
 
         run_q = queue.Queue()
+        running_q = queue.Queue()
         items_task_accum_result = {}
 
         # Inspect workflow spec and check for errors.
@@ -342,7 +344,7 @@ class WorkflowRehearsal(unittest.TestCase):
 
         # Get start tasks and being conducting workflow.
         for task in self.conductor.get_next_tasks():
-            run_q.put(task)
+            run_q.put(copy.deepcopy(task))
 
         # Serialize workflow conductor to mock async execution.
         wf_conducting_state = self.conductor.serialize()
@@ -352,12 +354,11 @@ class WorkflowRehearsal(unittest.TestCase):
             # Deserialize workflow conductor to mock async execution.
             self.conductor = conducting.WorkflowConductor.deserialize(wf_conducting_state)
 
-            # Process all the tasks in the run queue.
+            # Launch all the tasks in the run queue to simulate concurrency.
             while not run_q.empty():
                 current_task = run_q.get()
                 current_task_id = current_task["id"]
                 current_task_route = current_task["route"]
-                current_task_spec = self.wf_spec.tasks.get_task(current_task_id)
                 current_fq_task_id = constants.TASK_STATE_ROUTE_FORMAT % (
                     current_task_id,
                     str(current_task_route),
@@ -368,9 +369,26 @@ class WorkflowRehearsal(unittest.TestCase):
                 ac_ex_event = events.ActionExecutionEvent(statuses.RUNNING)
                 self.conductor.update_task_state(current_task_id, current_task_route, ac_ex_event)
 
-                # Mock completion of the task and apply mock action execution if given.
+                # Determine the seq_id for the current task.
                 current_seq_id = len(self.conductor.workflow_state.sequence) - 1
+                current_task["seq_id"] = current_seq_id
 
+                # Put task into the next queue.
+                running_q.put(current_task)
+
+            # Process all the tasks in the running queue.
+            while not running_q.empty():
+                current_task = running_q.get()
+                current_task_id = current_task["id"]
+                current_task_route = current_task["route"]
+                current_seq_id = current_task["seq_id"]
+                current_task_spec = self.wf_spec.tasks.get_task(current_task_id)
+                current_fq_task_id = constants.TASK_STATE_ROUTE_FORMAT % (
+                    current_task_id,
+                    str(current_task_route),
+                )
+
+                # Mock completion of the task and apply mock action execution if given.
                 ac_ex = self.session.get_mock_action_execution(
                     current_task_id, seq_id=current_seq_id
                 )
@@ -440,7 +458,7 @@ class WorkflowRehearsal(unittest.TestCase):
                     str(next_task["route"]),
                 )
                 LOG.debug('Task "%s" is identified to run next.', next_fq_task_id)
-                run_q.put(next_task)
+                run_q.put(copy.deepcopy(next_task))
 
             # Serialize workflow execution graph to mock async execution.
             wf_conducting_state = self.conductor.serialize()

@@ -130,6 +130,9 @@ class WorkflowState(object):
     def get_terminal_tasks(self):
         return [(i, t) for i, t in enumerate(self.sequence) if t.get("term", False)]
 
+    def has_barrier_next(self, task_id, route=None):
+        return self.conductor.has_barrier_next(task_id, route=route)
+
     def has_next_tasks(self, task_id=None, route=None):
         return self.conductor.has_next_tasks(task_id=task_id, route=route)
 
@@ -634,6 +637,39 @@ class WorkflowConductor(object):
 
         return task
 
+    def has_barrier_next(self, task_id, route=None):
+        task_state_entry = self.get_task_state_entry(task_id, route)
+
+        if (
+            not task_state_entry
+            or task_state_entry.get("status") not in statuses.COMPLETED_STATUSES
+        ):
+            return False
+
+        outbounds = self.graph.get_next_transitions(task_id)
+
+        for next_seq in outbounds:
+            next_task_id, seq_key = next_seq[1], next_seq[2]
+
+            task_transition_id = constants.TASK_STATE_TRANSITION_FORMAT % (
+                next_task_id,
+                str(seq_key),
+            )
+
+            # Ignore if the next task is the engine command to "continue".
+            if next_task_id == "continue":
+                continue
+
+            # Evaluate if outbound criteria is satisfied.
+            if not task_state_entry["next"].get(task_transition_id):
+                continue
+
+            # Evaluate if the next task is a barrier (join) task.
+            if self.graph.has_barrier(next_task_id):
+                return True
+
+        return False
+
     def has_next_tasks(self, task_id=None, route=None):
         if not task_id:
             return True if self.workflow_state.get_staged_tasks() else False
@@ -644,7 +680,7 @@ class WorkflowConductor(object):
                 not task_state_entry
                 or task_state_entry.get("status") not in statuses.COMPLETED_STATUSES
             ):
-                return []
+                return False
 
             outbounds = self.graph.get_next_transitions(task_id)
 
