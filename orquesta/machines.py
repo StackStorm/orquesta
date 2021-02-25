@@ -1,3 +1,4 @@
+# Copyright 2021 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -690,11 +691,12 @@ class WorkflowStateMachine(object):
         task_event = tk_ex_event.name
         task_id = getattr(tk_ex_event, "task_id", None)
         task_route = getattr(tk_ex_event, "route", None)
+        has_barrier_next = workflow_state.has_barrier_next(task_id, task_route)
         has_next_tasks = workflow_state.has_next_tasks(task_id, task_route)
         has_active_tasks = workflow_state.has_active_tasks
 
         # Mark task remediated if task is in abended statuses and there are transitions.
-        if tk_ex_event.status in statuses.ABENDED_STATUSES and has_next_tasks:
+        if tk_ex_event.status in statuses.ABENDED_STATUSES and (has_next_tasks or has_barrier_next):
             task_event = events.TASK_REMEDIATED
 
         # For certain events like cancel and pause, whether there are tasks in active
