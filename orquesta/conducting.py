@@ -638,7 +638,7 @@ class WorkflowConductor(object):
 
         return task
 
-    def _has_next(self, task_id, route=None, skip_barrier=False):
+    def _has_next(self, task_id, route=None, eval_join_ready=True):
         task_state_entry = self.get_task_state_entry(task_id, route)
 
         if (
@@ -667,8 +667,8 @@ class WorkflowConductor(object):
 
             # Evaluate if the next task is a barrier (join) task.
             if self.graph.has_barrier(next_task_id):
-                # If skip_barrier, then do not determine if the join is ready.
-                if skip_barrier:
+                # If eval_join_ready is false, then do not determine if the join is ready.
+                if not eval_join_ready:
                     return True
 
                 # Evaluate if inbound criteria is satisified for barrier (join) task.
@@ -681,7 +681,7 @@ class WorkflowConductor(object):
         return False
 
     def has_barrier_next(self, task_id, route=None):
-        return self._has_next(task_id, route=route, skip_barrier=True)
+        return self._has_next(task_id, route=route, eval_join_ready=False)
 
     def has_next_tasks(self, task_id=None, route=None):
         if not task_id:
