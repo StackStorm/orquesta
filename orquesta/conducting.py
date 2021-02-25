@@ -638,7 +638,7 @@ class WorkflowConductor(object):
 
         return task
 
-    def has_barrier_next(self, task_id, route=None):
+    def _has_next(self, task_id, route=None, skip_barrier=False):
         task_state_entry = self.get_task_state_entry(task_id, route)
 
         if (
@@ -667,48 +667,27 @@ class WorkflowConductor(object):
 
             # Evaluate if the next task is a barrier (join) task.
             if self.graph.has_barrier(next_task_id):
-                return True
+                # If skip_barrier, then do not determine if the join is ready.
+                if skip_barrier:
+                    return True
+
+                # Evaluate if inbound criteria is satisified for barrier (join) task.
+                inbound_criteria_status = self.get_inbound_criteria_status(next_task_id, route)
+                if inbound_criteria_status == constants.INBOUND_CRITERIA_NOT_SATISFIED:
+                    continue
+
+            return True
 
         return False
+
+    def has_barrier_next(self, task_id, route=None):
+        return self._has_next(task_id, route=route, skip_barrier=True)
 
     def has_next_tasks(self, task_id=None, route=None):
         if not task_id:
             return True if self.workflow_state.get_staged_tasks() else False
-        else:
-            task_state_entry = self.get_task_state_entry(task_id, route)
 
-            if (
-                not task_state_entry
-                or task_state_entry.get("status") not in statuses.COMPLETED_STATUSES
-            ):
-                return False
-
-            outbounds = self.graph.get_next_transitions(task_id)
-
-            for next_seq in outbounds:
-                next_task_id, seq_key = next_seq[1], next_seq[2]
-                task_transition_id = constants.TASK_STATE_TRANSITION_FORMAT % (
-                    next_task_id,
-                    str(seq_key),
-                )
-
-                # Ignore if the next task is the engine command to "continue".
-                if next_task_id == "continue":
-                    continue
-
-                # Evaluate if outbound criteria is satisfied.
-                if not task_state_entry["next"].get(task_transition_id):
-                    continue
-
-                # Evaluate if inbound criteria is satisified for barrier (join) task.
-                if self.graph.has_barrier(next_task_id):
-                    inbound_criteria_status = self.get_inbound_criteria_status(next_task_id, route)
-                    if inbound_criteria_status == constants.INBOUND_CRITERIA_NOT_SATISFIED:
-                        continue
-
-                return True
-
-        return False
+        return self._has_next(task_id, route=route)
 
     def get_next_tasks(self):
         fail_on_task_rendering = False
