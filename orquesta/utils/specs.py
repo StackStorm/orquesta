@@ -74,8 +74,10 @@ def instantiate(spec_type, definition):
     if isinstance(definition, six.string_types):
         try:
             definition = yaml.safe_load(definition)
-        except constructor.ConstructorError as e:
-            raise exc.WorkflowInspectionError([e])
+        except constructor.ConstructorError as yex:
+            raise exc.WorkflowInspectionError([yex])
+        except Exception as ex:
+            raise ex
 
     if not isinstance(definition, dict):
         raise ValueError("Unable to convert workflow definition into dict.")
