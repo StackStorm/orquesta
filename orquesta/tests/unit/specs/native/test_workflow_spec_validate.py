@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import six
+
+from orquesta import exceptions as exc
 from orquesta.tests.unit.specs.native import base as test_base
 
 
@@ -460,3 +463,37 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
         }
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_duplicate_tasks(self):
+        wf_def = """
+            version: 1.0
+
+            description: A sample workflow with a single task loop.
+
+            input:
+              - count: 0
+
+            tasks:
+              init:
+                action: core.noop
+                next:
+                  - do: task1
+              task1:
+                action: core.noop
+              task1:
+                action: core.noop
+                next:
+                  - when: <% ctx().count < 2 %>
+                    publish:
+                      - count: <% ctx().count + 1 %>
+                    do: task1
+        """
+
+        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+
+        assertRaisesRegex(
+            exc.WorkflowInspectionError,
+            "Workflow definition failed inspection.",
+            self.instantiate,
+            wf_def,
+        )
