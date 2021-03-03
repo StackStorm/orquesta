@@ -13,6 +13,7 @@ Fixed
 ~~~~~
 
 * Fix unreachable join when an inbound task fails as defined in the task transition. (bug fix)
+* Throw exception if YAML of workflow definition contains duplicate keys (i.e. task name). (bug fix)
 
 1.3.0
 -----
