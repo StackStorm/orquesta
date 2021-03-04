@@ -20,7 +20,6 @@ import jsonschema
 import logging
 import re
 import six
-import yaml
 
 from orquesta import exceptions as exc
 from orquesta.expressions import base as expr_base
@@ -29,6 +28,7 @@ from orquesta.utils import expression as expr_util
 from orquesta.utils import parameters as args_util
 from orquesta.utils import schema as schema_util
 from orquesta.utils import strings as str_util
+from orquesta.utils import yml as yaml_util
 
 
 LOG = logging.getLogger(__name__)
@@ -121,7 +121,7 @@ class Spec(object):
             raise ValueError("The spec cannot be type of None.")
 
         self.spec = (
-            yaml.safe_load(spec)
+            yaml_util.safe_load(spec)
             if not isinstance(spec, dict) and not isinstance(spec, list)
             else spec
         )
