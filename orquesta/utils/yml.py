@@ -16,9 +16,9 @@ import logging
 import yaml
 
 try:
-    from yaml import CLoader as Loader
+    from yaml import CSafeLoader as SafeLoader
 except ImportError:
-    from yaml import Loader
+    from yaml import SafeLoader
 
 from yaml import constructor
 from yaml import nodes
@@ -28,7 +28,7 @@ LOG = logging.getLogger(__name__)
 
 # Custom YAML loader that throw an exception on duplicate key.
 # Credit: https://gist.github.com/pypt/94d747fe5180851196eb
-class UniqueKeyLoader(Loader):
+class UniqueKeyLoader(SafeLoader):
     def construct_mapping(self, node, deep=False):
         if not isinstance(node, nodes.MappingNode):
             raise constructor.ConstructorError(
