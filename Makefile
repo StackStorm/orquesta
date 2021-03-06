@@ -44,7 +44,7 @@ venv:
 
 .PHONY: reqs
 reqs: venv
-	$(VENV_DIR)/bin/pip install --upgrade "pip>=19.0,<20.0"
+	$(VENV_DIR)/bin/pip install --upgrade "pip==20.0.2"
 	$(VENV_DIR)/bin/pip install -r requirements.txt
 	$(VENV_DIR)/bin/pip install -r requirements-test.txt
 	$(VENV_DIR)/bin/pip install -r requirements-docs.txt
