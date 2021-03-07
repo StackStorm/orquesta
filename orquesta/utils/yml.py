@@ -58,14 +58,17 @@ class UniqueKeyLoader(SafeLoader):
 yaml.add_constructor(
     yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
     UniqueKeyLoader.construct_mapping,
-    Loader=yaml.SafeLoader,
+    Loader=SafeLoader,
 )
 
 
 # Use a separate method here for yaml safe_load to ensure UniqueKeyLoader is loaded.
 def safe_load(definition):
     try:
-        return yaml.safe_load(definition)
+        # The use of yaml.load and passing SafeLoader is the same as yaml.safe_load which
+        # makes the same call. The difference here is that we use CSafeLoader where possible
+        # to improve performance and yaml.safe_load uses the python implementation by default.
+        return yaml.load(definition, SafeLoader)
     except Exception as e:
         # Reraise the exception as a ValueError since we do not need to
         # propagate the additional args returned by the ConstructorError.
