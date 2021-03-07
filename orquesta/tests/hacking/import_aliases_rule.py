@@ -1,3 +1,4 @@
+# Copyright 2021 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,6 +54,7 @@ REQS = {
     "orquesta.utils.schema": "schema_util",
     "orquesta.utils.specs": "spec_util",
     "orquesta.utils.strings": "str_util",
+    "orquesta.utils.yml": "yaml_util",
 }
 
 

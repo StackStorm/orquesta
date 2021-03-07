@@ -16,7 +16,6 @@
 import logging
 import six
 from six.moves import queue
-import yaml
 
 from orquesta import events
 from orquesta import exceptions as exc
@@ -27,6 +26,7 @@ from orquesta.utils import context as ctx_util
 from orquesta.utils import dictionary as dict_util
 from orquesta.utils import jsonify as json_util
 from orquesta.utils import parameters as args_util
+from orquesta.utils import yml as yaml_util
 
 
 LOG = logging.getLogger(__name__)
@@ -610,7 +610,7 @@ class WorkflowSpec(native_v1_specs.Spec):
             raise ValueError("The spec cannot be type of None.")
 
         spec = (
-            yaml.safe_load(spec)
+            yaml_util.safe_load(spec)
             if not isinstance(spec, dict) and not isinstance(spec, list)
             else spec
         )
