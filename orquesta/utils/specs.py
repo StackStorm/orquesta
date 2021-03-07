@@ -1,3 +1,4 @@
+# Copyright 2021 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,10 +15,9 @@
 
 import logging
 import six
-import yaml
 
 from orquesta.specs import loader as spec_loader
-
+from orquesta.utils import yml as yaml_util
 
 LOG = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ def instantiate(spec_type, definition):
         raise ValueError("Workflow definition is empty.")
 
     if isinstance(definition, six.string_types):
-        definition = yaml.safe_load(definition)
+        definition = yaml_util.safe_load(definition)
 
     if not isinstance(definition, dict):
         raise ValueError("Unable to convert workflow definition into dict.")
@@ -47,7 +47,9 @@ def instantiate(spec_type, definition):
     if not definition.keys():
         raise ValueError("Workflow definition contains no workflow.")
 
-    return spec_module.instantiate(definition)
+    spec = spec_module.instantiate(definition)
+
+    return spec
 
 
 def deserialize(data):

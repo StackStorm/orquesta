@@ -1,3 +1,4 @@
+# Copyright 2021 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import six
+
+from orquesta.specs import loader as spec_loader
 from orquesta.tests.unit.specs.native import base as test_base
+from orquesta.utils import specs as spec_util
 
 
 class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
@@ -460,3 +465,49 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
         }
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_duplicate_tasks(self):
+        wf_def = """
+            version: 1.0
+
+            description: A sample workflow with a single task loop.
+
+            input:
+              - count: 0
+
+            tasks:
+              init:
+                action: core.noop
+                next:
+                  - do: task1
+              task1:
+                action: core.noop
+              task1:
+                action: core.noop
+                next:
+                  - when: <% ctx().count < 2 %>
+                    publish:
+                      - count: <% ctx().count + 1 %>
+                    do: task1
+        """
+
+        expected_error = 'Failed to load workflow definition because found duplicate key "task1"'
+
+        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+
+        assertRaisesRegex(
+            ValueError,
+            expected_error,
+            spec_util.instantiate,
+            self.spec_module_name,
+            wf_def,
+        )
+
+        spec_module = spec_loader.get_spec_module(self.spec_module_name)
+
+        assertRaisesRegex(
+            ValueError,
+            expected_error,
+            spec_module.instantiate,
+            wf_def,
+        )
