@@ -3,6 +3,9 @@ name: Check
 on:
   push:
     branches: ['*']
+  pull_request:
+    branches:
+      - master
   schedule:
     # run every Monday at 6 AM
     - cron: '0 6 * * 1'
