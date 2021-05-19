@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Developing
-----------
+1.4.0
+-----
 
 Changed
 ~~~~~~~
