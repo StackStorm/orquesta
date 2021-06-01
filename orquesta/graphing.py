@@ -53,8 +53,8 @@ class WorkflowGraph(object):
     @staticmethod
     def get_root_nodes(graph):
         nodes = [
-            {"id": n, "name": graph.node[n].get("name", n)}
-            for n, d in graph.in_degree().items()
+            {"id": n, "name": graph.nodes[n].get("name", n)}
+            for n, d in dict(graph.in_degree()).items()
             if d == 0
         ]
 
@@ -80,7 +80,7 @@ class WorkflowGraph(object):
             raise exc.InvalidTask(task_id)
 
         task = {"id": task_id}
-        task.update(json_util.deepcopy(self._graph.node[task_id]))
+        task.update(json_util.deepcopy(self._graph.nodes[task_id]))
 
         return task
 
@@ -102,7 +102,7 @@ class WorkflowGraph(object):
             raise exc.InvalidTask(task_id)
 
         for key, value in six.iteritems(kwargs):
-            self._graph.node[task_id][key] = value
+            self._graph.nodes[task_id][key] = value
 
     def has_transition(self, source, destination, **kwargs):
         edges = filter(

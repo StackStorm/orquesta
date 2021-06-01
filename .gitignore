@@ -55,9 +55,13 @@ target/
 
 # Virtual Environments
 .venv
+venv/
 
 # Temporary Files
 *.swp
 
 # Visual Studio Code
 .vscode/
+
+# Pycharm
+.idea/
