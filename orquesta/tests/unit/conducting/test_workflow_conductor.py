@@ -141,7 +141,7 @@ class WorkflowConductorTest(test_base.WorkflowConductorTest):
         self.assertEqual(conductor.workflow_state.status, statuses.UNSET)
         self.assertEqual(conductor.get_workflow_status(), statuses.UNSET)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
-        self.assertEqual(len(conductor.graph._graph.node), 5)
+        self.assertEqual(len(conductor.graph._graph.nodes), 5)
         self.assertIsInstance(conductor.workflow_state, conducting.WorkflowState)
 
     def test_init_with_inputs(self):
@@ -180,7 +180,7 @@ class WorkflowConductorTest(test_base.WorkflowConductorTest):
         self.assertEqual(conductor.workflow_state.status, statuses.UNSET)
         self.assertEqual(conductor.get_workflow_status(), statuses.UNSET)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
-        self.assertEqual(len(conductor.graph._graph.node), 5)
+        self.assertEqual(len(conductor.graph._graph.nodes), 5)
         self.assertIsInstance(conductor.workflow_state, conducting.WorkflowState)
 
     def test_init_with_partial_inputs(self):
@@ -221,7 +221,7 @@ class WorkflowConductorTest(test_base.WorkflowConductorTest):
         self.assertEqual(conductor.workflow_state.status, statuses.UNSET)
         self.assertEqual(conductor.get_workflow_status(), statuses.UNSET)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
-        self.assertEqual(len(conductor.graph._graph.node), 5)
+        self.assertEqual(len(conductor.graph._graph.nodes), 5)
         self.assertIsInstance(conductor.workflow_state, conducting.WorkflowState)
 
     def test_init_with_context(self):
@@ -263,7 +263,7 @@ class WorkflowConductorTest(test_base.WorkflowConductorTest):
         self.assertEqual(conductor.workflow_state.status, statuses.UNSET)
         self.assertEqual(conductor.get_workflow_status(), statuses.UNSET)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
-        self.assertEqual(len(conductor.graph._graph.node), 5)
+        self.assertEqual(len(conductor.graph._graph.nodes), 5)
         self.assertIsInstance(conductor.workflow_state, conducting.WorkflowState)
 
     def test_serialization(self):
@@ -296,7 +296,7 @@ class WorkflowConductorTest(test_base.WorkflowConductorTest):
 
         self.assertIsInstance(conductor.spec, native_specs.WorkflowSpec)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
-        self.assertEqual(len(conductor.graph._graph.node), 5)
+        self.assertEqual(len(conductor.graph._graph.nodes), 5)
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
         self.assertIsInstance(conductor.workflow_state, conducting.WorkflowState)
         self.assertEqual(len(conductor.workflow_state.tasks), 5)
@@ -850,7 +850,7 @@ class WorkflowConductorTest(test_base.WorkflowConductorTest):
         self.assertIsInstance(conductor.spec, native_specs.WorkflowSpec)
         self.assertEqual(conductor.get_workflow_status(), statuses.RUNNING)
         self.assertIsInstance(conductor.graph, graphing.WorkflowGraph)
-        self.assertEqual(len(conductor.graph._graph.node), 5)
+        self.assertEqual(len(conductor.graph._graph.nodes), 5)
         self.assertIsInstance(conductor.workflow_state, conducting.WorkflowState)
         self.assertListEqual(conductor.log, expected_log_entries)
         self.assertListEqual(conductor.errors, expected_errors)
