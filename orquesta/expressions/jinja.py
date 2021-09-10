@@ -79,7 +79,7 @@ class JinjaEvaluator(expr_base.Evaluator):
     _regex_raw_block_pattern = "{% raw %}.*?{% endraw %}"
     _regex_raw_block_parser = re.compile(_regex_raw_block_pattern)
 
-    _jinja_env = jinja2.Environment(
+    _jinja_env = jinja2.SandboxedEnvironment(
         undefined=jinja2.StrictUndefined, trim_blocks=True, lstrip_blocks=True
     )
 
