@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Development
+-----------
+
+Fixed
+~~~~~
+
+* Update jinja to use sandboxed environment. (bug fix)
+
 1.4.0
 -----
 
