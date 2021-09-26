@@ -8,6 +8,8 @@ Fixed
 ~~~~~
 
 * Update jinja to use sandboxed environment. (bug fix)
+* Optimise inspect and workflow graph generation logic. (improvement)
+  Contributed by @yogeshgoyal26
 
 1.4.0
 -----
