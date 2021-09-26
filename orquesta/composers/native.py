@@ -43,7 +43,7 @@ class WorkflowComposer(comp_base.WorkflowComposer):
 
         q = queue.Queue()
         wf_graph = graphing.WorkflowGraph()
-        track_task = {}
+        track_splits = {}
 
         for task_name, condition, task_transition_item_idx in wf_spec.tasks.get_start_tasks():
             q.put((task_name, []))
@@ -90,9 +90,8 @@ class WorkflowComposer(comp_base.WorkflowComposer):
                 if not wf_graph.has_task(next_task_name) or not wf_spec.tasks.in_cycle(
                     next_task_name
                 ):
-                    # Track task and its splits, if superset is already added to queue
-                    # don't add them again
-                    existing_splits = track_task.get(next_task_name, {})
+                    # Track splits and if superset is already in queue then don't add them again
+                    existing_splits = track_splits.get(next_task_name, {})
                     if existing_splits:
                         new_splits = set(splits)
                         if not (
@@ -100,9 +99,9 @@ class WorkflowComposer(comp_base.WorkflowComposer):
                         ):
                             q.put((next_task_name, list(splits)))
                             existing_splits.update(new_splits)
-                            track_task[next_task_name] = existing_splits
+                            track_splits[next_task_name] = existing_splits
                     else:
-                        track_task[next_task_name] = set(splits)
+                        track_splits[next_task_name] = set(splits)
                         q.put((next_task_name, list(splits)))
 
                 crta = [condition] if condition else []

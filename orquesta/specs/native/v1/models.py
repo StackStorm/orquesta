@@ -430,7 +430,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         result = []
         staging = {}
         q = queue.Queue()
-        track_tasks = {}
+        track_splits = {}
 
         # Traverse the tasks spec and prep data for evaluation.
         for task_name, condition, task_transition_item_idx in self.get_start_tasks():
@@ -467,9 +467,9 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
 
             for next_task_name, condition, task_transition_item_idx in next_tasks:
                 if next_task_name not in staging or not self.in_cycle(next_task_name):
-                    # keep track of splits for task and its next task combination,
-                    # if superset is already added to queue, no need to add again
-                    existing_splits = track_tasks.get(task_name + "_" + next_task_name, {})
+                    # Keep track of splits for task and its next task combination,
+                    # if superset is already added to queue, then no need to add again.
+                    existing_splits = track_splits.get(task_name + "_" + next_task_name, {})
                     if existing_splits:
                         new_splits = set(splits)
                         if not (
@@ -477,10 +477,10 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                         ):
                             q.put((task_name, next_task_name, list(splits)))
                             existing_splits.update(new_splits)
-                            track_tasks[task_name + "_" + next_task_name] = existing_splits
+                            track_splits[task_name + "_" + next_task_name] = existing_splits
                     else:
                         q.put((task_name, next_task_name, list(splits)))
-                        track_tasks[task_name + "_" + next_task_name] = set(splits)
+                        track_splits[task_name + "_" + next_task_name] = set(splits)
 
         # Use the prepped data to identify tasks that are not reachable.
         for task_name, meta in six.iteritems(staging):
