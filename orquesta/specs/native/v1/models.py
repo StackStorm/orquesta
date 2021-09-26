@@ -469,18 +469,17 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                 if next_task_name not in staging or not self.in_cycle(next_task_name):
                     # Keep track of splits for task and its next task combination,
                     # if superset is already added to queue, then no need to add again.
-                    existing_splits = track_splits.get(task_name + "_" + next_task_name, {})
+                    split_id = task_name + "_" + next_task_name
+                    existing_splits = track_splits.get(split_id, set())
                     if existing_splits:
                         new_splits = set(splits)
-                        if not (
-                            existing_splits == new_splits or new_splits.issubset(existing_splits)
-                        ):
+                        if not new_splits.issubset(existing_splits):
                             q.put((task_name, next_task_name, list(splits)))
                             existing_splits.update(new_splits)
-                            track_splits[task_name + "_" + next_task_name] = existing_splits
+                            track_splits[split_id] = existing_splits
                     else:
                         q.put((task_name, next_task_name, list(splits)))
-                        track_splits[task_name + "_" + next_task_name] = set(splits)
+                        track_splits[split_id] = set(splits)
 
         # Use the prepped data to identify tasks that are not reachable.
         for task_name, meta in six.iteritems(staging):

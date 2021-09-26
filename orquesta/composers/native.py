@@ -91,18 +91,17 @@ class WorkflowComposer(comp_base.WorkflowComposer):
                     next_task_name
                 ):
                     # Track splits and if superset is already in queue then don't add them again
-                    existing_splits = track_splits.get(next_task_name, {})
+                    split_id = next_task_name
+                    existing_splits = track_splits.get(split_id, set())
                     if existing_splits:
                         new_splits = set(splits)
-                        if not (
-                            existing_splits == new_splits or new_splits.issubset(existing_splits)
-                        ):
+                        if not new_splits.issubset(existing_splits):
                             q.put((next_task_name, list(splits)))
                             existing_splits.update(new_splits)
-                            track_splits[next_task_name] = existing_splits
+                            track_splits[split_id] = existing_splits
                     else:
-                        track_splits[next_task_name] = set(splits)
                         q.put((next_task_name, list(splits)))
+                        track_splits[split_id] = set(splits)
 
                 crta = [condition] if condition else []
 
