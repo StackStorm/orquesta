@@ -20,6 +20,7 @@ import re
 import six
 
 import jinja2
+from jinja2.sandbox import SandboxedEnvironment
 
 from orquesta import exceptions as exc
 from orquesta.expressions import base as expr_base
@@ -79,7 +80,7 @@ class JinjaEvaluator(expr_base.Evaluator):
     _regex_raw_block_pattern = "{% raw %}.*?{% endraw %}"
     _regex_raw_block_parser = re.compile(_regex_raw_block_pattern)
 
-    _jinja_env = jinja2.SandboxedEnvironment(
+    _jinja_env = SandboxedEnvironment(
         undefined=jinja2.StrictUndefined, trim_blocks=True, lstrip_blocks=True
     )
 
