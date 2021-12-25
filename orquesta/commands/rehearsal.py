@@ -28,7 +28,7 @@ def process(base_path, test_spec):
 
     if not os.path.isfile(fixture_path):
         raise exc.WorkflowRehearsalError('The test spec "%s" does not exist.' % fixture_path)
-
+    LOG.info('Initiating test spec "%s".' % fixture_path)
     rehearsal = rehearsing.load_test_spec(fixture_path=test_spec, base_path=base_path)
     LOG.info('The test spec "%s" is successfully loaded.' % fixture_path)
 
