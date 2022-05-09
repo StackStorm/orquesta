@@ -62,7 +62,9 @@ class JinjaEvaluator(expr_base.Evaluator):
     #   word boundary ctx().*
     #   word boundary ctx(*)*
     #   word boundary ctx(*).*
-    _regex_ctx_pattern = r'\bctx\([\'"]?{0}[\'"]?\)\.?{0}'.format(_regex_ctx_ref_pattern)
+    _regex_ctx_pattern = r'\bctx\([\'"]?{0}[\'"]?\)\.?{0}'.format(
+        _regex_ctx_ref_pattern
+    )
     _regex_ctx_var_parser = re.compile(_regex_ctx_pattern)
 
     _regex_var = r"[a-zA-Z0-9_-]+"
@@ -96,7 +98,11 @@ class JinjaEvaluator(expr_base.Evaluator):
             ctx["__current_item"] = ctx["__vars"].get("__current_item")
 
         for name, func in six.iteritems(cls._custom_functions):
-            ctx[name] = functools.partial(func, ctx) if expr_base.func_has_ctx_arg(func) else func
+            ctx[name] = (
+                functools.partial(func, ctx)
+                if expr_base.func_has_ctx_arg(func)
+                else func
+            )
 
         return ctx
 
@@ -136,7 +142,9 @@ class JinjaEvaluator(expr_base.Evaluator):
 
             try:
                 parser = jinja2.parser.Parser(
-                    cls._jinja_env.overlay(), cls.strip_delimiter(expr), state="variable"
+                    cls._jinja_env.overlay(),
+                    cls.strip_delimiter(expr),
+                    state="variable",
                 )
 
                 parser.parse_expression()
@@ -161,7 +169,8 @@ class JinjaEvaluator(expr_base.Evaluator):
 
                 # Traverse and evaulate again in case additional inline epxressions are
                 # introduced after the jinja block is evaluated.
-                output = cls._evaluate_and_expand(output, data)
+                if cls.enable_recursively_evaluation():
+                    output = cls._evaluate_and_expand(output, data)
             else:
                 # The output will first be the original text and the expressions
                 # will be substituted by the evaluated value.
@@ -176,7 +185,10 @@ class JinjaEvaluator(expr_base.Evaluator):
                     if inspect.isgenerator(result):
                         result = list(result)
 
-                    if isinstance(result, six.string_types):
+                    if (
+                        isinstance(result, six.string_types)
+                        and cls.enable_recursively_evaluation()
+                    ):
                         result = cls._evaluate_and_expand(result, data)
 
                     # For StrictUndefined values, UndefinedError only gets raised when the value is
@@ -185,7 +197,9 @@ class JinjaEvaluator(expr_base.Evaluator):
                     # raise an exception with error description.
                     if not isinstance(result, jinja2.runtime.StrictUndefined):
                         if len(exprs) > 1 or block_exprs or len(output) > len(expr):
-                            output = output.replace(expr, str_util.unicode(result, force=True))
+                            output = output.replace(
+                                expr, str_util.unicode(result, force=True)
+                            )
                         else:
                             output = str_util.unicode(result)
 
@@ -216,9 +230,11 @@ class JinjaEvaluator(expr_base.Evaluator):
         output = cls._evaluate_and_expand(text, data=data)
 
         if isinstance(output, six.string_types):
-            exprs = [cls.strip_delimiter(expr) for expr in cls._regex_parser.findall(output)]
+            exprs = [
+                cls.strip_delimiter(expr) for expr in cls._regex_parser.findall(output)
+            ]
 
-            if exprs:
+            if exprs and cls.enable_recursively_evaluation():
                 raise JinjaEvaluationException(
                     "There are unresolved variables: %s" % ", ".join(exprs)
                 )
@@ -226,7 +242,9 @@ class JinjaEvaluator(expr_base.Evaluator):
         if isinstance(output, six.string_types) and raw_blocks:
             # Put raw blocks back into the expression.
             for i in range(0, len(raw_blocks)):
-                output = output.replace("{%s}" % str(i), raw_blocks[i])  # pylint: disable=E1101
+                output = output.replace(
+                    "{%s}" % str(i), raw_blocks[i]
+                )  # pylint: disable=E1101
 
             # Evaluate the raw blocks.
             ctx = cls.contextualize(data)
