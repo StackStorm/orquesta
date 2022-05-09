@@ -1,6 +1,15 @@
 Changelog
 =========
 
+1.5.1
+-----
+Added
+~~~~~
+
+* Ability to disable the recursively evaluation of jinja and yaql expressions, by setting the environment variable ``ENABLE_RECURSIVELY_EVALUATION`` to ``false``.
+  Contributed by @moradf90
+
+
 1.5.0
 -----
 
@@ -138,7 +147,7 @@ Added
 ~~~~~
 
 * Add flake8 extension to restrict import alias. (improvement)
-* Add developer docs on getting started, testing, and StackStorm integration. (improvement) 
+* Add developer docs on getting started, testing, and StackStorm integration. (improvement)
 
 Changed
 ~~~~~~~
@@ -168,7 +177,7 @@ Added
 Fixed
 ~~~~~
 
-* Add sleep in while loop for composing execution graph to spread out cpu spike. (improvement) 
+* Add sleep in while loop for composing execution graph to spread out cpu spike. (improvement)
 * Value in quotes in shorthand publish should be evaluated as string type. Fixes #130 (bug fix)
 * Fix interpretation of boolean value in shorthand format of publish. Fixes #119 (bug fix)
 * Update YAQL section in docs on use of "=>" for named parameters in function calls. Closes #124
