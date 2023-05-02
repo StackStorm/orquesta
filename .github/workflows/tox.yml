@@ -14,7 +14,7 @@ jobs:
   tests:
     strategy:
       matrix:
-        python-version: ["3.6", "3.8", "3.10"]
+        python-version: ["3.6", "3.8"]
         os: [ubuntu-latest, ubuntu-22.04, ubuntu-20.04]
         exclude: 
           - python-version: "3.10"
