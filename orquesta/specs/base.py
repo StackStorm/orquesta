@@ -613,7 +613,7 @@ class MappingSpec(Spec):
         raise NotImplementedError()
 
 
-class SequenceSpec(Spec, collections.MutableSequence):
+class SequenceSpec(Spec, collections.abc.MutableSequence):
     def __init__(self, spec, name=None, member=False):
         super(SequenceSpec, self).__init__(spec, name=name, member=member)
 
