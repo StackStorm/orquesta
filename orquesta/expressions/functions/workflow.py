@@ -117,7 +117,7 @@ def item_(context, key=None):
     if not key:
         return current_item
 
-    if not isinstance(current_item, collections.Mapping):
+    if not isinstance(current_item, collections.abc.Mapping):
         raise exc.ExpressionEvaluationException("Item is not type of collections.Mapping.")
 
     if key not in current_item:
