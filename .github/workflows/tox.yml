@@ -12,14 +12,15 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.6", "3.8"]
+        python-version: ["3.6", "3.8", "3.10"]
+        os: [ubuntu-latest, ubuntu-22.04, ubuntu-20.04]
+    runs-on: ${{matrix.os}}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-      - name: "Set up Python ${{ matrix.python-version }}"
+      - name: "Set up Python ${{ matrix.python-version }} on ${{matrix.os}}"
         uses: actions/setup-python@v4
         with:
           python-version: "${{ matrix.python-version }}"
@@ -30,3 +31,10 @@ jobs:
       - name: "Run tox for ${{ matrix.python-version }}"
         run: |
           tox
+    exclude: 
+      - python-version: "3.10"
+        os: ubuntu-20.04
+      - python-version: "3.6"
+        os: ubuntu-22.04
+      - python-version: "3.6"
+        os: ubuntu-latest
