@@ -52,7 +52,7 @@ class WorkflowState(object):
             "contexts": self.contexts,
             "routes": self.routes,
             "sequence": self.sequence,
-            "staged": json_util.deepcopy(self.staged),
+            "staged": self.staged,
             "status": self.status,
             "tasks": self.tasks,
         }
