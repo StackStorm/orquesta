@@ -58,7 +58,7 @@ class WorkflowState(object):
         }
 
         if self.reruns:
-            data["reruns"] = json_util.deepcopy(self.reruns)
+            data["reruns"] = self.reruns
 
         return data
 
