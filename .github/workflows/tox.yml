@@ -27,6 +27,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install tox tox-gh-actions
+          pip install .
       - name: "Run tox for ${{ matrix.python-version }}"
         run: |
           tox
