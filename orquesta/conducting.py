@@ -279,7 +279,7 @@ class WorkflowConductor(object):
             "spec": self.spec.serialize(),
             "graph": self.graph.serialize(),
             "input": self.get_workflow_input(),
-            "context": self.get_workflow_parent_context(),
+            "context": self._parent_ctx,
             "state": self.workflow_state.serialize(),
             "log": self.log,
             "errors": self.errors,
