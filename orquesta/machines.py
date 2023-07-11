@@ -18,7 +18,6 @@ import logging
 from orquesta import events
 from orquesta import exceptions as exc
 from orquesta import statuses
-from orquesta.utils import jsonify as json_util
 
 
 LOG = logging.getLogger(__name__)
