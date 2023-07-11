@@ -317,7 +317,7 @@ class WorkflowConductor(object):
             self._workflow_state = WorkflowState(conductor=self)
 
             # Set any given context as the initial context.
-            init_ctx = self.get_workflow_parent_context()
+            init_ctx = self.get_workflow_parent_context_copy()
 
             # Render workflow inputs and merge into the initial context.
             workflow_input = self.get_workflow_input()
@@ -407,7 +407,7 @@ class WorkflowConductor(object):
                 error, task_id=task_id, route=route, task_transition_id=task_transition_id
             )
 
-    def get_workflow_parent_context(self):
+    def get_workflow_parent_context_copy(self):
         return json_util.deepcopy(self._parent_ctx)
 
     def get_workflow_input(self):
@@ -481,8 +481,8 @@ class WorkflowConductor(object):
         for idx, task in other_term_tasks:
             # Remove the initial context since the first task processed above already
             # inclulded that and we only want to apply the differences.
-            in_ctx_idxs = json_util.deepcopy(task["ctxs"]["in"])
-            in_ctx_idxs.remove(0)
+            in_ctx_idxs = [i for index, i in enumerate(task["ctxs"]["in"]) if
+                           index != 0]
 
             wf_term_ctx = dict_util.merge_dicts(
                 wf_term_ctx, self.get_task_context(in_ctx_idxs), overwrite=True
