@@ -68,7 +68,7 @@ class WorkflowState(object):
         instance.contexts = data.get("contexts", list())
         instance.routes = data.get("routes", list())
         instance.sequence = data.get("sequence", list())
-        instance.staged = data.get("staged", list())
+        instance.staged = json_util.deepcopy(data.get("staged", list()))
         instance.status = data.get("status", statuses.UNSET)
         instance.tasks = data.get("tasks", dict())
         instance.reruns = data.get("reruns", list())
@@ -481,8 +481,7 @@ class WorkflowConductor(object):
         for idx, task in other_term_tasks:
             # Remove the initial context since the first task processed above already
             # inclulded that and we only want to apply the differences.
-            in_ctx_idxs = [i for index, i in enumerate(task["ctxs"]["in"]) if
-                           index != 0]
+            in_ctx_idxs = [i for index, i in enumerate(task["ctxs"]["in"]) if index != 0]
 
             wf_term_ctx = dict_util.merge_dicts(
                 wf_term_ctx, self.get_task_context(in_ctx_idxs), overwrite=True

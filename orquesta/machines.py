@@ -527,8 +527,11 @@ class TaskStateMachine(object):
             # Make a copy of the items and remove current item under evaluation.
             staged_task = workflow_state.get_staged_task(task_id, task_route)
             items = staged_task["items"]
-            items_status = [item.get("status", statuses.UNSET) for index, item in
-                            enumerate(items) if index != ac_ex_event.item_id]
+            items_status = [
+                item.get("status", statuses.UNSET)
+                for index, item in enumerate(items)
+                if index != ac_ex_event.item_id
+            ]
 
             # Assess various situations.
             # todo(aj) loop over list one time and add to each list
