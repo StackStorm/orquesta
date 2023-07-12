@@ -1,3 +1,4 @@
+# Copyright 2021-2023 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +17,6 @@ import inspect
 import itertools
 import logging
 import re
-import six
 
 import yaql
 import yaql.language.exceptions as yaql_exc
@@ -35,7 +35,7 @@ LOG = logging.getLogger(__name__)
 def register_functions(ctx):
     catalog = func_base.load()
 
-    for name, func in six.iteritems(catalog):
+    for name, func in catalog.items():
         ctx.register_function(func, name=name)
 
     return catalog
@@ -111,7 +111,7 @@ class YAQLEvaluator(expr_base.Evaluator):
 
     @classmethod
     def validate(cls, text):
-        if not isinstance(text, six.string_types):
+        if not isinstance(text, str):
             raise ValueError("Text to be evaluated is not typeof string.")
 
         errors = []
@@ -126,7 +126,7 @@ class YAQLEvaluator(expr_base.Evaluator):
 
     @classmethod
     def evaluate(cls, text, data=None):
-        if not isinstance(text, six.string_types):
+        if not isinstance(text, str):
             raise ValueError("Text to be evaluated is not typeof string.")
 
         if data and not isinstance(data, dict):
@@ -144,7 +144,7 @@ class YAQLEvaluator(expr_base.Evaluator):
                 if inspect.isgenerator(result):
                     result = list(result)
 
-                if isinstance(result, six.string_types):
+                if isinstance(result, str):
                     result = cls.evaluate(result, data)
 
                 if len(exprs) > 1 or len(output) > len(expr):
@@ -167,7 +167,7 @@ class YAQLEvaluator(expr_base.Evaluator):
 
     @classmethod
     def extract_vars(cls, text):
-        if not isinstance(text, six.string_types):
+        if not isinstance(text, str):
             raise ValueError("Text to be evaluated is not typeof string.")
 
         results = [

@@ -7,7 +7,7 @@ on:
     branches:
       - master
   schedule:
-    # run every Monday at 6 AM
+    # run every Monday at 6am
     - cron: '0 6 * * 1'
 
 jobs:

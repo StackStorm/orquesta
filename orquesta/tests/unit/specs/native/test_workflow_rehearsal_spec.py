@@ -1,4 +1,4 @@
-# Copyright 2021 The StackStorm Authors.
+# Copyright 2021-2023 The StackStorm Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
 
 import os
 import shutil
-import six
 import tempfile
 
 from orquesta import conducting
@@ -543,7 +542,7 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
         self.assertIsNone(rehearsal.session.expected_output)
 
     def test_init_test_spec_null_type(self):
-        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+        assertRaisesRegex = self.assertRaisesRegex
 
         assertRaisesRegex(
             exc.WorkflowRehearsalError,
@@ -553,7 +552,7 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
         )
 
     def test_init_test_spec_bad_type(self):
-        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+        assertRaisesRegex = self.assertRaisesRegex
 
         assertRaisesRegex(
             exc.WorkflowRehearsalError,
@@ -573,7 +572,7 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
 
         test_case = rehearsing.WorkflowTestCase(test_spec)
 
-        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+        assertRaisesRegex = self.assertRaisesRegex
 
         assertRaisesRegex(
             exc.WorkflowRehearsalError,
@@ -591,7 +590,7 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
 
         test_case = rehearsing.WorkflowTestCase(test_spec)
 
-        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+        assertRaisesRegex = self.assertRaisesRegex
 
         assertRaisesRegex(
             exc.WorkflowRehearsalError,

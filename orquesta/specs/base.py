@@ -1,4 +1,4 @@
-# Copyright 2021 The StackStorm Authors.
+# Copyright 2021-2023 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,6 @@ import json
 import jsonschema
 import logging
 import re
-import six
 
 from orquesta import exceptions as exc
 from orquesta.expressions import base as expr_base
@@ -141,19 +140,19 @@ class Spec(object):
         )
 
         # Process attributes defined under properties in the schema.
-        property_specs = {k: v for k, v in six.iteritems(schema.get("properties", {})) if isspec(v)}
+        property_specs = {k: v for k, v in schema.get("properties", {}).items() if isspec(v)}
 
-        for name, spec_cls in six.iteritems(property_specs):
+        for name, spec_cls in property_specs.items():
             if self.spec.get(name):
                 setattr(self, name, spec_cls(self.spec.get(name), member=True))
 
         # Process pattern properties (regex) defined in the schema.
         regex_property_specs = {
-            k: v for k, v in six.iteritems(schema.get("patternProperties", {})) if isspec(v)
+            k: v for k, v in schema.get("patternProperties", {}).items() if isspec(v)
         }
         # regex_property_specs are member=True so they don't use meta_schema
-        for pattern, spec_cls in six.iteritems(regex_property_specs):
-            for name, value in six.iteritems(self.spec):
+        for pattern, spec_cls in regex_property_specs.items():
+            for name, value in self.spec.items():
                 if re.match(pattern, name) and value:
                     setattr(self, name, spec_cls(value, member=True))
 
@@ -228,12 +227,12 @@ class Spec(object):
             return schema
 
         # Resolve the schema for children specs under properties.
-        for k, v in six.iteritems(schema.get("properties", {})):
+        for k, v in schema.get("properties", {}).items():
             if inspect.isclass(v) and issubclass(v, Spec):
                 schema["properties"][k] = v.get_schema(includes=None)
 
         # Resolve the schema for children specs under patternProperties.
-        for k, v in six.iteritems(schema.get("patternProperties", {})):
+        for k, v in schema.get("patternProperties", {}).items():
             if inspect.isclass(v) and issubclass(v, Spec):
                 schema["patternProperties"][k] = v.get_schema(includes=None)
 
@@ -243,7 +242,7 @@ class Spec(object):
         if inspect.isclass(items_schema) and issubclass(items_schema, Spec):
             schema["items"] = items_schema.get_schema(includes=None)
         elif isinstance(items_schema, dict):
-            for k, v in six.iteritems(items_schema.get("properties", {})):
+            for k, v in items_schema.get("properties", {}).items():
                 if inspect.isclass(v) and issubclass(v, Spec):
                     schema_properties = schema["items"]["properties"]
                     schema_properties[k] = v.get_schema(includes=None)
@@ -338,14 +337,14 @@ class Spec(object):
         properties = {}
         schema = self.get_schema(includes=None)
 
-        for prop_name, prop_type in six.iteritems(schema.get("properties", {})):
+        for prop_name, prop_type in schema.get("properties", {}).items():
             properties[prop_name] = getattr(self, prop_name)
 
-        for prop_name_regex, prop_type in six.iteritems(schema.get("patternProperties", {})):
+        for prop_name_regex, prop_type in schema.get("patternProperties", {}).items():
             for prop_name in [key for key in self.keys() if re.findall(prop_name_regex, key)]:
                 properties[prop_name] = getattr(self, prop_name)
 
-        for prop_name, prop_value in six.iteritems(properties):
+        for prop_name, prop_value in properties.items():
             spec_path = self.get_spec_path(prop_name, parent=parent)
             schema_path = self.get_schema_path(prop_name, parent=parent)
             prop_parent = {"spec_path": spec_path, "schema_path": schema_path}
@@ -365,7 +364,7 @@ class Spec(object):
             if isinstance(prop_value, MappingSpec):
                 errors.extend(prop_value.inspect_semantics(parent=prop_parent))
 
-                for k, v in six.iteritems(prop_value):
+                for k, v in prop_value.items():
                     item_spec_path = spec_path + "." + k
                     item_schema_path = schema_path + ".patternProperties.^\\w+$"
                     item_parent = {"spec_path": item_spec_path, "schema_path": item_schema_path}
@@ -390,14 +389,14 @@ class Spec(object):
         properties = {}
         schema = self.get_schema(includes=None)
 
-        for prop_name, prop_type in six.iteritems(schema.get("properties", {})):
+        for prop_name, prop_type in schema.get("properties", {}).items():
             properties[prop_name] = getattr(self, prop_name)
 
-        for prop_name_regex, prop_type in six.iteritems(schema.get("patternProperties", {})):
+        for prop_name_regex, prop_type in schema.get("patternProperties", {}).items():
             for prop_name in [key for key in self.keys() if re.findall(prop_name_regex, key)]:
                 properties[prop_name] = getattr(self, prop_name)
 
-        for prop_name, prop_value in six.iteritems(properties):
+        for prop_name, prop_value in properties.items():
             spec_path = self.get_spec_path(prop_name, parent=parent)
             schema_path = self.get_schema_path(prop_name, parent=parent)
 
@@ -412,7 +411,7 @@ class Spec(object):
                 continue
 
             if isinstance(prop_value, MappingSpec):
-                for k, v in six.iteritems(prop_value):
+                for k, v in prop_value.items():
                     item_spec_path = spec_path + "." + k
                     item_schema_path = schema_path + ".patternProperties.^\\w+$"
                     item_parent = {"spec_path": item_spec_path, "schema_path": item_schema_path}
@@ -467,11 +466,11 @@ class Spec(object):
                 ctx_inputs = list(prop_value.keys())
             elif isinstance(prop_value, list):
                 for prop_value_item in prop_value:
-                    if isinstance(prop_value_item, six.string_types):
+                    if isinstance(prop_value_item, str):
                         ctx_inputs.append(prop_value_item)
                     elif isinstance(prop_value_item, dict) and len(prop_value_item) == 1:
                         ctx_inputs.extend(list(prop_value_item.keys()))
-            elif isinstance(prop_value, six.string_types):
+            elif isinstance(prop_value, str):
                 ctx_inputs.append(prop_value)
 
             return ctx_inputs
@@ -528,7 +527,7 @@ class Spec(object):
                 continue
 
             # Parse inline parameters from value if value is a string.
-            if isinstance(prop_value, six.string_types):
+            if isinstance(prop_value, str):
                 inline_params = args_util.parse_inline_params(prop_value)
 
                 if inline_params:

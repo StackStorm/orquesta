@@ -1,4 +1,4 @@
-# Copyright 2021 The StackStorm Authors.
+# Copyright 2021-2023 The StackStorm Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
 
 import argparse
 import mock
-import six
 import unittest
 
 from orquesta.commands import rehearsal
@@ -36,7 +35,7 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
         ),
     )
     def test_rehearse_bad_base_path(self):
-        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+        assertRaisesRegex = self.assertRaisesRegex
 
         assertRaisesRegex(
             exc.WorkflowRehearsalError,
@@ -59,7 +58,7 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
     def test_rehearse_bad_test_spec(self):
         test_spec_path = "%s/tests/foobar.yaml" % fixture_loader.get_rehearsal_fixtures_base_path()
 
-        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+        assertRaisesRegex = self.assertRaisesRegex
 
         assertRaisesRegex(
             exc.WorkflowRehearsalError,
@@ -95,7 +94,7 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
         ),
     )
     def test_rehearse_failure(self):
-        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+        assertRaisesRegex = self.assertRaisesRegex
 
         assertRaisesRegex(
             exc.WorkflowRehearsalError,
@@ -118,7 +117,7 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
     def test_rehearse_bad_test_spec_dir(self):
         test_spec_dir = "%s/foobar" % fixture_loader.get_rehearsal_fixtures_base_path()
 
-        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+        assertRaisesRegex = self.assertRaisesRegex
 
         assertRaisesRegex(
             exc.WorkflowRehearsalError,
@@ -141,7 +140,7 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
     def test_rehearse_multiple(self):
         # The assert raise is correct here because the given test spec directory
         # has a test spec that will fail.
-        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+        assertRaisesRegex = self.assertRaisesRegex
 
         assertRaisesRegex(
             exc.WorkflowRehearsalError,

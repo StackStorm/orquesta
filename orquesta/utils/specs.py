@@ -1,4 +1,4 @@
-# Copyright 2021 The StackStorm Authors.
+# Copyright 2021-2023 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import logging
-import six
 
 from orquesta.specs import loader as spec_loader
 from orquesta.utils import yml as yaml_util
@@ -26,7 +25,7 @@ def instantiate(spec_type, definition):
     if not definition:
         raise ValueError("Workflow definition is empty.")
 
-    if isinstance(definition, six.string_types):
+    if isinstance(definition, str):
         definition = yaml_util.safe_load(definition)
 
     if not isinstance(definition, dict):

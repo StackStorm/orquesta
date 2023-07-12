@@ -18,8 +18,6 @@ import logging
 import networkx as nx
 from networkx.readwrite import json_graph
 
-import six
-
 from orquesta import exceptions as exc
 from orquesta.utils import dictionary as dict_util
 from orquesta.utils import jsonify as json_util
@@ -28,8 +26,7 @@ from orquesta.utils import jsonify as json_util
 LOG = logging.getLogger(__name__)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class WorkflowGraph(object):
+class WorkflowGraph(metaclass=abc.ABCMeta):
     def __init__(self, graph=None):
         # self._graph is the graph model for the workflow. The tracking of workflow and task
         # progress and state is separate from the graph model. There are use cases where tasks
@@ -101,7 +98,7 @@ class WorkflowGraph(object):
         if not self.has_task(task_id):
             raise exc.InvalidTask(task_id)
 
-        for key, value in six.iteritems(kwargs):
+        for key, value in kwargs.items():
             self._graph.nodes[task_id][key] = value
 
     def has_transition(self, source, destination, **kwargs):
@@ -110,7 +107,7 @@ class WorkflowGraph(object):
             self._graph.edges(data=True, keys=True),  # pylint: disable=unexpected-keyword-arg
         )
 
-        for attr, value in six.iteritems(kwargs):
+        for attr, value in kwargs.items():
             edges = filter(lambda e: e[3].get(attr, None) == value, list(edges))
 
         return list(edges)
@@ -127,7 +124,7 @@ class WorkflowGraph(object):
                 self._graph.edges(data=True, keys=True),  # pylint: disable=unexpected-keyword-arg
             )
 
-            for attr, value in six.iteritems(kwargs):
+            for attr, value in kwargs.items():
                 edges = filter(lambda e: e[3].get(attr, None) == value, list(edges))
 
         edges = list(edges)
@@ -153,7 +150,7 @@ class WorkflowGraph(object):
         # Add attributes only if value is not None.
         attrs = {}
 
-        for attr, value in six.iteritems(kwargs):
+        for attr, value in kwargs.items():
             if attr is not None:
                 attrs[attr] = value
 
@@ -162,7 +159,7 @@ class WorkflowGraph(object):
     def update_transition(self, source, destination, key, **kwargs):
         seq = self.get_transition(source, destination, key=key)
 
-        for attr, value in six.iteritems(kwargs):
+        for attr, value in kwargs.items():
             self._graph[source][destination][seq[2]][attr] = value
 
     def get_next_transitions(self, task_id):

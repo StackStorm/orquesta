@@ -37,6 +37,8 @@ Fixed
   Contributed by @Stealthii
 * Update jsonschema requirements to allow 3.2 (security fix)
   Contributed by @james-bellamy
+* Removed six from code base since py2 is not supported.
+  Contributed by @nzlosh
 
 1.5.0
 -----

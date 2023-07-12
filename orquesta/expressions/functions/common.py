@@ -1,3 +1,4 @@
+# Copyright 2021-2023 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +14,7 @@
 # limitations under the License.
 
 import json
-import six
+from itertools import zip_longest
 
 from orquesta import exceptions as exc
 
@@ -22,7 +23,7 @@ def json_(s):
     if isinstance(s, dict):
         return s
 
-    if not isinstance(s, six.string_types):
+    if not isinstance(s, str):
         raise TypeError("Given object is not typeof string.")
 
     return json.loads(s)
@@ -36,7 +37,7 @@ def zip_(*args, **kwargs):
 
     pad_with = kwargs.pop("pad", None)
 
-    return list(six.moves.zip_longest(*args, fillvalue=pad_with))
+    return list(zip_longest(*args, fillvalue=pad_with))
 
 
 def ctx_(context, key=None):
@@ -49,4 +50,4 @@ def ctx_(context, key=None):
 
         return context["__vars"][key]
     else:
-        return {k: v for k, v in six.iteritems(context["__vars"]) if not k.startswith("__")}
+        return {k: v for k, v in context["__vars"].items() if not k.startswith("__")}

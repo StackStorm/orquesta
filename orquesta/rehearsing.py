@@ -1,4 +1,4 @@
-# Copyright 2021 The StackStorm Authors.
+# Copyright 2021-2023 The StackStorm Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,12 +14,10 @@
 
 import copy
 import logging
+import queue
 import os
-import six
 import unittest
 import yaml
-
-from six.moves import queue
 
 from orquesta import conducting
 from orquesta import constants
@@ -47,7 +45,7 @@ def load_test_spec(fixture=None, fixture_path=None, base_path=None):
     if base_path and not os.path.isdir(base_path):
         raise ValueError('The base path "%s" does not exist.' % base_path)
 
-    if fixture and isinstance(fixture, six.string_types):
+    if fixture and isinstance(fixture, str):
         fixture = yaml.safe_load(fixture)
 
     if fixture_path:

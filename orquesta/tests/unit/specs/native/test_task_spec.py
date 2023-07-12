@@ -1,3 +1,4 @@
+# Copyright 2021-2023 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import six
 
 from orquesta.specs import native as native_specs
 from orquesta.tests.unit.specs.native import base as test_base
@@ -526,7 +525,7 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
             "task12": "x,  y in <% zip(ctx(xs), ctx(ys)) %>",
         }
 
-        for task_name, items_expr in six.iteritems(expected_items):
+        for task_name, items_expr in expected_items.items():
             tk_with_attr = getattr(wf_spec.tasks[task_name], "with")
             self.assertEqual(tk_with_attr.items, items_expr)
 

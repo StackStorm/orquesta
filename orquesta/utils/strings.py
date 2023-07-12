@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+# Copyright 2021-2023 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,19 +16,13 @@
 # limitations under the License.
 
 import logging
-
 import chardet
-import six
-
-if six.PY2:
-    import __builtin__  # pylint: disable=import-error
-
 
 LOG = logging.getLogger(__name__)
 
 
 def unescape(s):
-    return s.decode("string_escape") if six.PY2 else bytes(s, "utf-8").decode("unicode_escape")
+    return bytes(s, "utf-8").decode("unicode_escape")
 
 
 def encoding(s):
@@ -33,13 +30,7 @@ def encoding(s):
 
 
 def unicode(s, force=False, encoding_type=None):
-    if not isinstance(s, six.string_types) and not force:
+    if not isinstance(s, str) and not force:
         return s
-
-    if six.PY2:
-        if not force and (isinstance(s, __builtin__.unicode) or encoding(s) == "utf-8"):
-            return s
-
-        return __builtin__.unicode(s, encoding_type) if encoding_type else __builtin__.unicode(s)
 
     return str(s)

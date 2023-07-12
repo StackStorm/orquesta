@@ -1,4 +1,4 @@
-# Copyright 2021 The StackStorm Authors.
+# Copyright 2021-2023 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,6 @@
 import abc
 import copy
 import os
-import six
 import unittest
 
 from orquesta import conducting
@@ -29,8 +28,7 @@ from orquesta.utils import plugin as plugin_util
 from orquesta.utils import specs as spec_util
 
 
-@six.add_metaclass(abc.ABCMeta)
-class ExpressionEvaluatorTest(unittest.TestCase):
+class ExpressionEvaluatorTest(metaclass=abc.ABCMeta):
     language = None
     evaluator = None
 
@@ -39,14 +37,15 @@ class ExpressionEvaluatorTest(unittest.TestCase):
         cls.evaluator = plugin_util.get_module("orquesta.expressions.evaluators", cls.language)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class ExpressionFacadeEvaluatorTest(unittest.TestCase):
+ExpressionEvaluatorTest.register(unittest.TestCase)
+
+
+class ExpressionFacadeEvaluatorTest(unittest.TestCase, metaclass=abc.ABCMeta):
     def validate(self, expr):
         return expr_base.validate(expr).get("errors", [])
 
 
-@six.add_metaclass(abc.ABCMeta)
-class WorkflowGraphTest(unittest.TestCase):
+class WorkflowGraphTest(unittest.TestCase, metaclass=abc.ABCMeta):
     def _zip_wf_graph_meta(self, wf_graph_json):
         wf_graph_json["adjacency"] = [
             sorted(link, key=lambda x: x["id"]) if link else link
@@ -107,8 +106,7 @@ class WorkflowSpecTest(unittest.TestCase):
         self.assertDictEqual(wf_spec.inspect(), errors or {})
 
 
-@six.add_metaclass(abc.ABCMeta)
-class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
+class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest, metaclass=abc.ABCMeta):
     composer = None
 
     @classmethod
@@ -143,8 +141,7 @@ class WorkflowComposerTest(WorkflowGraphTest, WorkflowSpecTest):
         self.assert_graph_equal(wf_ex_graph, expected_wf_ex_graph)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class WorkflowConductorTest(WorkflowComposerTest):
+class WorkflowConductorTest(WorkflowComposerTest, metaclass=abc.ABCMeta):
     def format_task_item(
         self,
         task_id,

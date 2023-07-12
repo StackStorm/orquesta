@@ -1,3 +1,4 @@
+# Copyright 2021-2023 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +14,7 @@
 # limitations under the License.
 
 import logging
-from six.moves import queue
+import queue
 
 from orquesta.composers import base as comp_base
 from orquesta import graphing

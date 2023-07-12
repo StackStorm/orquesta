@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+
+# Copyright 2021-2023 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +19,6 @@ import abc
 import inspect
 import logging
 import re
-import six
 import threading
 
 from stevedore import extension
@@ -32,8 +34,7 @@ _EXP_EVALUATORS_LOCK = threading.Lock()
 _EXP_EVALUATOR_NAMESPACE = "orquesta.expressions.evaluators"
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Evaluator(object):
+class Evaluator(metaclass=abc.ABCMeta):
     _type = "unspecified"
     _delimiter = None
 
@@ -92,11 +93,11 @@ def get_evaluators():
 
 
 def get_statement_regexes():
-    return {t: e.get_statement_regex() for t, e in six.iteritems(get_evaluators())}
+    return {t: e.get_statement_regex() for t, e in get_evaluators().items()}
 
 
 def has_expressions(text):
-    result = {t: e.has_expressions(text) for t, e in six.iteritems(get_evaluators())}
+    result = {t: e.has_expressions(text) for t, e in get_evaluators().items()}
 
     return any(result.values())
 
@@ -105,7 +106,7 @@ def validate(statement):
     errors = []
 
     if isinstance(statement, dict):
-        for k, v in six.iteritems(statement):
+        for k, v in statement.items():
             errors.extend(validate(k)["errors"])
             errors.extend(validate(v)["errors"])
 
@@ -113,10 +114,10 @@ def validate(statement):
         for item in statement:
             errors.extend(validate(item)["errors"])
 
-    elif isinstance(statement, six.string_types):
+    elif isinstance(statement, str):
         evaluators = [
             evaluator
-            for name, evaluator in six.iteritems(get_evaluators())
+            for name, evaluator in get_evaluators().items()
             if evaluator.has_expressions(statement)
         ]
 
@@ -131,13 +132,13 @@ def validate(statement):
 
 def evaluate(statement, data=None):
     if isinstance(statement, dict):
-        return {evaluate(k, data=data): evaluate(v, data=data) for k, v in six.iteritems(statement)}
+        return {evaluate(k, data=data): evaluate(v, data=data) for k, v in statement.items()}
 
     elif isinstance(statement, list):
         return [evaluate(item, data=data) for item in statement]
 
-    elif isinstance(statement, six.string_types):
-        for name, evaluator in six.iteritems(get_evaluators()):
+    elif isinstance(statement, str):
+        for name, evaluator in get_evaluators().items():
             if evaluator.has_expressions(statement):
                 return evaluator.evaluate(statement, data=data)
 
@@ -148,7 +149,7 @@ def extract_vars(statement):
     variables = []
 
     if isinstance(statement, dict):
-        for k, v in six.iteritems(statement):
+        for k, v in statement.items():
             variables.extend(extract_vars(k))
             variables.extend(extract_vars(v))
 
@@ -156,8 +157,8 @@ def extract_vars(statement):
         for item in statement:
             variables.extend(extract_vars(item))
 
-    elif isinstance(statement, six.string_types):
-        for name, evaluator in six.iteritems(get_evaluators()):
+    elif isinstance(statement, str):
+        for name, evaluator in get_evaluators().items():
             for var_ref in evaluator.extract_vars(statement):
                 for regex_var_extract in evaluator.get_var_extraction_regexes():
                     result = re.search(regex_var_extract, var_ref)
@@ -170,8 +171,6 @@ def extract_vars(statement):
 
 
 def func_has_ctx_arg(func):
-    getargspec = (
-        inspect.getargspec if six.PY2 else inspect.getfullargspec  # pylint: disable=no-member
-    )
+    getargspec = inspect.getfullargspec  # pylint: disable=no-member
 
     return "context" in getargspec(func).args

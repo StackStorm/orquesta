@@ -1,3 +1,4 @@
+# Copyright 2021-2023 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import six
 import unittest
 
 from orquesta import exceptions as exc
@@ -191,7 +191,7 @@ class SpecTest(unittest.TestCase):
         attr6_values = list(spec_obj.attr6.values())
         attr6_items = list(spec_obj.attr6.items())
         attr6_iter = [item for item in spec_obj.attr6]
-        attr6_iteritems = [(k, v) for k, v in six.iteritems(spec_obj.attr6)]
+        attr6_iteritems = [(k, v) for k, v in spec_obj.attr6.items()]
 
         self.assertListEqual(attr6_keys, ["attr1"])
         self.assertListEqual(attr6_values, [spec_obj.attr6.attr1])

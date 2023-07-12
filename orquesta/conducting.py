@@ -1,4 +1,4 @@
-# Copyright 2021 The StackStorm Authors.
+# Copyright 2021-2023 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,9 +14,7 @@
 # limitations under the License.
 
 import logging
-import six
-
-from six.moves import queue
+import queue
 
 from orquesta import constants
 from orquesta import events
@@ -119,7 +117,7 @@ class WorkflowState(object):
             task_id, route = q.get()
 
             for i, t in enumerate(self.sequence):
-                for k, v in six.iteritems(t["prev"]):
+                for k, v in t["prev"].items():
                     p = self.sequence[v]
                     if p["id"] == task_id and p["route"] == route:
                         seq.append((i, t))
@@ -590,7 +588,7 @@ class WorkflowConductor(object):
         if getattr(task_spec, "delay", None):
             task_delay = task_spec.delay
 
-            if isinstance(task_delay, six.string_types):
+            if isinstance(task_delay, str):
                 task_delay = expr_base.evaluate(task_delay, task_ctx)
 
             if not isinstance(task_delay, int):
@@ -790,7 +788,7 @@ class WorkflowConductor(object):
 
         # Evaluate the retry delay value.
         if "delay" in task_state_entry["retry"] and isinstance(
-            task_state_entry["retry"]["delay"], six.string_types
+            task_state_entry["retry"]["delay"], str
         ):
             delay_value = expr_base.evaluate(task_state_entry["retry"]["delay"], in_ctx)
 
@@ -801,7 +799,7 @@ class WorkflowConductor(object):
 
         # Evaluate the retry count value.
         if "count" in task_state_entry["retry"] and isinstance(
-            task_state_entry["retry"]["count"], six.string_types
+            task_state_entry["retry"]["count"], str
         ):
             count_value = expr_base.evaluate(task_state_entry["retry"]["count"], in_ctx)
 
@@ -1227,7 +1225,7 @@ class WorkflowConductor(object):
         # Only the index is required for further evaluation below.
         result = {
             k: [i[0] for i in self.workflow_state.get_task_sequence(t.task_id, t.route)]
-            for k, t in six.iteritems(tasks)
+            for k, t in tasks.items()
         }
 
         # If the list of task request is greater than one, then we have to check whether
@@ -1238,10 +1236,7 @@ class WorkflowConductor(object):
             # The for loops below identify task requests that have subsequent task sequences
             # not in other task requests.
             result = {
-                k: i
-                for k, i in six.iteritems(result)
-                for j in result.values()
-                if len(set(i) - set(j)) > 0
+                k: i for k, i in result.items() for j in result.values() if len(set(i) - set(j)) > 0
             }
 
         return result
@@ -1256,9 +1251,7 @@ class WorkflowConductor(object):
         tasks = {t.task_state_entry_id: t for t in task_requests or []}
 
         # If the list of tasks is provided, verify if task exist and rerunnable.
-        invalid_rerun_requests = [
-            t for k, t in six.iteritems(tasks) if k not in self.workflow_state.tasks
-        ]
+        invalid_rerun_requests = [t for k, t in tasks.items() if k not in self.workflow_state.tasks]
 
         if invalid_rerun_requests:
             raise exc.InvalidTaskRerunRequest(invalid_rerun_requests)
@@ -1277,7 +1270,7 @@ class WorkflowConductor(object):
                     self._get_task_state_idx(t.task_id, t.route),
                     self.workflow_state.get_task(t.task_id, t.route),
                 )
-                for k, t in six.iteritems(tasks)
+                for k, t in tasks.items()
                 if k in self._collapse_task_rerun_requests(tasks)
             }
 
@@ -1299,11 +1292,11 @@ class WorkflowConductor(object):
         continuable_candidates = {
             constants.TASK_STATE_ROUTE_FORMAT % (t["id"], str(t["route"])): t
             for i, t in self.workflow_state.get_terminal_tasks()
-            if len([k for k, v in six.iteritems(t["next"]) if v]) > 0
+            if len([k for k, v in t["next"].items() if v]) > 0
         }
 
         # Automatically resume all continuable candidates.
-        for _, task in sorted(six.iteritems(continuable_candidates), key=lambda x: x[0]):
+        for _, task in sorted(continuable_candidates.items(), key=lambda x: x[0]):
             # Reset terminal status for the continuable candidate.
             task.pop("term", None)
 

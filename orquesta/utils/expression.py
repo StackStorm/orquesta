@@ -1,3 +1,4 @@
+# Copyright 2021-2023 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import six
-
 
 def format_error(expr_type, expr, exc, spec_path=None, schema_path=None):
     error = {
         "type": expr_type,
         "expression": expr,
-        "message": exc if isinstance(exc, six.string_types) else str(getattr(exc, "message", exc)),
+        "message": exc if isinstance(exc, str) else str(getattr(exc, "message", exc)),
     }
 
     if spec_path:

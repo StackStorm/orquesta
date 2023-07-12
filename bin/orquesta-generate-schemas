@@ -1,3 +1,4 @@
+# Copyright 2021-2023 The StackStorm Authors.
 # Licensed to the StackStorm, Inc ('StackStorm') under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -18,7 +19,6 @@ from __future__ import absolute_import
 import inspect
 import json
 import os
-import six
 import sys
 
 from orquesta.specs import native
@@ -32,7 +32,7 @@ def main():
     scripts_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
     schemas_dir = scripts_dir + "/../docs/source/schemas"
 
-    for name, model in six.iteritems(workflow_models):
+    for name, model in workflow_models.items():
         new_schema_text = json.dumps(model.get_schema(), indent=4) + "\n"
         print('Generated schema for the "%s" model.' % name)
 
