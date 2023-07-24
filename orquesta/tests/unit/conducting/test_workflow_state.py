@@ -88,7 +88,7 @@ class WorkflowStateTest(unittest.TestCase):
 
         data["sequence"] = copy.deepcopy(task_sequence)
         state = conducting.WorkflowState.deserialize(data)
-        MOCK_WORKFLOW_STATE["staged"]=["something"]
+        MOCK_WORKFLOW_STATE["staged"] = ["something"]
         self.assertNotEqual(len(state.staged), len(MOCK_WORKFLOW_STATE["staged"]))
 
     def test_get_tasks_by_task_id_and_route(self):
