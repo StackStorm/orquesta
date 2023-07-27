@@ -296,7 +296,7 @@ class WorkflowConductor(object):
         context = data["context"]
         state = WorkflowState.deserialize(data["state"])
         log = data.get("log", [])
-        errors = data["errors"]
+        errors = json_util.deepcopy(data["errors"])
         outputs = data["output"]
 
         instance = cls(spec)
