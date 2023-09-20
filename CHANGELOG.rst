@@ -1,6 +1,14 @@
 Changelog
 =========
 
+In Development
+--------------
+
+Changed
+~~~~~~~
+* Update deprecated `collections` imports to `collections.abc`
+  Contributed by @AndroxxTraxxon
+
 1.5.0
 -----
 
