@@ -6,7 +6,7 @@ In Development
 
 Changed
 ~~~~~~~
-* Update deprecated `collections` imports to `collections.abc`
+* Update deprecated `collections` imports to `collections.abc` to be forward-compatible with Python3.10
   Contributed by @AndroxxTraxxon
 
 1.5.0
