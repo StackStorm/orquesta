@@ -1,6 +1,15 @@
 Changelog
 =========
 
+In Development
+--------------
+
+Changed
+~~~~~~~
+
+* Update networkx >=2.6 for Python 3.8 to fix insecure deserialization #255 (improvement)
+  Contributed by @Stealthii
+
 1.5.0
 -----
 
