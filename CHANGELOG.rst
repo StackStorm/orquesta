@@ -9,6 +9,8 @@ Changed
 
 * Update networkx >=2.6 for Python 3.8 to fix insecure deserialization #255 (improvement)
   Contributed by @Stealthii
+* Update jsonschema requirements to allow 3.2 (improvement)
+  Contributed by @james-bellamy
 
 1.5.0
 -----
