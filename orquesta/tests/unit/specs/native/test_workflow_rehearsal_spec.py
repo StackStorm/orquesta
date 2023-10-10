@@ -211,8 +211,7 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
     def test_init_test_spec_with_base_path(self):
         shutil.copy(self.get_wf_file_path("sequential"), "/tmp/sequential.yaml")
 
-        fd, path = tempfile.mkstemp(suffix=".json")
-
+        fd, path = tempfile.mkstemp(suffix=".json", dir="/tmp")
         with os.fdopen(fd, "w") as tmp:
             tmp.write('{"foo": "bar"}\n')
 
