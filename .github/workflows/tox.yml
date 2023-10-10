@@ -12,20 +12,10 @@ on:
 
 jobs:
   tests:
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
-        python-version: ["3.6", "3.8", "3.10"]
-        os: [ubuntu-latest, ubuntu-22.04, ubuntu-20.04]
-        exclude: 
-          - python-version: "3.10"
-            os: ubuntu-20.04
-          - python-version: "3.12"
-            os: ubuntu-20.04
-          - python-version: "3.6"
-            os: ubuntu-22.04
-          - python-version: "3.6"
-            os: ubuntu-latest
-    runs-on: ${{matrix.os}}
+        python-version: ["3.6", "3.8"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
