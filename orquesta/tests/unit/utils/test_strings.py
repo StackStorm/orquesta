@@ -28,7 +28,7 @@ class StringsTest(unittest.TestCase):
     def test_unicode(self):
         self.assertEqual(str_util.unicode(123), 123)
         self.assertEqual(str_util.unicode("foobar"), "foobar")
-        self.assertEqual(str_util.unicode(u"fubar" if six.PY2 else str("fubar")), "fubar")
+        self.assertEqual(str_util.unicode("fubar" if six.PY2 else str("fubar")), "fubar")
         self.assertEqual(str_util.unicode("鐵甲奇俠"), "鐵甲奇俠")
         self.assertEqual(str_util.unicode("\xe9\x90\xb5\xe7\x94\xb2"), "\xe9\x90\xb5\xe7\x94\xb2")
 
