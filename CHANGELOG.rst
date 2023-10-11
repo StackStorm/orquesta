@@ -9,6 +9,10 @@ Changed
 
 * Update deprecated `collections` imports to `collections.abc` to be forward-compatible with Python3.10
   Contributed by @AndroxxTraxxon
+* Migrate from `nosetest` to `pytest` for Python test runner.
+  Contributed by @AndroxxTraxxon
+* Add Python versions 3.9, 3.10, and 3.11 to the test matrix
+  Contributed by @AndroxxTraxxon
 * Update networkx >=2.6 for Python 3.8 to fix insecure deserialization #255 (improvement)
   Contributed by @Stealthii
 * Update jsonschema requirements to allow 3.2 (improvement)
