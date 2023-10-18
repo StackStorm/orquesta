@@ -156,7 +156,6 @@ class WorkflowConductorTest(WorkflowComposerTest):
         items_count=None,
         items_concurrency=None,
     ):
-
         if not actions and items_count is None:
             actions = [{"action": spec.action, "input": spec.input}]
 
@@ -285,7 +284,6 @@ class WorkflowConductorWithItemsTest(WorkflowConductorTest):
         concurrency=None,
         mock_ac_ex_results=None,
     ):
-
         # Set up test cases.
         tests = list(zip(mock_ac_ex_statuses, expected_task_statuses, expected_workflow_statuses))
         tk_ex_result = [None] * len(items)

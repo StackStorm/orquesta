@@ -370,7 +370,6 @@ class WorkflowConductor(object):
         result=None,
         data=None,
     ):
-
         # Check entry type.
         if entry_type not in ["info", "warn", "error"]:
             raise exc.WorkflowLogEntryError('The log entry type "%s" is not valid.' % entry_type)
