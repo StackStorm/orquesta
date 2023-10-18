@@ -1,8 +1,8 @@
 Changelog
 =========
 
-In Development
---------------
+1.6.0
+-----
 
 Changed
 ~~~~~~~
@@ -13,9 +13,13 @@ Changed
   Contributed by @AndroxxTraxxon
 * Add Python versions 3.9, 3.10, and 3.11 to the test matrix
   Contributed by @AndroxxTraxxon
-* Update networkx >=2.6 for Python 3.8 to fix insecure deserialization #255 (improvement)
+
+Fixed
+~~~~~
+
+* Update networkx >=2.6 for Python 3.8 to fix insecure deserialization #255 (security fix)
   Contributed by @Stealthii
-* Update jsonschema requirements to allow 3.2 (improvement)
+* Update jsonschema requirements to allow 3.2 (security fix)
   Contributed by @james-bellamy
 
 1.5.0
