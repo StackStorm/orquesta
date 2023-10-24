@@ -629,6 +629,9 @@ class WorkflowConductor(object):
         active_items = list(filter(lambda x: x[1]["status"] in statuses.ACTIVE_STATUSES, all_items))
 
         if task["concurrency"] is not None:
+            # Concurrency below 1 prevents scheduling of tasks.
+            if task["concurrency"] <= 0:
+               task["concurrency"] = 1
             availability = task["concurrency"] - len(active_items)
             candidates = list(zip(*notrun_items[:availability]))
             task["actions"] = list(candidates[0]) if candidates and availability > 0 else []
