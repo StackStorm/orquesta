@@ -417,7 +417,9 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
           - items: <% ctx(items) %>
         """
 
-        concurrency = 0
+        # Set the concurrency to 1 since concurrency 0 is expected to be
+        # overridden in the Orquesta concurrency scheduling code.
+        concurrency = 1
 
         spec = native_specs.WorkflowSpec(wf_def)
         self.assertDictEqual(spec.inspect(), {})
@@ -459,7 +461,6 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
 
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
-
 
     def test_multiple_items_list(self):
         wf_def = """
