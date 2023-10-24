@@ -12,11 +12,10 @@ on:
 
 jobs:
   tests:
-    #python 3.6 not available on ubuntu-latest
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        python-version: ["3.6", "3.8"]
+        python-version: ["3.6", "3.8", "3.9", "3.10", "3.11"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -30,5 +29,4 @@ jobs:
           pip install -r requirements-ci.txt
           make clean reqs schemas
       - name: "Run tox for ${{ matrix.python-version }}"
-        run: |
-          make check
+        run: make check

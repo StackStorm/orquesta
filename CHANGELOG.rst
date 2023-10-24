@@ -1,15 +1,25 @@
 Changelog
 =========
 
-In Development
---------------
+1.6.0
+-----
 
 Changed
 ~~~~~~~
 
-* Update networkx >=2.6 for Python 3.8 to fix insecure deserialization #255 (improvement)
+* Update deprecated `collections` imports to `collections.abc` to be forward-compatible with Python3.10
+  Contributed by @AndroxxTraxxon
+* Migrate from `nosetest` to `pytest` for Python test runner.
+  Contributed by @AndroxxTraxxon
+* Add Python versions 3.9, 3.10, and 3.11 to the test matrix
+  Contributed by @AndroxxTraxxon
+
+Fixed
+~~~~~
+
+* Update networkx >=2.6 for Python 3.8 to fix insecure deserialization #255 (security fix)
   Contributed by @Stealthii
-* Update jsonschema requirements to allow 3.2 (improvement)
+* Update jsonschema requirements to allow 3.2 (security fix)
   Contributed by @james-bellamy
 
 1.5.0
