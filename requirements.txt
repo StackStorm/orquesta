@@ -1,4 +1,4 @@
-chardet>=3.0.2,<4.0.0
+chardet==5.2.0
 eventlet
 Jinja2>=2.11 # BSD License (3 clause)
 jsonschema!=2.5.0,>=2.0.0,<=3.2 # MIT
