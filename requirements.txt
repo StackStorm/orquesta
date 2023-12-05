@@ -1,7 +1,8 @@
 chardet==5.2.0
 eventlet
 Jinja2==3.1.2 # BSD License (3 clause)
-jsonschema==4.20.0 # MIT
+jsonschema!=2.5.0,>=2.0.0,<=3.2 # MIT
+# jsonschema newer version not working: ImportError: cannot import name '_validators' from 'jsonschema' (/home/hombergerpadm/st2-python-keyczar/virtualenv/lib/python3.8/site-packages/jsonschema/__init__.py
 networkx==3.1
 python-dateutil
 PyYAML==6.0.1
