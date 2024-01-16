@@ -184,13 +184,7 @@ class WorkflowState(object):
         if not filtered:
             return self.staged
 
-        # resp = [x for x in self.staged if x["ready"] and not x.get("completed", False)]
-        resp = []
-        it_cnt = 0
-        for x in self.staged:
-            if x["ready"] and not x.get("completed", False):
-                resp.append(x)
-            it_cnt += 1
+        resp = [x for x in self.staged if x["ready"] and not x.get("completed", False)]
         return resp
 
     @property
@@ -713,7 +707,6 @@ class WorkflowConductor(object):
         # task rendering, then log the error and continue. This allows user to know about
         # all task rendering errors for this task transition instead of getting rendering
         # error one at a time during runtime.
-        it_cnt = 0
         for staged_task in remediation_tasks or staged_tasks:
             try:
                 next_task = self.get_task(staged_task["id"], staged_task["route"])
@@ -726,14 +719,12 @@ class WorkflowConductor(object):
 
                 if "actions" in next_task and len(next_task["actions"]) > 0:
                     next_tasks.append(next_task)
-
                 elif "items_count" in next_task and next_task["items_count"] == 0:
                     next_tasks.append(next_task)
             except Exception as e:
                 fail_on_task_rendering = True
                 self.log_error(e, task_id=staged_task["id"], route=staged_task["route"])
                 continue
-            it_cnt += 1
 
         # Return nothing if there is error(s) on determining next tasks.
         if fail_on_task_rendering:
