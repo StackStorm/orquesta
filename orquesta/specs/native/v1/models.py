@@ -15,8 +15,6 @@
 
 import logging
 import six
-import time
-import uuid
 from six.moves import queue
 
 from orquesta import events
@@ -156,27 +154,19 @@ class TaskSpec(native_v1_specs.Spec):
         return hasattr(self, "retry") and self.retry
 
     def render(self, in_ctx):
-        gnt_uuid = uuid.uuid4()
-        start = time.time()
-        LOG.info("render - 1 - %s, %s", gnt_uuid, time.time() - start)
         action_specs = []
 
         item_ctx_value = ctx_util.copy_context(in_ctx)
 
         if not self.has_items():
-            # LOG.info("render - 2 - %s, %s", gnt_uuid, time.time() - start)
             action_spec = {
                 "action": expr_base.evaluate(self.action, in_ctx),
                 "input": expr_base.evaluate(getattr(self, "input", {}), in_ctx),
             }
-            # LOG.info("render - 3 - %s, %s", gnt_uuid, time.time() - start)
 
             action_specs.append(action_spec)
-            # LOG.info("render - 4 - %s, %s", gnt_uuid, time.time() - start)
         else:
-            # LOG.info("render - 5 - %s, %s", gnt_uuid, time.time() - start)
             items_spec = self.get_items_spec()
-            # LOG.info("render - 6 - %s, %s", gnt_uuid, time.time() - start)
 
             if " in " not in items_spec.items:
                 items_expr = items_spec.items.strip()
@@ -184,10 +174,7 @@ class TaskSpec(native_v1_specs.Spec):
                 start_idx = items_spec.items.index(" in ") + 4
                 items_expr = items_spec.items[start_idx:].strip()
 
-            # LOG.info("render - 7 - %s, %s", gnt_uuid, time.time() - start)
-
             items = expr_base.evaluate(items_expr, in_ctx)
-            # LOG.info("render - 8 - %s, %s", gnt_uuid, time.time() - start)
 
             if not isinstance(items, list):
                 raise TypeError('The value of "%s" is not type of list.' % items_expr)
@@ -197,39 +184,23 @@ class TaskSpec(native_v1_specs.Spec):
                 if " in " not in items_spec.items
                 else items_spec.items[: items_spec.items.index(" in ")].replace(" ", "").split(",")
             )
-            LOG.info("render - 9 - %s, %s", gnt_uuid, time.time() - start)
 
             for idx, item in enumerate(items):
-                LOG.info("render - 10.%s - %s, %s", idx, gnt_uuid, time.time() - start)
                 if item_keys and (isinstance(item, tuple) or isinstance(item, list)):
-                    LOG.info("render - 11.%s - %s, %s", idx, gnt_uuid, time.time() - start)
                     item = dict(zip(item_keys, list(item)))
-                    LOG.info("render - 12.%s - %s, %s", idx, gnt_uuid, time.time() - start)
                 elif item_keys and len(item_keys) == 1:
-                    LOG.info("render - 13.%s - %s, %s", idx, gnt_uuid, time.time() - start)
                     item = {item_keys[0]: item}
-                    LOG.info("render - 14.%s - %s, %s", idx, gnt_uuid, time.time() - start)
 
-                LOG.info("render - 15.%s - %s, %s", idx, gnt_uuid, time.time() - start)
                 item_ctx_value = ctx_util.set_current_item(item_ctx_value, item)
-                LOG.info("render - 16.%s - %s, %s", idx, gnt_uuid, time.time() - start)
-                LOG.info("render - 16.0.%s - %s, %s - self.action - %s", idx, gnt_uuid, time.time() - start, self.action)
-                LOG.info("render - 16.1.%s - %s, %s - getattr(self, 'input', {}) - %s", idx, gnt_uuid, time.time() - start, getattr(self, "input", {}))
                 action = expr_base.evaluate(self.action, item_ctx_value)
-                LOG.info("render - 16.2.%s - %s, %s - action - %s", idx, gnt_uuid, time.time() - start, action)
                 gen_input = expr_base.evaluate(getattr(self, "input", {}), item_ctx_value)
-                LOG.info("render - 16.3.%s - %s, %s - gen_input - %s", idx, gnt_uuid, time.time() - start, gen_input)
                 action_spec = {
                     "action": action,
                     "input": gen_input,
                     "item_id": idx,
                 }
-                LOG.info("render - 17.%s - %s, %s, action_spec - %s", idx, gnt_uuid, time.time() - start, action_spec)
-
                 action_specs.append(action_spec)
-                # LOG.info("render - 18.%s - %s, %s", idx, gnt_uuid, time.time() - start)
 
-        LOG.info("render - 19 - %s, %s, action_specs - %s", gnt_uuid, time.time() - start, action_specs)
         return self, action_specs
 
     def finalize_context(self, next_task_name, task_transition_meta, in_ctx):

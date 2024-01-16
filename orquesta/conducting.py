@@ -15,8 +15,6 @@
 
 import logging
 import six
-import time
-import uuid
 
 from six.moves import queue
 
@@ -183,24 +181,16 @@ class WorkflowState(object):
         return unreachable_barriers
 
     def get_staged_tasks(self, filtered=True):
-        gnt_uuid = uuid.uuid4()
-        start = time.time()
-        LOG.info("get_staged_tasks - 1 - %s, %s", gnt_uuid, time.time() - start)
         if not filtered:
             return self.staged
-        LOG.info("get_staged_tasks - 2 - %s, %s", gnt_uuid, time.time() - start)
 
         # resp = [x for x in self.staged if x["ready"] and not x.get("completed", False)]
         resp = []
         it_cnt = 0
         for x in self.staged:
-            LOG.info("get_staged_tasks - 3.%s - %s, %s", it_cnt, gnt_uuid, time.time() - start)
             if x["ready"] and not x.get("completed", False):
-                LOG.info("get_staged_tasks - 4.%s - %s, %s", it_cnt, gnt_uuid, time.time() - start)
                 resp.append(x)
-                LOG.info("get_staged_tasks - 5.%s - %s, %s", it_cnt, gnt_uuid, time.time() - start)
             it_cnt += 1
-        LOG.info("get_staged_tasks - 6 - %s, %s", gnt_uuid, time.time() - start)
         return resp
 
     @property
@@ -583,29 +573,17 @@ class WorkflowConductor(object):
         return constants.INBOUND_CRITERIA_NOT_SATISFIED
 
     def get_task(self, task_id, route):
-        gnt_uuid = uuid.uuid4()
-        start = time.time()
-        LOG.info("get_task - 1 - %s, %s", gnt_uuid, time.time() - start)
         try:
             task_ctx = self.get_task_initial_context(task_id, route)
-            LOG.info("get_task - 2 - %s, %s", gnt_uuid, time.time() - start)
         except ValueError:
-            LOG.info("get_task - 3 - %s, %s", gnt_uuid, time.time() - start)
             task_ctx = self.get_workflow_initial_context()
-            LOG.info("get_task - 4 - %s, %s", gnt_uuid, time.time() - start)
 
-        LOG.info("get_task - 5 - %s, %s", gnt_uuid, time.time() - start)
         state_ctx = {"__state": self.workflow_state.serialize()}
-        LOG.info("get_task - 6 - %s, %s", gnt_uuid, time.time() - start)
         current_task = {"id": task_id, "route": route}
         task_ctx = ctx_util.set_current_task(task_ctx, current_task)
-        LOG.info("get_task - 7 - %s, %s", gnt_uuid, time.time() - start)
         task_ctx = dict_util.merge_dicts(task_ctx, state_ctx, True)
-        LOG.info("get_task - 8 - %s, %s", gnt_uuid, time.time() - start)
         task_spec = self.spec.tasks.get_task(task_id).copy()
-        LOG.info("get_task - 9 - %s, %s", gnt_uuid, time.time() - start)
         task_spec, action_specs = task_spec.render(task_ctx)
-        LOG.info("get_task - 10 - %s, %s", gnt_uuid, time.time() - start)
 
         task = {
             "id": task_id,
@@ -617,37 +595,23 @@ class WorkflowConductor(object):
 
         # If there is a task delay specified, evaluate the delay value.
         if getattr(task_spec, "delay", None):
-            LOG.info("get_task - 11 - %s, %s", gnt_uuid, time.time() - start)
             task_delay = task_spec.delay
 
-            LOG.info("get_task - 12 - %s, %s", gnt_uuid, time.time() - start)
             if isinstance(task_delay, six.string_types):
-                LOG.info("get_task - 13 - %s, %s", gnt_uuid, time.time() - start)
                 task_delay = expr_base.evaluate(task_delay, task_ctx)
-                LOG.info("get_task - 14 - %s, %s", gnt_uuid, time.time() - start)
 
-            LOG.info("get_task - 15 - %s, %s", gnt_uuid, time.time() - start)
             if not isinstance(task_delay, int):
-                LOG.info("get_task - 16 - %s, %s", gnt_uuid, time.time() - start)
                 raise TypeError("The value of task delay is not type of integer.")
 
             task["delay"] = task_delay
-            LOG.info("get_task - 17 - %s, %s", gnt_uuid, time.time() - start)
 
         # Add items and related meta data to the task details.
-        LOG.info("get_task - 18 - %s, %s", gnt_uuid, time.time() - start)
         if task_spec.has_items():
-            LOG.info("get_task - 19 - %s, %s", gnt_uuid, time.time() - start)
             items_spec = getattr(task_spec, "with")
-            LOG.info("get_task - 20 - %s, %s", gnt_uuid, time.time() - start)
             concurrency = getattr(items_spec, "concurrency", None)
-            LOG.info("get_task - 21 - %s, %s", gnt_uuid, time.time() - start)
             task["items_count"] = len(action_specs)
-            LOG.info("get_task - 22 - %s, %s", gnt_uuid, time.time() - start)
             task["concurrency"] = expr_base.evaluate(concurrency, task_ctx)
-            LOG.info("get_task - 23 - %s, %s", gnt_uuid, time.time() - start)
 
-        LOG.info("get_task - 24 - %s, %s", gnt_uuid, time.time() - start)
         return task
 
     def _evaluate_task_actions(self, task):
@@ -732,27 +696,18 @@ class WorkflowConductor(object):
         return self._has_next(task_id, route=route)
 
     def get_next_tasks(self):
-        gnt_uuid = uuid.uuid4()
-        start = time.time()
-        LOG.info("get_next_tasks - 1 - %s, %s", gnt_uuid, time.time() - start)
         fail_on_task_rendering = False
         staged_tasks = self.workflow_state.get_staged_tasks()
-        LOG.info("get_next_tasks - 2 - %s, %s", gnt_uuid, time.time() - start)
         remediation_tasks = []
         next_tasks = []
 
         # Identify remediation tasks if workflow failed.
         if self.get_workflow_status() == statuses.FAILED:
-            LOG.info("get_next_tasks - 3 - %s, %s", gnt_uuid, time.time() - start)
             remediation_tasks = [s for s in staged_tasks if s.get("run_on_fail", False) is True]
-            LOG.info("get_next_tasks - 4 - %s, %s", gnt_uuid, time.time() - start)
 
         # Return an empty list if the workflow is not running and there is no remediation tasks.
-        LOG.info("get_next_tasks - 5 - %s, %s", gnt_uuid, time.time() - start)
         if self.get_workflow_status() not in statuses.RUNNING_STATUSES and not remediation_tasks:
-            LOG.info("get_next_tasks - 6 - %s, %s", gnt_uuid, time.time() - start)
             return next_tasks
-        LOG.info("get_next_tasks - 7 - %s, %s", gnt_uuid, time.time() - start)
 
         # Return the list of tasks that are staged and readied. If there is exception on
         # task rendering, then log the error and continue. This allows user to know about
@@ -760,45 +715,31 @@ class WorkflowConductor(object):
         # error one at a time during runtime.
         it_cnt = 0
         for staged_task in remediation_tasks or staged_tasks:
-            LOG.info("get_next_tasks - 8.%s - %s, %s", it_cnt, gnt_uuid, time.time() - start)
             try:
                 next_task = self.get_task(staged_task["id"], staged_task["route"])
-                LOG.info("get_next_tasks - 9.%s - %s, %s", it_cnt, gnt_uuid, time.time() - start)
                 next_task = self._evaluate_task_actions(next_task)
-                LOG.info("get_next_tasks - 10.%s - %s, %s", it_cnt, gnt_uuid, time.time() - start)
 
                 # Assign the task retry delay which will overwrite any task delay
                 # specified in the task definition.
                 if "retry" in staged_task:
-                    LOG.info("get_next_tasks - 11.%s - %s, %s", it_cnt, gnt_uuid, time.time() - start)
                     next_task["delay"] = staged_task["retry"].get("delay") or 0
 
-                LOG.info("get_next_tasks - 12.%s - %s, %s", it_cnt, gnt_uuid, time.time() - start)
                 if "actions" in next_task and len(next_task["actions"]) > 0:
-                    LOG.info("get_next_tasks - 13.%s - %s, %s", it_cnt, gnt_uuid, time.time() - start)
                     next_tasks.append(next_task)
-                    LOG.info("get_next_tasks - 14.%s - %s, %s", it_cnt, gnt_uuid, time.time() - start)
 
                 elif "items_count" in next_task and next_task["items_count"] == 0:
-                    LOG.info("get_next_tasks - 15.%s - %s, %s", it_cnt, gnt_uuid, time.time() - start)
                     next_tasks.append(next_task)
-                    LOG.info("get_next_tasks - 16.%s - %s, %s", it_cnt, gnt_uuid, time.time() - start)
             except Exception as e:
-                LOG.info("get_next_tasks - 17.%s - %s, %s", it_cnt, gnt_uuid, time.time() - start)
                 fail_on_task_rendering = True
                 self.log_error(e, task_id=staged_task["id"], route=staged_task["route"])
                 continue
             it_cnt += 1
 
         # Return nothing if there is error(s) on determining next tasks.
-        LOG.info("get_next_tasks - 18 - %s, %s", gnt_uuid, time.time() - start)
         if fail_on_task_rendering:
-            LOG.info("get_next_tasks - 19 - %s, %s", gnt_uuid, time.time() - start)
             self.request_workflow_status(statuses.FAILED)
-            LOG.info("get_next_tasks - 20 - %s, %s", gnt_uuid, time.time() - start)
             return []
 
-        LOG.info("get_next_tasks - 21 - %s, %s", gnt_uuid, time.time() - start)
         return sorted(next_tasks, key=lambda x: (x["id"], x["route"]))
 
     def _get_task_state_idx(self, task_id, route):
