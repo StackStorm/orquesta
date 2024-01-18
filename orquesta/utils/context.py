@@ -47,6 +47,7 @@ def copy_context(context):
     ctx = json_util.deepcopy(context) if context else dict()
     return ctx
 
+
 def set_current_item(context, item):
     if context and not isinstance(context, dict):
         raise TypeError("The context is not type of dict.")
