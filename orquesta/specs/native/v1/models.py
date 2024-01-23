@@ -155,7 +155,6 @@ class TaskSpec(native_v1_specs.Spec):
 
     def render(self, in_ctx):
         action_specs = []
-
         if not self.has_items():
             action_spec = {
                 "action": expr_base.evaluate(self.action, in_ctx),
@@ -182,21 +181,26 @@ class TaskSpec(native_v1_specs.Spec):
                 if " in " not in items_spec.items
                 else items_spec.items[: items_spec.items.index(" in ")].replace(" ", "").split(",")
             )
-
             for idx, item in enumerate(items):
                 if item_keys and (isinstance(item, tuple) or isinstance(item, list)):
                     item = dict(zip(item_keys, list(item)))
                 elif item_keys and len(item_keys) == 1:
                     item = {item_keys[0]: item}
 
-                item_ctx_value = ctx_util.set_current_item(in_ctx, item)
+                if in_ctx and not isinstance(in_ctx, dict):
+                    raise TypeError("The context is not type of dict.")
 
-                action_spec = {
-                    "action": expr_base.evaluate(self.action, item_ctx_value),
-                    "input": expr_base.evaluate(getattr(self, "input", {}), item_ctx_value),
-                    "item_id": idx,
-                }
+                in_ctx["__current_item"] = item
 
+                try:
+                    action_spec = {
+                        "action": expr_base.evaluate(self.action, in_ctx),
+                        "input": expr_base.evaluate(getattr(self, "input", {}), in_ctx),
+                        "item_id": idx,
+                    }
+                finally:
+                    in_ctx.pop("__current_item", None)
+                # expr_base.evaluate does the copy for us here.
                 action_specs.append(action_spec)
 
         return self, action_specs

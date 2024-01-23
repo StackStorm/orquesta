@@ -575,6 +575,7 @@ class WorkflowConductor(object):
         task_ctx = ctx_util.set_current_task(task_ctx, current_task)
         task_ctx = dict_util.merge_dicts(task_ctx, state_ctx, True)
         task_spec = self.spec.tasks.get_task(task_id).copy()
+        # here is where taskspec.render is used
         task_spec, action_specs = task_spec.render(task_ctx)
 
         task = {
