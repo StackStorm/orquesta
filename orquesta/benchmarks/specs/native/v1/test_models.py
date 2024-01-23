@@ -40,9 +40,9 @@ def test_task_spec_render(benchmark, fixture):
             },
         }
         # Instantiate conductor
-        res, actions = task_spec.render(in_ctx)
+        task_spec.render(in_ctx)
 
-    res = benchmark(run_benchmark)
+    benchmark(run_benchmark)
 
 
 class OldTaskSpec(models.TaskSpec):
@@ -122,6 +122,6 @@ def test_task_spec_render_old(benchmark, fixture):
             },
         }
         # Instantiate conductor
-        res, actions = task_spec.render(in_ctx)
+        task_spec.render(in_ctx)
 
-    res = benchmark(run_benchmark)
+    benchmark(run_benchmark)
