@@ -184,8 +184,7 @@ class WorkflowState(object):
         if not filtered:
             return self.staged
 
-        resp = [x for x in self.staged if x["ready"] and not x.get("completed", False)]
-        return resp
+        return [x for x in self.staged if x["ready"] and not x.get("completed", False)]
 
     @property
     def has_staged_tasks(self):
