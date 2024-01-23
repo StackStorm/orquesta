@@ -22,7 +22,6 @@ from orquesta import exceptions as exc
 from orquesta.expressions import base as expr_base
 from orquesta.specs.native.v1 import base as native_v1_specs
 from orquesta.specs import types as spec_types
-from orquesta.utils import context as ctx_util
 from orquesta.utils import dictionary as dict_util
 from orquesta.utils import jsonify as json_util
 from orquesta.utils import parameters as args_util
