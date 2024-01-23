@@ -183,6 +183,7 @@ class TaskSpec(native_v1_specs.Spec):
                 if " in " not in items_spec.items
                 else items_spec.items[: items_spec.items.index(" in ")].replace(" ", "").split(",")
             )
+
             for idx, item in enumerate(items):
                 if item_keys and (isinstance(item, tuple) or isinstance(item, list)):
                     item = dict(zip(item_keys, list(item)))
@@ -190,11 +191,13 @@ class TaskSpec(native_v1_specs.Spec):
                     item = {item_keys[0]: item}
 
                 item_ctx_value = ctx_util.set_current_item(item_ctx_value, item)
+
                 action_spec = {
                     "action": expr_base.evaluate(self.action, item_ctx_value),
                     "input": expr_base.evaluate(getattr(self, "input", {}), item_ctx_value),
                     "item_id": idx,
                 }
+
                 action_specs.append(action_spec)
 
         return self, action_specs
