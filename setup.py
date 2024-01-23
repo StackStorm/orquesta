@@ -54,10 +54,6 @@ setup(
     packages=find_packages(exclude=[]),
     install_requires=get_requirements(),
     license="Apache License (2.0)",
-    extras_require={
-        "tests": ["coverage", "pytest>=6.2.2", "pytest-cov", "mock"],
-        "build": ["wheel"],
-    },
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Information Technology",
