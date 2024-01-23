@@ -391,6 +391,77 @@ class WorkflowConductorWithItemsTest(test_base.WorkflowConductorWithItemsTest):
         # Assert the workflow succeeded.
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
 
+    def test_basic_items_list_with_zero_concurrency(self):
+        wf_def = """
+        version: 1.0
+
+        vars:
+          - concurrency: 0
+          - xs:
+              - fee
+              - fi
+              - fo
+              - fum
+
+        tasks:
+          task1:
+            with:
+              items: <% ctx(xs) %>
+              concurrency: <% ctx(concurrency) %>
+            action: core.echo message=<% item() %>
+            next:
+              - publish:
+                  - items: <% result() %>
+
+        output:
+          - items: <% ctx(items) %>
+        """
+
+        # Set the concurrency to 1 since concurrency 0 is expected to be
+        # overridden in the Orquesta concurrency scheduling code.
+        concurrency = 1
+
+        spec = native_specs.WorkflowSpec(wf_def)
+        self.assertDictEqual(spec.inspect(), {})
+
+        conductor = conducting.WorkflowConductor(spec)
+        conductor.request_workflow_status(statuses.RUNNING)
+
+        # Mock the action execution for each item and assert expected task statuses.
+        task_route = 0
+        task_name = "task1"
+        task_ctx = {"xs": ["fee", "fi", "fo", "fum"], "concurrency": 0}
+
+        task_action_specs = [
+            {"action": "core.echo", "input": {"message": "fee"}, "item_id": 0},
+            {"action": "core.echo", "input": {"message": "fi"}, "item_id": 1},
+            {"action": "core.echo", "input": {"message": "fo"}, "item_id": 2},
+            {"action": "core.echo", "input": {"message": "fum"}, "item_id": 3},
+        ]
+
+        mock_ac_ex_statuses = [statuses.SUCCEEDED] * 4
+        expected_task_statuses = [statuses.RUNNING] * 3 + [statuses.SUCCEEDED]
+        expected_workflow_statuses = [statuses.RUNNING] * 3 + [statuses.SUCCEEDED]
+
+        self.assert_task_items(
+            conductor,
+            task_name,
+            task_route,
+            task_ctx,
+            task_ctx["xs"],
+            task_action_specs,
+            mock_ac_ex_statuses,
+            expected_task_statuses,
+            expected_workflow_statuses,
+            concurrency=concurrency,
+        )
+
+        # Assert the task is removed from staging.
+        self.assertIsNone(conductor.workflow_state.get_staged_task(task_name, task_route))
+
+        # Assert the workflow succeeded.
+        self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
+
     def test_multiple_items_list(self):
         wf_def = """
         version: 1.0
