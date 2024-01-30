@@ -71,6 +71,26 @@ class WorkflowStateTest(unittest.TestCase):
 
         self.assertListEqual(actual_task_sequence, expected_task_sequence)
 
+    def test_stage_is_deepcopied(self):
+        # if staged is not deep copied then an st2 workflow with a failed
+        # with_items task will never finish running.  It will remain in a
+        # running state forever.  I believe it is due to iteration over staged
+        # tasks and mutation of the staged section.
+        data = copy.deepcopy(MOCK_WORKFLOW_STATE)
+
+        task_sequence = [
+            {"id": "task1", "route": 0},
+            {"id": "task2", "route": 0},
+            {"id": "task2", "route": 1},
+            {"id": "task2", "route": 2},
+            {"id": "task3", "route": 0},
+        ]
+
+        data["sequence"] = copy.deepcopy(task_sequence)
+        state = conducting.WorkflowState.deserialize(data)
+        MOCK_WORKFLOW_STATE["staged"] = ["something"]
+        self.assertNotEqual(len(state.staged), len(MOCK_WORKFLOW_STATE["staged"]))
+
     def test_get_tasks_by_task_id_and_route(self):
         data = copy.deepcopy(MOCK_WORKFLOW_STATE)
 

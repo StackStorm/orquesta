@@ -18,7 +18,6 @@ import logging
 from orquesta import events
 from orquesta import exceptions as exc
 from orquesta import statuses
-from orquesta.utils import jsonify as json_util
 
 
 LOG = logging.getLogger(__name__)
@@ -527,11 +526,15 @@ class TaskStateMachine(object):
         if ac_ex_event.status in requirements:
             # Make a copy of the items and remove current item under evaluation.
             staged_task = workflow_state.get_staged_task(task_id, task_route)
-            items = json_util.deepcopy(staged_task["items"])
-            del items[ac_ex_event.item_id]
-            items_status = [item.get("status", statuses.UNSET) for item in items]
+            items = staged_task["items"]
+            items_status = [
+                item.get("status", statuses.UNSET)
+                for index, item in enumerate(items)
+                if index != ac_ex_event.item_id
+            ]
 
             # Assess various situations.
+            # todo(aj) loop over list one time and add to each list
             active = list(filter(lambda x: x in statuses.ACTIVE_STATUSES, items_status))
             incomplete = list(filter(lambda x: x not in statuses.COMPLETED_STATUSES, items_status))
             paused = list(filter(lambda x: x in [statuses.PENDING, statuses.PAUSED], items_status))
