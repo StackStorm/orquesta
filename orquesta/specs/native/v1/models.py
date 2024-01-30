@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import logging
+import copy
 import six
 from six.moves import queue
 
@@ -205,7 +206,7 @@ class TaskSpec(native_v1_specs.Spec):
         return self, action_specs
 
     def finalize_context(self, next_task_name, task_transition_meta, in_ctx):
-        rolling_ctx = json_util.deepcopy(in_ctx)
+        rolling_ctx = copy.copy(in_ctx)
         new_ctx = {}
         errors = []
 
@@ -640,7 +641,8 @@ class WorkflowSpec(native_v1_specs.Spec):
         super(WorkflowSpec, self).__init__(spec, name=name, member=member)
 
     def render_input(self, runtime_inputs, in_ctx=None):
-        rolling_ctx = json_util.deepcopy(in_ctx) if in_ctx else {}
+        # only replacing top key values in dict a copy is fine here
+        rolling_ctx = copy.copy(in_ctx) if in_ctx else {}
         errors = []
 
         for input_spec in getattr(self, "input") or []:
@@ -662,7 +664,8 @@ class WorkflowSpec(native_v1_specs.Spec):
         return rolling_ctx, errors
 
     def render_vars(self, in_ctx):
-        rolling_ctx = json_util.deepcopy(in_ctx)
+        # only replacing top key values in dict a copy is fine here
+        rolling_ctx = copy.copy(in_ctx)
         rendered_vars = {}
         errors = []
 
@@ -681,7 +684,7 @@ class WorkflowSpec(native_v1_specs.Spec):
 
     def render_output(self, in_ctx):
         output_specs = getattr(self, "output") or []
-        rolling_ctx = json_util.deepcopy(in_ctx)
+        rolling_ctx = copy.copy(in_ctx)
         rendered_outputs = {}
         errors = []
 
