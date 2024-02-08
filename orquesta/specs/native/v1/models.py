@@ -382,6 +382,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         # Identify the undefined task in task transitions.
         result = []
         traversed = []
+        queued_task = []
         q = queue.Queue()
 
         for task in self.get_start_tasks():
@@ -412,8 +413,12 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                         continue
 
                     if self.has_task(next_task_name):
-                        if next_task_name not in RESERVED_TASK_NAMES + traversed:
+                        if (
+                            next_task_name not in RESERVED_TASK_NAMES + traversed
+                            and next_task_name not in queued_task
+                        ):
                             q.put(next_task_name)
+                            queued_task.append(next_task_name)
                     else:
                         entry = {
                             "message": 'The task "%s" is not defined.' % next_task_name,
@@ -523,6 +528,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         ctxs = {}
         errors = []
         traversed = []
+        task_ctx_map = {}
         parent_ctx = parent.get("ctx", []) if parent else []
         rolling_ctx = list(set(parent_ctx))
         q = queue.Queue()
@@ -592,7 +598,11 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                 next_task_spec = self.get_task(next_task_name)
 
                 if not next_task_spec.has_join():
-                    q.put((next_task_name, branch_ctx))
+                    if next_task_name not in task_ctx_map or task_ctx_map[next_task_name] != set(
+                        branch_ctx
+                    ):
+                        q.put((next_task_name, branch_ctx))
+                        task_ctx_map[next_task_name] = set(branch_ctx)
                 else:
                     next_task_ctx = ctxs.get(next_task_name, [])
                     ctxs[next_task_name] = list(set(next_task_ctx + branch_ctx))
