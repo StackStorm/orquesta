@@ -1,0 +1,4 @@
+# Different versions of tox are required by python version
+tox-gh-actions
+tox==3.28.0 ; python_version == "3.6"
+tox==4.11.3; python_version >= "3.8"

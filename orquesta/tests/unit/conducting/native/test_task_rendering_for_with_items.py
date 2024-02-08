@@ -81,7 +81,7 @@ class WorkflowConductorWithItemsTaskRenderingTest(test_base.WorkflowConductorTes
                 "type": "error",
                 "message": (
                     "YaqlEvaluationException: Unable to evaluate expression '<% item(x) %>'. "
-                    "ExpressionEvaluationException: Item is not type of collections.Mapping."
+                    "ExpressionEvaluationException: Item is not type of collections.abc.Mapping."
                 ),
                 "task_id": "task1",
                 "route": 0,
