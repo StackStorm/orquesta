@@ -264,6 +264,7 @@ class WorkflowRehearsal(unittest.TestCase):
                 "The session object is not type of WorkflowTestCase or WorkflowRerunTestCase."
             )
 
+        self.maxDiff = None
         self.session = session
         self.inspection_errors = {}
         self.rerun = False
