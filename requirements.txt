@@ -1,13 +1,15 @@
 # 202404: Align all requirements with st2 fixed-requirements
-chardet==5.2.0
-eventlet==0.35.2
-jinja2==3.1.3 # BSD License (3 clause)
-jsonschema==3.2.0 # MIT
+# 202405: Orquesta is a library, leave version ranges as wide as possible
+#         so pip can handle resolving the final version constraints.
+chardet>=3.0.2
+eventlet
+jinja2>=2.11 # BSD License (3 clause)
+jsonschema>=3,<4 # MIT
 # networkx v3.2 and greater does not support Python3.8.
-networkx<3.2
-python-dateutil==2.8.1
-pyyaml==5.3.1 # MIT
-six~=1.15
+networkx>=2.6,<3.2
+python-dateutil
+pyyaml>=5.3.1 # MIT
+six>=1.14.0
 stevedore>=1.3.0 # Apache-2.0
 ujson>=1.35 # BSD License
 yaql>=1.1.0 # Apache-2.0
