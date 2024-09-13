@@ -1,3 +1,4 @@
-sphinx>=2.0
+# 202404: Align all requirements with st2 test-requirements
+sphinx>=5.0.0,<7.2.0
 sphinx-autobuild
 sphinx_rtd_theme

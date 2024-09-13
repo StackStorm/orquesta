@@ -1,6 +1,22 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+Changed
+~~~~~~~
+* Dropped python3.6 support.
+  Contributed by @nzlosh
+* Use pip 24.0 in virtualenv
+  Contributed by @nzlosh
+* Aligned pinned dependencies with St2 core.
+  Contributed by @nzlosh
+
+Fixed
+~~~~~
+
+
 1.6.0
 -----
 
@@ -159,7 +175,7 @@ Added
 ~~~~~
 
 * Add flake8 extension to restrict import alias. (improvement)
-* Add developer docs on getting started, testing, and StackStorm integration. (improvement) 
+* Add developer docs on getting started, testing, and StackStorm integration. (improvement)
 
 Changed
 ~~~~~~~
@@ -189,7 +205,7 @@ Added
 Fixed
 ~~~~~
 
-* Add sleep in while loop for composing execution graph to spread out cpu spike. (improvement) 
+* Add sleep in while loop for composing execution graph to spread out cpu spike. (improvement)
 * Value in quotes in shorthand publish should be evaluated as string type. Fixes #130 (bug fix)
 * Fix interpretation of boolean value in shorthand format of publish. Fixes #119 (bug fix)
 * Update YAQL section in docs on use of "=>" for named parameters in function calls. Closes #124
