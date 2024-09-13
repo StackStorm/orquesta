@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import logging
 import six
 from six.moves import queue
@@ -22,7 +23,6 @@ from orquesta import exceptions as exc
 from orquesta.expressions import base as expr_base
 from orquesta.specs.native.v1 import base as native_v1_specs
 from orquesta.specs import types as spec_types
-from orquesta.utils import context as ctx_util
 from orquesta.utils import dictionary as dict_util
 from orquesta.utils import jsonify as json_util
 from orquesta.utils import parameters as args_util
@@ -155,7 +155,6 @@ class TaskSpec(native_v1_specs.Spec):
 
     def render(self, in_ctx):
         action_specs = []
-
         if not self.has_items():
             action_spec = {
                 "action": expr_base.evaluate(self.action, in_ctx),
@@ -182,27 +181,32 @@ class TaskSpec(native_v1_specs.Spec):
                 if " in " not in items_spec.items
                 else items_spec.items[: items_spec.items.index(" in ")].replace(" ", "").split(",")
             )
-
             for idx, item in enumerate(items):
                 if item_keys and (isinstance(item, tuple) or isinstance(item, list)):
                     item = dict(zip(item_keys, list(item)))
                 elif item_keys and len(item_keys) == 1:
                     item = {item_keys[0]: item}
 
-                item_ctx_value = ctx_util.set_current_item(in_ctx, item)
+                if in_ctx and not isinstance(in_ctx, dict):
+                    raise TypeError("The context is not type of dict.")
 
-                action_spec = {
-                    "action": expr_base.evaluate(self.action, item_ctx_value),
-                    "input": expr_base.evaluate(getattr(self, "input", {}), item_ctx_value),
-                    "item_id": idx,
-                }
+                in_ctx["__current_item"] = item
 
+                try:
+                    action_spec = {
+                        "action": expr_base.evaluate(self.action, in_ctx),
+                        "input": expr_base.evaluate(getattr(self, "input", {}), in_ctx),
+                        "item_id": idx,
+                    }
+                finally:
+                    in_ctx.pop("__current_item", None)
+                # expr_base.evaluate does the copy for us here.
                 action_specs.append(action_spec)
 
         return self, action_specs
 
     def finalize_context(self, next_task_name, task_transition_meta, in_ctx):
-        rolling_ctx = json_util.deepcopy(in_ctx)
+        rolling_ctx = copy.copy(in_ctx)
         new_ctx = {}
         errors = []
 
@@ -647,7 +651,8 @@ class WorkflowSpec(native_v1_specs.Spec):
         super(WorkflowSpec, self).__init__(spec, name=name, member=member)
 
     def render_input(self, runtime_inputs, in_ctx=None):
-        rolling_ctx = json_util.deepcopy(in_ctx) if in_ctx else {}
+        # only replacing top key values in dict a copy is fine here
+        rolling_ctx = copy.copy(in_ctx) if in_ctx else {}
         errors = []
 
         for input_spec in getattr(self, "input") or []:
@@ -669,7 +674,8 @@ class WorkflowSpec(native_v1_specs.Spec):
         return rolling_ctx, errors
 
     def render_vars(self, in_ctx):
-        rolling_ctx = json_util.deepcopy(in_ctx)
+        # only replacing top key values in dict a copy is fine here
+        rolling_ctx = copy.copy(in_ctx)
         rendered_vars = {}
         errors = []
 
@@ -688,7 +694,7 @@ class WorkflowSpec(native_v1_specs.Spec):
 
     def render_output(self, in_ctx):
         output_specs = getattr(self, "output") or []
-        rolling_ctx = json_util.deepcopy(in_ctx)
+        rolling_ctx = copy.copy(in_ctx)
         rendered_outputs = {}
         errors = []
 
