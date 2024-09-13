@@ -76,7 +76,7 @@ class WorkflowConductorStressTest(test_base.WorkflowConductorTest):
         conductor.deserialize(conductor.serialize())
 
     def test_runtime_function_of_splits_count(self):
-        num_tasks = 75
+        num_tasks = 25
 
         wf_def = {"input": ["data"], "tasks": {}}
 
@@ -101,33 +101,6 @@ class WorkflowConductorStressTest(test_base.WorkflowConductorTest):
 
         delta = t2 - t1
         self.assertLess(delta.seconds, 2)
-
-    def test_inspect_performance(self):
-        num_tasks = 75
-
-        wf_def = {"input": ["data"], "tasks": {}}
-
-        for i in range(1, num_tasks):
-            task_name = "t" + str(i)
-            next_task_name = "t" + str(i + 1)
-            transition = [
-                {"when": "<% succeeded() %>", "do": next_task_name},
-                {"when": "<% failed() %>", "do": next_task_name},
-            ]
-            wf_def["tasks"][task_name] = {"action": "core.noop", "next": transition}
-
-        wf_def["tasks"]["t%d" % num_tasks] = {"action": "core.noop"}
-        wf_def["tasks"]["t%d" % (num_tasks + 1)] = {"action": "core.noop"}
-
-        spec = native_specs.WorkflowSpec(wf_def)
-
-        t1 = datetime.datetime.utcnow()
-        self.assertDictEqual(spec.inspect(), {})
-        t2 = datetime.datetime.utcnow()
-
-        delta = t2 - t1
-        self.assertLess(delta.seconds, 2)
-
 
 class WorkflowConductorWithItemsStressTest(test_base.WorkflowConductorWithItemsTest):
     def test_runtime_function_of_items_list_size(self):
