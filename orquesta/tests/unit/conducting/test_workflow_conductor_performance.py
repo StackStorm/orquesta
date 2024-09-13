@@ -62,7 +62,7 @@ class WorkflowConductorStressTest(test_base.WorkflowConductorTest):
             self.forward_task_statuses(conductor, task_name, [statuses.RUNNING, statuses.SUCCEEDED])
 
         self.assertEqual(conductor.get_workflow_status(), statuses.SUCCEEDED)
-
+        
     def test_serialization_function_of_graph_size(self):
         num_tasks = 100
         conductor = self._prep_conductor(num_tasks, status=statuses.RUNNING)
@@ -101,7 +101,7 @@ class WorkflowConductorStressTest(test_base.WorkflowConductorTest):
 
         delta = t2 - t1
         self.assertLess(delta.seconds, 2)
-
+        
 class WorkflowConductorWithItemsStressTest(test_base.WorkflowConductorWithItemsTest):
     def test_runtime_function_of_items_list_size(self):
         wf_def = """
