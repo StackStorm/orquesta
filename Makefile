@@ -1,3 +1,6 @@
+# Copyright 2020-2024 StackStorm contributors.
+# Copyright 2019 Extreme Networks, Inc.
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -10,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PY3 := $(shell which python3)
+PY3 := python3
+SYS_PY3 := $(shell which $(PY3))
+PIP_VERSION = 24.0
 
 # Virtual Environment
 VENV_DIR ?= .venv
@@ -21,14 +26,19 @@ TOX_DIR ?= .tox
 # Sphinx Document Options
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
-SPHINXAUTO	  = sphinx-autobuild
+SPHINXAUTO    = sphinx-autobuild
 SPHINXPROJ    = Orquesta
 SOURCEDIR     = docs/source
 BUILDDIR      = docs/build
+EGGDIR        = orquesta.egg-info
 
 # Packaging Options
 PKGDISTDIR    = dist
 PKGBUILDDIR   = build
+
+
+.PHONY: all
+all: clean reqs schemas check package
 
 .PHONY: clean
 clean:
@@ -37,31 +47,38 @@ clean:
 	rm -rf $(BUILDDIR)
 	rm -rf $(PKGDISTDIR)
 	rm -rf $(PKGBUILDDIR)
+	rm -rf $(EGGDIR)
 
 .PHONY: venv
 venv:
-	test -d $(VENV_DIR) || virtualenv -p $(PY3) $(VENV_DIR)
+	test -d $(VENV_DIR) || $(SYS_PY3) -m venv $(VENV_DIR)
 
 .PHONY: reqs
-reqs: venv
-	$(VENV_DIR)/bin/pip install --upgrade "pip==20.3.3"
+reqs: venv check_virtualenv
+	echo Install pip version $(PIP_VERSION) to match st2 core.
+	$(VENV_DIR)/bin/pip install --upgrade "pip==$(PIP_VERSION)"
 	$(VENV_DIR)/bin/pip install -r requirements.txt
 	$(VENV_DIR)/bin/pip install -r requirements-test.txt
 	$(VENV_DIR)/bin/pip install -r requirements-docs.txt
+	$(VENV_DIR)/bin/pip install -r requirements-ci.txt
 	$(VENV_DIR)/bin/python setup.py develop
 	echo
 
+.PHONY: check_virtualenv
+check_virtualenv:
+	test -d $(VENV_DIR) || exit 1
+
 .PHONY: schemas
-schemas: reqs
-	$(VENV_DIR)/bin/python bin/orquesta-generate-schemas
+schemas: check_virtualenv
+	$(VENV_DIR)/bin/$(PY3) bin/orquesta-generate-schemas
 
 .PHONY: format
-format:
+format: check_virtualenv
 	$(VENV_DIR)/bin/black orquesta bin setup.py -l 100
 
 .PHONY: check
-check:
-	tox
+check: check_virtualenv
+	$(VENV_DIR)/bin/tox
 
 .PHONY: docs
 docs: reqs
@@ -74,14 +91,12 @@ livedocs: reqs
 	. $(VENV_DIR)/bin/activate; $(SPHINXAUTO) -H 0.0.0.0 -b html $(SOURCEDIR) $(BUILDDIR)/html
 
 .PHONY: package
-package:
+package: check_virtualenv
 	rm -rf $(PKGDISTDIR)
 	rm -rf $(PKGBUILDDIR)
-	$(VENV_DIR)/bin/python setup.py sdist bdist_wheel
+	$(VENV_DIR)/bin/$(PY3) setup.py sdist bdist_wheel
 
 .PHONY: publish
 publish: package
-	$(VENV_DIR)/bin/python -m twine upload dist/*
+	$(VENV_DIR)/bin/$(PY3) -m twine upload dist/*
 
-.PHONY: all
-all: clean reqs schemas check package
