@@ -304,6 +304,7 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_CANCELED: statuses.CANCELED,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_FAILED: statuses.FAILED,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.FAILED,
+        events.ACTION_FAILED_TASK_DORMANT_ITEMS_INCOMPLETE_CONTINUE: statuses.RUNNING,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_COMPLETED: statuses.FAILED,
         events.ACTION_EXPIRED: statuses.FAILED,
         events.ACTION_EXPIRED_TASK_DORMANT_ITEMS_PAUSED: statuses.FAILED,
@@ -365,6 +366,7 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_CANCELED: statuses.CANCELED,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_FAILED: statuses.FAILED,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.FAILED,
+        events.ACTION_FAILED_TASK_DORMANT_ITEMS_INCOMPLETE_CONTINUE: statuses.PAUSED,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_COMPLETED: statuses.FAILED,
         events.ACTION_EXPIRED: statuses.FAILED,
         events.ACTION_EXPIRED_TASK_DORMANT_ITEMS_PAUSED: statuses.FAILED,
@@ -425,6 +427,7 @@ TASK_STATE_MACHINE_DATA = {
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_CANCELED: statuses.CANCELED,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_FAILED: statuses.CANCELED,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_INCOMPLETE: statuses.CANCELED,
+        events.ACTION_FAILED_TASK_DORMANT_ITEMS_INCOMPLETE_CONTINUE: statuses.CANCELED,
         events.ACTION_FAILED_TASK_DORMANT_ITEMS_COMPLETED: statuses.CANCELED,
         events.ACTION_EXPIRED: statuses.FAILED,
         events.ACTION_EXPIRED_TASK_DORMANT_ITEMS_PAUSED: statuses.CANCELED,
@@ -548,6 +551,11 @@ class TaskStateMachine(object):
             # Attach info on whether there are canceled execution on the items and return.
             if not active and canceled:
                 return action_event + "_items_canceled"
+
+            # If not failfast than run the pending incomplete tasks too
+            failfast = workflow_state.should_failfast(task_id, task_route)
+            if not active and incomplete and not failfast:
+                return action_event + "_items_incomplete_continue"
 
             # Attach info on whether there are failed execution on the items and return.
             if not active and failed:
@@ -786,11 +794,11 @@ class WorkflowStateMachine(object):
 
         # If the workflow is paused and on resume, check whether it is already completed.
         if (
-            workflow_state.status == statuses.PAUSED
-            and wf_ex_event.status in [statuses.RUNNING, statuses.RESUMING]
-            and not workflow_state.has_active_tasks
-            and not workflow_state.has_staged_tasks
-            and not workflow_state.has_paused_tasks
+                workflow_state.status == statuses.PAUSED
+                and wf_ex_event.status in [statuses.RUNNING, statuses.RESUMING]
+                and not workflow_state.has_active_tasks
+                and not workflow_state.has_staged_tasks
+                and not workflow_state.has_paused_tasks
         ):
             workflow_event += "_workflow_completed"
 

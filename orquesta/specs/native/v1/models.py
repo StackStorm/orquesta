@@ -125,6 +125,7 @@ class TaskSpec(native_v1_specs.Spec):
             "input": {"oneOf": [spec_types.NONEMPTY_STRING, spec_types.NONEMPTY_DICT]},
             "retry": TaskRetrySpec,
             "next": TaskTransitionSequenceSpec,
+            "failfast": spec_types.STRING_OR_BOOLEAN
         },
         "additionalProperties": False,
     }
@@ -152,6 +153,12 @@ class TaskSpec(native_v1_specs.Spec):
 
     def has_retry(self):
         return hasattr(self, "retry") and self.retry
+
+    def has_failfast(self):
+        return hasattr(self, "failfast")
+
+    def get_failfast_spec(self):
+        return getattr(self, "failfast", True)
 
     def render(self, in_ctx):
         action_specs = []
