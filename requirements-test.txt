@@ -1,11 +1,12 @@
-black
-coverage
-flake8<3.9.0,>=3.8.0
-hacking
-mock>=1.0
-nose
-nosexcover
-pep8>=1.6.0,<1.7
-pylint>=2.5.2,<2.6
+# 202404: Align all requirements with st2 test-requirements
+coverage==7.2.7
+black==22.3.0
+flake8==7.0.0
+mock==4.0.3
+pytest==6.2.5
+pytest-cov==4.1.0
+pep8==1.7.1
+pylint==3.1.0
 twine
-unittest2
+# 202404: Use forked version for flake8 v7.0.0 to align requirements with st2 test-requirements
+hacking @ git+https://github.com/nzlosh/hacking@flake8v7

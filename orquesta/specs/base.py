@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import collections
+import collections.abc
 import inspect
 import json
 import jsonschema
@@ -613,7 +613,7 @@ class MappingSpec(Spec):
         raise NotImplementedError()
 
 
-class SequenceSpec(Spec, collections.MutableSequence):
+class SequenceSpec(Spec, collections.abc.MutableSequence):
     def __init__(self, spec, name=None, member=False):
         super(SequenceSpec, self).__init__(spec, name=name, member=member)
 

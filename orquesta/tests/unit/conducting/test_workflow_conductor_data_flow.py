@@ -25,7 +25,6 @@ import yaql.language.utils as yaql_utils
 
 
 class WorkflowConductorDataFlowTest(test_base.WorkflowConductorTest):
-
     wf_def_yaql = """
     version: 1.0
 
@@ -157,14 +156,14 @@ class WorkflowConductorDataFlowTest(test_base.WorkflowConductorTest):
 
     def assert_unicode_data_flow(self, input_value):
         inputs = {
-            u"a1": (
+            "a1": (
                 str_util.unicode(input_value, encoding_type="utf-8", force=True)
                 if six.PY2
                 else input_value
             )
         }
 
-        expected_output = {u"a5": inputs["a1"], u"b5": inputs["a1"]}
+        expected_output = {"a5": inputs["a1"], "b5": inputs["a1"]}
 
         self._assert_data_flow(inputs, expected_output)
 

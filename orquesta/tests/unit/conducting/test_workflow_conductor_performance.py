@@ -100,7 +100,7 @@ class WorkflowConductorStressTest(test_base.WorkflowConductorTest):
         t2 = datetime.datetime.utcnow()
 
         delta = t2 - t1
-        self.assertLess(delta.seconds, 3)
+        self.assertLess(delta.seconds, 2)
 
 
 class WorkflowConductorWithItemsStressTest(test_base.WorkflowConductorWithItemsTest):
