@@ -62,7 +62,9 @@ class YAQLEvaluator(expr_base.Evaluator):
     #   word boundary ctx().*
     #   word boundary ctx(*)*
     #   word boundary ctx(*).*
-    _regex_ctx_pattern = r'\bctx\([\'"]?{0}[\'"]?\)\.?{0}'.format(_regex_ctx_ref_pattern)
+    _regex_ctx_pattern = r'\bctx\([\'"]?{0}[\'"]?\)\.?{0}'.format(
+        _regex_ctx_ref_pattern
+    )
     _regex_ctx_var_parser = re.compile(_regex_ctx_pattern)
 
     _regex_var = r"[a-zA-Z0-9_-]+"
@@ -84,7 +86,9 @@ class YAQLEvaluator(expr_base.Evaluator):
         # Some yaql expressions (e.g. distinct()) refer to hash value of variable.
         # But some built-in Python type values (e.g. list and dict) don't have __hash__() method.
         # The convert_input_data method parses specified variable and convert it to hashable one.
-        if isinstance(data, yaql_utils.SequenceType) or isinstance(data, yaql_utils.MappingType):
+        if isinstance(data, yaql_utils.SequenceType) or isinstance(
+            data, yaql_utils.MappingType
+        ):
             ctx["__vars"] = yaql_utils.convert_input_data(data)
         else:
             ctx["__vars"] = data or {}
@@ -144,7 +148,10 @@ class YAQLEvaluator(expr_base.Evaluator):
                 if inspect.isgenerator(result):
                     result = list(result)
 
-                if isinstance(result, six.string_types):
+                if (
+                    isinstance(result, six.string_types)
+                    and cls.enable_recursively_evaluation()
+                ):
                     result = cls.evaluate(result, data)
 
                 if len(exprs) > 1 or len(output) > len(expr):
@@ -158,7 +165,9 @@ class YAQLEvaluator(expr_base.Evaluator):
             raise YaqlEvaluationException(msg % (error, expr))
         except (yaql_exc.YaqlException, ValueError, TypeError) as e:
             msg = "Unable to evaluate expression '%s'. %s: %s"
-            raise YaqlEvaluationException(msg % (expr, e.__class__.__name__, str(e).strip("'")))
+            raise YaqlEvaluationException(
+                msg % (expr, e.__class__.__name__, str(e).strip("'"))
+            )
         except Exception as e:
             msg = "Unable to evaluate expression '%s'. %s: %s"
             raise YaqlEvaluationException(msg % (expr, e.__class__.__name__, str(e)))

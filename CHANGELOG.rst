@@ -1,6 +1,14 @@
 Changelog
 =========
 
+-----
+Added
+~~~~~
+
+* Ability to disable the recursively evaluation of jinja and yaql expressions, by setting the environment variable ``ENABLE_RECURSIVELY_EVALUATION`` to ``false``.
+  Contributed by @moradf90
+
+
 Unreleased
 ----------
 
@@ -37,6 +45,7 @@ Fixed
   Contributed by @Stealthii
 * Update jsonschema requirements to allow 3.2 (security fix)
   Contributed by @james-bellamy
+
 
 1.5.0
 -----
