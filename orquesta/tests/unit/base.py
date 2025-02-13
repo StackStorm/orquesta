@@ -209,20 +209,11 @@ class WorkflowConductorTest(WorkflowComposerTest):
         expected_copy = copy.deepcopy(expected)
 
         for task in actual_copy:
-            for staged_task in task["ctx"]["__state"]["staged"]:
-                if "items" in staged_task:
-                    del staged_task["items"]
-
             task["spec"] = task["spec"].serialize()
 
         for task in expected_copy:
             task["ctx"]["__current_task"] = {"id": task["id"], "route": task["route"]}
             task["ctx"]["__state"] = conductor.workflow_state.serialize()
-
-            for staged_task in task["ctx"]["__state"]["staged"]:
-                if "items" in staged_task:
-                    del staged_task["items"]
-
             task["spec"] = task["spec"].serialize()
 
         self.assertListEqual(actual_copy, expected_copy)

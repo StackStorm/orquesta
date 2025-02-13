@@ -49,29 +49,29 @@ class WorkflowState(object):
 
     def serialize(self):
         data = {
-            "contexts": json_util.deepcopy(self.contexts),
-            "routes": json_util.deepcopy(self.routes),
-            "sequence": json_util.deepcopy(self.sequence),
-            "staged": json_util.deepcopy(self.staged),
+            "contexts": self.contexts,
+            "routes": self.routes,
+            "sequence": self.sequence,
+            "staged": self.staged,
             "status": self.status,
-            "tasks": json_util.deepcopy(self.tasks),
+            "tasks": self.tasks,
         }
 
         if self.reruns:
-            data["reruns"] = json_util.deepcopy(self.reruns)
+            data["reruns"] = self.reruns
 
         return data
 
     @classmethod
     def deserialize(cls, data):
         instance = cls()
-        instance.contexts = json_util.deepcopy(data.get("contexts", list()))
-        instance.routes = json_util.deepcopy(data.get("routes", list()))
-        instance.sequence = json_util.deepcopy(data.get("sequence", list()))
+        instance.contexts = data.get("contexts", list())
+        instance.routes = data.get("routes", list())
+        instance.sequence = data.get("sequence", list())
         instance.staged = json_util.deepcopy(data.get("staged", list()))
         instance.status = data.get("status", statuses.UNSET)
-        instance.tasks = json_util.deepcopy(data.get("tasks", dict()))
-        instance.reruns = json_util.deepcopy(data.get("reruns", list()))
+        instance.tasks = data.get("tasks", dict())
+        instance.reruns = data.get("reruns", list())
 
         return instance
 
@@ -279,10 +279,10 @@ class WorkflowConductor(object):
             "spec": self.spec.serialize(),
             "graph": self.graph.serialize(),
             "input": self.get_workflow_input(),
-            "context": self.get_workflow_parent_context(),
+            "context": self._parent_ctx,
             "state": self.workflow_state.serialize(),
-            "log": json_util.deepcopy(self.log),
-            "errors": json_util.deepcopy(self.errors),
+            "log": self.log,
+            "errors": self.errors,
             "output": self.get_workflow_output(),
         }
 
@@ -292,12 +292,12 @@ class WorkflowConductor(object):
         spec = spec_module.WorkflowSpec.deserialize(data["spec"])
 
         graph = graphing.WorkflowGraph.deserialize(data["graph"])
-        inputs = json_util.deepcopy(data["input"])
-        context = json_util.deepcopy(data["context"])
+        inputs = data["input"]
+        context = data["context"]
         state = WorkflowState.deserialize(data["state"])
-        log = json_util.deepcopy(data.get("log", []))
+        log = data.get("log", [])
         errors = json_util.deepcopy(data["errors"])
-        outputs = json_util.deepcopy(data["output"])
+        outputs = data["output"]
 
         instance = cls(spec)
         instance.restore(graph, log, errors, state, inputs, outputs, context)
@@ -317,7 +317,7 @@ class WorkflowConductor(object):
             self._workflow_state = WorkflowState(conductor=self)
 
             # Set any given context as the initial context.
-            init_ctx = self.get_workflow_parent_context()
+            init_ctx = self.get_workflow_parent_context_copy()
 
             # Render workflow inputs and merge into the initial context.
             workflow_input = self.get_workflow_input()
@@ -407,11 +407,11 @@ class WorkflowConductor(object):
                 error, task_id=task_id, route=route, task_transition_id=task_transition_id
             )
 
-    def get_workflow_parent_context(self):
+    def get_workflow_parent_context_copy(self):
         return json_util.deepcopy(self._parent_ctx)
 
     def get_workflow_input(self):
-        return json_util.deepcopy(self._inputs)
+        return self._inputs
 
     def get_workflow_status(self):
         return self.workflow_state.status
@@ -460,7 +460,7 @@ class WorkflowConductor(object):
             raise exc.InvalidWorkflowStatusTransition(current_status, wf_ex_event.name)
 
     def get_workflow_initial_context(self):
-        return json_util.deepcopy(self.workflow_state.contexts[0])
+        return self.workflow_state.contexts[0]
 
     def get_workflow_terminal_context(self):
         if self.get_workflow_status() not in statuses.COMPLETED_STATUSES:
@@ -481,8 +481,7 @@ class WorkflowConductor(object):
         for idx, task in other_term_tasks:
             # Remove the initial context since the first task processed above already
             # inclulded that and we only want to apply the differences.
-            in_ctx_idxs = json_util.deepcopy(task["ctxs"]["in"])
-            in_ctx_idxs.remove(0)
+            in_ctx_idxs = [i for index, i in enumerate(task["ctxs"]["in"]) if index != 0]
 
             wf_term_ctx = dict_util.merge_dicts(
                 wf_term_ctx, self.get_task_context(in_ctx_idxs), overwrite=True
@@ -512,7 +511,7 @@ class WorkflowConductor(object):
                     self.request_workflow_status(statuses.FAILED)
 
     def get_workflow_output(self):
-        return json_util.deepcopy(self._outputs) if self._outputs else None
+        return self._outputs if self._outputs else None
 
     def reset_workflow_output(self):
         self._outputs = None
@@ -782,7 +781,7 @@ class WorkflowConductor(object):
         # Setup the retry in the task state.
         task_id = task_state_entry["id"]
         task_retry_spec = self.graph.get_task_retry_spec(task_id)
-        task_state_entry["retry"] = json_util.deepcopy(task_retry_spec)
+        task_state_entry["retry"] = task_retry_spec
         task_state_entry["retry"]["tally"] = 0
 
         # Get task context for evaluating the expression in delay and count.
@@ -1188,8 +1187,8 @@ class WorkflowConductor(object):
 
     def _request_task_rerun(self, task_id, route, reset_items=False):
         task = self.workflow_state.get_task(task_id, route)
-        task_ctx = json_util.deepcopy(task["ctxs"]["in"])
-        task_prev = json_util.deepcopy(task["prev"])
+        task_ctx = task["ctxs"]["in"]
+        task_prev = task["prev"]
         task_spec = self.spec.tasks.get_task(task_id)
 
         # Reset terminal status for the rerunnable candidate.

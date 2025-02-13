@@ -8,5 +8,6 @@ pytest-cov==4.1.0
 pep8==1.7.1
 pylint==3.1.0
 twine
+pytest-benchmark
 # 202404: Use forked version for flake8 v7.0.0 to align requirements with st2 test-requirements
 hacking @ git+https://github.com/nzlosh/hacking@flake8v7
