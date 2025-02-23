@@ -15,6 +15,7 @@
 import abc
 import inspect
 import logging
+import os
 import re
 import six
 import threading
@@ -36,6 +37,11 @@ _EXP_EVALUATOR_NAMESPACE = "orquesta.expressions.evaluators"
 class Evaluator(object):
     _type = "unspecified"
     _delimiter = None
+
+    @classmethod
+    def enable_recursively_evaluation(cls):
+        env_value = os.environ.get("ENABLE_RECURSIVELY_EVALUATION")
+        return not (env_value is not None and str(env_value).lower() == "false")
 
     @classmethod
     def get_type(cls):
@@ -131,7 +137,10 @@ def validate(statement):
 
 def evaluate(statement, data=None):
     if isinstance(statement, dict):
-        return {evaluate(k, data=data): evaluate(v, data=data) for k, v in six.iteritems(statement)}
+        return {
+            evaluate(k, data=data): evaluate(v, data=data)
+            for k, v in six.iteritems(statement)
+        }
 
     elif isinstance(statement, list):
         return [evaluate(item, data=data) for item in statement]
@@ -171,7 +180,9 @@ def extract_vars(statement):
 
 def func_has_ctx_arg(func):
     getargspec = (
-        inspect.getargspec if six.PY2 else inspect.getfullargspec  # pylint: disable=no-member
+        inspect.getargspec
+        if six.PY2
+        else inspect.getfullargspec  # pylint: disable=no-member
     )
 
     return "context" in getargspec(func).args

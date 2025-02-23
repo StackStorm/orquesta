@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import os
 import unittest
 
 from orquesta import exceptions as exc
@@ -30,7 +30,9 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
 
         data = {}
 
-        self.assertRaises(exc.ExpressionEvaluationException, expr_base.evaluate, expr, data)
+        self.assertRaises(
+            exc.ExpressionEvaluationException, expr_base.evaluate, expr, data
+        )
 
     def test_dict_eval(self):
         expr = "{{ ctx().nested.foo }}"
@@ -58,12 +60,28 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
 
         self.assertEqual("fee-fi-fo-fum", expr_base.evaluate(expr, data))
 
+        # when the recursively evaluation is disable
+        os.environ.setdefault("ENABLE_RECURSIVELY_EVALUATION", "false")
+
+        self.assertEqual("{{ ctx().fi }}", expr_base.evaluate(expr, data))
+
     def test_eval_recursive_undefined(self):
         expr = "{{ ctx().fee }}"
 
-        data = {"fee": "{{ ctx().fi }}", "fi": "{{ ctx().fo }}", "fo": "{{ ctx().fum }}"}
+        data = {
+            "fee": "{{ ctx().fi }}",
+            "fi": "{{ ctx().fo }}",
+            "fo": "{{ ctx().fum }}",
+        }
 
-        self.assertRaises(exc.ExpressionEvaluationException, expr_base.evaluate, expr, data)
+        self.assertRaises(
+            exc.ExpressionEvaluationException, expr_base.evaluate, expr, data
+        )
+
+        # when the recursively evaluation is disable
+        os.environ.setdefault("ENABLE_RECURSIVELY_EVALUATION", "false")
+
+        self.assertEqual("{{ ctx().fi }}", expr_base.evaluate(expr, data))
 
     def test_multi_eval_recursive(self):
         expr = "{{ ctx().fee }} {{ ctx().im }}"
@@ -78,6 +96,13 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
         }
 
         self.assertEqual("fee-fi-fo-fum! i'm hungry!", expr_base.evaluate(expr, data))
+
+        # when the recursively evaluation is disable
+        os.environ.setdefault("ENABLE_RECURSIVELY_EVALUATION", "false")
+
+        self.assertEqual(
+            "{{ ctx().fi }} {{ ctx().hungry }}", expr_base.evaluate(expr, data)
+        )
 
     def test_eval_list(self):
         expr = ["{{ ctx().foo }}", "{{ ctx().marco }}", "foo{{ ctx().foo }}"]
@@ -136,7 +161,14 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
         self.assertDictEqual(expected, expr_base.evaluate(expr, data))
 
     def test_type_preservation(self):
-        data = {"k1": 101, "k2": 1.999, "k3": True, "k4": [1, 2], "k5": {"k": "v"}, "k6": None}
+        data = {
+            "k1": 101,
+            "k2": 1.999,
+            "k3": True,
+            "k4": [1, 2],
+            "k5": {"k": "v"},
+            "k6": None,
+        }
 
         self.assertEqual(data["k1"], expr_base.evaluate("{{ ctx().k1 }}", data))
 
@@ -179,7 +211,9 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
 
         data = {"x": ["a", "b", "c"]}
 
-        self.assertRaises(exc.ExpressionEvaluationException, expr_base.evaluate, expr, data)
+        self.assertRaises(
+            exc.ExpressionEvaluationException, expr_base.evaluate, expr, data
+        )
 
     def test_block_eval_recursive(self):
         expr = "{% for i in ctx().x %}{{ i }}{% endfor %}"
@@ -200,7 +234,8 @@ class JinjaFacadeEvaluationTest(unittest.TestCase):
 
     def test_multi_block_eval(self):
         expr = (
-            "{% for i in ctx().x %}{{ i }}{% endfor %}" "{% for i in ctx().y %}{{ i }}{% endfor %}"
+            "{% for i in ctx().x %}{{ i }}{% endfor %}"
+            "{% for i in ctx().y %}{{ i }}{% endfor %}"
         )
 
         data = {"x": ["a", "b", "c"], "y": ["d", "e", "f"]}
