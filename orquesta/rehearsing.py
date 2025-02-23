@@ -1,4 +1,4 @@
-# Copyright 2021-2023 The StackStorm Authors.
+# Copyright 2021 The StackStorm Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -481,9 +481,11 @@ class WorkflowRehearsal(unittest.TestCase):
         ]
 
         actual_task_seq_user_friendly = [
-            constants.TASK_STATE_ROUTE_FORMAT % (entry["id"], str(entry["route"]))
-            if entry["route"] > 0
-            else entry["id"]
+            (
+                constants.TASK_STATE_ROUTE_FORMAT % (entry["id"], str(entry["route"]))
+                if entry["route"] > 0
+                else entry["id"]
+            )
             for entry in self.conductor.workflow_state.sequence
         ]
 
@@ -539,16 +541,20 @@ class WorkflowRehearsal(unittest.TestCase):
             ]
 
             actual_term_tasks_user_friendly = [
-                constants.TASK_STATE_ROUTE_FORMAT % (t["id"], str(t["route"]))
-                if t["route"] > 0
-                else t["id"]
+                (
+                    constants.TASK_STATE_ROUTE_FORMAT % (t["id"], str(t["route"]))
+                    if t["route"] > 0
+                    else t["id"]
+                )
                 for i, t in self.conductor.workflow_state.get_terminal_tasks()
             ]
 
             expected_term_tasks = [
-                task_id
-                if "__r" in task_id
-                else constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(0))
+                (
+                    task_id
+                    if "__r" in task_id
+                    else constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(0))
+                )
                 for task_id in self.session.expected_term_tasks
             ]
 
