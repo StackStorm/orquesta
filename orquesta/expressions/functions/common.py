@@ -14,8 +14,8 @@
 # limitations under the License.
 
 import json
-from itertools import zip_longest
 
+from itertools import zip_longest
 from orquesta import exceptions as exc
 
 

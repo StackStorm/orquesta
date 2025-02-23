@@ -19,7 +19,6 @@ from orquesta import conducting
 from orquesta.specs import native as native_specs
 from orquesta import statuses
 from orquesta.tests.unit import base as test_base
-from orquesta.utils import strings as str_util
 import yaql.language.utils as yaql_utils
 
 

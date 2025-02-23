@@ -14,8 +14,8 @@
 
 import copy
 import logging
-import queue
 import os
+import queue
 import unittest
 import yaml
 

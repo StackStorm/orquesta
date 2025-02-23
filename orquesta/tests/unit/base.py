@@ -28,16 +28,13 @@ from orquesta.utils import plugin as plugin_util
 from orquesta.utils import specs as spec_util
 
 
-class ExpressionEvaluatorTest(metaclass=abc.ABCMeta):
+class ExpressionEvaluatorTest(unittest.TestCase, metaclass=abc.ABCMeta):
     language = None
     evaluator = None
 
     @classmethod
     def setUpClass(cls):
         cls.evaluator = plugin_util.get_module("orquesta.expressions.evaluators", cls.language)
-
-
-ExpressionEvaluatorTest.register(unittest.TestCase)
 
 
 class ExpressionFacadeEvaluatorTest(unittest.TestCase, metaclass=abc.ABCMeta):
