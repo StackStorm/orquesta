@@ -135,6 +135,9 @@ class WorkflowState(object):
     def has_next_tasks(self, task_id=None, route=None):
         return self.conductor.has_next_tasks(task_id=task_id, route=route)
 
+    def should_failfast(self, task_id, route):
+        return self.conductor.should_failfast(task_id, route)
+
     @property
     def has_active_tasks(self):
         return len(self.get_tasks_by_status(statuses.ACTIVE_STATUSES)) > 0
@@ -688,6 +691,13 @@ class WorkflowConductor(object):
             return True if self.workflow_state.get_staged_tasks() else False
 
         return self._has_next(task_id, route=route)
+
+    def should_failfast(self, task_id, route):
+        task = self.get_task(task_id, route)
+        if task:
+            task_spec = task.get("spec")
+            return task_spec.get_failfast_spec() if task_spec.get_failfast_spec() is not None else True
+        return True
 
     def get_next_tasks(self):
         fail_on_task_rendering = False
