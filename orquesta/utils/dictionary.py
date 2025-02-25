@@ -1,3 +1,4 @@
+# Copyright 2021 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import six
-
 
 def merge_dicts(left, right, overwrite=True):
     if left is None:
@@ -22,7 +21,7 @@ def merge_dicts(left, right, overwrite=True):
     if right is None:
         return left
 
-    for k, v in six.iteritems(right):
+    for k, v in right.items():
         if k not in left:
             left[k] = v
         else:

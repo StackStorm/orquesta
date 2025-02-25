@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import six
-
 from orquesta.specs import loader as spec_loader
 from orquesta.tests.unit.specs.native import base as test_base
 from orquesta.utils import specs as spec_util
@@ -493,7 +491,7 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
 
         expected_error = 'Failed to load workflow definition because found duplicate key "task1"'
 
-        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+        assertRaisesRegex = self.assertRaisesRegex
 
         assertRaisesRegex(
             ValueError,

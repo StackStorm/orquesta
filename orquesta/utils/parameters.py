@@ -1,3 +1,4 @@
+# Copyright 2021 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +15,6 @@
 
 import json
 import re
-import six
 
 from orquesta.expressions import base as expr_base
 
@@ -24,8 +24,8 @@ REGEX_VALUE_IN_QUOTES = r"\"[^\"]*\"\s*"
 REGEX_VALUE_IN_APOSTROPHES = r"'[^']*'\s*"
 REGEX_FLOATING_NUMBER = r"[-]?\d*\.\d+"
 REGEX_INTEGER = r"[-]?\d+"
-REGEX_TRUE = r"(?i:true)" if six.PY3 else r"(?i)true"
-REGEX_FALSE = r"(?i:false)" if six.PY3 else r"(?i)false"
+REGEX_TRUE = r"(?i:true)"
+REGEX_FALSE = r"(?i:false)"
 REGEX_NULL = r"null"
 
 # REGEX_FLOATING_NUMBER must go before REGEX_INTEGER
@@ -51,7 +51,7 @@ def parse_inline_params(s, preserve_order=True):
     # Use a list to preserve order.
     params = [] if preserve_order else {}
 
-    if s is None or not isinstance(s, six.string_types) or s == str():
+    if s is None or not isinstance(s, str) or s == str():
         return params
 
     for k, v in re.findall(REGEX_INLINE_PARAMS, s):

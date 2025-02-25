@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+# Copyright 2021 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import six
-
 from orquesta import conducting
 from orquesta.specs import native as native_specs
 from orquesta import statuses
 from orquesta.tests.unit import base as test_base
-from orquesta.utils import strings as str_util
 import yaql.language.utils as yaql_utils
 
 
@@ -154,19 +152,6 @@ class WorkflowConductorDataFlowTest(test_base.WorkflowConductorTest):
 
         self._assert_data_flow(inputs, expected_output)
 
-    def assert_unicode_data_flow(self, input_value):
-        inputs = {
-            "a1": (
-                str_util.unicode(input_value, encoding_type="utf-8", force=True)
-                if six.PY2
-                else input_value
-            )
-        }
-
-        expected_output = {"a5": inputs["a1"], "b5": inputs["a1"]}
-
-        self._assert_data_flow(inputs, expected_output)
-
     def test_data_flow_string(self):
         self.assert_data_flow("xyz")
 
@@ -198,4 +183,4 @@ class WorkflowConductorDataFlowTest(test_base.WorkflowConductorTest):
         self.assert_data_flow(sequence_typed_data)
 
     def test_data_flow_unicode(self):
-        self.assert_unicode_data_flow("光合作用")
+        self.assert_data_flow("光合作用")

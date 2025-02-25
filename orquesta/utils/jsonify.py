@@ -1,3 +1,4 @@
+# Copyright 2020 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +16,6 @@
 import copy
 import datetime
 import logging
-import six
 import ujson
 
 from orquesta.utils import date as date_util
@@ -25,7 +25,7 @@ LOG = logging.getLogger(__name__)
 
 
 SERIALIZABLE_TYPES = (
-    six.string_types,
+    str,
     bool,
     datetime.datetime,
     dict,
@@ -38,7 +38,7 @@ SERIALIZABLE_TYPES = (
 def serialize(obj):
     doc = {}
 
-    for k, v in six.iteritems(obj.__dict__):
+    for k, v in obj.__dict__.items():
         if isinstance(v, SERIALIZABLE_TYPES):
             doc[k] = date_util.format(v) if date_util.valid(v) else v
 
@@ -48,7 +48,7 @@ def serialize(obj):
 def deserialize(obj_type, data):
     obj = obj_type()
 
-    for k, v in six.iteritems(data):
+    for k, v in data.items():
         if isinstance(v, SERIALIZABLE_TYPES):
             v = date_util.parse(v) if date_util.valid(v) else v
             setattr(obj, k, v)

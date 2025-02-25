@@ -14,8 +14,7 @@
 # limitations under the License.
 
 import logging
-import six
-from six.moves import queue
+import queue
 
 from orquesta import events
 from orquesta import exceptions as exc
@@ -62,7 +61,7 @@ class TaskTransitionSpec(native_v1_specs.Spec):
 
         publish_spec = getattr(self, "publish", None)
 
-        if publish_spec and isinstance(publish_spec, six.string_types):
+        if publish_spec and isinstance(publish_spec, str):
             self.publish = args_util.parse_inline_params(publish_spec or str())
 
         do_spec = getattr(self, "do", None)
@@ -260,7 +259,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
             condition = getattr(task_transition, "when") or None
             next_task_names = getattr(task_transition, "do") or []
 
-            if isinstance(next_task_names, six.string_types):
+            if isinstance(next_task_names, str):
                 next_task_names = [x.strip() for x in next_task_names.split(",")]
 
             for next_task_name in next_task_names:
@@ -271,7 +270,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
     def get_prev_tasks(self, task_name, *args, **kwargs):
         prev_tasks = []
 
-        for name, task_spec in six.iteritems(self):
+        for name, task_spec in self.items():
             for next_task in self.get_next_tasks(name):
                 if task_name == next_task[0]:
                     prev_tasks.append((name, next_task[1], next_task[2]))
@@ -323,7 +322,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         return False
 
     def has_cycles(self):
-        for task_name, task_spec in six.iteritems(self):
+        for task_name, task_spec in self.items():
             if self.in_cycle(task_name):
                 return True
 
@@ -333,7 +332,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         result = []
 
         # Identify with items task with no action defined.
-        for task_name, task_spec in six.iteritems(self):
+        for task_name, task_spec in self.items():
             if task_spec.has_items() and not task_spec.action:
                 message = "The action property is required for with items task."
                 spec_path = parent.get("spec_path") + "." + task_name
@@ -351,7 +350,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         result = []
 
         # Identify use of reserved words in task names.
-        for task_name, task_spec in six.iteritems(self):
+        for task_name, task_spec in self.items():
             if task_name in RESERVED_TASK_NAMES:
                 message = 'The task name "%s" is reserved with special function.' % task_name
                 spec_path = parent.get("spec_path") + "." + task_name
@@ -404,7 +403,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                 task_transition_spec = task_transition_specs[i]
                 next_task_names = getattr(task_transition_spec, "do") or []
 
-                if isinstance(next_task_names, six.string_types):
+                if isinstance(next_task_names, str):
                     next_task_names = [x.strip() for x in next_task_names.split(",")]
 
                 for next_task_name in next_task_names:
@@ -487,7 +486,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                         track_splits[split_id] = set(splits)
 
         # Use the prepped data to identify tasks that are not reachable.
-        for task_name, meta in six.iteritems(staging):
+        for task_name, meta in staging.items():
             if not meta["join"]:
                 meta["reachable"] = True
                 continue
@@ -566,7 +565,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                     transitions.append((None, task_transition_spec, str(i)))
                     continue
 
-                if isinstance(next_task_names, six.string_types):
+                if isinstance(next_task_names, str):
                     next_task_names = [x.strip() for x in next_task_names.split(",")]
 
                 for next_task_name in next_task_names:
@@ -640,8 +639,8 @@ class WorkflowSpec(native_v1_specs.Spec):
 
         # Resolve shorthand inline with items.
         if "tasks" in spec and isinstance(spec["tasks"], dict) and spec["tasks"]:
-            for task_name, task_spec in six.iteritems(spec["tasks"]):
-                if "with" in task_spec and isinstance(task_spec["with"], six.string_types):
+            for task_name, task_spec in spec["tasks"].items():
+                if "with" in task_spec and isinstance(task_spec["with"], str):
                     task_spec["with"] = {"items": task_spec["with"]}
 
         super(WorkflowSpec, self).__init__(spec, name=name, member=member)
