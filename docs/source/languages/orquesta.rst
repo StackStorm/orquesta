@@ -11,7 +11,7 @@ The following is the list of attributes that makes up the workflow model. A work
 perform a set of tasks in predefined order, and returns output. The workflow model here is a
 directed graph where the tasks are the nodes and the transitions and their condition between tasks
 form the edges. The tasks that compose a workflow will be defined in the DSL as a dictionary named
-``tasks`` where the key and value is the task name and task model respectively. 
+``tasks`` where the key and value is the task name and task model respectively.
 
 +-------------+------------+-------------------------------------------------------------------+
 | Attribute   | Required   | Description                                                       |
@@ -385,6 +385,70 @@ command value is accessed via ``<% item(command) %>``.
       task1:
         with: host, command in <% zip(ctx(hosts), ctx(commands)) %>
         action: core.remote hosts=<% item(host) %> cmd=<% item(command) %>
+
+Getting Results from With-Items
+-------------------------------
+
+Each ``item`` under the ``with`` block returns results from the action specified. These results
+are contained in the **``items``** list/array of the ``result`` for the given task. To acquire
+this output, typically, a ``core.noop`` task action is used with ``join: all`` after all
+parallel tasks have been completed.
+
+As an example, using the last example from the ``with-items`` section above, which runs a list
+of shell commands on a list of hosts, the following workflow retrieves the results from ``task1``
+as described in ``task2`` and publishes those results in output variables. Note that we must provide
+the ``next`` clause with ``do`` referencing the appropriate task for obtaining the results from
+the ``with-items`` task.
+
+.. code-block:: yaml
+
+    version: 1.0
+
+    description: Workflow to test getting results from with-items
+
+    input:
+      - hosts
+      - commands
+
+    vars:
+      - command_output: []
+      - successful_commands: []
+      - failed_commands: []
+
+    output:
+      - successful_commands: <% ctx(successful_commands) %>
+      - failed_commands: <% ctx(failed_commands) %>
+
+    tasks:
+      task1:
+        with:
+          items: <% ctx(hosts).join(ctx(commands), true, [$1, $2])
+            .select(dict("host" => $[0], "command" => $[1])) %>
+          concurrency: 2
+        action: core.remote hosts=<% item(host) %> cmd=<% item(command) %>
+        next:
+          - when: <% succeeded() %>
+            do: task2
+
+      task2:
+        join: all
+        delay: 5
+        action: core.noop
+        next:
+          - when: <% succeeded() %>
+            publish:
+              # Get the list/array of *ALL* items from task1 with-items.
+              - command_output: <% task(task1).result.items %>
+              # Find the items that ran successfully.
+              - successful_commands: <% ctx(command_output)
+                  .where($ != null)
+                  .where($.status = "succeeded")
+                  .select($.result) %>
+              # Find the items that failed, if any.
+              - failed_commands: <% ctx(command_output)
+                  .where($ != null)
+                  .where($.status = "failed")
+                  .select($.result) %>
 
 Task Retry Model
 ----------------
