@@ -44,7 +44,7 @@ class WorkflowGraph(metaclass=abc.ABCMeta):
 
     @classmethod
     def deserialize(cls, data):
-        g = json_graph.adjacency_graph(json_util.deepcopy(data), directed=True, multigraph=True)
+        g = json_graph.adjacency_graph(data, directed=True, multigraph=True)
         return cls(graph=g)
 
     @staticmethod

@@ -97,7 +97,7 @@ class WorkflowConductorTest(test_base.WorkflowConductorTest):
         self.assertDictEqual(conductor._inputs, user_inputs)
         self.assertDictEqual(conductor.get_workflow_input(), user_inputs)
         self.assertDictEqual(conductor._parent_ctx, parent_context)
-        self.assertDictEqual(conductor.get_workflow_parent_context(), parent_context)
+        self.assertDictEqual(conductor.get_workflow_parent_context_copy(), parent_context)
 
         default_inputs = {"a": None, "b": False}
         init_ctx_value = dict_util.merge_dicts(default_inputs, user_inputs, True)
@@ -282,7 +282,7 @@ class WorkflowConductorTest(test_base.WorkflowConductorTest):
             "spec": conductor.spec.serialize(),
             "graph": conductor.graph.serialize(),
             "state": conductor.workflow_state.serialize(),
-            "context": conductor.get_workflow_parent_context(),
+            "context": conductor.get_workflow_parent_context_copy(),
             "input": conductor.get_workflow_input(),
             "output": conductor.get_workflow_output(),
             "errors": conductor.errors,
