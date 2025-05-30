@@ -1107,9 +1107,8 @@ class WorkflowConductor(object):
         )
 
         is_split_task = self.spec.tasks.is_split_task(task_id)
-        is_in_cycle = self.graph.in_cycle(task_id)
 
-        if not is_split_task or is_in_cycle:
+        if not is_split_task:
             return prev_route
 
         old_route_details = self.workflow_state.routes[prev_route]
@@ -1119,6 +1118,11 @@ class WorkflowConductor(object):
             new_route_details.append(prev_task_transition_id)
 
         if old_route_details == new_route_details:
+            return prev_route
+
+        # The following is very computationally expensive; defer it as much as possible.
+        is_in_cycle = self.graph.in_cycle(task_id)
+        if is_in_cycle:
             return prev_route
 
         self.workflow_state.routes.append(new_route_details)
