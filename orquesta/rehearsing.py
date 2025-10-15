@@ -225,6 +225,7 @@ class WorkflowRerunTestCase(native_v1_specs.Spec, WorkflowTestCaseMixin):
             "workflow_state": {"type": "object"},
             "rerun_tasks": requests.TaskRerunRequestSequenceSpec,
             "expected_inspection_errors": MockInspectionErrors,
+            "context": {"type": "object", "default": {}},
             "expected_routes": {"type": "array", "items": {"type": "array"}, "default": [[]]},
             "expected_task_sequence": {"type": "array", "items": spec_types.NONEMPTY_STRING},
             "mock_action_executions": MockActionExecutionSequenceSpec,
