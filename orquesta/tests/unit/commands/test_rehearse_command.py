@@ -147,3 +147,18 @@ class WorkflowRehearsalSpecTest(unittest.TestCase):
             "There are errors processing test specs. Please review details above.",
             rehearsal.rehearse,
         )
+
+    @mock.patch.object(
+        argparse.ArgumentParser,
+        "parse_args",
+        mock.MagicMock(
+            return_value=argparse.Namespace(
+                base_path=fixture_loader.get_rehearsal_fixtures_base_path(),
+                test_spec="tests/sequential_success_w_context.yaml",
+                test_spec_dir=None,
+                debug=False,
+            )
+        ),
+    )
+    def test_rehearse_success_w_context(self):
+        rehearsal.rehearse()
