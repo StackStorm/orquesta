@@ -1,0 +1,24 @@
+---
+workflow: workflows/sequential_w_context.yaml
+inputs:
+  name: Stanley
+context:
+  st2:
+    api_url: http://localhost
+    token: faketoken
+expected_task_sequence:
+  - task1
+  - task2
+  - task3
+  - continue
+mock_action_executions:
+  - task_id: task1
+    result: Stanley
+  - task_id: task2
+    result: All your base are belong to us!
+  - task_id: task3
+    result: Stanley, All your base are belong to us!
+expected_output:
+  greeting: Stanley, All your base are belong to us!
+  api_url: http://localhost
+  token: faketoken
