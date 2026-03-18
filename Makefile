@@ -1,4 +1,4 @@
-# Copyright 2020-2024 StackStorm contributors.
+# Copyright 2020-2026 StackStorm contributors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,8 @@
 
 PY3 := python3
 SYS_PY3 := $(shell which $(PY3))
-PIP_VERSION = 24.0
+PIP_VERSION ?= 25.3
+SETUPTOOLS_VERSION ?= 80.10.2
 
 # Virtual Environment
 VENV_DIR ?= .venv
@@ -56,47 +57,47 @@ venv:
 .PHONY: reqs
 reqs: venv check_virtualenv
 	echo Install pip version $(PIP_VERSION) to match st2 core.
-	$(VENV_DIR)/bin/pip install --upgrade "pip==$(PIP_VERSION)"
-	$(VENV_DIR)/bin/pip install -r requirements.txt
-	$(VENV_DIR)/bin/pip install -r requirements-test.txt
-	$(VENV_DIR)/bin/pip install -r requirements-docs.txt
-	$(VENV_DIR)/bin/pip install -r requirements-ci.txt
-	$(VENV_DIR)/bin/python setup.py develop
+	$(VENV_DIR)/bin/python -m pip install --upgrade "pip==$(PIP_VERSION)"
+	$(VENV_DIR)/bin/python -m pip install -r requirements.txt
+	$(VENV_DIR)/bin/python -m pip install -r requirements-test.txt
+	$(VENV_DIR)/bin/python -m pip install -r requirements-docs.txt
+	$(VENV_DIR)/bin/python -m pip install -r requirements-ci.txt
+	$(VENV_DIR)/bin/python -m pip install --editable .
 	echo
 
 .PHONY: check_virtualenv
 check_virtualenv:
-	test -d $(VENV_DIR) || exit 1
+	test -d "$(VENV_DIR)" || exit 1
 
 .PHONY: schemas
 schemas: check_virtualenv
-	$(VENV_DIR)/bin/$(PY3) bin/orquesta-generate-schemas
+	"$(VENV_DIR)/bin/$(PY3)" bin/orquesta-generate-schemas
 
 .PHONY: format
 format: check_virtualenv
-	$(VENV_DIR)/bin/black orquesta bin setup.py -l 100
+	"$(VENV_DIR)/bin/black" orquesta bin setup.py -l 100
 
 .PHONY: check
 check: check_virtualenv
-	$(VENV_DIR)/bin/tox
+	"$(VENV_DIR)/bin/tox"
 
 .PHONY: docs
 docs: reqs
-	rm -rf $(BUILDDIR)
-	. $(VENV_DIR)/bin/activate; $(SPHINXBUILD) -W -b html $(SOURCEDIR) $(BUILDDIR)/html
+	rm -rf "$(BUILDDIR)"
+	. "$(VENV_DIR)/bin/activate"; "$(SPHINXBUILD)" -W -b html "$(SOURCEDIR)" "$(BUILDDIR)/html"
 
 .PHONY: livedocs
 livedocs: reqs
-	rm -rf $(BUILDDIR)
-	. $(VENV_DIR)/bin/activate; $(SPHINXAUTO) -H 0.0.0.0 -b html $(SOURCEDIR) $(BUILDDIR)/html
+	rm -rf "$(BUILDDIR)"
+	. "$(VENV_DIR)/bin/activate"; "$(SPHINXAUTO)" -H 0.0.0.0 -b html "$(SOURCEDIR)" "$(BUILDDIR)/html"
 
 .PHONY: package
 package: check_virtualenv
-	rm -rf $(PKGDISTDIR)
-	rm -rf $(PKGBUILDDIR)
-	$(VENV_DIR)/bin/$(PY3) setup.py sdist bdist_wheel
+	rm -rf "$(PKGDISTDIR)"
+	rm -rf "$(PKGBUILDDIR)"
+	"$(VENV_DIR)/bin/$(PY3)" -m build --outdir "${PKGDISTDIR}"
 
 .PHONY: publish
 publish: package
-	$(VENV_DIR)/bin/$(PY3) -m twine upload dist/*
+	"$(VENV_DIR)/bin/$(PY3)" -m twine upload dist/*
 
