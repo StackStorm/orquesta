@@ -4,9 +4,10 @@
 chardet>=3.0.2
 eventlet
 jinja2>=2.11 # BSD License (3 clause)
-jsonschema>=4.18.5 # MIT
-# networkx v3.2 and greater does not support Python3.8.
-networkx>=2.6,<3.2
+#jsonschema==4.17.3
+jsonschema==4.26.0
+# networkx v3.5 and greater does not support Python3.10.
+networkx>=2.6,<3.4
 python-dateutil
 pyyaml>=5.3.1 # MIT
 six>=1.14.0
