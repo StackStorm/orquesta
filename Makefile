@@ -67,8 +67,9 @@ venv:
 
 .PHONY: reqs
 reqs: venv check_virtualenv
-	echo Install pip version $(PIP_VERSION) to match st2 core.
+	echo Install pip $(PIP_VERSION) and setuptools $(SETUPTOOLS_VERSION) to match st2 core.
 	$(VENV_DIR)/bin/$(PY3) -m pip install --upgrade "pip==$(PIP_VERSION)"
+	$(VENV_DIR)/bin/$(PY3) -m pip install --upgrade "setuptools==$(SETUPTOOLS_VERSION)"
 	$(VENV_DIR)/bin/$(PY3) -m pip install -r requirements.txt
 	$(VENV_DIR)/bin/$(PY3) -m pip install -r requirements-test.txt
 	$(VENV_DIR)/bin/$(PY3) -m pip install -r requirements-docs.txt
