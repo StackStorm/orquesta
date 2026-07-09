@@ -26,7 +26,8 @@ ifeq ($(OS_ID),rocky)
 endif
 
 SYS_PY3 := $(shell which $(PY3))
-PIP_VERSION = 24.0
+PIP_VERSION ?= 26.1.2
+SETUPTOOLS_VERSION ?= 82.0.1
 
 # Virtual Environment
 VENV_DIR ?= .venv
