@@ -12,8 +12,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+SHELL = /bin/bash
+OS_ID := $(shell source /etc/os-release; echo $ID)
+# Major OS version is sufficient.
+OS_VERSION := $(shell source /etc/os-release; echo ${VERSION_ID%.*})
 
 PY3 := python3
+# Rocky9 requires a newer python version that the default py3.9
+ifeq ($(OS_ID),rocky)
+	ifeq ($(OS_VERSION),9)
+		PY3 := python3.11
+	endif
+endif
+
 SYS_PY3 := $(shell which $(PY3))
 PIP_VERSION = 24.0
 
@@ -56,12 +67,12 @@ venv:
 .PHONY: reqs
 reqs: venv check_virtualenv
 	echo Install pip version $(PIP_VERSION) to match st2 core.
-	$(VENV_DIR)/bin/pip install --upgrade "pip==$(PIP_VERSION)"
-	$(VENV_DIR)/bin/pip install -r requirements.txt
-	$(VENV_DIR)/bin/pip install -r requirements-test.txt
-	$(VENV_DIR)/bin/pip install -r requirements-docs.txt
-	$(VENV_DIR)/bin/pip install -r requirements-ci.txt
-	$(VENV_DIR)/bin/python setup.py develop
+	$(VENV_DIR)/bin/$(PY3) -m pip install --upgrade "pip==$(PIP_VERSION)"
+	$(VENV_DIR)/bin/$(PY3) -m pip install -r requirements.txt
+	$(VENV_DIR)/bin/$(PY3) -m pip install -r requirements-test.txt
+	$(VENV_DIR)/bin/$(PY3) -m pip install -r requirements-docs.txt
+	$(VENV_DIR)/bin/$(PY3) -m pip install -r requirements-ci.txt
+	$(VENV_DIR)/bin/$(PY3) -m pip install --editable .
 	echo
 
 .PHONY: check_virtualenv
