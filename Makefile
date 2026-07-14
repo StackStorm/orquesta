@@ -12,10 +12,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+SHELL = /bin/bash
+OS_ID := $(shell source /etc/os-release; echo $ID)
+# Major OS version is sufficient.
+OS_VERSION := $(shell source /etc/os-release; echo ${VERSION_ID%.*})
 
 PY3 := python3
+# Rocky9 requires a newer python version than the default py3.9
+ifeq ($(OS_ID),rocky)
+	ifeq ($(OS_VERSION),9)
+		PY3 := python3.11
+	endif
+endif
+
 SYS_PY3 := $(shell which $(PY3))
-PIP_VERSION = 24.0
+PIP_VERSION ?= 26.1.2
+SETUPTOOLS_VERSION ?= 82.0.1
 
 # Virtual Environment
 VENV_DIR ?= .venv
@@ -55,48 +67,49 @@ venv:
 
 .PHONY: reqs
 reqs: venv check_virtualenv
-	echo Install pip version $(PIP_VERSION) to match st2 core.
-	$(VENV_DIR)/bin/pip install --upgrade "pip==$(PIP_VERSION)"
-	$(VENV_DIR)/bin/pip install -r requirements.txt
-	$(VENV_DIR)/bin/pip install -r requirements-test.txt
-	$(VENV_DIR)/bin/pip install -r requirements-docs.txt
-	$(VENV_DIR)/bin/pip install -r requirements-ci.txt
-	$(VENV_DIR)/bin/python setup.py develop
+	echo Install pip $(PIP_VERSION) and setuptools $(SETUPTOOLS_VERSION) to match st2 core.
+	$(VENV_DIR)/bin/$(PY3) -m pip install --upgrade "pip==$(PIP_VERSION)"
+	$(VENV_DIR)/bin/$(PY3) -m pip install --upgrade "setuptools==$(SETUPTOOLS_VERSION)"
+	$(VENV_DIR)/bin/$(PY3) -m pip install -r requirements.txt
+	$(VENV_DIR)/bin/$(PY3) -m pip install -r requirements-test.txt
+	$(VENV_DIR)/bin/$(PY3) -m pip install -r requirements-docs.txt
+	$(VENV_DIR)/bin/$(PY3) -m pip install -r requirements-ci.txt
+	$(VENV_DIR)/bin/$(PY3) -m pip install --editable .
 	echo
 
 .PHONY: check_virtualenv
 check_virtualenv:
-	test -d $(VENV_DIR) || exit 1
+	test -d "$(VENV_DIR)" || exit 1
 
 .PHONY: schemas
 schemas: check_virtualenv
-	$(VENV_DIR)/bin/$(PY3) bin/orquesta-generate-schemas
+	"$(VENV_DIR)/bin/$(PY3)" bin/orquesta-generate-schemas
 
 .PHONY: format
 format: check_virtualenv
-	$(VENV_DIR)/bin/black orquesta bin setup.py -l 100
+	"$(VENV_DIR)/bin/black" orquesta bin setup.py -l 100
 
 .PHONY: check
 check: check_virtualenv
-	$(VENV_DIR)/bin/tox
+	"$(VENV_DIR)/bin/tox"
 
 .PHONY: docs
 docs: reqs
-	rm -rf $(BUILDDIR)
-	. $(VENV_DIR)/bin/activate; $(SPHINXBUILD) -W -b html $(SOURCEDIR) $(BUILDDIR)/html
+	rm -rf "$(BUILDDIR)"
+	. "$(VENV_DIR)/bin/activate"; "$(SPHINXBUILD)" -W -b html "$(SOURCEDIR)" "$(BUILDDIR)/html"
 
 .PHONY: livedocs
 livedocs: reqs
-	rm -rf $(BUILDDIR)
-	. $(VENV_DIR)/bin/activate; $(SPHINXAUTO) -H 0.0.0.0 -b html $(SOURCEDIR) $(BUILDDIR)/html
+	rm -rf "$(BUILDDIR)"
+	. "$(VENV_DIR)/bin/activate"; "$(SPHINXAUTO)" -H 0.0.0.0 -b html "$(SOURCEDIR)" "$(BUILDDIR)/html"
 
 .PHONY: package
-package: check_virtualenv
-	rm -rf $(PKGDISTDIR)
-	rm -rf $(PKGBUILDDIR)
-	$(VENV_DIR)/bin/$(PY3) setup.py sdist bdist_wheel
+package: reqs
+	rm -rf "$(PKGDISTDIR)"
+	rm -rf "$(PKGBUILDDIR)"
+	"$(VENV_DIR)/bin/$(PY3)" -m build --outdir "${PKGDISTDIR}"
 
 .PHONY: publish
 publish: package
-	$(VENV_DIR)/bin/$(PY3) -m twine upload dist/*
+	"$(VENV_DIR)/bin/$(PY3)" -m twine upload dist/*
 

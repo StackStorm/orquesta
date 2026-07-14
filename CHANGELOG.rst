@@ -6,11 +6,15 @@ Unreleased
 
 Changed
 ~~~~~~~
-* Dropped python3.6 support.
+* Dropped support for python3.6 to 3.9.
   Contributed by @nzlosh
 * Use pip 24.0 in virtualenv
   Contributed by @nzlosh
 * Aligned pinned dependencies with St2 core.
+  Contributed by @nzlosh
+* Replaced usage of imp module by importlib
+  Contributed by @nzlosh
+* Added support for python3.10 to 3.12.
   Contributed by @nzlosh
 
 Fixed
