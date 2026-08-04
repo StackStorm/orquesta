@@ -1,3 +1,4 @@
+# Copyright 2021 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +15,6 @@
 
 import abc
 import logging
-import six
 
 from orquesta.utils import plugin as plugin_util
 
@@ -26,8 +26,7 @@ def get_composer(catalog):
     return plugin_util.get_module("orquesta.composers", catalog)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class WorkflowComposer(object):
+class WorkflowComposer(object, metaclass=abc.ABCMeta):
     wf_spec_type = None
 
     @classmethod

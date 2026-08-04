@@ -15,11 +15,9 @@
 import copy
 import logging
 import os
-import six
+import queue
 import unittest
 import yaml
-
-from six.moves import queue
 
 from orquesta import conducting
 from orquesta import constants
@@ -47,7 +45,7 @@ def load_test_spec(fixture=None, fixture_path=None, base_path=None):
     if base_path and not os.path.isdir(base_path):
         raise ValueError('The base path "%s" does not exist.' % base_path)
 
-    if fixture and isinstance(fixture, six.string_types):
+    if fixture and isinstance(fixture, str):
         fixture = yaml.safe_load(fixture)
 
     if fixture_path:
@@ -483,9 +481,11 @@ class WorkflowRehearsal(unittest.TestCase):
         ]
 
         actual_task_seq_user_friendly = [
-            constants.TASK_STATE_ROUTE_FORMAT % (entry["id"], str(entry["route"]))
-            if entry["route"] > 0
-            else entry["id"]
+            (
+                constants.TASK_STATE_ROUTE_FORMAT % (entry["id"], str(entry["route"]))
+                if entry["route"] > 0
+                else entry["id"]
+            )
             for entry in self.conductor.workflow_state.sequence
         ]
 
@@ -541,16 +541,20 @@ class WorkflowRehearsal(unittest.TestCase):
             ]
 
             actual_term_tasks_user_friendly = [
-                constants.TASK_STATE_ROUTE_FORMAT % (t["id"], str(t["route"]))
-                if t["route"] > 0
-                else t["id"]
+                (
+                    constants.TASK_STATE_ROUTE_FORMAT % (t["id"], str(t["route"]))
+                    if t["route"] > 0
+                    else t["id"]
+                )
                 for i, t in self.conductor.workflow_state.get_terminal_tasks()
             ]
 
             expected_term_tasks = [
-                task_id
-                if "__r" in task_id
-                else constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(0))
+                (
+                    task_id
+                    if "__r" in task_id
+                    else constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(0))
+                )
                 for task_id in self.session.expected_term_tasks
             ]
 

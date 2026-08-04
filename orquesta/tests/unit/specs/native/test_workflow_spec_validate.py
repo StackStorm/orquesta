@@ -1,4 +1,4 @@
-# Copyright 2021 The StackStorm Authors.
+# Copyright 2021-2026 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import six
 
 from orquesta.specs import loader as spec_loader
 from orquesta.tests.unit.specs.native import base as test_base
@@ -236,7 +234,7 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
         expected_errors = {
             "syntax": [
                 {
-                    "message": "{} does not have enough properties",
+                    "message": "{} should be non-empty",
                     "schema_path": "properties.tasks.minProperties",
                     "spec_path": "tasks",
                 }
@@ -493,7 +491,7 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
 
         expected_error = 'Failed to load workflow definition because found duplicate key "task1"'
 
-        assertRaisesRegex = self.assertRaisesRegex if six.PY3 else self.assertRaisesRegexp
+        assertRaisesRegex = self.assertRaisesRegex
 
         assertRaisesRegex(
             ValueError,

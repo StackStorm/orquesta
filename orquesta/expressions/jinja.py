@@ -1,3 +1,4 @@
+# Copyright 2021 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +18,6 @@ import inspect
 import itertools
 import logging
 import re
-import six
 
 import jinja2
 import jinja2.sandbox
@@ -35,7 +35,7 @@ LOG = logging.getLogger(__name__)
 def register_functions(env):
     catalog = func_base.load()
 
-    for name, func in six.iteritems(catalog):
+    for name, func in catalog.items():
         env.filters[name] = func
 
     return catalog
@@ -95,7 +95,7 @@ class JinjaEvaluator(expr_base.Evaluator):
             ctx["__current_task"] = ctx["__vars"].get("__current_task")
             ctx["__current_item"] = ctx["__vars"].get("__current_item")
 
-        for name, func in six.iteritems(cls._custom_functions):
+        for name, func in cls._custom_functions.items():
             ctx[name] = functools.partial(func, ctx) if expr_base.func_has_ctx_arg(func) else func
 
         return ctx
@@ -117,7 +117,7 @@ class JinjaEvaluator(expr_base.Evaluator):
 
     @classmethod
     def validate(cls, text):
-        if not isinstance(text, six.string_types):
+        if not isinstance(text, str):
             raise ValueError("Text to be evaluated is not typeof string.")
 
         errors = []
@@ -176,7 +176,7 @@ class JinjaEvaluator(expr_base.Evaluator):
                     if inspect.isgenerator(result):
                         result = list(result)
 
-                    if isinstance(result, six.string_types):
+                    if isinstance(result, str):
                         result = cls._evaluate_and_expand(result, data)
 
                     # For StrictUndefined values, UndefinedError only gets raised when the value is
@@ -200,7 +200,7 @@ class JinjaEvaluator(expr_base.Evaluator):
 
     @classmethod
     def evaluate(cls, text, data=None):
-        if not isinstance(text, six.string_types):
+        if not isinstance(text, str):
             raise ValueError("Text to be evaluated is not typeof string.")
 
         if data and not isinstance(data, dict):
@@ -215,7 +215,7 @@ class JinjaEvaluator(expr_base.Evaluator):
         # Recursively evaluate the expression.
         output = cls._evaluate_and_expand(text, data=data)
 
-        if isinstance(output, six.string_types):
+        if isinstance(output, str):
             exprs = [cls.strip_delimiter(expr) for expr in cls._regex_parser.findall(output)]
 
             if exprs:
@@ -223,7 +223,7 @@ class JinjaEvaluator(expr_base.Evaluator):
                     "There are unresolved variables: %s" % ", ".join(exprs)
                 )
 
-        if isinstance(output, six.string_types) and raw_blocks:
+        if isinstance(output, str) and raw_blocks:
             # Put raw blocks back into the expression.
             for i in range(0, len(raw_blocks)):
                 output = output.replace("{%s}" % str(i), raw_blocks[i])  # pylint: disable=E1101
@@ -236,7 +236,7 @@ class JinjaEvaluator(expr_base.Evaluator):
 
     @classmethod
     def extract_vars(cls, text):
-        if not isinstance(text, six.string_types):
+        if not isinstance(text, str):
             raise ValueError("Text to be evaluated is not typeof string.")
 
         results = [

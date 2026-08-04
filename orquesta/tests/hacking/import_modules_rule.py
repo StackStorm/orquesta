@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import imp
+import importlib
 import inspect
 import sys
 import traceback
@@ -54,10 +54,10 @@ def check_module_only(logical_line, filename, noqa):
 
             while "." in mod_name:
                 pack_name, _sep, mod_name = mod_name.partition(".")
-                f, p, d = imp.find_module(pack_name, search_path)
+                f, p, d = importlib.util.find_spec(pack_name, search_path)
                 search_path = [p]
 
-            imp.find_module(mod_name, search_path)
+            importlib.util.find_spec(mod_name, search_path)
         except ImportError:
             try:
                 # Handle namespace modules

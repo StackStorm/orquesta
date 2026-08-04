@@ -1,0 +1,20 @@
+name: Publish
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+    needs:
+      - build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: "Set up Python ${{ matrix.python-version }}"
+        uses: actions/setup-python@v4
+        with:
+          python-version: "${{ matrix.python-version }}"
+      - name: Publish wheel
+        run: |
+          echo "TODO: make publish"
