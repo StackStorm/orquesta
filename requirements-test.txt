@@ -10,3 +10,4 @@ pylint==3.1.0
 twine
 pytest-benchmark
 build
+hacking
