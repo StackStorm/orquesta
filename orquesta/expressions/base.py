@@ -76,7 +76,7 @@ def get_evaluator(language):
 
 def get_evaluators():
     global _EXP_EVALUATORS
-    global _EXP_EVALUATORS_LOCK
+    global _EXP_EVALUATORS_LOCK  # noqa: F824
 
     with _EXP_EVALUATORS_LOCK:
         if _EXP_EVALUATORS is None:

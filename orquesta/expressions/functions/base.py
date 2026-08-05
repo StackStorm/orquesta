@@ -23,7 +23,7 @@ _EXP_FUNC_CATALOG_LOCK = threading.Lock()
 
 def load():
     global _EXP_FUNC_CATALOG
-    global _EXP_FUNC_CATALOG_LOCK
+    global _EXP_FUNC_CATALOG_LOCK  # noqa: F824
 
     with _EXP_FUNC_CATALOG_LOCK:
         if _EXP_FUNC_CATALOG is None:
