@@ -1,0 +1,31 @@
+name: Build
+
+on:
+  push:
+    branches: ['*']
+  pull_request:
+    branches:
+      - master
+  schedule:
+    # run every Monday at 6am
+    - cron: '0 6 * * 1'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+    needs:
+      - tests
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: "Set up Python ${{ matrix.python-version }}"
+        uses: actions/setup-python@v4
+        with:
+          python-version: "${{ matrix.python-version }}"
+      - name: Build wheel
+        run: |
+          make clean
+          make package

@@ -1,4 +1,4 @@
-# Copyright 2021 The StackStorm Authors.
+# Copyright 2021-2026 The StackStorm Authors.
 # Copyright 2019 Extreme Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -234,7 +234,7 @@ class WorkflowSpecValidationTest(test_base.OrchestraWorkflowSpecTest):
         expected_errors = {
             "syntax": [
                 {
-                    "message": "{} does not have enough properties",
+                    "message": "{} should be non-empty",
                     "schema_path": "properties.tasks.minProperties",
                     "spec_path": "tasks",
                 }
