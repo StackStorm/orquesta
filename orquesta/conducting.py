@@ -13,8 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import annotations
+
 import logging
 import queue
+import typing
 
 from orquesta import constants
 from orquesta import events
@@ -24,6 +27,7 @@ from orquesta import graphing
 from orquesta import machines
 from orquesta.specs import base as spec_base
 from orquesta.specs import loader as spec_loader
+from orquesta import statetypes
 from orquesta import statuses
 from orquesta.utils import context as ctx_util
 from orquesta.utils import dictionary as dict_util
@@ -37,16 +41,16 @@ LOG = logging.getLogger(__name__)
 class WorkflowState(object):
     def __init__(self, conductor=None):
         self.conductor = conductor
-        self.contexts = list()
-        self.routes = list()
-        self.sequence = list()
-        self.staged = list()
-        self.status = statuses.UNSET
-        self.tasks = dict()
-        self.reruns = list()
+        self.contexts: list[dict] = list()
+        self.routes: list[statetypes.RouteDetails] = list()
+        self.sequence: list[statetypes.TaskStateEntry] = list()
+        self.staged: list[statetypes.StagedTask] = list()
+        self.status: str = statuses.UNSET
+        self.tasks: statetypes.TaskIndex = dict()
+        self.reruns: list[list[int]] = list()
 
-    def serialize(self):
-        data = {
+    def serialize(self) -> statetypes.SerializedWorkflowState:
+        data: statetypes.SerializedWorkflowState = {
             "contexts": json_util.deepcopy(self.contexts),
             "routes": json_util.deepcopy(self.routes),
             "sequence": json_util.deepcopy(self.sequence),
@@ -61,7 +65,7 @@ class WorkflowState(object):
         return data
 
     @classmethod
-    def deserialize(cls, data):
+    def deserialize(cls, data: statetypes.SerializedWorkflowState) -> "WorkflowState":
         instance = cls()
         instance.contexts = json_util.deepcopy(data.get("contexts", list()))
         instance.routes = json_util.deepcopy(data.get("routes", list()))
@@ -178,7 +182,7 @@ class WorkflowState(object):
 
         return unreachable_barriers
 
-    def get_staged_tasks(self, filtered=True):
+    def get_staged_tasks(self, filtered=True) -> list[statetypes.StagedTask]:
         if not filtered:
             return self.staged
 
@@ -188,11 +192,13 @@ class WorkflowState(object):
     def has_staged_tasks(self):
         return len(self.get_staged_tasks()) > 0
 
-    def add_staged_task(self, task_id, route, ctxs=None, prev=None, ready=True, retry=False):
+    def add_staged_task(
+        self, task_id, route, ctxs=None, prev=None, ready=True, retry=False
+    ) -> statetypes.StagedTask:
         if not ctxs:
             ctxs = [0]
 
-        entry = {
+        entry: statetypes.StagedTask = {
             "id": task_id,
             "ctxs": {"in": ctxs},
             "route": route,
@@ -207,7 +213,7 @@ class WorkflowState(object):
 
         return entry
 
-    def get_staged_task(self, task_id, route):
+    def get_staged_task(self, task_id, route) -> typing.Optional[statetypes.StagedTask]:
         staged_tasks = [x for x in self.staged if x["id"] == task_id and x["route"] == route]
 
         return staged_tasks[0] if staged_tasks else None
@@ -563,7 +569,7 @@ class WorkflowConductor(object):
         # If reached here, then the requirement is not satisified.
         return constants.INBOUND_CRITERIA_NOT_SATISFIED
 
-    def get_task(self, task_id, route):
+    def get_task(self, task_id, route) -> statetypes.RuntimeTask:
         try:
             task_ctx = self.get_task_initial_context(task_id, route)
         except ValueError:
@@ -576,7 +582,7 @@ class WorkflowConductor(object):
         task_spec = self.spec.tasks.get_task(task_id).copy()
         task_spec, action_specs = task_spec.render(task_ctx)
 
-        task = {
+        task: statetypes.RuntimeTask = {
             "id": task_id,
             "route": route,
             "ctx": task_ctx,
@@ -605,7 +611,7 @@ class WorkflowConductor(object):
 
         return task
 
-    def _evaluate_task_actions(self, task):
+    def _evaluate_task_actions(self, task: statetypes.RuntimeTask) -> statetypes.RuntimeTask:
         task_id = task["id"]
         task_route = task["route"]
 
@@ -738,7 +744,7 @@ class WorkflowConductor(object):
             constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route))
         )
 
-    def get_task_state_entry(self, task_id, route):
+    def get_task_state_entry(self, task_id, route) -> typing.Optional[statetypes.TaskStateEntry]:
         task_state_seq_idx = self._get_task_state_idx(task_id, route)
 
         if task_state_seq_idx is None:
@@ -808,14 +814,16 @@ class WorkflowConductor(object):
 
             task_state_entry["retry"]["count"] = count_value
 
-    def add_task_state(self, task_id, route, in_ctx_idxs=None, prev=None):
+    def add_task_state(
+        self, task_id, route, in_ctx_idxs=None, prev=None
+    ) -> statetypes.TaskStateEntry:
         if not self.graph.has_task(task_id):
             raise exc.InvalidTask(task_id)
 
         if not in_ctx_idxs:
             in_ctx_idxs = [0]
 
-        task_state_entry = {
+        task_state_entry: statetypes.TaskStateEntry = {
             "id": task_id,
             "route": route,
             "ctxs": {"in": in_ctx_idxs},
