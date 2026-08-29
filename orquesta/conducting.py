@@ -465,11 +465,7 @@ class WorkflowConductor(object):
             raise exc.InvalidWorkflowStatusTransition(current_status, wf_ex_event.name)
 
     def get_workflow_initial_context(self):
-<<<<<<< HEAD
-        return json_util.deepcopy(self.workflow_state.contexts[constants.ROOT_CONTEXT_INDEX])
-=======
-        return self.workflow_state.contexts[0]
->>>>>>> github/master
+        return self.workflow_state.contexts[constants.ROOT_CONTEXT_INDEX]
 
     def get_workflow_terminal_context(self):
         if self.get_workflow_status() not in statuses.COMPLETED_STATUSES:
@@ -490,12 +486,7 @@ class WorkflowConductor(object):
         for idx, task in other_term_tasks:
             # Remove the initial context since the first task processed above already
             # inclulded that and we only want to apply the differences.
-<<<<<<< HEAD
-            in_ctx_idxs = json_util.deepcopy(task["ctxs"]["in"])
-            in_ctx_idxs.remove(constants.ROOT_CONTEXT_INDEX)
-=======
             in_ctx_idxs = [i for index, i in enumerate(task["ctxs"]["in"]) if index != 0]
->>>>>>> github/master
 
             wf_term_ctx = dict_util.merge_dicts(
                 wf_term_ctx, self.get_task_context(in_ctx_idxs), overwrite=True
