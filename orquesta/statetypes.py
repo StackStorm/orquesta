@@ -53,7 +53,10 @@ _TaskContextsIn = TypedDict("_TaskContextsIn", {"in": List[int]})
 _TaskContextsOut = TypedDict("_TaskContextsOut", {"out": Dict[str, int]}, total=False)
 
 
-class TaskContexts(_TaskContextsIn, _TaskContextsOut):
+# pylint on Python 3.10 does not recognize functional-form TypedDicts as classes,
+class TaskContexts(  # pylint: disable=inherit-non-class,duplicate-bases
+    _TaskContextsIn, _TaskContextsOut
+):
     """``{"in": [<ctx idx>, ...], "out"?: {<transition id>: <ctx idx>}}``.
 
     ``in`` is always present; ``out`` is only added once a task completes and
