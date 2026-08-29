@@ -13,18 +13,53 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""The two state machines that decide status transitions from events.
+
+The conductor feeds :class:`orquesta.events.ExecutionEvent` instances to two
+state machines defined here:
+
+* :class:`WorkflowStateMachine` -- owns the *workflow's* status. It reacts to
+  workflow-level events and to task-level events (a task finishing can complete
+  or fail the whole workflow).
+* :class:`TaskStateMachine` -- owns a single *task's* status. It reacts to
+  action-execution events, with-items events, and workflow-level events.
+
+Both are driven by a lookup table (``*_STATE_MACHINE_DATA`` below). A table maps
+``current status -> {event name -> new status}``: given where you are and what
+happened, it tells you where to go. If the current status has no entry for the
+event, the status is left unchanged.
+
+The ``add_context_to_*`` methods are the reason the event *name* fed to the
+table is not always the raw ``event.name``: they append suffixes such as
+``_workflow_active`` / ``_task_dormant_items_completed`` derived from the rest
+of the workflow state, so a single raw event can resolve to different
+transitions depending on context. Those expanded names are exactly the
+``events.*_EXECUTION_EVENTS`` constants used as table keys.
+"""
+
+from __future__ import annotations
+
 import logging
+import typing
 
 from orquesta import events
 from orquesta import exceptions as exc
+from orquesta import statetypes
 from orquesta import statuses
 from orquesta.utils import jsonify as json_util
+
+if typing.TYPE_CHECKING:
+    from orquesta import conducting
 
 
 LOG = logging.getLogger(__name__)
 
 
-WORKFLOW_STATE_MACHINE_DATA = {
+# A state-machine transition table: current status -> {event name -> new status}.
+StateTransitionTable = typing.Dict[str, typing.Dict[str, str]]
+
+
+WORKFLOW_STATE_MACHINE_DATA: StateTransitionTable = {
     statuses.UNSET: {
         events.WORKFLOW_REQUESTED: statuses.REQUESTED,
         events.WORKFLOW_SCHEDULED: statuses.SCHEDULED,
@@ -226,7 +261,7 @@ WORKFLOW_STATE_MACHINE_DATA = {
 }
 
 
-TASK_STATE_MACHINE_DATA = {
+TASK_STATE_MACHINE_DATA: StateTransitionTable = {
     statuses.UNSET: {
         events.ACTION_REQUESTED: statuses.REQUESTED,
         events.ACTION_SCHEDULED: statuses.SCHEDULED,
@@ -451,8 +486,17 @@ TASK_STATE_MACHINE_DATA = {
 
 
 class TaskStateMachine(object):
+    """Decides a single task's status from the events it receives.
+
+    All methods are class methods; the machine is stateless. It mutates the
+    ``task_state`` entry (a :class:`statetypes.TaskStateEntry`) in place by
+    writing its ``status`` key, using ``TASK_STATE_MACHINE_DATA`` as the table.
+    """
+
     @classmethod
-    def is_transition_valid(cls, old_status, new_status):
+    def is_transition_valid(
+        cls, old_status: typing.Optional[str], new_status: typing.Optional[str]
+    ) -> bool:
         if old_status is None:
             old_status = "null"
 
@@ -474,11 +518,22 @@ class TaskStateMachine(object):
         return False
 
     @classmethod
-    def add_context_to_action_event(cls, workflow_state, task_id, task_route, ac_ex_event):
+    def add_context_to_action_event(
+        cls,
+        workflow_state: "conducting.WorkflowState",
+        task_id: statetypes.TaskId,
+        task_route: statetypes.RouteId,
+        ac_ex_event: events.ActionExecutionEvent,
+    ) -> str:
         return ac_ex_event.name
 
     @classmethod
-    def process_action_event(cls, workflow_state, task_state, ac_ex_event):
+    def process_action_event(
+        cls,
+        workflow_state: "conducting.WorkflowState",
+        task_state: statetypes.TaskStateEntry,
+        ac_ex_event: events.ActionExecutionEvent,
+    ) -> None:
         # Check if event is valid.
         if ac_ex_event.name not in events.ACTION_EXECUTION_EVENTS + events.ENGINE_OPERATION_EVENTS:
             raise exc.InvalidEvent(ac_ex_event.name)
@@ -510,7 +565,13 @@ class TaskStateMachine(object):
         task_state["status"] = new_task_status
 
     @classmethod
-    def add_context_to_task_item_event(cls, workflow_state, task_id, task_route, ac_ex_event):
+    def add_context_to_task_item_event(
+        cls,
+        workflow_state: "conducting.WorkflowState",
+        task_id: statetypes.TaskId,
+        task_route: statetypes.RouteId,
+        ac_ex_event: events.TaskItemActionExecutionEvent,
+    ) -> str:
         action_event = ac_ex_event.name
 
         requirements = [
@@ -560,7 +621,12 @@ class TaskStateMachine(object):
         return action_event
 
     @classmethod
-    def process_task_item_event(cls, workflow_state, task_state, ac_ex_event):
+    def process_task_item_event(
+        cls,
+        workflow_state: "conducting.WorkflowState",
+        task_state: statetypes.TaskStateEntry,
+        ac_ex_event: events.TaskItemActionExecutionEvent,
+    ) -> None:
         # Check if event is valid.
         if ac_ex_event.name not in events.ACTION_EXECUTION_EVENTS + events.ENGINE_OPERATION_EVENTS:
             raise exc.InvalidEvent(ac_ex_event.name)
@@ -592,7 +658,13 @@ class TaskStateMachine(object):
         task_state["status"] = new_task_status
 
     @classmethod
-    def add_context_to_workflow_event(cls, workflow_state, task_id, task_route, wf_ex_event):
+    def add_context_to_workflow_event(
+        cls,
+        workflow_state: "conducting.WorkflowState",
+        task_id: statetypes.TaskId,
+        task_route: statetypes.RouteId,
+        wf_ex_event: events.WorkflowExecutionEvent,
+    ) -> str:
         workflow_event = wf_ex_event.name
         requirements = statuses.PAUSE_STATUSES + statuses.CANCEL_STATUSES
         staged_task = workflow_state.get_staged_task(task_id, task_route)
@@ -607,7 +679,12 @@ class TaskStateMachine(object):
         return workflow_event
 
     @classmethod
-    def process_workflow_event(cls, workflow_state, task_state, wf_ex_event):
+    def process_workflow_event(
+        cls,
+        workflow_state: "conducting.WorkflowState",
+        task_state: statetypes.TaskStateEntry,
+        wf_ex_event: events.WorkflowExecutionEvent,
+    ) -> None:
         # Check if event is valid.
         if wf_ex_event.name not in events.WORKFLOW_EXECUTION_EVENTS:
             raise exc.InvalidEvent(wf_ex_event.name)
@@ -639,7 +716,12 @@ class TaskStateMachine(object):
         task_state["status"] = new_task_status
 
     @classmethod
-    def process_event(cls, workflow_state, task_state, event):
+    def process_event(
+        cls,
+        workflow_state: "conducting.WorkflowState",
+        task_state: statetypes.TaskStateEntry,
+        event: events.ExecutionEvent,
+    ) -> None:
         if isinstance(event, events.WorkflowExecutionEvent):
             cls.process_workflow_event(workflow_state, task_state, event)
             return
@@ -660,8 +742,19 @@ class TaskStateMachine(object):
 
 
 class WorkflowStateMachine(object):
+    """Decides the workflow's status from the events it receives.
+
+    All methods are class methods; the machine is stateless. It mutates
+    ``workflow_state.status`` in place, using ``WORKFLOW_STATE_MACHINE_DATA`` as
+    the table. Unlike :class:`TaskStateMachine`, it also reacts to task-level
+    events, since a task reaching a terminal status can complete or fail the
+    whole workflow.
+    """
+
     @classmethod
-    def is_transition_valid(cls, old_status, new_status):
+    def is_transition_valid(
+        cls, old_status: typing.Optional[str], new_status: typing.Optional[str]
+    ) -> bool:
         if old_status is None:
             old_status = "null"
 
@@ -686,7 +779,11 @@ class WorkflowStateMachine(object):
         return False
 
     @classmethod
-    def add_context_to_task_event(cls, workflow_state, tk_ex_event):
+    def add_context_to_task_event(
+        cls,
+        workflow_state: "conducting.WorkflowState",
+        tk_ex_event: events.TaskExecutionEvent,
+    ) -> str:
         # Identify current workflow status.
         task_event = tk_ex_event.name
         task_id = getattr(tk_ex_event, "task_id", None)
@@ -728,7 +825,11 @@ class WorkflowStateMachine(object):
         return task_event + "_completed"
 
     @classmethod
-    def process_task_event(cls, workflow_state, tk_ex_event):
+    def process_task_event(
+        cls,
+        workflow_state: "conducting.WorkflowState",
+        tk_ex_event: events.TaskExecutionEvent,
+    ) -> None:
         # Append additional workflow context to the event.
         event_name = cls.add_context_to_task_event(workflow_state, tk_ex_event)
 
@@ -772,7 +873,11 @@ class WorkflowStateMachine(object):
                     workflow_state.conductor.log_error(e, task_id=entry["id"], route=entry["route"])
 
     @classmethod
-    def add_context_to_workflow_event(cls, workflow_state, wf_ex_event):
+    def add_context_to_workflow_event(
+        cls,
+        workflow_state: "conducting.WorkflowState",
+        wf_ex_event: events.WorkflowExecutionEvent,
+    ) -> str:
         # Identify current workflow status.
         workflow_event = wf_ex_event.name
         has_active_tasks = workflow_state.has_active_tasks
@@ -797,7 +902,11 @@ class WorkflowStateMachine(object):
         return workflow_event
 
     @classmethod
-    def process_workflow_event(cls, workflow_state, wf_ex_event):
+    def process_workflow_event(
+        cls,
+        workflow_state: "conducting.WorkflowState",
+        wf_ex_event: events.WorkflowExecutionEvent,
+    ) -> None:
         # Append additional workflow context to the event.
         event_name = cls.add_context_to_workflow_event(workflow_state, wf_ex_event)
 
@@ -825,7 +934,11 @@ class WorkflowStateMachine(object):
             workflow_state.status = new_workflow_status
 
     @classmethod
-    def process_event(cls, workflow_state, event):
+    def process_event(
+        cls,
+        workflow_state: "conducting.WorkflowState",
+        event: events.ExecutionEvent,
+    ) -> None:
         if isinstance(event, events.WorkflowExecutionEvent):
             cls.process_workflow_event(workflow_state, event)
             return

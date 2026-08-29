@@ -20,6 +20,7 @@ import inspect
 import logging
 import re
 import threading
+import typing
 
 from stevedore import extension
 
@@ -32,6 +33,19 @@ LOG = logging.getLogger(__name__)
 _EXP_EVALUATORS = None
 _EXP_EVALUATORS_LOCK = threading.Lock()
 _EXP_EVALUATOR_NAMESPACE = "orquesta.expressions.evaluators"
+
+
+class ContextVar(typing.NamedTuple):
+    """A context variable reference extracted from an expression.
+
+    Returned by :func:`extract_vars`. It is a ``tuple`` subclass, so existing
+    positional access, unpacking, sorting, and set-dedup all behave as before;
+    the named fields simply make ``[0]``/``[1]``/``[2]`` self-documenting.
+    """
+
+    type: str  # the evaluator type that produced it, e.g. "jinja" / "yaql"
+    expression: str  # the full expression string the variable was found in
+    name: str  # the referenced variable name
 
 
 class Evaluator(metaclass=abc.ABCMeta):
@@ -163,11 +177,11 @@ def extract_vars(statement):
                 for regex_var_extract in evaluator.get_var_extraction_regexes():
                     result = re.search(regex_var_extract, var_ref)
                     var = result.group(1) if result else ""
-                    variables.append((evaluator.get_type(), statement, var))
+                    variables.append(ContextVar(evaluator.get_type(), statement, var))
 
-    variables = [v for v in variables if v[2] != ""]
+    variables = [v for v in variables if v.name != ""]
 
-    return sorted(list(set(variables)), key=lambda var: var[2])
+    return sorted(list(set(variables)), key=lambda var: var.name)
 
 
 def func_has_ctx_arg(func):

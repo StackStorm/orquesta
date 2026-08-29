@@ -23,6 +23,10 @@ from orquesta.specs import native as native_specs
 
 LOG = logging.getLogger(__name__)
 
+# Default number of attempts for the implicit "retry" task transition (the
+# `next: - do: retry` shorthand), used when the spec does not specify a count.
+DEFAULT_RETRY_COUNT = 3
+
 
 class WorkflowComposer(comp_base.WorkflowComposer):
     wf_spec_type = native_specs.WorkflowSpec
@@ -84,7 +88,10 @@ class WorkflowComposer(comp_base.WorkflowComposer):
 
             for next_task_name, condition, task_transition_item_idx in next_tasks:
                 if next_task_name == "retry":
-                    retry_spec = {"when": condition or "<% completed() %>", "count": 3}
+                    retry_spec = {
+                        "when": condition or "<% completed() %>",
+                        "count": DEFAULT_RETRY_COUNT,
+                    }
                     wf_graph.update_task(task_name, retry=retry_spec)
                     continue
 
@@ -115,7 +122,7 @@ class WorkflowComposer(comp_base.WorkflowComposer):
                     wf_graph.update_transition(
                         task_name,
                         next_task_name,
-                        key=seqs[0][2],
+                        key=seqs[0].key,
                         criteria=crta,
                         ref=task_transition_item_idx,
                     )

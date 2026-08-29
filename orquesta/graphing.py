@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import annotations
+
 import abc
 import logging
 
@@ -19,6 +21,7 @@ import networkx as nx
 from networkx.readwrite import json_graph
 
 from orquesta import exceptions as exc
+from orquesta import statetypes
 from orquesta.utils import dictionary as dict_util
 from orquesta.utils import jsonify as json_util
 
@@ -101,7 +104,7 @@ class WorkflowGraph(metaclass=abc.ABCMeta):
         for key, value in kwargs.items():
             self._graph.nodes[task_id][key] = value
 
-    def has_transition(self, source, destination, **kwargs):
+    def has_transition(self, source, destination, **kwargs) -> list[statetypes.TaskTransition]:
         edges = filter(
             lambda e: e[0] == source and e[1] == destination,
             self._graph.edges(data=True, keys=True),  # pylint: disable=unexpected-keyword-arg
@@ -110,9 +113,9 @@ class WorkflowGraph(metaclass=abc.ABCMeta):
         for attr, value in kwargs.items():
             edges = filter(lambda e: e[3].get(attr, None) == value, list(edges))
 
-        return list(edges)
+        return [statetypes.TaskTransition(*e) for e in edges]
 
-    def get_transition(self, source, destination, key=None, **kwargs):
+    def get_transition(self, source, destination, key=None, **kwargs) -> statetypes.TaskTransition:
         if key is not None:
             edges = filter(
                 lambda e: e[0] == source and e[1] == destination and e[2] == key,
@@ -135,7 +138,7 @@ class WorkflowGraph(metaclass=abc.ABCMeta):
         if len(edges) > 1:
             raise exc.AmbiguousTaskTransition(source, destination)
 
-        return edges[0]
+        return statetypes.TaskTransition(*edges[0])
 
     def get_transition_attributes(self, attribute):
         return nx.get_edge_attributes(self._graph, attribute)
@@ -160,16 +163,24 @@ class WorkflowGraph(metaclass=abc.ABCMeta):
         seq = self.get_transition(source, destination, key=key)
 
         for attr, value in kwargs.items():
-            self._graph[source][destination][seq[2]][attr] = value
+            self._graph[source][destination][seq.key][attr] = value
 
-    def get_next_transitions(self, task_id):
+    def get_next_transitions(self, task_id) -> list[statetypes.TaskTransition]:
         return sorted(
-            [e for e in self._graph.out_edges([task_id], data=True, keys=True)], key=lambda x: x[1]
+            [
+                statetypes.TaskTransition(*e)
+                for e in self._graph.out_edges([task_id], data=True, keys=True)
+            ],
+            key=lambda x: x.destination,
         )
 
-    def get_prev_transitions(self, task_id):
+    def get_prev_transitions(self, task_id) -> list[statetypes.TaskTransition]:
         return sorted(
-            [e for e in self._graph.in_edges([task_id], data=True, keys=True)], key=lambda x: x[1]
+            [
+                statetypes.TaskTransition(*e)
+                for e in self._graph.in_edges([task_id], data=True, keys=True)
+            ],
+            key=lambda x: x.destination,
         )
 
     def get_barriers(self):
@@ -202,7 +213,7 @@ class WorkflowGraph(metaclass=abc.ABCMeta):
         # transition to any task that is not a member of the cycle.
         for task_id in cycle["tasks"]:
             for transition in self.get_next_transitions(task_id):
-                if transition[1] not in cycle["tasks"]:
+                if transition.destination not in cycle["tasks"]:
                     return False
 
         return True

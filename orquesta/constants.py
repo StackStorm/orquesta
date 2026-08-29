@@ -15,6 +15,13 @@
 TASK_STATE_ROUTE_FORMAT = "%s__r%s"
 TASK_STATE_TRANSITION_FORMAT = "%s__t%s"
 
+# The initial (main) workflow context and route. When a workflow starts, the
+# root context is registered at this index in WorkflowState.contexts and the
+# main route at this id in WorkflowState.routes. The literal 0 is referenced
+# from many places in the conductor; these names make that intent explicit.
+ROOT_CONTEXT_INDEX = 0
+ROOT_ROUTE_ID = 0
+
 INBOUND_CRITERIA_WIP = "inbound_criteria_wip"
 INBOUND_CRITERIA_SATISFIED = "inbound_criteria_satisfied"
 INBOUND_CRITERIA_NOT_SATISFIED = "inbound_criteria_not_satisfied"

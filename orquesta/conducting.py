@@ -42,7 +42,7 @@ class WorkflowState(object):
     def __init__(self, conductor=None):
         self.conductor = conductor
         self.contexts: list[dict] = list()
-        self.routes: list[statetypes.RouteDetails] = list()
+        self.routes: statetypes.RoutesRegistry = list()
         self.sequence: list[statetypes.TaskStateEntry] = list()
         self.staged: list[statetypes.StagedTask] = list()
         self.status: str = statuses.UNSET
@@ -96,7 +96,7 @@ class WorkflowState(object):
             result = list(enumerate(self.sequence))
 
         if last_occurrence:
-            result = [s for s in result if s[0] in self.tasks.values()]
+            result = [(i, t) for i, t in result if i in self.tasks.values()]
 
         return result
 
@@ -106,7 +106,7 @@ class WorkflowState(object):
         ]
 
         if last_occurrence:
-            result = [s for s in result if s[0] in self.tasks.values()]
+            result = [(i, t) for i, t in result if i in self.tasks.values()]
 
         return result
 
@@ -196,7 +196,7 @@ class WorkflowState(object):
         self, task_id, route, ctxs=None, prev=None, ready=True, retry=False
     ) -> statetypes.StagedTask:
         if not ctxs:
-            ctxs = [0]
+            ctxs = [constants.ROOT_CONTEXT_INDEX]
 
         entry: statetypes.StagedTask = {
             "id": task_id,
@@ -344,12 +344,13 @@ class WorkflowConductor(object):
                 # Set the initial workflow context.
                 self._workflow_state.contexts.append(init_ctx)
 
-                # Set the initial execution route.
+                # Register the initial (main) route as route id 0. Its
+                # fingerprint is empty because no splits have been taken yet.
                 self._workflow_state.routes.append([])
 
                 # Identify the starting tasks and set the pointer to the initial context entry.
                 for task_node in self.graph.roots:
-                    ctxs, route = [0], 0
+                    ctxs, route = [constants.ROOT_CONTEXT_INDEX], constants.ROOT_ROUTE_ID
                     self._workflow_state.add_staged_task(
                         task_node["id"], route, ctxs=ctxs, ready=True
                     )
@@ -464,7 +465,7 @@ class WorkflowConductor(object):
             raise exc.InvalidWorkflowStatusTransition(current_status, wf_ex_event.name)
 
     def get_workflow_initial_context(self):
-        return json_util.deepcopy(self.workflow_state.contexts[0])
+        return json_util.deepcopy(self.workflow_state.contexts[constants.ROOT_CONTEXT_INDEX])
 
     def get_workflow_terminal_context(self):
         if self.get_workflow_status() not in statuses.COMPLETED_STATUSES:
@@ -477,7 +478,7 @@ class WorkflowConductor(object):
         if not term_tasks:
             return wf_term_ctx
 
-        _, first_term_task = term_tasks[0:1][0]
+        _, first_term_task = term_tasks[0]
         other_term_tasks = term_tasks[1:]
 
         wf_term_ctx = self.get_task_context(first_term_task["ctxs"]["in"])
@@ -486,7 +487,7 @@ class WorkflowConductor(object):
             # Remove the initial context since the first task processed above already
             # inclulded that and we only want to apply the differences.
             in_ctx_idxs = json_util.deepcopy(task["ctxs"]["in"])
-            in_ctx_idxs.remove(0)
+            in_ctx_idxs.remove(constants.ROOT_CONTEXT_INDEX)
 
             wf_term_ctx = dict_util.merge_dicts(
                 wf_term_ctx, self.get_task_context(in_ctx_idxs), overwrite=True
@@ -525,23 +526,27 @@ class WorkflowConductor(object):
         # Get the list of inbound task transitions for the barrier task.
         inbound_transitions = self.graph.get_prev_transitions(task_id)
 
-        # Setup the result for the evaluation of the criteria for inbound task transitions.
-        inbound_evaluation = {i: None for i in list(set(t[0] for t in inbound_transitions))}
+        # Setup the result for the evaluation of the criteria for inbound task
+        # transitions, keyed by source task id.
+        inbound_evaluation = {i: None for i in list(set(t.source for t in inbound_transitions))}
 
-        # Identify the join requirement.
+        # Identify the join requirement: how many inbound branches must satisfy their criteria.
+        # A barrier of "*" (or an unset barrier, which defaults to 1) means "all inbound branches".
         barrier = self.graph.get_barrier(task_id) or 1
         requirement = len(inbound_evaluation.keys()) if barrier == "*" else barrier
 
         # Evaluate the criteria for each inbound task transitions.
         for prev_transition in inbound_transitions:
-            prev_task_state_entry = self.get_task_state_entry(prev_transition[0], route)
+            prev_task_state_entry = self.get_task_state_entry(prev_transition.source, route)
 
             if not prev_task_state_entry:
                 continue
 
+            # The transition id recorded on the source task's "next" is built from
+            # the destination (this barrier task) and the transition key.
             prev_task_transition_id = constants.TASK_STATE_TRANSITION_FORMAT % (
-                prev_transition[1],
-                str(prev_transition[2]),
+                prev_transition.destination,
+                str(prev_transition.key),
             )
 
             satisfied = (
@@ -549,8 +554,8 @@ class WorkflowConductor(object):
                 and prev_task_state_entry["next"][prev_task_transition_id]
             )
 
-            if not bool(inbound_evaluation[prev_transition[0]]):
-                inbound_evaluation[prev_transition[0]] = satisfied
+            if not bool(inbound_evaluation[prev_transition.source]):
+                inbound_evaluation[prev_transition.source] = satisfied
 
         # If the count of inbound task(s) where the criteria is True >= requirements,
         # then the join requirement is satisified.
@@ -626,21 +631,27 @@ class WorkflowConductor(object):
         if "items" not in staged_task or not staged_task["items"]:
             staged_task["items"] = [{"status": statuses.UNSET}] * task["items_count"]
 
-        # Trim the list of actions in the task per concurrency policy.
-        all_items = list(zip(task["actions"], staged_task["items"]))
-        notrun_items = list(filter(lambda x: x[1]["status"] == statuses.UNSET, all_items))
-        active_items = list(filter(lambda x: x[1]["status"] in statuses.ACTIVE_STATUSES, all_items))
+        # Trim the list of actions in the task per concurrency policy. Each entry pairs an
+        # action with its item-execution state so items can be filtered by status.
+        action_item_pairs = list(zip(task["actions"], staged_task["items"]))
+        notrun_items = [
+            (action, item) for action, item in action_item_pairs if item["status"] == statuses.UNSET
+        ]
+        active_items = [
+            (action, item)
+            for action, item in action_item_pairs
+            if item["status"] in statuses.ACTIVE_STATUSES
+        ]
 
         if task["concurrency"] is not None:
             # Concurrency below 1 prevents scheduling of tasks.
             if task["concurrency"] <= 0:
                 task["concurrency"] = 1
             availability = task["concurrency"] - len(active_items)
-            candidates = list(zip(*notrun_items[:availability]))
-            task["actions"] = list(candidates[0]) if candidates and availability > 0 else []
+            schedulable = notrun_items[:availability] if availability > 0 else []
+            task["actions"] = [action for action, item in schedulable]
         else:
-            candidates = list(zip(*notrun_items))
-            task["actions"] = list(candidates[0]) if candidates else []
+            task["actions"] = [action for action, item in notrun_items]
 
         return task
 
@@ -655,12 +666,12 @@ class WorkflowConductor(object):
 
         outbounds = self.graph.get_next_transitions(task_id)
 
-        for next_seq in outbounds:
-            next_task_id, seq_key = next_seq[1], next_seq[2]
+        for transition in outbounds:
+            next_task_id = transition.destination
 
             task_transition_id = constants.TASK_STATE_TRANSITION_FORMAT % (
                 next_task_id,
-                str(seq_key),
+                str(transition.key),
             )
 
             # Ignore if the next task is the engine command to "continue".
@@ -821,7 +832,7 @@ class WorkflowConductor(object):
             raise exc.InvalidTask(task_id)
 
         if not in_ctx_idxs:
-            in_ctx_idxs = [0]
+            in_ctx_idxs = [constants.ROOT_CONTEXT_INDEX]
 
         task_state_entry: statetypes.TaskStateEntry = {
             "id": task_id,
@@ -973,15 +984,16 @@ class WorkflowConductor(object):
 
             # Iterate thru each outbound task transitions.
             for task_transition in task_transitions:
+                # A TaskTransition (source, destination, key, data); see statetypes.
                 task_transition_id = constants.TASK_STATE_TRANSITION_FORMAT % (
-                    task_transition[1],
-                    str(task_transition[2]),
+                    task_transition.destination,
+                    str(task_transition.key),
                 )
 
                 # Evaluate the criteria for task transition. If there is a failure while
                 # evaluating expression(s), fail the workflow.
                 try:
-                    criteria = task_transition[3].get("criteria") or []
+                    criteria = task_transition.data.get("criteria") or []
                     evaluated_criteria = [expr_base.evaluate(c, current_ctx) for c in criteria]
                     task_state_entry["next"][task_transition_id] = all(evaluated_criteria)
                 except Exception as e:
@@ -991,7 +1003,7 @@ class WorkflowConductor(object):
 
                 # If criteria met, then mark the next task staged and calculate outgoing context.
                 if task_state_entry["next"][task_transition_id]:
-                    next_task_node = self.graph.get_task(task_transition[1])
+                    next_task_node = self.graph.get_task(task_transition.destination)
                     next_task_id = next_task_node["id"]
                     new_ctx_idx = None
 
@@ -1027,9 +1039,11 @@ class WorkflowConductor(object):
                         next_task_id, next_task_route
                     )
 
+                    # The backref id embeds the *source* (current) task and the
+                    # transition key, and is stored on the next task's "prev".
                     backref = constants.TASK_STATE_TRANSITION_FORMAT % (
                         task_id,
-                        str(task_transition[2]),
+                        str(task_transition.key),
                     )
 
                     # If the next task is already staged.
@@ -1106,29 +1120,47 @@ class WorkflowConductor(object):
 
         return task_state_entry
 
-    def _evaluate_route(self, task_transition, prev_route):
-        task_id = task_transition[1]
+    def _evaluate_route(
+        self, task_transition: statetypes.TaskTransition, prev_route: statetypes.RouteId
+    ) -> statetypes.RouteId:
+        """Determine which route the task on the far side of a transition belongs to.
 
+        Given an outbound ``task_transition`` and the ``prev_route`` (route id)
+        the current task ran on, return the route id for the next task. See the
+        "Routing" section in :mod:`orquesta.statetypes` for the route model.
+
+        The next task stays on ``prev_route`` unless the transition forks a new
+        branch, i.e. the next task is a split task and is not inside a cycle.
+        When it does fork, the next task's route "fingerprint" is the previous
+        route's fingerprint plus this transition id. If that fingerprint is new,
+        a new route is registered and its id returned; if an identical
+        fingerprint already applies, the existing ``prev_route`` is reused.
+        """
+        # The next (destination) task is what may fork onto a new route.
         prev_task_transition_id = constants.TASK_STATE_TRANSITION_FORMAT % (
-            task_transition[0],
-            str(task_transition[2]),
+            task_transition.source,
+            str(task_transition.key),
         )
 
-        is_split_task = self.spec.tasks.is_split_task(task_id)
-        is_in_cycle = self.graph.in_cycle(task_id)
+        is_split_task = self.spec.tasks.is_split_task(task_transition.destination)
+        is_in_cycle = self.graph.in_cycle(task_transition.destination)
 
+        # Not a fork: the next task continues on the same route.
         if not is_split_task or is_in_cycle:
             return prev_route
 
+        # Build the candidate fingerprint for the forked branch.
         old_route_details = self.workflow_state.routes[prev_route]
         new_route_details = json_util.deepcopy(old_route_details)
 
         if prev_task_transition_id not in old_route_details:
             new_route_details.append(prev_task_transition_id)
 
+        # Fingerprint unchanged: this split was already accounted for, reuse it.
         if old_route_details == new_route_details:
             return prev_route
 
+        # New branch: register it and return its route id (its index).
         self.workflow_state.routes.append(new_route_details)
 
         return len(self.workflow_state.routes) - 1
@@ -1181,14 +1213,19 @@ class WorkflowConductor(object):
         if not task_state_entry:
             raise exc.InvalidTaskStateEntry(task_id)
 
-        for t in self.graph.get_next_transitions(task_id):
-            task_transition_id = constants.TASK_STATE_TRANSITION_FORMAT % (t[1], str(t[2]))
+        for transition in self.graph.get_next_transitions(task_id):
+            task_transition_id = constants.TASK_STATE_TRANSITION_FORMAT % (
+                transition.destination,
+                str(transition.key),
+            )
 
             if (
                 task_transition_id in task_state_entry["next"]
                 and task_state_entry["next"][task_transition_id]
             ):
-                contexts[task_transition_id] = self.get_task_initial_context(t[1], route)
+                contexts[task_transition_id] = self.get_task_initial_context(
+                    transition.destination, route
+                )
 
         return contexts
 
@@ -1232,7 +1269,7 @@ class WorkflowConductor(object):
         # The method get_task_sequence returns the index and the dictionary for the task entry.
         # Only the index is required for further evaluation below.
         result = {
-            k: [i[0] for i in self.workflow_state.get_task_sequence(t.task_id, t.route)]
+            k: [idx for idx, entry in self.workflow_state.get_task_sequence(t.task_id, t.route)]
             for k, t in tasks.items()
         }
 

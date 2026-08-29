@@ -37,6 +37,7 @@ from __future__ import annotations
 from typing import Any
 from typing import Dict
 from typing import List
+from typing import NamedTuple
 from typing import TypedDict
 
 
@@ -141,8 +142,78 @@ class StagedTask(_StagedTaskRequired, total=False):
 
 # "task__rN" -> index into ``sequence`` of that task/route's latest entry.
 TaskIndex = Dict[str, int]
-# Each route is the ordered list of split transition ids that define it.
+
+# --- Routing -------------------------------------------------------------
+#
+# A "route" identifies one branch of execution through the workflow. Whenever a
+# workflow forks (a "split" task), each parallel branch needs its own copy of
+# the context so sibling branches don't clobber each other's variables. Each
+# such branch is a distinct route.
+#
+# Routes live in ``WorkflowState.routes``, which is effectively a registry
+# indexed by route id. Note the deliberate two-part vocabulary -- the code
+# passes both around and they are easy to confuse:
+#
+#   * ``RouteId`` -- an *integer index* into that registry. This is the value
+#     passed around everywhere as ``route`` / ``prev_route`` /
+#     ``next_task_route``. Route id 0 is the initial (main) route.
+#   * ``RouteDetails`` -- the value stored *at* that index: the ordered list of
+#     split task-transition ids taken to reach the branch. It is the branch's
+#     "fingerprint" -- the root route is ``[]`` (no splits taken) and each
+#     further split appends the transition id that caused the fork.
+#
+# Two branches share a route id if and only if they were reached by the exact
+# same sequence of splits (see ``WorkflowConductor._evaluate_route``).
+RouteId = int
 RouteDetails = List[str]
+RoutesRegistry = List[RouteDetails]
+
+# --- Task transitions ----------------------------------------------------
+#
+# A task transition is a directed edge in the workflow graph: "when task A
+# completes, and criteria C holds, go to task B". The graph is a NetworkX
+# MultiDiGraph, whose edges are 4-tuples ``(source, destination, key, data)``.
+# ``graph.get_next_transitions`` / ``get_prev_transitions`` return those edges
+# wrapped as ``TaskTransition`` named tuples, so both attribute access
+# (``t.destination``) and the historical positional access (``t[1]``,
+# unpacking, sorting) work. The fields are:
+#
+#   * ``source``      -- id of the task the transition leaves from.
+#   * ``destination`` -- id of the task the transition leads to (the "next"
+#                        task).
+#   * ``key``         -- the MultiDiGraph edge key; the ordinal that
+#                        distinguishes multiple transitions between the same
+#                        pair of tasks. Also called the transition/seq key.
+#   * ``data``        -- the edge attributes, e.g.
+#                        ``{"criteria": [<expr>, ...], "ref": <int>}``.
+#
+# ``TaskTransitionId`` is the string ``"<task id>__t<key>"`` (see
+# ``constants.TASK_STATE_TRANSITION_FORMAT``). Watch out for its two uses,
+# which differ in *which* task id is embedded:
+#
+#   * Forward (in ``TaskStateEntry["next"]`` and ``TaskContexts["out"]``):
+#     built from the *destination* id -- "did this task's outbound transition
+#     to B fire?".
+#   * Backref (in ``TaskStateEntry["prev"]`` / ``StagedTask["prev"]``): built
+#     from the *source* id -- "which predecessor transition reached me?".
+TaskId = str
+TransitionKey = int
+TransitionData = Dict[str, Any]
+TaskTransitionId = str
+
+
+class TaskTransition(NamedTuple):
+    """A workflow-graph edge (``source`` -> ``destination``) with its metadata.
+
+    Backward compatible with the raw NetworkX edge tuple it replaces: it is a
+    ``tuple`` subclass, so positional access (``t[0]``), unpacking, and sorting
+    all behave exactly as before.
+    """
+
+    source: TaskId
+    destination: TaskId
+    key: TransitionKey
+    data: TransitionData
 
 
 class _SerializedWorkflowStateRequired(TypedDict):

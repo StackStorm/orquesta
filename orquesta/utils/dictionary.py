@@ -35,6 +35,16 @@ def merge_dicts(left, right, overwrite=True):
     return left
 
 
+def first_item(obj):
+    """Return the first ``(key, value)`` pair of a dict as a tuple.
+
+    Convenience for the common single-key-dict case (e.g. a ``{name: value}``
+    input/var/output/publish spec) where the caller wants both the sole key and
+    its value. Reads clearer than ``list(obj.items())[0][0]`` / ``[0][1]``.
+    """
+    return next(iter(obj.items()))
+
+
 def get_dict_value(obj, path, raise_key_error=False):
     item = obj
     traversed = ""
