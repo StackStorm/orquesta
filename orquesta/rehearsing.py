@@ -184,6 +184,7 @@ class WorkflowTestCase(native_v1_specs.Spec, WorkflowTestCaseMixin):
         "type": "object",
         "properties": {
             "workflow": spec_types.NONEMPTY_STRING,
+            "context": {"type": "object", "default": {}},
             "inputs": {"type": "object", "default": {}},
             "expected_inspection_errors": MockInspectionErrors,
             "expected_routes": {"type": "array", "items": {"type": "array"}, "default": [[]]},
@@ -224,6 +225,7 @@ class WorkflowRerunTestCase(native_v1_specs.Spec, WorkflowTestCaseMixin):
             "workflow_state": {"type": "object"},
             "rerun_tasks": requests.TaskRerunRequestSequenceSpec,
             "expected_inspection_errors": MockInspectionErrors,
+            "context": {"type": "object", "default": {}},
             "expected_routes": {"type": "array", "items": {"type": "array"}, "default": [[]]},
             "expected_task_sequence": {"type": "array", "items": spec_types.NONEMPTY_STRING},
             "mock_action_executions": MockActionExecutionSequenceSpec,
@@ -314,7 +316,7 @@ class WorkflowRehearsal(unittest.TestCase):
         pass
 
     def assert_spec_inspection(self):
-        self.inspection_errors = self.wf_spec.inspect()
+        self.inspection_errors = self.wf_spec.inspect(app_ctx=self.session.context)
         self.assertDictEqual(self.inspection_errors, self.session.expected_inspection_errors)
 
     def assert_conducting_sequence(self):
@@ -334,7 +336,9 @@ class WorkflowRehearsal(unittest.TestCase):
 
         if not self.rerun:
             # Instantiate a workflow conductor to check conducting sequences.
-            self.conductor = conducting.WorkflowConductor(self.wf_spec, inputs=self.session.inputs)
+            self.conductor = conducting.WorkflowConductor(
+                self.wf_spec, inputs=self.session.inputs, context=self.session.context
+            )
             self.conductor.request_workflow_status(statuses.RUNNING)
         else:
             # Request workflow rerun and assert workflow status is running.

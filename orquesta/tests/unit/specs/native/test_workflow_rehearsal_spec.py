@@ -598,3 +598,28 @@ class WorkflowRehearsalSpecTest(test_base.OrchestraWorkflowSpecTest):
             rehearsing.WorkflowRehearsal,
             test_case,
         )
+
+    def test_load_test_spec_dict_with_context(self):
+        test_spec = {
+            "workflow": self.get_wf_file_path("sequential_w_context"),
+            "context": {"st2": {"api_url": "http://localhost", "token": "faketoken"}},
+            "expected_task_sequence": ["task1", "task2", "task3", "continue"],
+            "mock_action_executions": [{"task_id": "task1"}, {"task_id": "task2"}],
+        }
+
+        rehearsal = rehearsing.load_test_spec(test_spec)
+
+        self.assertEqual(len(rehearsal.session.mock_action_executions), 2)
+        self.assertEqual(rehearsal.session.mock_action_executions[0].task_id, "task1")
+        self.assertEqual(rehearsal.session.mock_action_executions[1].task_id, "task2")
+        self.assertEqual(rehearsal.session.context, test_spec["context"])
+
+        for ac_ex in rehearsal.session.mock_action_executions:
+            self.assertIsInstance(ac_ex, rehearsing.MockActionExecution)
+            self.assertEqual(ac_ex.route, 0)
+            self.assertIsNone(ac_ex.seq_id)
+            self.assertIsNone(ac_ex.item_id)
+            self.assertEqual(ac_ex.iter_id, 0)
+            self.assertEqual(ac_ex.num_iter, 1)
+            self.assertEqual(ac_ex.status, statuses.SUCCEEDED)
+            self.assertIsNone(ac_ex.result)
