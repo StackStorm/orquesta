@@ -443,9 +443,9 @@ class Spec(object):
 
         def decorate_ctx_var(variable, spec_path, schema_path):
             return {
-                "type": variable[0],
-                "expression": variable[1],
-                "name": variable[2],
+                "type": variable.type,
+                "expression": variable.expression,
+                "name": variable.name,
                 "spec_path": spec_path,
                 "schema_path": schema_path,
             }
@@ -520,9 +520,9 @@ class Spec(object):
                     "schema_path": schema_path,
                 }
 
-                result = prop_value.inspect_context(parent=item_parent)
-                errors.extend(result[0])
-                rolling_ctx = list(set(rolling_ctx + result[1]))
+                result_errors, result_ctx = prop_value.inspect_context(parent=item_parent)
+                errors.extend(result_errors)
+                rolling_ctx = list(set(rolling_ctx + result_ctx))
 
                 continue
 

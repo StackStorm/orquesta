@@ -210,13 +210,12 @@ class TaskSpec(native_v1_specs.Spec):
         errors = []
 
         task_transition_specs = getattr(self, "next") or []
-        task_transition_spec = task_transition_specs[task_transition_meta[3]["ref"]]
+        task_transition_spec = task_transition_specs[task_transition_meta.data["ref"]]
         next_task_names = getattr(task_transition_spec, "do") or []
 
         if next_task_name in next_task_names:
             for task_publish_spec in getattr(task_transition_spec, "publish") or {}:
-                var_name = list(task_publish_spec.items())[0][0]
-                default_var_value = list(task_publish_spec.items())[0][1]
+                var_name, default_var_value = dict_util.first_item(task_publish_spec)
 
                 try:
                     rendered_var_value = expr_base.evaluate(default_var_value, rolling_ctx)
@@ -552,9 +551,9 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
             schema_path = parent.get("schema_path") + ".patternProperties.^\\w+$"
             task_parent = {"ctx": task_ctx, "spec_path": spec_path, "schema_path": schema_path}
 
-            result = task_spec.inspect_context(parent=task_parent)
-            errors.extend(result[0])
-            task_ctx = list(set(task_ctx + result[1]))
+            result_errors, result_ctx = task_spec.inspect_context(parent=task_parent)
+            errors.extend(result_errors)
+            task_ctx = list(set(task_ctx + result_ctx))
             rolling_ctx = list(set(rolling_ctx + task_ctx))
 
             # Identify the next set of tasks and related transition specs.
@@ -577,9 +576,7 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                     transitions.append(entry)
 
             for entry in transitions:
-                next_task_name = entry[0]
-                task_transition_spec = entry[1]
-                seq_num = entry[2]
+                next_task_name, task_transition_spec, seq_num = entry
 
                 parent_ctx = {
                     "ctx": task_ctx,
@@ -587,9 +584,9 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
                     "schema_path": schema_path + ".properties.next.items",
                 }
 
-                result = task_transition_spec.inspect_context(parent_ctx)
-                errors.extend(result[0])
-                branch_ctx = list(set(task_ctx + result[1]))
+                result_errors, result_ctx = task_transition_spec.inspect_context(parent_ctx)
+                errors.extend(result_errors)
+                branch_ctx = list(set(task_ctx + result_ctx))
 
                 if (
                     not next_task_name
@@ -656,8 +653,7 @@ class WorkflowSpec(native_v1_specs.Spec):
 
         for input_spec in getattr(self, "input") or []:
             if isinstance(input_spec, dict):
-                input_name = list(input_spec.items())[0][0]
-                default_input_value = list(input_spec.items())[0][1]
+                input_name, default_input_value = dict_util.first_item(input_spec)
             else:
                 input_name = input_spec
                 default_input_value = None
@@ -679,8 +675,7 @@ class WorkflowSpec(native_v1_specs.Spec):
         errors = []
 
         for var_spec in getattr(self, "vars") or []:
-            var_name = list(var_spec.items())[0][0]
-            default_var_value = list(var_spec.items())[0][1]
+            var_name, default_var_value = dict_util.first_item(var_spec)
 
             try:
                 rendered_var_value = expr_base.evaluate(default_var_value, rolling_ctx)
@@ -698,8 +693,7 @@ class WorkflowSpec(native_v1_specs.Spec):
         errors = []
 
         for output_spec in output_specs:
-            output_name = list(output_spec.items())[0][0]
-            default_output_value = list(output_spec.items())[0][1]
+            output_name, default_output_value = dict_util.first_item(output_spec)
 
             try:
                 rendered_output_value = expr_base.evaluate(default_output_value, rolling_ctx)

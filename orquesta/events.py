@@ -12,9 +12,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Execution events and the event-name vocabulary that drive the state machines.
+
+Orquesta is event driven: the conductor turns things that happen (an action
+finished, a pause was requested, ...) into :class:`ExecutionEvent` instances and
+feeds them to the state machines in :mod:`orquesta.machines`, which look up the
+event ``name`` in their transition tables to decide the next status.
+
+There are three families of event *names* (the module-level string constants),
+plus engine-operation events:
+
+* ``WORKFLOW_*`` / ``WORKFLOW_EXECUTION_EVENTS`` -- workflow-level status events.
+* ``TASK_*`` / ``TASK_EXECUTION_EVENTS`` -- task-level status events. The subset
+  in ``TASK_CONDITIONAL_EVENTS`` needs extra workflow context to be processed.
+* ``ACTION_*`` / ``ACTION_EXECUTION_EVENTS`` -- action-execution status events,
+  including the with-items ``..._TASK_[ACTIVE|DORMANT]_ITEMS_*`` variants.
+* ``ENGINE_OPERATION_EVENTS`` -- synthetic events for the engine commands
+  (continue/fail/noop/retry); see ``ENGINE_EVENT_MAP``.
+
+The classes near the bottom of this module are the runtime carriers of those
+names plus their payload (status/result/context/etc.).
+"""
+
+from __future__ import annotations
+
 import logging
+import typing
 
 from orquesta import exceptions as exc
+from orquesta import statetypes
 from orquesta import statuses
 
 
@@ -318,29 +344,46 @@ ENGINE_OPERATION_EVENTS = [
 
 
 class ExecutionEvent(object):
-    def __init__(self, name, status, result=None, context=None):
+    """Base class for events fed to the workflow and task state machines.
+
+    Attributes:
+        name: the event name; matched against the state-machine transition
+            tables (one of the ``*_EVENTS`` constants above, possibly with a
+            context suffix added by the machine).
+        status: the status being reported by this event.
+        result: the action result, when the event carries one.
+        context: extra workflow context attached to the event, when relevant.
+    """
+
+    def __init__(self, name: str, status: str, result: typing.Any = None, context: dict = None):
         if not statuses.is_valid(status):
             raise exc.InvalidStatus(status)
 
-        self.name = name
-        self.status = status
-        self.result = result
-        self.context = context
+        self.name: str = name
+        self.status: str = status
+        self.result: typing.Any = result
+        self.context: typing.Optional[dict] = context
 
 
 class WorkflowExecutionEvent(ExecutionEvent):
+    """A workflow-level status event, e.g. request to pause/cancel/resume."""
+
     def __init__(self, status):
         super(WorkflowExecutionEvent, self).__init__("workflow_%s" % status, status)
 
 
 class TaskExecutionEvent(ExecutionEvent):
-    def __init__(self, task_id, route, status):
+    """A task-level status event, identifying the task by id and route."""
+
+    def __init__(self, task_id: statetypes.TaskId, route: statetypes.RouteId, status: str):
         super(TaskExecutionEvent, self).__init__("task_%s" % status, status)
-        self.task_id = task_id
-        self.route = route
+        self.task_id: statetypes.TaskId = task_id
+        self.route: statetypes.RouteId = route
 
 
 class ActionExecutionEvent(ExecutionEvent):
+    """An action-execution status event (the result of running one action)."""
+
     def __init__(self, status, result=None, context=None):
         super(ActionExecutionEvent, self).__init__(
             "action_%s" % status, status, result=result, context=context
@@ -348,13 +391,27 @@ class ActionExecutionEvent(ExecutionEvent):
 
 
 class TaskItemActionExecutionEvent(ActionExecutionEvent):
-    def __init__(self, item_id, status, result=None, accumulated_result=None):
+    """An action-execution event for a single item of a with-items task.
+
+    Attributes:
+        item_id: index of the item within the with-items task.
+        accumulated_result: results accumulated across items so far.
+    """
+
+    def __init__(self, item_id: int, status, result=None, accumulated_result=None):
         super(TaskItemActionExecutionEvent, self).__init__(status, result=result)
-        self.item_id = item_id
+        self.item_id: int = item_id
         self.accumulated_result = accumulated_result
 
 
 class EngineOperationEvent(ExecutionEvent):
+    """Base class for synthetic events produced by engine commands.
+
+    Unlike the other events, these are not reported by an external actor; the
+    conductor emits them when a task transition targets an engine command (see
+    ``ENGINE_EVENT_MAP``). Each subclass hardcodes the name/status it carries.
+    """
+
     pass
 
 

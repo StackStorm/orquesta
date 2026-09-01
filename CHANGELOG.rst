@@ -16,6 +16,39 @@ Changed
   Contributed by @nzlosh
 * Added support for python3.10 to 3.12.
   Contributed by @nzlosh
+* Readability-only cleanup pass across the conductor, graph, spec, state-machine
+  and event layers. These changes make the code easier to follow without
+  altering any design decision, runtime behavior, or the serialized wire format
+  that StackStorm persists to Mongo. Specifically:
+
+  * Documented the previously implicit data shapes as type aliases and
+    ``TypedDict``/``NamedTuple`` definitions in ``statetypes.py`` (``RouteId`` vs
+    ``RouteDetails``/``RoutesRegistry``, ``TaskTransition``, ``TaskId``,
+    transition-id conventions), and added module/class/method docstrings and
+    annotations to ``events.py`` and ``machines.py`` explaining the two state
+    machines and their ``current status -> {event name -> new status}`` tables.
+  * Replaced magic positional indexes on workflow-graph edges with a
+    ``TaskTransition`` named tuple, so the conductor and graph read
+    ``t.source`` / ``t.destination`` / ``t.key`` / ``t.data`` instead of
+    ``t[0..3]``. ``TaskTransition`` is a ``tuple`` subclass, so positional
+    access, unpacking, sorting and set-dedup are unchanged. Likewise
+    ``extract_vars`` now returns a ``ContextVar`` named tuple.
+  * Named the recurring literal ``0`` used for the root context/route as
+    ``constants.ROOT_CONTEXT_INDEX`` / ``ROOT_ROUTE_ID``, and the implicit retry
+    attempt count as ``DEFAULT_RETRY_COUNT``.
+  * Added a ``dictionary.first_item`` helper for the single-key-dict spec case,
+    and switched ``(errors, ctx)`` result handling to named unpacking.
+  * No copies added or removed: every ``json_util.deepcopy`` call site is
+    unchanged, and all shared payloads (context dicts, action dicts, edge
+    ``data`` dicts) remain the same references they were before — preserving the
+    deliberate no-copy coupling with StackStorm. The changes are allocation
+    neutral: the spec-rendering paths allocate slightly less (``first_item``
+    avoids materializing ``list(dict.items())``; a redundant one-element slice
+    was removed), offsetting the one extra wrapper tuple per graph edge, whose
+    inner ``data`` dict is never copied. All 865 unit tests pass unchanged.
+  * Removed the standalone ``mock`` test dependency in favor of the stdlib
+    ``unittest.mock``.
+  * Contributed by guzzijones12@gmail.com
 
 Fixed
 ~~~~~

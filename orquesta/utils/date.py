@@ -49,6 +49,8 @@ def format(dt, usec=True, offset=True):
 
     if offset:
         ost = dt.strftime("%z")
+        # strftime gives the offset as "+HHMM"; insert a colon after the sign+hours
+        # (index 3) to make it ISO-8601 "+HH:MM". Empty (naive datetime) defaults to UTC.
         ost = (ost[:3] + ":" + ost[3:]) if ost else "+00:00"
     else:
         tz = dt.tzinfo.tzname(dt) if dt.tzinfo else "UTC"

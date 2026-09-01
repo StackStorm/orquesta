@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import argparse
-import mock
 import unittest
+
+from unittest import mock
 
 from orquesta.commands import rehearsal
 from orquesta import exceptions as exc
