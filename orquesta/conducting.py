@@ -109,6 +109,7 @@ class WorkflowState(object):
     def get_task_sequence(self, task_id, route):
         idx = self.tasks[constants.TASK_STATE_ROUTE_FORMAT % (task_id, str(route))]
         seq = [(idx, self.sequence[idx])]
+        visited = {idx}
 
         q = queue.Queue()
         q.put((task_id, route))
@@ -119,10 +120,10 @@ class WorkflowState(object):
             for i, t in enumerate(self.sequence):
                 for k, v in t["prev"].items():
                     p = self.sequence[v]
-                    if p["id"] == task_id and p["route"] == route:
+                    if p["id"] == task_id and p["route"] == route and i not in visited:
+                        visited.add(i)
                         seq.append((i, t))
-                        if (i, t) not in seq:
-                            q.put((t["id"], t["route"]))
+                        q.put((t["id"], t["route"]))
 
         return seq
 
@@ -1232,10 +1233,15 @@ class WorkflowConductor(object):
         # task rerun requests. If they are not collapsed/consolidated, then the rerun
         # will result in multiple branches of executions.
         if len(tasks) > 1:
-            # The for loops below identify task requests that have subsequent task sequences
-            # not in other task requests.
+            # Keep a requested task only when no other requested task contains all
+            # of the task-state entries in its execution sequence.
             result = {
-                k: i for k, i in result.items() for j in result.values() if len(set(i) - set(j)) > 0
+                k: indices
+                for k, indices in result.items()
+                if not any(
+                    other_k != k and set(indices) < set(other_indices)
+                    for other_k, other_indices in result.items()
+                )
             }
 
         return result
