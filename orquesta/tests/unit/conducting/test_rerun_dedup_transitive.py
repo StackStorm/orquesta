@@ -57,9 +57,7 @@ def _completed_conductor(shape):
             ]
         tasks[node] = task
 
-    workflow_yaml = yaml.safe_dump(
-        {"version": 1.0, "tasks": tasks}, sort_keys=False
-    )
+    workflow_yaml = yaml.safe_dump({"version": 1.0, "tasks": tasks}, sort_keys=False)
     spec = native_specs.WorkflowSpec(workflow_yaml)
     assert spec.inspect() == {}
 
@@ -103,7 +101,5 @@ def test_rerun_request_collapses_transitive_descendants(shape, requested, expect
         task_requests=[requests.TaskRerunRequest.new(node, route=0) for node in requested]
     )
     assert conductor.get_workflow_status() == statuses.RESUMING
-    assert sorted(t["id"] for t in conductor.workflow_state.get_staged_tasks()) == sorted(
-        expected
-    )
+    assert sorted(t["id"] for t in conductor.workflow_state.get_staged_tasks()) == sorted(expected)
     assert sorted(t["id"] for t in conductor.get_next_tasks()) == sorted(expected)
