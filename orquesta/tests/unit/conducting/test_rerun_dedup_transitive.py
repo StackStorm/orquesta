@@ -51,10 +51,10 @@ def _completed_conductor(shape):
     for node in nodes:
         task = {"action": "core.noop"}
         if graph[node]:
-            task["next"] = [
-                {"when": "<% succeeded() %>", "do": next_task}
-                for next_task in graph[node]
-            ]
+            next_steps = []
+            for next_task in graph[node]:
+                next_steps.append({"when": "<% succeeded() %>", "do": next_task})
+            task["next"] = next_steps
         tasks[node] = task
 
     workflow_yaml = yaml.safe_dump({"version": 1.0, "tasks": tasks}, sort_keys=False)
@@ -72,12 +72,10 @@ def _completed_conductor(shape):
             task_id, route = task["id"], task["route"]
             assert task_id not in seen, "Unexpected duplicate initial execution"
             seen.add(task_id)
-            conductor.update_task_state(
-                task_id, route, events.ActionExecutionEvent(statuses.RUNNING)
-            )
-            conductor.update_task_state(
-                task_id, route, events.ActionExecutionEvent(statuses.SUCCEEDED)
-            )
+            running_event = events.ActionExecutionEvent(statuses.RUNNING)
+            conductor.update_task_state(task_id, route, running_event)
+            success_event = events.ActionExecutionEvent(statuses.SUCCEEDED)
+            conductor.update_task_state(task_id, route, success_event)
 
     assert seen == set(nodes)
     assert conductor.get_workflow_status() == statuses.SUCCEEDED
@@ -97,9 +95,8 @@ def _completed_conductor(shape):
 )
 def test_rerun_request_collapses_transitive_descendants(shape, requested, expected):
     conductor = _completed_conductor(shape)
-    conductor.request_workflow_rerun(
-        task_requests=[requests.TaskRerunRequest.new(node, route=0) for node in requested]
-    )
+    rerun_requests = [requests.TaskRerunRequest.new(node, route=0) for node in requested]
+    conductor.request_workflow_rerun(task_requests=rerun_requests)
     assert conductor.get_workflow_status() == statuses.RESUMING
     assert sorted(t["id"] for t in conductor.workflow_state.get_staged_tasks()) == sorted(expected)
     assert sorted(t["id"] for t in conductor.get_next_tasks()) == sorted(expected)
